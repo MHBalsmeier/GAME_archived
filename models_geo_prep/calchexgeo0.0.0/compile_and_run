@@ -1,0 +1,2 @@
+gcc set_grid_properties.c -lnetcdf -lm -o set_grid_properties.exe
+./set_grid_properties.exe

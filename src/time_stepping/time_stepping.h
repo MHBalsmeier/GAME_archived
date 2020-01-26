@@ -1,2 +1,2 @@
-State leapfrog(State, State, State, float);
-State euler_explicit(State, State, float);
+State leapfrog(State, State, State, double);
+State euler_explicit(State, State, double);

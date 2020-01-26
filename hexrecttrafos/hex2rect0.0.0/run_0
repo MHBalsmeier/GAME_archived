@@ -1,0 +1,14 @@
+INITTIME=0
+STEPMAX=24
+input_folder="/home/max/Schreibtisch/code/real_stuff/models/ess0.0.0/output/test_0"
+input_filename_root="test_0"
+STEPSVECTOR=()
+for (( i=0; $i<=$STEPMAX ; i=$(($i+1)) ))
+do
+STEPSVECTOR+=($i)
+done
+for STEP in ${STEPSVECTOR[@]}
+do
+input_filename=$input_filename_root"+"$STEP"h.nc"
+source ~/Schreibtisch/code/real_stuff/hexrecttrafos/hex2rect0.0.0/root_script
+done

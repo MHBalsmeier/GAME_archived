@@ -1,0 +1,10 @@
+input_file_root=$input_folder"/"$input_filename_root
+output_folder="/home/max/Schreibtisch/large_data/ess_gribs""/"$input_filename_root
+input_file=$input_file_root"/"$input_filename
+if [ -d $output_folder ]
+then
+rm -r $output_folder
+fi
+mkdir $output_folder
+output_file=$output_folder"/"${input_filename/.nc/.grb2}
+/home/max/Schreibtisch/code/real_stuff/hexrecttrafos/hex2rect0.0.0/hex2rect.exe $input_file $output_file $INITTIME $STEP

@@ -1,0 +1,1 @@
+gcc hex_test_states_creation.c -lnetcdf -lm -o hex_test_states_creater.exe && ./hex_test_states_creater.exe

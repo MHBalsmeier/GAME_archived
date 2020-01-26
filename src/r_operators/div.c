@@ -1,39 +1,26 @@
-#include <math.h>
-#include <stdio.h>
 #include "../enum_and_typedefs.h"
-#include "r_operators.h"
-
 
 void divergence(Vector_field in_field, Scalar_field out_field)
 {
 	extern Grid grid;
-	for (int i = 0; i<=NUMBER_OF_SCALARS-1; ++i)
+    long layer_index, horizontal_index;
+    double comp_h, comp_v;
+	for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
 	{
-		int horizontal_index;
-		horizontal_index = i-(i/NUMBER_OF_SCALARS_H)*NUMBER_OF_SCALARS_H;
-		if (horizontal_index>NUMBER_OF_PENTAGONS-1)
+        out_field[i] = 0;
+        layer_index = i/NUMBER_OF_SCALARS_H;
+		horizontal_index = i - layer_index*NUMBER_OF_SCALARS_H;
+		if (horizontal_index < NUMBER_OF_PENTAGONS)
 		{
-			out_field[i] =
-			- in_field[grid.adjacent_vector_indices_h[i][0]]*grid.adjacent_signs_h[i][0]*grid.area[grid.adjacent_vector_indices_h[i][0]]
-			- in_field[grid.adjacent_vector_indices_h[i][1]]*grid.adjacent_signs_h[i][1]*grid.area[grid.adjacent_vector_indices_h[i][1]]
-			- in_field[grid.adjacent_vector_indices_h[i][2]]*grid.adjacent_signs_h[i][2]*grid.area[grid.adjacent_vector_indices_h[i][2]]
-			- in_field[grid.adjacent_vector_indices_h[i][3]]*grid.adjacent_signs_h[i][3]*grid.area[grid.adjacent_vector_indices_h[i][3]]
-			- in_field[grid.adjacent_vector_indices_h[i][4]]*grid.adjacent_signs_h[i][4]*grid.area[grid.adjacent_vector_indices_h[i][4]]
-			- in_field[grid.adjacent_vector_indices_h[i][5]]*grid.adjacent_signs_h[i][5]*grid.area[grid.adjacent_vector_indices_h[i][5]]
-			- in_field[grid.adjacent_vector_index_lower[i]]*grid.area[grid.adjacent_vector_index_lower[i]];
-			+ in_field[grid.adjacent_vector_index_upper[i]]*grid.area[grid.adjacent_vector_index_upper[i]];
+            for (int j = 0; j < 5; j++)
+                comp_h += in_field[grid.adjacent_vector_indices_h[6*i + j]]*grid.adjacent_signs_h[6*i + j]*grid.area[grid.adjacent_vector_indices_h[6*i + j]];
 		}
 		else
 		{
-			out_field[i] =
-			- in_field[grid.adjacent_vector_indices_h[i][0]]*grid.adjacent_signs_h[i][0]*grid.area[grid.adjacent_vector_indices_h[i][0]]
-			- in_field[grid.adjacent_vector_indices_h[i][1]]*grid.adjacent_signs_h[i][1]*grid.area[grid.adjacent_vector_indices_h[i][1]]
-			- in_field[grid.adjacent_vector_indices_h[i][2]]*grid.adjacent_signs_h[i][2]*grid.area[grid.adjacent_vector_indices_h[i][2]]
-			- in_field[grid.adjacent_vector_indices_h[i][3]]*grid.adjacent_signs_h[i][3]*grid.area[grid.adjacent_vector_indices_h[i][3]]
-			- in_field[grid.adjacent_vector_indices_h[i][4]]*grid.adjacent_signs_h[i][4]*grid.area[grid.adjacent_vector_indices_h[i][4]]
-			- in_field[grid.adjacent_vector_index_lower[i]]*grid.area[grid.adjacent_vector_index_lower[i]];
-			+ in_field[grid.adjacent_vector_index_upper[i]]*grid.area[grid.adjacent_vector_index_upper[i]];
+            for (int j = 0; j < 6; j++)
+                comp_h += in_field[grid.adjacent_vector_indices_h[6*i + j]]*grid.adjacent_signs_h[6*i + j]*grid.area[grid.adjacent_vector_indices_h[6*i + j]];
 		}
-		out_field[i] = (1/grid.volume[i])*out_field[i];
+        comp_v = in_field[grid.adjacent_vector_index_upper[i]]*grid.area[grid.adjacent_vector_index_upper[i]] - in_field[grid.adjacent_vector_index_lower[i]]*grid.area[grid.adjacent_vector_index_lower[i]];
+		out_field[i] = (1/grid.volume[i])*(comp_h + comp_v);
 	}
 }

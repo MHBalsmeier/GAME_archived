@@ -1,0 +1,3 @@
+LD_LIBRARY_PATH=/home/max/source/eccodes/lib/
+export LD_LIBRARY_PATH
+gcc /home/max/Schreibtisch/code/real_stuff/hexrecttrafos/hex2rect0.0.0/hex2rect.c -l netcdf /home/max/source/eccodes/lib/libeccodes.so -lm -o hex2rect.exe

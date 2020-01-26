@@ -1,52 +1,72 @@
-#include <math.h>
-#include <string.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <netcdf.h>
+#include <string.h>
 #include "../enum_and_typedefs.h"
-#include "../r_operators/r_operators.h"
 #include "io.h"
+#include "../diagnostics/diagnostics.h"
+#define ERRCODE 2
+#define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 
 void write_out(State state_write_out, double t_init, double t_write, int write_out_index, char output_foldername[])
 {
-	Scalar_field pressure, temperature;
-	pressure_diagnostics(state_write_out.pot_temp,state_write_out.density,pressure);
-	temperature_diagnostics(state_write_out.pot_temp,pressure,temperature);
-	FILE *output_file;
-	int number_of_digits = 1;
-	if(write_out_index > 9)
-	{
-		number_of_digits = 2;
-	}
-	if(write_out_index > 99)
-		number_of_digits = 3;
-	if(write_out_index > 999)
-		number_of_digits = 4;
-	if(write_out_index > 9999)
-		number_of_digits = 5;
-	char number[number_of_digits];
-	itoa(write_out_index, number, 10);
-	char output_folder_pre[] = "C:/Users/Max/Desktop/Programme/C/ESS_1_0_0/output/";
-	char output_filename[strlen(output_folder_pre)+strlen(output_foldername)+1+number_of_digits+1];
-	for (int i = 0; i < strlen(output_folder_pre)+strlen(output_foldername)+1+number_of_digits+1; ++i)
-	{
-		if(i<strlen(output_folder_pre))
-			output_filename[i] = output_folder_pre[i];
-		else if(i<strlen(output_folder_pre)+strlen(output_foldername))
-			output_filename[i] = output_foldername[i-strlen(output_folder_pre)];
-		else if(i<strlen(output_folder_pre)+strlen(output_foldername)+1)
-			output_filename[i] = '/';
-		else
-			output_filename[i] = number[i-(strlen(output_folder_pre)+strlen(output_foldername)+1)];
-	}
-	output_filename[strlen(output_folder_pre)+strlen(output_foldername)+1+number_of_digits] = '\0';
-	output_file = fopen(output_filename, "w");
-	for (int i = 0; i<=NUMBER_OF_SCALARS-1; ++i)
-	{
-		fprintf(output_file,"%d %f %f %f\n",i,pressure[i],temperature[i],state_write_out.density[i]);
-	}
-	for (int i = 0; i<=NUMBER_OF_VECTORS-1; ++i)
-	{
-		fprintf(output_file,"%d %f\n",i,state_write_out.wind[i]);
-	}
-	fclose(output_file);
+    char add_time_str[write_out_index/10+1];
+    char pre_string[] = "init+";
+    char append_string[] = "h.nc";
+    sprintf(add_time_str, "%d", write_out_index);
+    int out_file_length = strlen(output_foldername) + 1 + strlen(pre_string) + write_out_index/10 + 1 + strlen(append_string);
+    char FILE_WRITE[out_file_length];
+    for (int i = 0; i < out_file_length + 1; i++)
+    {
+        if (i < strlen(output_foldername))
+            FILE_WRITE[i] = output_foldername[i];
+        if (i == strlen(output_foldername))
+            FILE_WRITE[i] = '/';
+        if (i >= strlen(output_foldername) + 1 && i < strlen(output_foldername) + 1 + strlen(pre_string))
+            FILE_WRITE[i] = pre_string[i - (strlen(output_foldername) + 1)];
+        if (i >= strlen(output_foldername) + 1 + strlen(pre_string) && i < out_file_length - strlen(append_string))
+            FILE_WRITE[i] = add_time_str[i - (strlen(output_foldername) + 1 + strlen(pre_string))];
+        if (i >= out_file_length - strlen(append_string))
+            FILE_WRITE[i] = append_string[i - (out_file_length - strlen(append_string))];
+    }
+    Scalar_field pressure, temperature;
+    pressure_diagnostics(state_write_out.pot_temp, state_write_out.density, pressure);
+    temperature_diagnostics(state_write_out.pot_temp, pressure, temperature);
+    int ncid, scalar_dimid, vector_dimid, var_dimid, pressure_id, rho_id, temperature_id, wind_id;
+    int dimids_scalar[2];
+    int scalar_index,  retval;
+    if ((retval = nc_create(FILE_WRITE, NC_CLOBBER, &ncid)))
+        ERR(retval);
+    if ((retval = nc_def_dim(ncid, "scalar_index", NUMBER_OF_SCALARS, &scalar_dimid)))
+        ERR(retval);
+    if ((retval = nc_def_dim(ncid, "vector_index", NUMBER_OF_VECTORS, &vector_dimid)))
+        ERR(retval);
+    if ((retval = nc_def_var(ncid, "pressure", NC_DOUBLE, 1, &scalar_dimid, &pressure_id)))
+        ERR(retval);
+    if ((retval = nc_put_att_text(ncid, pressure_id, "units", strlen("hPa"), "hPa")))
+        ERR(retval);
+    if ((retval = nc_def_var(ncid, "density", NC_DOUBLE, 1, &scalar_dimid, &rho_id)))
+        ERR(retval);
+    if ((retval = nc_put_att_text(ncid, rho_id, "units", strlen("kg/m^3"), "kg/m^3")))
+        ERR(retval);
+    if ((retval = nc_def_var(ncid, "temperature", NC_DOUBLE, 1, &scalar_dimid, &temperature_id)))
+        ERR(retval);
+    if ((retval = nc_put_att_text(ncid, temperature_id, "units", strlen("K"), "K")))
+        ERR(retval);
+    if ((retval = nc_def_var(ncid, "wind", NC_DOUBLE, 1, &vector_dimid, &wind_id)))
+        ERR(retval);
+    if ((retval = nc_put_att_text(ncid, wind_id, "units", strlen("m/s"), "m/s")))
+        ERR(retval);
+    if ((retval = nc_enddef(ncid)))
+        ERR(retval);
+    if ((retval = nc_put_var_double(ncid, pressure_id, &pressure[0])))
+        ERR(retval);
+    if ((retval = nc_put_var_double(ncid, rho_id, &state_write_out.density[0])))
+        ERR(retval);
+    if ((retval = nc_put_var_double(ncid, temperature_id, &temperature[0])))
+        ERR(retval);
+    if ((retval = nc_put_var_double(ncid, wind_id, &state_write_out.wind[0])))
+        ERR(retval);
+    if ((retval = nc_close(ncid)))
+        ERR(retval);
 }
