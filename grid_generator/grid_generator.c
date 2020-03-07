@@ -1,178 +1,166 @@
-#include "../../models/game/src/enum_and_typedefs.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <netcdf.h>
 #include <string.h>
+#include "/home/max/my_code/game/core/src/enum_and_typedefs.h"
+#include "/home/max/my_code/c_source_libs/geos/geos.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
-#define FILE_NAME_GEO_PROP "nc_files/sphere_res_2_oro_0_geo_prop.nc"
-#define FILE_NAME_RECT_TRAFO "nc_files/sphere_res_2_oro_0_rect_trafo.nc"
-
-double scalar_product_elementary(double[], double[]);
-double calculate_distance_h(double, double, double, double, double);
-double calculate_vertical_face(double, double, double);
-void find_global_normal(double, double, double*, double*, double*);
-void find_geos(double, double, double, double*, double*);
-void find_geodetic(double, double, double, double, double, double*, double*);
-void find_center(double, double, double, double, double, double, double*, double*);
-double find_geodetic_direction(double, double, double, double, double);
-double find_volume(double, double, double);
-double calculate_distance_cart(double, double, double, double, double, double);
-long find_closest_index(int, int, double, double, double, double, double[], double[], int);
+#define FILE_NAME "grib_files/sphere_res_2_oro_0_geo_prop.nc"
 
 int main(int argc, char *argv[])
 {
     const double SCALE_HEIGHT = 8e3;
-	const double ATMOS_HEIGHT = SCALE_HEIGHT*log(1+NUMBER_OF_LAYERS);
-	double latitude_ico[12];
-	latitude_ico[0] = M_PI/2;
-	latitude_ico[1] = M_PI/6;
-	latitude_ico[2] = M_PI/6;
-	latitude_ico[3] = M_PI/6;
-	latitude_ico[4] = M_PI/6;
-	latitude_ico[5] = M_PI/6;
-	latitude_ico[6] = -M_PI/6;
-	latitude_ico[7] = -M_PI/6;
-	latitude_ico[8] = -M_PI/6;
-	latitude_ico[9] = -M_PI/6;
-	latitude_ico[10] = -M_PI/6;
-	latitude_ico[11] = -M_PI/2;
-	double longitude_ico[12];
-	longitude_ico[0] = 0;
-	longitude_ico[1] = 0;
-	longitude_ico[2] = 1*2*M_PI/5;
-	longitude_ico[3] = 2*2*M_PI/5;
-	longitude_ico[4] = 3*2*M_PI/5;
-	longitude_ico[5] = 4*2*M_PI/5;
-	longitude_ico[6] = 0;
-	longitude_ico[7] = 1*2*M_PI/5 + 2*M_PI/10;
-	longitude_ico[8] = 2*2*M_PI/5 + 2*M_PI/10;
-	longitude_ico[9] = 3*2*M_PI/5 + 2*M_PI/10;
-	longitude_ico[10] = 4*2*M_PI/5 + 2*M_PI/10;
-	longitude_ico[11] = 0;
-	int edge_vertices[NUMBER_OF_EDGES][2];
-	edge_vertices[0][0] = 0;
-	edge_vertices[0][1] = 1;
-	edge_vertices[1][0] = 0;
-	edge_vertices[1][1] = 2;
-	edge_vertices[2][0] = 0;
-	edge_vertices[2][1] = 3;
-	edge_vertices[3][0] = 0;
-	edge_vertices[3][1] = 4;
-	edge_vertices[4][0] = 0;
-	edge_vertices[4][1] = 5;
-	edge_vertices[5][0] = 1;
-	edge_vertices[5][1] = 2;
-	edge_vertices[6][0] = 2;
-	edge_vertices[6][1] = 3;
-	edge_vertices[7][0] = 3;
-	edge_vertices[7][1] = 4;
-	edge_vertices[8][0] = 4;
-	edge_vertices[8][1] = 5;
-	edge_vertices[9][0] = 5;
-	edge_vertices[9][1] = 1;
-	edge_vertices[10][0] = 1;
-	edge_vertices[10][1] = 6;
-	edge_vertices[11][0] = 6;
-	edge_vertices[11][1] = 2;
-	edge_vertices[12][0] = 2;
-	edge_vertices[12][1] = 7;
-	edge_vertices[13][0] = 7;
-	edge_vertices[13][1] = 3;
-	edge_vertices[14][0] = 3;
-	edge_vertices[14][1] = 8;
-	edge_vertices[15][0] = 8;
-	edge_vertices[15][1] = 4;
-	edge_vertices[16][0] = 4;
-	edge_vertices[16][1] = 9;
-	edge_vertices[17][0] = 9;
-	edge_vertices[17][1] = 5;
-	edge_vertices[18][0] = 5;
-	edge_vertices[18][1] = 10;
-	edge_vertices[19][0] = 10;
-	edge_vertices[19][1] = 1;
-	edge_vertices[20][0] = 10;
-	edge_vertices[20][1] = 6;
-	edge_vertices[21][0] = 6;
-	edge_vertices[21][1] = 7;
-	edge_vertices[22][0] = 7;
-	edge_vertices[22][1] = 8;
-	edge_vertices[23][0] = 8;
-	edge_vertices[23][1] = 9;
-	edge_vertices[24][0] = 9;
-	edge_vertices[24][1] = 10;
-	edge_vertices[25][0] = 6;
-	edge_vertices[25][1] = 11;
-	edge_vertices[26][0] = 7;
-	edge_vertices[26][1] = 11;
-	edge_vertices[27][0] = 8;
-	edge_vertices[27][1] = 11;
-	edge_vertices[28][0] = 9;
-	edge_vertices[28][1] = 11;
-	edge_vertices[29][0] = 10;
-	edge_vertices[29][1] = 11;
-	int face_vertices[20][3];
-	face_vertices[0][0] = 0;
-	face_vertices[0][1] = 1;
-	face_vertices[0][2] = 2;
-	face_vertices[1][0] = 0;
-	face_vertices[1][1] = 2;
-	face_vertices[1][2] = 3;
-	face_vertices[2][0] = 0;
-	face_vertices[2][1] = 3;
-	face_vertices[2][2] = 4;
-	face_vertices[3][0] = 0;
-	face_vertices[3][1] = 4;
-	face_vertices[3][2] = 5;
-	face_vertices[4][0] = 0;
-	face_vertices[4][1] = 5;
-	face_vertices[4][2] = 1;
-	face_vertices[5][0] = 1;
-	face_vertices[5][1] = 10;
-	face_vertices[5][2] = 6;
-	face_vertices[6][0] = 6;
-	face_vertices[6][1] = 2;
-	face_vertices[6][2] = 1;
-	face_vertices[7][0] = 2;
-	face_vertices[7][1] = 6;
-	face_vertices[7][2] = 7;
-	face_vertices[8][0] = 7;
-	face_vertices[8][1] = 3;
-	face_vertices[8][2] = 2;
-	face_vertices[9][0] = 3;
-	face_vertices[9][1] = 7;
-	face_vertices[9][2] = 8;
-	face_vertices[10][0] = 8;
-	face_vertices[10][1] = 4;
-	face_vertices[10][2] = 3;
-	face_vertices[11][0] = 4;
-	face_vertices[11][1] = 8;
-	face_vertices[11][2] = 9;
-	face_vertices[12][0] = 9;
-	face_vertices[12][1] = 5;
-	face_vertices[12][2] = 4;
-	face_vertices[13][0] = 5;
-	face_vertices[13][1] = 9;
-	face_vertices[13][2] = 10;
-	face_vertices[14][0] = 10;
-	face_vertices[14][1] = 1;
-	face_vertices[14][2] = 5;
-	face_vertices[15][0] = 11;
-	face_vertices[15][1] = 6;
-	face_vertices[15][2] = 10;
-	face_vertices[16][0] = 11;
-	face_vertices[16][1] = 7;
-	face_vertices[16][2] = 6;
-	face_vertices[17][0] = 11;
-	face_vertices[17][1] = 8;
-	face_vertices[17][2] = 7;
-	face_vertices[18][0] = 11;
-	face_vertices[18][1] = 9;
-	face_vertices[18][2] = 8;
-	face_vertices[19][0] = 11;
-	face_vertices[19][1] = 10;
-	face_vertices[19][2] = 9;
-	int face_edges[20][3];
+    const double ATMOS_HEIGHT = SCALE_HEIGHT*log(1 + NUMBER_OF_LAYERS);
+    double latitude_ico[12];
+    latitude_ico[0] = M_PI/2;
+    latitude_ico[1] = M_PI/6;
+    latitude_ico[2] = M_PI/6;
+    latitude_ico[3] = M_PI/6;
+    latitude_ico[4] = M_PI/6;
+    latitude_ico[5] = M_PI/6;
+    latitude_ico[6] = -M_PI/6;
+    latitude_ico[7] = -M_PI/6;
+    latitude_ico[8] = -M_PI/6;
+    latitude_ico[9] = -M_PI/6;
+    latitude_ico[10] = -M_PI/6;
+    latitude_ico[11] = -M_PI/2;
+    double longitude_ico[12];
+    longitude_ico[0] = 0;
+    longitude_ico[1] = 0;
+    longitude_ico[2] = 1*2*M_PI/5;
+    longitude_ico[3] = 2*2*M_PI/5;
+    longitude_ico[4] = 3*2*M_PI/5;
+    longitude_ico[5] = 4*2*M_PI/5;
+    longitude_ico[6] = 0;
+    longitude_ico[7] = 1*2*M_PI/5 + 2*M_PI/10;
+    longitude_ico[8] = 2*2*M_PI/5 + 2*M_PI/10;
+    longitude_ico[9] = 3*2*M_PI/5 + 2*M_PI/10;
+    longitude_ico[10] = 4*2*M_PI/5 + 2*M_PI/10;
+    longitude_ico[11] = 0;
+    int edge_vertices[NUMBER_OF_EDGES][2];
+    edge_vertices[0][0] = 0;
+    edge_vertices[0][1] = 1;
+    edge_vertices[1][0] = 0;
+    edge_vertices[1][1] = 2;
+    edge_vertices[2][0] = 0;
+    edge_vertices[2][1] = 3;
+    edge_vertices[3][0] = 0;
+    edge_vertices[3][1] = 4;
+    edge_vertices[4][0] = 0;
+    edge_vertices[4][1] = 5;
+    edge_vertices[5][0] = 1;
+    edge_vertices[5][1] = 2;
+    edge_vertices[6][0] = 2;
+    edge_vertices[6][1] = 3;
+    edge_vertices[7][0] = 3;
+    edge_vertices[7][1] = 4;
+    edge_vertices[8][0] = 4;
+    edge_vertices[8][1] = 5;
+    edge_vertices[9][0] = 5;
+    edge_vertices[9][1] = 1;
+    edge_vertices[10][0] = 1;
+    edge_vertices[10][1] = 6;
+    edge_vertices[11][0] = 6;
+    edge_vertices[11][1] = 2;
+    edge_vertices[12][0] = 2;
+    edge_vertices[12][1] = 7;
+    edge_vertices[13][0] = 7;
+    edge_vertices[13][1] = 3;
+    edge_vertices[14][0] = 3;
+    edge_vertices[14][1] = 8;
+    edge_vertices[15][0] = 8;
+    edge_vertices[15][1] = 4;
+    edge_vertices[16][0] = 4;
+    edge_vertices[16][1] = 9;
+    edge_vertices[17][0] = 9;
+    edge_vertices[17][1] = 5;
+    edge_vertices[18][0] = 5;
+    edge_vertices[18][1] = 10;
+    edge_vertices[19][0] = 10;
+    edge_vertices[19][1] = 1;
+    edge_vertices[20][0] = 10;
+    edge_vertices[20][1] = 6;
+    edge_vertices[21][0] = 6;
+    edge_vertices[21][1] = 7;
+    edge_vertices[22][0] = 7;
+    edge_vertices[22][1] = 8;
+    edge_vertices[23][0] = 8;
+    edge_vertices[23][1] = 9;
+    edge_vertices[24][0] = 9;
+    edge_vertices[24][1] = 10;
+    edge_vertices[25][0] = 6;
+    edge_vertices[25][1] = 11;
+    edge_vertices[26][0] = 7;
+    edge_vertices[26][1] = 11;
+    edge_vertices[27][0] = 8;
+    edge_vertices[27][1] = 11;
+    edge_vertices[28][0] = 9;
+    edge_vertices[28][1] = 11;
+    edge_vertices[29][0] = 10;
+    edge_vertices[29][1] = 11;
+    int face_vertices[20][3];
+    face_vertices[0][0] = 0;
+    face_vertices[0][1] = 1;
+    face_vertices[0][2] = 2;
+    face_vertices[1][0] = 0;
+    face_vertices[1][1] = 2;
+    face_vertices[1][2] = 3;
+    face_vertices[2][0] = 0;
+    face_vertices[2][1] = 3;
+    face_vertices[2][2] = 4;
+    face_vertices[3][0] = 0;
+    face_vertices[3][1] = 4;
+    face_vertices[3][2] = 5;
+    face_vertices[4][0] = 0;
+    face_vertices[4][1] = 5;
+    face_vertices[4][2] = 1;
+    face_vertices[5][0] = 1;
+    face_vertices[5][1] = 10;
+    face_vertices[5][2] = 6;
+    face_vertices[6][0] = 6;
+    face_vertices[6][1] = 2;
+    face_vertices[6][2] = 1;
+    face_vertices[7][0] = 2;
+    face_vertices[7][1] = 6;
+    face_vertices[7][2] = 7;
+    face_vertices[8][0] = 7;
+    face_vertices[8][1] = 3;
+    face_vertices[8][2] = 2;
+    face_vertices[9][0] = 3;
+    face_vertices[9][1] = 7;
+    face_vertices[9][2] = 8;
+    face_vertices[10][0] = 8;
+    face_vertices[10][1] = 4;
+    face_vertices[10][2] = 3;
+    face_vertices[11][0] = 4;
+    face_vertices[11][1] = 8;
+    face_vertices[11][2] = 9;
+    face_vertices[12][0] = 9;
+    face_vertices[12][1] = 5;
+    face_vertices[12][2] = 4;
+    face_vertices[13][0] = 5;
+    face_vertices[13][1] = 9;
+    face_vertices[13][2] = 10;
+    face_vertices[14][0] = 10;
+    face_vertices[14][1] = 1;
+    face_vertices[14][2] = 5;
+    face_vertices[15][0] = 11;
+    face_vertices[15][1] = 6;
+    face_vertices[15][2] = 10;
+    face_vertices[16][0] = 11;
+    face_vertices[16][1] = 7;
+    face_vertices[16][2] = 6;
+    face_vertices[17][0] = 11;
+    face_vertices[17][1] = 8;
+    face_vertices[17][2] = 7;
+    face_vertices[18][0] = 11;
+    face_vertices[18][1] = 9;
+    face_vertices[18][2] = 8;
+    face_vertices[19][0] = 11;
+    face_vertices[19][1] = 10;
+    face_vertices[19][2] = 9;
+    int face_edges[20][3];
     int face_vertex_0, face_vertex_1, face_vertex_2, edge_vertex_0, edge_vertex_1;
     for (int i = 0; i < NUMBER_OF_BASIC_TRIANGLES; i++)
     {
@@ -293,12 +281,12 @@ int main(int argc, char *argv[])
     h_curl_signs_dual = (short *) calloc(4*NUMBER_OF_DUAL_H_VECTORS, sizeof(short));
     double sigma, sigma_1, sigma_2, lat_edge_1, lon_edge_1, lat_edge_2, lon_edge_2, point_frac, lat_1, lon_1, lat_2, lon_2, rel_on_line, lat_res, lon_res, base_area, radius_1, radius_2, z_1, z_2;
     long h_index, edge_index, face_index, on_face_index, layer_index, level_index, inner_index, check, edge_0, edge_1, edge_2, edge_index_1, edge_index_2, coord_1_points_amount, index_check, j, coord_1, coord_2, vertex_index_0, vertex_index_1, vertex_index_2, reverse_0, reverse_1, reverse_2, index_1, index_2, index_3, points_right, small_triangle_edge_index, triangle_on_face_index, vert_index, floor_index, on_edge_index, point_0, point_1, point_2, dual_scalar_index, vector_index;
-	for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
-	{
+    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+    {
         layer_index = i/NUMBER_OF_SCALARS_H;
         h_index = i - layer_index*NUMBER_OF_SCALARS_H;
         sigma = 0.5*(SCALE_HEIGHT/ATMOS_HEIGHT)*(log((1.0 + NUMBER_OF_LAYERS)/(layer_index + 1.0)) + log((1.0 + NUMBER_OF_LAYERS)/(layer_index + 2.0)));
-		z_scalar[i] = ATMOS_HEIGHT*sigma;
+        z_scalar[i] = ATMOS_HEIGHT*sigma;
         if (layer_index == 0)
             adjacent_vector_index_upper[i] = -1;
         else
@@ -307,21 +295,21 @@ int main(int argc, char *argv[])
             adjacent_vector_index_lower[i] = -1;
         else
             adjacent_vector_index_lower[i] = h_index + (layer_index + 1)*(NUMBER_OF_VECTORS_H + NUMBER_OF_SCALARS_H);
-		if (h_index < NUMBER_OF_PENTAGONS)
-		{
-			latitude_scalar[i] = latitude_ico[h_index];
-			longitude_scalar[i] = longitude_ico[h_index];
-		}
-		else if (h_index < NUMBER_OF_PENTAGONS + POINTS_PER_EDGE*NUMBER_OF_EDGES)
-		{
-			edge_index = (h_index - NUMBER_OF_PENTAGONS)/POINTS_PER_EDGE;
-			point_frac = (1.0 + h_index - (NUMBER_OF_PENTAGONS + edge_index*POINTS_PER_EDGE))/(POINTS_PER_EDGE + 1.0);
+        if (h_index < NUMBER_OF_PENTAGONS)
+        {
+            latitude_scalar[i] = latitude_ico[h_index];
+            longitude_scalar[i] = longitude_ico[h_index];
+        }
+        else if (h_index < NUMBER_OF_PENTAGONS + POINTS_PER_EDGE*NUMBER_OF_EDGES)
+        {
+            edge_index = (h_index - NUMBER_OF_PENTAGONS)/POINTS_PER_EDGE;
+            point_frac = (1.0 + h_index - (NUMBER_OF_PENTAGONS + edge_index*POINTS_PER_EDGE))/(POINTS_PER_EDGE + 1.0);
             vertex_index_0 = edge_vertices[edge_index][0];
-			vertex_index_1 = edge_vertices[edge_index][1];
-			find_geodetic(latitude_ico[vertex_index_0], longitude_ico[vertex_index_0], latitude_ico[vertex_index_1], longitude_ico[vertex_index_1], point_frac, &lat_res, &lon_res);
-			latitude_scalar[i] = lat_res;
-			longitude_scalar[i] = lon_res;
-		}
+            vertex_index_1 = edge_vertices[edge_index][1];
+            find_geodetic(latitude_ico[vertex_index_0], longitude_ico[vertex_index_0], latitude_ico[vertex_index_1], longitude_ico[vertex_index_1], point_frac, &lat_res, &lon_res);
+            latitude_scalar[i] = lat_res;
+            longitude_scalar[i] = lon_res;
+        }
         else
         {
             inner_index = i - layer_index*NUMBER_OF_SCALARS_H - (NUMBER_OF_PENTAGONS + POINTS_PER_EDGE*NUMBER_OF_EDGES);
@@ -364,65 +352,65 @@ int main(int argc, char *argv[])
             latitude_scalar[i] = lat_res;
             longitude_scalar[i] = lon_res;
         }
-	}
+    }
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
-	{
-		vert_index = i/(NUMBER_OF_SCALARS_H + NUMBER_OF_VECTORS_H);
-		floor_index = vert_index*(NUMBER_OF_SCALARS_H + NUMBER_OF_VECTORS_H);
-		h_index = i - floor_index;
-		if (h_index >= NUMBER_OF_SCALARS_H)
-		{
+    {
+        vert_index = i/(NUMBER_OF_SCALARS_H + NUMBER_OF_VECTORS_H);
+        floor_index = vert_index*(NUMBER_OF_SCALARS_H + NUMBER_OF_VECTORS_H);
+        h_index = i - floor_index;
+        if (h_index >= NUMBER_OF_SCALARS_H)
+        {
             h_index -= NUMBER_OF_SCALARS_H;
-			if (h_index < NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))
-			{
-				edge_index = h_index/POINTS_PER_EDGE;
-				on_edge_index = h_index - edge_index*POINTS_PER_EDGE;
-				if(on_edge_index == 0)
-				{
-					from_indices[i] = edge_vertices[edge_index][0];
-					to_indices[i] = NUMBER_OF_PENTAGONS + edge_index*POINTS_PER_EDGE;
+            if (h_index < NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))
+            {
+                edge_index = h_index/POINTS_PER_EDGE;
+                on_edge_index = h_index - edge_index*POINTS_PER_EDGE;
+                if(on_edge_index == 0)
+                {
+                    from_indices[i] = edge_vertices[edge_index][0];
+                    to_indices[i] = NUMBER_OF_PENTAGONS + edge_index*POINTS_PER_EDGE;
                 }
-				else if (on_edge_index == POINTS_PER_EDGE - 1)
-				{
+                else if (on_edge_index == POINTS_PER_EDGE - 1)
+                {
                     from_indices[i] = NUMBER_OF_PENTAGONS + (edge_index + 1)*POINTS_PER_EDGE - 1;
-					to_indices[i] = edge_vertices[edge_index][1];
-				}
-				else
-				{
+                    to_indices[i] = edge_vertices[edge_index][1];
+                }
+                else
+                {
                     from_indices[i] = NUMBER_OF_PENTAGONS + edge_index*POINTS_PER_EDGE + on_edge_index - 1;
-					to_indices[i] = NUMBER_OF_PENTAGONS + edge_index*POINTS_PER_EDGE + on_edge_index;
-				}
-			}
-			else
-			{
-				face_index = (h_index - NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
-				edge_0 = face_edges[face_index][0];
+                    to_indices[i] = NUMBER_OF_PENTAGONS + edge_index*POINTS_PER_EDGE + on_edge_index;
+                }
+            }
+            else
+            {
+                face_index = (h_index - NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
+                edge_0 = face_edges[face_index][0];
                 edge_1 = face_edges[face_index][1];
-				edge_2 = face_edges[face_index][2];
-				on_face_index = h_index - (NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
-				triangle_on_face_index = on_face_index/3;
-				reverse_0, reverse_1, reverse_2 = 1;
+                edge_2 = face_edges[face_index][2];
+                on_face_index = h_index - (NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
+                triangle_on_face_index = on_face_index/3;
+                reverse_0, reverse_1, reverse_2 = 1;
                 if (face_vertices[face_index][0] == edge_vertices[edge_0][0])
-					reverse_1 = 0;
+                    reverse_1 = 0;
                 if (face_vertices[face_index][1] == edge_vertices[edge_1][0])
-					reverse_1 = 0;
-				if (face_vertices[face_index][2] == edge_vertices[edge_2][0])
-					reverse_2 = 0;
-				check = 1;
-				index_check = -1;
-				coord_2 = -1;
-				while (check == 1)
-				{
-					++coord_2;
-					coord_1_points_amount = POINTS_PER_EDGE - coord_2;
-					index_check = index_check + coord_1_points_amount;
+                    reverse_1 = 0;
+                if (face_vertices[face_index][2] == edge_vertices[edge_2][0])
+                    reverse_2 = 0;
+                check = 1;
+                index_check = -1;
+                coord_2 = -1;
+                while (check == 1)
+                {
+                    ++coord_2;
+                    coord_1_points_amount = POINTS_PER_EDGE - coord_2;
+                    index_check = index_check + coord_1_points_amount;
                     if (triangle_on_face_index <= index_check && triangle_on_face_index > index_check - coord_1_points_amount)
-					{
-						coord_1 = on_face_index - (index_check - coord_1_points_amount + 1);
-						check = 0;
-					}
-				}
-				small_triangle_edge_index = on_face_index - 3*triangle_on_face_index;
+                    {
+                        coord_1 = on_face_index - (index_check - coord_1_points_amount + 1);
+                        check = 0;
+                    }
+                }
+                small_triangle_edge_index = on_face_index - 3*triangle_on_face_index;
                 if (coord_2 == 0)
                     {
                         if (reverse_0 == 0)
@@ -442,25 +430,25 @@ int main(int argc, char *argv[])
                 else
                     point_1 = NUMBER_OF_PENTAGONS + POINTS_PER_EDGE*NUMBER_OF_EDGES + face_index*SCALAR_POINTS_PER_INNER_FACE + triangle_on_face_index - coord_2;
                 if (coord_1 == 0)
-					{
-						if (reverse_2 == 0)
-							point_2 = NUMBER_OF_PENTAGONS + POINTS_PER_EDGE*(edge_2 + 1) - 1 - coord_2;
-						else
-							point_2 = NUMBER_OF_PENTAGONS + POINTS_PER_EDGE*edge_2 + coord_2;
-					}
+                    {
+                        if (reverse_2 == 0)
+                            point_2 = NUMBER_OF_PENTAGONS + POINTS_PER_EDGE*(edge_2 + 1) - 1 - coord_2;
+                        else
+                            point_2 = NUMBER_OF_PENTAGONS + POINTS_PER_EDGE*edge_2 + coord_2;
+                    }
                 else
                     point_2 = NUMBER_OF_PENTAGONS + POINTS_PER_EDGE*NUMBER_OF_EDGES + face_index*SCALAR_POINTS_PER_INNER_FACE + triangle_on_face_index - 1 - coord_2;
-				if (small_triangle_edge_index == 0)
+                if (small_triangle_edge_index == 0)
                 {
                     from_indices[i] = point_0;
                     to_indices[i] = point_2;
                 }
-				if (small_triangle_edge_index == 1)
+                if (small_triangle_edge_index == 1)
                 {
                     from_indices[i] = point_0;
                     to_indices[i] = point_1;
                 }
-				if (small_triangle_edge_index == 2)
+                if (small_triangle_edge_index == 2)
                 {
                     from_indices[i] = point_2;
                     to_indices[i] = point_1;
@@ -478,65 +466,65 @@ int main(int argc, char *argv[])
                 else
                     adjacent_vector_index_lower_dual[dual_scalar_index] = dual_scalar_index + vert_index*NUMBER_OF_DUAL_VECTORS_H;
                 z_scalar_dual[dual_scalar_index] = SCALE_HEIGHT/ATMOS_HEIGHT*log(NUMBER_OF_LEVELS/(vert_index + 1));
-			}
-			find_geodetic(latitude_scalar[from_indices[i]], longitude_scalar[from_indices[i]], latitude_scalar[to_indices[i]], longitude_scalar[to_indices[i]], 0.5, &lat_res, &lon_res);
-			latitude_vector[i] = lat_res;
-			longitude_vector[i] = lon_res;
+            }
+            find_geodetic(latitude_scalar[from_indices[i]], longitude_scalar[from_indices[i]], latitude_scalar[to_indices[i]], longitude_scalar[to_indices[i]], 0.5, &lat_res, &lon_res);
+            latitude_vector[i] = lat_res;
+            longitude_vector[i] = lon_res;
             z_vector[i] = z_scalar[vert_index*NUMBER_OF_SCALARS_H];
             if (layer_index == 0)
                 direction[h_index] = find_geodetic_direction(latitude_scalar[from_indices[i]], longitude_scalar[from_indices[i]], latitude_scalar[to_indices[i]], longitude_scalar[to_indices[i]], 0.5);
-			normal_distance[i] = calculate_distance_h(latitude_vector[from_indices[i]], longitude_vector[from_indices[i]], latitude_vector[to_indices[i]], longitude_vector[to_indices[i]], SEMIMAJOR + z_vector[i]);
-			parallel_distance[2*i + 0] = 1;
+            normal_distance[i] = calculate_distance_h(latitude_vector[from_indices[i]], longitude_vector[from_indices[i]], latitude_vector[to_indices[i]], longitude_vector[to_indices[i]], SEMIMAJOR + z_vector[i]);
+            parallel_distance[2*i + 0] = 1;
             parallel_distance[2*i + 1] = 1;
             area[i] = calculate_vertical_face(parallel_distance[2*i + 0], SEMIMAJOR + ATMOS_HEIGHT*sigma_2, SEMIMAJOR + ATMOS_HEIGHT*sigma_1);
         }
-		else
-		{
-			if (vert_index == 0)
-			{
+        else
+        {
+            if (vert_index == 0)
+            {
                 from_indices[i] = h_index + (vert_index + 1)*NUMBER_OF_SCALARS_H;
                 to_indices[i] = -1;
-				latitude_vector[i] = latitude_scalar[from_indices[i]];
-				longitude_vector[i] = longitude_scalar[from_indices[i]];
+                latitude_vector[i] = latitude_scalar[from_indices[i]];
+                longitude_vector[i] = longitude_scalar[from_indices[i]];
                 normal_distance[i] = -1;
-			}
-			else if (vert_index == NUMBER_OF_LAYERS)
-			{
+            }
+            else if (vert_index == NUMBER_OF_LAYERS)
+            {
                 from_indices[i] = -1;
                 to_indices[i] = h_index + vert_index*NUMBER_OF_SCALARS_H;
-				latitude_vector[i] = latitude_scalar[to_indices[i]];
-				longitude_vector[i] = longitude_scalar[to_indices[i]];
+                latitude_vector[i] = latitude_scalar[to_indices[i]];
+                longitude_vector[i] = longitude_scalar[to_indices[i]];
                 normal_distance[i] = -1;
-			}
-			else
-			{
+            }
+            else
+            {
                 from_indices[i] = h_index + vert_index*NUMBER_OF_SCALARS_H;
                 to_indices[i] = h_index + (vert_index - 1)*NUMBER_OF_SCALARS_H;
-				latitude_vector[i] = latitude_scalar[to_indices[i]];
-				longitude_vector[i] = longitude_scalar[to_indices[i]];
+                latitude_vector[i] = latitude_scalar[to_indices[i]];
+                longitude_vector[i] = longitude_scalar[to_indices[i]];
                 normal_distance[i] = z_scalar[to_indices[i]] - z_scalar[from_indices[i]];
-			}
-			z_vector[i] = ATMOS_HEIGHT*(SCALE_HEIGHT/ATMOS_HEIGHT)*log((1.0 + NUMBER_OF_LAYERS)/(1.0 + vert_index));
-			parallel_distance[2*i + 0] = 1;
+            }
+            z_vector[i] = ATMOS_HEIGHT*(SCALE_HEIGHT/ATMOS_HEIGHT)*log((1.0 + NUMBER_OF_LAYERS)/(1.0 + vert_index));
+            parallel_distance[2*i + 0] = 1;
             parallel_distance[2*i + 1] = 1;
-			if (h_index < NUMBER_OF_PENTAGONS)
-				area[i] = 5*4*M_PI*pow(SEMIMAJOR + z_vector[i], 2)/(3*NUMBER_OF_TRIANGLES);
-			else
-				area[i] = 6*4*M_PI*pow(SEMIMAJOR + z_vector[i], 2)/(3*NUMBER_OF_TRIANGLES);
-		}
-	}
-	for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
-	{
+            if (h_index < NUMBER_OF_PENTAGONS)
+                area[i] = 5*4*M_PI*pow(SEMIMAJOR + z_vector[i], 2)/(3*NUMBER_OF_TRIANGLES);
+            else
+                area[i] = 6*4*M_PI*pow(SEMIMAJOR + z_vector[i], 2)/(3*NUMBER_OF_TRIANGLES);
+        }
+    }
+    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+    {
         layer_index = i/NUMBER_OF_SCALARS_H;
-		h_index = i - layer_index*NUMBER_OF_SCALARS_H;
+        h_index = i - layer_index*NUMBER_OF_SCALARS_H;
         base_area = area[adjacent_vector_index_lower[i]];
         radius_2 = SEMIMAJOR + z_vector[adjacent_vector_index_upper[i]];
         radius_1 = SEMIMAJOR + z_vector[adjacent_vector_index_lower[i]];
         volume[i] = find_volume(base_area, radius_1, radius_2);
     }
-	for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; ++i)
-	{
-		layer_index = i/(NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_DUAL_SCALARS_H);
+    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; ++i)
+    {
+        layer_index = i/(NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_DUAL_SCALARS_H);
         h_index = i - layer_index*(NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_DUAL_SCALARS_H);
         if (h_index >= NUMBER_OF_DUAL_VECTORS_H)
         {
@@ -566,9 +554,9 @@ int main(int argc, char *argv[])
             f_vec[i] = 2*OMEGA*sin(latitude_vector_dual[i]);
         else
             f_vec[i] = 2*OMEGA*cos(latitude_vector_dual[i])*sin(find_geodetic_direction(latitude_scalar_dual[from_indices_dual[i]], longitude_scalar_dual[from_indices_dual[i]], latitude_scalar_dual[to_indices_dual[i]], longitude_scalar_dual[to_indices_dual[i]], 0.5));
-	}
-	for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
-	{
+    }
+    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+    {
         layer_index = i/NUMBER_OF_SCALARS_H;
         if (layer_index == 0)
             adjacent_scalar_index_upper[i] = -1;
@@ -598,8 +586,8 @@ int main(int argc, char *argv[])
                 counter++;
             }
         }
-		if (h_index < NUMBER_OF_PENTAGONS)
-		{
+        if (h_index < NUMBER_OF_PENTAGONS)
+        {
             adjacent_scalar_indices_h[6*i + 5] = -1;
             adjacent_vector_indices_h[6*i + 5] = -1;
             adjacent_signs_h[6*i + 5] = 0;
@@ -616,20 +604,20 @@ int main(int argc, char *argv[])
                     vorticity_signs[6*i + j] = -1;
                 }
             }
-		}
-		else if (h_index < NUMBER_OF_PENTAGONS + POINTS_PER_EDGE*NUMBER_OF_EDGES)
-		{
-			edge_index = (h_index - NUMBER_OF_PENTAGONS)/POINTS_PER_EDGE;
+        }
+        else if (h_index < NUMBER_OF_PENTAGONS + POINTS_PER_EDGE*NUMBER_OF_EDGES)
+        {
+            edge_index = (h_index - NUMBER_OF_PENTAGONS)/POINTS_PER_EDGE;
             vertex_index_1 = edge_vertices[edge_index][0];
-			vertex_index_2 = edge_vertices[edge_index][1];
+            vertex_index_2 = edge_vertices[edge_index][1];
             for (int j = 0; j < 6; j++)
             {
                 vorticity_indices[6*i + j] = 0;
                 vorticity_signs[6*i + j] = 1;
             }
-		}
-		else
-		{
+        }
+        else
+        {
             inner_index = i - layer_index*NUMBER_OF_SCALARS_H - (NUMBER_OF_PENTAGONS + POINTS_PER_EDGE*NUMBER_OF_EDGES);
             face_index = inner_index/SCALAR_POINTS_PER_INNER_FACE;
             on_face_index = inner_index - face_index*SCALAR_POINTS_PER_INNER_FACE;
@@ -638,9 +626,9 @@ int main(int argc, char *argv[])
                 vorticity_indices[6*i + j] = 0;
                 vorticity_signs[6*i + j] = 1;
             }
-		}
+        }
     }
-	for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
+    for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
         for (int j = 0; j < 4; j++)
             {
@@ -648,8 +636,8 @@ int main(int argc, char *argv[])
                 h_curl_signs[4*i + j] = 1;
             }
         }
-	for (int i = 0; i < NUMBER_OF_H_VECTORS; ++i)
-	 {
+    for (int i = 0; i < NUMBER_OF_H_VECTORS; ++i)
+        {
         vector_product_sign[i] = 1;
         for (int j = 0; j < 2; j++)
         {
@@ -670,9 +658,9 @@ int main(int argc, char *argv[])
             recov_hor_par_dual_index[11*i + j] = 0;
             recov_hor_par_dual_weight[11*i + j] = 0;
         }
-	}
-	for (int i = 0; i < NUMBER_OF_V_VECTORS; ++i)
-	{
+    }
+    for (int i = 0; i < NUMBER_OF_V_VECTORS; ++i)
+    {
         gravity[i] = -9.8;
         for (int j = 0; j < 6; j++)
         {
@@ -685,16 +673,16 @@ int main(int argc, char *argv[])
             recov_ver_2_dual_index[6*i + j] = 0;
             recov_ver_2_dual_weight[6*i + j] = 0;
         }
-	}
-	for (int i = 0; i < NUMBER_OF_DUAL_SCALARS; ++i)
-	{
-		level_index = i/NUMBER_OF_DUAL_SCALARS_H;
-		h_index = i - level_index*NUMBER_OF_DUAL_SCALARS_H;
-		face_index = h_index/TRIANGLES_PER_FACE;
+    }
+    for (int i = 0; i < NUMBER_OF_DUAL_SCALARS; ++i)
+    {
+        level_index = i/NUMBER_OF_DUAL_SCALARS_H;
+        h_index = i - level_index*NUMBER_OF_DUAL_SCALARS_H;
+        face_index = h_index/TRIANGLES_PER_FACE;
         on_face_index =  h_index - face_index*TRIANGLES_PER_FACE;
         edge_1 = face_edges[face_index][0];
-		edge_1 = face_edges[face_index][1];
-		edge_2 = face_edges[face_index][2];
+        edge_1 = face_edges[face_index][1];
+        edge_2 = face_edges[face_index][2];
         if (level_index == 0)
             adjacent_scalar_index_upper_dual[i] = -1;
         else
@@ -723,17 +711,17 @@ int main(int argc, char *argv[])
                 counter++;
             }
         }
-	}
-	for (int i = 0; i < NUMBER_OF_DUAL_H_VECTORS; ++i)
-	{
+    }
+    for (int i = 0; i < NUMBER_OF_DUAL_H_VECTORS; ++i)
+    {
         for (int j = 0; j < 4; j++)
             {
                 h_curl_indices_dual[4*i + j] = 0;
                 h_curl_signs_dual[4*i + j] = 1;
             }
-	}
-	for (int i = 0; i < NUMBER_OF_DUAL_V_VECTORS; ++i)
-	{
+    }
+    for (int i = 0; i < NUMBER_OF_DUAL_V_VECTORS; ++i)
+    {
         for (int j = 0; j < 3; j++)
         {
             vorticity_indices_dual[3*i + j] = 0;
@@ -741,7 +729,7 @@ int main(int argc, char *argv[])
         }
     }
     int retval, ncid_g_prop;
-    if ((retval = nc_create(FILE_NAME_GEO_PROP, NC_CLOBBER, &ncid_g_prop)))
+    if ((retval = nc_create(FILE_NAME, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
     int latitude_scalar_id, longitude_scalar_id, z_scalar_id, latitude_vector_id, longitude_vector_id, z_vector_id, parallel_distance_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, recov_ver_2_pri_weight_id, recov_ver_2_dual_weight_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_dual_id, latitude_vector_dual_id, longitude_vector_dual_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, parallel_distance_dual_id, to_indices_id, from_indices_id, adjacent_vector_indices_h_id, adjacent_vector_index_lower_id, adjacent_vector_index_upper_id, adjacent_scalar_indices_h_id, adjacent_scalar_index_lower_id, adjacent_scalar_index_upper_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, recov_ver_2_pri_index_id, recov_ver_2_dual_index_id, to_indices_dual_id, from_indices_dual_id, adjacent_vector_indices_h_dual_id, adjacent_vector_index_upper_dual_id, adjacent_vector_index_lower_dual_id, adjacent_scalar_indices_h_dual_id, adjacent_scalar_index_lower_dual_id, adjacent_scalar_index_upper_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vector_product_sign_id, adjacent_signs_h_dual_id, vorticity_signs_dual_id, h_curl_signs_dual_id;
     int scalar_dimid, vector_dimid, vector_v_dimid, vector_dimid_2, scalar_dimid_6, vector_dimid_4, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, scalar_dual_dimid, vector_dual_dimid, vector_dual_h_dimid, vector_dual_dimid_2, scalar_dual_dimid_3, vector_dual_v_dimid_3, vector_dual_h_dimid_4;
@@ -1065,76 +1053,6 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_close(ncid_g_prop)))
         ERR(retval);
-    int ncid_rect_trafo;
-    if ((retval = nc_create(FILE_NAME_RECT_TRAFO, NC_CLOBBER, &ncid_rect_trafo)))
-        ERR(retval);
-    const int NUMBER_OF_LINES = 0.5*sqrt(NUMBER_OF_SCALARS_H*M_PI);
-    const int NUMBER_OF_COLUMNS = 4*NUMBER_OF_LINES/M_PI;
-    double lat_deg_inc = NUMBER_OF_LINES/180.0;
-    double lon_deg_inc = NUMBER_OF_COLUMNS/360.0;
-    double lat_deg_first_grid = -90 + 180.0/(2*NUMBER_OF_LINES);
-    double lon_deg_first_grid = lon_deg_inc/2.0; 
-    const int NUMBER_OF_VALUES = NUMBER_OF_LINES*NUMBER_OF_COLUMNS;
-    long *scalar_hex2rect_indices, *wind_hex2rect_indices, *w_wind_hex2rect_indices;
-    double *wind_hex2rect_weights, *directions_hex2rect;
-    wind_hex2rect_weights = (double *) calloc(11*NUMBER_OF_VALUES, sizeof(double));
-    directions_hex2rect = (double *) calloc(NUMBER_OF_VALUES, sizeof(double));
-    scalar_hex2rect_indices = (long *) calloc(NUMBER_OF_VALUES, sizeof(long));
-    wind_hex2rect_indices = (long *) calloc(11*NUMBER_OF_VALUES, sizeof(long));
-    w_wind_hex2rect_indices = (long *) calloc(NUMBER_OF_VALUES, sizeof(long));
-    long closest_scalar_h;
-    long closest_vector_h;
-    for (int i = 0; i < NUMBER_OF_LINES; i++)
-    {
-        for (int j = 0; j < NUMBER_OF_COLUMNS; j++)
-        {
-            closest_scalar_h = find_closest_index(i, j, lat_deg_first_grid, lon_deg_first_grid, lat_deg_inc, lon_deg_inc, latitude_scalar, longitude_scalar, NUMBER_OF_SCALARS_H);
-            closest_vector_h = find_closest_index(i, j, lat_deg_first_grid, lon_deg_first_grid, lat_deg_inc, lon_deg_inc, latitude_vector, longitude_vector, NUMBER_OF_VECTORS_H);
-            scalar_hex2rect_indices[i*NUMBER_OF_COLUMNS + j] = closest_scalar_h;
-            directions_hex2rect[i*NUMBER_OF_COLUMNS + j] = direction[closest_vector_h];
-            w_wind_hex2rect_indices[i*NUMBER_OF_COLUMNS + j] = 0;
-            for (int k = 0; k < 11; k++)
-            {
-                wind_hex2rect_indices[11*(i*NUMBER_OF_COLUMNS + j) + k] = recov_hor_par_dual_index[11*closest_vector_h + k];
-                wind_hex2rect_weights[11*(i*NUMBER_OF_COLUMNS + j) + k] = recov_hor_par_dual_weight[11*closest_vector_h + k];
-            }
-        }
-    }
-    int value_dimid, recov_values_dimid;
-    int scalar_hex2rect_indices_id, w_wind_hex2rect_indices_id, wind_hex2rect_indices_id, wind_hex2rect_weights_id, directions_hex2rect_id;
-    if ((retval = nc_def_dim(ncid_rect_trafo, "value_index", NUMBER_OF_VALUES, &value_dimid)))
-        ERR(retval);
-    if ((retval = nc_def_dim(ncid_rect_trafo, "recov_index", 11*NUMBER_OF_VALUES, &recov_values_dimid)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_rect_trafo, "wind_hex2rect_weights", NC_DOUBLE, 1, &recov_values_dimid, &wind_hex2rect_weights_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_rect_trafo, "directions", NC_DOUBLE, 1, &value_dimid, &directions_hex2rect_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_rect_trafo, "scalar_indices", NC_LONG, 1, &value_dimid, &scalar_hex2rect_indices_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_rect_trafo, "wind_hex2rect_indices", NC_LONG, 1, &recov_values_dimid, &wind_hex2rect_indices_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_rect_trafo, "w_wind_indices", NC_LONG, 1, &value_dimid, &w_wind_hex2rect_indices_id)))
-        ERR(retval);
-    if ((retval = nc_enddef(ncid_rect_trafo)))
-        ERR(retval);
-    if ((retval = nc_put_var_double(ncid_rect_trafo, directions_hex2rect_id, &directions_hex2rect[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_double(ncid_rect_trafo, wind_hex2rect_weights_id, &wind_hex2rect_weights[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_long(ncid_rect_trafo, scalar_hex2rect_indices_id, &scalar_hex2rect_indices[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_long(ncid_rect_trafo, wind_hex2rect_indices_id, &wind_hex2rect_indices[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_long(ncid_rect_trafo, w_wind_hex2rect_indices_id, &w_wind_hex2rect_indices[0])))
-        ERR(retval);
-    if ((retval = nc_close(ncid_rect_trafo)))
-        ERR(retval);
-    free(scalar_hex2rect_indices);
-    free(w_wind_hex2rect_indices);
-    free(wind_hex2rect_indices);
-    free(wind_hex2rect_weights);
-    free(directions_hex2rect);
     free(latitude_scalar);
     free(longitude_scalar);
     free(z_scalar);
@@ -1200,143 +1118,6 @@ int main(int argc, char *argv[])
     free(vorticity_signs_dual);
     free(h_curl_signs_dual);
     return 0;
-}
-
-long find_closest_index(int i, int j, double lat_deg_first_grid, double lon_deg_first_grid, double lat_deg_inc, double lon_deg_inc, double latitudes[], double longitudes[], int NUMBER_OF_SCALARS_H)
-{
-    double lat_deg, lon_deg, lat, lon;
-    lat_deg = lat_deg_first_grid + i*lat_deg_inc;
-    lon_deg = lon_deg_first_grid + j*lon_deg_inc;
-    lat = 360*lat_deg/(2*M_PI);
-    lon = 360*lon_deg/(2*M_PI);
-    double dist_array[NUMBER_OF_SCALARS_H];
-    for (int k = 0; k < NUMBER_OF_SCALARS_H; k++)
-        dist_array[k] = calculate_distance_cart(lat, lon, latitudes[k], longitudes[k], 1, 1);
-    long answer = 0;
-    short candidate_out = 0;
-    double dist;
-    for (int k = 1; k < NUMBER_OF_SCALARS_H; k++)
-    {
-        dist = dist_array[k];
-        for (int l = 0; l < NUMBER_OF_SCALARS_H && candidate_out == 0; l++)
-        {
-            if (dist_array[l] < dist)
-                candidate_out = 1;
-            if (l == NUMBER_OF_SCALARS_H - 1 && candidate_out == 0)
-                answer = k;
-        }
-        
-    }
-    return answer;
-}
-
-double scalar_product_elementary(double vector_a[], double vector_b[])
-{
-	double answer = 0;
-	for (int i = 0; i < 3; ++i)
-	{
-		answer = answer + vector_a[i]*vector_b[i];
-	}
-	return answer;
-}
-
-void find_geos(double x, double y, double z, double *lat_out, double *lon_out)
-{
-	*lat_out = asin(z/sqrt(x*x + y*y + z*z));
-	*lon_out = atan2(y, x);
-	if (lon_out < 0)
-		*lon_out = *lon_out + 2*M_PI;
-}
-
-void find_global_normal(double lat, double lon, double *x, double *y, double *z)
-{
-    *x = cos(lat)*cos(lon);
-    *y = cos(lat)*sin(lon);
-    *z = sin(lat);
-}
-
-double calculate_distance_h(double latitude_a, double longitude_a, double latitude_b, double longitude_b, double radius)
-{
-	double dist = 2*radius*asin(sqrt(0.5 - 0.5*(cos(latitude_a)*cos(latitude_b)*cos(longitude_b - longitude_a) + sin(latitude_a)*sin(latitude_b))));
-	return dist;
-}
- 
-double calculate_vertical_face(double base_distance, double r_1, double r_2)
-{
-	double area;
-	area = base_distance*(0.5*pow(r_2, 2)/r_1 - 0.5*r_1);
-	return area;
-}
-
-double calculate_distance_cart(double lat_1_in, double lon_1_in, double lat_2_in, double lon_2_in, double radius_1, double radius_2)
-{
-    double distance;
-    double x_1, y_1, z_1, x_2, y_2, z_2;
-    find_global_normal(lat_1_in, lon_1_in, &x_1, &y_1, &z_1);
-    find_global_normal(lat_2_in, lon_2_in, &x_2, &y_2, &z_2);
-    x_1 = radius_1*x_1;
-    y_1 = radius_1*y_1;
-    z_1 = radius_1*z_1;
-    x_2 = radius_2*x_2;
-    y_2 = radius_2*y_2;
-    z_2 = radius_2*z_2;
-    distance = sqrt(pow(x_2 - x_1, 2) + pow(y_2 - y_1, 2) + pow(z_2 - z_1, 2));
-    return distance;
-}
-
-void find_geodetic(double lat_1_in, double lon_1_in, double lat_2_in, double lon_2_in, double parameter, double *lat_out, double *lon_out)
-{
-    double d = calculate_distance_cart(lat_1_in , lon_1_in, lat_2_in, lon_2_in, 1, 1);
-    double theta = 2*asin(d/2.0);
-	double tau_dash = 0.5 + sqrt(1/pow(d, 2) - 0.25)*tan(theta*(parameter - 0.5));
-	double z = tau_dash*sin(lat_2_in) + (1 - tau_dash)*sin(lat_1_in);
-    double x = tau_dash*cos(lat_2_in)*cos(lon_2_in) + (1 - tau_dash)*cos(lat_1_in)*cos(lon_1_in);
-    double y = tau_dash*cos(lat_2_in)*sin(lon_2_in) + (1 - tau_dash)*cos(lat_1_in)*sin(lon_1_in);
-    *lat_out = asin(z/sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
-	*lon_out = atan2(y, x);
-    if (*lon_out < 0)
-		*lon_out = *lon_out + 2*M_PI;
-}
-
-double find_geodetic_direction(double lat_1_in, double lon_1_in, double lat_2_in, double lon_2_in, double parameter)
-{
-	double rel_vec[3], local_i[3], local_j[3];
-	rel_vec[0] = cos(lat_2_in)*cos(lon_2_in) - cos(lat_1_in)*cos(lon_1_in);
-	rel_vec[1] = cos(lat_2_in)*sin(lon_2_in) - cos(lat_1_in)*sin(lon_1_in);
-	rel_vec[2] = sin(lat_2_in) - sin(lat_1_in);
-	double lat, lon = 0;
-	find_geodetic(lat_1_in, lon_1_in, lat_2_in, lon_2_in, parameter, &lat, &lon);
-	local_i[0] = -sin(lon);
-	local_i[1] = cos(lon);
-	local_i[2] = 0;
-	local_j[0] = -sin(lat)*cos(lon);
-	local_j[1] = -sin(lat)*sin(lon);
-	local_j[2] = cos(lat);
-	double x_comp = scalar_product_elementary(local_i, rel_vec);
-	double y_comp = scalar_product_elementary(local_j, rel_vec);
-	double direction = atan2(y_comp, x_comp);
-	if (direction < 0)
-		direction = direction + 2*M_PI;
-	return direction;
-}
-
-void find_center(double lat_1_in, double lon_1_in, double lat_2_in, double lon_2_in, double lat_3_in, double lon_3_in, double *lat_out, double *lon_out)
-{
-    double x_1, y_1, z_1, x_2, y_2, z_2, x_3, y_3, z_3, x, y, z;
-    find_global_normal(lat_1_in, lon_1_in, &x_1, &y_1, &z_1);
-    find_global_normal(lat_2_in, lon_2_in, &x_2, &y_2, &z_2);
-    find_global_normal(lat_3_in, lon_3_in, &x_3, &y_3, &z_3);
-    x = x_1 + x_2 + x_3;
-    y = y_1 + y_2 + y_3;
-    z = z_1 + z_2 + z_3;
-    find_geos(x, y, z, lat_out, lon_out);
-}
-
-double find_volume(double area_1, double radius_1, double radius_2)
-{
-    double volume;
-    volume = (area_1/(3*pow(radius_1, 2)))*(pow(radius_2, 3) - pow(radius_1, 3));
-    return volume;
 }
 
 
