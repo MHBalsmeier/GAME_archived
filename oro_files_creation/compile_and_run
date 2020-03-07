@@ -1,1 +1,0 @@
-gcc hex_oro.c -lnetcdf -o hex_oro.exe && ./hex_oro.exe

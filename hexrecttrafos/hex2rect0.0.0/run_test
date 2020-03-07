@@ -1,6 +1,0 @@
-INITTIME=0
-STEP=0
-input_folder="/home/max/Schreibtisch/code/real_stuff/test_state_creation"
-input_filename_root="nc_files"
-input_filename="test_res_2_sphere_oro_0_scenario_0"".nc"
-source root_script
