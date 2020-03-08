@@ -6,79 +6,72 @@
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 
-Grid grid;
-Dualgrid dualgrid;
-
-int set_grid_properties(char GEO_PROP_FILE[])
+int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
 {
-    double *test;
-    test = (double *) calloc(1, sizeof(double));
-    double *latitude_scalar, *longitude_scalar, *z_scalar, *latitude_vector, *longitude_vector, *z_vector, *parallel_distance, *normal_distance, *gravity, *volume, *area, *recov_hor_par_dual_weight, *recov_hor_ver_dual_weight, *recov_hor_par_pri_weight, *recov_hor_ver_pri_weight, *recov_ver_1_pri_weight, *recov_ver_1_dual_weight, *recov_ver_2_pri_weight, *recov_ver_2_dual_weight, *latitude_scalar_dual, *longitude_scalar_dual, *z_scalar_dual, *latitude_vector_dual, *longitude_vector_dual, *z_vector_dual, *normal_distance_dual, *area_dual, *f_vec, *parallel_distance_dual;
-    long *to_indices, *from_indices, *adjacent_vector_indices_h, *adjacent_vector_index_lower, *adjacent_vector_index_upper, *adjacent_scalar_indices_h, *adjacent_scalar_index_lower, *adjacent_scalar_index_upper, *vorticity_indices, *h_curl_indices, *recov_hor_par_dual_index, *recov_hor_ver_dual_index, *recov_hor_par_pri_index, *recov_hor_ver_pri_index, *recov_ver_1_pri_index, *recov_ver_1_dual_index, *recov_ver_2_pri_index, *recov_ver_2_dual_index, *to_indices_dual, *from_indices_dual, *adjacent_vector_indices_h_dual, *adjacent_vector_index_upper_dual, *adjacent_vector_index_lower_dual, *adjacent_scalar_indices_h_dual, *adjacent_scalar_index_lower_dual, *adjacent_scalar_index_upper_dual, *vorticity_indices_dual, *h_curl_indices_dual;
-    short  *adjacent_signs_h, *vorticity_signs, *h_curl_signs, *vector_product_sign, *adjacent_signs_h_dual, *vorticity_signs_dual, *h_curl_signs_dual;   latitude_scalar = (double *) calloc(NUMBER_OF_SCALARS, sizeof(double));
-    longitude_scalar = (double *) calloc(NUMBER_OF_SCALARS, sizeof(double));
-    z_scalar = (double *) calloc(NUMBER_OF_SCALARS, sizeof(double));
-    latitude_vector = (double *) calloc(NUMBER_OF_VECTORS, sizeof(double));
-    longitude_vector = (double *) calloc(NUMBER_OF_VECTORS, sizeof(double));
-    z_vector = (double *) calloc(NUMBER_OF_VECTORS, sizeof(double));
-    parallel_distance = (double *) calloc(2*NUMBER_OF_VECTORS, sizeof(double));
-    normal_distance = (double *) calloc(NUMBER_OF_VECTORS, sizeof(double));
-    gravity = (double *) calloc(NUMBER_OF_V_VECTORS, sizeof(double));
-    volume = (double *) calloc(NUMBER_OF_SCALARS, sizeof(double));
-    area = (double *) calloc(NUMBER_OF_VECTORS, sizeof(double));
-    recov_hor_par_dual_weight = (double *) calloc(11*NUMBER_OF_H_VECTORS, sizeof(double));
-    recov_hor_ver_dual_weight = (double *) calloc(2*NUMBER_OF_H_VECTORS, sizeof(double));
-    recov_hor_par_pri_weight = (double *) calloc(2*NUMBER_OF_H_VECTORS, sizeof(double));
-    recov_hor_ver_pri_weight = (double *) calloc(4*NUMBER_OF_H_VECTORS, sizeof(double));
-    recov_ver_1_pri_weight = (double *) calloc(6*NUMBER_OF_V_VECTORS, sizeof(double));
-    recov_ver_1_dual_weight = (double *) calloc(6*NUMBER_OF_V_VECTORS, sizeof(double));
-    recov_ver_2_pri_weight = (double *) calloc(6*NUMBER_OF_V_VECTORS, sizeof(double));
-    recov_ver_2_dual_weight = (double *) calloc(6*NUMBER_OF_V_VECTORS, sizeof(double));
-    latitude_scalar_dual = (double *) calloc(NUMBER_OF_DUAL_SCALARS, sizeof(double));
-    longitude_scalar_dual = (double *) calloc(NUMBER_OF_DUAL_SCALARS, sizeof(double));
-    z_scalar_dual = (double *) calloc(NUMBER_OF_DUAL_SCALARS, sizeof(double));
-    latitude_vector_dual = (double *) calloc(NUMBER_OF_DUAL_VECTORS, sizeof(double));
-    longitude_vector_dual = (double *) calloc(NUMBER_OF_DUAL_VECTORS, sizeof(double));
-    z_vector_dual = (double *) calloc(NUMBER_OF_DUAL_VECTORS, sizeof(double));
-    normal_distance_dual = (double *) calloc(NUMBER_OF_DUAL_VECTORS, sizeof(double));
-    area_dual = (double *) calloc(NUMBER_OF_DUAL_VECTORS, sizeof(double));
-    f_vec = (double *) calloc(NUMBER_OF_DUAL_VECTORS, sizeof(double));
-    parallel_distance_dual = (double *) calloc(2*NUMBER_OF_DUAL_VECTORS, sizeof(double));
-    recov_ver_2_dual_index = (long *) calloc(6*NUMBER_OF_V_VECTORS, sizeof(long));
-    recov_ver_1_dual_index = (long *) calloc(6*NUMBER_OF_V_VECTORS, sizeof(long));
-    recov_ver_2_pri_index = (long *) calloc(6*NUMBER_OF_V_VECTORS, sizeof(long));
-    recov_hor_ver_pri_index = (long *) calloc(4*NUMBER_OF_H_VECTORS, sizeof(long));
-    recov_ver_1_pri_index = (long *) calloc(6*NUMBER_OF_V_VECTORS, sizeof(long));
-    recov_hor_ver_dual_index = (long *) calloc(2*NUMBER_OF_H_VECTORS, sizeof(long));
-    recov_hor_par_pri_index = (long *) calloc(2*NUMBER_OF_H_VECTORS, sizeof(long));
-    to_indices = (long *) calloc(NUMBER_OF_VECTORS, sizeof(long));
-    from_indices = (long *) calloc(NUMBER_OF_VECTORS, sizeof(long));
-    adjacent_vector_indices_h = (long *) calloc(6*NUMBER_OF_SCALARS, sizeof(long));
-    adjacent_vector_index_lower = (long *) calloc(NUMBER_OF_SCALARS, sizeof(long));
-    adjacent_vector_index_upper = (long *) calloc(NUMBER_OF_SCALARS, sizeof(long));
-    adjacent_scalar_indices_h = (long *) calloc(6*NUMBER_OF_SCALARS, sizeof(long));
-    adjacent_scalar_index_lower = (long *) calloc(NUMBER_OF_SCALARS, sizeof(long));
-    adjacent_scalar_index_upper = (long *) calloc(NUMBER_OF_SCALARS, sizeof(long));
-    vorticity_indices = (long *) calloc(6*NUMBER_OF_SCALARS, sizeof(long));
-    h_curl_indices = (long *) calloc(4*NUMBER_OF_VECTORS, sizeof(long));
-    recov_hor_par_dual_index = (long *) calloc(11*NUMBER_OF_H_VECTORS, sizeof(long));
-    to_indices_dual = (long *) calloc(NUMBER_OF_DUAL_VECTORS, sizeof(long));
-    from_indices_dual = (long *) calloc(NUMBER_OF_DUAL_VECTORS, sizeof(long));
-    adjacent_vector_indices_h_dual = (long *) calloc(3*NUMBER_OF_DUAL_SCALARS, sizeof(long));
-    adjacent_vector_index_upper_dual = (long *) calloc(NUMBER_OF_DUAL_SCALARS, sizeof(long));
-    adjacent_vector_index_lower_dual = (long *) calloc(NUMBER_OF_DUAL_SCALARS, sizeof(long));
-    adjacent_scalar_indices_h_dual = (long *) calloc(3*NUMBER_OF_DUAL_SCALARS, sizeof(long));
-    adjacent_scalar_index_lower_dual = (long *) calloc(NUMBER_OF_DUAL_SCALARS, sizeof(long));
-    adjacent_scalar_index_upper_dual = (long *) calloc(NUMBER_OF_DUAL_SCALARS, sizeof(long));
-    vorticity_indices_dual = (long *) calloc(3*NUMBER_OF_DUAL_V_VECTORS, sizeof(long));
-    h_curl_indices_dual = (long *) calloc(4*NUMBER_OF_DUAL_H_VECTORS, sizeof(long));
-    adjacent_signs_h = (short *) calloc(6*NUMBER_OF_SCALARS, sizeof(short));
-    vorticity_signs = (short *) calloc(6*NUMBER_OF_SCALARS, sizeof(short));
-    h_curl_signs = (short *) calloc(4*NUMBER_OF_VECTORS, sizeof(short));
-    vector_product_sign = (short *) calloc(NUMBER_OF_H_VECTORS, sizeof(short));
-    adjacent_signs_h_dual = (short *) calloc(3*NUMBER_OF_DUAL_SCALARS, sizeof(short));
-    vorticity_signs_dual = (short *) calloc(3*NUMBER_OF_DUAL_V_VECTORS, sizeof(short));
-    h_curl_signs_dual = (short *) calloc(4*NUMBER_OF_DUAL_H_VECTORS, sizeof(short));
+    double *latitude_scalar = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    double *longitude_scalar = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    double *z_scalar = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    double *latitude_vector = malloc(NUMBER_OF_VECTORS*sizeof(double));
+    double *longitude_vector = malloc(NUMBER_OF_VECTORS*sizeof(double));
+    double *z_vector = malloc(NUMBER_OF_VECTORS*sizeof(double));
+    double *parallel_distance = malloc(2*NUMBER_OF_VECTORS*sizeof(double));
+    double *normal_distance = malloc(NUMBER_OF_VECTORS*sizeof(double));
+    double *gravity = malloc(NUMBER_OF_V_VECTORS*sizeof(double));
+    double *volume = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    double *area = malloc(NUMBER_OF_VECTORS*sizeof(double));
+    double *recov_hor_par_dual_weight = malloc(11*NUMBER_OF_H_VECTORS*sizeof(double));
+    double *recov_hor_ver_dual_weight = malloc(2*NUMBER_OF_H_VECTORS*sizeof(double));
+    double *recov_hor_par_pri_weight = malloc(2*NUMBER_OF_H_VECTORS*sizeof(double));
+    double *recov_hor_ver_pri_weight = malloc(4*NUMBER_OF_H_VECTORS*sizeof(double));
+    double *recov_ver_1_pri_weight = malloc(6*NUMBER_OF_V_VECTORS*sizeof(double));
+    double *recov_ver_1_dual_weight = malloc(6*NUMBER_OF_V_VECTORS*sizeof(double));
+    double *recov_ver_2_pri_weight = malloc(6*NUMBER_OF_V_VECTORS*sizeof(double));
+    double *recov_ver_2_dual_weight = malloc(6*NUMBER_OF_V_VECTORS*sizeof(double));
+    double *latitude_scalar_dual = malloc(NUMBER_OF_DUAL_SCALARS*sizeof(double));
+    double *longitude_scalar_dual = malloc(NUMBER_OF_DUAL_SCALARS*sizeof(double));
+    double *z_scalar_dual = malloc(NUMBER_OF_DUAL_SCALARS*sizeof(double));
+    double *latitude_vector_dual = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(double));
+    double *longitude_vector_dual = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(double));
+    double *z_vector_dual = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(double));
+    double *normal_distance_dual = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(double));
+    double *area_dual = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(double));
+    double *f_vec = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(double));
+    double *parallel_distance_dual = malloc(2*NUMBER_OF_DUAL_VECTORS*sizeof(double));
+    long *recov_ver_2_dual_index = malloc(6*NUMBER_OF_V_VECTORS*sizeof(long));
+    long *recov_ver_1_dual_index = malloc(6*NUMBER_OF_V_VECTORS*sizeof(long));
+    long *recov_ver_2_pri_index = malloc(6*NUMBER_OF_V_VECTORS*sizeof(long));
+    long *recov_hor_ver_pri_index = malloc(4*NUMBER_OF_H_VECTORS*sizeof(long));
+    long *recov_ver_1_pri_index = malloc(6*NUMBER_OF_V_VECTORS*sizeof(long));
+    long *recov_hor_ver_dual_index = malloc(2*NUMBER_OF_H_VECTORS*sizeof(long));
+    long *recov_hor_par_pri_index = malloc(2*NUMBER_OF_H_VECTORS*sizeof(long));
+    long *to_indices = malloc(NUMBER_OF_VECTORS*sizeof(long));
+    long *from_indices = malloc(NUMBER_OF_VECTORS*sizeof(long));
+    long *adjacent_vector_indices_h = malloc(6*NUMBER_OF_SCALARS*sizeof(long));
+    long *adjacent_vector_index_lower = malloc(NUMBER_OF_SCALARS*sizeof(long));
+    long *adjacent_vector_index_upper = malloc(NUMBER_OF_SCALARS*sizeof(long));
+    long *adjacent_scalar_indices_h = malloc(6*NUMBER_OF_SCALARS*sizeof(long));
+    long *adjacent_scalar_index_lower = malloc(NUMBER_OF_SCALARS*sizeof(long));
+    long *adjacent_scalar_index_upper = malloc(NUMBER_OF_SCALARS*sizeof(long));
+    long *vorticity_indices = malloc(6*NUMBER_OF_SCALARS*sizeof(long));
+    long *h_curl_indices = malloc(4*NUMBER_OF_VECTORS*sizeof(long));
+    long *recov_hor_par_dual_index = malloc(11*NUMBER_OF_H_VECTORS*sizeof(long));
+    long *to_indices_dual = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(long));
+    long *from_indices_dual = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(long));
+    long *adjacent_vector_indices_h_dual = malloc(3*NUMBER_OF_DUAL_SCALARS*sizeof(long));
+    long *adjacent_vector_index_upper_dual = malloc(NUMBER_OF_DUAL_SCALARS*sizeof(long));
+    long *adjacent_vector_index_lower_dual = malloc(NUMBER_OF_DUAL_SCALARS*sizeof(long));
+    long *adjacent_scalar_indices_h_dual = malloc(3*NUMBER_OF_DUAL_SCALARS*sizeof(long));
+    long *adjacent_scalar_index_lower_dual = malloc(NUMBER_OF_DUAL_SCALARS*sizeof(long));
+    long *adjacent_scalar_index_upper_dual = malloc(NUMBER_OF_DUAL_SCALARS*sizeof(long));
+    long *vorticity_indices_dual = malloc(3*NUMBER_OF_DUAL_V_VECTORS*sizeof(long));
+    long *h_curl_indices_dual = malloc(4*NUMBER_OF_DUAL_H_VECTORS*sizeof(long));
+    short *adjacent_signs_h = (short *) malloc(6*NUMBER_OF_SCALARS*sizeof(short));
+    short *vorticity_signs = (short *) malloc(6*NUMBER_OF_SCALARS*sizeof(short));
+    short *h_curl_signs = (short *) malloc(4*NUMBER_OF_VECTORS*sizeof(short));
+    short *vector_product_sign = (short *) malloc(NUMBER_OF_H_VECTORS*sizeof(short));
+    short *adjacent_signs_h_dual = (short *) malloc(3*NUMBER_OF_DUAL_SCALARS*sizeof(short));
+    short *vorticity_signs_dual = (short *) malloc(3*NUMBER_OF_DUAL_V_VECTORS*sizeof(short));
+    short *h_curl_signs_dual = (short *) malloc(4*NUMBER_OF_DUAL_H_VECTORS*sizeof(short));
     int ncid;
     int retval;
     int latitude_scalar_id, longitude_scalar_id, z_scalar_id, latitude_vector_id, longitude_vector_id, z_vector_id, parallel_distance_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, recov_ver_2_pri_weight_id, recov_ver_2_dual_weight_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_dual_id, latitude_vector_dual_id, longitude_vector_dual_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, parallel_distance_dual_id, to_indices_id, from_indices_id, adjacent_vector_indices_h_id, adjacent_vector_index_lower_id, adjacent_vector_index_upper_id, adjacent_scalar_indices_h_id, adjacent_scalar_index_lower_id, adjacent_scalar_index_upper_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, recov_ver_2_pri_index_id, recov_ver_2_dual_index_id, to_indices_dual_id, from_indices_dual_id, adjacent_vector_indices_h_dual_id, adjacent_vector_index_upper_dual_id, adjacent_vector_index_lower_dual_id, adjacent_scalar_indices_h_dual_id, adjacent_scalar_index_lower_dual_id, adjacent_scalar_index_upper_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vector_product_sign_id, adjacent_signs_h_dual_id, vorticity_signs_dual_id, h_curl_signs_dual_id;
@@ -346,127 +339,126 @@ int set_grid_properties(char GEO_PROP_FILE[])
     int i, j, k;
     for (i = 0; i < NUMBER_OF_SCALARS; i++)
     {
-        grid.latitude_scalar[i] = latitude_scalar[i];
-        grid.longitude_scalar[i] = longitude_scalar[i];
-        grid.z_scalar[i] = z_scalar[i];
-        grid.volume[i] = volume[i];
-        grid.adjacent_scalar_index_lower[i] = adjacent_scalar_index_lower[i];
-        grid.adjacent_scalar_index_upper[i] = adjacent_scalar_index_upper[i];
-        grid.adjacent_vector_index_lower[i] = adjacent_vector_index_lower[i];
-        grid.adjacent_vector_index_upper[i] = adjacent_vector_index_upper[i];
+        grid -> latitude_scalar[i] = latitude_scalar[i];
+        grid -> longitude_scalar[i] = longitude_scalar[i];
+        grid -> z_scalar[i] = z_scalar[i];
+        grid -> volume[i] = volume[i];
+        grid -> adjacent_scalar_index_lower[i] = adjacent_scalar_index_lower[i];
+        grid -> adjacent_scalar_index_upper[i] = adjacent_scalar_index_upper[i];
+        grid -> adjacent_vector_index_lower[i] = adjacent_vector_index_lower[i];
+        grid -> adjacent_vector_index_upper[i] = adjacent_vector_index_upper[i];
         for (int j = 0; j < 6; j++)
         {
-            grid.adjacent_scalar_indices_h[6*i + j] = adjacent_scalar_indices_h[6*i + j];
-            grid.adjacent_vector_indices_h[6*i + j] = adjacent_vector_indices_h[6*i + j];
-            grid.adjacent_signs_h[6*i + j] = adjacent_signs_h[6*i + j];
-            grid.vorticity_indices[6*i + j] = vorticity_indices[6*i +j ];
-            grid.vorticity_signs[6*i + j] = vorticity_signs[6*i + j];
+            grid -> adjacent_scalar_indices_h[6*i + j] = adjacent_scalar_indices_h[6*i + j];
+            grid -> adjacent_vector_indices_h[6*i + j] = adjacent_vector_indices_h[6*i + j];
+            grid -> adjacent_signs_h[6*i + j] = adjacent_signs_h[6*i + j];
+            grid -> vorticity_indices[6*i + j] = vorticity_indices[6*i +j ];
+            grid -> vorticity_signs[6*i + j] = vorticity_signs[6*i + j];
         }
     }
     for (i = 0; i < NUMBER_OF_VECTORS; i++)
-    {		
+    {
         vert_index = i/(NUMBER_OF_SCALARS_H + NUMBER_OF_VECTORS_H);
-		floor_index = vert_index*(NUMBER_OF_SCALARS_H + NUMBER_OF_VECTORS_H);
-		h_index = i - floor_index;
-        grid.latitude_vector[i] = latitude_vector[i];
-        grid.longitude_vector[i] = longitude_vector[i];
-        grid.z_vector[i] = z_vector[i];
-        grid.normal_distance[i] = normal_distance[i];
-        grid.area[i] = area[i];
-        grid.to_indices[i] = to_indices[i];
-        grid.from_indices[i] = from_indices[i];
+        floor_index = vert_index*(NUMBER_OF_SCALARS_H + NUMBER_OF_VECTORS_H);
+        h_index = i - floor_index;
+        grid -> latitude_vector[i] = latitude_vector[i];
+        grid -> longitude_vector[i] = longitude_vector[i];
+        grid -> z_vector[i] = z_vector[i];
+        grid -> normal_distance[i] = normal_distance[i];
+        grid -> area[i] = area[i];
+        grid -> to_indices[i] = to_indices[i];
+        grid -> from_indices[i] = from_indices[i];
         for (int j = 0; j < 2; j++)
-           grid.parallel_distance[2*i + j] = parallel_distance[2*i + j];
+           grid -> parallel_distance[2*i + j] = parallel_distance[2*i + j];
         for (int j = 0; j < 4; j++)
         {
-            grid.h_curl_indices[4*i + j] = h_curl_indices[4*i + j];
-            grid.h_curl_signs[4*i + j] = h_curl_signs[4*i + j];
-            grid.adjacent_signs_h[4*i + j] = adjacent_signs_h[4*i + j];
-            grid.vorticity_indices[4*i + j] = vorticity_indices[4*i + j];
+            grid -> h_curl_indices[4*i + j] = h_curl_indices[4*i + j];
+            grid -> h_curl_signs[4*i + j] = h_curl_signs[4*i + j];
+            grid -> adjacent_signs_h[4*i + j] = adjacent_signs_h[4*i + j];
+            grid -> vorticity_indices[4*i + j] = vorticity_indices[4*i + j];
         }
     }
     for (int i = 0; i < NUMBER_OF_H_VECTORS; i++)
     {
-        grid.vector_product_sign[i] = vector_product_sign[i];
+        grid -> vector_product_sign[i] = vector_product_sign[i];
         for (int j = 0; j < 11; j++)
         {
-            grid.recov_hor_par_dual_index[11*i + j] = recov_hor_par_dual_index[11*i + j];
-            grid.recov_hor_par_dual_weight[11*i + j] = recov_hor_par_dual_weight[11*i + j];
+            grid -> recov_hor_par_dual_index[11*i + j] = recov_hor_par_dual_index[11*i + j];
+            grid -> recov_hor_par_dual_weight[11*i + j] = recov_hor_par_dual_weight[11*i + j];
         }
         for (int j = 0; j < 2; j++)
         {
-            grid.recov_hor_ver_dual_index[2*i + j] = recov_hor_ver_dual_index[2*i + j];
-            grid.recov_hor_ver_dual_weight[2*i + j] = recov_hor_ver_dual_weight[2*i + j];
-            grid.recov_hor_par_pri_index[2*i + j] = recov_hor_par_pri_index[2*i + j];
-            grid.recov_hor_par_pri_weight[2*i + j] = recov_hor_par_pri_weight[2*i + j];
+            grid -> recov_hor_ver_dual_index[2*i + j] = recov_hor_ver_dual_index[2*i + j];
+            grid -> recov_hor_ver_dual_weight[2*i + j] = recov_hor_ver_dual_weight[2*i + j];
+            grid -> recov_hor_par_pri_index[2*i + j] = recov_hor_par_pri_index[2*i + j];
+            grid -> recov_hor_par_pri_weight[2*i + j] = recov_hor_par_pri_weight[2*i + j];
         }
         for (int j = 0; j < 4; j++)
         {
-            grid.recov_hor_ver_pri_index[4*i + j] = recov_hor_ver_pri_index[4*i + j];
-            grid.recov_hor_ver_pri_weight[4*i + j] = recov_hor_ver_pri_weight[4*i + j];
+            grid -> recov_hor_ver_pri_index[4*i + j] = recov_hor_ver_pri_index[4*i + j];
+            grid -> recov_hor_ver_pri_weight[4*i + j] = recov_hor_ver_pri_weight[4*i + j];
         }
     }
     for (int i = 0; i < NUMBER_OF_V_VECTORS; i++)
     {
-        grid.gravity[i] = gravity[i];
+        grid -> gravity[i] = gravity[i];
         for (int j = 0; j < 6; j++)
         {
-            grid.recov_ver_1_pri_index[6*i + j] = recov_ver_1_pri_index[6*i + j];
-            grid.recov_ver_1_pri_weight[6*i + j] = recov_ver_1_pri_weight[6*i + j];
-            grid.recov_ver_1_dual_index[6*i + j] = recov_ver_1_dual_index[6*i + j];
-            grid.recov_ver_1_dual_weight[6*i + j] = recov_ver_1_dual_weight[6*i + j];
-            grid.recov_ver_2_pri_index[6*i + j] = recov_ver_2_pri_index[6*i + j];
-            grid.recov_ver_2_pri_weight[6*i + j] = recov_ver_2_pri_weight[6*i + j];
-            grid.recov_ver_2_dual_index[6*i + j] = recov_ver_2_dual_index[6*i + j];
-            grid.recov_ver_2_dual_weight[6*i + j] = recov_ver_2_dual_weight[6*i + j];
+            grid -> recov_ver_1_pri_index[6*i + j] = recov_ver_1_pri_index[6*i + j];
+            grid -> recov_ver_1_pri_weight[6*i + j] = recov_ver_1_pri_weight[6*i + j];
+            grid -> recov_ver_1_dual_index[6*i + j] = recov_ver_1_dual_index[6*i + j];
+            grid -> recov_ver_1_dual_weight[6*i + j] = recov_ver_1_dual_weight[6*i + j];
+            grid -> recov_ver_2_pri_index[6*i + j] = recov_ver_2_pri_index[6*i + j];
+            grid -> recov_ver_2_pri_weight[6*i + j] = recov_ver_2_pri_weight[6*i + j];
+            grid -> recov_ver_2_dual_index[6*i + j] = recov_ver_2_dual_index[6*i + j];
+            grid -> recov_ver_2_dual_weight[6*i + j] = recov_ver_2_dual_weight[6*i + j];
         }
     }
     for (int i = 0; i < NUMBER_OF_DUAL_SCALARS; i++)
     {
-        dualgrid.latitude_scalar[i] = latitude_scalar_dual[i];
-        dualgrid.longitude_scalar[i] = longitude_scalar_dual[i];
-        dualgrid.z_scalar[i] = z_scalar_dual[i];
-        dualgrid.adjacent_scalar_index_lower[i] = adjacent_scalar_index_lower_dual[i];
-        dualgrid.adjacent_scalar_index_upper[i] = adjacent_scalar_index_upper_dual[i];
-        dualgrid.adjacent_vector_index_upper[i] = adjacent_vector_index_upper_dual[i];
-        dualgrid.adjacent_vector_index_lower[i] = adjacent_vector_index_lower_dual[i];
+        dualgrid -> latitude_scalar[i] = latitude_scalar_dual[i];
+        dualgrid -> longitude_scalar[i] = longitude_scalar_dual[i];
+        dualgrid -> z_scalar[i] = z_scalar_dual[i];
+        dualgrid -> adjacent_scalar_index_lower[i] = adjacent_scalar_index_lower_dual[i];
+        dualgrid -> adjacent_scalar_index_upper[i] = adjacent_scalar_index_upper_dual[i];
+        dualgrid -> adjacent_vector_index_upper[i] = adjacent_vector_index_upper_dual[i];
+        dualgrid -> adjacent_vector_index_lower[i] = adjacent_vector_index_lower_dual[i];
             for (int k = 0; k < 3; k++)
             {
-                dualgrid.adjacent_scalar_indices_h[3*i + k] = adjacent_scalar_indices_h_dual[3*i + k];
-                dualgrid.adjacent_vector_indices_h[3*i + k] = adjacent_vector_indices_h_dual[3*i + k];
-                dualgrid.adjacent_signs_h[3*i + k] = adjacent_signs_h_dual[3*i + k];
+                dualgrid -> adjacent_scalar_indices_h[3*i + k] = adjacent_scalar_indices_h_dual[3*i + k];
+                dualgrid -> adjacent_vector_indices_h[3*i + k] = adjacent_vector_indices_h_dual[3*i + k];
+                dualgrid -> adjacent_signs_h[3*i + k] = adjacent_signs_h_dual[3*i + k];
             }
     }
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; i++)
     {
-        dualgrid.latitude_vector[i] = latitude_vector_dual[i];
-        dualgrid.longitude_vector[i] = longitude_vector_dual[i];
-        dualgrid.z_vector[i] = z_vector_dual[i];
-        dualgrid.area[i] = area_dual[i];
-        dualgrid.f_vec[i] = f_vec[i];
-        dualgrid.normal_distance[i] = normal_distance_dual[i];
-        dualgrid.to_indices[i] = to_indices_dual[i];
-        dualgrid.from_indices[i] = from_indices_dual[i];
+        dualgrid -> latitude_vector[i] = latitude_vector_dual[i];
+        dualgrid -> longitude_vector[i] = longitude_vector_dual[i];
+        dualgrid -> z_vector[i] = z_vector_dual[i];
+        dualgrid -> area[i] = area_dual[i];
+        dualgrid -> f_vec[i] = f_vec[i];
+        dualgrid -> normal_distance[i] = normal_distance_dual[i];
+        dualgrid -> to_indices[i] = to_indices_dual[i];
+        dualgrid -> from_indices[i] = from_indices_dual[i];
         for (int j = 0; j < 2; j++)
-            dualgrid.parallel_distance[2*i + j] = parallel_distance_dual[2*i + j];
+            dualgrid -> parallel_distance[2*i + j] = parallel_distance_dual[2*i + j];
     }
     for (int i = 0; i < NUMBER_OF_DUAL_H_VECTORS; i++)
     {
         for (int j = 0; j < 4; j++)
         {
-            dualgrid.h_curl_indices[4*i + j] = h_curl_indices_dual[4*i + j];
-            dualgrid.h_curl_signs[4*i + j] = h_curl_signs_dual[4*i + j];
+            dualgrid -> h_curl_indices[4*i + j] = h_curl_indices_dual[4*i + j];
+            dualgrid -> h_curl_signs[4*i + j] = h_curl_signs_dual[4*i + j];
         }
     }
     for (int i = 0; i < NUMBER_OF_DUAL_V_VECTORS; i++)
     {
         for (int j = 0; j < 3; j++)
         {
-            dualgrid.vorticity_indices[3*i + j] = vorticity_indices_dual[3*i + j];
-            dualgrid.vorticity_signs[3*i + j] = vorticity_signs_dual[3*i + j];
+            dualgrid -> vorticity_indices[3*i + j] = vorticity_indices_dual[3*i + j];
+            dualgrid -> vorticity_signs[3*i + j] = vorticity_signs_dual[3*i + j];
         }
     }
-    // freeing the memory 
     free(latitude_scalar);
     free(longitude_scalar);
     free(z_scalar);

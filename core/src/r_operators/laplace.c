@@ -1,9 +1,12 @@
 #include "../enum_and_typedefs.h"
 #include "r_operators.h"
+#include <stdlib.h>
 
-void laplace(Scalar_field in_field, Scalar_field out_field)
+int laplace(Scalar_field in_field, Scalar_field out_field, Grid *grid)
 {
-    Vector_field between;
-    grad(in_field, between);
-    divergence(between, out_field);
+    Vector_field *between = malloc(sizeof(Vector_field));
+    grad(in_field, *between, grid);
+    divergence(*between, out_field, grid);
+    free(between);
+    return 0;
 }

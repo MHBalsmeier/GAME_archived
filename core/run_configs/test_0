@@ -1,5 +1,5 @@
 run_hrs                     24
 write_out_interval_min      60
-geo_prop_file               ../../models_geo_prep/calchexgeo0.0.0/nc_files/sphere_res_2_oro_0_geo_prop.nc
-init_state_file             ../../test_state_creation/nc_files/test_res_2_sphere_oro_0_scenario_0.nc
+geo_prop_file               /home/max/my_code/game/grid_generator/nc_files/res_2_oro_0_geo_prop.nc
+init_state_file             /home/max/my_code/game/test_generator/grib_files/test_0_res_2_oro_0.grb2
 output_folder               output/test_0

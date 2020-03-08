@@ -1,2 +1,2 @@
-State leapfrog(State, State, State, double);
-State euler_explicit(State, State, double);
+int leapfrog(State *, State *, State *, State *, double);
+int euler_explicit(State *, State *, State *, double);
