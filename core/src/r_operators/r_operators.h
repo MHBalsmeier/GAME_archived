@@ -16,3 +16,4 @@ int recov_ver_1_pri(Vector_field, double[], Grid *);
 int recov_ver_2_dual(Dual_vector_field, double[], Grid *);
 int recov_ver_2_pri(Vector_field, double[], Grid *);
 int tendency(State *, State *, Grid *, Dualgrid*);
+int scalar_times_vector(Scalar_field, Vector_field, Vector_field, Grid *);

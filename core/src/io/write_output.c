@@ -8,14 +8,16 @@
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 
-int write_out(State *state_write_out, double t_init, double t_write, int write_out_index, char output_foldername[])
+int write_out(State *state_write_out, double t_init, double t_write, int time_since_init, char output_foldername[])
 {
     const double ATMOS_HEIGHT = SCALE_HEIGHT*log(1 + NUMBER_OF_LAYERS);
-    char add_time_str[write_out_index/10+1];
+    int str_len;
+    find_string_length_from_int(time_since_init, &str_len);
+    char add_time_str[str_len];
     char pre_string[] = "init+";
-    char append_string[] = "h.grb2";
-    sprintf(add_time_str, "%d", write_out_index);
-    int out_file_length = strlen(output_foldername) + 1 + strlen(pre_string) + write_out_index/10 + 1 + strlen(append_string);
+    char append_string[] = "s.grb2";
+    sprintf(add_time_str, "%d", time_since_init);
+    int out_file_length = strlen(output_foldername) + 1 + strlen(pre_string) + str_len + strlen(append_string);
     char OUTPUT_FILE[out_file_length];
     for (int i = 0; i < out_file_length + 1; i++)
     {
@@ -30,10 +32,6 @@ int write_out(State *state_write_out, double t_init, double t_write, int write_o
         if (i >= out_file_length - strlen(append_string))
             OUTPUT_FILE[i] = append_string[i - (out_file_length - strlen(append_string))];
     }
-    Scalar_field *pressure = malloc(sizeof(Scalar_field));
-    Scalar_field *pot_temperature = malloc(sizeof(Scalar_field));
-    pressure_diagnostics(state_write_out -> pot_temp, state_write_out -> density, *pressure);
-    temperature_diagnostics(state_write_out -> pot_temp, *pressure, *pot_temperature);
     int dimids_scalar[2];
     int scalar_index;
     const int START_SECTION = 4;
@@ -46,13 +44,11 @@ int write_out(State *state_write_out, double t_init, double t_write, int write_o
     SAMPLE_SCALAR = fopen(SAMPLE_FILE_SCALAR, "r");
     FILE *OUT_GRIB;
     OUT_GRIB = fopen(OUTPUT_FILE, "w");
-    
     codes_handle *handle_pot_temperature_h = NULL;
     codes_handle *handle_density_h = NULL;
     codes_handle *handle_wind_h_h = NULL;
     codes_handle *handle_wind_v_h = NULL;
-    double *pressure_h, *pot_temperature_h, *rho_h, *wind_h_h, *wind_v_h;
-    pressure_h = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
+    double *pot_temperature_h, *rho_h, *wind_h_h, *wind_v_h;
     pot_temperature_h = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
     rho_h = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
     wind_h_h = malloc(sizeof(double)*NUMBER_OF_VECTORS_H);
@@ -76,10 +72,12 @@ int write_out(State *state_write_out, double t_init, double t_write, int write_o
     {
         for (int j = 0; j < NUMBER_OF_SCALARS_H; j++)
         {
-            pot_temperature_h[j] = state_write_out -> pot_temp[j + i*NUMBER_OF_SCALARS_H];
+            pot_temperature_h[j] = state_write_out -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H];
             rho_h[j] = state_write_out -> density[j + i*NUMBER_OF_SCALARS_H];
         }
         if (retval = codes_set_long(handle_pot_temperature_h, "discipline", 0))
+            ECCERR(retval);
+        if (retval = codes_set_long(handle_pot_temperature_h, "centre", 255))
             ECCERR(retval);
         if (retval = codes_set_long(handle_pot_temperature_h, "significanceOfReferenceTime", 1))
             ECCERR(retval);
@@ -89,15 +87,21 @@ int write_out(State *state_write_out, double t_init, double t_write, int write_o
             ECCERR(retval);
         if (retval = codes_set_long(handle_pot_temperature_h, "indicatorOfUnitOfTimeRange", 13))
             ECCERR(retval);
+        if (retval = codes_set_long(handle_pot_temperature_h, "stepUnits", 13))
+            ECCERR(retval);
         if (retval = codes_set_long(handle_pot_temperature_h, "dataDate", 20000101))
             ECCERR(retval);
         if (retval = codes_set_long(handle_pot_temperature_h, "dataTime", 0000))
+            ECCERR(retval);
+        if (retval = codes_set_long(handle_pot_temperature_h, "forecastTime", t_write - t_init))
+            ECCERR(retval);
+        if (retval = codes_set_long(handle_pot_temperature_h, "stepRange", t_write - t_init))
             ECCERR(retval);
         if (retval = codes_set_long(handle_pot_temperature_h, "typeOfGeneratingProcess", 1))
             ECCERR(retval);
         if (retval = codes_set_long(handle_pot_temperature_h, "parameterCategory", 0))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "parameterNumber", 0))
+        if (retval = codes_set_long(handle_pot_temperature_h, "parameterNumber", 2))
             ECCERR(retval);
         if (retval = codes_set_long(handle_pot_temperature_h, "typeOfFirstFixedSurface", 102))
             ECCERR(retval);
@@ -115,6 +119,8 @@ int write_out(State *state_write_out, double t_init, double t_write, int write_o
             codes_write_message(handle_pot_temperature_h, OUTPUT_FILE, "a");
         if (retval = codes_set_long(handle_density_h, "discipline", 0))
             ECCERR(retval);
+        if (retval = codes_set_long(handle_density_h, "centre", 255))
+            ECCERR(retval);
         if (retval = codes_set_long(handle_density_h, "significanceOfReferenceTime", 1))
             ECCERR(retval);
         if (retval = codes_set_long(handle_density_h, "productionStatusOfProcessedData", 1))
@@ -123,9 +129,15 @@ int write_out(State *state_write_out, double t_init, double t_write, int write_o
             ECCERR(retval);
         if (retval = codes_set_long(handle_density_h, "indicatorOfUnitOfTimeRange", 13))
             ECCERR(retval);
+        if (retval = codes_set_long(handle_density_h, "stepUnits", 13))
+            ECCERR(retval);
         if (retval = codes_set_long(handle_density_h, "dataDate", 20000101))
             ECCERR(retval);
         if (retval = codes_set_long(handle_density_h, "dataTime", 0000))
+            ECCERR(retval);
+        if (retval = codes_set_long(handle_density_h, "forecastTime", t_write - t_init))
+            ECCERR(retval);
+        if (retval = codes_set_long(handle_density_h, "stepRange", t_write - t_init))
             ECCERR(retval);
         if (retval = codes_set_long(handle_density_h, "typeOfGeneratingProcess", 1))
             ECCERR(retval);
@@ -148,6 +160,8 @@ int write_out(State *state_write_out, double t_init, double t_write, int write_o
             wind_h_h[j] = state_write_out -> wind[j + i*NUMBER_OF_VECTORS_H + (i + 1)*NUMBER_OF_SCALARS_H];
         if (retval = codes_set_long(handle_wind_h_h, "discipline", 0))
             ECCERR(retval);
+        if (retval = codes_set_long(handle_wind_h_h, "centre", 255))
+            ECCERR(retval);
         if (retval = codes_set_long(handle_wind_h_h, "significanceOfReferenceTime", 1))
             ECCERR(retval);
         if (retval = codes_set_long(handle_wind_h_h, "productionStatusOfProcessedData", 1))
@@ -156,9 +170,15 @@ int write_out(State *state_write_out, double t_init, double t_write, int write_o
             ECCERR(retval);
         if (retval = codes_set_long(handle_wind_h_h, "indicatorOfUnitOfTimeRange", 13))
             ECCERR(retval);
+        if (retval = codes_set_long(handle_wind_h_h, "stepUnits", 13))
+            ECCERR(retval);
         if (retval = codes_set_long(handle_wind_h_h, "dataDate", 20000101))
             ECCERR(retval);
         if (retval = codes_set_long(handle_wind_h_h, "dataTime", 0000))
+            ECCERR(retval);
+        if (retval = codes_set_long(handle_wind_h_h, "forecastTime", t_write - t_init))
+            ECCERR(retval);
+        if (retval = codes_set_long(handle_wind_h_h, "stepRange", t_write - t_init))
             ECCERR(retval);
         if (retval = codes_set_long(handle_wind_h_h, "typeOfGeneratingProcess", 1))
             ECCERR(retval);
@@ -194,6 +214,8 @@ int write_out(State *state_write_out, double t_init, double t_write, int write_o
             wind_v_h[j] = state_write_out -> wind[j + i*(NUMBER_OF_SCALARS_H + NUMBER_OF_VECTORS_H)];
         if (retval = codes_set_long(handle_wind_v_h, "discipline", 0))
             ECCERR(retval);
+        if (retval = codes_set_long(handle_wind_v_h, "centre", 255))
+            ECCERR(retval);
         if (retval = codes_set_long(handle_wind_v_h, "significanceOfReferenceTime", 1))
             ECCERR(retval);
         if (retval = codes_set_long(handle_wind_v_h, "productionStatusOfProcessedData", 1))
@@ -202,9 +224,15 @@ int write_out(State *state_write_out, double t_init, double t_write, int write_o
             ECCERR(retval);
         if (retval = codes_set_long(handle_wind_v_h, "indicatorOfUnitOfTimeRange", 13))
             ECCERR(retval);
+        if (retval = codes_set_long(handle_wind_v_h, "stepUnits", 13))
+            ECCERR(retval);
         if (retval = codes_set_long(handle_wind_v_h, "dataDate", 20000101))
             ECCERR(retval);
         if (retval = codes_set_long(handle_wind_v_h, "dataTime", 0000))
+            ECCERR(retval);
+        if (retval = codes_set_long(handle_wind_v_h, "forecastTime", t_write - t_init))
+            ECCERR(retval);
+        if (retval = codes_set_long(handle_wind_v_h, "stepRange", t_write - t_init))
             ECCERR(retval);
         if (retval = codes_set_long(handle_wind_v_h, "typeOfGeneratingProcess", 1))
             ECCERR(retval);
@@ -225,11 +253,21 @@ int write_out(State *state_write_out, double t_init, double t_write, int write_o
         codes_write_message(handle_wind_v_h, OUTPUT_FILE, "a");
     }
     codes_handle_delete(handle_wind_v_h);
-    free(pressure_h);
     free(pot_temperature_h);
     free(rho_h);
     free(wind_h_h);
     free(wind_v_h);
     fclose(OUT_GRIB);
+    return 0;
+}
+
+int find_string_length_from_int(int input, int *answer)
+{
+    *answer = 1;
+    for (int i = 1; i < 10; ++i)
+    {
+        if (input > pow(10, i))
+            ++*answer;
+    }
     return 0;
 }

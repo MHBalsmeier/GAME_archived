@@ -1,5 +1,6 @@
 #include "../enum_and_typedefs.h"
 #include "io.h"
+#include <stdio.h>
 
 int interpolation_t(State *state_0, State *state_p1, State *state_write, double t_0, double t_p1, double t_write)
 {
@@ -9,7 +10,7 @@ int interpolation_t(State *state_0, State *state_p1, State *state_write, double 
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
         state_write -> density[i] = weight_0*state_0 -> density[i] + weight_p1*state_p1 -> density[i];
-        state_write -> pot_temp[i] = weight_0*state_0 -> pot_temp[i] + weight_p1*state_p1 -> pot_temp[i];
+        state_write -> density_pot_temp[i] = weight_0*state_0 -> density_pot_temp[i] + weight_p1*state_p1 -> density_pot_temp[i];
     }
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
         state_write -> wind[i] = weight_0*state_0 -> wind[i] + weight_p1*state_p1 -> wind[i];

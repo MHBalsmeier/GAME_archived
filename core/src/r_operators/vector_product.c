@@ -1,18 +1,20 @@
 #include "../enum_and_typedefs.h"
 #include "r_operators.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 int vector_product(Vector_field a_field, Dual_vector_field b_field, Vector_field out_field, Grid *grid)
 {
-    double vector_1,  vector_2,  vector_3,  vector_4, term_1, term_2;
+    double vector_1, vector_2, vector_3, vector_4, term_1, term_2;
     int sign;
-    double hor_par_pri[NUMBER_OF_H_VECTORS];
-    double hor_par_dual[NUMBER_OF_H_VECTORS];
-    double hor_ver_pri[NUMBER_OF_H_VECTORS];
-    double hor_ver_dual[NUMBER_OF_H_VECTORS];
-    double ver_1_pri[NUMBER_OF_V_VECTORS];
-    double ver_1_dual[NUMBER_OF_V_VECTORS];
-    double ver_2_pri[NUMBER_OF_V_VECTORS];
-    double ver_2_dual[NUMBER_OF_V_VECTORS];
+    double *hor_par_pri = malloc(NUMBER_OF_H_VECTORS*sizeof(double));
+    double *hor_par_dual = malloc(NUMBER_OF_H_VECTORS*sizeof(double));
+    double *hor_ver_pri = malloc(NUMBER_OF_H_VECTORS*sizeof(double));
+    double *hor_ver_dual = malloc(NUMBER_OF_H_VECTORS*sizeof(double));
+    double *ver_1_pri = malloc(NUMBER_OF_H_VECTORS*sizeof(double));
+    double *ver_1_dual = malloc(NUMBER_OF_H_VECTORS*sizeof(double));
+    double *ver_2_pri = malloc(NUMBER_OF_H_VECTORS*sizeof(double));
+    double *ver_2_dual = malloc(NUMBER_OF_H_VECTORS*sizeof(double));
     recov_hor_par_dual(b_field, hor_par_dual, grid);
     recov_hor_par_pri(a_field, hor_par_pri, grid);
     recov_hor_ver_dual(b_field, hor_ver_dual, grid);
@@ -57,5 +59,13 @@ int vector_product(Vector_field a_field, Dual_vector_field b_field, Vector_field
         }
         out_field[i] = term_1 + term_2;
     }
+    free(hor_par_pri);
+    free(hor_par_dual);
+    free(hor_ver_pri);
+    free(hor_ver_dual);
+    free(ver_1_pri);
+    free(ver_1_dual);
+    free(ver_2_pri);
+    free(ver_2_dual);
     return 0;
 }

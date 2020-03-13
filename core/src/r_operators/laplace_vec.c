@@ -15,7 +15,7 @@ int laplace_vec(Vector_field in_field, Vector_field out_field, Grid *grid, Dualg
     rot_dual(*between_2, *between_3, grid, dualgrid);
     free(between_2);
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
-        out_field[i] = *between_1[i] - *between_3[i];
+        out_field[i] = (*between_1)[i] - (*between_3)[i];
     free(between_1);
     free(between_3);
     return 0;

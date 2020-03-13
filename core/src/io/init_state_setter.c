@@ -17,8 +17,7 @@ int set_init_data(char FILE_NAME[], State *init_state)
     codes_handle *handle_density = NULL;
     codes_handle *handle_wind_h = NULL;
     codes_handle *handle_wind_v = NULL;
-    double *pressure, *pot_temp, *rho, *wind_h, *wind_v;
-    pressure = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
+    double *pot_temp, *rho, *wind_h, *wind_v;
     pot_temp = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
     rho = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
     wind_h = malloc(sizeof(double)*NUMBER_OF_VECTORS_H);
@@ -41,8 +40,8 @@ int set_init_data(char FILE_NAME[], State *init_state)
         codes_handle_delete(handle_density);
         for (int j = 0; j < NUMBER_OF_SCALARS_H; j++)
         {
-            init_state -> density[j] = rho[j];
-            init_state -> pot_temp[j] = pot_temp[j];
+            init_state -> density[j + i*NUMBER_OF_SCALARS_H] = rho[j];
+            init_state -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H] = rho[j]*pot_temp[j];
         }
         handle_wind_h = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
         if (err != 0)
@@ -62,12 +61,11 @@ int set_init_data(char FILE_NAME[], State *init_state)
             ECCERR(err);
         if (retval = codes_get_double_array(handle_wind_v, "values", wind_v, &no_scalars_h))
             ECCERR(retval);
+        codes_handle_delete(handle_wind_v);
         for (int j = 0; j < NUMBER_OF_SCALARS_H; j++)
             init_state -> wind[j + i*(NUMBER_OF_SCALARS_H + NUMBER_OF_VECTORS_H)] = wind_v[j];
-        codes_handle_delete(handle_wind_v);
     }
     fclose(IN_FILE);
-    free(pressure);
     free(pot_temp);
     free(rho);
     free(wind_h);

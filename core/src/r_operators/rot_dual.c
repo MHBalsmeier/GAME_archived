@@ -11,7 +11,7 @@ int rot_dual(Dual_vector_field in_field, Vector_field out_field, Grid *grid, Dua
         if(h_index < NUMBER_OF_SCALARS_H)
         {
             int vertical_index;
-            vertical_index = dualgrid -> to_indices[i];
+            vertical_index = dualgrid -> to_index[i];
             int index_1, index_2, index_3, index_4, index_5, index_6, sign_1, sign_2, sign_3, sign_4, sign_5, sign_6;
             index_1 = grid -> vorticity_indices[6*vertical_index + 0];
             index_2 = grid -> vorticity_indices[6*vertical_index + 1];
@@ -37,7 +37,7 @@ int rot_dual(Dual_vector_field in_field, Vector_field out_field, Grid *grid, Dua
         else
         {
             int horizontal_index;
-            horizontal_index = grid -> to_indices[i];
+            horizontal_index = grid -> to_index[i];
             int index_1, index_2, index_3, index_4, sign_1, sign_2, sign_3, sign_4;
             double distance_1, distance_2, distance_3, distance_4;
             index_1 = grid -> h_curl_indices[4*horizontal_index + 0];

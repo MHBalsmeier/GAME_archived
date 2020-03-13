@@ -16,14 +16,15 @@ int main(int argc, char *argv[])
      FILE *SAMPLE_VECTOR;
     int err = 0;
     SAMPLE_SCALAR = fopen(SAMPLE_FILE_SCALAR, "r");
-    char *OUTPUT_FILE = "grib_files/test_0_res_2_oro_0.grb2";
+    char *OUTPUT_FILE = "grib_files/test_0_res_3_oro_0.grb2";
     codes_handle *handle_pot_temperature = NULL;
     codes_handle *handle_density = NULL;
     codes_handle *handle_wind_h = NULL;
     codes_handle *handle_wind_v = NULL;
-    double *pressure, *pot_temperature, *rho, *wind_h, *wind_v;
+    double *pressure, *pot_temperature, *temperature, *rho, *wind_h, *wind_v;
     pressure = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
     pot_temperature = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
+    temperature = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
     rho = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
     wind_h = malloc(sizeof(double)*NUMBER_OF_VECTORS_H);
     wind_v = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
@@ -57,15 +58,16 @@ int main(int argc, char *argv[])
         {
             if (z_height < TROPO_HEIGHT)
             {
-                pot_temperature[j] = T_SFC + z_height*TEMP_GRADIENT;
+                temperature[j] = T_SFC + z_height*TEMP_GRADIENT;
                 pressure[j] = P_0*pow(1 + TEMP_GRADIENT*z_height/T_SFC, -G/(R_D*TEMP_GRADIENT));
             }
             else
             {
-                pot_temperature[j] = TROPO_TEMP;
-                pressure[j] = P_0*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT/T_SFC, -G/(R_D*TEMP_GRADIENT))*exp(-G*(z_height-TROPO_HEIGHT)/(R_D*TROPO_TEMP));
+                temperature[j] = TROPO_TEMP;
+                pressure[j] = P_0*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT/T_SFC, -G/(R_D*TEMP_GRADIENT))*exp(-G*(z_height - TROPO_HEIGHT)/(R_D*TROPO_TEMP));
             }
-            rho[j] = pressure[j]/(R_D*pot_temperature[j]);
+            rho[j] = pressure[j]/(R_D*temperature[j]);
+            pot_temperature[j] = temperature[j]*pow(P_0/pressure[j], R_D/C_P);
         }
         if (retval = codes_set_long(handle_pot_temperature, "discipline", 0))
             ECCERR(retval);
@@ -226,6 +228,7 @@ int main(int argc, char *argv[])
     }
     free(pressure);
     free(pot_temperature);
+    free(temperature);
     free(rho);
     free(wind_h);
     free(wind_v);
