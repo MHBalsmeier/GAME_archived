@@ -68,9 +68,9 @@ int write_out(State *state_write_out, double t_init, double t_write, int time_si
     if (err != 0)
         ECCERR(err);
     fclose(SAMPLE_VECTOR);
-    for (int i = 0; i < NUMBER_OF_LAYERS; i++)
+    for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
     {
-        for (int j = 0; j < NUMBER_OF_SCALARS_H; j++)
+        for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
         {
             pot_temperature_h[j] = state_write_out -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H];
             rho_h[j] = state_write_out -> density[j + i*NUMBER_OF_SCALARS_H];

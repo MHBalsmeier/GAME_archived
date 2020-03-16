@@ -13,10 +13,10 @@ int main(int argc, char *argv[])
     char *SAMPLE_FILE_SCALAR = "grib_files/scalar_field_blueprint_res_id_2.grb2";
     char *SAMPLE_FILE_VECTOR = "grib_files/vector_field_blueprint_res_id_2.grb2";
     FILE *SAMPLE_SCALAR;
-     FILE *SAMPLE_VECTOR;
+    FILE *SAMPLE_VECTOR;
     int err = 0;
     SAMPLE_SCALAR = fopen(SAMPLE_FILE_SCALAR, "r");
-    char *OUTPUT_FILE = "grib_files/test_0_res_3_oro_0.grb2";
+    char *OUTPUT_FILE = "grib_files/test_1_res_3_oro_0.grb2";
     codes_handle *handle_pot_temperature = NULL;
     codes_handle *handle_density = NULL;
     codes_handle *handle_wind_h = NULL;
@@ -139,9 +139,9 @@ int main(int argc, char *argv[])
             ECCERR(retval);
         codes_write_message(handle_density, OUTPUT_FILE, "a");
         for (int j = 0; j < NUMBER_OF_VECTORS_H; j++)
-        {
             wind_h[j] = 0;
-        }
+        if (i == NUMBER_OF_LAYERS - 2)
+            wind_h[NUMBER_OF_SCALARS_H/2] = 10;
         if (retval = codes_set_long(handle_wind_h, "discipline", 0))
             ECCERR(retval);
         if (retval = codes_set_long(handle_wind_h, "centre", 255))
@@ -188,10 +188,6 @@ int main(int argc, char *argv[])
     {
         sigma = (SCALE_HEIGHT/ATMOS_HEIGHT)*log((1.0 + NUMBER_OF_LAYERS)/(i + 1));
         z_height = ATMOS_HEIGHT*sigma;
-        for (int j = 0; j < NUMBER_OF_SCALARS_H; j++)
-        {
-            wind_v[j] = 0;
-        }
         if (retval = codes_set_long(handle_wind_v, "discipline", 0))
             ECCERR(retval);
         if (retval = codes_set_long(handle_wind_v, "centre", 255))

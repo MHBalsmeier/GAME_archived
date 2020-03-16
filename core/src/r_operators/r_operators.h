@@ -1,4 +1,3 @@
-int adv_s(Vector_field, Scalar_field, Scalar_field, Grid *);
 int grad(Scalar_field, Vector_field, Grid *);
 int laplace(Scalar_field, Scalar_field, Grid *);
 int laplace_vec(Vector_field, Vector_field, Grid *, Dualgrid *);

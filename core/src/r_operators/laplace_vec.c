@@ -4,11 +4,11 @@
 
 int laplace_vec(Vector_field in_field, Vector_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
-    Scalar_field *between = malloc(sizeof(Scalar_field));
-    divergence(in_field, *between, grid);
+    Scalar_field *between_0 = malloc(sizeof(Scalar_field));
+    divergence(in_field, *between_0, grid);
     Vector_field *between_1 = malloc(sizeof(Vector_field));
-    grad(*between, *between_1, grid);
-    free(between);
+    grad(*between_0, *between_1, grid);
+    free(between_0);
     Dual_vector_field *between_2 = malloc(sizeof(Dual_vector_field));
     rot(in_field, *between_2, grid, dualgrid);
     Vector_field *between_3 = malloc(sizeof(Vector_field));

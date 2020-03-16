@@ -6,29 +6,26 @@ int main(int argc, char *argv[])
     begin = clock();
     Grid *grid = malloc(sizeof(Grid));
     Dualgrid *dualgrid = malloc(sizeof(Dualgrid));
-    char *run_cfg_file_pre = malloc(strlen(argv[1])*sizeof(char));
-    for (int i = 0; i < strlen(argv[1]); ++i)
-        run_cfg_file_pre[i] = argv[1][i];
-    long  RUN_HRS, WRITE_OUT_INTERVAL_MIN;
-    char *GEO_PROP_FILE = malloc(128*sizeof(char));
-    char *INIT_STATE_FILE = malloc(128*sizeof(char));
-    char *OUTPUT_FOLDER = malloc(128*sizeof(char));
-    char *line = malloc(128*sizeof(char));
-    FILE *run_cfg_file;
-    char *dump = malloc(28*sizeof(char));
-    run_cfg_file = fopen(run_cfg_file_pre, "r");
-    fgets(line, 128, run_cfg_file);
-    sscanf(line, "%s %ld",dump, &RUN_HRS);
-    fgets(line, 128, run_cfg_file);
-    sscanf(line, "%s %ld",dump, &WRITE_OUT_INTERVAL_MIN);
-    fgets(line, 128, run_cfg_file);
-    sscanf(line, "%s %s", dump, GEO_PROP_FILE);
-    fgets(line, 128, run_cfg_file);
-    sscanf(line, "%s %s",dump, INIT_STATE_FILE);
-    fgets(line, 128, run_cfg_file);
-    sscanf(line, "%s %s", dump, OUTPUT_FOLDER);
-    free(line);
-    double delta_t = calc_delta_t(RES_ID);
+    size_t len = strlen(argv[1]);
+    char *TOTAL_RUN_SPAN_PRE = malloc((len + 1)*sizeof(char));
+    strcpy(TOTAL_RUN_SPAN_PRE, argv[1]);
+    long TOTAL_RUN_SPAN = strtol(TOTAL_RUN_SPAN_PRE, NULL, 10);
+    free(TOTAL_RUN_SPAN_PRE);
+    len = strlen(argv[2]);
+    char *WRITE_OUT_INTERVAL_PRE = malloc((len + 1)*sizeof(char));
+    strcpy(WRITE_OUT_INTERVAL_PRE, argv[2]);
+    long WRITE_OUT_INTERVAL = strtol(WRITE_OUT_INTERVAL_PRE, NULL, 10);
+    free(WRITE_OUT_INTERVAL_PRE);
+    len = strlen(argv[3]);
+    char *GEO_PROP_FILE = malloc((len + 1)*sizeof(char));
+    strcpy(GEO_PROP_FILE, argv[3]);
+    len = strlen(argv[4]);
+    char *INIT_STATE_FILE = malloc((len + 1)*sizeof(char));
+    strcpy(INIT_STATE_FILE, argv[4]);
+    len = strlen(argv[5]);
+    char *OUTPUT_FOLDER = malloc((len + 1)*sizeof(char));
+    strcpy(OUTPUT_FOLDER, argv[5]);
+    double t_init = 0;
     char *stars  = malloc(82*sizeof(char));
     for (int i = 0; i < 82 - 1; ++i)
         stars[i] = '*';
@@ -41,9 +38,8 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     printf("Use only legal if authorized by Max Henrik Balsmeier.\n");
     printf("What you want to do:\n");
-    printf("run configuration file:\t\t%s\n", run_cfg_file_pre);
-    printf("run hours:\t\t\t%ld\n", RUN_HRS);
-    printf("output written in intervals of\t%ld min\n", WRITE_OUT_INTERVAL_MIN);
+    printf("run time span:\t\t\t%ld\n", TOTAL_RUN_SPAN);
+    printf("output written in intervals of\t%ld s\n", WRITE_OUT_INTERVAL);
     printf("geo properties file:\t\t%s\n", GEO_PROP_FILE);
     printf("initialization state file:\t%s\n", INIT_STATE_FILE);
     printf("output directory:\t\t%s\n", OUTPUT_FOLDER);
@@ -59,26 +55,21 @@ int main(int argc, char *argv[])
     printf("number of scalar data points: %d\n", NUMBER_OF_SCALARS);
     printf("number of vectors: %d\n", NUMBER_OF_VECTORS);
     printf("number of data points: %d\n", NUMBER_OF_SCALARS + NUMBER_OF_VECTORS);
+    set_grid_properties(grid, dualgrid, GEO_PROP_FILE);
+    free(GEO_PROP_FILE);
+    double delta_t;
+    calc_delta_t(&delta_t, grid);
     printf("time step: %lf s\n", delta_t);
     printf("%s", stars);
     printf("It begins.\n");
     printf("%s", stars);
-    const double WRITE_OUT_INTERVAL = SECONDS_PER_MIN*WRITE_OUT_INTERVAL_MIN;
-    set_grid_properties(grid, dualgrid, GEO_PROP_FILE);
-    free(GEO_PROP_FILE);
-    long total_run_seconds;
     State *state_init = malloc(sizeof(State));
-    double min_dist;
     set_init_data(INIT_STATE_FILE, state_init);
     free(INIT_STATE_FILE);
-    total_run_seconds = RUN_HRS*SECONDS_PER_HOUR;
-    double write_out_interval = WRITE_OUT_INTERVAL_MIN*SECONDS_PER_MIN;
-    double t_init;
-    sscanf(argv[1], "%lf", &t_init);
     write_out(state_init, t_init, t_init, 0, OUTPUT_FOLDER);
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     double t_0, t_p1;
-    double t_write = t_init + write_out_interval;
+    double t_write = t_init + WRITE_OUT_INTERVAL;
     t_0 = t_init;
     int write_out_index = 1;
     State *state_0 = malloc(sizeof(State));
@@ -95,16 +86,17 @@ int main(int argc, char *argv[])
     double speed;
     if(t_p1 >= t_write && t_0 <= t_write)
     {
+        printf("%lf\t%lf\n", t_0, t_p1);
         interpolation_t(state_0, state_p1, state_write, t_0, t_p1, t_write);
         write_out(state_write, t_init, t_write, t_write, OUTPUT_FOLDER);
-        t_write += write_out_interval;
+        t_write += WRITE_OUT_INTERVAL;
         second_time = clock();
         speed = CLOCKS_PER_SEC*WRITE_OUT_INTERVAL/((double) second_time - first_time);
         printf("current speed: %lf\n", speed);
         first_time = clock();
     }
     printf("run progress: %f h\n", (t_p1 - t_init)/SECONDS_PER_HOUR);
-    while (t_p1 < t_init + total_run_seconds)
+    while (t_p1 < t_init + TOTAL_RUN_SPAN)
     {
         t_0 = t_p1;
         *state_0 = *state_p1;
@@ -114,8 +106,8 @@ int main(int argc, char *argv[])
         if(t_p1 >= t_write && t_0 <= t_write)
         {
             interpolation_t(state_0, state_p1, state_write, t_0, t_p1, t_write);
-            write_out(state_write, t_init, t_write,t_write, OUTPUT_FOLDER);
-            t_write += write_out_interval;
+            write_out(state_write, t_init, t_write, t_write, OUTPUT_FOLDER);
+            t_write += WRITE_OUT_INTERVAL;
             second_time = clock();
             speed = CLOCKS_PER_SEC*WRITE_OUT_INTERVAL/((double) second_time - first_time);
             printf("current speed: %lf\n", speed);
@@ -123,19 +115,17 @@ int main(int argc, char *argv[])
         }
         printf("run progress: %f h\n", (t_p1 - t_init)/SECONDS_PER_HOUR);
     }
+    free(grid);
+    free(dualgrid);
     free(OUTPUT_FOLDER);
-    free(run_cfg_file_pre);
     free(state_0);
     free(tendency_0);
     free(state_p1);
     free(state_write);
-    free(grid);
-    free(dualgrid);
     printf("%s", stars);
     free(stars);
-    free(dump);
     clock_t end = clock();
-    speed = CLOCKS_PER_SEC*total_run_seconds/((double) end - begin);
+    speed = CLOCKS_PER_SEC*TOTAL_RUN_SPAN/((double) end - begin);
     printf("average speed: %lf\n", speed);
     printf("GAME over.\n");
     return 0;

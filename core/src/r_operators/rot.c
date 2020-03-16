@@ -18,7 +18,7 @@ int rot(Vector_field in_field, Dual_vector_field out_field, Grid *grid, Dualgrid
             sign_1 = dualgrid -> vorticity_signs[3*vertical_index + 0];
             sign_2 = dualgrid -> vorticity_signs[3*vertical_index + 1];
             sign_3 = dualgrid -> vorticity_signs[3*vertical_index + 2];
-            out_field[i] = (1/dualgrid -> area[i])*(grid -> normal_distance[index_1]*sign_1*in_field[index_1] + grid -> normal_distance[index_2]*sign_2*in_field[index_2] + grid -> normal_distance[index_3]*sign_3*in_field[index_3]);
+            out_field[i] = 1/dualgrid -> area[i]*(grid -> normal_distance[index_1]*sign_1*in_field[index_1] + grid -> normal_distance[index_2]*sign_2*in_field[index_2] + grid -> normal_distance[index_3]*sign_3*in_field[index_3]);
         }
         else
         {

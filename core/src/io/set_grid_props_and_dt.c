@@ -341,16 +341,15 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     return 0;
 }
 
-double calc_delta_t(int res_id)
+int calc_delta_t(double *delta_t, Grid *grid)
 {
-    double delta_t;
-    if (res_id == 2)
-        delta_t = 1800;
-    if (res_id == 3)
-        delta_t = 900;
-    if (res_id == 4)
-        delta_t = 450;
-    if (res_id == 5)
-        delta_t = 225;
-    return delta_t;
+    double max_speed = 930;
+    double min_dist = SEMIMAJOR;
+    for (int i = NUMBER_OF_VECTORS_V; i < NUMBER_OF_VECTORS - NUMBER_OF_VECTORS_V; ++i)
+    {
+        if (grid -> normal_distance[i] < min_dist)
+            min_dist = grid -> normal_distance[i];
+    }
+    *delta_t = 1/sqrt(2)*min_dist/max_speed;
+    return 1;
 }
