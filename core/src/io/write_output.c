@@ -8,15 +8,15 @@
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 
-int write_out(State *state_write_out, double t_init, double t_write, int time_since_init, char output_foldername[])
+int write_out(State *state_write_out, double t_init, double t_write, char output_foldername[])
 {
     const double ATMOS_HEIGHT = SCALE_HEIGHT*log(1 + NUMBER_OF_LAYERS);
     int str_len;
-    find_string_length_from_int(time_since_init, &str_len);
+    find_string_length_from_int((int) t_write, &str_len);
     char add_time_str[str_len];
     char pre_string[] = "init+";
     char append_string[] = "s.grb2";
-    sprintf(add_time_str, "%d", time_since_init);
+    sprintf(add_time_str, "%lf", t_write);
     int out_file_length = strlen(output_foldername) + 1 + strlen(pre_string) + str_len + strlen(append_string);
     char OUTPUT_FILE[out_file_length];
     for (int i = 0; i < out_file_length + 1; i++)
@@ -68,6 +68,10 @@ int write_out(State *state_write_out, double t_init, double t_write, int time_si
     if (err != 0)
         ECCERR(err);
     fclose(SAMPLE_VECTOR);
+    int init_year, init_month, init_day, init_hour, init_minute, init_second, init_microsecond;
+    find_hour_from_time_coord(t_init, &init_year, &init_month, &init_day, &init_hour, &init_minute, &init_second, &init_microsecond);
+    long data_date = 10000*init_year + 100*init_month + init_day;
+    long data_time = init_hour;
     for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
     {
         for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
@@ -89,9 +93,9 @@ int write_out(State *state_write_out, double t_init, double t_write, int time_si
             ECCERR(retval);
         if (retval = codes_set_long(handle_pot_temperature_h, "stepUnits", 13))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "dataDate", 20000101))
+        if (retval = codes_set_long(handle_pot_temperature_h, "dataDate", data_date))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "dataTime", 0000))
+        if (retval = codes_set_long(handle_pot_temperature_h, "dataTime", data_time))
             ECCERR(retval);
         if (retval = codes_set_long(handle_pot_temperature_h, "forecastTime", t_write - t_init))
             ECCERR(retval);
@@ -131,9 +135,9 @@ int write_out(State *state_write_out, double t_init, double t_write, int time_si
             ECCERR(retval);
         if (retval = codes_set_long(handle_density_h, "stepUnits", 13))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "dataDate", 20000101))
+        if (retval = codes_set_long(handle_density_h, "dataDate", data_date))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "dataTime", 0000))
+        if (retval = codes_set_long(handle_density_h, "dataTime", data_time))
             ECCERR(retval);
         if (retval = codes_set_long(handle_density_h, "forecastTime", t_write - t_init))
             ECCERR(retval);
@@ -172,9 +176,9 @@ int write_out(State *state_write_out, double t_init, double t_write, int time_si
             ECCERR(retval);
         if (retval = codes_set_long(handle_wind_h_h, "stepUnits", 13))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_h_h, "dataDate", 20000101))
+        if (retval = codes_set_long(handle_wind_h_h, "dataDate", data_date))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_h_h, "dataTime", 0000))
+        if (retval = codes_set_long(handle_wind_h_h, "dataTime", data_time))
             ECCERR(retval);
         if (retval = codes_set_long(handle_wind_h_h, "forecastTime", t_write - t_init))
             ECCERR(retval);
@@ -226,9 +230,9 @@ int write_out(State *state_write_out, double t_init, double t_write, int time_si
             ECCERR(retval);
         if (retval = codes_set_long(handle_wind_v_h, "stepUnits", 13))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "dataDate", 20000101))
+        if (retval = codes_set_long(handle_wind_v_h, "dataDate", data_date))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "dataTime", 0000))
+        if (retval = codes_set_long(handle_wind_v_h, "dataTime", data_time))
             ECCERR(retval);
         if (retval = codes_set_long(handle_wind_v_h, "forecastTime", t_write - t_init))
             ECCERR(retval);

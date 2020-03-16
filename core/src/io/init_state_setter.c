@@ -3,16 +3,18 @@
 #include "../enum_and_typedefs.h"
 #include "io.h"
 #include "/home/max/custom_builds/eccodes/include/eccodes.h"
+#include "/home/max/my_code/c_source_libs/time/time.h"
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 
-int set_init_data(char FILE_NAME[], State *init_state)
+int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
 {
     const int START_SECTION = 4;
     long unsigned int no_scalars_h = NUMBER_OF_SCALARS_H;
     long unsigned int no_vectors_h = NUMBER_OF_VECTORS_H;
     FILE *IN_FILE;
     int err = 0;
+    *t_init = 0;
     codes_handle *handle_pot_temperature = NULL;
     codes_handle *handle_density = NULL;
     codes_handle *handle_wind_h = NULL;
@@ -23,6 +25,7 @@ int set_init_data(char FILE_NAME[], State *init_state)
     wind_h = malloc(sizeof(double)*NUMBER_OF_VECTORS_H);
     wind_v = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
     int retval;
+    long data_date, data_time;
     IN_FILE = fopen(FILE_NAME, "r");
     for (int i = 0; i < NUMBER_OF_LAYERS; i++)
     {
@@ -48,10 +51,19 @@ int set_init_data(char FILE_NAME[], State *init_state)
             ECCERR(err);
         if (retval = codes_get_double_array(handle_wind_h, "values", wind_h, &no_vectors_h))
             ECCERR(retval);
-        codes_handle_delete(handle_wind_h);
         for (int j = 0; j < NUMBER_OF_VECTORS_H; j++)
             init_state -> wind[j + i*NUMBER_OF_VECTORS_H + (i + 1)*NUMBER_OF_SCALARS_H] = wind_h[j];
+        codes_get_long(handle_wind_h, "dataDate", &data_date);
+        codes_get_long(handle_wind_h, "dataTime", &data_time);
+        codes_handle_delete(handle_wind_h);
     }
+    int year = data_date/10000;
+    int rest = data_date - 10000*year;
+    int month = rest/100;
+    rest -= 100*month;
+    int day = rest;
+    int hour = data_time;
+    *t_init = find_time_coord(year, month, day, hour, 0, 0, 0);
     if (err != 0)
         ECCERR(err);
     for (int i = 0; i < NUMBER_OF_LEVELS; i++)

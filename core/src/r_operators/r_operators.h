@@ -1,8 +1,8 @@
 int grad(Scalar_field, Vector_field, Grid *);
 int laplace(Scalar_field, Scalar_field, Grid *);
 int laplace_vec(Vector_field, Vector_field, Grid *, Dualgrid *);
-int rot(Vector_field, Dual_vector_field, Grid *, Dualgrid *);
-int rot_dual(Dual_vector_field, Vector_field, Grid *, Dualgrid *);
+int curl(Vector_field, Dual_vector_field, Grid *, Dualgrid *);
+int curl_dual(Dual_vector_field, Vector_field, Grid *, Dualgrid *);
 int vector_product(Vector_field, Dual_vector_field, Vector_field, Grid *);
 int scalar_product(Vector_field, Vector_field,Scalar_field, Grid *);
 int divergence(Vector_field, Scalar_field, Grid *);

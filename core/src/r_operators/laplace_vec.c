@@ -10,9 +10,9 @@ int laplace_vec(Vector_field in_field, Vector_field out_field, Grid *grid, Dualg
     grad(*between_0, *between_1, grid);
     free(between_0);
     Dual_vector_field *between_2 = malloc(sizeof(Dual_vector_field));
-    rot(in_field, *between_2, grid, dualgrid);
+    curl(in_field, *between_2, grid, dualgrid);
     Vector_field *between_3 = malloc(sizeof(Vector_field));
-    rot_dual(*between_2, *between_3, grid, dualgrid);
+    curl_dual(*between_2, *between_3, grid, dualgrid);
     free(between_2);
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
         out_field[i] = (*between_1)[i] - (*between_3)[i];

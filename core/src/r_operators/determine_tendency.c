@@ -23,7 +23,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
         state_tendency -> density_pot_temp[i] = -(*density_pot_temp_flux_divergence)[i];
     free(density_pot_temp_flux_divergence);
     Dual_vector_field *rel_curl = malloc(sizeof(Dual_vector_field));
-    rot(current_state -> wind, *rel_curl, grid, dualgrid);
+    curl(current_state -> wind, *rel_curl, grid, dualgrid);
     long layer_index;
     Dual_vector_field *abs_curl = malloc(sizeof(Dual_vector_field));
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; i++)

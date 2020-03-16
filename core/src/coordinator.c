@@ -25,7 +25,6 @@ int main(int argc, char *argv[])
     len = strlen(argv[5]);
     char *OUTPUT_FOLDER = malloc((len + 1)*sizeof(char));
     strcpy(OUTPUT_FOLDER, argv[5]);
-    double t_init = 0;
     char *stars  = malloc(82*sizeof(char));
     for (int i = 0; i < 82 - 1; ++i)
         stars[i] = '*';
@@ -64,9 +63,10 @@ int main(int argc, char *argv[])
     printf("It begins.\n");
     printf("%s", stars);
     State *state_init = malloc(sizeof(State));
-    set_init_data(INIT_STATE_FILE, state_init);
+    double t_init;
+    set_init_data(INIT_STATE_FILE, state_init, &t_init);
     free(INIT_STATE_FILE);
-    write_out(state_init, t_init, t_init, 0, OUTPUT_FOLDER);
+    write_out(state_init, t_init, 0, OUTPUT_FOLDER);
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     double t_0, t_p1;
     double t_write = t_init + WRITE_OUT_INTERVAL;
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     {
         printf("%lf\t%lf\n", t_0, t_p1);
         interpolation_t(state_0, state_p1, state_write, t_0, t_p1, t_write);
-        write_out(state_write, t_init, t_write, t_write, OUTPUT_FOLDER);
+        write_out(state_write, t_init, t_write, OUTPUT_FOLDER);
         t_write += WRITE_OUT_INTERVAL;
         second_time = clock();
         speed = CLOCKS_PER_SEC*WRITE_OUT_INTERVAL/((double) second_time - first_time);
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
         if(t_p1 >= t_write && t_0 <= t_write)
         {
             interpolation_t(state_0, state_p1, state_write, t_0, t_p1, t_write);
-            write_out(state_write, t_init, t_write, t_write, OUTPUT_FOLDER);
+            write_out(state_write, t_init, t_write, OUTPUT_FOLDER);
             t_write += WRITE_OUT_INTERVAL;
             second_time = clock();
             speed = CLOCKS_PER_SEC*WRITE_OUT_INTERVAL/((double) second_time - first_time);

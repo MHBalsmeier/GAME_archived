@@ -6,7 +6,7 @@
 int vector_product(Vector_field a_field, Dual_vector_field b_field, Vector_field out_field, Grid *grid)
 {
     double vector_1, vector_2, vector_3, vector_4, term_1, term_2;
-    int sign;
+    short sign;
     double *hor_par_pri = malloc(NUMBER_OF_H_VECTORS*sizeof(double));
     double *hor_par_dual = malloc(NUMBER_OF_H_VECTORS*sizeof(double));
     double *hor_ver_pri = malloc(NUMBER_OF_H_VECTORS*sizeof(double));
@@ -26,11 +26,10 @@ int vector_product(Vector_field a_field, Dual_vector_field b_field, Vector_field
     int vertical_horizontal_index, vert_index, floor_index, h_index;
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
-        vert_index = i/(NUMBER_OF_SCALARS_H + NUMBER_OF_VECTORS_H);
-        floor_index = vert_index*(NUMBER_OF_SCALARS_H + NUMBER_OF_VECTORS_H);
-        h_index = i - floor_index;
+        vert_index = i/NUMBER_OF_VECTORS_PER_LAYER;
+        h_index = i - vert_index*NUMBER_OF_VECTORS_PER_LAYER;
         vertical_horizontal_index = 0;
-        if(h_index >= NUMBER_OF_SCALARS_H)
+        if(h_index >= NUMBER_OF_VECTORS_V)
         {
             recov_hor_par_dual(b_field, hor_par_dual, grid);
             recov_hor_par_pri(a_field, hor_par_pri, grid);
