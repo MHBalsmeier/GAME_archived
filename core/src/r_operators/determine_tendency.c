@@ -34,7 +34,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     free(rel_curl);
     free(abs_curl);
     Scalar_field *e_kin_spec_2 = malloc(sizeof(Scalar_field));
-    scalar_product(current_state -> wind, current_state -> wind, *e_kin_spec_2, grid);
+    inner(current_state -> wind, current_state -> wind, *e_kin_spec_2, grid);
     Vector_field *m_e_kin_tend_2 = malloc(sizeof(Vector_field));
     grad(*e_kin_spec_2, *m_e_kin_tend_2, grid);
     free(e_kin_spec_2);
@@ -51,7 +51,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     free(pot_temp);
     free(exner_pressure_gradient);
     Vector_field *abs_curl_tend = malloc(sizeof(Vector_field));
-    vector_product(current_state -> wind, *abs_curl, *abs_curl_tend, grid);
+    cross_product(current_state -> wind, *abs_curl, *abs_curl_tend, grid);
     double density;
     long h_index;
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)

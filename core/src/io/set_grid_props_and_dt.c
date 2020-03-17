@@ -43,12 +43,11 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     short *adjacent_signs_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(short));
     short *vorticity_signs = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(short));
     short *h_curl_signs = malloc(4*NUMBER_OF_VECTORS_H*sizeof(short));
-    short *vector_product_sign = malloc(NUMBER_OF_VECTORS_H*sizeof(short));
     short *vorticity_signs_dual = malloc(6*NUMBER_OF_VECTORS_V*sizeof(short));
     short *h_curl_signs_dual = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(short));
     int ncid;
     int retval;
-    int normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, recov_ver_2_pri_weight_id, recov_ver_2_dual_weight_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, recov_ver_2_pri_index_id, recov_ver_2_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vector_product_sign_id, vorticity_signs_dual_id, h_curl_signs_dual_id;
+    int normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, recov_ver_2_pri_weight_id, recov_ver_2_dual_weight_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, recov_ver_2_pri_index_id, recov_ver_2_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id;
     long vert_index, floor_index, h_index, layer_index;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
@@ -121,8 +120,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     if ((retval = nc_inq_varid(ncid, "vorticity_signs", &vorticity_signs_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "h_curl_signs", &h_curl_signs_id)))
-        ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "vector_product_sign", &vector_product_sign_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "vorticity_signs_dual", &vorticity_signs_dual_id)))
         ERR(retval);
@@ -198,8 +195,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_get_var_short(ncid, h_curl_signs_id, &h_curl_signs[0])))
         ERR(retval);
-    if ((retval = nc_get_var_short(ncid, vector_product_sign_id, &vector_product_sign[0])))
-        ERR(retval);
     if ((retval = nc_get_var_short(ncid, vorticity_signs_dual_id, &vorticity_signs_dual[0])))
         ERR(retval);
     if ((retval = nc_get_var_short(ncid, h_curl_signs_dual_id, &h_curl_signs_dual[0])))
@@ -232,7 +227,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     }
     for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
     {
-        grid -> vector_product_sign[i] = vector_product_sign[i];
         grid -> to_index[i] = to_index[i];
         grid -> from_index[i] = from_index[i];
         for (int j = 0; j < 2; ++j)
@@ -320,7 +314,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     free(adjacent_signs_h);
     free(vorticity_signs);
     free(h_curl_signs);
-    free(vector_product_sign);
     free(vorticity_signs_dual);
     free(h_curl_signs_dual);
     return 0;

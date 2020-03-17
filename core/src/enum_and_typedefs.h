@@ -22,7 +22,7 @@
 #define SCALE_HEIGHT 8000.0
 
 enum grid_integers {
-RES_ID = 3,
+RES_ID = 4,
 NUMBER_OF_BASIC_TRIANGLES = 20,
 NUMBER_OF_PENTAGONS = 12,
 NUMBER_OF_HEXAGONS = (int) (10*(pow(2, 2*RES_ID) - 1)),

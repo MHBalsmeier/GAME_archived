@@ -1,11 +1,8 @@
 #include "../../enum_and_typedefs.h"
 
-void recov_hor_par_pri(Vector_field in_field, double out_field[], Grid *grid)
+void recov_hor_par_pri(Vector_field in_field, long layer_index, long h_index, double *component, Grid *grid)
 {
-    for( int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
-    {
-        out_field[i] = 0;
-        for (int j = 0; j < 2; ++j)
-            out_field[i] = out_field[i] + grid -> recov_hor_par_pri_weight[2*i + j]*in_field[grid -> recov_hor_par_pri_index[2*i + j]];
-    }
+    *component = 0;
+    for (int i = 0; i < 2; ++i)
+        *component += grid -> recov_hor_par_pri_weight[2*h_index + i]*in_field[layer_index*NUMBER_OF_VECTORS_PER_LAYER + grid -> recov_hor_par_pri_index[2*h_index + i]];
 }

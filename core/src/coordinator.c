@@ -68,26 +68,23 @@ int main(int argc, char *argv[])
     free(INIT_STATE_FILE);
     write_out(state_init, t_init, 0, OUTPUT_FOLDER);
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
-    double t_0, t_p1;
+    double t_0;
     double t_write = t_init + WRITE_OUT_INTERVAL;
     t_0 = t_init;
     int write_out_index = 1;
     State *state_0 = malloc(sizeof(State));
     *state_0 = *state_init;
     free(state_init);
-    State *tendency_0 = malloc(sizeof(State));
     clock_t first_time, second_time;
     first_time = clock();
-    tendency(state_0, tendency_0, grid, dualgrid);
     State *state_p1 = malloc(sizeof(State));
-    t_p1 = t_init + delta_t/2;
-    euler_explicit(state_0, tendency_0, state_p1, delta_t/2);
+    euler_explicit(state_0, state_p1, delta_t, grid, dualgrid);
     State *state_write = malloc(sizeof(State));
     double speed;
-    if(t_p1 >= t_write && t_0 <= t_write)
+    State *state_m1 = malloc(sizeof(State));
+    if(t_0 + delta_t >= t_write && t_0 <= t_write)
     {
-        printf("%lf\t%lf\n", t_0, t_p1);
-        interpolation_t(state_0, state_p1, state_write, t_0, t_p1, t_write);
+        interpolation_t(state_0, state_p1, state_write, t_0, t_0 + delta_t, t_write);
         write_out(state_write, t_init, t_write, OUTPUT_FOLDER);
         t_write += WRITE_OUT_INTERVAL;
         second_time = clock();
@@ -95,17 +92,16 @@ int main(int argc, char *argv[])
         printf("current speed: %lf\n", speed);
         first_time = clock();
     }
-    printf("run progress: %f h\n", (t_p1 - t_init)/SECONDS_PER_HOUR);
-    while (t_p1 < t_init + TOTAL_RUN_SPAN)
+    printf("run progress: %f h\n", (t_0 + delta_t - t_init)/SECONDS_PER_HOUR);
+    while (t_0 + delta_t < t_init + TOTAL_RUN_SPAN)
     {
-        t_0 = t_p1;
+        t_0 += delta_t;
+        *state_m1 = *state_0;
         *state_0 = *state_p1;
-        t_p1 += delta_t;
-        tendency(state_0, tendency_0, grid, dualgrid);
-        euler_explicit(state_0, tendency_0, state_p1, delta_t);
-        if(t_p1 >= t_write && t_0 <= t_write)
+        leapfrog(state_m1, state_0, state_p1, delta_t, grid, dualgrid);
+        if(t_0 + delta_t >= t_write && t_0 <= t_write)
         {
-            interpolation_t(state_0, state_p1, state_write, t_0, t_p1, t_write);
+            interpolation_t(state_0, state_p1, state_write, t_0, t_0 + delta_t, t_write);
             write_out(state_write, t_init, t_write, OUTPUT_FOLDER);
             t_write += WRITE_OUT_INTERVAL;
             second_time = clock();
@@ -113,13 +109,13 @@ int main(int argc, char *argv[])
             printf("current speed: %lf\n", speed);
             first_time = clock();
         }
-        printf("run progress: %f h\n", (t_p1 - t_init)/SECONDS_PER_HOUR);
+        printf("run progress: %f h\n", (t_0 + delta_t - t_init)/SECONDS_PER_HOUR);
     }
+    free(state_m1);
     free(grid);
     free(dualgrid);
     free(OUTPUT_FOLDER);
     free(state_0);
-    free(tendency_0);
     free(state_p1);
     free(state_write);
     printf("%s", stars);

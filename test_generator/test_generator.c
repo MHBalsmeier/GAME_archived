@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     FILE *SAMPLE_VECTOR;
     int err = 0;
     SAMPLE_SCALAR = fopen(SAMPLE_FILE_SCALAR, "r");
-    char *OUTPUT_FILE = "grib_files/test_1_res_3_oro_0.grb2";
+    char *OUTPUT_FILE = "grib_files/test_1_res_4_oro_0.grb2";
     codes_handle *handle_pot_temperature = NULL;
     codes_handle *handle_density = NULL;
     codes_handle *handle_wind_h = NULL;
