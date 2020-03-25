@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include "../enum_and_typedefs.h"
 #include "io.h"
-#include "/home/max/custom_builds/eccodes/include/eccodes.h"
-#include "/home/max/my_code/c_source_libs/time/time.h"
+#include "/usr/src/eccodes/include/eccodes.h"
+#include "/lib/time/include/time.h"
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 
@@ -63,7 +63,7 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
     rest -= 100*month;
     int day = rest;
     int hour = data_time;
-    *t_init = find_time_coord(year, month, day, hour, 0, 0, 0);
+    find_time_coord(year, month, day, hour, 0, 0, 0, t_init);
     if (err != 0)
         ECCERR(err);
     for (int i = 0; i < NUMBER_OF_LEVELS; i++)

@@ -1,9 +1,9 @@
-#include "/home/max/my_code/game/core/src/enum_and_typedefs.h"
+#include "../core/src/enum_and_typedefs.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include "/home/max/custom_builds/eccodes/include/eccodes.h"
+#include "/usr/src/eccodes/include/eccodes.h"
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 

@@ -77,14 +77,14 @@ long recov_hor_par_pri_index[2*NUMBER_OF_VECTORS_H];
 double recov_hor_par_pri_weight[2*NUMBER_OF_VECTORS_H];
 long recov_hor_ver_pri_index[4*NUMBER_OF_VECTORS_H];
 double recov_hor_ver_pri_weight[4*NUMBER_OF_VECTORS_H];
+long recov_ver_0_pri_index[6*NUMBER_OF_VECTORS_V];
+double recov_ver_0_pri_weight[6*NUMBER_OF_VECTORS_V];
+long recov_ver_0_dual_index[6*NUMBER_OF_VECTORS_V];
+double recov_ver_0_dual_weight[6*NUMBER_OF_VECTORS_V];
 long recov_ver_1_pri_index[6*NUMBER_OF_VECTORS_V];
 double recov_ver_1_pri_weight[6*NUMBER_OF_VECTORS_V];
 long recov_ver_1_dual_index[6*NUMBER_OF_VECTORS_V];
 double recov_ver_1_dual_weight[6*NUMBER_OF_VECTORS_V];
-long recov_ver_2_pri_index[6*NUMBER_OF_VECTORS_V];
-double recov_ver_2_pri_weight[6*NUMBER_OF_VECTORS_V];
-long recov_ver_2_dual_index[6*NUMBER_OF_VECTORS_V];
-double recov_ver_2_dual_weight[6*NUMBER_OF_VECTORS_V];
 } Grid;
 
 typedef struct dualgrid {

@@ -1,10 +1,10 @@
-#include "/home/max/my_code/game/core/src/enum_and_typedefs.h"
+#include "../../../core/src/enum_and_typedefs.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "io.h"
 #include "../diagnostics/diagnostics.h"
-#include "/home/max/custom_builds/eccodes/include/eccodes.h"
+#include "/usr/src/eccodes/include/eccodes.h"
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 
@@ -35,8 +35,8 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
     int dimids_scalar[2];
     int scalar_index;
     const int START_SECTION = 4;
-    char *SAMPLE_FILE_SCALAR = "/home/max/my_code/game/test_generator/grib_files/scalar_field_blueprint_res_id_2.grb2";
-    char *SAMPLE_FILE_VECTOR = "/home/max/my_code/game/test_generator/grib_files/vector_field_blueprint_res_id_2.grb2";
+    char *SAMPLE_FILE_SCALAR = "../test_generator/grib_files/scalar_field_blueprint_res_id_2.grb2";
+    char *SAMPLE_FILE_VECTOR = "../test_generator/grib_files/vector_field_blueprint_res_id_2.grb2";
     FILE *SAMPLE_SCALAR;
     FILE *SAMPLE_VECTOR;
     int err = 0;
@@ -74,6 +74,8 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
     long data_time = init_hour;
     for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
     {
+	sigma = 0.5*((SCALE_HEIGHT/ATMOS_HEIGHT)*log((1.0 + NUMBER_OF_LAYERS)/(i + 1)) + (SCALE_HEIGHT/ATMOS_HEIGHT)*log((1.0 + NUMBER_OF_LAYERS)/(i + 2)));
+        z_height = ATMOS_HEIGHT*sigma;
         for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
         {
             pot_temperature_h[j] = state_write_out -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H];
