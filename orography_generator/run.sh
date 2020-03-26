@@ -1,1 +1,1 @@
-./orography_generator.exe
+./orography_generator

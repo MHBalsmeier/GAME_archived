@@ -321,8 +321,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
 
 int calc_delta_t(double *delta_t, Grid *grid)
 {
-    double max_rossby_speed = 930;
-    double max_sound_speed = 350;
+    double max_speed = 350;
     double min_dist_horizontal = SEMIMAJOR;
     double min_dist_vertical = SEMIMAJOR;
     double delta_t_horizontal;
@@ -343,8 +342,8 @@ int calc_delta_t(double *delta_t, Grid *grid)
                 min_dist_vertical = grid -> normal_distance[i*NUMBER_OF_VECTORS_PER_LAYER + j];
         }
     }
-    delta_t_horizontal = 1/sqrt(2)*min_dist_horizontal/max_rossby_speed;
-    delta_t_vertical = 1/sqrt(2)*min_dist_vertical/max_sound_speed;
+    delta_t_horizontal = 1/sqrt(2)*min_dist_horizontal/max_speed;
+    delta_t_vertical = 1/sqrt(2)*min_dist_vertical/max_speed;
     *delta_t = delta_t_vertical;
     if (delta_t_horizontal < delta_t_vertical)
         *delta_t = delta_t_horizontal;

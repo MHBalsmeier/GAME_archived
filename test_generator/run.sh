@@ -1,1 +1,1 @@
-./test_generator.exe
+./test_generator

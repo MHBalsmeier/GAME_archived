@@ -78,10 +78,9 @@ int main(int argc, char *argv[])
     clock_t first_time, second_time;
     first_time = clock();
     State *state_p1 = malloc(sizeof(State));
-    euler_explicit(state_0, state_p1, delta_t, grid, dualgrid);
+    runge_kutta_third_order(state_0, state_p1, delta_t, grid, dualgrid);
     State *state_write = malloc(sizeof(State));
     double speed;
-    State *state_m1 = malloc(sizeof(State));
     if(t_0 + delta_t >= t_write && t_0 <= t_write)
     {
         interpolation_t(state_0, state_p1, state_write, t_0, t_0 + delta_t, t_write);
@@ -96,9 +95,8 @@ int main(int argc, char *argv[])
     while (t_0 + delta_t < t_init + TOTAL_RUN_SPAN)
     {
         t_0 += delta_t;
-        *state_m1 = *state_0;
         *state_0 = *state_p1;
-        leapfrog(state_m1, state_0, state_p1, delta_t, grid, dualgrid);
+        runge_kutta_third_order(state_0, state_p1, delta_t, grid, dualgrid);
         if(t_0 + delta_t >= t_write && t_0 <= t_write)
         {
             interpolation_t(state_0, state_p1, state_write, t_0, t_0 + delta_t, t_write);
@@ -111,7 +109,6 @@ int main(int argc, char *argv[])
         }
         printf("run progress: %f h\n", (t_0 + delta_t - t_init)/SECONDS_PER_HOUR);
     }
-    free(state_m1);
     free(grid);
     free(dualgrid);
     free(OUTPUT_FOLDER);

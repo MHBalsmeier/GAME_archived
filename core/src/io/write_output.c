@@ -12,7 +12,7 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
 {
     const double ATMOS_HEIGHT = SCALE_HEIGHT*log(1 + NUMBER_OF_LAYERS);
     int str_len;
-    find_string_length_from_int((int) t_write, &str_len);
+    find_string_length_from_int((int) t_write - t_init, &str_len);
     char add_time_str[str_len];
     char pre_string[] = "init+";
     char append_string[] = "s.grb2";
@@ -272,7 +272,7 @@ int find_string_length_from_int(int input, int *answer)
     *answer = 1;
     for (int i = 1; i < 10; ++i)
     {
-        if (input > pow(10, i))
+        if (input >= pow(10, i))
             ++*answer;
     }
     return 0;
