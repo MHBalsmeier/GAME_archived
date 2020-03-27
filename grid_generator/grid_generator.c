@@ -860,7 +860,33 @@ int main(int argc, char *argv[])
             area[i] = calculate_vertical_face(base_distance, r_1, r_2);
         }
     }
-    for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
+    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_V; ++i)
+    {
+        counter = 0;
+        for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_H; ++j)
+        {
+            if (from_index_dual[j] == i || to_index_dual[j] == i)
+            {
+                vorticity_indices[3*i + counter] = j;
+                sign = 1;
+                if (from_index_dual[j] == i)
+                {
+                    find_angle_change(direction_dual[j], direction[j], &direction_change);
+                    if (rad2deg(direction_change) < -70)
+                        sign = -1;
+                }
+                if (to_index_dual[j] == i)
+                {
+                    find_angle_change(direction_dual[j], direction[j], &direction_change);
+                    if (rad2deg(direction_change) > 70)
+                        sign = -1;
+                }
+                vorticity_signs[3*i + counter] = sign;
+                ++counter;
+            }
+        }
+    }
+    for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
     {
         counter = 0;
         for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
@@ -868,10 +894,23 @@ int main(int argc, char *argv[])
             if (from_index[j] == i || to_index[j] == i)
             {
                 adjacent_vector_indices_h[6*i + counter] = j;
+                vorticity_indices_dual[6*i + counter] = j;
+                sign = 1;
                 if (from_index[j] == i)
+                {
                     adjacent_signs_h[6*i + counter] = 1;
+                    find_angle_change(direction[j], direction_dual[j], &direction_change);
+                    if (rad2deg(direction_change) < -70)
+                        sign = -1;
+                }
                 if (to_index[j] == i)
+                {
                     adjacent_signs_h[6*i + counter] = -1;
+                    find_angle_change(direction[j], direction_dual[j], &direction_change);
+                    if (rad2deg(direction_change) > 70)
+                        sign = -1;
+                }
+                vorticity_signs_dual[6*i + counter] = sign;
                 ++counter;
             }
         }
@@ -879,6 +918,8 @@ int main(int argc, char *argv[])
         {
             adjacent_vector_indices_h[6*i + 5] = 0;
             adjacent_signs_h[6*i + 5] = 0;
+            vorticity_indices_dual[6*i + 5] = 0;
+            vorticity_signs_dual[6*i + 5] = 0;
         }
     }
     for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
@@ -895,13 +936,13 @@ int main(int argc, char *argv[])
             sign = 1;
             recov_hor_par_dual_index[2*i + j] = i + j*NUMBER_OF_DUAL_VECTORS_PER_LAYER;
             find_angle_change(direction[i], direction_dual[i], &direction_change);
-            if (rad2deg(direction_change) < -60)
+            if (rad2deg(direction_change) < -70)
                 sign = -1;
             recov_hor_par_dual_weight[2*i + j] = sign*0.5;
         }
         sign = 1;
         find_angle_change(direction[i], direction_dual[i], &direction_change);
-        if (rad2deg(direction_change) < -60)
+        if (rad2deg(direction_change) < -70)
             sign = -1;
         for (int j = 0; j < 4; ++j)
         {
@@ -960,7 +1001,7 @@ int main(int argc, char *argv[])
     {
         sign = 1;
         find_angle_change(direction_dual[i], direction[i], &direction_change);
-        if (rad2deg(direction_change) < -60)
+        if (rad2deg(direction_change) < -70)
             sign = -1;
         for (int j = 0; j < 4; ++j)
             {
