@@ -12,41 +12,43 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     double *gravity = malloc(NUMBER_OF_VECTORS*sizeof(double));
     double *volume = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *area = malloc(NUMBER_OF_VECTORS*sizeof(double));
+    double *z_scalar = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *recov_hor_par_dual_weight = malloc(2*NUMBER_OF_VECTORS_H*sizeof(double));
     double *recov_hor_ver_dual_weight = malloc(2*NUMBER_OF_VECTORS_H*sizeof(double));
     double *recov_hor_par_pri_weight = malloc(4*NUMBER_OF_VECTORS_H*sizeof(double));
     double *recov_hor_ver_pri_weight = malloc(4*NUMBER_OF_VECTORS_H*sizeof(double));
-    double *recov_ver_0_pri_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
+    double *recov_ver_0_pri_weight = malloc(12*NUMBER_OF_VECTORS_V*sizeof(double));
+    double *recov_ver_1_pri_weight = malloc(12*NUMBER_OF_VECTORS_V*sizeof(double));
     double *recov_ver_0_dual_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
-    double *recov_ver_1_pri_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
     double *recov_ver_1_dual_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
     double *normal_distance_dual = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(double));
     double *area_dual = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(double));
     double *f_vec = malloc(NUMBER_OF_DUAL_VECTORS_PER_LAYER*sizeof(double));
+    double *direction = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
     long *to_index = malloc(NUMBER_OF_VECTORS_H*sizeof(long));
     long *from_index = malloc(NUMBER_OF_VECTORS_H*sizeof(long));
-    long *recov_ver_1_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
+    long *recov_ver_0_pri_index = malloc(12*NUMBER_OF_VECTORS_V*sizeof(long));
+    long *recov_ver_1_pri_index = malloc(12*NUMBER_OF_VECTORS_V*sizeof(long));
     long *recov_ver_0_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
-    long *recov_ver_1_pri_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
+    long *recov_ver_1_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
     long *recov_hor_ver_pri_index = malloc(4*NUMBER_OF_VECTORS_H*sizeof(long));
-    long *recov_ver_0_pri_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
     long *recov_hor_ver_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(long));
     long *recov_hor_par_pri_index = malloc(4*NUMBER_OF_VECTORS_H*sizeof(long));
     long *adjacent_vector_indices_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(long));
     long *to_index_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(long));
     long *from_index_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(long));
     long *vorticity_indices = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(long));
-    long *h_curl_indices = malloc(4*NUMBER_OF_VECTORS_H*sizeof(long));
+    long *h_curl_indices = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(long));
     long *recov_hor_par_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(long));
     long *vorticity_indices_dual = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
-    long *h_curl_indices_dual = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(long));
+    long *h_curl_indices_dual = malloc(4*NUMBER_OF_VECTORS_H*sizeof(long));
     short *adjacent_signs_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(short));
     short *vorticity_signs = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(short));
-    short *h_curl_signs = malloc(4*NUMBER_OF_VECTORS_H*sizeof(short));
+    short *h_curl_signs = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(short));
     short *vorticity_signs_dual = malloc(6*NUMBER_OF_VECTORS_V*sizeof(short));
-    short *h_curl_signs_dual = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(short));
+    short *h_curl_signs_dual = malloc(4*NUMBER_OF_VECTORS_H*sizeof(short));
     int ncid, retval;
-    int normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id;
+    int normal_distance_id, gravity_id, volume_id, area_id, z_scalar_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id, direction_id;
     long vert_index, floor_index, h_index, layer_index;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
@@ -57,6 +59,8 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     if ((retval = nc_inq_varid(ncid, "volume", &volume_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "area", &area_id)))
+        ERR(retval);
+    if ((retval = nc_inq_varid(ncid, "z_scalar", &z_scalar_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "recov_hor_par_dual_weight", &recov_hor_par_dual_weight_id)))
         ERR(retval);
@@ -81,6 +85,8 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     if ((retval = nc_inq_varid(ncid, "f_vec", &f_vec_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "to_index", &to_index_id)))
+        ERR(retval);
+    if ((retval = nc_inq_varid(ncid, "direction", &direction_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "from_index", &from_index_id)))
         ERR(retval);
@@ -132,6 +138,8 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, area_id, &area[0])))
         ERR(retval);
+    if ((retval = nc_get_var_double(ncid, z_scalar_id, &z_scalar[0])))
+        ERR(retval);
     if ((retval = nc_get_var_double(ncid, recov_hor_par_dual_weight_id, &recov_hor_par_dual_weight[0])))
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, recov_hor_ver_dual_weight_id, &recov_hor_ver_dual_weight[0])))
@@ -151,6 +159,8 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     if ((retval = nc_get_var_double(ncid, normal_distance_dual_id, &normal_distance_dual[0])))
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, area_dual_id, &area_dual[0])))
+        ERR(retval);
+    if ((retval = nc_get_var_double(ncid, direction_id, &direction[0])))
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, f_vec_id, &f_vec[0])))
         ERR(retval);
@@ -207,6 +217,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
             grid -> adjacent_vector_indices_h[6*i + j] = adjacent_vector_indices_h[6*i + j];
             grid -> adjacent_signs_h[6*i + j] = adjacent_signs_h[6*i + j];
         }
+        grid -> z_scalar_lowest[i] = z_scalar[(NUMBER_OF_LAYERS - 1)*NUMBER_OF_SCALARS_H + i];
     }
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_V; ++i)
     {
@@ -228,6 +239,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     {
         grid -> to_index[i] = to_index[i];
         grid -> from_index[i] = from_index[i];
+        grid -> direction[i] = direction[i];
         for (int j = 0; j < 2; ++j)
         {
             grid -> recov_hor_ver_dual_index[2*i + j] = recov_hor_ver_dual_index[2*i + j];
@@ -239,26 +251,33 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         {
             grid -> recov_hor_par_pri_index[4*i + j] = recov_hor_par_pri_index[4*i + j];
             grid -> recov_hor_par_pri_weight[4*i + j] = recov_hor_par_pri_weight[4*i + j];
-            grid -> h_curl_indices[4*i + j] = h_curl_indices[4*i + j];
-            grid -> h_curl_signs[4*i + j] = h_curl_signs[4*i + j];
             grid -> recov_hor_ver_pri_index[4*i + j] = recov_hor_ver_pri_index[4*i + j];
             grid -> recov_hor_ver_pri_weight[4*i + j] = recov_hor_ver_pri_weight[4*i + j];
+            grid -> h_curl_indices[4*i + j] = h_curl_indices_dual[4*i + j];
+            grid -> h_curl_signs[4*i + j] = h_curl_signs_dual[4*i + j];
         }
     }
     for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
     {
         for (int j = 0; j < 6; ++j)
         {
-            grid -> recov_ver_0_pri_index[6*i + j] = recov_ver_0_pri_index[6*i + j];
-            grid -> recov_ver_0_pri_weight[6*i + j] = recov_ver_0_pri_weight[6*i + j];
+            grid -> recov_ver_0_pri_index[12*i + j] = recov_ver_0_pri_index[12*i + j];
+            grid -> recov_ver_0_pri_weight[12*i + j] = recov_ver_0_pri_weight[12*i + j];
             grid -> recov_ver_0_dual_index[6*i + j] = recov_ver_0_dual_index[6*i + j];
             grid -> recov_ver_0_dual_weight[6*i + j] = recov_ver_0_dual_weight[6*i + j];
-            grid -> recov_ver_1_pri_index[6*i + j] = recov_ver_1_pri_index[6*i + j];
-            grid -> recov_ver_1_pri_weight[6*i + j] = recov_ver_1_pri_weight[6*i + j];
+            grid -> recov_ver_1_pri_index[12*i + j] = recov_ver_1_pri_index[12*i + j];
+            grid -> recov_ver_1_pri_weight[12*i + j] = recov_ver_1_pri_weight[12*i + j];
             grid -> recov_ver_1_dual_index[6*i + j] = recov_ver_1_dual_index[6*i + j];
             grid -> recov_ver_1_dual_weight[6*i + j] = recov_ver_1_dual_weight[6*i + j];
             grid -> vorticity_indices[6*i + j] = vorticity_indices_dual[6*i + j];
             grid -> vorticity_signs[6*i + j] = vorticity_signs_dual[6*i + j];
+        }
+        for (int j = 6; j < 12; ++j)
+        {
+            grid -> recov_ver_0_pri_index[12*i + j] = recov_ver_0_pri_index[12*i + j];
+            grid -> recov_ver_0_pri_weight[12*i + j] = recov_ver_0_pri_weight[12*i + j];
+            grid -> recov_ver_1_pri_index[12*i + j] = recov_ver_1_pri_index[12*i + j];
+            grid -> recov_ver_1_pri_weight[12*i + j] = recov_ver_1_pri_weight[12*i + j];
         }
     }
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_PER_LAYER; ++i)
@@ -274,14 +293,16 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         dualgrid -> from_index[i] = from_index_dual[i];
         for (int j = 0; j < 4; ++j)
         {
-            dualgrid -> h_curl_indices[4*i + j] = h_curl_indices_dual[4*i + j];
-            dualgrid -> h_curl_signs[4*i + j] = h_curl_signs_dual[4*i + j];
+            dualgrid -> h_curl_indices[4*i + j] = h_curl_indices[4*i + j];
+            dualgrid -> h_curl_signs[4*i + j] = h_curl_signs[4*i + j];
         }
     }
+    free(direction);
     free(normal_distance);
     free(gravity);
     free(volume);
     free(area);
+    free(z_scalar);
     free(recov_hor_par_dual_weight);
     free(recov_hor_ver_dual_weight);
     free(recov_hor_par_pri_weight);

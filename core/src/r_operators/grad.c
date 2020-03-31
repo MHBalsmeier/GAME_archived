@@ -1,7 +1,7 @@
 #include "../enum_and_typedefs.h"
 #include <stdio.h>
 
-void grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
+int grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
 {
     long layer_index, h_index, lower_index, upper_index;
     for (int i = NUMBER_OF_VECTORS_V; i < NUMBER_OF_VECTORS - NUMBER_OF_VECTORS_V; ++i)
@@ -21,4 +21,5 @@ void grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
         out_field[i] = out_field[i + NUMBER_OF_VECTORS_PER_LAYER];
     for (int i = NUMBER_OF_VECTORS - NUMBER_OF_VECTORS_V; i < NUMBER_OF_VECTORS; ++i)
         out_field[i] = out_field[i - NUMBER_OF_VECTORS_PER_LAYER];
+    return 0;
 }

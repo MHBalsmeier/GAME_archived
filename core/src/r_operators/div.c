@@ -1,7 +1,7 @@
 #include "../enum_and_typedefs.h"
 #include <stdio.h>
 
-void divergence(Vector_field in_field, Scalar_field out_field, Grid *grid)
+int divergence(Vector_field in_field, Scalar_field out_field, Grid *grid)
 {
     long layer_index, h_index;
     double comp_h, comp_v;
@@ -23,4 +23,5 @@ void divergence(Vector_field in_field, Scalar_field out_field, Grid *grid)
         comp_v = in_field[h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER]*grid -> area[h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER] - in_field[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER]*grid -> area[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER];
         out_field[i] = 1/grid -> volume[i]*(comp_h + comp_v);
     }
+    return 0;
 }

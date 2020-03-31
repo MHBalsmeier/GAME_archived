@@ -243,8 +243,8 @@ int main(int argc, char *argv[])
     double *recov_hor_ver_pri_weight = malloc(4*NUMBER_OF_VECTORS_H*sizeof(double));
     double *recov_hor_par_dual_weight = malloc(2*NUMBER_OF_VECTORS_H*sizeof(double));
     double *recov_hor_ver_dual_weight = malloc(2*NUMBER_OF_VECTORS_H*sizeof(double));
-    double *recov_ver_0_pri_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
-    double *recov_ver_1_pri_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
+    double *recov_ver_0_pri_weight = malloc(12*NUMBER_OF_VECTORS_V*sizeof(double));
+    double *recov_ver_1_pri_weight = malloc(12*NUMBER_OF_VECTORS_V*sizeof(double));
     double *recov_ver_0_dual_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
     double *recov_ver_1_dual_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
     double *latitude_scalar_dual = malloc(NUMBER_OF_DUAL_SCALARS_H*sizeof(double));
@@ -262,25 +262,25 @@ int main(int argc, char *argv[])
     long *recov_hor_ver_pri_index = malloc(4*NUMBER_OF_VECTORS_H*sizeof(long));
     long *recov_hor_par_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(long));
     long *recov_hor_ver_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(long));
-    long *recov_ver_0_pri_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
-    long *recov_ver_1_pri_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
+    long *recov_ver_0_pri_index = malloc(12*NUMBER_OF_VECTORS_V*sizeof(long));
+    long *recov_ver_1_pri_index = malloc(12*NUMBER_OF_VECTORS_V*sizeof(long));
     long *recov_ver_0_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
     long *recov_ver_1_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
     long *adjacent_vector_indices_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(long));
     long *vorticity_indices = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(long));
-    long *h_curl_indices = malloc(4*NUMBER_OF_VECTORS_H*sizeof(long));
+    long *h_curl_indices = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(long));
     long *to_index_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(long));
     long *from_index_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(long));
     long *vorticity_indices_dual = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
-    long *h_curl_indices_dual = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(long));
+    long *h_curl_indices_dual = malloc(4*NUMBER_OF_VECTORS_H*sizeof(long));
     short *adjacent_signs_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(short));
     short *vorticity_signs = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(short));
-    short *h_curl_signs = malloc(4*NUMBER_OF_VECTORS_H*sizeof(short));
+    short *h_curl_signs = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(short));
     short *vorticity_signs_dual = malloc(6*NUMBER_OF_VECTORS_V*sizeof(short));
-    short *h_curl_signs_dual = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(short));
+    short *h_curl_signs_dual = malloc(4*NUMBER_OF_VECTORS_H*sizeof(short));
     double lat_edge_1, lon_edge_1, lat_edge_2, lon_edge_2, lat_1, lon_1, lat_2, lon_2, rel_on_line, lat_res, lon_res, base_area, base_distance, z_0, z_1, radius_0, radius_1, parallel_distance, direction_change, x_point_0, y_point_0, z_point_0, x_point_1, y_point_1, z_point_1, x_res, y_res, z_res;
     int small_triangle_edge_index, reverse_0, reverse_1, reverse_2, face_index, face_index_0, face_index_1;
-    long h_index, on_face_index, layer_index, level_index, inner_index, upper_index, lower_index, edge_0, edge_1, edge_2, edge_index_1, edge_index_2, coord_0_points_amount, j, coord_0, coord_1, vertex_index_0, vertex_index_1, vertex_index_2, index_0, index_1, index_2, points_right, triangle_on_face_index, floor_index, on_edge_index, point_0, point_1, point_2, point_3, dual_scalar_index, counter, primal_vector_index, dual_vector_index;
+    long h_index, on_face_index, layer_index, level_index, inner_index, upper_index, lower_index, edge_0, edge_1, edge_2, edge_index_1, edge_index_2, coord_0_points_amount, j, coord_0, coord_1, vertex_index_0, vertex_index_1, vertex_index_2, index_0, index_1, index_2, points_right, triangle_on_face_index, on_edge_index, point_0, point_1, point_2, point_3, dual_scalar_index, counter, primal_vector_index, dual_vector_index;
     short first_face_found, edge_rel_to_face_0, edge_rel_to_face_1, edge_index, sign, retval;
     for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
     {
@@ -350,6 +350,11 @@ int main(int argc, char *argv[])
         layer_index = i/NUMBER_OF_SCALARS_H;
         z_scalar[i] = 0.5*SCALE_HEIGHT*(log(NUMBER_OF_LEVELS/(layer_index + 1.0)) + log(NUMBER_OF_LEVELS/(layer_index + 2.0)));
     }
+    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+    {
+        if (z_scalar[i] <= 0)
+            printf("z_scalar contains non-positve values.");
+    }
     for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
     {
         if (i < NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))
@@ -418,7 +423,7 @@ int main(int argc, char *argv[])
             }
             else
                 point_2 = NUMBER_OF_PENTAGONS + POINTS_PER_EDGE*NUMBER_OF_EDGES + face_index*SCALAR_POINTS_PER_INNER_FACE + triangle_on_face_index - 1 - coord_1;
-            dual_scalar_index = face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + 1 + coord_1;
+            dual_scalar_index = face_index*TRIANGLES_PER_FACE + 1 + 2*triangle_on_face_index + coord_1;
             if (small_triangle_edge_index == 0)
             {
                 from_index[i] = point_0;
@@ -463,7 +468,7 @@ int main(int argc, char *argv[])
             retval = find_geos(x_res, y_res, z_res, &lat_res, &lon_res);
             latitude_scalar_dual[dual_scalar_index - 1] = lat_res;
             longitude_scalar_dual[dual_scalar_index - 1] = lon_res;
-            if (coord_0 == POINTS_PER_EDGE - 1 - coord_1)
+            if (coord_0 == coord_0_points_amount - 1)
             {
                 if (coord_1 == 0)
                     point_3 = face_vertices[face_index][1];
@@ -488,13 +493,13 @@ int main(int argc, char *argv[])
                 }
             }
         }
-        normal_distance[i] = calculate_distance_h(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], SEMIMAJOR + z_vector[i]);
         retval = find_global_normal(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], &x_point_0, &y_point_0, &z_point_0);
         retval = find_global_normal(latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], &x_point_1, &y_point_1, &z_point_1);
         retval = find_between_point(x_point_0, y_point_0, z_point_0, x_point_1, y_point_1, z_point_1, 0.5, &x_res, &y_res, &z_res);
         retval = find_geos(x_res, y_res, z_res, &lat_res, &lon_res);
         latitude_vector[i] = lat_res;
         longitude_vector[i] = lon_res;
+        direction[i] = find_geodetic_direction(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], 0.5);
     }
     free(x_unity);
     free(y_unity);
@@ -502,23 +507,16 @@ int main(int argc, char *argv[])
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
         layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
-        floor_index = layer_index*NUMBER_OF_VECTORS_PER_LAYER;
-        h_index = i - floor_index;
+        h_index = i - layer_index*NUMBER_OF_VECTORS_PER_LAYER;
         if (h_index >= NUMBER_OF_VECTORS_V)
         {
-            gravity[i] = 0;
-            if (h_index - NUMBER_OF_VECTORS_V < NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))
-            {
-                edge_index = (h_index - NUMBER_OF_VECTORS_V)/(POINTS_PER_EDGE + 1);
-                on_edge_index = h_index - NUMBER_OF_VECTORS_V - edge_index*(POINTS_PER_EDGE + 1);
-            }
-            else
+            if (h_index - NUMBER_OF_VECTORS_V >= NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))
             {
                 face_index = (h_index - NUMBER_OF_VECTORS_V - NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
                 on_face_index = h_index - NUMBER_OF_VECTORS_V - (NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
                 triangle_on_face_index = on_face_index/3;
                 retval = find_coords_from_triangle_on_face_index(triangle_on_face_index, &coord_0, &coord_1, &coord_0_points_amount);
-                dual_scalar_index = layer_index*NUMBER_OF_DUAL_SCALARS_H + face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + 1 + coord_1;
+                dual_scalar_index = layer_index*NUMBER_OF_DUAL_SCALARS_H + face_index*TRIANGLES_PER_FACE + 1 + 2*triangle_on_face_index + coord_1;
                 z_scalar_dual[dual_scalar_index] = SCALE_HEIGHT*log(NUMBER_OF_LEVELS/(layer_index + 1.0));
                 z_scalar_dual[dual_scalar_index - 1] = SCALE_HEIGHT*log(NUMBER_OF_LEVELS/(layer_index + 1.0));
                 if (layer_index == NUMBER_OF_LAYERS - 1)
@@ -539,9 +537,9 @@ int main(int argc, char *argv[])
                     }
                 }
             }
+            gravity[i] = 0;
             z_vector[i] = z_scalar[layer_index*NUMBER_OF_SCALARS_H];
             normal_distance[i] = calculate_distance_h(latitude_scalar[from_index[h_index - NUMBER_OF_VECTORS_V]], longitude_scalar[from_index[h_index - NUMBER_OF_VECTORS_V]], latitude_scalar[to_index[h_index - NUMBER_OF_VECTORS_V]], longitude_scalar[to_index[h_index - NUMBER_OF_VECTORS_V]], SEMIMAJOR + z_vector[i]);
-            direction[h_index - NUMBER_OF_VECTORS_V] = find_geodetic_direction(latitude_scalar[from_index[h_index - NUMBER_OF_VECTORS_V]], longitude_scalar[from_index[h_index - NUMBER_OF_VECTORS_V]], latitude_scalar[to_index[h_index - NUMBER_OF_VECTORS_V]], longitude_scalar[to_index[h_index - NUMBER_OF_VECTORS_V]], 0.5);
         }
         else
         {
@@ -549,9 +547,9 @@ int main(int argc, char *argv[])
             upper_index = h_index + (layer_index - 1)*NUMBER_OF_SCALARS_H;
             lower_index = h_index + layer_index*NUMBER_OF_SCALARS_H;
             if (layer_index == 0)
-                normal_distance[i] = 0;
+                normal_distance[i] = SCALE_HEIGHT*log(NUMBER_OF_LEVELS/(layer_index + 1.0)) - z_scalar[lower_index];
             else if (layer_index == NUMBER_OF_LAYERS)
-                normal_distance[i] = 0;
+                normal_distance[i] = z_scalar[upper_index] - 0;
             else
                 normal_distance[i] = z_scalar[upper_index] - z_scalar[lower_index];
             z_vector[i] = SCALE_HEIGHT*log(NUMBER_OF_LEVELS/(layer_index + 1.0));
@@ -561,6 +559,11 @@ int main(int argc, char *argv[])
                 area[i] = 6*4*M_PI*pow(SEMIMAJOR + z_vector[i], 2)/(3*NUMBER_OF_TRIANGLES);
         }
     }
+    for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
+    {
+        if (normal_distance[i] <= 0)
+            printf("normal_distance contains non-positive values.\n");
+    }
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
         layer_index = i/NUMBER_OF_SCALARS_H;
@@ -569,6 +572,11 @@ int main(int argc, char *argv[])
         radius_0 = SEMIMAJOR + z_vector[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER];
         radius_1 = SEMIMAJOR + z_vector[h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER];
         volume[i] = find_volume(base_area, radius_0, radius_1);
+    }
+    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+    {
+        if (volume[i] <= 0)
+            printf("volume contains non-positive values.\n");
     }
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_PER_LAYER; ++i)
     {
@@ -666,24 +674,27 @@ int main(int argc, char *argv[])
                 on_face_index = i - (NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
                 triangle_on_face_index = on_face_index/3;
                 small_triangle_edge_index = on_face_index - 3*triangle_on_face_index;
-                
+                retval = find_coords_from_triangle_on_face_index(triangle_on_face_index, &coord_0, &coord_1, &coord_0_points_amount);
                 if (small_triangle_edge_index == 0)
                 {
                     from_index_dual[i] = face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + coord_1;
-                    to_index_dual[i] = face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + coord_1 + 1;
+                    to_index_dual[i] = from_index_dual[i] + 1;
                 }
                 if (small_triangle_edge_index == 1)
                 {
-                    from_index_dual[i] = face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + coord_1 + 1;
-                    to_index_dual[i] = face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + coord_1 + 2;
+                    from_index_dual[i] = face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + 1 + coord_1;
+                    to_index_dual[i] = from_index_dual[i] + 1;
                 }
                 if (small_triangle_edge_index == 2)
                 {
-                    from_index_dual[i] = face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + coord_1 + 1;
-                    to_index_dual[i] = face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + coord_1 + 1 + 2*coord_0_points_amount;
+                    from_index_dual[i] = face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + 1 + coord_1;
+                    to_index_dual[i] = from_index_dual[i] + 2*coord_0_points_amount;
                 }
             }
-            find_geodetic(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], 0.5, &lat_res, &lon_res);
+            retval = find_global_normal(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], &x_point_0, &y_point_0, &z_point_0);
+            retval = find_global_normal(latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], &x_point_1, &y_point_1, &z_point_1);
+            retval = find_between_point(x_point_0, y_point_0, z_point_0, x_point_1, y_point_1, z_point_1, 0.5, &x_res, &y_res, &z_res);
+            retval = find_geos(x_res, y_res, z_res, &lat_res, &lon_res);
             latitude_vector_dual[i] = lat_res;
             direction_dual[i] = find_geodetic_direction(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], 0.5);
             f_vec[i] = 2*OMEGA*cos(latitude_vector_dual[i])*sin(direction_dual[i]);
@@ -719,6 +730,13 @@ int main(int argc, char *argv[])
             normal_distance_dual[i] = calculate_distance_h(latitude_scalar_dual[from_index_dual[h_index]], longitude_scalar_dual[from_index_dual[h_index]], latitude_scalar_dual[to_index_dual[h_index]], longitude_scalar_dual[to_index_dual[h_index]], SEMIMAJOR + z_vector_dual[i]);
         }
     }
+    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; ++i)
+    {
+        if (area_dual[i] <= 0)
+            printf("area_dual contains non-positive values.\n");
+        if (normal_distance_dual[i] <= 0)
+            printf("normal_distance_dual contains non-positive values.\n");
+    }
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
         layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
@@ -732,6 +750,11 @@ int main(int argc, char *argv[])
             base_distance = parallel_distance*radius_0/(SEMIMAJOR + z_vector[i]);
             area[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
         }
+    }
+    for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
+    {
+        if (area[i] <= 0)
+            printf("area contains non-positive values.\n");
     }
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_V; ++i)
     {
@@ -758,8 +781,11 @@ int main(int argc, char *argv[])
                 ++counter;
             }
         }
+        if (counter != 3)
+            printf("Trouble detected, place 0.\n");
     }
-    for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
+    short trouble_detected = 0;
+    for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
     {
         counter = 0;
         for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
@@ -787,6 +813,14 @@ int main(int argc, char *argv[])
                 ++counter;
             }
         }
+        if (counter != 6)
+        {
+            trouble_detected = 1;
+            if (counter == 5 && i < NUMBER_OF_PENTAGONS)
+                trouble_detected = 0;
+        }
+        if (trouble_detected == 1)
+            printf("Trouble detected, place 1.\n");
         if (i < NUMBER_OF_PENTAGONS)
         {
             adjacent_vector_indices_h[6*i + 5] = -1;
@@ -815,10 +849,7 @@ int main(int argc, char *argv[])
                 sign = -1;
             recov_hor_par_dual_weight[2*i + j] = sign*0.5;
         }
-        sign = 1;
-        find_angle_change(direction[i], direction_dual[i], &direction_change);
         first_found = 0;
-        short face_of_cell_index;
         for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
         {
             for (int k = 0; k < 5; ++k)
@@ -859,6 +890,8 @@ int main(int argc, char *argv[])
                 ++counter;
             }
         }
+        if (counter != 2)
+            printf("Trouble detected, place 2.\n");
         recov_hor_par_pri_index[4*i] = adjacent_vector_indices_h[6*cell_0_for_cross + face_of_cell_indices[0]];
         recov_hor_par_pri_weight[4*i] = 2.0/3.0*0.5*(cos(direction[i] + M_PI/2)*cos(direction[recov_hor_par_pri_index[4*i]]) + sin(direction[i] + M_PI/2)*sin(direction[recov_hor_par_pri_index[4*i]]));
         recov_hor_par_pri_index[4*i + 1] = adjacent_vector_indices_h[6*cell_0_for_cross + face_of_cell_indices[1]];
@@ -872,25 +905,116 @@ int main(int argc, char *argv[])
                 ++counter;
             }
         }
+        if (counter != 2)
+            printf("Trouble detected, place 3.\n");
         recov_hor_par_pri_index[4*i + 2] = adjacent_vector_indices_h[6*cell_1_for_cross + face_of_cell_indices[0]];
         recov_hor_par_pri_weight[4*i + 2] = 2.0/3.0*0.5*(cos(direction[i] + M_PI/2)*cos(direction[recov_hor_par_pri_index[4*i + 2]]) + sin(direction[i] + M_PI/2)*sin(direction[recov_hor_par_pri_index[4*i + 2]]));
         recov_hor_par_pri_index[4*i + 3] = adjacent_vector_indices_h[6*cell_1_for_cross + face_of_cell_indices[1]];
         recov_hor_par_pri_weight[4*i + 3] = 2.0/3.0*0.5*(cos(direction[i] + M_PI/2)*cos(direction[recov_hor_par_pri_index[4*i + 3]]) + sin(direction[i] + M_PI/2)*sin(direction[recov_hor_par_pri_index[4*i + 3]]));
+        sign = 1;
+        find_angle_change(direction[i], direction_dual[i], &direction_change);
         if (rad2deg(direction_change) < -70)
             sign = -1;
         for (int j = 0; j < 4; ++j)
         {
             if (j == 0)
             {
-                h_curl_indices[4*i + j] = i + NUMBER_OF_DUAL_VECTORS_PER_LAYER;
+                h_curl_indices_dual[4*i + j] = i + NUMBER_OF_DUAL_VECTORS_PER_LAYER;
+                h_curl_signs_dual[4*i + j] = sign;
+            }
+            if (j == 1)
+            {
+                if (sign == 1)
+                    h_curl_indices_dual[4*i + j] = to_index_dual[i];
+                else
+                    h_curl_indices_dual[4*i + j] = from_index_dual[i];
+                h_curl_signs_dual[4*i + j] = 1;
+            }
+            if (j == 2)
+            {
+                h_curl_indices_dual[4*i + j] = i;
+                h_curl_signs_dual[4*i + j] = -sign;
+            }
+            if (j == 3)
+            {
+                if (sign == 1)
+                    h_curl_indices_dual[4*i + j] = from_index_dual[i];
+                else
+                    h_curl_indices_dual[4*i + j] = to_index_dual[i];
+                h_curl_signs_dual[4*i + j] = -1;
+            }
+            if (j == 0)
+                recov_hor_ver_pri_index[4*i + j] = to_index[i];
+            if (j == 1)
+                recov_hor_ver_pri_index[4*i + j] = from_index[i];
+            if (j == 2)
+                recov_hor_ver_pri_index[4*i + j] = to_index[i] + NUMBER_OF_VECTORS_PER_LAYER;
+            if (j == 3)
+                recov_hor_ver_pri_index[4*i + j] = from_index[i] + NUMBER_OF_VECTORS_PER_LAYER;
+            recov_hor_ver_pri_weight[4*i + j] = 0.25;
+        }
+    }
+    free(face_of_cell_indices);
+    free(adjacent_scalar_indices_for_cross);
+    double weight_prefactor;
+    for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
+    {
+        weight_prefactor = 2.0/6.0;
+        if (i < NUMBER_OF_PENTAGONS)
+            weight_prefactor = 2.0/5.0;
+        for (int j = 0; j < 6; ++j)
+        {
+            recov_ver_0_pri_index[12*i + j] = adjacent_vector_indices_h[6*i + j];
+            recov_ver_0_pri_weight[12*i + j] = 0.5*weight_prefactor*cos(direction[recov_ver_0_pri_index[12*i + j]]);
+            recov_ver_0_dual_index[6*i + j] = adjacent_vector_indices_h[6*i + j];
+            recov_ver_0_dual_weight[6*i + j] = weight_prefactor*cos(direction_dual[recov_ver_0_dual_index[6*i + j]]);
+            recov_ver_1_pri_index[12*i + j] = adjacent_vector_indices_h[6*i + j];
+            recov_ver_1_pri_weight[12*i + j] = 0.5*weight_prefactor*sin(direction[recov_ver_1_pri_index[12*i + j]]);
+            recov_ver_1_dual_index[6*i + j] = adjacent_vector_indices_h[6*i + j];
+            recov_ver_1_dual_weight[6*i + j] = weight_prefactor*sin(direction_dual[recov_ver_1_dual_index[6*i + j]]);
+        }
+        for (int j = 6; j < 12; ++j)
+        {
+            recov_ver_0_pri_index[12*i + j] = adjacent_vector_indices_h[6*i + j - 6] + NUMBER_OF_VECTORS_PER_LAYER;
+            recov_ver_0_pri_weight[12*i + j] = 0.5*weight_prefactor*cos(direction[recov_ver_0_pri_index[12*i + j]]);
+            recov_ver_1_pri_index[12*i + j] = adjacent_vector_indices_h[6*i + j - 6] + NUMBER_OF_VECTORS_PER_LAYER;
+            recov_ver_1_pri_weight[12*i + j] = 0.5*weight_prefactor*sin(direction[recov_ver_1_pri_index[12*i + j]]);
+        }
+        if (i < NUMBER_OF_PENTAGONS)
+        {
+            recov_ver_0_pri_index[12*i + 6] = 0;
+            recov_ver_0_pri_index[12*i + 12] = 0;
+            recov_ver_1_pri_index[12*i + 6] = 0;
+            recov_ver_1_pri_index[12*i + 12] = 0;
+            recov_ver_0_dual_index[12*i + 6] = 0;
+            recov_ver_1_dual_index[12*i + 6] = 0;
+            recov_ver_0_pri_weight[12*i + 6] = 0;
+            recov_ver_0_pri_weight[12*i + 12] = 0;
+            recov_ver_1_pri_weight[12*i + 6] = 0;
+            recov_ver_1_pri_weight[12*i + 12] = 0;
+            recov_ver_0_dual_weight[12*i + 6] = 0;
+            recov_ver_1_dual_weight[12*i + 6] = 0;
+        }
+    }
+    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_H; ++i)
+    {
+        sign = 1;
+        find_angle_change(direction_dual[i], direction[i], &direction_change);
+        if (rad2deg(direction_change) < -70)
+            sign = -1;
+        for (int j = 0; j < 4; ++j)
+        {
+            if (j == 0)
+            {
+                h_curl_indices[4*i + j] = i + NUMBER_OF_VECTORS_PER_LAYER;
                 h_curl_signs[4*i + j] = sign;
             }
             if (j == 1)
             {
                 if (sign == 1)
-                    h_curl_indices[4*i + j] = to_index_dual[i];
+                    h_curl_indices[4*i + j] = to_index[i];
                 else
-                    h_curl_indices[4*i + j] = from_index_dual[i];
+                    h_curl_indices[4*i + j] = from_index[i];
                 h_curl_signs[4*i + j] = 1;
             }
             if (j == 2)
@@ -901,93 +1025,30 @@ int main(int argc, char *argv[])
             if (j == 3)
             {
                 if (sign == 1)
-                    h_curl_indices[4*i + j] = from_index_dual[i];
+                    h_curl_indices[4*i + j] = from_index[i];
                 else
-                    h_curl_indices[4*i + j] = to_index_dual[i];
+                    h_curl_indices[4*i + j] = to_index[i];
                 h_curl_signs[4*i + j] = -1;
             }
-            if (j == 0)
-                recov_hor_ver_pri_index[4*i] = to_index[i];
-            if (j == 1)
-                recov_hor_ver_pri_index[4*i + 1] = from_index[i];
-            if (j == 2)
-                recov_hor_ver_pri_index[4*i + 2] = to_index[i] + NUMBER_OF_VECTORS_PER_LAYER;
-            if (j == 3)
-                recov_hor_ver_pri_index[4*i + 3] = from_index[i] + NUMBER_OF_VECTORS_PER_LAYER;
-            recov_hor_ver_pri_weight[4*i + j] = 0.25;
         }
-    }
-    free(face_of_cell_indices);
-    free(adjacent_scalar_indices_for_cross);
-    for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
-    {
-        for (int j = 0; j < 6; ++j)
-        {
-            recov_ver_0_pri_index[6*i + j] = 0;
-            recov_ver_0_pri_weight[6*i + j] = 0;
-            recov_ver_0_dual_index[6*i + j] = 0;
-            recov_ver_0_dual_weight[6*i + j] = 0;
-            recov_ver_1_pri_index[6*i + j] = 0;
-            recov_ver_1_pri_weight[6*i + j] = 0;
-            recov_ver_1_dual_index[6*i + j] = 0;
-            recov_ver_1_dual_weight[6*i + j] = 0;
-        }
-    }
-    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_H; ++i)
-    {
-        sign = 1;
-        find_angle_change(direction_dual[i], direction[i], &direction_change);
-        if (rad2deg(direction_change) < -70)
-            sign = -1;
-        for (int j = 0; j < 4; ++j)
-            {
-                if (j == 0)
-                {
-                    h_curl_indices_dual[4*i + j] = i + NUMBER_OF_VECTORS_PER_LAYER;
-                    h_curl_signs_dual[4*i + j] = sign;
-                }
-                if (j == 1)
-                {
-                    if (sign == 1)
-                        h_curl_indices_dual[4*i + j] = to_index[i];
-                    else
-                        h_curl_indices_dual[4*i + j] = from_index[i];
-                    h_curl_signs_dual[4*i + j] = 1;
-                }
-                if (j == 2)
-                {
-                    h_curl_indices_dual[4*i + j] = i;
-                    h_curl_signs_dual[4*i + j] = -sign;
-                }
-                if (j == 3)
-                {
-                    if (sign == 1)
-                        h_curl_indices_dual[4*i + j] = from_index[i];
-                    else
-                        h_curl_indices_dual[4*i + j] = to_index[i];
-                    h_curl_signs_dual[4*i + j] = -1;
-                }
-            }
     }
     free(direction_dual);
     int ncid_g_prop;
     if ((retval = nc_create(FILE_NAME, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
-    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id, vector_index_one_layer_dual;
-    int scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_dimid_6, vector_dimid_4, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4;
+    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id, vector_dual_one_layer_dimid;
+    int scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_v_dimid_12, vector_dual_h_dimid_4;
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NUMBER_OF_SCALARS, &scalar_dimid)))
         ERR(retval);  
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_h_index", NUMBER_OF_SCALARS_H, &scalar_h_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_dual_h_index", NUMBER_OF_DUAL_SCALARS_H, &scalar_dual_h_dimid)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_h_index", NUMBER_OF_VECTORS_H, &vector_h_dimid)))
-        ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_index", NUMBER_OF_VECTORS, &vector_dimid)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "scalar_6_index", 6*NUMBER_OF_SCALARS_H, &scalar_dimid_6)))
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_h_index", NUMBER_OF_VECTORS_H, &vector_h_dimid)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_4_index", 4*NUMBER_OF_VECTORS_H, &vector_dimid_4)))
+    if ((retval = nc_def_dim(ncid_g_prop, "scalar_h_6_index", 6*NUMBER_OF_SCALARS_H, &scalar_h_dimid_6)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_h_11_index", 11*NUMBER_OF_VECTORS_H, &vector_h_dimid_11)))
         ERR(retval);
@@ -997,9 +1058,11 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_v_6_index", 6*NUMBER_OF_VECTORS_V, &vector_v_dimid_6)))
         ERR(retval);
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_v_12_index", 12*NUMBER_OF_VECTORS_V, &vector_v_dimid_12)))
+        ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_index_h_dual", NUMBER_OF_DUAL_VECTORS_H, &vector_dual_h_dimid)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_index_one_layer_dual", NUMBER_OF_DUAL_VECTORS_PER_LAYER, &vector_index_one_layer_dual)))
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_dual_one_layer_dimid", NUMBER_OF_DUAL_VECTORS_PER_LAYER, &vector_dual_one_layer_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_index_dual", NUMBER_OF_DUAL_VECTORS, &vector_dual_dimid)))
         ERR(retval);
@@ -1015,7 +1078,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "longitude_scalar_dual", NC_DOUBLE, 1, &scalar_dual_h_dimid, &longitude_scalar_dual_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "z_scalar", NC_DOUBLE, 1, &scalar_h_dimid, &z_scalar_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "z_scalar", NC_DOUBLE, 1, &scalar_dimid, &z_scalar_id)))
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, z_scalar_id, "units", strlen("m"), "m")))
         ERR(retval);
@@ -1049,9 +1112,9 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_dual_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_0_dual_weight_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_pri_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_0_pri_weight_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_pri_weight", NC_DOUBLE, 1, &vector_v_dimid_12, &recov_ver_0_pri_weight_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_pri_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_1_pri_weight_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_pri_weight", NC_DOUBLE, 1, &vector_v_dimid_12, &recov_ver_1_pri_weight_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_dual_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_1_dual_weight_id)))
         ERR(retval);
@@ -1067,7 +1130,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, area_dual_id, "units", strlen("m^2"), "m^2")))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "f_vec", NC_DOUBLE, 1, &vector_index_one_layer_dual, &f_vec_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "f_vec", NC_DOUBLE, 1, &vector_dual_one_layer_dimid, &f_vec_id)))
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, f_vec_id, "units", strlen("1/s"), "1/s")))
         ERR(retval);
@@ -1081,7 +1144,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "from_index", NC_LONG, 1, &vector_h_dimid, &from_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "adjacent_vector_indices_h", NC_LONG, 1, &scalar_dimid_6, &adjacent_vector_indices_h_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "adjacent_vector_indices_h", NC_LONG, 1, &scalar_h_dimid_6, &adjacent_vector_indices_h_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "vorticity_indices", NC_LONG, 1, &vector_dual_v_dimid_3, &vorticity_indices_id)))
         ERR(retval);
@@ -1095,11 +1158,11 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "recov_hor_ver_pri_index", NC_LONG, 1, &vector_h_dimid_4, &recov_hor_ver_pri_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_pri_index", NC_LONG, 1, &vector_v_dimid_6, &recov_ver_0_pri_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_pri_index", NC_LONG, 1, &vector_v_dimid_12, &recov_ver_0_pri_index_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_dual_index", NC_LONG, 1, &vector_v_dimid_6, &recov_ver_0_dual_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_pri_index", NC_LONG, 1, &vector_v_dimid_6, &recov_ver_1_pri_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_pri_index", NC_LONG, 1, &vector_v_dimid_12, &recov_ver_1_pri_index_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_dual_index", NC_LONG, 1, &vector_v_dimid_6, &recov_ver_1_dual_index_id)))
         ERR(retval);
@@ -1109,17 +1172,17 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "vorticity_indices_dual", NC_LONG, 1, &vector_v_dimid_6, &vorticity_indices_dual_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "h_curl_indices_dual", NC_LONG, 1, &vector_dual_h_dimid_4, &h_curl_indices_dual_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "h_curl_indices_dual", NC_LONG, 1, &vector_h_dimid_4, &h_curl_indices_dual_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "adjacent_signs_h", NC_SHORT, 1, &scalar_dimid_6, &adjacent_signs_h_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "adjacent_signs_h", NC_SHORT, 1, &scalar_h_dimid_6, &adjacent_signs_h_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "vorticity_signs", NC_SHORT, 1, &vector_dual_v_dimid_3, &vorticity_signs_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "h_curl_signs", NC_SHORT, 1, &vector_dimid_4, &h_curl_signs_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "h_curl_signs", NC_SHORT, 1, &vector_dual_h_dimid_4, &h_curl_signs_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "vorticity_signs_dual", NC_SHORT, 1, &vector_v_dimid_6, &vorticity_signs_dual_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "h_curl_signs_dual", NC_SHORT, 1, &vector_dual_h_dimid_4, &h_curl_signs_dual_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "h_curl_signs_dual", NC_SHORT, 1, &vector_h_dimid_4, &h_curl_signs_dual_id)))
         ERR(retval);
     if ((retval = nc_enddef(ncid_g_prop)))
         ERR(retval);
@@ -1167,13 +1230,13 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, f_vec_id, &f_vec[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, to_index_id, &to_index[0])))
-        ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, direction_id, &direction[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, latitude_vector_id, &latitude_vector[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, longitude_vector_id, &longitude_vector[0])))
+        ERR(retval);
+    if ((retval = nc_put_var_long(ncid_g_prop, to_index_id, &to_index[0])))
         ERR(retval);
     if ((retval = nc_put_var_long(ncid_g_prop, from_index_id, &from_index[0])))
         ERR(retval);
@@ -1285,7 +1348,6 @@ int find_angle_change(double angle_0, double angle_1, double *result)
 int find_coords_from_triangle_on_face_index(long triangle_on_face_index, long *coord_0, long *coord_1, long *coord_0_points_amount)
 {
     short check = 1;
-    long coord_0_pre;
     long coord_1_pre = -1;
     long min_index, max_index;
     max_index = -1;
@@ -1294,15 +1356,15 @@ int find_coords_from_triangle_on_face_index(long triangle_on_face_index, long *c
         ++coord_1_pre;
         *coord_0_points_amount = POINTS_PER_EDGE - coord_1_pre;
         max_index = max_index + *coord_0_points_amount;
-        min_index = max_index - *coord_0_points_amount + 1;
+        min_index = max_index - (*coord_0_points_amount - 1);
         if (triangle_on_face_index <= max_index && triangle_on_face_index >= min_index)
         {
-            coord_0_pre = triangle_on_face_index - min_index;
+            *coord_0 = triangle_on_face_index - min_index;
             check = 0;
         }
     }
-    *coord_0 = coord_0_pre;
     *coord_1 = coord_1_pre;
+    return 0;
 }
 
 

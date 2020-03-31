@@ -72,13 +72,12 @@ int main(int argc, char *argv[])
     codes_handle *handle_density = NULL;
     codes_handle *handle_wind_h = NULL;
     codes_handle *handle_wind_v = NULL;
-    double *pressure, *pot_temperature, *temperature, *rho, *wind_h, *wind_v;
-    pressure = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
-    pot_temperature = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
-    temperature = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
-    rho = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
-    wind_h = malloc(sizeof(double)*NUMBER_OF_VECTORS_H);
-    wind_v = malloc(sizeof(double)*NUMBER_OF_VECTORS_V);
+    double *pressure = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *pot_temperature = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *temperature = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *rho = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *wind_h = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
+    double *wind_v = malloc(NUMBER_OF_VECTORS_V*sizeof(double));
     const double TROPO_TEMP = T_SFC + TROPO_HEIGHT*TEMP_GRADIENT;
     const double ATMOS_HEIGHT = SCALE_HEIGHT*log(1 + NUMBER_OF_LAYERS);
     int scalar_index;
@@ -103,7 +102,7 @@ int main(int argc, char *argv[])
     double distance_scale = SEMIMAJOR/10;
     double lat_perturb = 2*M_PI/9;
     double lon_perturb = M_PI/9;
-    for (int i = 0; i < NUMBER_OF_LAYERS; i++)
+    for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
     {
         sigma = 0.5*(SCALE_HEIGHT/ATMOS_HEIGHT)*(log((1.0 + NUMBER_OF_LAYERS)/(i + 1)) + log((1.0 + NUMBER_OF_LAYERS)/(i + 2)));
         for (int j = 0; j < NUMBER_OF_SCALARS_H; j++)
@@ -130,11 +129,11 @@ int main(int argc, char *argv[])
                 pressure[j] = pressure_value;
                 eta = pressure[j]/P_0;
                 eta_v = (eta - ETA_0)*M_PI/2;
-                T_perturb = 3.0/4.0*eta*M_PI*U_0/R_D*sin(eta_v)*pow(cos(eta_v), 0.5)*((-2*pow(sin(lat), 6)*(pow(cos(lat), 2) + 1.0/3.0) + 10.0/63.0)*2*U_0*pow(cos(eta_v), 1.5) + SEMIMAJOR*OMEGA*(8.0/5.0*pow(cos(lat), 3)*(pow(sin(lat), 2) + 2.0/3.0) - M_PI/4));
+                T_perturb = 3.0/4.0*eta*M_PI*U_0/R_D*sin(eta_v)*pow(cos(eta_v), 0.5)*((-2*pow(sin(lat), 6)*(pow(cos(lat), 2) + 1.0/3.0) + 10.0/63.0)*2*U_0*pow(cos(eta_v), 1.5) + SEMIMAJOR*OMEGA*(8.0/5.0*pow(cos(lat), 3)*(pow(sin(lat), 2) + 2.0/3.0) - M_PI/4.0));
                 if (eta >= ETA_T)
                     temperature[j] = T_0*pow(eta, R_D*GAMMA/G) + T_perturb;
                 else
-                    temperature[j] = T_0*pow(eta, R_D*GAMMA/G) + DELTA_T*pow(0.2 - eta, 5) + T_perturb;
+                    temperature[j] = T_0*pow(eta, R_D*GAMMA/G) + DELTA_T*pow(ETA_T - eta, 5) + T_perturb;
             }
             rho[j] = pressure[j]/(R_D*temperature[j]);
             pot_temperature[j] = temperature[j]*pow(P_0/pressure[j], R_D/C_P);
@@ -208,9 +207,9 @@ int main(int argc, char *argv[])
         if (retval = codes_set_double_array(handle_density, "values", rho, NUMBER_OF_SCALARS_H))
             ECCERR(retval);
         codes_write_message(handle_density, OUTPUT_FILE, "a");
-        for (int j = 0; j < NUMBER_OF_VECTORS_H; j++)
+        for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
         {
-            sigma = 0.5*(SCALE_HEIGHT/ATMOS_HEIGHT)*(log((1.0 + NUMBER_OF_LAYERS)/(i + 1)) + log((1.0 + NUMBER_OF_LAYERS)/(i + 2)));
+            sigma = 0.5*(SCALE_HEIGHT/ATMOS_HEIGHT)*(log((1.0 + NUMBER_OF_LAYERS)/(i + 1.0)) + log((1.0 + NUMBER_OF_LAYERS)/(i + 2.0)));
             lat = latitude_vector[j];
             lon = longitude_vector[j];
             if (test_id == 0)
@@ -232,7 +231,7 @@ int main(int argc, char *argv[])
                 if (test_id == 3)
                 {
                     distance = calculate_distance_h(lat, lon, lat_perturb, lon_perturb, SEMIMAJOR);
-                    u = u + u_p*exp(-pow(distance/distance_scale, 2));
+                    u += u_p*exp(-pow(distance/distance_scale, 2));
                 }
                 wind_h[j] = u*cos(direction[j]);
             }
@@ -342,15 +341,13 @@ int main(int argc, char *argv[])
 int find_pressure_value(double lat, double z_height, double *result)
 {
     double p = P_0/2;
-    double precision = 1;
+    double precision = 0.0001;
     double z;
     double current_max = P_0;
     double current_min = 0;
     find_z_from_p(lat, p, &z);
-    int i = 0;
-    while (abs(z - z_height) > precision)
+    while (fabs(z - z_height) > precision)
     {
-        ++i;
         if (z < z_height)
         {
             current_max = p;
@@ -377,7 +374,7 @@ int find_z_from_p(double lat, double p, double *result)
         phi_bg = T_0*G/GAMMA*(1 - pow(eta, R_D*GAMMA/G));
     else
         phi_bg = T_0*G/GAMMA*(1 - pow(eta, R_D*GAMMA/G)) - R_D*DELTA_T*((log(eta/ETA_T) + 137.0/60.0)*pow(ETA_T, 5) - 5*eta*pow(ETA_T, 4) + 5*pow(ETA_T, 3)*pow(eta, 2) - 10.0/3.0*pow(ETA_T, 2)*pow(eta, 3) + 5.0/4.0*ETA_T*pow(eta, 4) - 1.0/5.0*pow(eta, 5));
-    phi_perturb = U_0*pow(cos(eta_v), 1.5)*((-2*pow(sin(lat), 6)*(pow(cos(lat), 2) + 1.0/3.0) + 10.0/63.0)*U_0*pow(cos(eta_v), 1.5) + SEMIMAJOR*OMEGA*(8.0/5.0*pow(cos(lat), 3)*(pow(sin(lat), 2) + 2.0/3.0) - M_PI/4));;
+    phi_perturb = U_0*pow(cos(eta_v), 1.5)*((-2*pow(sin(lat), 6)*(pow(cos(lat), 2) + 1.0/3.0) + 10.0/63.0)*U_0*pow(cos(eta_v), 1.5) + SEMIMAJOR*OMEGA*(8.0/5.0*pow(cos(lat), 3)*(pow(sin(lat), 2) + 2.0/3.0) - M_PI/4.0));
     phi = phi_bg + phi_perturb;
     z = phi/G;
     *result = z;

@@ -19,15 +19,14 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
     codes_handle *handle_density = NULL;
     codes_handle *handle_wind_h = NULL;
     codes_handle *handle_wind_v = NULL;
-    double *pot_temp, *rho, *wind_h, *wind_v;
-    pot_temp = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
-    rho = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
-    wind_h = malloc(sizeof(double)*NUMBER_OF_VECTORS_H);
-    wind_v = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
+    double *pot_temp = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
+    double *rho = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
+    double *wind_h = malloc(sizeof(double)*NUMBER_OF_VECTORS_H);
+    double *wind_v = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
     int retval;
     long data_date, data_time;
     IN_FILE = fopen(FILE_NAME, "r");
-    for (int i = 0; i < NUMBER_OF_LAYERS; i++)
+    for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
     {
         handle_pot_temperature = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
         if (err != 0)
@@ -51,8 +50,8 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
             ECCERR(err);
         if (retval = codes_get_double_array(handle_wind_h, "values", wind_h, &no_vectors_h))
             ECCERR(retval);
-        for (int j = 0; j < NUMBER_OF_VECTORS_H; j++)
-            init_state -> wind[j + i*NUMBER_OF_VECTORS_H + (i + 1)*NUMBER_OF_SCALARS_H] = wind_h[j];
+        for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
+            init_state -> wind[j + i*NUMBER_OF_VECTORS_H + (i + 1)*NUMBER_OF_VECTORS_V] = wind_h[j];
         codes_get_long(handle_wind_h, "dataDate", &data_date);
         codes_get_long(handle_wind_h, "dataTime", &data_time);
         codes_handle_delete(handle_wind_h);
@@ -66,7 +65,7 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
     find_time_coord(year, month, day, hour, 0, 0, 0, t_init);
     if (err != 0)
         ECCERR(err);
-    for (int i = 0; i < NUMBER_OF_LEVELS; i++)
+    for (int i = 0; i < NUMBER_OF_LEVELS; ++i)
     {
         handle_wind_v = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
         if (err != 0)
@@ -74,8 +73,8 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
         if (retval = codes_get_double_array(handle_wind_v, "values", wind_v, &no_scalars_h))
             ECCERR(retval);
         codes_handle_delete(handle_wind_v);
-        for (int j = 0; j < NUMBER_OF_SCALARS_H; j++)
-            init_state -> wind[j + i*(NUMBER_OF_SCALARS_H + NUMBER_OF_VECTORS_H)] = wind_v[j];
+        for (int j = 0; j < NUMBER_OF_VECTORS_V; ++j)
+            init_state -> wind[j + i*NUMBER_OF_VECTORS_PER_LAYER] = wind_v[j];
     }
     fclose(IN_FILE);
     free(pot_temp);
