@@ -282,6 +282,8 @@ int main(int argc, char *argv[])
     int small_triangle_edge_index, reverse_0, reverse_1, reverse_2, face_index, face_index_0, face_index_1;
     long h_index, on_face_index, layer_index, level_index, inner_index, upper_index, lower_index, edge_0, edge_1, edge_2, edge_index_1, edge_index_2, coord_0_points_amount, j, coord_0, coord_1, vertex_index_0, vertex_index_1, vertex_index_2, index_0, index_1, index_2, points_right, triangle_on_face_index, on_edge_index, point_0, point_1, point_2, point_3, dual_scalar_index, counter, primal_vector_index, dual_vector_index;
     short first_face_found, edge_rel_to_face_0, edge_rel_to_face_1, edge_index, sign, retval;
+    if (NUMBER_OF_VECTORS_H != NUMBER_OF_DUAL_VECTORS_H)
+        printf("It is NUMBER_OF_VECTORS_H != NUMBER_OF_DUAL_VECTORS_H.\n");
     for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
     {
         if (i < NUMBER_OF_PENTAGONS)
@@ -348,7 +350,7 @@ int main(int argc, char *argv[])
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
         layer_index = i/NUMBER_OF_SCALARS_H;
-        z_scalar[i] = 0.5*SCALE_HEIGHT*(log(NUMBER_OF_LEVELS/(layer_index + 1.0)) + log(NUMBER_OF_LEVELS/(layer_index + 2.0)));
+        z_scalar[i] = SCALE_HEIGHT*log(NUMBER_OF_LEVELS/(layer_index + 0.5 + 1.0));
     }
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
@@ -708,7 +710,7 @@ int main(int argc, char *argv[])
         {
             upper_index = h_index - NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_DUAL_SCALARS_H;
             lower_index = h_index - NUMBER_OF_DUAL_VECTORS_H + (layer_index + 1)*NUMBER_OF_DUAL_SCALARS_H;
-            z_vector_dual[i] = 0.5*SCALE_HEIGHT*(log(NUMBER_OF_LEVELS/(layer_index + 1.0)) + log(NUMBER_OF_LEVELS/(layer_index + 2.0)));
+            z_vector_dual[i] = SCALE_HEIGHT*log(NUMBER_OF_LEVELS/(layer_index + 0.5 + 1.0));
             normal_distance_dual[i] = z_scalar_dual[upper_index] - z_scalar_dual[lower_index];
             area_dual[i] = 4*M_PI*pow(SEMIMAJOR + z_vector_dual[i], 2)/NUMBER_OF_TRIANGLES;
         }
@@ -982,18 +984,18 @@ int main(int argc, char *argv[])
         }
         if (i < NUMBER_OF_PENTAGONS)
         {
-            recov_ver_0_pri_index[12*i + 6] = 0;
-            recov_ver_0_pri_index[12*i + 12] = 0;
-            recov_ver_1_pri_index[12*i + 6] = 0;
-            recov_ver_1_pri_index[12*i + 12] = 0;
-            recov_ver_0_dual_index[12*i + 6] = 0;
-            recov_ver_1_dual_index[12*i + 6] = 0;
-            recov_ver_0_pri_weight[12*i + 6] = 0;
-            recov_ver_0_pri_weight[12*i + 12] = 0;
-            recov_ver_1_pri_weight[12*i + 6] = 0;
-            recov_ver_1_pri_weight[12*i + 12] = 0;
-            recov_ver_0_dual_weight[12*i + 6] = 0;
-            recov_ver_1_dual_weight[12*i + 6] = 0;
+            recov_ver_0_pri_index[12*i + 5] = 0;
+            recov_ver_0_pri_index[12*i + 11] = 0;
+            recov_ver_1_pri_index[12*i + 5] = 0;
+            recov_ver_1_pri_index[12*i + 11] = 0;
+            recov_ver_0_dual_index[6*i + 5] = 0;
+            recov_ver_1_dual_index[6*i + 5] = 0;
+            recov_ver_0_pri_weight[12*i + 5] = 0;
+            recov_ver_0_pri_weight[12*i + 11] = 0;
+            recov_ver_1_pri_weight[12*i + 5] = 0;
+            recov_ver_1_pri_weight[12*i + 11] = 0;
+            recov_ver_0_dual_weight[6*i + 5] = 0;
+            recov_ver_1_dual_weight[6*i + 5] = 0;
         }
     }
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_H; ++i)

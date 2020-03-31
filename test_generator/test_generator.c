@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
     double lon_perturb = M_PI/9;
     for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
     {
-        sigma = 0.5*(SCALE_HEIGHT/ATMOS_HEIGHT)*(log((1.0 + NUMBER_OF_LAYERS)/(i + 1)) + log((1.0 + NUMBER_OF_LAYERS)/(i + 2)));
+        sigma = SCALE_HEIGHT/ATMOS_HEIGHT*log(NUMBER_OF_LEVELS/(i + 0.5 + 1));
         for (int j = 0; j < NUMBER_OF_SCALARS_H; j++)
         {
             lat = latitude_scalar[j];
@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
         codes_write_message(handle_density, OUTPUT_FILE, "a");
         for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
         {
-            sigma = 0.5*(SCALE_HEIGHT/ATMOS_HEIGHT)*(log((1.0 + NUMBER_OF_LAYERS)/(i + 1.0)) + log((1.0 + NUMBER_OF_LAYERS)/(i + 2.0)));
+            sigma = SCALE_HEIGHT/ATMOS_HEIGHT*log(NUMBER_OF_LEVELS/(i + 0.5 + 1.0));
             lat = latitude_vector[j];
             lon = longitude_vector[j];
             if (test_id == 0)

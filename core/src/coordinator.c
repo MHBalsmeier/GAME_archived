@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
     printf("number of scalar data points: %d\n", NUMBER_OF_SCALARS);
     printf("number of vectors: %d\n", NUMBER_OF_VECTORS);
     printf("number of data points: %d\n", NUMBER_OF_SCALARS + NUMBER_OF_VECTORS);
+    printf("reading grid data and checking ... ");
     set_grid_properties(grid, dualgrid, GEO_PROP_FILE);
     free(GEO_PROP_FILE);
     double delta_t;

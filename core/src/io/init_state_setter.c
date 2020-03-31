@@ -40,7 +40,7 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
         if (retval = codes_get_double_array(handle_density, "values", rho, &no_scalars_h))
             ECCERR(retval);
         codes_handle_delete(handle_density);
-        for (int j = 0; j < NUMBER_OF_SCALARS_H; j++)
+        for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
         {
             init_state -> density[j + i*NUMBER_OF_SCALARS_H] = rho[j];
             init_state -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H] = rho[j]*pot_temp[j];
