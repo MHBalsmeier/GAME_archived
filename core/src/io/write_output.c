@@ -12,7 +12,6 @@
 
 int write_out(State *state_write_out, double t_init, double t_write, char output_foldername[], Grid *grid)
 {
-    const double ATMOS_HEIGHT = SCALE_HEIGHT*log(1 + NUMBER_OF_LAYERS);
     int str_len;
     find_string_length_from_int((int) t_write - t_init, &str_len);
     char add_time_str[str_len];
@@ -52,7 +51,7 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
     codes_handle *handle_wind_v_h = NULL;
     codes_handle *handle_wind_w_h = NULL;
     codes_handle *handle_mslp = NULL;
-    double sigma, z_height;
+    double z_height;
     handle_pot_temperature_h = codes_handle_new_from_file(NULL, SAMPLE_SCALAR, PRODUCT_GRIB, &err);
     if (err != 0)
         ECCERR(err);
@@ -96,8 +95,7 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
     double standard_vert_lapse_rate = 0.0065;
     for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
     {
-        sigma = 0.5*((SCALE_HEIGHT/ATMOS_HEIGHT)*log((1.0 + NUMBER_OF_LAYERS)/(i + 1)) + (SCALE_HEIGHT/ATMOS_HEIGHT)*log((1.0 + NUMBER_OF_LAYERS)/(i + 2)));
-        z_height = ATMOS_HEIGHT*sigma;
+        z_height = grid -> z_scalar[i*NUMBER_OF_SCALARS_H];
         for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
         {
             pot_temperature_h[j] = state_write_out -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H];
@@ -110,7 +108,7 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
                 exner_pressure = pow(R_D*state_write_out -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H]/P_0, R_D/C_V);
                 temp_value = exner_pressure*state_write_out -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H];
                 pressure_value = state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]*R_D*temp_value;
-                temp_mslp = temp_value + standard_vert_lapse_rate*grid -> z_scalar_lowest[j];
+                temp_mslp = temp_value + standard_vert_lapse_rate*grid -> z_scalar[j + i*NUMBER_OF_SCALARS_H];
                 gravity_value = -0.5*(grid -> gravity[(NUMBER_OF_LAYERS - 1)*NUMBER_OF_VECTORS_PER_LAYER + j] + grid -> gravity[NUMBER_OF_LAYERS*NUMBER_OF_VECTORS_PER_LAYER + j]);
                 mslp_factor = pow(1 - (temp_mslp - temp_value)/temp_mslp, gravity_value/(R_D*standard_vert_lapse_rate));
                 mslp[j] = pressure_value/mslp_factor;
@@ -346,8 +344,7 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
     fclose(SAMPLE_SCALAR);
     for (int i = 0; i < NUMBER_OF_LEVELS; ++i)
     {
-        sigma = (SCALE_HEIGHT/ATMOS_HEIGHT)*log((1.0 + NUMBER_OF_LAYERS)/(i + 1));
-        z_height = ATMOS_HEIGHT*sigma;
+        z_height = grid -> z_vector[i*NUMBER_OF_VECTORS_PER_LAYER];
         for (int j = 0; j < NUMBER_OF_SCALARS_H; j++)
             wind_w_h[j] = state_write_out -> wind[j + i*(NUMBER_OF_SCALARS_H + NUMBER_OF_VECTORS_H)];
         if (retval = codes_set_long(handle_wind_w_h, "discipline", 0))

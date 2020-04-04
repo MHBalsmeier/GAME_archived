@@ -32,11 +32,13 @@ int main(int argc, char *argv[])
     double *longitude_scalar = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double *latitude_vector = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
     double *longitude_vector = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
+    double *z_scalar = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    double *z_vector = malloc(NUMBER_OF_VECTORS*sizeof(double));
     int ncid, retval;
-    char *GEO_PROP_FILE = "../grid_generator/nc_files/res_4_oro_0_geo_prop.nc";
+    char *GEO_PROP_FILE = "../grid_generator/nc_files/B4L6T20000_O0.nc";
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         NCERR(retval);
-    int direction_id, latitude_scalar_id, longitude_scalar_id, latitude_vector_id, longitude_vector_id;
+    int direction_id, latitude_scalar_id, longitude_scalar_id, latitude_vector_id, longitude_vector_id, z_scalar_id, z_vector_id;
     if ((retval = nc_inq_varid(ncid, "direction", &direction_id)))
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "latitude_scalar", &latitude_scalar_id)))
@@ -46,6 +48,10 @@ int main(int argc, char *argv[])
     if ((retval = nc_inq_varid(ncid, "latitude_vector", &latitude_vector_id)))
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "longitude_vector", &longitude_vector_id)))
+        NCERR(retval);
+    if ((retval = nc_inq_varid(ncid, "z_scalar", &z_scalar_id)))
+        NCERR(retval);
+    if ((retval = nc_inq_varid(ncid, "z_vector", &z_vector_id)))
         NCERR(retval);
     if ((retval = nc_get_var_double(ncid, direction_id, &direction[0])))
         NCERR(retval);
@@ -57,6 +63,10 @@ int main(int argc, char *argv[])
         NCERR(retval);
     if ((retval = nc_get_var_double(ncid, longitude_vector_id, &longitude_vector[0])))
         NCERR(retval);
+    if ((retval = nc_get_var_double(ncid, z_scalar_id, &z_scalar[0])))
+        NCERR(retval);
+    if ((retval = nc_get_var_double(ncid, z_vector_id, &z_vector[0])))
+        NCERR(retval);
     if ((retval = nc_close(ncid)))
         NCERR(retval);
     const int START_SECTION = 4;
@@ -66,8 +76,8 @@ int main(int argc, char *argv[])
     FILE *SAMPLE_VECTOR;
     int err = 0;
     SAMPLE_SCALAR = fopen(SAMPLE_FILE_SCALAR, "r");
-    char *OUTPUT_FILE = malloc(strlen("grib_files/test_x_res_4_oro_0.grb2")*sizeof(char));
-    sprintf(OUTPUT_FILE, "grib_files/test_%d_res_4_oro_0.grb2", test_id);
+    char *OUTPUT_FILE = malloc(strlen("grib_files/test_x_B4L6T20000_O0.grb2")*sizeof(char));
+    sprintf(OUTPUT_FILE, "grib_files/test_%d_B4L6T20000_O0.grb2", test_id);
     codes_handle *handle_pot_temperature = NULL;
     codes_handle *handle_density = NULL;
     codes_handle *handle_wind_h = NULL;
@@ -79,9 +89,8 @@ int main(int argc, char *argv[])
     double *wind_h = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
     double *wind_v = malloc(NUMBER_OF_VECTORS_V*sizeof(double));
     const double TROPO_TEMP = T_SFC + TROPO_HEIGHT*TEMP_GRADIENT;
-    const double ATMOS_HEIGHT = SCALE_HEIGHT*log(1 + NUMBER_OF_LAYERS);
     int scalar_index;
-    double sigma, z_height;
+    double z_height;
     handle_pot_temperature = codes_handle_new_from_file(NULL, SAMPLE_SCALAR, PRODUCT_GRIB, &err);
     if (err != 0)
         ECCERR(err);
@@ -104,12 +113,11 @@ int main(int argc, char *argv[])
     double lon_perturb = M_PI/9;
     for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
     {
-        sigma = SCALE_HEIGHT/ATMOS_HEIGHT*log(NUMBER_OF_LEVELS/(i + 0.5 + 1));
-        for (int j = 0; j < NUMBER_OF_SCALARS_H; j++)
+        for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
         {
             lat = latitude_scalar[j];
             lon = longitude_scalar[j];
-            z_height = ATMOS_HEIGHT*sigma;
+            z_height = z_scalar[i*NUMBER_OF_SCALARS_H + j];
             if (test_id == 0 || test_id == 1)
             {
                 if (z_height < TROPO_HEIGHT)
@@ -209,9 +217,9 @@ int main(int argc, char *argv[])
         codes_write_message(handle_density, OUTPUT_FILE, "a");
         for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
         {
-            sigma = SCALE_HEIGHT/ATMOS_HEIGHT*log(NUMBER_OF_LEVELS/(i + 0.5 + 1.0));
             lat = latitude_vector[j];
             lon = longitude_vector[j];
+            z_height = z_vector[NUMBER_OF_VECTORS_V + j + i*NUMBER_OF_VECTORS_PER_LAYER];
             if (test_id == 0)
                 wind_h[j] = 0;
             if (test_id == 1)
@@ -223,7 +231,6 @@ int main(int argc, char *argv[])
             }
             if (test_id == 2 || test_id == 3)
             {
-                z_height = ATMOS_HEIGHT*sigma;
                 find_pressure_value(lat, z_height, &pressure_value);
                 eta = pressure_value/P_0;
                 eta_v = (eta - ETA_0)*M_PI/2; 
@@ -270,6 +277,7 @@ int main(int argc, char *argv[])
             ECCERR(retval);
         codes_write_message(handle_wind_h, OUTPUT_FILE, "a");
     }
+    free(z_scalar);
     codes_handle_delete(handle_pot_temperature);
     codes_handle_delete(handle_density);
     codes_handle_delete(handle_wind_h);
@@ -278,14 +286,13 @@ int main(int argc, char *argv[])
     if (err != 0)
         ECCERR(err);
     fclose(SAMPLE_SCALAR);
-    for (int i = 0; i < NUMBER_OF_LEVELS; i++)
+    for (int i = 0; i < NUMBER_OF_LEVELS; ++i)
     {
-        sigma = (SCALE_HEIGHT/ATMOS_HEIGHT)*log((1.0 + NUMBER_OF_LAYERS)/(i + 1));
         for (int j = 0; j < NUMBER_OF_VECTORS_V; ++j)
         {
-            z_height = ATMOS_HEIGHT*sigma;
             lat = latitude_scalar[j];
             lon = longitude_scalar[j];
+            z_height = z_vector[j + i*NUMBER_OF_VECTORS_PER_LAYER];
             if (test_id == 0 || test_id == 1 || test_id == 2 || test_id == 3)
                 wind_v[j] = 0;
         }
@@ -323,6 +330,7 @@ int main(int argc, char *argv[])
             ECCERR(retval);
         codes_write_message(handle_wind_v, OUTPUT_FILE, "a");
     }
+    free(z_vector);
     free(latitude_vector);
     free(longitude_vector);
     free(latitude_scalar);

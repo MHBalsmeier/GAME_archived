@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     printf("Use only legal if authorized by Max Henrik Balsmeier.\n");
     printf("What you want to do:\n");
-    printf("run time span:\t\t\t%ld\n", TOTAL_RUN_SPAN);
+    printf("run time span:\t\t\t%ld s\n", TOTAL_RUN_SPAN);
     printf("output written in intervals of\t%ld s\n", WRITE_OUT_INTERVAL);
     printf("geo properties file:\t\t%s\n", GEO_PROP_FILE);
     printf("initialization state file:\t%s\n", INIT_STATE_FILE);

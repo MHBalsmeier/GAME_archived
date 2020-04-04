@@ -1,7 +1,7 @@
 #!/bin/bash
-if [ -d $output_folder ]
+if [ -d $output_dir ]
 then
-rm -r $output_folder
+rm -r $output_dir
 fi
-mkdir $output_folder
-./game $run_span $write_out_interval $geo_prop_file $init_state_file $output_folder
+mkdir $output_dir
+./game $run_span $write_out_interval $grid_props_file $init_state_file $output_dir
