@@ -322,24 +322,18 @@ int main(int argc, char *argv[])
             reverse_2 = 0;
         for (int j = 0; j < RES_ID; ++j)
         {
-            if (j == 0)
-                number_of_triangles_per_face = 1;
-            else
-                retval = find_triangles_per_face(j, &number_of_triangles_per_face);
+            retval = find_triangles_per_face(j, &number_of_triangles_per_face);
             for (int k = 0; k < number_of_triangles_per_face; ++k)
             {
                 if (j == 0)
                 {
-                    edgepoint_0 = face_vertices[i][0];
-                    edgepoint_1 = face_vertices[i][1];
-                    edgepoint_2 = face_vertices[i][2];
                     dual_scalar_on_face_index = 1;
                     retval = find_triangle_edge_points_from_dual_scalar_on_face_index(dual_scalar_on_face_index, face_edges[i][0], face_edges[i][1], face_edges[i][2], reverse_0, reverse_1, reverse_2, i, j + 1, &point_0, &point_1, &point_2, face_vertices);
                     retval += upscale_scalar_point(j + 1, point_0, &point_0);
                     retval += upscale_scalar_point(j + 1, point_1, &point_1);
                     retval += upscale_scalar_point(j + 1, point_2, &point_2);
                     points_upwards = 1;
-                    retval = write_scalar_coordinates(edgepoint_0, edgepoint_1, edgepoint_2, point_0, point_1, point_2, points_upwards, x_unity, y_unity, z_unity, latitude_scalar, longitude_scalar);
+                    retval = write_scalar_coordinates(face_vertices[i][0], face_vertices[i][1], face_vertices[i][2], point_0, point_1, point_2, points_upwards, x_unity, y_unity, z_unity, latitude_scalar, longitude_scalar);
                 }
                 else
                 {
@@ -1631,11 +1625,10 @@ int upscale_scalar_point(long res_id, long old_index, long *new_index)
 
 int write_scalar_coordinates(long edgepoint_0, long edgepoint_1, long edgepoint_2, long point_0, long point_1, long point_2, short points_upwards, double x_unity[], double y_unity[], double z_unity[], double latitude_scalar[], double longitude_scalar[])
 {
-    double x_point_0, y_point_0, z_point_0, x_point_1, y_point_1, z_point_1, x_point_2, y_point_2, z_point_2, x_res, y_res, z_res, lat_res, lon_res;
-    int retval = find_global_normal(latitude_scalar[edgepoint_0], longitude_scalar[edgepoint_0], &x_point_0, &y_point_0, &z_point_0);
-    retval += find_global_normal(latitude_scalar[edgepoint_1], longitude_scalar[edgepoint_1], &x_point_1, &y_point_1, &z_point_1);
-    retval += find_global_normal(latitude_scalar[edgepoint_2], longitude_scalar[edgepoint_2], &x_point_2, &y_point_2, &z_point_2);
-    retval += find_between_point(x_point_0, y_point_0, z_point_0, x_point_1, y_point_1, z_point_1, 0.5, &x_res, &y_res, &z_res);
+    double x_res, y_res, z_res, lat_res, lon_res;
+    int retval = find_between_point(x_unity[edgepoint_0], y_unity[edgepoint_0], z_unity[edgepoint_0], x_unity[edgepoint_1], y_unity[edgepoint_1], z_unity[edgepoint_1], 0.5, &x_res, &y_res, &z_res);
+    double test_0, test_1, test_2;
+    retval += normalize_cartesian(x_res, y_res, z_res, &x_res, &y_res, &z_res);
     if (points_upwards == 1)
     {
         x_unity[point_0] = x_res;
@@ -1659,7 +1652,8 @@ int write_scalar_coordinates(long edgepoint_0, long edgepoint_1, long edgepoint_
         latitude_scalar[point_1] = lat_res;
         longitude_scalar[point_1] = lon_res;
     }
-    retval += find_between_point(x_point_1, y_point_1, z_point_1, x_point_2, y_point_2, z_point_2, 0.5, &x_res, &y_res, &z_res);
+    retval += find_between_point(x_unity[edgepoint_1], y_unity[edgepoint_1], z_unity[edgepoint_1], x_unity[edgepoint_2], y_unity[edgepoint_2], z_unity[edgepoint_2], 0.5, &x_res, &y_res, &z_res);
+    retval += normalize_cartesian(x_res, y_res, z_res, &x_res, &y_res, &z_res);
     if (points_upwards == 1)
     {
         x_unity[point_1] = x_res;
@@ -1683,7 +1677,8 @@ int write_scalar_coordinates(long edgepoint_0, long edgepoint_1, long edgepoint_
         latitude_scalar[point_2] = lat_res;
         longitude_scalar[point_2] = lon_res;
     }
-    retval += find_between_point(x_point_2, y_point_2, z_point_2, x_point_0, y_point_0, z_point_0, 0.5, &x_res, &y_res, &z_res);
+    retval += find_between_point(x_unity[edgepoint_2], y_unity[edgepoint_2], z_unity[edgepoint_2], x_unity[edgepoint_0], y_unity[edgepoint_0], z_unity[edgepoint_0], 0.5, &x_res, &y_res, &z_res);
+    retval += normalize_cartesian(x_res, y_res, z_res, &x_res, &y_res, &z_res);
     if (points_upwards == 1)
     {
         x_unity[point_2] = x_res;
