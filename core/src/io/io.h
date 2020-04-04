@@ -1,5 +1,5 @@
 int set_grid_properties(Grid *, Dualgrid *, char[]);
-int calc_delta_t(double *, Grid *);
+int calc_delta_t(double, double *, Grid *);
 int interpolation_t(State *, State *, State *, double, double, double);
 int set_init_data(char[], State *, double *);
 int write_out(State *, double, double, char[], Grid *);

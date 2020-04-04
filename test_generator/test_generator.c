@@ -1,4 +1,4 @@
-#include "../core/src/enum_and_typedefs.h"
+#include "enum_and_typedefs.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -20,6 +20,11 @@ const double DELTA_T = 4.8e5;
 const double ETA_T = 0.2;
 const double U_0 = 35;
 const double ETA_0 = 0.252;
+const long NO_OF_LAYERS = 6;
+const long R_ID = 4;
+const double TOA = 30000;
+const short MODE = 0;
+const short ORO_ID = 0;
 
 int find_pressure_value(double, double, double *);
 int find_z_from_p(double, double, double *);
@@ -35,9 +40,16 @@ int main(int argc, char *argv[])
     double *z_scalar = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *z_vector = malloc(NUMBER_OF_VECTORS*sizeof(double));
     int ncid, retval;
-    char *GEO_PROP_FILE = "../grid_generator/nc_files/B4L6T20000_O0.nc";
+    short GEO_PROP_FILE_LENGTH = 100;
+    char *GEO_PROP_FILE_PRE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
+    sprintf(GEO_PROP_FILE_PRE, "../grid_generator/nc_files/B%dL%dT%d_M%d_O%d.nc", R_ID, NO_OF_LAYERS, (int) TOA, MODE, ORO_ID);
+    GEO_PROP_FILE_LENGTH = strlen(GEO_PROP_FILE_PRE);
+    free(GEO_PROP_FILE_PRE);
+    char *GEO_PROP_FILE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
+    sprintf(GEO_PROP_FILE, "../grid_generator/nc_files/B%dL%dT%d_M%d_O%d.nc", R_ID, NO_OF_LAYERS, (int) TOA, MODE, ORO_ID);
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         NCERR(retval);
+    free(GEO_PROP_FILE);
     int direction_id, latitude_scalar_id, longitude_scalar_id, latitude_vector_id, longitude_vector_id, z_scalar_id, z_vector_id;
     if ((retval = nc_inq_varid(ncid, "direction", &direction_id)))
         NCERR(retval);
@@ -76,8 +88,13 @@ int main(int argc, char *argv[])
     FILE *SAMPLE_VECTOR;
     int err = 0;
     SAMPLE_SCALAR = fopen(SAMPLE_FILE_SCALAR, "r");
-    char *OUTPUT_FILE = malloc(strlen("grib_files/test_x_B4L6T20000_O0.grb2")*sizeof(char));
-    sprintf(OUTPUT_FILE, "grib_files/test_%d_B4L6T20000_O0.grb2", test_id);
+    short OUTPUT_FILE_LENGTH = 100;
+    char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
+    sprintf(OUTPUT_FILE_PRE, "grib_files/test_%d_B%dL%dT%d_M%d_O%d.grb2", test_id, R_ID, NO_OF_LAYERS, (int) TOA, MODE, ORO_ID);
+    OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
+    free(OUTPUT_FILE_PRE);
+    char *OUTPUT_FILE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
+    sprintf(OUTPUT_FILE, "grib_files/test_%d_B%dL%dT%d_M%d_O%d.grb2", test_id, R_ID, NO_OF_LAYERS, (int) TOA, MODE, ORO_ID);
     codes_handle *handle_pot_temperature = NULL;
     codes_handle *handle_density = NULL;
     codes_handle *handle_wind_h = NULL;
@@ -111,7 +128,7 @@ int main(int argc, char *argv[])
     double distance_scale = SEMIMAJOR/10;
     double lat_perturb = 2*M_PI/9;
     double lon_perturb = M_PI/9;
-    for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
+    for (int i = 0; i < NO_OF_LAYERS; ++i)
     {
         for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
         {
@@ -224,7 +241,7 @@ int main(int argc, char *argv[])
                 wind_h[j] = 0;
             if (test_id == 1)
             {
-                if (i == NUMBER_OF_LAYERS - 2 && j == NUMBER_OF_SCALARS_H/2)
+                if (i == NO_OF_LAYERS - 2 && j == NUMBER_OF_SCALARS_H/2)
                     wind_h[j] = 10;
                 else
                     wind_h[j] = 0;

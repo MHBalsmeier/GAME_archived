@@ -264,7 +264,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         if (grid -> z_vector[i] < -0)
             grid_check_failed();
     }
-    printf("\nhere");
     for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
     {
         grid -> to_index[i] = to_index[i];
@@ -441,7 +440,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     return 0;
 }
 
-int calc_delta_t(double *delta_t, Grid *grid)
+int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid)
 {
     double max_speed = 350;
     double min_dist_horizontal = SEMIMAJOR;
@@ -464,8 +463,8 @@ int calc_delta_t(double *delta_t, Grid *grid)
                 min_dist_vertical = grid -> normal_distance[i*NUMBER_OF_VECTORS_PER_LAYER + j];
         }
     }
-    delta_t_horizontal = 1/sqrt(2)*min_dist_horizontal/max_speed;
-    delta_t_vertical = 1/sqrt(2)*min_dist_vertical/max_speed;
+    delta_t_horizontal = (1 - cfl_margin)*min_dist_horizontal/max_speed;
+    delta_t_vertical = (1 - cfl_margin)*min_dist_vertical/max_speed;
     *delta_t = delta_t_vertical;
     if (delta_t_horizontal < delta_t_vertical)
         *delta_t = delta_t_horizontal;
