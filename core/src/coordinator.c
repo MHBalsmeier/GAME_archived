@@ -92,8 +92,8 @@ int main(int argc, char *argv[])
         speed = CLOCKS_PER_SEC*WRITE_OUT_INTERVAL/((double) second_time - first_time);
         printf("current speed: %lf\n", speed);
         first_time = clock();
+        printf("run progress: %f h\n", (t_0 + delta_t - t_init)/SECONDS_PER_HOUR);
     }
-    printf("run progress: %f h\n", (t_0 + delta_t - t_init)/SECONDS_PER_HOUR);
     while (t_0 + delta_t < t_init + TOTAL_RUN_SPAN)
     {
         t_0 += delta_t;
@@ -108,8 +108,8 @@ int main(int argc, char *argv[])
             speed = CLOCKS_PER_SEC*WRITE_OUT_INTERVAL/((double) second_time - first_time);
             printf("current speed: %lf\n", speed);
             first_time = clock();
+            printf("run progress: %f h\n", (t_0 + delta_t - t_init)/SECONDS_PER_HOUR);
         }
-        printf("run progress: %f h\n", (t_0 + delta_t - t_init)/SECONDS_PER_HOUR);
     }
     free(grid);
     free(dualgrid);

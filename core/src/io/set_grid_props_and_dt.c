@@ -366,7 +366,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_PER_LAYER; ++i)
     {
         dualgrid -> f_vec[i] = f_vec[i];
-        if (fabs(dualgrid -> f_vec[i]) >= 2*OMEGA)
+        if (fabs(dualgrid -> f_vec[i]) > 2*OMEGA)
             grid_check_failed();
     }
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; ++i)

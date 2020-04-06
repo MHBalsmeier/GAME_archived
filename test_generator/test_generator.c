@@ -1,4 +1,3 @@
-#include "enum_and_typedefs.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -9,6 +8,14 @@
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
+#define N_A (6.0221409e23)
+#define K_B (1.380649e-23)
+#define M_D 0.028964420
+#define R (N_A*K_B)
+#define R_D (R/M_D)
+#define P_0 100000.0
+#define OMEGA (7.292115e-5)
+#define C_P 1005.0
 
 const double TROPO_HEIGHT = 12e3;
 const double T_SFC = 273.15 + 15;
@@ -20,11 +27,39 @@ const double DELTA_T = 4.8e5;
 const double ETA_T = 0.2;
 const double U_0 = 35;
 const double ETA_0 = 0.252;
-const long NO_OF_LAYERS = 6;
-const long R_ID = 4;
 const double TOA = 30000;
-const short MODE = 0;
+const short MODE = 2;
 const short ORO_ID = 0;
+
+enum grid_integers {
+RES_ID = 4,
+NUMBER_OF_BASIC_TRIANGLES = 20,
+NUMBER_OF_PENTAGONS = 12,
+NUMBER_OF_HEXAGONS = (int) (10*(pow(2, 2*RES_ID) - 1)),
+NUMBER_OF_EDGES = 3*NUMBER_OF_BASIC_TRIANGLES/2,
+NUMBER_OF_LAYERS = 6,
+NUMBER_OF_LEVELS = NUMBER_OF_LAYERS + 1,
+NUMBER_OF_SCALARS_H = NUMBER_OF_PENTAGONS + NUMBER_OF_HEXAGONS,
+NUMBER_OF_VECTORS_H = (5*NUMBER_OF_PENTAGONS/2 + 6/2*NUMBER_OF_HEXAGONS),
+NUMBER_OF_VECTORS_V = NUMBER_OF_SCALARS_H,
+NUMBER_OF_H_VECTORS = NUMBER_OF_LAYERS*NUMBER_OF_VECTORS_H,
+NUMBER_OF_V_VECTORS = NUMBER_OF_LEVELS*NUMBER_OF_VECTORS_V,
+NUMBER_OF_VECTORS_PER_LAYER = NUMBER_OF_VECTORS_H + NUMBER_OF_VECTORS_V,
+NUMBER_OF_TRIANGLES = (int) (NUMBER_OF_BASIC_TRIANGLES*(pow(4, RES_ID))),
+NUMBER_OF_SCALARS = NUMBER_OF_SCALARS_H*NUMBER_OF_LAYERS,
+NUMBER_OF_VECTORS = NUMBER_OF_H_VECTORS + NUMBER_OF_V_VECTORS,
+NUMBER_OF_DUAL_SCALARS_H = NUMBER_OF_TRIANGLES,
+NUMBER_OF_DUAL_VECTORS_H = 3*NUMBER_OF_TRIANGLES/2,
+NUMBER_OF_DUAL_VECTORS_V = NUMBER_OF_DUAL_SCALARS_H,
+NUMBER_OF_DUAL_H_VECTORS = NUMBER_OF_LEVELS*NUMBER_OF_DUAL_VECTORS_H,
+NUMBER_OF_DUAL_V_VECTORS = NUMBER_OF_LAYERS*NUMBER_OF_DUAL_VECTORS_V,
+NUMBER_OF_DUAL_VECTORS_PER_LAYER = NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_DUAL_VECTORS_V,
+NUMBER_OF_DUAL_SCALARS = NUMBER_OF_LEVELS*NUMBER_OF_DUAL_SCALARS_H,
+NUMBER_OF_DUAL_VECTORS = NUMBER_OF_DUAL_H_VECTORS + NUMBER_OF_DUAL_V_VECTORS,
+TRIANGLES_PER_FACE = NUMBER_OF_TRIANGLES/NUMBER_OF_BASIC_TRIANGLES,
+POINTS_PER_EDGE = (int) (pow(2, RES_ID) - 1),
+SCALAR_POINTS_PER_INNER_FACE = (int) (0.5*(pow(2, RES_ID) - 2)*(pow(2, RES_ID) - 1)),
+VECTOR_POINTS_PER_INNER_FACE = (int) (1.5*(pow(2, RES_ID) - 1)*pow(2, RES_ID))};
 
 int find_pressure_value(double, double, double *);
 int find_z_from_p(double, double, double *);
@@ -42,11 +77,11 @@ int main(int argc, char *argv[])
     int ncid, retval;
     short GEO_PROP_FILE_LENGTH = 100;
     char *GEO_PROP_FILE_PRE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(GEO_PROP_FILE_PRE, "../grid_generator/nc_files/B%dL%dT%d_M%d_O%d.nc", R_ID, NO_OF_LAYERS, (int) TOA, MODE, ORO_ID);
+    sprintf(GEO_PROP_FILE_PRE, "../grid_generator/nc_files/B%dL%dT%d_M%d_O%d.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, MODE, ORO_ID);
     GEO_PROP_FILE_LENGTH = strlen(GEO_PROP_FILE_PRE);
     free(GEO_PROP_FILE_PRE);
     char *GEO_PROP_FILE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(GEO_PROP_FILE, "../grid_generator/nc_files/B%dL%dT%d_M%d_O%d.nc", R_ID, NO_OF_LAYERS, (int) TOA, MODE, ORO_ID);
+    sprintf(GEO_PROP_FILE, "../grid_generator/nc_files/B%dL%dT%d_M%d_O%d.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, MODE, ORO_ID);
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         NCERR(retval);
     free(GEO_PROP_FILE);
@@ -90,11 +125,11 @@ int main(int argc, char *argv[])
     SAMPLE_SCALAR = fopen(SAMPLE_FILE_SCALAR, "r");
     short OUTPUT_FILE_LENGTH = 100;
     char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(OUTPUT_FILE_PRE, "grib_files/test_%d_B%dL%dT%d_M%d_O%d.grb2", test_id, R_ID, NO_OF_LAYERS, (int) TOA, MODE, ORO_ID);
+    sprintf(OUTPUT_FILE_PRE, "grib_files/test_%d_B%dL%dT%d_M%d_O%d.grb2", test_id, RES_ID, NUMBER_OF_LAYERS, (int) TOA, MODE, ORO_ID);
     OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
     free(OUTPUT_FILE_PRE);
     char *OUTPUT_FILE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(OUTPUT_FILE, "grib_files/test_%d_B%dL%dT%d_M%d_O%d.grb2", test_id, R_ID, NO_OF_LAYERS, (int) TOA, MODE, ORO_ID);
+    sprintf(OUTPUT_FILE, "grib_files/test_%d_B%dL%dT%d_M%d_O%d.grb2", test_id, RES_ID, NUMBER_OF_LAYERS, (int) TOA, MODE, ORO_ID);
     codes_handle *handle_pot_temperature = NULL;
     codes_handle *handle_density = NULL;
     codes_handle *handle_wind_h = NULL;
@@ -128,7 +163,7 @@ int main(int argc, char *argv[])
     double distance_scale = SEMIMAJOR/10;
     double lat_perturb = 2*M_PI/9;
     double lon_perturb = M_PI/9;
-    for (int i = 0; i < NO_OF_LAYERS; ++i)
+    for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
     {
         for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
         {
@@ -241,7 +276,7 @@ int main(int argc, char *argv[])
                 wind_h[j] = 0;
             if (test_id == 1)
             {
-                if (i == NO_OF_LAYERS - 2 && j == NUMBER_OF_SCALARS_H/2)
+                if (i == NUMBER_OF_LAYERS - 2 && j == NUMBER_OF_SCALARS_H/2)
                     wind_h[j] = 10;
                 else
                     wind_h[j] = 0;
