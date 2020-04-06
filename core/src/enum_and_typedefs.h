@@ -94,6 +94,7 @@ long vorticity_indices[3*NUMBER_OF_DUAL_VECTORS_V];
 short vorticity_signs[3*NUMBER_OF_DUAL_VECTORS_V];
 long h_curl_indices[4*NUMBER_OF_DUAL_VECTORS_H];
 short h_curl_signs[4*NUMBER_OF_DUAL_VECTORS_H];
+long adjacent_scalar_indices_dual_h[3*NUMBER_OF_DUAL_SCALARS_H];
 } Dualgrid;
 
 typedef struct state {

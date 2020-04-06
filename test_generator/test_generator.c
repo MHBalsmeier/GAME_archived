@@ -66,7 +66,7 @@ int find_z_from_p(double, double, double *);
 
 int main(int argc, char *argv[])
 {
-    int test_id = 3;
+    int test_id = 1;
     double *direction = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
     double *latitude_scalar = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double *longitude_scalar = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
