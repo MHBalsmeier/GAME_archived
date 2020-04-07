@@ -8,7 +8,7 @@ int linear_combine_two_states(State *state_0, State *state_1, State *state_out, 
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
         state_out -> density[i] = coeff_0*state_0 -> density[i] + coeff_1*state_1 -> density[i];
-        state_out -> entropy_density[i] = coeff_0*state_0 -> entropy_density[i] + coeff_1*state_1 -> entropy_density[i];
+        state_out -> density_pot_temp[i] = coeff_0*state_0 -> density_pot_temp[i] + coeff_1*state_1 -> density_pot_temp[i];
     }
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
         state_out -> wind[i] = coeff_0*state_0 -> wind[i] + coeff_1*state_1 -> wind[i];

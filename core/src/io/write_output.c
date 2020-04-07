@@ -98,15 +98,15 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
         z_height = grid -> z_scalar[i*NUMBER_OF_SCALARS_H];
         for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
         {
-            pot_temperature_h[j] = THETA_0*exp(state_write_out -> entropy_density[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]);
+            pot_temperature_h[j] = state_write_out -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H];
             rho_h[j] = state_write_out -> density[j + i*NUMBER_OF_SCALARS_H];
         }
         if (i == NUMBER_OF_LAYERS - 1)
         {
             for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
             {
-                exner_pressure = pow(R_D*state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]*THETA_0*exp(state_write_out -> entropy_density[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H])/P_0, R_D/C_V);
-                temp_value = exner_pressure*THETA_0*exp(state_write_out -> entropy_density[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]);
+                exner_pressure = pow(R_D*state_write_out -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H]/P_0, R_D/C_V);
+                temp_value = exner_pressure*state_write_out -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H];
                 pressure_value = state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]*R_D*temp_value;
                 temp_mslp = temp_value + standard_vert_lapse_rate*grid -> z_scalar[j + i*NUMBER_OF_SCALARS_H];
                 gravity_value = 9.80616;
