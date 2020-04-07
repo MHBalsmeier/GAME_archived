@@ -9,6 +9,13 @@
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 #define OMEGA (7.292115e-5)
+#define N_A (6.0221409e23)
+#define K_B (1.380649e-23)
+#define M_D 0.028964420
+#define R (N_A*K_B)
+#define R_D (R/M_D)
+#define C_P 1005.0
+#define P_0 100000.0
 
 const short MODE = 2;
 const double TOA = 30000.0;
@@ -285,6 +292,9 @@ int main(int argc, char *argv[])
     double *triangle_face_unit_sphere = malloc(NUMBER_OF_DUAL_VECTORS_V*sizeof(double));
     double *pent_hex_face_unity_sphere = malloc(NUMBER_OF_VECTORS_V*sizeof(double));
     double *rel_on_line_dual = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
+    double *exner_pressure_background = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    double *exner_pressure_background_gradient = malloc(NUMBER_OF_V_VECTORS*sizeof(double));
+    double *pot_temp_background = malloc(NUMBER_OF_V_VECTORS*sizeof(double));
     long *to_index = malloc(NUMBER_OF_VECTORS_H*sizeof(long));
     long *from_index = malloc(NUMBER_OF_VECTORS_H*sizeof(long));
     long *recov_hor_par_pri_index = malloc(4*NUMBER_OF_VECTORS_H*sizeof(long));
@@ -900,6 +910,8 @@ int main(int argc, char *argv[])
         if (normal_distance[i] <= 0)
             printf("normal_distance contains a non-positive value.\n");
     }
+    double volume_sum, volume_sum_ideal;
+    volume_sum = 0;
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
         layer_index = i/NUMBER_OF_SCALARS_H;
@@ -908,7 +920,11 @@ int main(int argc, char *argv[])
         radius_0 = SEMIMAJOR + z_vector[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER];
         radius_1 = SEMIMAJOR + z_vector[h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER];
         volume[i] = find_volume(base_area, radius_0, radius_1);
+        volume_sum += volume[i];
     }
+    volume_sum_ideal = find_volume(4*M_PI*pow(SEMIMAJOR, 2), SEMIMAJOR, SEMIMAJOR + z_vector[0]);
+    if (fabs(volume_sum/volume_sum_ideal - 1) > 1e-12)
+        printf("Sum of volumes of grid boxes does not match volume of entire atmosphere.");
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
         if (volume[i] <= 0)
@@ -1181,11 +1197,44 @@ int main(int argc, char *argv[])
         }
     }
     free(direction_dual);
+    double z_scale_temp = 10000;
+    double T_str = 213.15;
+    double T_sl = 288.15;
+    double mean_msl_pressure = 101325;
+    double pressure_value, help_function_value, z_value;
+    double help_constant = gravity[0]*z_scale_temp/(T_str*R_D)*log(1 + (T_sl - T_str)/T_str);
+    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+    {
+        z_value = z_scalar[i];
+        help_function_value = gravity[0]*z_scale_temp/(T_str*R_D)*log(exp(z_value/z_scale_temp) + (T_sl - T_str)/T_str);
+        pressure_value = mean_msl_pressure*exp(help_function_value - help_constant);
+        exner_pressure_background[i] = pow(pressure_value/P_0, R_D/C_P);
+        if (exner_pressure_background[i] < 0)
+            printf("exner_pressure_background contains a non-positive value.\n");
+    }
+    double temperature_value;
+    for (int i = 0; i < NUMBER_OF_V_VECTORS; ++i)
+    {
+        layer_index = i/NUMBER_OF_VECTORS_V;
+        h_index = i - layer_index*NUMBER_OF_VECTORS_V;
+        z_value = z_vector[h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER];
+        help_function_value = gravity[0]*z_scale_temp/(T_str*R_D)*log(exp(z_value/z_scale_temp) + (T_sl - T_str)/T_str);
+        pressure_value = mean_msl_pressure*exp(help_function_value - help_constant);
+        temperature_value = T_str + (T_sl - T_str)*exp(-z_value/z_scale_temp);
+        exner_pressure_background_gradient[i] = pow(pressure_value/P_0, R_D/C_P)*gravity[0]/C_P*1/temperature_value;
+        if (exner_pressure_background_gradient[i] >= 0)
+            printf("exner_pressure_background_gradient contains a non-negative value.\n");
+        pot_temp_background[i] = temperature_value*pow(P_0/pressure_value, R_D/C_P);
+        if (pot_temp_background[i] <= 0)
+            printf("pot_temp_background contains a non-positive value.\n");
+    }
     int ncid_g_prop;
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
     free(OUTPUT_FILE);
-    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id, vector_dual_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_v_dimid_12, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id;
+    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id, vector_dual_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_v_dimid_12, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id, exner_pressure_background_gradient_id, vector_v_dimid;
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_v_index", NUMBER_OF_V_VECTORS, &vector_v_dimid)))
+        ERR(retval); 
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NUMBER_OF_SCALARS, &scalar_dimid)))
         ERR(retval);  
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_h_index", NUMBER_OF_SCALARS_H, &scalar_h_dimid)))
@@ -1217,6 +1266,12 @@ int main(int argc, char *argv[])
     if ((retval = nc_def_dim(ncid_g_prop, "vector_dual_v_3_index", 3*NUMBER_OF_DUAL_VECTORS_V, &vector_dual_v_dimid_3)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_dual_h_4_index", 4*NUMBER_OF_DUAL_VECTORS_H, &vector_dual_h_dimid_4)))
+        ERR(retval);
+    if ((retval = nc_def_var(ncid_g_prop, "exner_pressure_background", NC_DOUBLE, 1, &scalar_dimid, &exner_pressure_background_id)))
+        ERR(retval);
+    if ((retval = nc_def_var(ncid_g_prop, "pot_temp_background", NC_DOUBLE, 1, &vector_v_dimid, &pot_temp_background_id)))
+        ERR(retval);
+    if ((retval = nc_def_var(ncid_g_prop, "exner_pressure_background_gradient", NC_DOUBLE, 1, &vector_v_dimid, &exner_pressure_background_gradient_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "latitude_scalar", NC_DOUBLE, 1, &scalar_h_dimid, &latitude_scalar_id)))
         ERR(retval);
@@ -1336,6 +1391,12 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_enddef(ncid_g_prop)))
         ERR(retval);
+    if ((retval = nc_put_var_double(ncid_g_prop, exner_pressure_background_id, &exner_pressure_background[0])))
+        ERR(retval);
+    if ((retval = nc_put_var_double(ncid_g_prop, pot_temp_background_id, &pot_temp_background[0])))
+        ERR(retval);
+    if ((retval = nc_put_var_double(ncid_g_prop, exner_pressure_background_gradient_id, &exner_pressure_background_gradient[0])))
+        ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, latitude_scalar_id, &latitude_scalar[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, longitude_scalar_id, &longitude_scalar[0])))
@@ -1434,6 +1495,9 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_close(ncid_g_prop)))
         ERR(retval);
+    free(exner_pressure_background);
+    free(pot_temp_background);
+    free(exner_pressure_background_gradient);
     free(adjacent_scalar_indices_dual_h);
     free(latitude_vector);
     free(longitude_vector);

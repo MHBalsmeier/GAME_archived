@@ -1,0 +1,14 @@
+
+    double energy = 0;
+    short check_energy = 0;
+    if (check_energy == 1)
+    {
+        double gravity = 9.80616;
+        double temperature_value;
+        for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+        {
+            temperature_value = (*exner_pressure)[i]*THETA_0*exp(current_state -> entropy_density[i]/current_state -> density[i]);
+            energy += gravity*grid -> z_scalar[i]*current_state -> density[i]*grid -> volume[i] + 0.5*(*e_kin_spec_2)[i]*current_state -> density[i]*grid -> volume[i] + C_V*temperature_value*current_state -> density[i]*grid -> volume[i];
+        }
+        printf("%lf\n", energy);
+    }

@@ -43,7 +43,7 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
         for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
         {
             init_state -> density[j + i*NUMBER_OF_SCALARS_H] = rho[j];
-            init_state -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H] = rho[j]*pot_temp[j];
+            init_state -> entropy_density[j + i*NUMBER_OF_SCALARS_H] = rho[j]*log(pot_temp[j]/THETA_0);
         }
         handle_wind_h = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
         if (err != 0)

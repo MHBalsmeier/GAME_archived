@@ -20,7 +20,12 @@ int divergence(Vector_field in_field, Scalar_field out_field, Grid *grid)
             for (int j = 0; j < 6; ++j)
                 comp_h += in_field[NUMBER_OF_VECTORS_V + layer_index*NUMBER_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]*grid -> adjacent_signs_h[6*h_index + j]*grid -> area[NUMBER_OF_VECTORS_V + layer_index*NUMBER_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]];
         }
-        comp_v = in_field[h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER]*grid -> area[h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER] - in_field[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER]*grid -> area[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER];
+        if (layer_index == 0)
+            comp_v = -in_field[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER]*grid -> area[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER];
+        else if (layer_index == NUMBER_OF_LAYERS - 1)
+            comp_v = in_field[h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER]*grid -> area[h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER];
+        else
+            comp_v = in_field[h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER]*grid -> area[h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER] - in_field[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER]*grid -> area[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER];
         out_field[i] = 1/grid -> volume[i]*(comp_h + comp_v);
     }
     return 0;
