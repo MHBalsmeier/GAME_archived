@@ -1,5 +1,5 @@
 #!/bin/bash
-run_span=25200
+run_span=36000
 write_out_interval=288
 grid_props_file=/home/max/my_code/game/grid_generator/nc_files/B4L6T30000_M2_O0.nc
 init_state_file=/home/max/my_code/game/test_generator/grib_files/test_3_B4L6T30000_M2_O0.grb2

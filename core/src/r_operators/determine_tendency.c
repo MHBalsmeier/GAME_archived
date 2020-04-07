@@ -28,6 +28,9 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     mass_diffusion_coeff = pow(10, 5)*mass_molecular_diffusion_coeff;
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
         state_tendency -> density[i] = -(*density_flux_divergence)[i] + mass_diffusion_coeff*(*laplace_density)[i];
+    double global_mass;
+    retval = global_scalar_integrator(current_state -> density, grid, &global_mass);
+    printf("%lf\n", global_mass);
     free(density_flux_divergence);
     Vector_field *density_pot_temp_flux = malloc(sizeof(Vector_field));
     scalar_times_vector(current_state -> density_pot_temp, current_state -> wind, *density_pot_temp_flux, grid);
