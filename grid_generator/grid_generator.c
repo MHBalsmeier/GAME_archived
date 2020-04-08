@@ -707,6 +707,8 @@ int main(int argc, char *argv[])
         {
             if (from_index[j] == i || to_index[j] == i)
             {
+                if (from_index[j] == to_index[j])
+                    printf("It is from_index == to_index at some point.\n");
                 adjacent_vector_indices_h[6*i + counter] = j;
                 vorticity_indices_dual[6*i + counter] = j;
                 sign = 1;
@@ -743,6 +745,34 @@ int main(int argc, char *argv[])
             vorticity_indices_dual[6*i + 5] = 0;
             vorticity_signs_dual[6*i + 5] = 0;
         }
+    }
+    short number_of_edges, double_check, sign_sum_check;
+    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+    {
+        counter = 0;
+        sign_sum_check = 0;
+        for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
+        {
+            number_of_edges = 6;
+            if (j < NUMBER_OF_PENTAGONS)
+                number_of_edges = 5;
+            double_check = 0;
+            for (int k = 0; k < number_of_edges; ++k)
+            {
+                if (adjacent_vector_indices_h[6*j + k] == i)
+                {
+                    ++counter;
+                    ++double_check;
+                    sign_sum_check += adjacent_signs_h[6*j + k];
+                }
+            }
+            if (double_check > 1)
+                printf("Same vector twice in adjacent_vector_indices_h of same grid cell.\n");
+        }
+        if (sign_sum_check != 0)
+            printf("Problem with adjacent_signs_h.\n");
+        if (counter != 2)
+            printf("Problem with adjacent_vector_indices_h.\n");
     }
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_V; ++i)
     {
