@@ -27,6 +27,8 @@ int main(int argc, char *argv[])
     strcpy(OUTPUT_FOLDER, argv[5]);
     char *stars  = malloc(82*sizeof(char));
     double cfl_margin = strtof(argv[6], NULL);
+    short dissipation_on;
+    dissipation_on = strtod(argv[7], NULL);
     for (int i = 0; i < 82 - 1; ++i)
         stars[i] = '*';
     stars[81] = '\n';
@@ -80,7 +82,7 @@ int main(int argc, char *argv[])
     clock_t first_time, second_time;
     first_time = clock();
     State *state_p1 = malloc(sizeof(State));
-    runge_kutta_third_order(state_0, state_p1, delta_t, grid, dualgrid);
+    runge_kutta_third_order(state_0, state_p1, delta_t, grid, dualgrid, dissipation_on);
     State *state_write = malloc(sizeof(State));
     double speed;
     if(t_0 + delta_t >= t_write && t_0 <= t_write)
@@ -98,7 +100,7 @@ int main(int argc, char *argv[])
     {
         t_0 += delta_t;
         *state_0 = *state_p1;
-        runge_kutta_third_order(state_0, state_p1, delta_t, grid, dualgrid);
+        runge_kutta_third_order(state_0, state_p1, delta_t, grid, dualgrid, dissipation_on);
         if(t_0 + delta_t >= t_write && t_0 <= t_write)
         {
             interpolation_t(state_0, state_p1, state_write, t_0, t_0 + delta_t, t_write);

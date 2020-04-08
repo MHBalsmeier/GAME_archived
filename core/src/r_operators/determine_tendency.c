@@ -6,7 +6,7 @@
 
 int calc_diffusion_coeff(double temperature, double particle_mass, double denstiy, double particle_radius, double *result);
 
-int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid)
+int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, short dissipation_on)
 {
     Vector_field *density_flux = malloc(sizeof(Vector_field));
     scalar_times_vector(current_state -> density, current_state -> wind, *density_flux, grid);
@@ -27,10 +27,9 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     int retval = calc_diffusion_coeff(mean_temperature, mean_particle_mass, mean_density, eff_particle_radius, &mass_molecular_diffusion_coeff);
     mass_diffusion_coeff = pow(10, 5)*mass_molecular_diffusion_coeff;
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
-        state_tendency -> density[i] = -(*density_flux_divergence)[i] + mass_diffusion_coeff*(*laplace_density)[i];
+        state_tendency -> density[i] = -(*density_flux_divergence)[i] + dissipation_on*mass_diffusion_coeff*(*laplace_density)[i];
     double global_mass;
     retval = global_scalar_integrator(current_state -> density, grid, &global_mass);
-    printf("%lf\n", global_mass);
     free(density_flux_divergence);
     Vector_field *density_pot_temp_flux = malloc(sizeof(Vector_field));
     scalar_times_vector(current_state -> density_pot_temp, current_state -> wind, *density_pot_temp_flux, grid);
@@ -51,7 +50,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     {
         heat_power_density = -current_state -> density[i]*(*u_dot_friction)[i];
         heat_power_density += temperature_diffusion_coeff*(*laplace_temperature)[i];
-        state_tendency -> density_pot_temp[i] = -(*density_pot_temp_flux_divergence)[i] + current_state -> density_pot_temp[i]/current_state -> density[i]*mass_diffusion_coeff*(*laplace_density)[i] + 1/(C_P*(*exner_pressure)[i])*heat_power_density;
+        state_tendency -> density_pot_temp[i] = -(*density_pot_temp_flux_divergence)[i] + dissipation_on*(current_state -> density_pot_temp[i]/current_state -> density[i]*mass_diffusion_coeff*(*laplace_density)[i] + 1/(C_P*(*exner_pressure)[i])*heat_power_density);
     }
     free(laplace_temperature);
     free(temperature);
