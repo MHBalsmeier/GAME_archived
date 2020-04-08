@@ -55,7 +55,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     short *h_curl_signs_dual = malloc(4*NUMBER_OF_VECTORS_H*sizeof(short));
     int ncid, retval;
     int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id, direction_id, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id, exner_pressure_background_gradient_id;
-    long vert_index, floor_index, h_index, layer_index;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "normal_distance", &normal_distance_id)))

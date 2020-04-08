@@ -9,7 +9,6 @@
 
 int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
 {
-    const int START_SECTION = 4;
     long unsigned int no_scalars_h = NUMBER_OF_SCALARS_H;
     long unsigned int no_vectors_h = NUMBER_OF_VECTORS_H;
     FILE *IN_FILE;
@@ -31,13 +30,13 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
         handle_pot_temperature = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
         if (err != 0)
             ECCERR(err);
-        if (retval = codes_get_double_array(handle_pot_temperature, "values", pot_temp, &no_scalars_h))
+        if ((retval = codes_get_double_array(handle_pot_temperature, "values", pot_temp, &no_scalars_h)))
             ECCERR(retval);
         codes_handle_delete(handle_pot_temperature);
         handle_density = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
         if (err != 0)
             ECCERR(err);
-        if (retval = codes_get_double_array(handle_density, "values", rho, &no_scalars_h))
+        if ((retval = codes_get_double_array(handle_density, "values", rho, &no_scalars_h)))
             ECCERR(retval);
         codes_handle_delete(handle_density);
         for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
@@ -48,7 +47,7 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
         handle_wind_h = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
         if (err != 0)
             ECCERR(err);
-        if (retval = codes_get_double_array(handle_wind_h, "values", wind_h, &no_vectors_h))
+        if ((retval = codes_get_double_array(handle_wind_h, "values", wind_h, &no_vectors_h)))
             ECCERR(retval);
         for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
             init_state -> wind[j + i*NUMBER_OF_VECTORS_H + (i + 1)*NUMBER_OF_VECTORS_V] = wind_h[j];
@@ -70,7 +69,7 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
         handle_wind_v = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
         if (err != 0)
             ECCERR(err);
-        if (retval = codes_get_double_array(handle_wind_v, "values", wind_v, &no_scalars_h))
+        if ((retval = codes_get_double_array(handle_wind_v, "values", wind_v, &no_scalars_h)))
             ECCERR(retval);
         codes_handle_delete(handle_wind_v);
         for (int j = 0; j < NUMBER_OF_VECTORS_V; ++j)

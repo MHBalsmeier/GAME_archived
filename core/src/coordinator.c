@@ -75,7 +75,6 @@ int main(int argc, char *argv[])
     double t_0;
     double t_write = t_init + WRITE_OUT_INTERVAL;
     t_0 = t_init;
-    int write_out_index = 1;
     State *state_0 = malloc(sizeof(State));
     *state_0 = *state_init;
     free(state_init);

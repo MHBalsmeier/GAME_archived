@@ -33,9 +33,6 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
         if (i >= out_file_length - strlen(append_string))
             OUTPUT_FILE[i] = append_string[i - (out_file_length - strlen(append_string))];
     }
-    int dimids_scalar[2];
-    int scalar_index;
-    const int START_SECTION = 4;
     char *SAMPLE_FILE_SCALAR = "../test_generator/grib_files/scalar_field_blueprint_res_id_2.grb2";
     char *SAMPLE_FILE_VECTOR = "../test_generator/grib_files/vector_field_blueprint_res_id_2.grb2";
     FILE *SAMPLE_SCALAR;
@@ -113,134 +110,134 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
                 mslp_factor = pow(1 - (temp_mslp - temp_value)/temp_mslp, gravity_value/(R_D*standard_vert_lapse_rate));
                 mslp[j] = pressure_value/mslp_factor;
             }
-            if (retval = codes_set_long(handle_mslp, "discipline", 0))
+            if ((retval = codes_set_long(handle_mslp, "discipline", 0)))
                 ECCERR(retval);
-            if (retval = codes_set_long(handle_mslp, "centre", 255))
+            if ((retval = codes_set_long(handle_mslp, "centre", 255)))
                 ECCERR(retval);
-            if (retval = codes_set_long(handle_mslp, "significanceOfReferenceTime", 1))
+            if ((retval = codes_set_long(handle_mslp, "significanceOfReferenceTime", 1)))
                 ECCERR(retval);
-            if (retval = codes_set_long(handle_mslp, "productionStatusOfProcessedData", 1))
+            if ((retval = codes_set_long(handle_mslp, "productionStatusOfProcessedData", 1)))
                 ECCERR(retval);
-            if (retval = codes_set_long(handle_mslp, "typeOfProcessedData", 1))
+            if ((retval = codes_set_long(handle_mslp, "typeOfProcessedData", 1)))
                 ECCERR(retval);
-            if (retval = codes_set_long(handle_mslp, "indicatorOfUnitOfTimeRange", 13))
+            if ((retval = codes_set_long(handle_mslp, "indicatorOfUnitOfTimeRange", 13)))
                 ECCERR(retval);
-            if (retval = codes_set_long(handle_mslp, "stepUnits", 13))
+            if ((retval = codes_set_long(handle_mslp, "stepUnits", 13)))
                 ECCERR(retval);
-            if (retval = codes_set_long(handle_mslp, "dataDate", data_date))
+            if ((retval = codes_set_long(handle_mslp, "dataDate", data_date)))
                 ECCERR(retval);
-            if (retval = codes_set_long(handle_mslp, "dataTime", data_time))
+            if ((retval = codes_set_long(handle_mslp, "dataTime", data_time)))
                 ECCERR(retval);
-            if (retval = codes_set_long(handle_mslp, "forecastTime", t_write - t_init))
+            if ((retval = codes_set_long(handle_mslp, "forecastTime", t_write - t_init)))
                 ECCERR(retval);
-            if (retval = codes_set_long(handle_mslp, "stepRange", t_write - t_init))
+            if ((retval = codes_set_long(handle_mslp, "stepRange", t_write - t_init)))
                 ECCERR(retval);
-            if (retval = codes_set_long(handle_mslp, "typeOfGeneratingProcess", 1))
+            if ((retval = codes_set_long(handle_mslp, "typeOfGeneratingProcess", 1)))
                 ECCERR(retval);
-            if (retval = codes_set_long(handle_mslp, "parameterCategory", 3))
+            if ((retval = codes_set_long(handle_mslp, "parameterCategory", 3)))
                 ECCERR(retval);
-            if (retval = codes_set_long(handle_mslp, "parameterNumber", 1))
+            if ((retval = codes_set_long(handle_mslp, "parameterNumber", 1)))
                 ECCERR(retval);
-            if (retval = codes_set_long(handle_mslp, "typeOfFirstFixedSurface", 101))
+            if ((retval = codes_set_long(handle_mslp, "typeOfFirstFixedSurface", 101)))
                 ECCERR(retval);
-            if (retval = codes_set_long(handle_mslp, "scaleFactorOfFirstFixedSurface", 1))
+            if ((retval = codes_set_long(handle_mslp, "scaleFactorOfFirstFixedSurface", 1)))
                 ECCERR(retval);
-            if (retval = codes_set_long(handle_mslp, "scaledValueOfFirstFixedSurface", 0))
+            if ((retval = codes_set_long(handle_mslp, "scaledValueOfFirstFixedSurface", 0)))
                 ECCERR(retval);
-            if (retval = codes_set_long(handle_mslp, "level", i + 1))
+            if ((retval = codes_set_long(handle_mslp, "level", i + 1)))
                 ECCERR(retval);
-            if (retval = codes_set_double_array(handle_mslp, "values", mslp, NUMBER_OF_SCALARS_H))
+            if ((retval = codes_set_double_array(handle_mslp, "values", mslp, NUMBER_OF_SCALARS_H)))
                 ECCERR(retval);
-            if (retval = codes_write_message(handle_mslp, OUTPUT_FILE, "a"))
+            if ((retval = codes_write_message(handle_mslp, OUTPUT_FILE, "a")))
                 ECCERR(retval);
         }
-        if (retval = codes_set_long(handle_pot_temperature_h, "discipline", 0))
+        if ((retval = codes_set_long(handle_pot_temperature_h, "discipline", 0)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "centre", 255))
+        if ((retval = codes_set_long(handle_pot_temperature_h, "centre", 255)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "significanceOfReferenceTime", 1))
+        if ((retval = codes_set_long(handle_pot_temperature_h, "significanceOfReferenceTime", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "productionStatusOfProcessedData", 1))
+        if ((retval = codes_set_long(handle_pot_temperature_h, "productionStatusOfProcessedData", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "typeOfProcessedData", 1))
+        if ((retval = codes_set_long(handle_pot_temperature_h, "typeOfProcessedData", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "indicatorOfUnitOfTimeRange", 13))
+        if ((retval = codes_set_long(handle_pot_temperature_h, "indicatorOfUnitOfTimeRange", 13)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "stepUnits", 13))
+        if ((retval = codes_set_long(handle_pot_temperature_h, "stepUnits", 13)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "dataDate", data_date))
+        if ((retval = codes_set_long(handle_pot_temperature_h, "dataDate", data_date)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "dataTime", data_time))
+        if ((retval = codes_set_long(handle_pot_temperature_h, "dataTime", data_time)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "forecastTime", t_write - t_init))
+        if ((retval = codes_set_long(handle_pot_temperature_h, "forecastTime", t_write - t_init)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "stepRange", t_write - t_init))
+        if ((retval = codes_set_long(handle_pot_temperature_h, "stepRange", t_write - t_init)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "typeOfGeneratingProcess", 1))
+        if ((retval = codes_set_long(handle_pot_temperature_h, "typeOfGeneratingProcess", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "parameterCategory", 0))
+        if ((retval = codes_set_long(handle_pot_temperature_h, "parameterCategory", 0)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "parameterNumber", 2))
+        if ((retval = codes_set_long(handle_pot_temperature_h, "parameterNumber", 2)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "typeOfFirstFixedSurface", 102))
+        if ((retval = codes_set_long(handle_pot_temperature_h, "typeOfFirstFixedSurface", 102)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "scaleFactorOfFirstFixedSurface", 1))
+        if ((retval = codes_set_long(handle_pot_temperature_h, "scaleFactorOfFirstFixedSurface", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "scaledValueOfFirstFixedSurface", z_height))
+        if ((retval = codes_set_long(handle_pot_temperature_h, "scaledValueOfFirstFixedSurface", z_height)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_pot_temperature_h, "level", i))
+        if ((retval = codes_set_long(handle_pot_temperature_h, "level", i)))
             ECCERR(retval);
-        if (retval = codes_set_double_array(handle_pot_temperature_h, "values", pot_temperature_h, NUMBER_OF_SCALARS_H))
+        if ((retval = codes_set_double_array(handle_pot_temperature_h, "values", pot_temperature_h, NUMBER_OF_SCALARS_H)))
             ECCERR(retval);
         if (i == 0)
         {
-            if (retval = codes_write_message(handle_pot_temperature_h, OUTPUT_FILE, "w"))
+            if ((retval = codes_write_message(handle_pot_temperature_h, OUTPUT_FILE, "w")))
                 ECCERR(retval);
         }
         else
         {
-            if (retval = codes_write_message(handle_pot_temperature_h, OUTPUT_FILE, "a"))
+            if ((retval = codes_write_message(handle_pot_temperature_h, OUTPUT_FILE, "a")))
                 ECCERR(retval);
         }
-        if (retval = codes_set_long(handle_density_h, "discipline", 0))
+        if ((retval = codes_set_long(handle_density_h, "discipline", 0)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "centre", 255))
+        if ((retval = codes_set_long(handle_density_h, "centre", 255)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "significanceOfReferenceTime", 1))
+        if ((retval = codes_set_long(handle_density_h, "significanceOfReferenceTime", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "productionStatusOfProcessedData", 1))
+        if ((retval = codes_set_long(handle_density_h, "productionStatusOfProcessedData", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "typeOfProcessedData", 1))
+        if ((retval = codes_set_long(handle_density_h, "typeOfProcessedData", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "indicatorOfUnitOfTimeRange", 13))
+        if ((retval = codes_set_long(handle_density_h, "indicatorOfUnitOfTimeRange", 13)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "stepUnits", 13))
+        if ((retval = codes_set_long(handle_density_h, "stepUnits", 13)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "dataDate", data_date))
+        if ((retval = codes_set_long(handle_density_h, "dataDate", data_date)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "dataTime", data_time))
+        if ((retval = codes_set_long(handle_density_h, "dataTime", data_time)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "forecastTime", t_write - t_init))
+        if ((retval = codes_set_long(handle_density_h, "forecastTime", t_write - t_init)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "stepRange", t_write - t_init))
+        if ((retval = codes_set_long(handle_density_h, "stepRange", t_write - t_init)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "typeOfGeneratingProcess", 1))
+        if ((retval = codes_set_long(handle_density_h, "typeOfGeneratingProcess", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "parameterCategory", 3))
+        if ((retval = codes_set_long(handle_density_h, "parameterCategory", 3)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "parameterNumber", 10))
+        if ((retval = codes_set_long(handle_density_h, "parameterNumber", 10)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "typeOfFirstFixedSurface", 102))
+        if ((retval = codes_set_long(handle_density_h, "typeOfFirstFixedSurface", 102)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "scaleFactorOfFirstFixedSurface", 1))
+        if ((retval = codes_set_long(handle_density_h, "scaleFactorOfFirstFixedSurface", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "scaledValueOfFirstFixedSurface", z_height))
+        if ((retval = codes_set_long(handle_density_h, "scaledValueOfFirstFixedSurface", z_height)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_density_h, "level", i))
+        if ((retval = codes_set_long(handle_density_h, "level", i)))
             ECCERR(retval);
-        if (retval = codes_set_double_array(handle_density_h, "values", rho_h, NUMBER_OF_SCALARS_H))
+        if ((retval = codes_set_double_array(handle_density_h, "values", rho_h, NUMBER_OF_SCALARS_H)))
             ECCERR(retval);
-        if (retval = codes_write_message(handle_density_h, OUTPUT_FILE, "a"))
+        if ((retval = codes_write_message(handle_density_h, OUTPUT_FILE, "a")))
             ECCERR(retval);
         for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
         {
@@ -250,85 +247,85 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
             wind_u_h[j] = wind_u;
             wind_v_h[j] = wind_v;
         }
-        if (retval = codes_set_long(handle_wind_u_h, "discipline", 0))
+        if ((retval = codes_set_long(handle_wind_u_h, "discipline", 0)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_u_h, "centre", 255))
+        if ((retval = codes_set_long(handle_wind_u_h, "centre", 255)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_u_h, "significanceOfReferenceTime", 1))
+        if ((retval = codes_set_long(handle_wind_u_h, "significanceOfReferenceTime", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_u_h, "productionStatusOfProcessedData", 1))
+        if ((retval = codes_set_long(handle_wind_u_h, "productionStatusOfProcessedData", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_u_h, "typeOfProcessedData", 1))
+        if ((retval = codes_set_long(handle_wind_u_h, "typeOfProcessedData", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_u_h, "indicatorOfUnitOfTimeRange", 13))
+        if ((retval = codes_set_long(handle_wind_u_h, "indicatorOfUnitOfTimeRange", 13)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_u_h, "stepUnits", 13))
+        if ((retval = codes_set_long(handle_wind_u_h, "stepUnits", 13)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_u_h, "dataDate", data_date))
+        if ((retval = codes_set_long(handle_wind_u_h, "dataDate", data_date)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_u_h, "dataTime", data_time))
+        if ((retval = codes_set_long(handle_wind_u_h, "dataTime", data_time)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_u_h, "forecastTime", t_write - t_init))
+        if ((retval = codes_set_long(handle_wind_u_h, "forecastTime", t_write - t_init)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_u_h, "stepRange", t_write - t_init))
+        if ((retval = codes_set_long(handle_wind_u_h, "stepRange", t_write - t_init)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_u_h, "typeOfGeneratingProcess", 1))
+        if ((retval = codes_set_long(handle_wind_u_h, "typeOfGeneratingProcess", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_u_h, "parameterCategory", 2))
+        if ((retval = codes_set_long(handle_wind_u_h, "parameterCategory", 2)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_u_h, "parameterNumber", 2))
+        if ((retval = codes_set_long(handle_wind_u_h, "parameterNumber", 2)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_u_h, "typeOfFirstFixedSurface", 102))
+        if ((retval = codes_set_long(handle_wind_u_h, "typeOfFirstFixedSurface", 102)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_u_h, "scaleFactorOfFirstFixedSurface", 1))
+        if ((retval = codes_set_long(handle_wind_u_h, "scaleFactorOfFirstFixedSurface", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_u_h, "scaledValueOfFirstFixedSurface", z_height))
+        if ((retval = codes_set_long(handle_wind_u_h, "scaledValueOfFirstFixedSurface", z_height)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_u_h, "level", i))
+        if ((retval = codes_set_long(handle_wind_u_h, "level", i)))
             ECCERR(retval);
-        if (retval = codes_set_double_array(handle_wind_u_h, "values", wind_u_h, NUMBER_OF_VECTORS_H))
+        if ((retval = codes_set_double_array(handle_wind_u_h, "values", wind_u_h, NUMBER_OF_VECTORS_H)))
             ECCERR(retval);
-        if (retval = codes_write_message(handle_wind_u_h, OUTPUT_FILE, "a"))
+        if ((retval = codes_write_message(handle_wind_u_h, OUTPUT_FILE, "a")))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "discipline", 0))
+        if ((retval = codes_set_long(handle_wind_v_h, "discipline", 0)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "centre", 255))
+        if ((retval = codes_set_long(handle_wind_v_h, "centre", 255)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "significanceOfReferenceTime", 1))
+        if ((retval = codes_set_long(handle_wind_v_h, "significanceOfReferenceTime", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "productionStatusOfProcessedData", 1))
+        if ((retval = codes_set_long(handle_wind_v_h, "productionStatusOfProcessedData", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "typeOfProcessedData", 1))
+        if ((retval = codes_set_long(handle_wind_v_h, "typeOfProcessedData", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "indicatorOfUnitOfTimeRange", 13))
+        if ((retval = codes_set_long(handle_wind_v_h, "indicatorOfUnitOfTimeRange", 13)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "stepUnits", 13))
+        if ((retval = codes_set_long(handle_wind_v_h, "stepUnits", 13)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "dataDate", data_date))
+        if ((retval = codes_set_long(handle_wind_v_h, "dataDate", data_date)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "dataTime", data_time))
+        if ((retval = codes_set_long(handle_wind_v_h, "dataTime", data_time)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "forecastTime", t_write - t_init))
+        if ((retval = codes_set_long(handle_wind_v_h, "forecastTime", t_write - t_init)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "stepRange", t_write - t_init))
+        if ((retval = codes_set_long(handle_wind_v_h, "stepRange", t_write - t_init)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "typeOfGeneratingProcess", 1))
+        if ((retval = codes_set_long(handle_wind_v_h, "typeOfGeneratingProcess", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "parameterCategory", 2))
+        if ((retval = codes_set_long(handle_wind_v_h, "parameterCategory", 2)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "parameterNumber", 3))
+        if ((retval = codes_set_long(handle_wind_v_h, "parameterNumber", 3)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "typeOfFirstFixedSurface", 102))
+        if ((retval = codes_set_long(handle_wind_v_h, "typeOfFirstFixedSurface", 102)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "scaleFactorOfFirstFixedSurface", 1))
+        if ((retval = codes_set_long(handle_wind_v_h, "scaleFactorOfFirstFixedSurface", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "scaledValueOfFirstFixedSurface", z_height))
+        if ((retval = codes_set_long(handle_wind_v_h, "scaledValueOfFirstFixedSurface", z_height)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_v_h, "level", i))
+        if ((retval = codes_set_long(handle_wind_v_h, "level", i)))
             ECCERR(retval);
-        if (retval = codes_set_double_array(handle_wind_v_h, "values", wind_v_h, NUMBER_OF_VECTORS_H))
+        if ((retval = codes_set_double_array(handle_wind_v_h, "values", wind_v_h, NUMBER_OF_VECTORS_H)))
             ECCERR(retval);
-        if (retval = codes_write_message(handle_wind_v_h, OUTPUT_FILE, "a"))
+        if ((retval = codes_write_message(handle_wind_v_h, OUTPUT_FILE, "a")))
             ECCERR(retval);
     }
     free(mslp);
@@ -347,45 +344,45 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
         z_height = grid -> z_vector[i*NUMBER_OF_VECTORS_PER_LAYER];
         for (int j = 0; j < NUMBER_OF_SCALARS_H; j++)
             wind_w_h[j] = state_write_out -> wind[j + i*(NUMBER_OF_SCALARS_H + NUMBER_OF_VECTORS_H)];
-        if (retval = codes_set_long(handle_wind_w_h, "discipline", 0))
+        if ((retval = codes_set_long(handle_wind_w_h, "discipline", 0)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_w_h, "centre", 255))
+        if ((retval = codes_set_long(handle_wind_w_h, "centre", 255)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_w_h, "significanceOfReferenceTime", 1))
+        if ((retval = codes_set_long(handle_wind_w_h, "significanceOfReferenceTime", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_w_h, "productionStatusOfProcessedData", 1))
+        if ((retval = codes_set_long(handle_wind_w_h, "productionStatusOfProcessedData", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_w_h, "typeOfProcessedData", 1))
+        if ((retval = codes_set_long(handle_wind_w_h, "typeOfProcessedData", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_w_h, "indicatorOfUnitOfTimeRange", 13))
+        if ((retval = codes_set_long(handle_wind_w_h, "indicatorOfUnitOfTimeRange", 13)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_w_h, "stepUnits", 13))
+        if ((retval = codes_set_long(handle_wind_w_h, "stepUnits", 13)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_w_h, "dataDate", data_date))
+        if ((retval = codes_set_long(handle_wind_w_h, "dataDate", data_date)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_w_h, "dataTime", data_time))
+        if ((retval = codes_set_long(handle_wind_w_h, "dataTime", data_time)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_w_h, "forecastTime", t_write - t_init))
+        if ((retval = codes_set_long(handle_wind_w_h, "forecastTime", t_write - t_init)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_w_h, "stepRange", t_write - t_init))
+        if ((retval = codes_set_long(handle_wind_w_h, "stepRange", t_write - t_init)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_w_h, "typeOfGeneratingProcess", 1))
+        if ((retval = codes_set_long(handle_wind_w_h, "typeOfGeneratingProcess", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_w_h, "parameterCategory", 2))
+        if ((retval = codes_set_long(handle_wind_w_h, "parameterCategory", 2)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_w_h, "parameterNumber", 9))
+        if ((retval = codes_set_long(handle_wind_w_h, "parameterNumber", 9)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_w_h, "typeOfFirstFixedSurface", 102))
+        if ((retval = codes_set_long(handle_wind_w_h, "typeOfFirstFixedSurface", 102)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_w_h, "scaleFactorOfFirstFixedSurface", 1))
+        if ((retval = codes_set_long(handle_wind_w_h, "scaleFactorOfFirstFixedSurface", 1)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_w_h, "scaledValueOfFirstFixedSurface", z_height))
+        if ((retval = codes_set_long(handle_wind_w_h, "scaledValueOfFirstFixedSurface", z_height)))
             ECCERR(retval);
-        if (retval = codes_set_long(handle_wind_w_h, "level", i))
+        if ((retval = codes_set_long(handle_wind_w_h, "level", i)))
             ECCERR(retval);
-        if (retval = codes_set_double_array(handle_wind_w_h, "values", wind_v_h, NUMBER_OF_SCALARS_H))
+        if ((retval = codes_set_double_array(handle_wind_w_h, "values", wind_v_h, NUMBER_OF_SCALARS_H)))
             ECCERR(retval);
-        if (retval = codes_write_message(handle_wind_w_h, OUTPUT_FILE, "a"))
+        if ((retval = codes_write_message(handle_wind_w_h, OUTPUT_FILE, "a")))
             ECCERR(retval);
     }
     codes_handle_delete(handle_wind_w_h);

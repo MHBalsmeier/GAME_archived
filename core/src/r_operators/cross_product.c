@@ -30,5 +30,5 @@ int cross_product(Vector_field a_field, Dual_vector_field b_field, Vector_field 
         term_1 = component_2*component_1;
         out_field[i] = term_0 - term_1;
     }
-    return 0;
+    return retval;
 }
