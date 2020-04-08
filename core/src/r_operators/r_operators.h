@@ -17,3 +17,4 @@ int recov_ver_1_pri(Vector_field, long, long, double *, Grid *);
 int tendency(State *, State *, Grid *, Dualgrid*, short);
 int scalar_times_vector(Scalar_field, Vector_field, Vector_field, Grid *);
 int linear_combine_two_states(State *, State *, State *, double, double);
+int add_vector_fields(Vector_field, Vector_field, Vector_field);
