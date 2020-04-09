@@ -20,6 +20,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     Scalar_field *mass_diffusion_rate = malloc(sizeof(Scalar_field));
     Scalar_field *temperature = malloc(sizeof(Scalar_field));
     Scalar_field *mass_diffusion_coeff = malloc(sizeof(Scalar_field));
+    double mass_diffusion_coeff_para_ratio;
     if (dissipation_on == 1)
     {
         temperature_diagnostics(current_state -> density_pot_temp, current_state -> density, *temperature);
@@ -28,7 +29,8 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
         for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
         {
             calc_diffusion_coeff((*temperature)[i], mean_particle_mass, current_state -> density[i], eff_particle_radius, &(*mass_diffusion_coeff)[i]);
-            (*mass_diffusion_coeff)[i] = pow(10, 5)*(*mass_diffusion_coeff)[i];
+            mass_diffusion_coeff_para_ratio = pow(10, 5);
+            (*mass_diffusion_coeff)[i] = mass_diffusion_coeff_para_ratio*(*mass_diffusion_coeff)[i];
         }
         scalar_times_vector(*mass_diffusion_coeff, *diffusion_mass_flux_pre, *diffusion_mass_flux, grid);
         free(diffusion_mass_flux_pre);

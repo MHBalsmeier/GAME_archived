@@ -318,9 +318,9 @@ int main(int argc, char *argv[])
     short *h_curl_signs = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(short));
     short *vorticity_signs_dual = malloc(6*NUMBER_OF_VECTORS_V*sizeof(short));
     short *h_curl_signs_dual = malloc(4*NUMBER_OF_VECTORS_H*sizeof(short));
-    double lat_edge_1, lon_edge_1, lat_edge_2, lon_edge_2, lat_1, lon_1, lat_2, lon_2, lat_res, lon_res, base_area, base_distance, z_0, z_1, radius_0, radius_1, direction_change, x_point_0, y_point_0, z_point_0, x_point_1, y_point_1, z_point_1, x_res, y_res, z_res, sigma_z, sigma_z_dual_scalar, rel_on_line;
+    double lat_res, lon_res, base_area, base_distance, radius_0, radius_1, direction_change, x_point_0, y_point_0, z_point_0, x_point_1, y_point_1, z_point_1, x_res, y_res, z_res, sigma_z, sigma_z_dual_scalar, rel_on_line;
     int face_index, face_index_0, face_index_1, retval;
-    long h_index, on_face_index, layer_index, level_index, inner_index, upper_index, lower_index, coord_0_points_amount, j, coord_0, coord_1, index_0, index_1, index_2, points_right, triangle_on_face_index, on_edge_index, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_index, counter, primal_vector_index, dual_vector_index, number_of_triangles_per_face, edgepoint_0, edgepoint_1, edgepoint_2, edgepoint_3, points_per_edge, dual_scalar_on_face_index, base_index_old, base_index_down_triangles, base_index_up_triangles, old_triangle_on_line_index;
+    long h_index, on_face_index, layer_index, inner_index, upper_index, lower_index, coord_0_points_amount, coord_0, coord_1, index_0, index_1, triangle_on_face_index, on_edge_index, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_index, counter, primal_vector_index, dual_vector_index, number_of_triangles_per_face, edgepoint_0, edgepoint_1, edgepoint_2, points_per_edge, dual_scalar_on_face_index, base_index_old, base_index_down_triangles, base_index_up_triangles, old_triangle_on_line_index;
     short first_face_found, edge_rel_to_face_0, edge_rel_to_face_1, edge_index, sign, small_triangle_edge_index, dump, points_upwards, points_downwards, last_triangle_bool;
     if (NUMBER_OF_VECTORS_H != NUMBER_OF_DUAL_VECTORS_H)
         printf("It is NUMBER_OF_VECTORS_H != NUMBER_OF_DUAL_VECTORS_H.\n");
@@ -1629,7 +1629,7 @@ int find_triangle_on_face_index_from_coords(long coord_0, long coord_1, long res
         ++i;
     }
     *triangle_on_face_index += coord_0;
-    return 0;
+    return retval;
 }
 
 int find_sigma_from_level(int level_index, double *result)
@@ -1892,7 +1892,6 @@ int write_scalar_coordinates(long edgepoint_0, long edgepoint_1, long edgepoint_
 {
     double x_res, y_res, z_res, lat_res, lon_res;
     int retval = find_between_point(x_unity[edgepoint_0], y_unity[edgepoint_0], z_unity[edgepoint_0], x_unity[edgepoint_1], y_unity[edgepoint_1], z_unity[edgepoint_1], 0.5, &x_res, &y_res, &z_res);
-    double test_0, test_1, test_2;
     retval += normalize_cartesian(x_res, y_res, z_res, &x_res, &y_res, &z_res);
     if (points_upwards == 1)
     {
