@@ -1,7 +1,7 @@
 #include "../enum_and_typedefs.h"
 #include <stdio.h>
 
-int divergence(Vector_field in_field, Scalar_field out_field, Grid *grid)
+int divergence(Vector_field in_field, Scalar_field out_field, Grid *grid, short allow_surface_flux)
 {
     short number_of_edges;
     long layer_index, h_index;
@@ -19,7 +19,7 @@ int divergence(Vector_field in_field, Scalar_field out_field, Grid *grid)
         if (layer_index == 0)
             comp_v = -in_field[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER]*grid -> area[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER];
         else if (layer_index == NUMBER_OF_LAYERS - 1)
-            comp_v = in_field[h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER]*grid -> area[h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER];
+            comp_v = in_field[h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER]*grid -> area[h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER] - allow_surface_flux*in_field[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER]*grid -> area[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER];
         else
             comp_v = in_field[h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER]*grid -> area[h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER] - in_field[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER]*grid -> area[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER];
         out_field[i] = 1/grid -> volume[i]*(comp_h + comp_v);

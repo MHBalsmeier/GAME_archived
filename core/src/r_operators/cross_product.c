@@ -1,5 +1,5 @@
 #include "../enum_and_typedefs.h"
-#include "r_operators.h"
+#include "../diagnostics/diagnostics.h"
 #include <stdlib.h>
 #include <stdio.h>
 

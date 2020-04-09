@@ -276,8 +276,8 @@ int main(int argc, char *argv[])
     double *recov_hor_ver_pri_weight = malloc(4*NUMBER_OF_VECTORS_H*sizeof(double));
     double *recov_hor_par_dual_weight = malloc(2*NUMBER_OF_VECTORS_H*sizeof(double));
     double *recov_hor_ver_dual_weight = malloc(2*NUMBER_OF_VECTORS_H*sizeof(double));
-    double *recov_ver_0_pri_weight = malloc(12*NUMBER_OF_VECTORS_V*sizeof(double));
-    double *recov_ver_1_pri_weight = malloc(12*NUMBER_OF_VECTORS_V*sizeof(double));
+    double *recov_ver_0_pri_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
+    double *recov_ver_1_pri_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
     double *recov_ver_0_dual_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
     double *recov_ver_1_dual_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
     double *latitude_scalar_dual = malloc(NUMBER_OF_DUAL_SCALARS_H*sizeof(double));
@@ -301,8 +301,8 @@ int main(int argc, char *argv[])
     long *recov_hor_ver_pri_index = malloc(4*NUMBER_OF_VECTORS_H*sizeof(long));
     long *recov_hor_par_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(long));
     long *recov_hor_ver_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(long));
-    long *recov_ver_0_pri_index = malloc(12*NUMBER_OF_VECTORS_V*sizeof(long));
-    long *recov_ver_1_pri_index = malloc(12*NUMBER_OF_VECTORS_V*sizeof(long));
+    long *recov_ver_0_pri_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
+    long *recov_ver_1_pri_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
     long *recov_ver_0_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
     long *recov_ver_1_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
     long *adjacent_vector_indices_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(long));
@@ -1158,34 +1158,23 @@ int main(int argc, char *argv[])
             weight_prefactor = 2.0/5.0;
         for (int j = 0; j < 6; ++j)
         {
-            recov_ver_0_pri_index[12*i + j] = adjacent_vector_indices_h[6*i + j];
-            recov_ver_0_pri_weight[12*i + j] = 0.5*weight_prefactor*cos(direction[recov_ver_0_pri_index[12*i + j]]);
+            recov_ver_0_pri_index[6*i + j] = adjacent_vector_indices_h[6*i + j];
+            recov_ver_0_pri_weight[6*i + j] = weight_prefactor*cos(direction[recov_ver_0_pri_index[6*i + j]]);
             recov_ver_0_dual_index[6*i + j] = adjacent_vector_indices_h[6*i + j];
             recov_ver_0_dual_weight[6*i + j] = weight_prefactor*cos(direction_dual[recov_ver_0_dual_index[6*i + j]]);
-            recov_ver_1_pri_index[12*i + j] = adjacent_vector_indices_h[6*i + j];
-            recov_ver_1_pri_weight[12*i + j] = 0.5*weight_prefactor*sin(direction[recov_ver_1_pri_index[12*i + j]]);
+            recov_ver_1_pri_index[6*i + j] = adjacent_vector_indices_h[6*i + j];
+            recov_ver_1_pri_weight[6*i + j] = weight_prefactor*sin(direction[recov_ver_1_pri_index[6*i + j]]);
             recov_ver_1_dual_index[6*i + j] = adjacent_vector_indices_h[6*i + j];
             recov_ver_1_dual_weight[6*i + j] = weight_prefactor*sin(direction_dual[recov_ver_1_dual_index[6*i + j]]);
         }
-        for (int j = 6; j < 12; ++j)
-        {
-            recov_ver_0_pri_index[12*i + j] = adjacent_vector_indices_h[6*i + j - 6] + NUMBER_OF_VECTORS_PER_LAYER;
-            recov_ver_0_pri_weight[12*i + j] = 0.5*weight_prefactor*cos(direction[recov_ver_0_pri_index[12*i + j]]);
-            recov_ver_1_pri_index[12*i + j] = adjacent_vector_indices_h[6*i + j - 6] + NUMBER_OF_VECTORS_PER_LAYER;
-            recov_ver_1_pri_weight[12*i + j] = 0.5*weight_prefactor*sin(direction[recov_ver_1_pri_index[12*i + j]]);
-        }
         if (i < NUMBER_OF_PENTAGONS)
         {
-            recov_ver_0_pri_index[12*i + 5] = 0;
-            recov_ver_0_pri_index[12*i + 11] = 0;
-            recov_ver_1_pri_index[12*i + 5] = 0;
-            recov_ver_1_pri_index[12*i + 11] = 0;
+            recov_ver_0_pri_index[6*i + 5] = 0;
+            recov_ver_1_pri_index[6*i + 5] = 0;
             recov_ver_0_dual_index[6*i + 5] = 0;
             recov_ver_1_dual_index[6*i + 5] = 0;
-            recov_ver_0_pri_weight[12*i + 5] = 0;
-            recov_ver_0_pri_weight[12*i + 11] = 0;
-            recov_ver_1_pri_weight[12*i + 5] = 0;
-            recov_ver_1_pri_weight[12*i + 11] = 0;
+            recov_ver_0_pri_weight[6*i + 5] = 0;
+            recov_ver_1_pri_weight[6*i + 5] = 0;
             recov_ver_0_dual_weight[6*i + 5] = 0;
             recov_ver_1_dual_weight[6*i + 5] = 0;
         }
@@ -1262,7 +1251,7 @@ int main(int argc, char *argv[])
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
     free(OUTPUT_FILE);
-    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id, vector_dual_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_v_dimid_12, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id, exner_pressure_background_gradient_id, vector_v_dimid;
+    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id, vector_dual_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id, exner_pressure_background_gradient_id, vector_v_dimid;
     if ((retval = nc_def_dim(ncid_g_prop, "vector_v_index", NUMBER_OF_V_VECTORS, &vector_v_dimid)))
         ERR(retval); 
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NUMBER_OF_SCALARS, &scalar_dimid)))
@@ -1284,8 +1273,6 @@ int main(int argc, char *argv[])
     if ((retval = nc_def_dim(ncid_g_prop, "vector_h_4_index", 4*NUMBER_OF_VECTORS_H, &vector_h_dimid_4)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_v_6_index", 6*NUMBER_OF_VECTORS_V, &vector_v_dimid_6)))
-        ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_v_12_index", 12*NUMBER_OF_VECTORS_V, &vector_v_dimid_12)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_index_h_dual", NUMBER_OF_DUAL_VECTORS_H, &vector_dual_h_dimid)))
         ERR(retval);
@@ -1345,9 +1332,9 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_dual_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_0_dual_weight_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_pri_weight", NC_DOUBLE, 1, &vector_v_dimid_12, &recov_ver_0_pri_weight_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_pri_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_0_pri_weight_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_pri_weight", NC_DOUBLE, 1, &vector_v_dimid_12, &recov_ver_1_pri_weight_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_pri_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_1_pri_weight_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_dual_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_1_dual_weight_id)))
         ERR(retval);
@@ -1391,11 +1378,11 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "recov_hor_ver_pri_index", NC_LONG, 1, &vector_h_dimid_4, &recov_hor_ver_pri_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_pri_index", NC_LONG, 1, &vector_v_dimid_12, &recov_ver_0_pri_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_pri_index", NC_LONG, 1, &vector_v_dimid_6, &recov_ver_0_pri_index_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_dual_index", NC_LONG, 1, &vector_v_dimid_6, &recov_ver_0_dual_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_pri_index", NC_LONG, 1, &vector_v_dimid_12, &recov_ver_1_pri_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_pri_index", NC_LONG, 1, &vector_v_dimid_6, &recov_ver_1_pri_index_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_dual_index", NC_LONG, 1, &vector_v_dimid_6, &recov_ver_1_dual_index_id)))
         ERR(retval);

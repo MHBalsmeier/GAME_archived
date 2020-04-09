@@ -11,6 +11,7 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
 {
     long unsigned int no_scalars_h = NUMBER_OF_SCALARS_H;
     long unsigned int no_vectors_h = NUMBER_OF_VECTORS_H;
+    double exner_pressure;
     FILE *IN_FILE;
     int err = 0;
     *t_init = 0;
@@ -43,6 +44,13 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
         {
             init_state -> density[j + i*NUMBER_OF_SCALARS_H] = rho[j];
             init_state -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H] = rho[j]*pot_temp[j];
+            for (int k = 0; k < NUMBER_OF_ADD_COMPS; k++)
+                init_state -> add_comp_densities[k*NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H] = 0;
+            for (int k = 0; k < NUMBER_OF_COND_ADD_COMPS; k++)
+            {
+                exner_pressure = pow(R_D*rho[j]*pot_temp[j]/P_0, R_D/C_V);
+                init_state -> add_comp_temps[k*NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H] = exner_pressure*pot_temp[j];
+            }
         }
         handle_wind_h = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
         if (err != 0)

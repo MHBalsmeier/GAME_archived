@@ -18,6 +18,8 @@
 
 enum grid_integers {
 RES_ID = 4,
+NUMBER_OF_ADD_COMPS = 3,
+NUMBER_OF_COND_ADD_COMPS = 2,
 NUMBER_OF_BASIC_TRIANGLES = 20,
 NUMBER_OF_PENTAGONS = 12,
 NUMBER_OF_HEXAGONS = (int) (10*(pow(2, 2*RES_ID) - 1)),
@@ -49,6 +51,8 @@ VECTOR_POINTS_PER_INNER_FACE = (int) (1.5*(pow(2, RES_ID) - 1)*pow(2, RES_ID))};
 typedef double Scalar_field[NUMBER_OF_SCALARS];
 typedef double Vector_field[NUMBER_OF_VECTORS];
 typedef double Dual_vector_field[NUMBER_OF_DUAL_VECTORS];
+typedef double Add_comp_densities[NUMBER_OF_ADD_COMPS*NUMBER_OF_SCALARS];
+typedef double Add_comp_temps[NUMBER_OF_COND_ADD_COMPS*NUMBER_OF_SCALARS];
 
 typedef struct grid {
 Vector_field normal_distance;
@@ -76,12 +80,12 @@ long recov_hor_par_pri_index[4*NUMBER_OF_VECTORS_H];
 double recov_hor_par_pri_weight[4*NUMBER_OF_VECTORS_H];
 long recov_hor_ver_pri_index[4*NUMBER_OF_VECTORS_H];
 double recov_hor_ver_pri_weight[4*NUMBER_OF_VECTORS_H];
-long recov_ver_0_pri_index[12*NUMBER_OF_VECTORS_V];
-double recov_ver_0_pri_weight[12*NUMBER_OF_VECTORS_V];
+long recov_ver_0_pri_index[6*NUMBER_OF_VECTORS_V];
+double recov_ver_0_pri_weight[6*NUMBER_OF_VECTORS_V];
 long recov_ver_0_dual_index[6*NUMBER_OF_VECTORS_V];
 double recov_ver_0_dual_weight[6*NUMBER_OF_VECTORS_V];
-long recov_ver_1_pri_index[12*NUMBER_OF_VECTORS_V];
-double recov_ver_1_pri_weight[12*NUMBER_OF_VECTORS_V];
+long recov_ver_1_pri_index[6*NUMBER_OF_VECTORS_V];
+double recov_ver_1_pri_weight[6*NUMBER_OF_VECTORS_V];
 long recov_ver_1_dual_index[6*NUMBER_OF_VECTORS_V];
 double recov_ver_1_dual_weight[6*NUMBER_OF_VECTORS_V];
 } Grid;
@@ -103,4 +107,6 @@ typedef struct state {
 Scalar_field density_pot_temp;
 Scalar_field density;
 Vector_field wind;
+Add_comp_densities add_comp_densities;
+Add_comp_temps add_comp_temps;
 } State;

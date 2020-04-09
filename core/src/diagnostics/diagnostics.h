@@ -1,3 +1,11 @@
 int exner_pressure_diagnostics(Scalar_field, Scalar_field);
 int temperature_diagnostics(Scalar_field, Scalar_field, Scalar_field);
 int global_scalar_integrator(Scalar_field, Grid *, double *);
+int recov_hor_par_dual(Dual_vector_field, long, long, double *, Grid *);
+int recov_hor_par_pri(Vector_field, long, long, double *, Grid *);
+int recov_hor_ver_dual(Dual_vector_field, long, long, double *, Grid *);
+int recov_hor_ver_pri(Vector_field, long, long, double *, Grid *);
+int recov_ver_0_dual(Dual_vector_field, long, long, double *, Grid *);
+int recov_ver_0_pri(Vector_field, long, long, double *, Grid *);
+int recov_ver_1_dual(Dual_vector_field, long, long, double *, Grid *);
+int recov_ver_1_pri(Vector_field, long, long, double *, Grid *);

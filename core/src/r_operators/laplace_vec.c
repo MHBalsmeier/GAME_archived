@@ -5,7 +5,7 @@
 int laplace_vec(Vector_field in_field, Vector_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
     Scalar_field *between_0 = malloc(sizeof(Scalar_field));
-    divergence(in_field, *between_0, grid);
+    divergence(in_field, *between_0, grid, 0);
     Vector_field *between_1 = malloc(sizeof(Vector_field));
     grad(*between_0, *between_1, grid);
     free(between_0);

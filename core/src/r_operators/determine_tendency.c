@@ -1,6 +1,9 @@
 #include "../enum_and_typedefs.h"
 #include "r_operators.h"
 #include "../diagnostics/diagnostics.h"
+#include "/lib/rad/include/rad.h"
+#include "/lib/addcomp/include/addcomp.h"
+#include "/lib/surface/include/surface.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -11,7 +14,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     Vector_field *density_flux = malloc(sizeof(Vector_field));
     scalar_times_vector(current_state -> density, current_state -> wind, *density_flux, grid);
     Scalar_field *density_flux_divergence = malloc(sizeof(Scalar_field));
-    divergence(*density_flux, *density_flux_divergence, grid);
+    divergence(*density_flux, *density_flux_divergence, grid, 0);
     free(density_flux);
     double mean_particle_mass = M_D/N_A;
     double eff_particle_radius = 130e-12;
@@ -34,7 +37,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
         }
         scalar_times_vector(*mass_diffusion_coeff, *diffusion_mass_flux_pre, *diffusion_mass_flux, grid);
         free(diffusion_mass_flux_pre);
-        retval = divergence(*diffusion_mass_flux, *mass_diffusion_rate, grid);
+        retval = divergence(*diffusion_mass_flux, *mass_diffusion_rate, grid, 0);
         free(diffusion_mass_flux);
     }
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
@@ -48,12 +51,12 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     Vector_field *density_pot_temp_flux = malloc(sizeof(Vector_field));
     scalar_times_vector(current_state -> density_pot_temp, current_state -> wind, *density_pot_temp_flux, grid);
     Scalar_field *density_pot_temp_flux_divergence = malloc(sizeof(Scalar_field));
-    divergence(*density_pot_temp_flux, *density_pot_temp_flux_divergence, grid);
+    divergence(*density_pot_temp_flux, *density_pot_temp_flux_divergence, grid, 0);
     free(density_pot_temp_flux);
     Vector_field *laplace_wind_field = malloc(sizeof(Vector_field));
     laplace_vec(current_state -> wind, *laplace_wind_field, grid, dualgrid);
-    Scalar_field *u_dot_friction = malloc(sizeof(Scalar_field));
-    inner(current_state -> wind, *laplace_wind_field, *u_dot_friction, grid);
+    Scalar_field *u_dot_laplace_wind = malloc(sizeof(Scalar_field));
+    inner(current_state -> wind, *laplace_wind_field, *u_dot_laplace_wind, grid);
     Scalar_field *temp_diffusion_heating = malloc(sizeof(Scalar_field));
     Vector_field *temperature_flux = malloc(sizeof(Vector_field));
     if (dissipation_on == 1)
@@ -63,33 +66,90 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
         scalar_times_vector(*mass_diffusion_coeff, *temperature_flux_pre, *temperature_flux, grid);
         free(temperature_flux_pre);
         free(mass_diffusion_coeff);
-        retval = divergence(*temperature_flux, *temp_diffusion_heating, grid);
+        retval = divergence(*temperature_flux, *temp_diffusion_heating, grid, 0);
     }
-    free(temperature);
     free(temperature_flux);
     Scalar_field *pot_temp = malloc(sizeof(Scalar_field));
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
         (*pot_temp)[i] = current_state -> density_pot_temp[i]/current_state -> density[i];
     Scalar_field *exner_pressure = malloc(sizeof(Scalar_field));
     exner_pressure_diagnostics(current_state -> density_pot_temp, *exner_pressure);
+    double viscosity_coeff = 5;
     double friction_heating;
+    Scalar_field *rad_heating = malloc(sizeof(Scalar_field));
+    double *source_rates = malloc((1 + NUMBER_OF_ADD_COMPS)*NUMBER_OF_SCALARS*sizeof(double));
+    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+        (*rad_heating)[i] = 0;
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
         if (dissipation_on == 1)
         {
-            friction_heating = -current_state -> density[i]*(*u_dot_friction)[i];
-            state_tendency -> density_pot_temp[i] = -(*density_pot_temp_flux_divergence)[i] + (*pot_temp)[i]*(*mass_diffusion_rate)[i] + 1/(C_P*(*exner_pressure)[i])*(friction_heating + (*temp_diffusion_heating)[i]);
+            friction_heating = -viscosity_coeff*current_state -> density[i]*(*u_dot_laplace_wind)[i];
+            state_tendency -> density_pot_temp[i] = -(*density_pot_temp_flux_divergence)[i] + (*pot_temp)[i]*((*mass_diffusion_rate)[i] + source_rates[i]) + 1/(C_P*(*exner_pressure)[i])*(friction_heating + (*rad_heating)[i] + (*temp_diffusion_heating)[i]);
         }
         else
             state_tendency -> density_pot_temp[i] = -(*density_pot_temp_flux_divergence)[i];
     }
     free(temp_diffusion_heating);
     free(mass_diffusion_rate);
-    free(u_dot_friction);
+    free(u_dot_laplace_wind);
     free(density_pot_temp_flux_divergence);
+    Scalar_field *add_comp_density = malloc(sizeof(Scalar_field));
+    Vector_field *add_comp_velocity = malloc(sizeof(Vector_field));
+    Vector_field *add_comp_density_flux = malloc(sizeof(Vector_field));
+    Scalar_field *add_comp_flux_divergence = malloc(sizeof(Scalar_field));
+    long h_index, layer_index;
+    for (int i = 0; i < NUMBER_OF_ADD_COMPS; ++i)
+    {
+        for (int j = 0; j < NUMBER_OF_SCALARS; ++j)
+            (*add_comp_density)[j] = current_state -> add_comp_densities[i*NUMBER_OF_SCALARS + j];
+        if (i < NUMBER_OF_COND_ADD_COMPS)
+        {
+            for (int j = 0; j < NUMBER_OF_VECTORS; ++j)
+            {
+                layer_index = j/NUMBER_OF_VECTORS_PER_LAYER;
+                h_index = j - layer_index*NUMBER_OF_VECTORS_PER_LAYER;
+                (*add_comp_velocity)[j] = current_state -> wind[j];
+                if (h_index < NUMBER_OF_VECTORS_V)
+                    (*add_comp_velocity)[j] -= ret_sink_velocity(i, 0, 0.001);
+            }
+            retval = scalar_times_vector(*add_comp_density, *add_comp_velocity, *add_comp_density_flux, grid);
+            retval = divergence(*add_comp_density_flux, *add_comp_flux_divergence, grid, 1);
+        }
+        else
+        {
+            retval = scalar_times_vector(*add_comp_density, current_state -> wind, *add_comp_density_flux, grid);
+            retval = divergence(*add_comp_density_flux, *add_comp_flux_divergence, grid, 0);
+        }
+        for (int j = 0; j < NUMBER_OF_SCALARS; ++j)
+            state_tendency -> add_comp_densities[i*NUMBER_OF_SCALARS + j] = -(*add_comp_flux_divergence)[j] + source_rates[(i + 1)*NUMBER_OF_SCALARS + j];
+    }
+    free(source_rates);
+    free(add_comp_density);
+    free(add_comp_density_flux);
+    free(add_comp_flux_divergence);
+    Scalar_field *add_comp_temp = malloc(sizeof(Scalar_field));
+    Scalar_field *add_comp_temp_adv = malloc(sizeof(Scalar_field));
+    for (int i = 0; i < NUMBER_OF_COND_ADD_COMPS; ++i)
+    {
+        for (int j = 0; j < NUMBER_OF_VECTORS; ++j)
+        {
+            layer_index = j/NUMBER_OF_VECTORS_PER_LAYER;
+            h_index = j - layer_index*NUMBER_OF_VECTORS_PER_LAYER;
+            (*add_comp_velocity)[j] = current_state -> wind[j];
+            if (h_index < NUMBER_OF_VECTORS_V)
+                (*add_comp_velocity)[j] -= ret_sink_velocity(i, 0, 0.001);
+        }
+        retval = adv_scalar(*add_comp_temp, *add_comp_velocity, *add_comp_temp_adv, grid);
+        for (int j = 0; j < NUMBER_OF_SCALARS; ++j)
+            state_tendency -> add_comp_temps[i*NUMBER_OF_SCALARS + j] = (*add_comp_temp_adv)[j] + (*rad_heating)[j]*current_state -> add_comp_densities[i*NUMBER_OF_SCALARS + j]/current_state -> density[j];
+    }
+    free(rad_heating);
+    free(add_comp_temp);
+    free(add_comp_velocity);
+    free(add_comp_temp_adv);
     Dual_vector_field *rel_curl = malloc(sizeof(Dual_vector_field));
     curl(current_state -> wind, *rel_curl, grid, dualgrid);
-    long layer_index;
     Dual_vector_field *abs_curl = malloc(sizeof(Dual_vector_field));
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; ++i)
     {
@@ -105,7 +165,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     grad(*exner_pressure_perturb, *exner_pressure_perturb_gradient, grid);
     free(exner_pressure_perturb);
     Vector_field *m_pressure_gradient_acc = malloc(sizeof(Vector_field));
-    scalar_times_vector(*pot_temp, *exner_pressure_perturb_gradient, *m_pressure_gradient_acc, grid);
+    retval = scalar_times_vector(*pot_temp, *exner_pressure_perturb_gradient, *m_pressure_gradient_acc, grid);
     free(pot_temp);
     free(exner_pressure_perturb_gradient);
     Vector_field *abs_curl_tend = malloc(sizeof(Vector_field));
@@ -117,10 +177,21 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
         (*m_pressure_gradient_acc)[i] = C_P*(*m_pressure_gradient_acc)[i];
     Vector_field *m_e_kin_tend_2 = malloc(sizeof(Vector_field));
     grad(*e_kin_spec_2, *m_e_kin_tend_2, grid);
+    short check_energy_bool = 0;
+    double enery_integral = 0;
+    if (check_energy_bool == 1)
+    {
+        for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+        {
+            enery_integral += (*e_kin_spec_2)[i]*current_state -> density[i]*grid -> volume[i];
+            enery_integral += 9.80616*grid -> z_scalar[i]*current_state -> density[i]*grid -> volume[i];
+            enery_integral += C_V*(*temperature)[i]*current_state -> density[i]*grid -> volume[i];
+        }
+        printf("%lf\n", enery_integral);
+    }
+    free(temperature);
     free(e_kin_spec_2);
-    double viscosity_coeff = 5;
     double pot_temp_perturb;
-    long h_index;
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
         layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;

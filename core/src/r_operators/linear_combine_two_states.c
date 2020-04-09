@@ -9,6 +9,10 @@ int linear_combine_two_states(State *state_0, State *state_1, State *state_out, 
     {
         state_out -> density[i] = coeff_0*state_0 -> density[i] + coeff_1*state_1 -> density[i];
         state_out -> density_pot_temp[i] = coeff_0*state_0 -> density_pot_temp[i] + coeff_1*state_1 -> density_pot_temp[i];
+        for (int j = 0; j < NUMBER_OF_ADD_COMPS; ++j)
+            state_out -> add_comp_densities[j*NUMBER_OF_SCALARS + i] = coeff_0*state_0 -> add_comp_densities[j*NUMBER_OF_SCALARS + i] + coeff_1*state_1 -> add_comp_densities[j*NUMBER_OF_SCALARS + i];
+        for (int j = 0; j < NUMBER_OF_COND_ADD_COMPS; ++j)
+            state_out -> add_comp_temps[j*NUMBER_OF_SCALARS + i] = coeff_0*state_0 -> add_comp_temps[j*NUMBER_OF_SCALARS + i] + coeff_1*state_1 -> add_comp_temps[j*NUMBER_OF_SCALARS + i];
     }
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
         state_out -> wind[i] = coeff_0*state_0 -> wind[i] + coeff_1*state_1 -> wind[i];

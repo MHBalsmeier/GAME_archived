@@ -19,8 +19,8 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     double *recov_hor_ver_dual_weight = malloc(2*NUMBER_OF_VECTORS_H*sizeof(double));
     double *recov_hor_par_pri_weight = malloc(4*NUMBER_OF_VECTORS_H*sizeof(double));
     double *recov_hor_ver_pri_weight = malloc(4*NUMBER_OF_VECTORS_H*sizeof(double));
-    double *recov_ver_0_pri_weight = malloc(12*NUMBER_OF_VECTORS_V*sizeof(double));
-    double *recov_ver_1_pri_weight = malloc(12*NUMBER_OF_VECTORS_V*sizeof(double));
+    double *recov_ver_0_pri_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
+    double *recov_ver_1_pri_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
     double *recov_ver_0_dual_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
     double *recov_ver_1_dual_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
     double *normal_distance_dual = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(double));
@@ -32,8 +32,8 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     double *pot_temp_background = malloc(NUMBER_OF_V_VECTORS*sizeof(double));
     long *to_index = malloc(NUMBER_OF_VECTORS_H*sizeof(long));
     long *from_index = malloc(NUMBER_OF_VECTORS_H*sizeof(long));
-    long *recov_ver_0_pri_index = malloc(12*NUMBER_OF_VECTORS_V*sizeof(long));
-    long *recov_ver_1_pri_index = malloc(12*NUMBER_OF_VECTORS_V*sizeof(long));
+    long *recov_ver_0_pri_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
+    long *recov_ver_1_pri_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
     long *recov_ver_0_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
     long *recov_ver_1_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
     long *recov_hor_ver_pri_index = malloc(4*NUMBER_OF_VECTORS_H*sizeof(long));
@@ -332,11 +332,11 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     {
         for (int j = 0; j < 6; ++j)
         {
-            grid -> recov_ver_0_pri_index[12*i + j] = recov_ver_0_pri_index[12*i + j];
-            if (grid -> recov_ver_0_pri_index[12*i + j] >= 2*NUMBER_OF_VECTORS_H + NUMBER_OF_VECTORS_V || grid -> recov_ver_0_pri_index[12*i + j] < 0)
+            grid -> recov_ver_0_pri_index[6*i + j] = recov_ver_0_pri_index[6*i + j];
+            if (grid -> recov_ver_0_pri_index[6*i + j] >= 2*NUMBER_OF_VECTORS_H + NUMBER_OF_VECTORS_V || grid -> recov_ver_0_pri_index[6*i + j] < 0)
                 grid_check_failed();
-            grid -> recov_ver_0_pri_weight[12*i + j] = recov_ver_0_pri_weight[12*i + j];
-            if (fabs(grid -> recov_ver_0_pri_weight[12*i + j]) >= 1.0001)
+            grid -> recov_ver_0_pri_weight[6*i + j] = recov_ver_0_pri_weight[6*i + j];
+            if (fabs(grid -> recov_ver_0_pri_weight[6*i + j]) >= 1.0001)
                 grid_check_failed();
             grid -> recov_ver_0_dual_index[6*i + j] = recov_ver_0_dual_index[6*i + j];
             if (grid -> recov_ver_0_dual_index[6*i + j] >= NUMBER_OF_DUAL_VECTORS_H || grid -> recov_ver_0_dual_index[6*i + j] < 0)
@@ -344,11 +344,11 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
             grid -> recov_ver_0_dual_weight[6*i + j] = recov_ver_0_dual_weight[6*i + j];
             if (fabs(grid -> recov_ver_0_dual_weight[6*i + j]) >= 1.0001)
                 grid_check_failed();
-            grid -> recov_ver_1_pri_index[12*i + j] = recov_ver_1_pri_index[12*i + j];
-            if (recov_ver_1_pri_index[12*i + j] >= 2*NUMBER_OF_VECTORS_H + NUMBER_OF_VECTORS_V || grid -> recov_ver_1_pri_index[12*i + j] < 0)
+            grid -> recov_ver_1_pri_index[6*i + j] = recov_ver_1_pri_index[6*i + j];
+            if (recov_ver_1_pri_index[6*i + j] >= 2*NUMBER_OF_VECTORS_H + NUMBER_OF_VECTORS_V || grid -> recov_ver_1_pri_index[6*i + j] < 0)
                 grid_check_failed();
-            grid -> recov_ver_1_pri_weight[12*i + j] = recov_ver_1_pri_weight[12*i + j];
-            if (fabs(grid -> recov_ver_1_pri_weight[12*i + j]) >= 1.0001)
+            grid -> recov_ver_1_pri_weight[6*i + j] = recov_ver_1_pri_weight[6*i + j];
+            if (fabs(grid -> recov_ver_1_pri_weight[6*i + j]) >= 1.0001)
                 grid_check_failed();
             grid -> recov_ver_1_dual_index[6*i + j] = recov_ver_1_dual_index[6*i + j];
             if (grid -> recov_ver_1_dual_index[6*i + j] >= NUMBER_OF_DUAL_VECTORS_H || grid -> recov_ver_1_dual_index[6*i + j] < 0)
@@ -361,21 +361,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
                 grid_check_failed();
             grid -> vorticity_signs[6*i + j] = vorticity_signs_dual[6*i + j];
             if (fabs(grid -> vorticity_signs[6*i + j]) > 1)
-                grid_check_failed();
-        }
-        for (int j = 6; j < 12; ++j)
-        {
-            grid -> recov_ver_0_pri_index[12*i + j] = recov_ver_0_pri_index[12*i + j];
-            if (recov_ver_0_pri_index[12*i + j] >= 2*NUMBER_OF_VECTORS_H + NUMBER_OF_VECTORS_V || recov_ver_0_pri_index[12*i + j] < 0)
-                grid_check_failed();
-            grid -> recov_ver_0_pri_weight[12*i + j] = recov_ver_0_pri_weight[12*i + j];
-            if (fabs(grid -> recov_ver_0_pri_weight[12*i + j]) >= 1.0001)
-                grid_check_failed();
-            grid -> recov_ver_1_pri_index[12*i + j] = recov_ver_1_pri_index[12*i + j];
-            if (recov_ver_1_pri_index[12*i + j] >= 2*NUMBER_OF_VECTORS_H + NUMBER_OF_VECTORS_V || recov_ver_1_pri_index[12*i + j] < 0)
-                grid_check_failed();
-            grid -> recov_ver_1_pri_weight[12*i + j] = recov_ver_1_pri_weight[12*i + j];
-            if (fabs(grid -> recov_ver_1_pri_weight[12*i + j]) >= 1.0001)
                 grid_check_failed();
         }
     }
