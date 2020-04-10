@@ -7,6 +7,8 @@ init_state_file=/home/max/my_code/game/test_generator/grib_files/test_3_B4L6T300
 output_dir=output/test_3
 cfl_margin=0.2
 dissipation=1
+rad_on=1
+add_comps_on=1
 source run.sh
 disp_level=2
 disp_shortname=2t

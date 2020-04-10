@@ -11,7 +11,6 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
 {
     long unsigned int no_scalars_h = NUMBER_OF_SCALARS_H;
     long unsigned int no_vectors_h = NUMBER_OF_VECTORS_H;
-    double exner_pressure;
     FILE *IN_FILE;
     int err = 0;
     *t_init = 0;
@@ -19,10 +18,20 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
     codes_handle *handle_density = NULL;
     codes_handle *handle_wind_h = NULL;
     codes_handle *handle_wind_v = NULL;
-    double *pot_temp = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
-    double *rho = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
-    double *wind_h = malloc(sizeof(double)*NUMBER_OF_VECTORS_H);
-    double *wind_v = malloc(sizeof(double)*NUMBER_OF_SCALARS_H);
+    codes_handle *handle_water_vapour_density = NULL;
+    codes_handle *handle_liquid_water_density = NULL;
+    codes_handle *handle_solid_water_density = NULL;
+    codes_handle *handle_liquid_water_temp = NULL;
+    codes_handle *handle_solid_water_temp = NULL;
+    double *pot_temp = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *rho = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *water_vapour_density = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *liquid_water_density = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *solid_water_density = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *liquid_water_temp = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *solid_water_temp = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *wind_h = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
+    double *wind_v = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     int retval;
     long data_date, data_time;
     IN_FILE = fopen(FILE_NAME, "r");
@@ -40,16 +49,47 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
         if ((retval = codes_get_double_array(handle_density, "values", rho, &no_scalars_h)))
             ECCERR(retval);
         codes_handle_delete(handle_density);
+        handle_water_vapour_density = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
+        if (err != 0)
+            ECCERR(err);
+        if ((retval = codes_get_double_array(handle_water_vapour_density, "values", water_vapour_density, &no_scalars_h)))
+            ECCERR(retval);
+        codes_handle_delete(handle_water_vapour_density);
+        handle_liquid_water_density = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
+        if (err != 0)
+            ECCERR(err);
+        if ((retval = codes_get_double_array(handle_liquid_water_density, "values", liquid_water_density, &no_scalars_h)))
+            ECCERR(retval);
+        codes_handle_delete(handle_liquid_water_density);
+        handle_solid_water_density = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
+        if (err != 0)
+            ECCERR(err);
+        if ((retval = codes_get_double_array(handle_solid_water_density, "values", solid_water_density, &no_scalars_h)))
+            ECCERR(retval);
+        codes_handle_delete(handle_solid_water_density);
+        handle_liquid_water_temp = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
+        if (err != 0)
+            ECCERR(err);
+        if ((retval = codes_get_double_array(handle_liquid_water_temp, "values", liquid_water_temp, &no_scalars_h)))
+            ECCERR(retval);
+        codes_handle_delete(handle_liquid_water_temp);
+        handle_solid_water_temp = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
+        if (err != 0)
+            ECCERR(err);
+        if ((retval = codes_get_double_array(handle_solid_water_temp, "values", solid_water_temp, &no_scalars_h)))
+            ECCERR(retval);
+        codes_handle_delete(handle_solid_water_temp);
         for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
         {
             init_state -> density[j + i*NUMBER_OF_SCALARS_H] = rho[j];
             init_state -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H] = rho[j]*pot_temp[j];
-            for (int k = 0; k < NUMBER_OF_ADD_COMPS; k++)
-                init_state -> add_comp_densities[k*NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H] = 0;
-            for (int k = 0; k < NUMBER_OF_COND_ADD_COMPS; k++)
+            if (NUMBER_OF_ADD_COMPS > 0)
             {
-                exner_pressure = pow(R_D*rho[j]*pot_temp[j]/P_0, R_D/C_V);
-                init_state -> add_comp_temps[k*NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H] = exner_pressure*pot_temp[j];
+                init_state -> add_comp_densities[j + i*NUMBER_OF_SCALARS_H] = solid_water_density[j];
+                init_state -> add_comp_densities[NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H] = liquid_water_density[j];
+                init_state -> add_comp_densities[2*NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H] = water_vapour_density[j];
+                init_state -> add_comp_temps[j + i*NUMBER_OF_SCALARS_H] = solid_water_temp[j];
+                init_state -> add_comp_temps[NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H] = liquid_water_temp[j];
             }
         }
         handle_wind_h = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
@@ -84,6 +124,11 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
             init_state -> wind[j + i*NUMBER_OF_VECTORS_PER_LAYER] = wind_v[j];
     }
     fclose(IN_FILE);
+    free(water_vapour_density);
+    free(liquid_water_density);
+    free(solid_water_density);
+    free(liquid_water_temp);
+    free(solid_water_temp);
     free(pot_temp);
     free(rho);
     free(wind_h);

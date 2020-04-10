@@ -7,7 +7,7 @@ int curl_dual(Dual_vector_field, Vector_field, Grid *, Dualgrid *);
 int cross_product(Vector_field, Dual_vector_field, Vector_field, Grid *);
 int inner(Vector_field, Vector_field,Scalar_field, Grid *);
 int divergence(Vector_field, Scalar_field, Grid *, short);
-int tendency(State *, State *, Grid *, Dualgrid*, short);
+int tendency(State *, State *, Grid *, Dualgrid*, short, short, short, double);
 int scalar_times_vector(Scalar_field, Vector_field, Vector_field, Grid *);
 int linear_combine_two_states(State *, State *, State *, double, double);
 int add_vector_fields(Vector_field, Vector_field, Vector_field);

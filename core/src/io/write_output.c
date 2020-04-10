@@ -52,6 +52,7 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
     codes_handle *handle_wind_v_10m = NULL;
     codes_handle *handle_mslp = NULL;
     codes_handle *handle_t2 = NULL;
+    codes_handle *handle_tcdc = NULL;
     codes_handle *handle_rprate = NULL;
     codes_handle *handle_sprate = NULL;
     double z_height;
@@ -81,6 +82,11 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
     fclose(SAMPLE_SCALAR);
     SAMPLE_SCALAR = fopen(SAMPLE_FILE_SCALAR, "r");
     handle_sprate = codes_handle_new_from_file(NULL, SAMPLE_SCALAR, PRODUCT_GRIB, &err);
+    if (err != 0)
+        ECCERR(err);
+    fclose(SAMPLE_SCALAR);
+    SAMPLE_SCALAR = fopen(SAMPLE_FILE_SCALAR, "r");
+    handle_tcdc = codes_handle_new_from_file(NULL, SAMPLE_SCALAR, PRODUCT_GRIB, &err);
     if (err != 0)
         ECCERR(err);
     fclose(SAMPLE_SCALAR);
@@ -122,10 +128,12 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
     double *wind_v_10m = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
     double *mslp = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double *t2 = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *tcdc = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double *rprate = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double *sprate = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double pressure_value, mslp_factor, temp_lowest_layer, temp_mslp, gravity_value, exner_pressure, wind_0, wind_1, wind_u, wind_v, delta_z_temp, temp_gradient, temp_upper, temp_lower;
     double standard_vert_lapse_rate = 0.0065;
+    long unsigned length = 4;
     for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
     {
         z_height = grid -> z_scalar[i*NUMBER_OF_SCALARS_H];
@@ -150,10 +158,21 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
                 temp_lower = pow(R_D*state_write_out -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H]/P_0, R_D/C_V)*state_write_out -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H];
                 temp_gradient = (temp_upper - temp_lower)/(grid -> z_scalar[j + (i - 1)*NUMBER_OF_SCALARS_H] - grid -> z_scalar[j + i*NUMBER_OF_SCALARS_H]);
                 t2[j] = temp_lowest_layer + delta_z_temp*temp_gradient;
-                rprate[j] = 0;
                 sprate[j] = 0;
+                rprate[j] = 0;
+                tcdc[j] = 0;
                 for (int k = 0; k < NUMBER_OF_COND_ADD_COMPS; ++k)
-                    sprate[j] -= ret_sink_velocity(k, 0, 0.001)*state_write_out -> add_comp_densities[k*NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H];
+                {
+                    for (int l = 0; l < NUMBER_OF_LAYERS; ++l)
+                    {
+                        if (state_write_out -> add_comp_densities[k*NUMBER_OF_SCALARS + j + l*NUMBER_OF_SCALARS_H] > 0)
+                            tcdc[j] = 100*1;
+                    }
+                }
+                for (int k = 0; k < NUMBER_OF_SOLID_ADD_COMPS; ++k)
+                    sprate[j] = fmax(-ret_sink_velocity(k, 0, 0.001)*state_write_out -> add_comp_densities[k*NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H], 0);
+                for (int k = NUMBER_OF_SOLID_ADD_COMPS; k < NUMBER_OF_COND_ADD_COMPS; ++k)
+                    rprate[j] = fmax(-ret_sink_velocity(k, 0, 0.001)*state_write_out -> add_comp_densities[k*NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H], 0);
             }
             if ((retval = codes_set_long(handle_mslp, "discipline", 0)))
                 ECCERR(retval);
@@ -314,6 +333,48 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
             if ((retval = codes_set_double_array(handle_sprate, "values", sprate, NUMBER_OF_SCALARS_H)))
                 ECCERR(retval);
             if ((retval = codes_write_message(handle_sprate, OUTPUT_FILE, "a")))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_tcdc, "discipline", 0)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_tcdc, "centre", 255)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_tcdc, "significanceOfReferenceTime", 1)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_tcdc, "productionStatusOfProcessedData", 1)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_tcdc, "typeOfProcessedData", 1)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_tcdc, "indicatorOfUnitOfTimeRange", 13)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_tcdc, "stepUnits", 13)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_tcdc, "dataDate", data_date)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_tcdc, "dataTime", data_time)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_tcdc, "forecastTime", t_write - t_init)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_tcdc, "stepRange", t_write - t_init)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_tcdc, "typeOfGeneratingProcess", 1)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_tcdc, "parameterCategory", 6)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_tcdc, "parameterNumber", 1)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_tcdc, "typeOfFirstFixedSurface", 1)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_tcdc, "scaledValueOfFirstFixedSurface", 0)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_tcdc, "scaleFactorOfFirstFixedSurface", 0)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_tcdc, "level", 0)))
+                ECCERR(retval);
+            if ((retval = codes_set_string(handle_tcdc, "shortName", "tcc", &length)))
+                ECCERR(retval);
+            if ((retval = codes_set_double_array(handle_tcdc, "values", tcdc, NUMBER_OF_SCALARS_H)))
+                ECCERR(retval);
+            if ((retval = codes_write_message(handle_tcdc, OUTPUT_FILE, "a")))
                 ECCERR(retval);
         }
         if ((retval = codes_set_long(handle_pot_temperature_h, "discipline", 0)))
@@ -496,8 +557,8 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
         {
             for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
             {
-                wind_u_h[j] = 0.667*wind_u_h[j];
-                wind_v_h[j] = 0.667*wind_v_h[j];
+                wind_u_10m[j] = 0.667*wind_u_h[j];
+                wind_v_10m[j] = 0.667*wind_v_h[j];
             }
             if ((retval = codes_set_long(handle_wind_u_10m, "discipline", 0)))
                 ECCERR(retval);
@@ -585,9 +646,11 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
     free(mslp);
     free(rprate);
     free(sprate);
+    free(tcdc);
     codes_handle_delete(handle_rprate);
     codes_handle_delete(handle_sprate);
     codes_handle_delete(handle_t2);
+    codes_handle_delete(handle_tcdc);
     codes_handle_delete(handle_mslp);
     codes_handle_delete(handle_pot_temperature_h);
     codes_handle_delete(handle_density_h);
