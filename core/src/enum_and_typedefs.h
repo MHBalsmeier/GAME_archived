@@ -15,6 +15,7 @@
 #define OMEGA (7.292115e-5)
 #define SEMIMAJOR 6378137.0
 #define SEMIMINOR 6356752.314
+#define RADIUS pow(SEMIMAJOR*SEMIMAJOR*SEMIMINOR, 1.0/3.0)
 
 enum grid_integers {
 RES_ID = 4,
@@ -62,8 +63,8 @@ Vector_field area;
 Scalar_field z_scalar;
 Vector_field z_vector;
 Scalar_field exner_pressure_background;
-double pot_temp_background[NUMBER_OF_V_VECTORS];
-double exner_pressure_background_gradient[NUMBER_OF_V_VECTORS];
+Vector_field pot_temp_background;
+Vector_field gravity;
 long from_index[NUMBER_OF_VECTORS_H];
 long to_index[NUMBER_OF_VECTORS_H];
 double direction[NUMBER_OF_VECTORS_H];

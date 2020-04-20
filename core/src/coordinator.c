@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     printf("configuration information:\n");
     printf("number of layers: %d\n", NUMBER_OF_LAYERS);
     printf("number of scalar data points per layer: %d\n", NUMBER_OF_SCALARS_H);
-    double surface = 4*M_PI*pow(SEMIMAJOR, 2);
+    double surface = 4*M_PI*pow(RADIUS, 2);
     double points_per_axis = pow(NUMBER_OF_SCALARS_H, 0.5);
     int eff_hor_res_km = 1e-3*pow(surface, 0.5)/points_per_axis;
     printf("effective horizontal resolution: %d km\n", eff_hor_res_km);

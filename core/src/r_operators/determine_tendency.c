@@ -202,19 +202,22 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     grad(*e_kin_spec_2, *m_e_kin_tend_2, grid);
     short check_energy_bool = 0;
     double enery_integral = 0;
+    double z_value, z_g;
     if (check_energy_bool == 1)
     {
         for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
         {
             enery_integral += (*e_kin_spec_2)[i]*current_state -> density[i]*grid -> volume[i];
-            enery_integral += 9.80616*grid -> z_scalar[i]*current_state -> density[i]*grid -> volume[i];
+            z_value = grid -> z_scalar[i];
+            z_g = z_value/(1 + z_value/RADIUS);
+            enery_integral += -grid -> gravity[NUMBER_OF_LAYERS*NUMBER_OF_VECTORS_PER_LAYER]*z_g*current_state -> density[i]*grid -> volume[i];
             enery_integral += C_V*(*temperature)[i]*current_state -> density[i]*grid -> volume[i];
         }
         printf("%lf\n", enery_integral);
     }
     free(temperature);
     free(e_kin_spec_2);
-    double pot_temp_perturb;
+    double pot_temp_value, pot_temp_perturb;
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
         layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
@@ -223,12 +226,12 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
             state_tendency -> wind[i] = 0;
         else
         {
-            state_tendency -> wind[i] = -(*m_pressure_gradient_acc)[i] + (*abs_curl_tend)[i] - 0.5*(*m_e_kin_tend_2)[i] + dissipation_on*viscosity_coeff*(*laplace_wind_field)[i];
             if (h_index < NUMBER_OF_VECTORS_V)
-            {
-                pot_temp_perturb = 0.5*current_state -> density_pot_temp[h_index + (layer_index - 1)*NUMBER_OF_SCALARS_H]/current_state -> density[h_index + (layer_index - 1)*NUMBER_OF_SCALARS_H] + 0.5*current_state -> density_pot_temp[h_index + layer_index*NUMBER_OF_SCALARS_H]/current_state -> density[h_index + layer_index*NUMBER_OF_SCALARS_H] - grid -> pot_temp_background[h_index + layer_index*NUMBER_OF_VECTORS_V];
-                state_tendency -> wind[i] -= C_P*pot_temp_perturb*grid -> exner_pressure_background_gradient[layer_index*NUMBER_OF_VECTORS_V + h_index];
-            }
+                pot_temp_value = 0.5*current_state -> density_pot_temp[h_index + (layer_index - 1)*NUMBER_OF_SCALARS_H]/current_state -> density[h_index + (layer_index - 1)*NUMBER_OF_SCALARS_H] + 0.5*current_state -> density_pot_temp[h_index + layer_index*NUMBER_OF_SCALARS_H]/current_state -> density[h_index + layer_index*NUMBER_OF_SCALARS_H];
+            else
+                pot_temp_value = 0.5*(current_state -> density_pot_temp[grid -> to_index[h_index - NUMBER_OF_VECTORS_V] + layer_index*NUMBER_OF_SCALARS_H]/current_state -> density[grid -> to_index[h_index - NUMBER_OF_VECTORS_V] + layer_index*NUMBER_OF_SCALARS_H] + current_state -> density_pot_temp[grid -> from_index[h_index - NUMBER_OF_VECTORS_V] + layer_index*NUMBER_OF_SCALARS_H]/current_state -> density[grid -> from_index[h_index - NUMBER_OF_VECTORS_V] + layer_index*NUMBER_OF_SCALARS_H]);
+            pot_temp_perturb = pot_temp_value - grid -> pot_temp_background[i];
+            state_tendency -> wind[i] = -(*m_pressure_gradient_acc)[i] + (*abs_curl_tend)[i] - 0.5*(*m_e_kin_tend_2)[i] - pot_temp_perturb/grid -> pot_temp_background[i]*grid -> gravity[i] + dissipation_on*viscosity_coeff*(*laplace_wind_field)[i];
         }
     }
     free(laplace_wind_field);

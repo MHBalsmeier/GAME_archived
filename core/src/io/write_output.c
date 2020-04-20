@@ -131,7 +131,7 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
     double *tcdc = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double *rprate = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double *sprate = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double pressure_value, mslp_factor, temp_lowest_layer, temp_mslp, gravity_value, exner_pressure, wind_0, wind_1, wind_u, wind_v, delta_z_temp, temp_gradient, temp_upper, temp_lower;
+    double pressure_value, mslp_factor, temp_lowest_layer, temp_mslp, exner_pressure, wind_0, wind_1, wind_u, wind_v, delta_z_temp, temp_gradient, temp_upper, temp_lower;
     double standard_vert_lapse_rate = 0.0065;
     long unsigned length = 4;
     for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
@@ -150,8 +150,7 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
                 temp_lowest_layer = exner_pressure*state_write_out -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H];
                 pressure_value = state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]*R_D*temp_lowest_layer;
                 temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[j + i*NUMBER_OF_SCALARS_H];
-                gravity_value = 9.80616;
-                mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, gravity_value/(R_D*standard_vert_lapse_rate));
+                mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, -grid -> gravity[NUMBER_OF_LAYERS*NUMBER_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
                 mslp[j] = pressure_value/mslp_factor;
                 delta_z_temp = 2 - grid -> z_scalar[j + i*NUMBER_OF_SCALARS_H];
                 temp_upper = pow(R_D*state_write_out -> density_pot_temp[j + (i - 1)*NUMBER_OF_SCALARS_H]/P_0, R_D/C_V)*state_write_out -> density_pot_temp[j + (i - 1)*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + (i - 1)*NUMBER_OF_SCALARS_H];
