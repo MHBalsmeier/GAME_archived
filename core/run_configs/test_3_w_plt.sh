@@ -9,7 +9,7 @@ cfl_margin=0.2
 dissipation=1
 rad_on=1
 add_comps_on=1
-source run.sh
+source run
 disp_level=2
 disp_shortname=2t
 fig_save_path=/home/max/figs/game_output/movie_elements

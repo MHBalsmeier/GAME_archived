@@ -6,6 +6,7 @@
 #include "/usr/src/eccodes/include/eccodes.h"
 #include "/lib/geos/include/geos.h"
 #include "/lib/addcomp/include/addcomp.h"
+#include "/lib/indextools/include/indextools.h"
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}

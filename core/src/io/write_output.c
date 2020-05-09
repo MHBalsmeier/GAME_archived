@@ -34,8 +34,8 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
         if (i >= out_file_length - strlen(append_string))
             OUTPUT_FILE[i] = append_string[i - (out_file_length - strlen(append_string))];
     }
-    char *SAMPLE_FILE_SCALAR = "../test_generator/grib_files/scalar_field_blueprint_res_id_2.grb2";
-    char *SAMPLE_FILE_VECTOR = "../test_generator/grib_files/vector_field_blueprint_res_id_2.grb2";
+    char *SAMPLE_FILE_SCALAR = "../input/scalar_field_blueprint_res_id_2.grb2";
+    char *SAMPLE_FILE_VECTOR = "../input/vector_field_blueprint_res_id_2.grb2";
     FILE *SAMPLE_SCALAR;
     FILE *SAMPLE_VECTOR;
     int err = 0;

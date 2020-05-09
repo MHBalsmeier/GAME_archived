@@ -5,4 +5,4 @@ grid_props_file=/home/max/my_code/game/grid_generator/nc_files/B4L6T30000_M2_O0.
 init_state_file=/home/max/my_code/game/test_generator/grib_files/test_3_B4L6T30000_M2_O0.grb2
 output_dir=output/test_3
 cfl_margin=0.2
-source run.sh
+source run
