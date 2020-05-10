@@ -13,4 +13,3 @@ ctest
 make install
 chmod +x $aim_dir/run.sh
 cd ..
-rm -r build

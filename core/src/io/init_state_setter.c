@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include "../enum_and_typedefs.h"
 #include "io.h"
-#include "/usr/src/eccodes/include/eccodes.h"
-#include "/lib/time/include/time.h"
+#include "eccodes.h"
+#include "time00.h"
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 

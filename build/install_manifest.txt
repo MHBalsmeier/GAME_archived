@@ -1,0 +1,11 @@
+/home/max/compiled/game/core/game
+/home/max/compiled/game/core/../run.sh
+/home/max/compiled/game/input/vector_field_blueprint_res_id_2.grb2
+/home/max/compiled/game/input/scalar_field_blueprint_res_id_2.grb2
+/home/max/compiled/game/input/test_4_B4L6T30000_M2_O0.grb2
+/home/max/compiled/game/input/test_3_B4L6T30000_M2_O0.grb2
+/home/max/compiled/game/input/test_1_B4L6T30000_M2_O0.grb2
+/home/max/compiled/game/grids/B4L6T30000_M0_O0.nc
+/home/max/compiled/game/grids/B4L6T30000_M1_O0.nc
+/home/max/compiled/game/grids/B4L6T20000_M1_O0.nc
+/home/max/compiled/game/grids/B4L6T30000_M2_O0.nc

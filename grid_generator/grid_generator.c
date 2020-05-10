@@ -3,9 +3,9 @@
 #include <netcdf.h>
 #include <string.h>
 #include <math.h>
-#include "/lib/geos/include/geos.h"
-#include "/lib/conv/include/conv.h"
-#include "/lib/indextools/include/index_tools.h"
+#include "/lib/geos/include/geos95"
+#include "conv.h"
+#include "indextools.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 #define OMEGA (7.292115e-5)

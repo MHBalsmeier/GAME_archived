@@ -5,9 +5,9 @@
 #include "io.h"
 #include "../diagnostics/diagnostics.h"
 #include "../r_operators/r_operators.h"
-#include "/usr/src/eccodes/include/eccodes.h"
-#include "/lib/geos/include/geos.h"
-#include "/lib/addcomp/include/addcomp.h"
+#include "eccodes.h"
+#include "geos95.h"
+#include "addcomp.h"
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 

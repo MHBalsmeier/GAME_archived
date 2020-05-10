@@ -1,9 +1,9 @@
 #include "../enum_and_typedefs.h"
 #include "r_operators.h"
 #include "../diagnostics/diagnostics.h"
-#include "/lib/rad/include/rad.h"
-#include "/lib/addcomp/include/addcomp.h"
-#include "/lib/surface/include/surface.h"
+#include "rad.h"
+#include "addcomp.h"
+#include "surface.h"
 #include <stdlib.h>
 #include <stdio.h>
 
