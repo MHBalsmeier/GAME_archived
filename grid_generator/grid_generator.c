@@ -1022,7 +1022,11 @@ int main(int argc, char *argv[])
         if (area[i] <= 0)
             printf("area contains a non-positive value.\n");
     }
-    short *face_of_cell_indices = malloc(2*sizeof(short));
+    /* short bool_0, bool_1, first_found;
+    long cell_0_for_cross, cell_1_for_cross;
+	uncomment for ald Coriolis reconstruction	
+	*/    
+	short *face_of_cell_indices = malloc(2*sizeof(short));
 	short offset;
     for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
     {
@@ -1045,6 +1049,68 @@ int main(int argc, char *argv[])
                 sign = -1;
             recov_hor_par_dual_weight[2*i + j] = sign*0.5;
         }
+        /*first_found = 0;
+        for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
+        {
+            for (int k = 0; k < 5; ++k)
+            {
+                if (to_index[adjacent_vector_indices_h[6*j + k]] != j)
+                    adjacent_scalar_indices_for_cross[k] = to_index[adjacent_vector_indices_h[6*j + k]];
+                else
+                    adjacent_scalar_indices_for_cross[k] = from_index[adjacent_vector_indices_h[6*j + k]];
+            }
+            if (j < NUMBER_OF_PENTAGONS)
+                adjacent_scalar_indices_for_cross[5] = -1;
+            else
+            {
+                if (to_index[adjacent_vector_indices_h[6*j + 5]] != j)
+                    adjacent_scalar_indices_for_cross[5] = to_index[adjacent_vector_indices_h[6*j + 5]];
+                else
+                    adjacent_scalar_indices_for_cross[5] = from_index[adjacent_vector_indices_h[6*j + 5]];
+            }
+            retval = in_bool_calculator_long(adjacent_scalar_indices_for_cross, 6, from_index[i], &bool_0);
+            retval = in_bool_calculator_long(adjacent_scalar_indices_for_cross, 6, to_index[i], &bool_1);
+            if (bool_0 == 1 && bool_1 == 1)
+            {
+                if (first_found == 0)
+                {
+                    cell_0_for_cross = j;
+                    first_found = 1;
+                }
+                else
+                    cell_1_for_cross = j;
+            }
+        }
+        counter = 0;
+        for (int k = 0; k < 6; ++k)
+        {
+            if (to_index[adjacent_vector_indices_h[6*cell_0_for_cross + k]] == to_index[i] || from_index[adjacent_vector_indices_h[6*cell_0_for_cross + k]] == to_index[i] || to_index[adjacent_vector_indices_h[6*cell_0_for_cross + k]] == from_index[i] || from_index[adjacent_vector_indices_h[6*cell_0_for_cross + k]] == from_index[i])
+            {
+                face_of_cell_indices[counter] = k;
+                ++counter;
+            }
+        }
+        if (counter != 2)
+            printf("Trouble detected, place 2.\n");
+        recov_hor_par_pri_index[4*i] = adjacent_vector_indices_h[6*cell_0_for_cross + face_of_cell_indices[0]];
+        recov_hor_par_pri_weight[4*i] = 2.0/3.0*0.5*(cos(direction[i] + M_PI/2)*cos(direction[recov_hor_par_pri_index[4*i]]) + sin(direction[i] + M_PI/2)*sin(direction[recov_hor_par_pri_index[4*i]]));
+        recov_hor_par_pri_index[4*i + 1] = adjacent_vector_indices_h[6*cell_0_for_cross + face_of_cell_indices[1]];
+        recov_hor_par_pri_weight[4*i + 1] = 2.0/3.0*0.5*(cos(direction[i] + M_PI/2)*cos(direction[recov_hor_par_pri_index[4*i + 1]]) + sin(direction[i] + M_PI/2)*sin(direction[recov_hor_par_pri_index[4*i + 1]]));
+        counter = 0;
+        for (int k = 0; k < 6; ++k)
+        {
+            if (to_index[adjacent_vector_indices_h[6*cell_1_for_cross + k]] == to_index[i] || from_index[adjacent_vector_indices_h[6*cell_1_for_cross + k]] == to_index[i] || to_index[adjacent_vector_indices_h[6*cell_1_for_cross + k]] == from_index[i] || from_index[adjacent_vector_indices_h[6*cell_1_for_cross + k]] == from_index[i])
+            {
+                face_of_cell_indices[counter] = k;
+                ++counter;
+            }
+        }
+        if (counter != 2)
+            printf("Trouble detected, place 3.\n");
+        recov_hor_par_pri_index[4*i + 2] = adjacent_vector_indices_h[6*cell_1_for_cross + face_of_cell_indices[0]];
+        recov_hor_par_pri_weight[4*i + 2] = 2.0/3.0*0.5*(cos(direction[i] + M_PI/2)*cos(direction[recov_hor_par_pri_index[4*i + 2]]) + sin(direction[i] + M_PI/2)*sin(direction[recov_hor_par_pri_index[4*i + 2]]));
+        recov_hor_par_pri_index[4*i + 3] = adjacent_vector_indices_h[6*cell_1_for_cross + face_of_cell_indices[1]];
+        recov_hor_par_pri_weight[4*i + 3] = 2.0/3.0*0.5*(cos(direction[i] + M_PI/2)*cos(direction[recov_hor_par_pri_index[4*i + 3]]) + sin(direction[i] + M_PI/2)*sin(direction[recov_hor_par_pri_index[4*i + 3]])); uncomment for cold Coriolis reconstruction*/
 		offset = 0;
 		for (int k = 0; k < 10; ++k)
 		{
@@ -1133,6 +1199,7 @@ int main(int argc, char *argv[])
     }
     free(rel_on_line_dual);
     free(face_of_cell_indices);
+	// free(adjacent_scalar_indices_for_cross); uncomment for old Coriolis reconstruction
     double weight_prefactor;
     for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
     {
