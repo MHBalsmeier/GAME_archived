@@ -3,7 +3,7 @@
 #include <netcdf.h>
 #include <string.h>
 #include <math.h>
-#include "/lib/geos/include/geos95"
+#include "geos95.h"
 #include "conv.h"
 #include "indextools.h"
 #define ERRCODE 2
@@ -18,6 +18,11 @@
 #define P_0 100000.0
 #define GRAVITY_MEAN_SFC_ABS 9.80616
 
+/*MODES:
+0	old grid generation
+1	
+2	new grid generation
+*/
 const short MODE = 2;
 const double TOA = 30000.0;
 const double SCALE_HEIGHT = 8000.0;
@@ -273,7 +278,7 @@ int main(int argc, char *argv[])
     double *gravity = malloc(NUMBER_OF_VECTORS*sizeof(double));
     double *volume = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *area = malloc(NUMBER_OF_VECTORS*sizeof(double));
-    double *recov_hor_par_pri_weight = malloc(4*NUMBER_OF_VECTORS_H*sizeof(double));
+    double *recov_hor_par_pri_weight = calloc(10*NUMBER_OF_VECTORS_H, sizeof(double));
     double *recov_hor_ver_pri_weight = malloc(4*NUMBER_OF_VECTORS_H*sizeof(double));
     double *recov_hor_par_dual_weight = malloc(2*NUMBER_OF_VECTORS_H*sizeof(double));
     double *recov_hor_ver_dual_weight = malloc(2*NUMBER_OF_VECTORS_H*sizeof(double));
@@ -297,7 +302,7 @@ int main(int argc, char *argv[])
     double *pot_temp_background = malloc(NUMBER_OF_VECTORS*sizeof(double));
     long *to_index = malloc(NUMBER_OF_VECTORS_H*sizeof(long));
     long *from_index = malloc(NUMBER_OF_VECTORS_H*sizeof(long));
-    long *recov_hor_par_pri_index = malloc(4*NUMBER_OF_VECTORS_H*sizeof(long));
+    long *recov_hor_par_pri_index = calloc(10*NUMBER_OF_VECTORS_H, sizeof(long));
     long *recov_hor_ver_pri_index = malloc(4*NUMBER_OF_VECTORS_H*sizeof(long));
     long *recov_hor_par_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(long));
     long *recov_hor_ver_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(long));
@@ -1017,10 +1022,8 @@ int main(int argc, char *argv[])
         if (area[i] <= 0)
             printf("area contains a non-positive value.\n");
     }
-    long *adjacent_scalar_indices_for_cross = malloc(6*sizeof(long));
     short *face_of_cell_indices = malloc(2*sizeof(short));
-    short bool_0, bool_1, first_found;
-    long cell_0_for_cross, cell_1_for_cross;
+	short offset;
     for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
     {
         for (int j = 0; j < 2; ++j)
@@ -1042,68 +1045,49 @@ int main(int argc, char *argv[])
                 sign = -1;
             recov_hor_par_dual_weight[2*i + j] = sign*0.5;
         }
-        first_found = 0;
-        for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
-        {
-            for (int k = 0; k < 5; ++k)
-            {
-                if (to_index[adjacent_vector_indices_h[6*j + k]] != j)
-                    adjacent_scalar_indices_for_cross[k] = to_index[adjacent_vector_indices_h[6*j + k]];
-                else
-                    adjacent_scalar_indices_for_cross[k] = from_index[adjacent_vector_indices_h[6*j + k]];
-            }
-            if (j < NUMBER_OF_PENTAGONS)
-                adjacent_scalar_indices_for_cross[5] = -1;
-            else
-            {
-                if (to_index[adjacent_vector_indices_h[6*j + 5]] != j)
-                    adjacent_scalar_indices_for_cross[5] = to_index[adjacent_vector_indices_h[6*j + 5]];
-                else
-                    adjacent_scalar_indices_for_cross[5] = from_index[adjacent_vector_indices_h[6*j + 5]];
-            }
-            retval = in_bool_calculator_long(adjacent_scalar_indices_for_cross, 6, from_index[i], &bool_0);
-            retval = in_bool_calculator_long(adjacent_scalar_indices_for_cross, 6, to_index[i], &bool_1);
-            if (bool_0 == 1 && bool_1 == 1)
-            {
-                if (first_found == 0)
-                {
-                    cell_0_for_cross = j;
-                    first_found = 1;
-                }
-                else
-                    cell_1_for_cross = j;
-            }
-        }
-        counter = 0;
-        for (int k = 0; k < 6; ++k)
-        {
-            if (to_index[adjacent_vector_indices_h[6*cell_0_for_cross + k]] == to_index[i] || from_index[adjacent_vector_indices_h[6*cell_0_for_cross + k]] == to_index[i] || to_index[adjacent_vector_indices_h[6*cell_0_for_cross + k]] == from_index[i] || from_index[adjacent_vector_indices_h[6*cell_0_for_cross + k]] == from_index[i])
-            {
-                face_of_cell_indices[counter] = k;
-                ++counter;
-            }
-        }
-        if (counter != 2)
-            printf("Trouble detected, place 2.\n");
-        recov_hor_par_pri_index[4*i] = adjacent_vector_indices_h[6*cell_0_for_cross + face_of_cell_indices[0]];
-        recov_hor_par_pri_weight[4*i] = 2.0/3.0*0.5*(cos(direction[i] + M_PI/2)*cos(direction[recov_hor_par_pri_index[4*i]]) + sin(direction[i] + M_PI/2)*sin(direction[recov_hor_par_pri_index[4*i]]));
-        recov_hor_par_pri_index[4*i + 1] = adjacent_vector_indices_h[6*cell_0_for_cross + face_of_cell_indices[1]];
-        recov_hor_par_pri_weight[4*i + 1] = 2.0/3.0*0.5*(cos(direction[i] + M_PI/2)*cos(direction[recov_hor_par_pri_index[4*i + 1]]) + sin(direction[i] + M_PI/2)*sin(direction[recov_hor_par_pri_index[4*i + 1]]));
-        counter = 0;
-        for (int k = 0; k < 6; ++k)
-        {
-            if (to_index[adjacent_vector_indices_h[6*cell_1_for_cross + k]] == to_index[i] || from_index[adjacent_vector_indices_h[6*cell_1_for_cross + k]] == to_index[i] || to_index[adjacent_vector_indices_h[6*cell_1_for_cross + k]] == from_index[i] || from_index[adjacent_vector_indices_h[6*cell_1_for_cross + k]] == from_index[i])
-            {
-                face_of_cell_indices[counter] = k;
-                ++counter;
-            }
-        }
-        if (counter != 2)
-            printf("Trouble detected, place 3.\n");
-        recov_hor_par_pri_index[4*i + 2] = adjacent_vector_indices_h[6*cell_1_for_cross + face_of_cell_indices[0]];
-        recov_hor_par_pri_weight[4*i + 2] = 2.0/3.0*0.5*(cos(direction[i] + M_PI/2)*cos(direction[recov_hor_par_pri_index[4*i + 2]]) + sin(direction[i] + M_PI/2)*sin(direction[recov_hor_par_pri_index[4*i + 2]]));
-        recov_hor_par_pri_index[4*i + 3] = adjacent_vector_indices_h[6*cell_1_for_cross + face_of_cell_indices[1]];
-        recov_hor_par_pri_weight[4*i + 3] = 2.0/3.0*0.5*(cos(direction[i] + M_PI/2)*cos(direction[recov_hor_par_pri_index[4*i + 3]]) + sin(direction[i] + M_PI/2)*sin(direction[recov_hor_par_pri_index[4*i + 3]]));
+		offset = 0;
+		for (int k = 0; k < 10; ++k)
+		{
+			if (k < 5)
+			{
+				if (offset == 0 && adjacent_vector_indices_h[6*from_index[i] + k] == i)
+					offset += 1;
+				if (from_index[i] < NUMBER_OF_PENTAGONS && k == 4)
+				{
+					recov_hor_par_pri_index[10*i + k] = 0;
+					recov_hor_par_pri_weight[10*i + k] = 0;
+				}
+				else
+				{
+					recov_hor_par_pri_index[10*i + k] = adjacent_vector_indices_h[6*from_index[i] + k + offset];
+					recov_hor_par_pri_weight[10*i + k] = 0;
+				}
+			}
+			else
+			{
+				if (k == 5)
+				{
+					if (offset > 1)
+						printf("Problem 0 in TRSK implementation detected.");
+					offset = 0;
+				}
+				if (offset == 0 && adjacent_vector_indices_h[6*to_index[i] + k - 5] == i)
+					offset += 1;
+				if (to_index[i] < NUMBER_OF_PENTAGONS && k == 9)
+				{
+					recov_hor_par_pri_index[10*i + k] = 0;
+					recov_hor_par_pri_weight[10*i + k] = 0;
+				}
+				else
+				{
+					recov_hor_par_pri_index[10*i + k] = adjacent_vector_indices_h[6*to_index[i] + k - 5];
+					recov_hor_par_pri_weight[10*i + k] = 0;
+				}
+			}
+			recov_hor_par_pri_weight[10*i + k] = normal_distance[recov_hor_par_pri_index[10*i + k]]/normal_distance_dual[i]*recov_hor_par_pri_weight[10*i + k];
+		}
+		if (offset > 1)
+			printf("Problem 1 in TRSK implementation detected.");
         sign = 1;
         find_angle_change(direction[i], direction_dual[i], &direction_change);
         if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
@@ -1149,7 +1133,6 @@ int main(int argc, char *argv[])
     }
     free(rel_on_line_dual);
     free(face_of_cell_indices);
-    free(adjacent_scalar_indices_for_cross);
     double weight_prefactor;
     for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
     {
@@ -1243,7 +1226,7 @@ int main(int argc, char *argv[])
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
     free(OUTPUT_FILE);
-    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id, vector_dual_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id;
+    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id, vector_dual_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id;
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NUMBER_OF_SCALARS, &scalar_dimid)))
         ERR(retval);  
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_h_index", NUMBER_OF_SCALARS_H, &scalar_h_dimid)))
@@ -1256,6 +1239,8 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_h_6_index", 6*NUMBER_OF_SCALARS_H, &scalar_h_dimid_6)))
         ERR(retval);
+	if ((retval = nc_def_dim(ncid_g_prop, "vector_h_10_index", 10*NUMBER_OF_VECTORS_H, &vector_h_dimid_10)))
+		    ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_h_11_index", 11*NUMBER_OF_VECTORS_H, &vector_h_dimid_11)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_h_2_index", 2*NUMBER_OF_VECTORS_H, &vector_h_dimid_2)))
@@ -1314,7 +1299,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "recov_hor_ver_dual_weight", NC_DOUBLE, 1, &vector_h_dimid_2, &recov_hor_ver_dual_weight_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_par_pri_weight", NC_DOUBLE, 1, &vector_h_dimid_4, &recov_hor_par_pri_weight_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_par_pri_weight", NC_DOUBLE, 1, &vector_h_dimid_10, &recov_hor_par_pri_weight_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "recov_hor_ver_pri_weight", NC_DOUBLE, 1, &vector_h_dimid_4, &recov_hor_ver_pri_weight_id)))
         ERR(retval);
@@ -1362,7 +1347,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "recov_hor_ver_dual_index", NC_LONG, 1, &vector_h_dimid_2, &recov_hor_ver_dual_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_par_pri_index", NC_LONG, 1, &vector_h_dimid_4, &recov_hor_par_pri_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_par_pri_index", NC_LONG, 1, &vector_h_dimid_10, &recov_hor_par_pri_index_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "recov_hor_ver_pri_index", NC_LONG, 1, &vector_h_dimid_4, &recov_hor_ver_pri_index_id)))
         ERR(retval);

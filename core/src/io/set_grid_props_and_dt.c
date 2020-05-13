@@ -17,7 +17,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     double *z_vector = malloc(NUMBER_OF_VECTORS*sizeof(double));
     double *recov_hor_par_dual_weight = malloc(2*NUMBER_OF_VECTORS_H*sizeof(double));
     double *recov_hor_ver_dual_weight = malloc(2*NUMBER_OF_VECTORS_H*sizeof(double));
-    double *recov_hor_par_pri_weight = malloc(4*NUMBER_OF_VECTORS_H*sizeof(double));
+    double *recov_hor_par_pri_weight = malloc(10*NUMBER_OF_VECTORS_H*sizeof(double));
     double *recov_hor_ver_pri_weight = malloc(4*NUMBER_OF_VECTORS_H*sizeof(double));
     double *recov_ver_0_pri_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
     double *recov_ver_1_pri_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
@@ -38,7 +38,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     long *recov_ver_1_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
     long *recov_hor_ver_pri_index = malloc(4*NUMBER_OF_VECTORS_H*sizeof(long));
     long *recov_hor_ver_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(long));
-    long *recov_hor_par_pri_index = malloc(4*NUMBER_OF_VECTORS_H*sizeof(long));
+    long *recov_hor_par_pri_index = malloc(10*NUMBER_OF_VECTORS_H*sizeof(long));
     long *adjacent_vector_indices_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(long));
     long *to_index_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(long));
     long *from_index_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(long));
@@ -313,14 +313,17 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
             if (fabs(grid -> recov_hor_par_dual_weight[2*i + j]) >= 1.0001)
                 grid_check_failed();
         }
+        for (int j = 0; j < 10; ++j)
+        {
+            grid -> recov_hor_par_pri_index[10*i + j] = recov_hor_par_pri_index[10*i + j];
+            if (grid -> recov_hor_par_pri_index[10*i + j] >= NUMBER_OF_VECTORS_H || grid -> recov_hor_par_pri_index[10*i + j] < 0)
+                grid_check_failed();
+            grid -> recov_hor_par_pri_weight[10*i + j] = recov_hor_par_pri_weight[10*i + j];
+            if (fabs(grid -> recov_hor_par_pri_weight[10*i + j]) >= 1.0001)
+                grid_check_failed();
+		}
         for (int j = 0; j < 4; ++j)
         {
-            grid -> recov_hor_par_pri_index[4*i + j] = recov_hor_par_pri_index[4*i + j];
-            if (grid -> recov_hor_par_pri_index[4*i + j] >= NUMBER_OF_VECTORS_H || grid -> recov_hor_par_pri_index[4*i + j] < 0)
-                grid_check_failed();
-            grid -> recov_hor_par_pri_weight[4*i + j] = recov_hor_par_pri_weight[4*i + j];
-            if (fabs(grid -> recov_hor_par_pri_weight[4*i + j]) >= 1.0001)
-                grid_check_failed();
             grid -> recov_hor_ver_pri_index[4*i + j] = recov_hor_ver_pri_index[4*i + j];
             if (grid -> recov_hor_ver_pri_index[4*i + j] >= 2*NUMBER_OF_VECTORS_V + NUMBER_OF_VECTORS_H || grid -> recov_hor_ver_pri_index[4*i + j] < 0)
                 grid_check_failed();
