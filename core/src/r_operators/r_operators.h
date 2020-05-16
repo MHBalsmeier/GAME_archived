@@ -9,5 +9,6 @@ int inner(Vector_field, Vector_field,Scalar_field, Grid *);
 int divergence(Vector_field, Scalar_field, Grid *, int);
 int tendency(State *, State *, Grid *, Dualgrid*, int, int, int, double);
 int scalar_times_vector(Scalar_field, Vector_field, Vector_field, Grid *);
+int scalar_times_vector_h_v(Scalar_field, Scalar_field, Vector_field, Vector_field, Grid *);
 int linear_combine_two_states(State *, State *, State *, double, double);
 int add_vector_fields(Vector_field, Vector_field, Vector_field);

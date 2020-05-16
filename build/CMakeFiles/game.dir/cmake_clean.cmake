@@ -17,6 +17,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/game.dir/src/r_operators/laplace.c.o"
   "CMakeFiles/game.dir/src/r_operators/linear_combine_two_states.c.o"
   "CMakeFiles/game.dir/src/r_operators/scalar_times_vector.c.o"
+  "CMakeFiles/game.dir/src/r_operators/scalar_times_vector_h_v.c.o"
   "CMakeFiles/game.dir/src/time_stepping/runge_kutta_fourth_order.c.o"
   "CMakeFiles/game.dir/src/time_stepping/runge_kutta_third_order.c.o"
   "CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o"

@@ -963,6 +963,33 @@ src/r_operators/scalar_times_vector.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/scalar_times_vector.c.s
 .PHONY : src/r_operators/scalar_times_vector.c.s
 
+src/r_operators/scalar_times_vector_h_v.o: src/r_operators/scalar_times_vector_h_v.c.o
+
+.PHONY : src/r_operators/scalar_times_vector_h_v.o
+
+# target to build an object file
+src/r_operators/scalar_times_vector_h_v.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/scalar_times_vector_h_v.c.o
+.PHONY : src/r_operators/scalar_times_vector_h_v.c.o
+
+src/r_operators/scalar_times_vector_h_v.i: src/r_operators/scalar_times_vector_h_v.c.i
+
+.PHONY : src/r_operators/scalar_times_vector_h_v.i
+
+# target to preprocess a source file
+src/r_operators/scalar_times_vector_h_v.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/scalar_times_vector_h_v.c.i
+.PHONY : src/r_operators/scalar_times_vector_h_v.c.i
+
+src/r_operators/scalar_times_vector_h_v.s: src/r_operators/scalar_times_vector_h_v.c.s
+
+.PHONY : src/r_operators/scalar_times_vector_h_v.s
+
+# target to generate assembly for a file
+src/r_operators/scalar_times_vector_h_v.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/scalar_times_vector_h_v.c.s
+.PHONY : src/r_operators/scalar_times_vector_h_v.c.s
+
 src/time_stepping/runge_kutta_fourth_order.o: src/time_stepping/runge_kutta_fourth_order.c.o
 
 .PHONY : src/time_stepping/runge_kutta_fourth_order.o
@@ -1118,6 +1145,9 @@ help:
 	@echo "... src/r_operators/scalar_times_vector.o"
 	@echo "... src/r_operators/scalar_times_vector.i"
 	@echo "... src/r_operators/scalar_times_vector.s"
+	@echo "... src/r_operators/scalar_times_vector_h_v.o"
+	@echo "... src/r_operators/scalar_times_vector_h_v.i"
+	@echo "... src/r_operators/scalar_times_vector_h_v.s"
 	@echo "... src/time_stepping/runge_kutta_fourth_order.o"
 	@echo "... src/time_stepping/runge_kutta_fourth_order.i"
 	@echo "... src/time_stepping/runge_kutta_fourth_order.s"

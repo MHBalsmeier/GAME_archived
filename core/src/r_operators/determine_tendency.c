@@ -20,10 +20,11 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     double eff_particle_radius = 130e-12;
     int retval;
     Vector_field *diffusion_mass_flux = malloc(sizeof(Vector_field));
-    Scalar_field *mass_diffusion_rate = malloc(sizeof(Scalar_field));
+    Scalar_field *mass_source_rate = malloc(sizeof(Scalar_field));
     Scalar_field *temperature = malloc(sizeof(Scalar_field));
-    Scalar_field *mass_diffusion_coeff = malloc(sizeof(Scalar_field));
-    double mass_diffusion_coeff_para_ratio;
+    Scalar_field *mass_diffusion_coeff_h = malloc(sizeof(Scalar_field));
+	Scalar_field *mass_diffusion_coeff_v = malloc(sizeof(Scalar_field));
+    double mass_diffusion_coeff, mass_diffusion_coeff_para_ratio_h, mass_diffusion_coeff_para_ratio_v;
     if (dissipation_on == 1)
     {
         temperature_diagnostics(current_state -> density_entropy, current_state -> density, *temperature);
@@ -31,19 +32,21 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
         retval = grad(current_state -> density, *diffusion_mass_flux_pre, grid);
         for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
         {
-            calc_diffusion_coeff((*temperature)[i], mean_particle_mass, current_state -> density[i], eff_particle_radius, &(*mass_diffusion_coeff)[i]);
-            mass_diffusion_coeff_para_ratio = pow(10, 5);
-            (*mass_diffusion_coeff)[i] = mass_diffusion_coeff_para_ratio*(*mass_diffusion_coeff)[i];
+            calc_diffusion_coeff((*temperature)[i], mean_particle_mass, current_state -> density[i], eff_particle_radius, &mass_diffusion_coeff);
+            mass_diffusion_coeff_para_ratio_h = pow(10, 5);
+			mass_diffusion_coeff_para_ratio_v = pow(10, 4);
+            (*mass_diffusion_coeff_h)[i] = mass_diffusion_coeff_para_ratio_h*mass_diffusion_coeff;
+            (*mass_diffusion_coeff_v)[i] = mass_diffusion_coeff_para_ratio_v*mass_diffusion_coeff;
         }
-        scalar_times_vector(*mass_diffusion_coeff, *diffusion_mass_flux_pre, *diffusion_mass_flux, grid);
+        scalar_times_vector_h_v(*mass_diffusion_coeff_h, *mass_diffusion_coeff_v, *diffusion_mass_flux_pre, *diffusion_mass_flux, grid);
         free(diffusion_mass_flux_pre);
-        retval = divergence(*diffusion_mass_flux, *mass_diffusion_rate, grid, 0);
+        retval = divergence(*diffusion_mass_flux, *mass_source_rate, grid, 0);
         free(diffusion_mass_flux);
     }
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
         if (dissipation_on == 1)
-            state_tendency -> density[i] = -(*density_flux_divergence)[i] + (*mass_diffusion_rate)[i] ;
+            state_tendency -> density[i] = -(*density_flux_divergence)[i] + (*mass_source_rate)[i] ;
         else
             state_tendency -> density[i] = -(*density_flux_divergence)[i];
     }
@@ -63,9 +66,10 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     {
         Vector_field *temperature_flux_pre = malloc(sizeof(Vector_field));
         retval = grad(*temperature, *temperature_flux_pre, grid);
-        scalar_times_vector(*mass_diffusion_coeff, *temperature_flux_pre, *temperature_flux, grid);
+        scalar_times_vector_h_v(*mass_diffusion_coeff_h, *mass_diffusion_coeff_v, *temperature_flux_pre, *temperature_flux, grid);
         free(temperature_flux_pre);
-        free(mass_diffusion_coeff);
+        free(mass_diffusion_coeff_h);
+		free(mass_diffusion_coeff_v);
         retval = divergence(*temperature_flux, *temp_diffusion_heating, grid, 0);
     }
     free(temperature_flux);
@@ -93,13 +97,13 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
             total_density = current_state -> density[i];
             for (int k = 0; k < NUMBER_OF_ADD_COMPS; ++k)
                 total_density += current_state -> add_comp_densities[k*NUMBER_OF_SCALARS + i];
-            state_tendency -> density_entropy[i] = -(*density_entropy_flux_divergence)[i] + (*pot_temp)[i]*(*mass_diffusion_rate)[i] + 1/(C_P*(*exner_pressure)[i])*(friction_heating + (*rad_heating)[i]*current_state -> density[i]/total_density + (*temp_diffusion_heating)[i] + add_comp_heat_source_rates[(NUMBER_OF_ADD_COMPS - 1)*NUMBER_OF_SCALARS + i]);
+            state_tendency -> density_entropy[i] = -(*density_entropy_flux_divergence)[i] + state_tendency -> density_entropy[i]/state_tendency -> density[i]*(*mass_source_rate)[i] + 1/(C_P*(*pot_temp)[i])*(friction_heating + (*rad_heating)[i]*current_state -> density[i]/total_density + (*temp_diffusion_heating)[i] + add_comp_heat_source_rates[(NUMBER_OF_ADD_COMPS - 1)*NUMBER_OF_SCALARS + i]) - R_D/C_P*(*mass_source_rate)[i];
         }
         else
             state_tendency -> density_entropy[i] = -(*density_entropy_flux_divergence)[i];
     }
     free(temp_diffusion_heating);
-    free(mass_diffusion_rate);
+    free(mass_source_rate);
     free(u_dot_laplace_wind);
     free(density_entropy_flux_divergence);
     Scalar_field *add_comp_density = malloc(sizeof(Scalar_field));

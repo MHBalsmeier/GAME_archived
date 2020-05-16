@@ -111,6 +111,9 @@ CMakeFiles/game.dir/src/r_operators/linear_combine_two_states.c.o: /home/max/my_
 CMakeFiles/game.dir/src/r_operators/scalar_times_vector.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/r_operators/scalar_times_vector.c.o: /home/max/my_code/game/core/src/r_operators/scalar_times_vector.c
 
+CMakeFiles/game.dir/src/r_operators/scalar_times_vector_h_v.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
+CMakeFiles/game.dir/src/r_operators/scalar_times_vector_h_v.c.o: /home/max/my_code/game/core/src/r_operators/scalar_times_vector_h_v.c
+
 CMakeFiles/game.dir/src/time_stepping/runge_kutta_fourth_order.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 CMakeFiles/game.dir/src/time_stepping/runge_kutta_fourth_order.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/time_stepping/runge_kutta_fourth_order.c.o: /home/max/my_code/game/core/src/r_operators/r_operators.h
