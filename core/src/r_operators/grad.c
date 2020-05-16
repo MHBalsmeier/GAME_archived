@@ -3,7 +3,7 @@
 
 int grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
 {
-    long layer_index, h_index, lower_index, upper_index;
+    int layer_index, h_index, lower_index, upper_index;
     for (int i = NUMBER_OF_VECTORS_V; i < NUMBER_OF_VECTORS - NUMBER_OF_VECTORS_V; ++i)
     {
         layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;

@@ -3,9 +3,7 @@
 
 int curl(Vector_field in_field, Dual_vector_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
-    long layer_index, h_index;
-    long index_0, index_1, index_2, index_3;
-    short sign_0, sign_1, sign_2, sign_3;
+    int layer_index, h_index, index_0, index_1, index_2, index_3, sign_0, sign_1, sign_2, sign_3;
     double rhombus_circ, rhombus_area;
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; ++i)
     {

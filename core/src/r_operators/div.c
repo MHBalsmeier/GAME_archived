@@ -1,10 +1,9 @@
 #include "../enum_and_typedefs.h"
 #include <stdio.h>
 
-int divergence(Vector_field in_field, Scalar_field out_field, Grid *grid, short allow_surface_flux)
+int divergence(Vector_field in_field, Scalar_field out_field, Grid *grid, int allow_surface_flux)
 {
-    short number_of_edges;
-    long layer_index, h_index;
+    int number_of_edges, layer_index, h_index;
     double comp_h, comp_v;
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {

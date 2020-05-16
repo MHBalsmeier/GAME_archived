@@ -9,12 +9,12 @@ int main(int argc, char *argv[])
     size_t len = strlen(argv[1]);
     char *TOTAL_RUN_SPAN_PRE = malloc((len + 1)*sizeof(char));
     strcpy(TOTAL_RUN_SPAN_PRE, argv[1]);
-    long TOTAL_RUN_SPAN = strtol(TOTAL_RUN_SPAN_PRE, NULL, 10);
+    int TOTAL_RUN_SPAN = strtol(TOTAL_RUN_SPAN_PRE, NULL, 10);
     free(TOTAL_RUN_SPAN_PRE);
     len = strlen(argv[2]);
     char *WRITE_OUT_INTERVAL_PRE = malloc((len + 1)*sizeof(char));
     strcpy(WRITE_OUT_INTERVAL_PRE, argv[2]);
-    long WRITE_OUT_INTERVAL = strtol(WRITE_OUT_INTERVAL_PRE, NULL, 10);
+    int WRITE_OUT_INTERVAL = strtol(WRITE_OUT_INTERVAL_PRE, NULL, 10);
     free(WRITE_OUT_INTERVAL_PRE);
     len = strlen(argv[3]);
     char *GEO_PROP_FILE = malloc((len + 1)*sizeof(char));
@@ -27,11 +27,11 @@ int main(int argc, char *argv[])
     strcpy(OUTPUT_FOLDER, argv[5]);
     char *stars  = malloc(82*sizeof(char));
     double cfl_margin = strtof(argv[6], NULL);
-    short dissipation_on;
+    int dissipation_on;
     dissipation_on = strtod(argv[7], NULL);
-    short rad_on;
+    int rad_on;
     rad_on = strtod(argv[8], NULL);
-    short add_comps_on;
+    int add_comps_on;
     add_comps_on = strtod(argv[9], NULL);
     for (int i = 0; i < 82 - 1; ++i)
         stars[i] = '*';
@@ -44,8 +44,8 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     printf("Use only legal if authorized by Max Henrik Balsmeier.\n");
     printf("What you want to do:\n");
-    printf("run time span:\t\t\t%ld s\n", TOTAL_RUN_SPAN);
-    printf("output written in intervals of\t%ld s\n", WRITE_OUT_INTERVAL);
+    printf("run time span:\t\t\t%d s\n", TOTAL_RUN_SPAN);
+    printf("output written in intervals of\t%d s\n", WRITE_OUT_INTERVAL);
     printf("geo properties file:\t\t%s\n", GEO_PROP_FILE);
     printf("initialization state file:\t%s\n", INIT_STATE_FILE);
     printf("output directory:\t\t%s\n", OUTPUT_FOLDER);

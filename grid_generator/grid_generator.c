@@ -23,10 +23,10 @@
 1	
 2	new grid generation
 */
-const short MODE = 2;
+const int MODE = 2;
 const double TOA = 30000.0;
 const double SCALE_HEIGHT = 8000.0;
-const short ORO_ID = 0;
+const int ORO_ID = 0;
 const double ORTH_CRITERION_DEG = 89.996;
 
 enum grid_integers {
@@ -60,23 +60,23 @@ SCALAR_POINTS_PER_INNER_FACE = (int) (0.5*(pow(2, RES_ID) - 2)*(pow(2, RES_ID) -
 VECTOR_POINTS_PER_INNER_FACE = (int) (1.5*(pow(2, RES_ID) - 1)*pow(2, RES_ID))};
 
 int find_angle_change(double, double, double *);
-int find_coords_from_triangle_on_face_index(long, long, long *, long *, long *);
-int find_triangle_on_face_index_from_coords(long, long, long, long *);
+int find_coords_from_triangle_on_face_index(int, int, int *, int *, int *);
+int find_triangle_on_face_index_from_coords(int, int, int, int *);
 int find_sigma_from_level(int, double *);
 int find_sigma_from_layer(int, double *);
-int find_triangle_indices_from_h_vector_index(int, long, long *, long *, long *, long *, long *, long *, long *, short *, short[][3], short[][3], short[][2], short[][3]);
-int find_triangle_edge_points(long, short, long, long *, long *, long *, long *, long *, long *, long *, short[][3], short[][3], short[][3]);
-int find_points_per_edge(long, long *);
-int find_scalar_points_per_inner_face(long, long *);
-int upscale_scalar_point(long, long, long *);
-int write_scalar_coordinates(long, long, long, long, long, long, short, double[], double[], double[], double[], double[]);
-int find_triangles_per_face(long, long *);
-int find_triangle_edge_points_from_dual_scalar_on_face_index(long, short, long, long *, long *, long *, short[][3], short[][3], short[][3]);
-int find_triangle_on_face_index_from_dual_scalar_on_face_index(long, long, long *, short *, short *, short *);
+int find_triangle_indices_from_h_vector_index(int, int, int *, int *, int *, int *, int *, int *, int *, int *, int[][3], int[][3], int[][2], int[][3]);
+int find_triangle_edge_points(int, int, int, int *, int *, int *, int *, int *, int *, int *, int[][3], int[][3], int[][3]);
+int find_points_per_edge(int, int *);
+int find_scalar_points_per_inner_face(int, int *);
+int upscale_scalar_point(int, int, int *);
+int write_scalar_coordinates(int, int, int, int, int, int, int, double[], double[], double[], double[], double[]);
+int find_triangles_per_face(int, int *);
+int find_triangle_edge_points_from_dual_scalar_on_face_index(int, int, int, int *, int *, int *, int[][3], int[][3], int[][3]);
+int find_triangle_on_face_index_from_dual_scalar_on_face_index(int, int, int *, int *, int *, int *);
 
 int main(int argc, char *argv[])
 {
-    short OUTPUT_FILE_LENGTH = 100;
+    int OUTPUT_FILE_LENGTH = 100;
     char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
     sprintf(OUTPUT_FILE_PRE, "nc_files/B%dL%dT%d_M%d_O%d", RES_ID, NUMBER_OF_LAYERS, (int) TOA, MODE, ORO_ID);
     OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
     longitude_ico[9] = 2*M_PI/10 + 3*2*M_PI/5;
     longitude_ico[10] = 2*M_PI/10 + 4*2*M_PI/5;    
     longitude_ico[11] = 0;
-    short edge_vertices[NUMBER_OF_EDGES][2];
+    int edge_vertices[NUMBER_OF_EDGES][2];
     edge_vertices[0][0] = 0;
     edge_vertices[0][1] = 1;
     edge_vertices[1][0] = 0;
@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
     edge_vertices[28][1] = 11;
     edge_vertices[29][0] = 10;
     edge_vertices[29][1] = 11;
-    short face_vertices[20][3];
+    int face_vertices[20][3];
     face_vertices[0][0] = 0;
     face_vertices[0][1] = 1;
     face_vertices[0][2] = 2;
@@ -231,9 +231,9 @@ int main(int argc, char *argv[])
     face_vertices[19][0] = 11;
     face_vertices[19][1] = 10;
     face_vertices[19][2] = 9;
-    short face_edges[20][3];
-    short face_edges_reverse[20][3];
-    short edge_other_vertex_index, check_index;
+    int face_edges[20][3];
+    int face_edges_reverse[20][3];
+    int edge_other_vertex_index, check_index;
     for (int i = 0; i < 20; ++i)
     {
         for (int j = 0; j < 3; ++j)
@@ -300,36 +300,36 @@ int main(int argc, char *argv[])
     double *rel_on_line_dual = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
     double *exner_pressure_background = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *pot_temp_background = malloc(NUMBER_OF_VECTORS*sizeof(double));
-    long *to_index = malloc(NUMBER_OF_VECTORS_H*sizeof(long));
-    long *from_index = malloc(NUMBER_OF_VECTORS_H*sizeof(long));
-    long *recov_hor_par_pri_index = calloc(10*NUMBER_OF_VECTORS_H, sizeof(long));
-    long *recov_hor_ver_pri_index = malloc(4*NUMBER_OF_VECTORS_H*sizeof(long));
-    long *recov_hor_par_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(long));
-    long *recov_hor_ver_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(long));
-    long *recov_ver_0_pri_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
-    long *recov_ver_1_pri_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
-    long *recov_ver_0_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
-    long *recov_ver_1_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
-    long *adjacent_vector_indices_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(long));
-    long *vorticity_indices = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(long));
-    long *h_curl_indices = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(long));
-    long *to_index_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(long));
-    long *from_index_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(long));
-    long *vorticity_indices_dual = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
-    long *h_curl_indices_dual = malloc(4*NUMBER_OF_VECTORS_H*sizeof(long));
-    long *adjacent_scalar_indices_dual_h = malloc(3*NUMBER_OF_DUAL_SCALARS_H*sizeof(long));
-    short *adjacent_signs_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(short));
-    short *vorticity_signs = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(short));
-    short *h_curl_signs = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(short));
-    short *vorticity_signs_dual = malloc(6*NUMBER_OF_VECTORS_V*sizeof(short));
-    short *h_curl_signs_dual = malloc(4*NUMBER_OF_VECTORS_H*sizeof(short));
+    int *to_index = malloc(NUMBER_OF_VECTORS_H*sizeof(int));
+    int *from_index = malloc(NUMBER_OF_VECTORS_H*sizeof(int));
+    int *recov_hor_par_pri_index = calloc(10*NUMBER_OF_VECTORS_H, sizeof(int));
+    int *recov_hor_ver_pri_index = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
+    int *recov_hor_par_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(int));
+    int *recov_hor_ver_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(int));
+    int *recov_ver_0_pri_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
+    int *recov_ver_1_pri_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
+    int *recov_ver_0_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
+    int *recov_ver_1_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
+    int *adjacent_vector_indices_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(int));
+    int *vorticity_indices = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(int));
+    int *h_curl_indices = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
+    int *to_index_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
+    int *from_index_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
+    int *vorticity_indices_dual = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
+    int *h_curl_indices_dual = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
+    int *adjacent_scalar_indices_dual_h = malloc(3*NUMBER_OF_DUAL_SCALARS_H*sizeof(int));
+    int *adjacent_signs_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(int));
+    int *vorticity_signs = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(int));
+    int *h_curl_signs = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
+    int *vorticity_signs_dual = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
+    int *h_curl_signs_dual = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
     double lat_res, lon_res, base_area, base_distance, radius_0, radius_1, direction_change, x_point_0, y_point_0, z_point_0, x_point_1, y_point_1, z_point_1, x_res, y_res, z_res, sigma_z, sigma_z_dual_scalar, rel_on_line;
     int face_index, face_index_0, face_index_1, retval;
-    long h_index, on_face_index, layer_index, inner_index, upper_index, lower_index, coord_0_points_amount, coord_0, coord_1, index_0, index_1, triangle_on_face_index, on_edge_index, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_index, counter, primal_vector_index, dual_vector_index, number_of_triangles_per_face, edgepoint_0, edgepoint_1, edgepoint_2, points_per_edge, dual_scalar_on_face_index, base_index_old, base_index_down_triangles, base_index_up_triangles, old_triangle_on_line_index;
-    short first_face_found, edge_rel_to_face_0, edge_rel_to_face_1, edge_index, sign, small_triangle_edge_index, dump, points_upwards, points_downwards, last_triangle_bool;
+    int h_index, on_face_index, layer_index, inner_index, upper_index, lower_index, coord_0_points_amount, coord_0, coord_1, index_0, index_1, triangle_on_face_index, on_edge_index, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_index, counter, primal_vector_index, dual_vector_index, number_of_triangles_per_face, edgepoint_0, edgepoint_1, edgepoint_2, points_per_edge, dual_scalar_on_face_index, base_index_old, base_index_down_triangles, base_index_up_triangles, old_triangle_on_line_index;
+    int first_face_found, edge_rel_to_face_0, edge_rel_to_face_1, edge_index, sign, small_triangle_edge_index, dump, points_upwards, points_downwards, last_triangle_bool;
     if (NUMBER_OF_VECTORS_H != NUMBER_OF_DUAL_VECTORS_H)
         printf("It is NUMBER_OF_VECTORS_H != NUMBER_OF_DUAL_VECTORS_H.\n");
-    long test_index;
+    int test_index;
     for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
     {
         upscale_scalar_point(RES_ID, i, &test_index);
@@ -704,7 +704,7 @@ int main(int argc, char *argv[])
             f_vec[i] = 2*OMEGA*cos(latitude_vector_dual[i])*sin(direction_dual[i]);
         }
     }
-    short trouble_detected = 0;
+    int trouble_detected = 0;
     for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
     {
         counter = 0;
@@ -751,7 +751,7 @@ int main(int argc, char *argv[])
             vorticity_signs_dual[6*i + 5] = 0;
         }
     }
-    short number_of_edges, double_check, sign_sum_check;
+    int number_of_edges, double_check, sign_sum_check;
     for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
     {
         counter = 0;
@@ -815,22 +815,22 @@ int main(int argc, char *argv[])
         if (fabs(rad2deg(direction_change)) < ORTH_CRITERION_DEG || fabs(rad2deg(direction_change)) > 90 + (90 - ORTH_CRITERION_DEG))
             printf("Grid non-orthogonal.\n");
     }
-    short check_0, check_1, check_2;
+    int check_0, check_1, check_2;
     for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
     {
         if (i < NUMBER_OF_PENTAGONS)
         {
             double *lat_points = malloc(5*sizeof(double));
             double *lon_points = malloc(5*sizeof(double));
-            long *cell_vector_indices = malloc(5*sizeof(long));
+            int *cell_vector_indices = malloc(5*sizeof(int));
             for (int j = 0; j < 5; ++j)
                 cell_vector_indices[j] = adjacent_vector_indices_h[6*i + j];
             counter = 0;
             for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_V; ++j)
             {
-                retval = in_bool_calculator_long(cell_vector_indices, 5, vorticity_indices[3*j + 0], &check_0);
-                retval = in_bool_calculator_long(cell_vector_indices, 5, vorticity_indices[3*j + 1], &check_1);
-                retval = in_bool_calculator_long(cell_vector_indices, 5, vorticity_indices[3*j + 2], &check_2);
+                retval = in_bool_calculator(cell_vector_indices, 5, vorticity_indices[3*j + 0], &check_0);
+                retval = in_bool_calculator(cell_vector_indices, 5, vorticity_indices[3*j + 1], &check_1);
+                retval = in_bool_calculator(cell_vector_indices, 5, vorticity_indices[3*j + 2], &check_2);
                 if (check_0 == 1 || check_1 == 1 || check_2 == 1)
                 {
                     lat_points[counter] = latitude_scalar_dual[j];
@@ -847,15 +847,15 @@ int main(int argc, char *argv[])
         {
             double *lat_points = malloc(6*sizeof(double));
             double *lon_points = malloc(6*sizeof(double));
-            long *cell_vector_indices = malloc(6*sizeof(long));
+            int *cell_vector_indices = malloc(6*sizeof(int));
             for (int j = 0; j < 6; ++j)
                 cell_vector_indices[j] = adjacent_vector_indices_h[6*i + j];
             counter = 0;
             for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_V; ++j)
             {
-                retval = in_bool_calculator_long(cell_vector_indices, 6, vorticity_indices[3*j + 0], &check_0);
-                retval = in_bool_calculator_long(cell_vector_indices, 6, vorticity_indices[3*j + 1], &check_1);
-                retval = in_bool_calculator_long(cell_vector_indices, 6, vorticity_indices[3*j + 2], &check_2);
+                retval = in_bool_calculator(cell_vector_indices, 6, vorticity_indices[3*j + 0], &check_0);
+                retval = in_bool_calculator(cell_vector_indices, 6, vorticity_indices[3*j + 1], &check_1);
+                retval = in_bool_calculator(cell_vector_indices, 6, vorticity_indices[3*j + 2], &check_2);
                 if (check_0 == 1 || check_1 == 1 || check_2 == 1)
                 {
                     lat_points[counter] = latitude_scalar_dual[j];
@@ -1022,12 +1022,13 @@ int main(int argc, char *argv[])
         if (area[i] <= 0)
             printf("area contains a non-positive value.\n");
     }
-    /* short bool_0, bool_1, first_found;
-    long cell_0_for_cross, cell_1_for_cross;
+    /* int bool_0, bool_1, first_found;
+    int cell_0_for_cross, cell_1_for_cross;
 	uncomment for ald Coriolis reconstruction	
 	*/    
-	short *face_of_cell_indices = malloc(2*sizeof(short));
-	short offset;
+	int *face_of_cell_indices = malloc(2*sizeof(int));
+	int offset, sign_0, sign_1;
+	double sum_of_weights = 0;
     for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
     {
         for (int j = 0; j < 2; ++j)
@@ -1068,8 +1069,8 @@ int main(int argc, char *argv[])
                 else
                     adjacent_scalar_indices_for_cross[5] = from_index[adjacent_vector_indices_h[6*j + 5]];
             }
-            retval = in_bool_calculator_long(adjacent_scalar_indices_for_cross, 6, from_index[i], &bool_0);
-            retval = in_bool_calculator_long(adjacent_scalar_indices_for_cross, 6, to_index[i], &bool_1);
+            retval = in_bool_calculator(adjacent_scalar_indices_for_cross, 6, from_index[i], &bool_0);
+            retval = in_bool_calculator(adjacent_scalar_indices_for_cross, 6, to_index[i], &bool_1);
             if (bool_0 == 1 && bool_1 == 1)
             {
                 if (first_found == 0)
@@ -1111,49 +1112,455 @@ int main(int argc, char *argv[])
         recov_hor_par_pri_weight[4*i + 2] = 2.0/3.0*0.5*(cos(direction[i] + M_PI/2)*cos(direction[recov_hor_par_pri_index[4*i + 2]]) + sin(direction[i] + M_PI/2)*sin(direction[recov_hor_par_pri_index[4*i + 2]]));
         recov_hor_par_pri_index[4*i + 3] = adjacent_vector_indices_h[6*cell_1_for_cross + face_of_cell_indices[1]];
         recov_hor_par_pri_weight[4*i + 3] = 2.0/3.0*0.5*(cos(direction[i] + M_PI/2)*cos(direction[recov_hor_par_pri_index[4*i + 3]]) + sin(direction[i] + M_PI/2)*sin(direction[recov_hor_par_pri_index[4*i + 3]])); uncomment for cold Coriolis reconstruction*/
+		/*
+		translation from TRSK paper:
+		sign_0: t_{e, v_2}
+		sign_1: n_{e', i}
+		recov_hor_par_pri_weight: w
+		*/
 		offset = 0;
+		double triangle_0, triangle_1, check_sum;
+		int vertex_index_candidate_0, vertex_index_candidate_1, counter, check_result, first_index, last_index;
 		for (int k = 0; k < 10; ++k)
 		{
 			if (k < 5)
 			{
-				if (offset == 0 && adjacent_vector_indices_h[6*from_index[i] + k] == i)
+				sign_0 = -1;
+				if (adjacent_vector_indices_h[6*from_index[i] + k] == i)
 					offset += 1;
-				if (from_index[i] < NUMBER_OF_PENTAGONS && k == 4)
-				{
+				if (offset > 1)
+					printf("Problem 1 in TRSK implementation detected.\n");
+				recov_hor_par_pri_index[10*i + k] = adjacent_vector_indices_h[6*from_index[i] + k + offset];
+				if (recov_hor_par_pri_index[10*i + k] == -1)
 					recov_hor_par_pri_index[10*i + k] = 0;
-					recov_hor_par_pri_weight[10*i + k] = 0;
+				if (recov_hor_par_pri_index[10*i + k] < 0 || recov_hor_par_pri_index[10*i + k] >= NUMBER_OF_VECTORS_H)
+					printf("Problem 11 in TRSK implementation detected.\n");
+				sign_1 = -1;
+				if (from_index[recov_hor_par_pri_index[10*i + k]] == from_index[i])
+					sign_1 = 1;
+				if (from_index[i] < NUMBER_OF_PENTAGONS)
+				{
+					int vertex_indices[5];
+					int edge_indices[5];
+					int indices_resorted[5];
+					int vertex_indices_resorted[5];
+					double latitude_vertices[5];
+					double longitude_vertices[5];
+					double latitude_edges[5];
+					double longitude_edges[5];
+					double vector_of_areas[5];
+					for (int l = 0; l < 5; ++l)
+						vertex_indices[l] = -1;
+					counter = 0;
+					for (int l = 0; l < 5; ++l)
+					{
+						vertex_index_candidate_0 = from_index_dual[adjacent_vector_indices_h[6*from_index[i] + l]];
+						vertex_index_candidate_1 = to_index_dual[adjacent_vector_indices_h[6*from_index[i] + l]];
+						retval = in_bool_calculator(vertex_indices, 5, vertex_index_candidate_0, &check_result);						
+						if (check_result == 0)
+						{
+							vertex_indices[counter] = vertex_index_candidate_0;
+							latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
+							longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
+							++counter;
+						}
+						retval = in_bool_calculator(vertex_indices, 5, vertex_index_candidate_1, &check_result);						
+						if (check_result == 0)
+						{
+							vertex_indices[counter] = vertex_index_candidate_1;
+							latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
+							longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
+							++counter;
+						}
+					}
+					if (counter != 5)
+						printf("Problem 13 in TRSK implementation detected.\n");
+					for (int l = 0; l < 5; ++l)
+					{
+						if (vertex_indices[l] < 0 || vertex_indices[l] >= NUMBER_OF_DUAL_SCALARS_H)
+							printf("Problem 3 in TRSK implementation detected.\n");
+						for (int m = l + 1; m < 5; ++m)
+						{
+							if (vertex_indices[l] == vertex_indices[m])
+								printf("Problem 17 in TRSK implementation detected.\n");
+						}
+					}
+					retval = sort_edge_indices(latitude_vertices, longitude_vertices, 5, indices_resorted);
+					for (int l = 0; l < 5; ++l)
+					{
+						latitude_vertices[l] = latitude_vertices[indices_resorted[l]];
+						longitude_vertices[l] = longitude_vertices[indices_resorted[l]];
+						vertex_indices_resorted[l] = vertex_indices[indices_resorted[l]];
+					}
+					for (int l = 0; l < 5; ++l)
+					{
+						for (int m = 0; m < 5; ++m)
+						{
+							if ((from_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[l] && to_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[(l + 1)%5]) || (to_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[l] && from_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[(l + 1)%5]))
+								edge_indices[l] = adjacent_vector_indices_h[6*from_index[i] + m];
+						}
+					}
+					for (int l = 0; l < 5; ++l)
+					{
+						if (edge_indices[l] < 0 || edge_indices[l] >= NUMBER_OF_VECTORS_H)
+						{
+							printf("Problem 7 in TRSK implementation detected.\n");
+						}
+						for (int m = l + 1; m < 5; ++m)
+						{
+							if (edge_indices[l] == edge_indices[m])
+								printf("Problem 18 in TRSK implementation detected.\n");
+						}
+					}
+					for (int l = 0; l < 5; ++l)
+					{
+						latitude_edges[l] = latitude_vector[edge_indices[l]];
+						longitude_edges[l] = longitude_vector[edge_indices[l]];
+					}
+					for (int l = 0; l < 5; ++l)	
+					{
+						if (l == 0)
+							retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[4], longitude_edges[4], &triangle_0);
+						else
+							retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[l - 1], longitude_edges[l - 1], &triangle_0);
+						retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[l], longitude_edges[l], &triangle_1);
+						vector_of_areas[l] = pow(RADIUS + z_scalar[from_index[i]], 2)*(triangle_0 + triangle_1);
+					}
+					for (int l = 0; l < 5; ++l)
+					{
+						if (edge_indices[l] == i)
+							last_index = l;
+						if (edge_indices[l] == recov_hor_par_pri_index[10*i + k])
+							first_index = (l + 1)%5;
+							
+					}
+					if (k == 4)
+						sum_of_weights = 0;
+					else
+						double_sum_gen(vector_of_areas, 5, first_index, last_index, &sum_of_weights);
 				}
 				else
 				{
-					recov_hor_par_pri_index[10*i + k] = adjacent_vector_indices_h[6*from_index[i] + k + offset];
-					recov_hor_par_pri_weight[10*i + k] = 0;
+					int vertex_indices[6];
+					int edge_indices[6];
+					int indices_resorted[6];
+					int vertex_indices_resorted[6];
+					double latitude_vertices[6];
+					double longitude_vertices[6];
+					double latitude_edges[6];
+					double longitude_edges[6];
+					double vector_of_areas[6];
+					for (int l = 0; l < 6; ++l)
+						vertex_indices[l] = -1;
+					counter = 0;
+					for (int l = 0; l < 5; ++l)
+					{
+						vertex_index_candidate_0 = from_index_dual[adjacent_vector_indices_h[6*from_index[i] + l]];
+						vertex_index_candidate_1 = to_index_dual[adjacent_vector_indices_h[6*from_index[i] + l]];
+						retval = in_bool_calculator(vertex_indices, 6, vertex_index_candidate_0, &check_result);						
+						if (check_result == 0)
+						{
+							vertex_indices[counter] = vertex_index_candidate_0;
+							latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
+							longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
+							++counter;
+						}
+						retval = in_bool_calculator(vertex_indices, 6, vertex_index_candidate_1, &check_result);						
+						if (check_result == 0)
+						{
+							vertex_indices[counter] = vertex_index_candidate_1;
+							latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
+							longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
+							++counter;
+						}
+					}
+					if (counter != 6)
+						printf("Problem 14 in TRSK implementation detected.\n");
+					for (int l = 0; l < 6; ++l)
+					{
+						if (vertex_indices[l] < 0 || vertex_indices[l] >= NUMBER_OF_DUAL_SCALARS_H)
+							printf("Problem 4 in TRSK implementation detected.\n");
+						for (int m = l + 1; m < 6; ++m)
+						{
+							if (vertex_indices[l] == vertex_indices[m])
+								printf("Problem 22 in TRSK implementation detected.\n");
+						}
+					}
+					retval = sort_edge_indices(latitude_vertices, longitude_vertices, 6, indices_resorted);
+					for (int l = 0; l < 6; ++l)
+					{
+						latitude_vertices[l] = latitude_vertices[indices_resorted[l]];
+						longitude_vertices[l] = longitude_vertices[indices_resorted[l]];
+						vertex_indices_resorted[l] = vertex_indices[indices_resorted[l]];
+					}
+					for (int l = 0; l < 6; ++l)
+					{
+						for (int m = 0; m < 6; ++m)
+						{
+							if ((from_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[l] && to_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[(l + 1)%6]) || (to_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[l] && from_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[(l + 1)%6]))
+								edge_indices[l] = adjacent_vector_indices_h[6*from_index[i] + m];
+						}
+					}
+					for (int l = 0; l < 6; ++l)
+					{
+						if (edge_indices[l] < 0 || edge_indices[l] >= NUMBER_OF_VECTORS_H)
+						{
+							printf("Problem 8 in TRSK implementation detected.\n");
+						}
+						for (int m = l + 1; m < 6; ++m)
+						{
+							if (edge_indices[l] == edge_indices[m])
+								printf("Problem 19 in TRSK implementation detected.\n");
+						}
+					}
+					for (int l = 0; l < 6; ++l)
+					{
+						latitude_edges[l] = latitude_vector[edge_indices[l]];
+						longitude_edges[l] = longitude_vector[edge_indices[l]];
+					}
+					for (int l = 0; l < 6; ++l)	
+					{
+						if (l == 0)
+							retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[5], longitude_edges[5], &triangle_0);
+						else
+							retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[l - 1], longitude_edges[l - 1], &triangle_0);
+						retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[l], longitude_edges[l], &triangle_1);
+						vector_of_areas[l] = pow(RADIUS + z_scalar[from_index[i]], 2)*(triangle_0 + triangle_1);
+					}
+					for (int l = 0; l < 6; ++l)
+					{
+						if (edge_indices[l] == i)
+							last_index = l;
+						if (edge_indices[l] == recov_hor_par_pri_index[10*i + k])
+							first_index = (l + 1)%6;
+							
+					}
+					double_sum_gen(vector_of_areas, 6, first_index, last_index, &sum_of_weights);
 				}
+				sum_of_weights = sum_of_weights/area[from_index[i]];
+				recov_hor_par_pri_weight[10*i + k] = sign_0*(sum_of_weights - 0.5)*sign_1;
 			}
 			else
 			{
 				if (k == 5)
-				{
-					if (offset > 1)
-						printf("Problem 0 in TRSK implementation detected.");
 					offset = 0;
-				}
-				if (offset == 0 && adjacent_vector_indices_h[6*to_index[i] + k - 5] == i)
+				sign_0 = 1;
+				if (adjacent_vector_indices_h[6*to_index[i] + k] == i)
 					offset += 1;
-				if (to_index[i] < NUMBER_OF_PENTAGONS && k == 9)
-				{
+				if (offset > 1)
+					printf("Problem 2 in TRSK implementation detected.\n");
+				recov_hor_par_pri_index[10*i + k - 5] = adjacent_vector_indices_h[6*to_index[i] + k - 5 + offset];
+				if (recov_hor_par_pri_index[10*i + k] == -1)
 					recov_hor_par_pri_index[10*i + k] = 0;
-					recov_hor_par_pri_weight[10*i + k] = 0;
+				if (recov_hor_par_pri_index[10*i + k] < 0 || recov_hor_par_pri_index[10*i + k] >= NUMBER_OF_VECTORS_H)
+					printf("Problem 12 in TRSK implementation detected.\n");
+				sign_1 = -1;
+				if (to_index[recov_hor_par_pri_index[10*i + k]] == to_index[i])
+					sign_1 = 1;
+				if (to_index[i] < NUMBER_OF_PENTAGONS)
+				{
+					int vertex_indices[5];
+					int edge_indices[5];
+					int indices_resorted[5];
+					int vertex_indices_resorted[5];
+					double latitude_vertices[5];
+					double longitude_vertices[5];
+					double latitude_edges[5];
+					double longitude_edges[5];
+					double vector_of_areas[5];
+					for (int l = 0; l < 5; ++l)
+						vertex_indices[l] = -1;
+					counter = 0;
+					for (int l = 0; l < 5; ++l)
+					{
+						vertex_index_candidate_0 = from_index_dual[adjacent_vector_indices_h[6*to_index[i] + l]];
+						vertex_index_candidate_1 = to_index_dual[adjacent_vector_indices_h[6*to_index[i] + l]];
+						retval = in_bool_calculator(vertex_indices, 5, vertex_index_candidate_0, &check_result);						
+						if (check_result == 0)
+						{
+							vertex_indices[counter] = vertex_index_candidate_0;
+							latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
+							longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
+							++counter;
+						}
+						retval = in_bool_calculator(vertex_indices, 5, vertex_index_candidate_1, &check_result);						
+						if (check_result == 0)
+						{
+							vertex_indices[counter] = vertex_index_candidate_1;
+							latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
+							longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
+							++counter;
+						}
+					}
+					if (counter != 5)
+						printf("Problem 15 in TRSK implementation detected.\n");
+					for (int l = 0; l < 5; ++l)
+					{
+						if (vertex_indices[l] < 0 || vertex_indices[l] >= NUMBER_OF_DUAL_SCALARS_H)
+							printf("Problem 5 in TRSK implementation detected.\n");
+						for (int m = l + 1; m < 5; ++m)
+						{
+							if (vertex_indices[l] == vertex_indices[m])
+								printf("Problem 23 in TRSK implementation detected.\n");
+						}
+					}
+					retval = sort_edge_indices(latitude_vertices, longitude_vertices, 5, indices_resorted);
+					for (int l = 0; l < 5; ++l)
+					{
+						latitude_vertices[l] = latitude_vertices[indices_resorted[l]];
+						longitude_vertices[l] = longitude_vertices[indices_resorted[l]];
+						vertex_indices_resorted[l] = vertex_indices[indices_resorted[l]];
+					}
+					for (int l = 0; l < 5; ++l)
+					{
+						for (int m = 0; m < 5; ++m)
+						{
+							if ((from_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[l] && to_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[(l + 1)%5]) || (to_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[l] && from_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[(l + 1)%5]))
+								edge_indices[l] = adjacent_vector_indices_h[6*to_index[i] + m];
+						}
+					}
+					for (int l = 0; l < 5; ++l)
+					{
+						if (edge_indices[l] < 0 || edge_indices[l] >= NUMBER_OF_VECTORS_H)
+						{
+							printf("Problem 9 in TRSK implementation detected.\n");
+						}
+						for (int m = l + 1; m < 5; ++m)
+						{
+							if (edge_indices[l] == edge_indices[m])
+								printf("Problem 20 in TRSK implementation detected.\n");
+						}
+					}
+					for (int l = 0; l < 5; ++l)
+					{
+						latitude_edges[l] = latitude_vector[edge_indices[l]];
+						longitude_edges[l] = longitude_vector[edge_indices[l]];
+					}
+					for (int l = 0; l < 5; ++l)	
+					{
+						if (l == 0)
+							retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[4], longitude_edges[4], &triangle_0);
+						else
+							retval = calc_triangle_face(latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[l - 1], longitude_edges[l - 1], &triangle_0);
+						retval = calc_triangle_face(latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[l], longitude_edges[l], &triangle_1);
+						vector_of_areas[l] = pow(RADIUS + z_scalar[to_index[i]], 2)*(triangle_0 + triangle_1);
+					}
+					for (int l = 0; l < 5; ++l)
+					{
+						if (edge_indices[l] == i)
+							last_index = l;
+						if (edge_indices[l] == recov_hor_par_pri_index[10*i + k])
+							first_index = (l + 1)%5;
+							
+					}
+					if (k == 9)
+						sum_of_weights = 0;
+					else
+						double_sum_gen(vector_of_areas, 5, first_index, last_index, &sum_of_weights);
 				}
 				else
 				{
-					recov_hor_par_pri_index[10*i + k] = adjacent_vector_indices_h[6*to_index[i] + k - 5];
-					recov_hor_par_pri_weight[10*i + k] = 0;
+					int vertex_indices[6];
+					int edge_indices[6];
+					int indices_resorted[6];
+					int vertex_indices_resorted[6];
+					double latitude_vertices[6];
+					double longitude_vertices[6];
+					double latitude_edges[6];
+					double longitude_edges[6];
+					double vector_of_areas[6];
+					for (int l = 0; l < 6; ++l)
+						vertex_indices[l] = -1;
+					counter = 0;
+					for (int l = 0; l < 6; ++l)
+					{
+						vertex_index_candidate_0 = from_index_dual[adjacent_vector_indices_h[6*to_index[i] + l]];
+						vertex_index_candidate_1 = to_index_dual[adjacent_vector_indices_h[6*to_index[i] + l]];
+						retval = in_bool_calculator(vertex_indices, 6, vertex_index_candidate_0, &check_result);						
+						if (check_result == 0)
+						{
+							vertex_indices[counter] = vertex_index_candidate_0;
+							latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
+							longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
+							++counter;
+						}
+						retval = in_bool_calculator(vertex_indices, 6, vertex_index_candidate_1, &check_result);						
+						if (check_result == 0)
+						{
+							vertex_indices[counter] = vertex_index_candidate_1;
+							latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
+							longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
+							++counter;
+						}
+					}
+					if (counter != 6)
+						printf("Problem 16 in TRSK implementation detected.\n");
+					for (int l = 0; l < 6; ++l)
+					{
+						if (vertex_indices[l] < 0 || vertex_indices[l] >= NUMBER_OF_DUAL_SCALARS_H)
+							printf("Problem 6 in TRSK implementation detected.\n");
+						for (int m = l + 1; m < 6; ++m)
+						{
+							if (vertex_indices[l] == vertex_indices[m])
+								printf("Problem 24 in TRSK implementation detected.\n");
+						}
+					}
+					retval = sort_edge_indices(latitude_vertices, longitude_vertices, 6, indices_resorted);
+					for (int l = 0; l < 6; ++l)
+					{
+						latitude_vertices[l] = latitude_vertices[indices_resorted[l]];
+						longitude_vertices[l] = longitude_vertices[indices_resorted[l]];
+						vertex_indices_resorted[l] = vertex_indices[indices_resorted[l]];
+					}
+					for (int l = 0; l < 6; ++l)
+					{
+						for (int m = 0; m < 6; ++m)
+						{
+							if ((from_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[l] && to_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[(l + 1)%6]) || (to_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[l] && from_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[(l + 1)%6]))
+								edge_indices[l] = adjacent_vector_indices_h[6*to_index[i] + m];
+						}
+					}
+					for (int l = 0; l < 6; ++l)
+					{
+						if (edge_indices[l] < 0 || edge_indices[l] >= NUMBER_OF_VECTORS_H)
+						{
+							printf("Problem 10 in TRSK implementation detected.\n");
+						}
+						for (int m = l + 1; m < 6; ++m)
+						{
+							if (edge_indices[l] == edge_indices[m])
+								printf("Problem 21 in TRSK implementation detected.\n");
+						}
+					}
+					for (int l = 0; l < 6; ++l)
+					{
+						latitude_edges[l] = latitude_vector[edge_indices[l]];
+						longitude_edges[l] = longitude_vector[edge_indices[l]];
+					}
+					for (int l = 0; l < 6; ++l)	
+					{
+						if (l == 0)
+							retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[5], longitude_edges[5], &triangle_0);
+						else
+							retval = calc_triangle_face(latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[l - 1], longitude_edges[l - 1], &triangle_0);
+						retval = calc_triangle_face(latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[l], longitude_edges[l], &triangle_1);
+						vector_of_areas[l] = pow(RADIUS + z_scalar[to_index[i]], 2)*(triangle_0 + triangle_1);
+					}
+					for (int l = 0; l < 6; ++l)
+					{
+						if (edge_indices[l] == i)
+							last_index = l;
+						if (edge_indices[l] == recov_hor_par_pri_index[10*i + k])
+							first_index = (l + 1)%6;
+							
+					}
+					double_sum_gen(vector_of_areas, 6, first_index, last_index, &sum_of_weights);	
 				}
+				sum_of_weights = sum_of_weights/area[to_index[i]];
+				recov_hor_par_pri_weight[10*i + k] = sign_0*(sum_of_weights - 0.5)*sign_1;
 			}
-			recov_hor_par_pri_weight[10*i + k] = normal_distance[recov_hor_par_pri_index[10*i + k]]/normal_distance_dual[i]*recov_hor_par_pri_weight[10*i + k];
+			recov_hor_par_pri_weight[10*i + k] = (normal_distance_dual[recov_hor_par_pri_index[10*i + k]]/(RADIUS + z_vector_dual[recov_hor_par_pri_index[10*i + k]]))/(normal_distance[NUMBER_OF_VECTORS_V + i]/(RADIUS + z_vector_dual[NUMBER_OF_VECTORS_V + i]))*recov_hor_par_pri_weight[10*i + k];
 		}
-		if (offset > 1)
-			printf("Problem 1 in TRSK implementation detected.");
         sign = 1;
         find_angle_change(direction[i], direction_dual[i], &direction_change);
         if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
@@ -1400,51 +1807,51 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "longitude_vector", NC_DOUBLE, 1, &vector_h_dimid, &longitude_vector_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "to_index", NC_LONG, 1, &vector_h_dimid, &to_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "to_index", NC_INT, 1, &vector_h_dimid, &to_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "from_index", NC_LONG, 1, &vector_h_dimid, &from_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "from_index", NC_INT, 1, &vector_h_dimid, &from_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "adjacent_vector_indices_h", NC_LONG, 1, &scalar_h_dimid_6, &adjacent_vector_indices_h_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "adjacent_vector_indices_h", NC_INT, 1, &scalar_h_dimid_6, &adjacent_vector_indices_h_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "vorticity_indices", NC_LONG, 1, &vector_dual_v_dimid_3, &vorticity_indices_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "vorticity_indices", NC_INT, 1, &vector_dual_v_dimid_3, &vorticity_indices_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "h_curl_indices", NC_LONG, 1, &vector_dual_h_dimid_4, &h_curl_indices_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "h_curl_indices", NC_INT, 1, &vector_dual_h_dimid_4, &h_curl_indices_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_par_dual_index", NC_LONG, 1, &vector_h_dimid_2, &recov_hor_par_dual_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_par_dual_index", NC_INT, 1, &vector_h_dimid_2, &recov_hor_par_dual_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_ver_dual_index", NC_LONG, 1, &vector_h_dimid_2, &recov_hor_ver_dual_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_ver_dual_index", NC_INT, 1, &vector_h_dimid_2, &recov_hor_ver_dual_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_par_pri_index", NC_LONG, 1, &vector_h_dimid_10, &recov_hor_par_pri_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_par_pri_index", NC_INT, 1, &vector_h_dimid_10, &recov_hor_par_pri_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_ver_pri_index", NC_LONG, 1, &vector_h_dimid_4, &recov_hor_ver_pri_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_ver_pri_index", NC_INT, 1, &vector_h_dimid_4, &recov_hor_ver_pri_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_pri_index", NC_LONG, 1, &vector_v_dimid_6, &recov_ver_0_pri_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_pri_index", NC_INT, 1, &vector_v_dimid_6, &recov_ver_0_pri_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_dual_index", NC_LONG, 1, &vector_v_dimid_6, &recov_ver_0_dual_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_dual_index", NC_INT, 1, &vector_v_dimid_6, &recov_ver_0_dual_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_pri_index", NC_LONG, 1, &vector_v_dimid_6, &recov_ver_1_pri_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_pri_index", NC_INT, 1, &vector_v_dimid_6, &recov_ver_1_pri_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_dual_index", NC_LONG, 1, &vector_v_dimid_6, &recov_ver_1_dual_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_dual_index", NC_INT, 1, &vector_v_dimid_6, &recov_ver_1_dual_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "to_index_dual", NC_LONG, 1, &vector_dual_h_dimid, &to_index_dual_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "to_index_dual", NC_INT, 1, &vector_dual_h_dimid, &to_index_dual_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "from_index_dual", NC_LONG, 1, &vector_dual_h_dimid, &from_index_dual_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "from_index_dual", NC_INT, 1, &vector_dual_h_dimid, &from_index_dual_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "vorticity_indices_dual", NC_LONG, 1, &vector_v_dimid_6, &vorticity_indices_dual_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "vorticity_indices_dual", NC_INT, 1, &vector_v_dimid_6, &vorticity_indices_dual_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "h_curl_indices_dual", NC_LONG, 1, &vector_h_dimid_4, &h_curl_indices_dual_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "h_curl_indices_dual", NC_INT, 1, &vector_h_dimid_4, &h_curl_indices_dual_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "adjacent_scalar_indices_dual_h", NC_LONG, 1, &vector_dual_v_dimid_3, &adjacent_scalar_indices_dual_h_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "adjacent_scalar_indices_dual_h", NC_INT, 1, &vector_dual_v_dimid_3, &adjacent_scalar_indices_dual_h_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "adjacent_signs_h", NC_SHORT, 1, &scalar_h_dimid_6, &adjacent_signs_h_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "adjacent_signs_h", NC_INT, 1, &scalar_h_dimid_6, &adjacent_signs_h_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "vorticity_signs", NC_SHORT, 1, &vector_dual_v_dimid_3, &vorticity_signs_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "vorticity_signs", NC_INT, 1, &vector_dual_v_dimid_3, &vorticity_signs_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "h_curl_signs", NC_SHORT, 1, &vector_dual_h_dimid_4, &h_curl_signs_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "h_curl_signs", NC_INT, 1, &vector_dual_h_dimid_4, &h_curl_signs_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "vorticity_signs_dual", NC_SHORT, 1, &vector_v_dimid_6, &vorticity_signs_dual_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "vorticity_signs_dual", NC_INT, 1, &vector_v_dimid_6, &vorticity_signs_dual_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "h_curl_signs_dual", NC_SHORT, 1, &vector_h_dimid_4, &h_curl_signs_dual_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "h_curl_signs_dual", NC_INT, 1, &vector_h_dimid_4, &h_curl_signs_dual_id)))
         ERR(retval);
     if ((retval = nc_enddef(ncid_g_prop)))
         ERR(retval);
@@ -1502,51 +1909,51 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, longitude_vector_id, &longitude_vector[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, to_index_id, &to_index[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, to_index_id, &to_index[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, from_index_id, &from_index[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, from_index_id, &from_index[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, adjacent_vector_indices_h_id, &adjacent_vector_indices_h[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, adjacent_vector_indices_h_id, &adjacent_vector_indices_h[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, vorticity_indices_id, &vorticity_indices[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, vorticity_indices_id, &vorticity_indices[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, h_curl_indices_id, &h_curl_indices[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, h_curl_indices_id, &h_curl_indices[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, recov_hor_par_dual_index_id, &recov_hor_par_dual_index[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, recov_hor_par_dual_index_id, &recov_hor_par_dual_index[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, recov_hor_ver_dual_index_id, &recov_hor_ver_dual_index[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, recov_hor_ver_dual_index_id, &recov_hor_ver_dual_index[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, recov_hor_par_pri_index_id, &recov_hor_par_pri_index[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, recov_hor_par_pri_index_id, &recov_hor_par_pri_index[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, recov_hor_ver_pri_index_id, &recov_hor_ver_pri_index[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, recov_hor_ver_pri_index_id, &recov_hor_ver_pri_index[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, recov_ver_0_pri_index_id, &recov_ver_0_pri_index[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, recov_ver_0_pri_index_id, &recov_ver_0_pri_index[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, recov_ver_0_dual_index_id, &recov_ver_0_dual_index[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, recov_ver_0_dual_index_id, &recov_ver_0_dual_index[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, recov_ver_1_pri_index_id, &recov_ver_1_pri_index[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, recov_ver_1_pri_index_id, &recov_ver_1_pri_index[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, recov_ver_1_dual_index_id, &recov_ver_1_dual_index[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, recov_ver_1_dual_index_id, &recov_ver_1_dual_index[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, to_index_dual_id, &to_index_dual[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, to_index_dual_id, &to_index_dual[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, from_index_dual_id, &from_index_dual[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, from_index_dual_id, &from_index_dual[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, vorticity_indices_dual_id, &vorticity_indices_dual[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, vorticity_indices_dual_id, &vorticity_indices_dual[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, h_curl_indices_dual_id, &h_curl_indices_dual[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, h_curl_indices_dual_id, &h_curl_indices_dual[0])))
         ERR(retval);
-    if ((retval = nc_put_var_long(ncid_g_prop, adjacent_scalar_indices_dual_h_id, &adjacent_scalar_indices_dual_h[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, adjacent_scalar_indices_dual_h_id, &adjacent_scalar_indices_dual_h[0])))
         ERR(retval);
-    if ((retval = nc_put_var_short(ncid_g_prop, adjacent_signs_h_id, &adjacent_signs_h[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, adjacent_signs_h_id, &adjacent_signs_h[0])))
         ERR(retval);
-    if ((retval = nc_put_var_short(ncid_g_prop, vorticity_signs_id, &vorticity_signs[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, vorticity_signs_id, &vorticity_signs[0])))
         ERR(retval);
-    if ((retval = nc_put_var_short(ncid_g_prop, h_curl_signs_id, &h_curl_signs[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, h_curl_signs_id, &h_curl_signs[0])))
         ERR(retval);
-    if ((retval = nc_put_var_short(ncid_g_prop, vorticity_signs_dual_id, &vorticity_signs_dual[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, vorticity_signs_dual_id, &vorticity_signs_dual[0])))
         ERR(retval);
-    if ((retval = nc_put_var_short(ncid_g_prop, h_curl_signs_dual_id, &h_curl_signs_dual[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, h_curl_signs_dual_id, &h_curl_signs_dual[0])))
         ERR(retval);
     if ((retval = nc_close(ncid_g_prop)))
         ERR(retval);
@@ -1616,11 +2023,11 @@ int find_angle_change(double angle_0, double angle_1, double *result)
     return 0;
 }
 
-int find_coords_from_triangle_on_face_index(long triangle_on_face_index, long res_id, long *coord_0, long *coord_1, long *coord_0_points_amount)
+int find_coords_from_triangle_on_face_index(int triangle_on_face_index, int res_id, int *coord_0, int *coord_1, int *coord_0_points_amount)
 {
-    short check = 1;
-    long coord_1_pre = -1;
-    long min_index, max_index, points_per_edge;
+    int check = 1;
+    int coord_1_pre = -1;
+    int min_index, max_index, points_per_edge;
     int retval = find_points_per_edge(res_id, &points_per_edge);
     max_index = -1;
     while (check == 1)
@@ -1639,13 +2046,13 @@ int find_coords_from_triangle_on_face_index(long triangle_on_face_index, long re
     return retval;
 }
 
-int find_triangle_on_face_index_from_coords(long coord_0, long coord_1, long res_id, long *triangle_on_face_index)
+int find_triangle_on_face_index_from_coords(int coord_0, int coord_1, int res_id, int *triangle_on_face_index)
 {
     int i = 0;
     *triangle_on_face_index = 0;
-    long points_per_edge;
+    int points_per_edge;
     int retval = find_points_per_edge(res_id, &points_per_edge);
-    long coord_0_points_amount = points_per_edge;
+    int coord_0_points_amount = points_per_edge;
     while (i < coord_1)
     {
         *triangle_on_face_index += coord_0_points_amount;
@@ -1669,22 +2076,22 @@ int find_sigma_from_layer(int layer_index, double *result)
 }
 
 
-int find_triangle_indices_from_h_vector_index(int res_id, long i, long *point_0, long *point_1, long *point_2, long *point_3, long *point_4, long *point_5, long *dual_scalar_on_face_index, short *small_triangle_edge_index, short face_edges[][3], short face_vertices[][3], short edge_vertices [][2], short face_edges_reverse[][3])
+int find_triangle_indices_from_h_vector_index(int res_id, int i, int *point_0, int *point_1, int *point_2, int *point_3, int *point_4, int *point_5, int *dual_scalar_on_face_index, int *small_triangle_edge_index, int face_edges[][3], int face_vertices[][3], int edge_vertices [][2], int face_edges_reverse[][3])
 {
-    short face_index = (i - NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
-    long on_face_index = i - (NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
+    int face_index = (i - NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
+    int on_face_index = i - (NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
     int triangle_on_face_index = on_face_index/3;
     *small_triangle_edge_index = on_face_index - 3*triangle_on_face_index;
     int retval = find_triangle_edge_points(triangle_on_face_index, face_index, res_id, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, face_vertices, face_edges, face_edges_reverse);
     return retval;
 }
 
-int find_triangle_edge_points(long triangle_on_face_index, short face_index, long res_id, long *point_0, long *point_1, long *point_2, long *point_3, long *point_4, long *point_5, long *dual_scalar_on_face_index, short face_vertices[][3], short face_edges[][3], short face_edges_reverse[][3])
+int find_triangle_edge_points(int triangle_on_face_index, int face_index, int res_id, int *point_0, int *point_1, int *point_2, int *point_3, int *point_4, int *point_5, int *dual_scalar_on_face_index, int face_vertices[][3], int face_edges[][3], int face_edges_reverse[][3])
 {
-    long coord_0, coord_1, coord_0_points_amount;
+    int coord_0, coord_1, coord_0_points_amount;
     int retval = find_coords_from_triangle_on_face_index(triangle_on_face_index, res_id, &coord_0, &coord_1, &coord_0_points_amount);
     *dual_scalar_on_face_index = 1 + 2*triangle_on_face_index + coord_1;
-    long points_per_edge, scalar_points_per_inner_face;
+    int points_per_edge, scalar_points_per_inner_face;
     retval += find_points_per_edge(res_id, &points_per_edge);
     retval += find_scalar_points_per_inner_face(res_id, &scalar_points_per_inner_face);
     if (coord_1 == 0)
@@ -1754,11 +2161,11 @@ int find_triangle_edge_points(long triangle_on_face_index, short face_index, lon
     return 0;
 }
 
-int find_triangle_on_face_index_from_dual_scalar_on_face_index(long dual_scalar_on_face_index, long res_id, long *triangle_on_face_index, short *points_downwards, short *special_case_bool, short *last_triangle_bool)
+int find_triangle_on_face_index_from_dual_scalar_on_face_index(int dual_scalar_on_face_index, int res_id, int *triangle_on_face_index, int *points_downwards, int *special_case_bool, int *last_triangle_bool)
 {
-    short value_found = 0;
+    int value_found = 0;
     int retval = 0;
-    long triangle_on_face_index_pre, coord_0_pre, coord_1_pre, coord_0_points_amount_pre, dual_scalar_on_face_index_0, dual_scalar_on_face_index_1, dual_scalar_on_face_index_2, dual_scalar_on_face_index_3, points_per_edge;
+    int triangle_on_face_index_pre, coord_0_pre, coord_1_pre, coord_0_points_amount_pre, dual_scalar_on_face_index_0, dual_scalar_on_face_index_1, dual_scalar_on_face_index_2, dual_scalar_on_face_index_3, points_per_edge;
     triangle_on_face_index_pre = -1;
     retval += find_points_per_edge(res_id, &points_per_edge);
     while (value_found == 0)
@@ -1808,10 +2215,10 @@ int find_triangle_on_face_index_from_dual_scalar_on_face_index(long dual_scalar_
     return retval;
 }
 
-int find_triangle_edge_points_from_dual_scalar_on_face_index(long dual_scalar_on_face_index, short face_index, long res_id, long *point_0, long *point_1, long *point_2, short face_vertices[][3], short face_edges[][3], short face_edges_reverse[][3])
+int find_triangle_edge_points_from_dual_scalar_on_face_index(int dual_scalar_on_face_index, int face_index, int res_id, int *point_0, int *point_1, int *point_2, int face_vertices[][3], int face_edges[][3], int face_edges_reverse[][3])
 {
-    short points_downwards, special_case_bool, last_triangle_bool;
-    long triangle_on_face_index, rhombuspoint_0, rhombuspoint_1, rhombuspoint_2, rhombuspoint_3, coord_0, coord_1, coord_0_points_amount, points_per_edge, dump, addpoint_0, addpoint_1;
+    int points_downwards, special_case_bool, last_triangle_bool;
+    int triangle_on_face_index, rhombuspoint_0, rhombuspoint_1, rhombuspoint_2, rhombuspoint_3, coord_0, coord_1, coord_0_points_amount, points_per_edge, dump, addpoint_0, addpoint_1;
     int retval = find_triangle_on_face_index_from_dual_scalar_on_face_index(dual_scalar_on_face_index, res_id, &triangle_on_face_index, &points_downwards, &special_case_bool, &last_triangle_bool);
     retval += find_coords_from_triangle_on_face_index(triangle_on_face_index, res_id, &coord_0, &coord_1, &coord_0_points_amount);
     retval += find_points_per_edge(res_id, &points_per_edge);
@@ -1873,22 +2280,22 @@ int find_triangle_edge_points_from_dual_scalar_on_face_index(long dual_scalar_on
     return retval;
 }
 
-int find_points_per_edge(long res_id, long *points_per_edge)
+int find_points_per_edge(int res_id, int *points_per_edge)
 {
-    *points_per_edge = (long) (pow(2, res_id) - 1);
+    *points_per_edge = (int) (pow(2, res_id) - 1);
     return 0;
 }
 
-int find_scalar_points_per_inner_face(long res_id, long *scalar_points_per_inner_face)
+int find_scalar_points_per_inner_face(int res_id, int *scalar_points_per_inner_face)
 {
-    *scalar_points_per_inner_face = (long) (0.5*(pow(2, res_id) - 2)*(pow(2, res_id) - 1));
+    *scalar_points_per_inner_face = (int) (0.5*(pow(2, res_id) - 2)*(pow(2, res_id) - 1));
     return 0;
 }
 
-int upscale_scalar_point(long res_id, long old_index, long *new_index)
+int upscale_scalar_point(int res_id, int old_index, int *new_index)
 {
-    short edge_index, face_index;
-    long points_per_edge, on_edge_index, scalar_points_per_inner_face, on_face_index, coord_0, coord_1, coord_0_points_amount;
+    int edge_index, face_index;
+    int points_per_edge, on_edge_index, scalar_points_per_inner_face, on_face_index, coord_0, coord_1, coord_0_points_amount;
     int retval = find_points_per_edge(res_id, &points_per_edge);
     retval += find_scalar_points_per_inner_face(res_id, &scalar_points_per_inner_face);
     if (old_index < NUMBER_OF_PENTAGONS)
@@ -1912,7 +2319,7 @@ int upscale_scalar_point(long res_id, long old_index, long *new_index)
     return retval;
 }
 
-int write_scalar_coordinates(long edgepoint_0, long edgepoint_1, long edgepoint_2, long point_0, long point_1, long point_2, short points_upwards, double x_unity[], double y_unity[], double z_unity[], double latitude_scalar[], double longitude_scalar[])
+int write_scalar_coordinates(int edgepoint_0, int edgepoint_1, int edgepoint_2, int point_0, int point_1, int point_2, int points_upwards, double x_unity[], double y_unity[], double z_unity[], double latitude_scalar[], double longitude_scalar[])
 {
     double x_res, y_res, z_res, lat_res, lon_res;
     int retval = find_between_point(x_unity[edgepoint_0], y_unity[edgepoint_0], z_unity[edgepoint_0], x_unity[edgepoint_1], y_unity[edgepoint_1], z_unity[edgepoint_1], 0.5, &x_res, &y_res, &z_res);
@@ -1993,9 +2400,9 @@ int write_scalar_coordinates(long edgepoint_0, long edgepoint_1, long edgepoint_
     return retval;
 }
 
-int find_triangles_per_face(long res_id, long *number_of_triangles_per_face)
+int find_triangles_per_face(int res_id, int *number_of_triangles_per_face)
 {
-    *number_of_triangles_per_face = (long) (pow(4, res_id));
+    *number_of_triangles_per_face = (int) (pow(4, res_id));
     return 0;
 }
 

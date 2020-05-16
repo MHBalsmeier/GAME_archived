@@ -30,29 +30,29 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     double *exner_pressure_background = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *pot_temp_background = malloc(NUMBER_OF_VECTORS*sizeof(double));
     double *gravity = malloc(NUMBER_OF_VECTORS*sizeof(double));
-    long *to_index = malloc(NUMBER_OF_VECTORS_H*sizeof(long));
-    long *from_index = malloc(NUMBER_OF_VECTORS_H*sizeof(long));
-    long *recov_ver_0_pri_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
-    long *recov_ver_1_pri_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
-    long *recov_ver_0_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
-    long *recov_ver_1_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
-    long *recov_hor_ver_pri_index = malloc(4*NUMBER_OF_VECTORS_H*sizeof(long));
-    long *recov_hor_ver_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(long));
-    long *recov_hor_par_pri_index = malloc(10*NUMBER_OF_VECTORS_H*sizeof(long));
-    long *adjacent_vector_indices_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(long));
-    long *to_index_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(long));
-    long *from_index_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(long));
-    long *vorticity_indices = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(long));
-    long *h_curl_indices = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(long));
-    long *recov_hor_par_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(long));
-    long *vorticity_indices_dual = malloc(6*NUMBER_OF_VECTORS_V*sizeof(long));
-    long *h_curl_indices_dual = malloc(4*NUMBER_OF_VECTORS_H*sizeof(long));
-    long *adjacent_scalar_indices_dual_h = malloc(3*NUMBER_OF_DUAL_SCALARS_H*sizeof(long));
-    short *adjacent_signs_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(short));
-    short *vorticity_signs = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(short));
-    short *h_curl_signs = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(short));
-    short *vorticity_signs_dual = malloc(6*NUMBER_OF_VECTORS_V*sizeof(short));
-    short *h_curl_signs_dual = malloc(4*NUMBER_OF_VECTORS_H*sizeof(short));
+    int *to_index = malloc(NUMBER_OF_VECTORS_H*sizeof(int));
+    int *from_index = malloc(NUMBER_OF_VECTORS_H*sizeof(int));
+    int *recov_ver_0_pri_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
+    int *recov_ver_1_pri_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
+    int *recov_ver_0_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
+    int *recov_ver_1_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
+    int *recov_hor_ver_pri_index = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
+    int *recov_hor_ver_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(int));
+    int *recov_hor_par_pri_index = malloc(10*NUMBER_OF_VECTORS_H*sizeof(int));
+    int *adjacent_vector_indices_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(int));
+    int *to_index_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
+    int *from_index_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
+    int *vorticity_indices = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(int));
+    int *h_curl_indices = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
+    int *recov_hor_par_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(int));
+    int *vorticity_indices_dual = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
+    int *h_curl_indices_dual = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
+    int *adjacent_scalar_indices_dual_h = malloc(3*NUMBER_OF_DUAL_SCALARS_H*sizeof(int));
+    int *adjacent_signs_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(int));
+    int *vorticity_signs = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(int));
+    int *h_curl_signs = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
+    int *vorticity_signs_dual = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
+    int *h_curl_signs_dual = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
     int ncid, retval;
     int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id, direction_id, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id, gravity_id;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
@@ -183,51 +183,51 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, pot_temp_background_id, &pot_temp_background[0])))
         ERR(retval);
-    if ((retval = nc_get_var_long(ncid, to_index_id, &to_index[0])))
+    if ((retval = nc_get_var_int(ncid, to_index_id, &to_index[0])))
         ERR(retval);
-    if ((retval = nc_get_var_long(ncid, from_index_id, &from_index[0])))
+    if ((retval = nc_get_var_int(ncid, from_index_id, &from_index[0])))
         ERR(retval);
-    if ((retval = nc_get_var_long(ncid, adjacent_vector_indices_h_id, &adjacent_vector_indices_h[0])))
+    if ((retval = nc_get_var_int(ncid, adjacent_vector_indices_h_id, &adjacent_vector_indices_h[0])))
         ERR(retval);
-    if ((retval = nc_get_var_long(ncid, vorticity_indices_id, &vorticity_indices[0])))
+    if ((retval = nc_get_var_int(ncid, vorticity_indices_id, &vorticity_indices[0])))
         ERR(retval);
-    if ((retval = nc_get_var_long(ncid, h_curl_indices_id, &h_curl_indices[0])))
+    if ((retval = nc_get_var_int(ncid, h_curl_indices_id, &h_curl_indices[0])))
         ERR(retval);
-    if ((retval = nc_get_var_long(ncid, recov_hor_par_dual_index_id, &recov_hor_par_dual_index[0])))
+    if ((retval = nc_get_var_int(ncid, recov_hor_par_dual_index_id, &recov_hor_par_dual_index[0])))
         ERR(retval);
-    if ((retval = nc_get_var_long(ncid, recov_hor_ver_dual_index_id, &recov_hor_ver_dual_index[0])))
+    if ((retval = nc_get_var_int(ncid, recov_hor_ver_dual_index_id, &recov_hor_ver_dual_index[0])))
         ERR(retval);
-    if ((retval = nc_get_var_long(ncid, recov_hor_par_pri_index_id, &recov_hor_par_pri_index[0])))
+    if ((retval = nc_get_var_int(ncid, recov_hor_par_pri_index_id, &recov_hor_par_pri_index[0])))
         ERR(retval);
-    if ((retval = nc_get_var_long(ncid, recov_hor_ver_pri_index_id, &recov_hor_ver_pri_index[0])))
+    if ((retval = nc_get_var_int(ncid, recov_hor_ver_pri_index_id, &recov_hor_ver_pri_index[0])))
         ERR(retval);
-    if ((retval = nc_get_var_long(ncid, recov_ver_0_pri_index_id, &recov_ver_0_pri_index[0])))
+    if ((retval = nc_get_var_int(ncid, recov_ver_0_pri_index_id, &recov_ver_0_pri_index[0])))
         ERR(retval);
-    if ((retval = nc_get_var_long(ncid, recov_ver_0_dual_index_id, &recov_ver_0_dual_index[0])))
+    if ((retval = nc_get_var_int(ncid, recov_ver_0_dual_index_id, &recov_ver_0_dual_index[0])))
         ERR(retval);
-    if ((retval = nc_get_var_long(ncid, recov_ver_1_pri_index_id, &recov_ver_1_pri_index[0])))
+    if ((retval = nc_get_var_int(ncid, recov_ver_1_pri_index_id, &recov_ver_1_pri_index[0])))
         ERR(retval);
-    if ((retval = nc_get_var_long(ncid, recov_ver_1_dual_index_id, &recov_ver_1_dual_index[0])))
+    if ((retval = nc_get_var_int(ncid, recov_ver_1_dual_index_id, &recov_ver_1_dual_index[0])))
         ERR(retval);
-    if ((retval = nc_get_var_long(ncid, to_index_dual_id, &to_index_dual[0])))
+    if ((retval = nc_get_var_int(ncid, to_index_dual_id, &to_index_dual[0])))
         ERR(retval);
-    if ((retval = nc_get_var_long(ncid, from_index_dual_id, &from_index_dual[0])))
+    if ((retval = nc_get_var_int(ncid, from_index_dual_id, &from_index_dual[0])))
         ERR(retval);
-    if ((retval = nc_get_var_long(ncid, vorticity_indices_dual_id, &vorticity_indices_dual[0])))
+    if ((retval = nc_get_var_int(ncid, vorticity_indices_dual_id, &vorticity_indices_dual[0])))
         ERR(retval);
-    if ((retval = nc_get_var_long(ncid, h_curl_indices_dual_id, &h_curl_indices_dual[0])))
+    if ((retval = nc_get_var_int(ncid, h_curl_indices_dual_id, &h_curl_indices_dual[0])))
         ERR(retval);
-    if ((retval = nc_get_var_long(ncid, adjacent_scalar_indices_dual_h_id, &adjacent_scalar_indices_dual_h[0])))
+    if ((retval = nc_get_var_int(ncid, adjacent_scalar_indices_dual_h_id, &adjacent_scalar_indices_dual_h[0])))
         ERR(retval);
-    if ((retval = nc_get_var_short(ncid, adjacent_signs_h_id, &adjacent_signs_h[0])))
+    if ((retval = nc_get_var_int(ncid, adjacent_signs_h_id, &adjacent_signs_h[0])))
         ERR(retval);
-    if ((retval = nc_get_var_short(ncid, vorticity_signs_id, &vorticity_signs[0])))
+    if ((retval = nc_get_var_int(ncid, vorticity_signs_id, &vorticity_signs[0])))
         ERR(retval);
-    if ((retval = nc_get_var_short(ncid, h_curl_signs_id, &h_curl_signs[0])))
+    if ((retval = nc_get_var_int(ncid, h_curl_signs_id, &h_curl_signs[0])))
         ERR(retval);
-    if ((retval = nc_get_var_short(ncid, vorticity_signs_dual_id, &vorticity_signs_dual[0])))
+    if ((retval = nc_get_var_int(ncid, vorticity_signs_dual_id, &vorticity_signs_dual[0])))
         ERR(retval);
-    if ((retval = nc_get_var_short(ncid, h_curl_signs_dual_id, &h_curl_signs_dual[0])))
+    if ((retval = nc_get_var_int(ncid, h_curl_signs_dual_id, &h_curl_signs_dual[0])))
         ERR(retval);
     if ((retval = nc_close(ncid)))
         ERR(retval);

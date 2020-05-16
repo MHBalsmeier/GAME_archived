@@ -1,6 +1,6 @@
 #!/bin/bash
-run_span=500
-write_out_interval=100
+run_span=7200
+write_out_interval=300
 grid_props_file=/home/max/compiled/game/grids/B4L6T30000_M2_O0.nc
 init_state_file=/home/max/compiled/game/input/test_4_B4L6T30000_M2_O0.grb2
 output_dir=/home/max/compiled/game/output/test_4

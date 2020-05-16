@@ -3,7 +3,7 @@
 
 int inner(Vector_field in_field_0, Vector_field in_field_1, Scalar_field out_field, Grid *grid)
 {
-    long layer_index, h_index;
+    int layer_index, h_index;
     double comp_h, comp_v, x_0, x_1, y_0, y_1;
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {

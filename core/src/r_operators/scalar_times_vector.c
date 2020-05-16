@@ -3,7 +3,7 @@
 
 int scalar_times_vector(Scalar_field in_field_0, Vector_field in_field_1, Vector_field out_field, Grid *grid)
 {
-    long layer_index, h_index, lower_index, upper_index;
+    int layer_index, h_index, lower_index, upper_index;
     double scalar_value;
     for (int i = NUMBER_OF_VECTORS_V; i < NUMBER_OF_VECTORS - NUMBER_OF_VECTORS_V; ++i)
     {

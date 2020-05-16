@@ -6,8 +6,7 @@
 int cross_product(Vector_field a_field, Dual_vector_field b_field, Vector_field out_field, Grid *grid)
 {
     double component_0, component_1, component_2, component_3, term_0, term_1;
-    long layer_index, h_index;
-    int retval;
+    int layer_index, h_index, retval;
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
         layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;

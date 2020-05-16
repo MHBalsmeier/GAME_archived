@@ -3,9 +3,7 @@
 
 int curl_dual(Dual_vector_field in_field, Vector_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
-    int layer_index, h_index;
-    long index_0, index_1, index_2, index_3, index_4, index_5;
-    short sign_0, sign_1, sign_2, sign_3, sign_4, sign_5;
+    int layer_index, h_index, index_0, index_1, index_2, index_3, index_4, index_5, sign_0, sign_1, sign_2, sign_3, sign_4, sign_5;
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
         layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;

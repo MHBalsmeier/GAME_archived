@@ -85,7 +85,6 @@ for i in np.arange(1, int(max_interval/time_step) + 1):
     lat, lon, values[:, i] = rmo.fetch_model_output(input_file, time_after_init, short_name, level, 4, grid_props_file);
     values[:, i] = rescale*values[:, i] + shift;
 
-
 color_bar_min = np.floor(np.min(values));
 color_bar_max = np.ceil(np.max(values));
 color_bar_range = color_bar_max - color_bar_min;

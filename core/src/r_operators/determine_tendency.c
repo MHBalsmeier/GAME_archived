@@ -9,7 +9,7 @@
 
 int calc_diffusion_coeff(double temperature, double particle_mass, double denstiy, double particle_radius, double *result);
 
-int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, short dissipation_on, short rad_bool, short add_comps_bool, double delta_t)
+int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int dissipation_on, int rad_bool, int add_comps_bool, double delta_t)
 {
     Vector_field *density_flux = malloc(sizeof(Vector_field));
     scalar_times_vector(current_state -> density, current_state -> wind, *density_flux, grid);
@@ -106,7 +106,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     Vector_field *add_comp_velocity = malloc(sizeof(Vector_field));
     Vector_field *add_comp_density_flux = malloc(sizeof(Vector_field));
     Scalar_field *add_comp_flux_divergence = malloc(sizeof(Scalar_field));
-    long h_index, layer_index;
+    int h_index, layer_index;
     for (int i = 0; i < NUMBER_OF_ADD_COMPS; ++i)
     {
         for (int j = 0; j < NUMBER_OF_SCALARS; ++j)
@@ -200,7 +200,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
         (*m_pressure_gradient_acc)[i] = C_P*(*m_pressure_gradient_acc)[i];
     Vector_field *m_e_kin_tend_2 = malloc(sizeof(Vector_field));
     grad(*e_kin_spec_2, *m_e_kin_tend_2, grid);
-    short check_energy_bool = 0;
+    int check_energy_bool = 0;
     double enery_integral = 0;
     double z_value, z_g;
     if (check_energy_bool == 1)
