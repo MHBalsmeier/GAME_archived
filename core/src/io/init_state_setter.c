@@ -82,7 +82,7 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
         for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
         {
             init_state -> density[j + i*NUMBER_OF_SCALARS_H] = rho[j];
-            init_state -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H] = rho[j]*pot_temp[j];
+            init_state -> density_entropy[j + i*NUMBER_OF_SCALARS_H] = rho[j]*log(pot_temp[j]);
             if (NUMBER_OF_ADD_COMPS > 0)
             {
                 init_state -> add_comp_densities[j + i*NUMBER_OF_SCALARS_H] = solid_water_density[j];

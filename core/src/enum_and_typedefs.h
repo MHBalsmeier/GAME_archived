@@ -106,7 +106,7 @@ int adjacent_scalar_indices_dual_h[3*NUMBER_OF_DUAL_SCALARS_H];
 } Dualgrid;
 
 typedef struct state {
-Scalar_field density_pot_temp;
+Scalar_field density_entropy;
 Scalar_field density;
 Vector_field wind;
 Add_comp_densities add_comp_densities;

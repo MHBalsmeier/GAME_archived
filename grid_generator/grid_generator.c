@@ -1226,6 +1226,16 @@ int main(int argc, char *argv[])
 						retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[l], longitude_edges[l], &triangle_1);
 						vector_of_areas[l] = pow(RADIUS + z_scalar[from_index[i]], 2)*(triangle_0 + triangle_1);
 					}
+					check_sum = 0;
+					double new_value;
+					for (int l = 0; l < 5; ++l)
+					{
+						calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_vertices[(l + 1)%5], longitude_vertices[(l + 1)%5], &new_value);
+						check_sum += new_value;
+						printf("%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_vertices[(l + 1)%5], longitude_vertices[(l + 1)%5]);
+					}
+					check_sum = pow(RADIUS + z_scalar[from_index[i]], 2)*check_sum;
+					printf("%lf\n", check_sum/area[from_index[i]]);
 					for (int l = 0; l < 5; ++l)
 					{
 						if (edge_indices[l] == i)

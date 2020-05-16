@@ -139,22 +139,22 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
         z_height = grid -> z_scalar[i*NUMBER_OF_SCALARS_H];
         for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
         {
-            pot_temperature_h[j] = state_write_out -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H];
+            pot_temperature_h[j] = exp(state_write_out -> density_entropy[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]);
             rho_h[j] = state_write_out -> density[j + i*NUMBER_OF_SCALARS_H];
         }
         if (i == NUMBER_OF_LAYERS - 1)
         {
             for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
             {
-                exner_pressure = pow(R_D*state_write_out -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H]/P_0, R_D/C_V);
-                temp_lowest_layer = exner_pressure*state_write_out -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H];
+                exner_pressure = pow(R_D*state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]*exp(state_write_out -> density_entropy[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H])/P_0, R_D/C_V);
+                temp_lowest_layer = exner_pressure*exp(state_write_out -> density_entropy[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]);
                 pressure_value = state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]*R_D*temp_lowest_layer;
                 temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[j + i*NUMBER_OF_SCALARS_H];
                 mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, -grid -> gravity[NUMBER_OF_LAYERS*NUMBER_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
                 mslp[j] = pressure_value/mslp_factor;
                 delta_z_temp = 2 - grid -> z_scalar[j + i*NUMBER_OF_SCALARS_H];
-                temp_upper = pow(R_D*state_write_out -> density_pot_temp[j + (i - 1)*NUMBER_OF_SCALARS_H]/P_0, R_D/C_V)*state_write_out -> density_pot_temp[j + (i - 1)*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + (i - 1)*NUMBER_OF_SCALARS_H];
-                temp_lower = pow(R_D*state_write_out -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H]/P_0, R_D/C_V)*state_write_out -> density_pot_temp[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H];
+                temp_upper = pow(R_D*state_write_out -> density[j + (i - 1)*NUMBER_OF_SCALARS_H]*exp(state_write_out -> density_entropy[j + (i - 1)*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + (i - 1)*NUMBER_OF_SCALARS_H])/P_0, R_D/C_V)*exp(state_write_out -> density_entropy[j + (i - 1)*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + (i - 1)*NUMBER_OF_SCALARS_H]);
+                temp_lower = pow(R_D*state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]*exp(state_write_out -> density_entropy[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H])/P_0, R_D/C_V)*exp(state_write_out -> density_entropy[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]);
                 temp_gradient = (temp_upper - temp_lower)/(grid -> z_scalar[j + (i - 1)*NUMBER_OF_SCALARS_H] - grid -> z_scalar[j + i*NUMBER_OF_SCALARS_H]);
                 t2[j] = temp_lowest_layer + delta_z_temp*temp_gradient;
                 sprate[j] = 0;
