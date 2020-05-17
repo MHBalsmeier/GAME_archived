@@ -51,7 +51,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     Vector_field *laplace_wind_field = malloc(sizeof(Vector_field));
     laplace_vec(current_state -> wind, *laplace_wind_field, grid, dualgrid);
     Scalar_field *u_dot_laplace_wind = malloc(sizeof(Scalar_field));
-    inner(current_state -> wind, *laplace_wind_field, *u_dot_laplace_wind, grid);
+    inner(current_state -> wind, *laplace_wind_field, *u_dot_laplace_wind, grid, dualgrid);
     Scalar_field *temp_diffusion_heating = malloc(sizeof(Scalar_field));
     Vector_field *temperature_flux = malloc(sizeof(Vector_field));
     Scalar_field *temp_diffusion_coeff_numerical_h = malloc(sizeof(Scalar_field));
@@ -153,7 +153,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
             if (h_index < NUMBER_OF_VECTORS_V)
                 (*add_comp_velocity)[j] += ret_sink_velocity(i, 0, 0.001);
         }
-        retval = adv_scalar(*add_comp_temp, *add_comp_velocity, *add_comp_temp_adv, grid);
+        retval = adv_scalar(*add_comp_temp, *add_comp_velocity, *add_comp_temp_adv, grid, dualgrid);
         for (int j = 0; j < NUMBER_OF_SCALARS; ++j)
         {
             c_p_cond = ret_c_p_cond(i, 0, current_state -> add_comp_temps[i*NUMBER_OF_SCALARS + j]);
@@ -194,7 +194,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     cross_product(current_state -> wind, *abs_curl, *abs_curl_tend, grid);
     free(abs_curl);
     Scalar_field *e_kin_spec_2 = malloc(sizeof(Scalar_field));
-    inner(current_state -> wind, current_state -> wind, *e_kin_spec_2, grid);
+    inner(current_state -> wind, current_state -> wind, *e_kin_spec_2, grid, dualgrid);
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
         (*m_pressure_gradient_acc)[i] = C_P*(*m_pressure_gradient_acc)[i];
     Vector_field *m_e_kin_tend_2 = malloc(sizeof(Vector_field));
