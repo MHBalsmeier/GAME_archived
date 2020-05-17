@@ -318,7 +318,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
             if (grid -> recov_hor_par_pri_index[10*i + j] >= NUMBER_OF_VECTORS_H || grid -> recov_hor_par_pri_index[10*i + j] < 0)
                 grid_check_failed();
             grid -> recov_hor_par_pri_weight[10*i + j] = recov_hor_par_pri_weight[10*i + j];
-            if (fabs(grid -> recov_hor_par_pri_weight[10*i + j]) >= 1.0001)
+            if (fabs(grid -> recov_hor_par_pri_weight[10*i + j]) >= 0.30)
                 grid_check_failed();
 		}
         for (int j = 0; j < 4; ++j)

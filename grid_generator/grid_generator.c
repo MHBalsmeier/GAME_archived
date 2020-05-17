@@ -1133,445 +1133,492 @@ int main(int argc, char *argv[])
 					printf("Problem 1 in TRSK implementation detected.\n");
 				recov_hor_par_pri_index[10*i + k] = adjacent_vector_indices_h[6*from_index[i] + k + offset];
 				if (recov_hor_par_pri_index[10*i + k] == -1)
-					recov_hor_par_pri_index[10*i + k] = 0;
-				if (recov_hor_par_pri_index[10*i + k] < 0 || recov_hor_par_pri_index[10*i + k] >= NUMBER_OF_VECTORS_H)
-					printf("Problem 11 in TRSK implementation detected.\n");
-				sign_1 = -1;
-				if (from_index[recov_hor_par_pri_index[10*i + k]] == from_index[i])
-					sign_1 = 1;
-				if (from_index[i] < NUMBER_OF_PENTAGONS)
 				{
-					int vertex_indices[5];
-					int edge_indices[5];
-					int indices_resorted[5];
-					int vertex_indices_resorted[5];
-					double latitude_vertices[5];
-					double longitude_vertices[5];
-					double latitude_edges[5];
-					double longitude_edges[5];
-					double vector_of_areas[5];
-					for (int l = 0; l < 5; ++l)
-						vertex_indices[l] = -1;
-					counter = 0;
-					for (int l = 0; l < 5; ++l)
-					{
-						vertex_index_candidate_0 = from_index_dual[adjacent_vector_indices_h[6*from_index[i] + l]];
-						vertex_index_candidate_1 = to_index_dual[adjacent_vector_indices_h[6*from_index[i] + l]];
-						retval = in_bool_calculator(vertex_indices, 5, vertex_index_candidate_0, &check_result);						
-						if (check_result == 0)
-						{
-							vertex_indices[counter] = vertex_index_candidate_0;
-							latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
-							longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
-							++counter;
-						}
-						retval = in_bool_calculator(vertex_indices, 5, vertex_index_candidate_1, &check_result);						
-						if (check_result == 0)
-						{
-							vertex_indices[counter] = vertex_index_candidate_1;
-							latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
-							longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
-							++counter;
-						}
-					}
-					if (counter != 5)
-						printf("Problem 13 in TRSK implementation detected.\n");
-					for (int l = 0; l < 5; ++l)
-					{
-						if (vertex_indices[l] < 0 || vertex_indices[l] >= NUMBER_OF_DUAL_SCALARS_H)
-							printf("Problem 3 in TRSK implementation detected.\n");
-						for (int m = l + 1; m < 5; ++m)
-						{
-							if (vertex_indices[l] == vertex_indices[m])
-								printf("Problem 17 in TRSK implementation detected.\n");
-						}
-					}
-					retval = sort_edge_indices(latitude_vertices, longitude_vertices, 5, indices_resorted);
-					for (int l = 0; l < 5; ++l)
-					{
-						latitude_vertices[l] = latitude_vertices[indices_resorted[l]];
-						longitude_vertices[l] = longitude_vertices[indices_resorted[l]];
-						vertex_indices_resorted[l] = vertex_indices[indices_resorted[l]];
-					}
-					for (int l = 0; l < 5; ++l)
-					{
-						for (int m = 0; m < 5; ++m)
-						{
-							if ((from_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[l] && to_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[(l + 1)%5]) || (to_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[l] && from_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[(l + 1)%5]))
-								edge_indices[l] = adjacent_vector_indices_h[6*from_index[i] + m];
-						}
-					}
-					for (int l = 0; l < 5; ++l)
-					{
-						if (edge_indices[l] < 0 || edge_indices[l] >= NUMBER_OF_VECTORS_H)
-						{
-							printf("Problem 7 in TRSK implementation detected.\n");
-						}
-						for (int m = l + 1; m < 5; ++m)
-						{
-							if (edge_indices[l] == edge_indices[m])
-								printf("Problem 18 in TRSK implementation detected.\n");
-						}
-					}
-					for (int l = 0; l < 5; ++l)
-					{
-						latitude_edges[l] = latitude_vector[edge_indices[l]];
-						longitude_edges[l] = longitude_vector[edge_indices[l]];
-					}
-					for (int l = 0; l < 5; ++l)	
-					{
-						if (l == 0)
-							retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[4], longitude_edges[4], &triangle_0);
-						else
-							retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[l - 1], longitude_edges[l - 1], &triangle_0);
-						retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[l], longitude_edges[l], &triangle_1);
-						vector_of_areas[l] = pow(RADIUS + z_scalar[from_index[i]], 2)*(triangle_0 + triangle_1);
-					}
-					check_sum = 0;
-					double new_value;
-					for (int l = 0; l < 5; ++l)
-					{
-						calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_vertices[(l + 1)%5], longitude_vertices[(l + 1)%5], &new_value);
-						check_sum += new_value;
-						printf("%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_vertices[(l + 1)%5], longitude_vertices[(l + 1)%5]);
-					}
-					check_sum = pow(RADIUS + z_scalar[from_index[i]], 2)*check_sum;
-					printf("%lf\n", check_sum/area[from_index[i]]);
-					for (int l = 0; l < 5; ++l)
-					{
-						if (edge_indices[l] == i)
-							last_index = l;
-						if (edge_indices[l] == recov_hor_par_pri_index[10*i + k])
-							first_index = (l + 1)%5;
-							
-					}
-					if (k == 4)
-						sum_of_weights = 0;
-					else
-						double_sum_gen(vector_of_areas, 5, first_index, last_index, &sum_of_weights);
+					recov_hor_par_pri_index[10*i + k] = 0;
+					recov_hor_par_pri_weight[10*i + k] = 0;
 				}
 				else
 				{
-					int vertex_indices[6];
-					int edge_indices[6];
-					int indices_resorted[6];
-					int vertex_indices_resorted[6];
-					double latitude_vertices[6];
-					double longitude_vertices[6];
-					double latitude_edges[6];
-					double longitude_edges[6];
-					double vector_of_areas[6];
-					for (int l = 0; l < 6; ++l)
-						vertex_indices[l] = -1;
-					counter = 0;
-					for (int l = 0; l < 5; ++l)
+					if (recov_hor_par_pri_index[10*i + k] < 0 || recov_hor_par_pri_index[10*i + k] >= NUMBER_OF_VECTORS_H)
+						printf("Problem 11 in TRSK implementation detected.\n");
+					sign_1 = -1;
+					if (from_index[recov_hor_par_pri_index[10*i + k]] == from_index[i])
+						sign_1 = 1;
+					if (from_index[i] < NUMBER_OF_PENTAGONS)
 					{
-						vertex_index_candidate_0 = from_index_dual[adjacent_vector_indices_h[6*from_index[i] + l]];
-						vertex_index_candidate_1 = to_index_dual[adjacent_vector_indices_h[6*from_index[i] + l]];
-						retval = in_bool_calculator(vertex_indices, 6, vertex_index_candidate_0, &check_result);						
-						if (check_result == 0)
+						int vertex_indices[5];
+						int edge_indices[5];
+						int indices_resorted[5];
+						int vertex_indices_resorted[5];
+						double latitude_vertices[5];
+						double longitude_vertices[5];
+						double latitude_edges[5];
+						double longitude_edges[5];
+						double vector_of_areas[5];
+						for (int l = 0; l < 5; ++l)
+							vertex_indices[l] = -1;
+						counter = 0;
+						for (int l = 0; l < 5; ++l)
 						{
-							vertex_indices[counter] = vertex_index_candidate_0;
-							latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
-							longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
-							++counter;
+							vertex_index_candidate_0 = from_index_dual[adjacent_vector_indices_h[6*from_index[i] + l]];
+							vertex_index_candidate_1 = to_index_dual[adjacent_vector_indices_h[6*from_index[i] + l]];
+							retval = in_bool_calculator(vertex_indices, 5, vertex_index_candidate_0, &check_result);						
+							if (check_result == 0)
+							{
+								vertex_indices[counter] = vertex_index_candidate_0;
+								latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
+								longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
+								++counter;
+							}
+							retval = in_bool_calculator(vertex_indices, 5, vertex_index_candidate_1, &check_result);						
+							if (check_result == 0)
+							{
+								vertex_indices[counter] = vertex_index_candidate_1;
+								latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
+								longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
+								++counter;
+							}
 						}
-						retval = in_bool_calculator(vertex_indices, 6, vertex_index_candidate_1, &check_result);						
-						if (check_result == 0)
+						if (counter != 5)
+							printf("Problem 13 in TRSK implementation detected.\n");
+						for (int l = 0; l < 5; ++l)
 						{
-							vertex_indices[counter] = vertex_index_candidate_1;
-							latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
-							longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
-							++counter;
+							if (vertex_indices[l] < 0 || vertex_indices[l] >= NUMBER_OF_DUAL_SCALARS_H)
+								printf("Problem 3 in TRSK implementation detected.\n");
+							for (int m = l + 1; m < 5; ++m)
+							{
+								if (vertex_indices[l] == vertex_indices[m])
+									printf("Problem 17 in TRSK implementation detected.\n");
+							}
 						}
-					}
-					if (counter != 6)
-						printf("Problem 14 in TRSK implementation detected.\n");
-					for (int l = 0; l < 6; ++l)
-					{
-						if (vertex_indices[l] < 0 || vertex_indices[l] >= NUMBER_OF_DUAL_SCALARS_H)
-							printf("Problem 4 in TRSK implementation detected.\n");
-						for (int m = l + 1; m < 6; ++m)
+						retval = sort_edge_indices(latitude_vertices, longitude_vertices, 5, indices_resorted);
+						for (int l = 0; l < 5; ++l)
 						{
-							if (vertex_indices[l] == vertex_indices[m])
-								printf("Problem 22 in TRSK implementation detected.\n");
+							for (int m = l + 1; m < 5; ++m)
+							{
+								if (indices_resorted[l] == indices_resorted[m] || indices_resorted[l] < 0 || indices_resorted[l] > 4)
+									printf("Problem 25 in TRSK implementation detected.\n");
+							}
 						}
-					}
-					retval = sort_edge_indices(latitude_vertices, longitude_vertices, 6, indices_resorted);
-					for (int l = 0; l < 6; ++l)
-					{
-						latitude_vertices[l] = latitude_vertices[indices_resorted[l]];
-						longitude_vertices[l] = longitude_vertices[indices_resorted[l]];
-						vertex_indices_resorted[l] = vertex_indices[indices_resorted[l]];
-					}
-					for (int l = 0; l < 6; ++l)
-					{
-						for (int m = 0; m < 6; ++m)
+						for (int l = 0; l < 5; ++l)
+							vertex_indices_resorted[l] = vertex_indices[indices_resorted[l]];
+						for (int l = 0; l < 5; ++l)
 						{
-							if ((from_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[l] && to_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[(l + 1)%6]) || (to_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[l] && from_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[(l + 1)%6]))
-								edge_indices[l] = adjacent_vector_indices_h[6*from_index[i] + m];
+							for (int m = 0; m < 5; ++m)
+							{
+								if ((from_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[l] && to_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[(l + 1)%5]) || (to_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[l] && from_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[(l + 1)%5]))
+									edge_indices[l] = adjacent_vector_indices_h[6*from_index[i] + m];
+							}
 						}
-					}
-					for (int l = 0; l < 6; ++l)
-					{
-						if (edge_indices[l] < 0 || edge_indices[l] >= NUMBER_OF_VECTORS_H)
+						for (int l = 0; l < 5; ++l)
 						{
-							printf("Problem 8 in TRSK implementation detected.\n");
+							if (edge_indices[l] < 0 || edge_indices[l] >= NUMBER_OF_VECTORS_H)
+							{
+								printf("Problem 7 in TRSK implementation detected.\n");
+							}
+							for (int m = l + 1; m < 5; ++m)
+							{
+								if (edge_indices[l] == edge_indices[m])
+									printf("Problem 18 in TRSK implementation detected.\n");
+							}
 						}
-						for (int m = l + 1; m < 6; ++m)
+						for (int l = 0; l < 5; ++l)
 						{
-							if (edge_indices[l] == edge_indices[m])
-								printf("Problem 19 in TRSK implementation detected.\n");
+							latitude_edges[l] = latitude_vector[edge_indices[l]];
+							longitude_edges[l] = longitude_vector[edge_indices[l]];
 						}
-					}
-					for (int l = 0; l < 6; ++l)
-					{
-						latitude_edges[l] = latitude_vector[edge_indices[l]];
-						longitude_edges[l] = longitude_vector[edge_indices[l]];
-					}
-					for (int l = 0; l < 6; ++l)	
-					{
-						if (l == 0)
-							retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[5], longitude_edges[5], &triangle_0);
+						check_sum = 0;
+						for (int l = 0; l < 5; ++l)	
+						{
+							if (l == 0)
+								retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[4], longitude_edges[4], &triangle_0);
+							else
+								retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[l - 1], longitude_edges[l - 1], &triangle_0);
+							retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[l], longitude_edges[l], &triangle_1);
+							vector_of_areas[l] = pow(RADIUS + z_scalar[from_index[i]], 2)*(triangle_0 + triangle_1);
+							check_sum += vector_of_areas[l];
+						}
+						if (fabs(check_sum/area[from_index[i]] - 1) > 0.001)
+							printf("Problem 30 in TRSK implementation detected.\n");
+						for (int l = 0; l < 5; ++l)
+						{
+							if (edge_indices[l] == i)
+								last_index = l;
+							if (edge_indices[l] == recov_hor_par_pri_index[10*i + k])
+								first_index = (l + 1)%5;
+						}
+						if (k == 4)
+							sum_of_weights = 0;
 						else
-							retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[l - 1], longitude_edges[l - 1], &triangle_0);
-						retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[l], longitude_edges[l], &triangle_1);
-						vector_of_areas[l] = pow(RADIUS + z_scalar[from_index[i]], 2)*(triangle_0 + triangle_1);
+							double_sum_gen(vector_of_areas, 5, first_index, last_index, &sum_of_weights);
+						if (sum_of_weights < 0 || sum_of_weights/area[from_index[i]] > 1)
+							printf("Problem 34 in TRSK implementation detected\n");
 					}
-					for (int l = 0; l < 6; ++l)
+					else
 					{
-						if (edge_indices[l] == i)
-							last_index = l;
-						if (edge_indices[l] == recov_hor_par_pri_index[10*i + k])
-							first_index = (l + 1)%6;
-							
+						int vertex_indices[6];
+						int edge_indices[6];
+						int indices_resorted[6];
+						int vertex_indices_resorted[6];
+						double latitude_vertices[6];
+						double longitude_vertices[6];
+						double latitude_edges[6];
+						double longitude_edges[6];
+						double vector_of_areas[6];
+						for (int l = 0; l < 6; ++l)
+							vertex_indices[l] = -1;
+						counter = 0;
+						for (int l = 0; l < 6; ++l)
+						{
+							vertex_index_candidate_0 = from_index_dual[adjacent_vector_indices_h[6*from_index[i] + l]];
+							vertex_index_candidate_1 = to_index_dual[adjacent_vector_indices_h[6*from_index[i] + l]];
+							retval = in_bool_calculator(vertex_indices, 6, vertex_index_candidate_0, &check_result);						
+							if (check_result == 0)
+							{
+								vertex_indices[counter] = vertex_index_candidate_0;
+								latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
+								longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
+								++counter;
+							}
+							retval = in_bool_calculator(vertex_indices, 6, vertex_index_candidate_1, &check_result);						
+							if (check_result == 0)
+							{
+								vertex_indices[counter] = vertex_index_candidate_1;
+								latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
+								longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
+								++counter;
+							}
+						}
+						if (counter != 6)
+							printf("Problem 14 in TRSK implementation detected.\n");
+						for (int l = 0; l < 6; ++l)
+						{
+							if (vertex_indices[l] < 0 || vertex_indices[l] >= NUMBER_OF_DUAL_SCALARS_H)
+								printf("Problem 4 in TRSK implementation detected.\n");
+							for (int m = l + 1; m < 6; ++m)
+							{
+								if (vertex_indices[l] == vertex_indices[m])
+									printf("Problem 22 in TRSK implementation detected.\n");
+							}
+						}
+						retval = sort_edge_indices(latitude_vertices, longitude_vertices, 6, indices_resorted);
+						for (int l = 0; l < 6; ++l)
+						{
+							for (int m = l + 1; m < 6; ++m)
+							{
+								if (indices_resorted[l] == indices_resorted[m] || indices_resorted[l] < 0 || indices_resorted[l] > 5)
+									printf("Problem 26 in TRSK implementation detected.\n");
+							}
+						}
+						for (int l = 0; l < 6; ++l)
+							vertex_indices_resorted[l] = vertex_indices[indices_resorted[l]];
+						for (int l = 0; l < 6; ++l)
+						{
+							for (int m = 0; m < 6; ++m)
+							{
+								if ((from_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[l] && to_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[(l + 1)%6]) || (to_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[l] && from_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[(l + 1)%6]))
+									edge_indices[l] = adjacent_vector_indices_h[6*from_index[i] + m];
+							}
+						}
+						for (int l = 0; l < 6; ++l)
+						{
+							if (edge_indices[l] < 0 || edge_indices[l] >= NUMBER_OF_VECTORS_H)
+							{
+								printf("Problem 8 in TRSK implementation detected.\n");
+							}
+							for (int m = l + 1; m < 6; ++m)
+							{
+								if (edge_indices[l] == edge_indices[m])
+									printf("Problem 19 in TRSK implementation detected.\n");
+							}
+						}
+						for (int l = 0; l < 6; ++l)
+						{
+							latitude_edges[l] = latitude_vector[edge_indices[l]];
+							longitude_edges[l] = longitude_vector[edge_indices[l]];
+						}
+						check_sum = 0;
+						for (int l = 0; l < 6; ++l)	
+						{
+							if (l == 0)
+								retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[5], longitude_edges[5], &triangle_0);
+							else
+								retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[l - 1], longitude_edges[l - 1], &triangle_0);
+							retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[l], longitude_edges[l], &triangle_1);
+							vector_of_areas[l] = pow(RADIUS + z_scalar[from_index[i]], 2)*(triangle_0 + triangle_1);
+							check_sum += vector_of_areas[l];
+						}
+						if (fabs(check_sum/area[from_index[i]] - 1) > 0.001)
+							printf("Problem 31 in TRSK implementation detected.\n");
+						for (int l = 0; l < 6; ++l)
+						{
+							if (edge_indices[l] == i)
+								last_index = l;
+							if (edge_indices[l] == recov_hor_par_pri_index[10*i + k])
+								first_index = (l + 1)%6;
+						}
+						double_sum_gen(vector_of_areas, 6, first_index, last_index, &sum_of_weights);
+						if (sum_of_weights < 0 || sum_of_weights/area[from_index[i]] > 1)
+							printf("Problem 35 in TRSK implementation detected\n");
 					}
-					double_sum_gen(vector_of_areas, 6, first_index, last_index, &sum_of_weights);
+					sum_of_weights = sum_of_weights/area[from_index[i]];
+					recov_hor_par_pri_weight[10*i + k] = sign_0*(sum_of_weights - 0.5)*sign_1;
 				}
-				sum_of_weights = sum_of_weights/area[from_index[i]];
-				recov_hor_par_pri_weight[10*i + k] = sign_0*(sum_of_weights - 0.5)*sign_1;
 			}
 			else
 			{
 				if (k == 5)
 					offset = 0;
 				sign_0 = 1;
-				if (adjacent_vector_indices_h[6*to_index[i] + k] == i)
+				if (adjacent_vector_indices_h[6*to_index[i] + k - 5] == i)
 					offset += 1;
 				if (offset > 1)
 					printf("Problem 2 in TRSK implementation detected.\n");
-				recov_hor_par_pri_index[10*i + k - 5] = adjacent_vector_indices_h[6*to_index[i] + k - 5 + offset];
+				recov_hor_par_pri_index[10*i + k] = adjacent_vector_indices_h[6*to_index[i] + k - 5 + offset];
 				if (recov_hor_par_pri_index[10*i + k] == -1)
-					recov_hor_par_pri_index[10*i + k] = 0;
-				if (recov_hor_par_pri_index[10*i + k] < 0 || recov_hor_par_pri_index[10*i + k] >= NUMBER_OF_VECTORS_H)
-					printf("Problem 12 in TRSK implementation detected.\n");
-				sign_1 = -1;
-				if (to_index[recov_hor_par_pri_index[10*i + k]] == to_index[i])
-					sign_1 = 1;
-				if (to_index[i] < NUMBER_OF_PENTAGONS)
 				{
-					int vertex_indices[5];
-					int edge_indices[5];
-					int indices_resorted[5];
-					int vertex_indices_resorted[5];
-					double latitude_vertices[5];
-					double longitude_vertices[5];
-					double latitude_edges[5];
-					double longitude_edges[5];
-					double vector_of_areas[5];
-					for (int l = 0; l < 5; ++l)
-						vertex_indices[l] = -1;
-					counter = 0;
-					for (int l = 0; l < 5; ++l)
-					{
-						vertex_index_candidate_0 = from_index_dual[adjacent_vector_indices_h[6*to_index[i] + l]];
-						vertex_index_candidate_1 = to_index_dual[adjacent_vector_indices_h[6*to_index[i] + l]];
-						retval = in_bool_calculator(vertex_indices, 5, vertex_index_candidate_0, &check_result);						
-						if (check_result == 0)
-						{
-							vertex_indices[counter] = vertex_index_candidate_0;
-							latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
-							longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
-							++counter;
-						}
-						retval = in_bool_calculator(vertex_indices, 5, vertex_index_candidate_1, &check_result);						
-						if (check_result == 0)
-						{
-							vertex_indices[counter] = vertex_index_candidate_1;
-							latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
-							longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
-							++counter;
-						}
-					}
-					if (counter != 5)
-						printf("Problem 15 in TRSK implementation detected.\n");
-					for (int l = 0; l < 5; ++l)
-					{
-						if (vertex_indices[l] < 0 || vertex_indices[l] >= NUMBER_OF_DUAL_SCALARS_H)
-							printf("Problem 5 in TRSK implementation detected.\n");
-						for (int m = l + 1; m < 5; ++m)
-						{
-							if (vertex_indices[l] == vertex_indices[m])
-								printf("Problem 23 in TRSK implementation detected.\n");
-						}
-					}
-					retval = sort_edge_indices(latitude_vertices, longitude_vertices, 5, indices_resorted);
-					for (int l = 0; l < 5; ++l)
-					{
-						latitude_vertices[l] = latitude_vertices[indices_resorted[l]];
-						longitude_vertices[l] = longitude_vertices[indices_resorted[l]];
-						vertex_indices_resorted[l] = vertex_indices[indices_resorted[l]];
-					}
-					for (int l = 0; l < 5; ++l)
-					{
-						for (int m = 0; m < 5; ++m)
-						{
-							if ((from_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[l] && to_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[(l + 1)%5]) || (to_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[l] && from_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[(l + 1)%5]))
-								edge_indices[l] = adjacent_vector_indices_h[6*to_index[i] + m];
-						}
-					}
-					for (int l = 0; l < 5; ++l)
-					{
-						if (edge_indices[l] < 0 || edge_indices[l] >= NUMBER_OF_VECTORS_H)
-						{
-							printf("Problem 9 in TRSK implementation detected.\n");
-						}
-						for (int m = l + 1; m < 5; ++m)
-						{
-							if (edge_indices[l] == edge_indices[m])
-								printf("Problem 20 in TRSK implementation detected.\n");
-						}
-					}
-					for (int l = 0; l < 5; ++l)
-					{
-						latitude_edges[l] = latitude_vector[edge_indices[l]];
-						longitude_edges[l] = longitude_vector[edge_indices[l]];
-					}
-					for (int l = 0; l < 5; ++l)	
-					{
-						if (l == 0)
-							retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[4], longitude_edges[4], &triangle_0);
-						else
-							retval = calc_triangle_face(latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[l - 1], longitude_edges[l - 1], &triangle_0);
-						retval = calc_triangle_face(latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[l], longitude_edges[l], &triangle_1);
-						vector_of_areas[l] = pow(RADIUS + z_scalar[to_index[i]], 2)*(triangle_0 + triangle_1);
-					}
-					for (int l = 0; l < 5; ++l)
-					{
-						if (edge_indices[l] == i)
-							last_index = l;
-						if (edge_indices[l] == recov_hor_par_pri_index[10*i + k])
-							first_index = (l + 1)%5;
-							
-					}
-					if (k == 9)
-						sum_of_weights = 0;
-					else
-						double_sum_gen(vector_of_areas, 5, first_index, last_index, &sum_of_weights);
+					recov_hor_par_pri_index[10*i + k] = 0;
+					recov_hor_par_pri_weight[10*i + k] = 0;
 				}
 				else
 				{
-					int vertex_indices[6];
-					int edge_indices[6];
-					int indices_resorted[6];
-					int vertex_indices_resorted[6];
-					double latitude_vertices[6];
-					double longitude_vertices[6];
-					double latitude_edges[6];
-					double longitude_edges[6];
-					double vector_of_areas[6];
-					for (int l = 0; l < 6; ++l)
-						vertex_indices[l] = -1;
-					counter = 0;
-					for (int l = 0; l < 6; ++l)
+					if (recov_hor_par_pri_index[10*i + k] < 0 || recov_hor_par_pri_index[10*i + k] >= NUMBER_OF_VECTORS_H)
+						printf("Problem 12 in TRSK implementation detected.\n");
+					sign_1 = -1;
+					if (from_index[recov_hor_par_pri_index[10*i + k]] == to_index[i])
+						sign_1 = 1;
+					if (to_index[i] < NUMBER_OF_PENTAGONS)
 					{
-						vertex_index_candidate_0 = from_index_dual[adjacent_vector_indices_h[6*to_index[i] + l]];
-						vertex_index_candidate_1 = to_index_dual[adjacent_vector_indices_h[6*to_index[i] + l]];
-						retval = in_bool_calculator(vertex_indices, 6, vertex_index_candidate_0, &check_result);						
-						if (check_result == 0)
+						int vertex_indices[5];
+						int edge_indices[5];
+						int indices_resorted[5];
+						int vertex_indices_resorted[5];
+						double latitude_vertices[5];
+						double longitude_vertices[5];
+						double latitude_edges[5];
+						double longitude_edges[5];
+						double vector_of_areas[5];
+						for (int l = 0; l < 5; ++l)
+							vertex_indices[l] = -1;
+						counter = 0;
+						for (int l = 0; l < 5; ++l)
 						{
-							vertex_indices[counter] = vertex_index_candidate_0;
-							latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
-							longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
-							++counter;
+							vertex_index_candidate_0 = from_index_dual[adjacent_vector_indices_h[6*to_index[i] + l]];
+							vertex_index_candidate_1 = to_index_dual[adjacent_vector_indices_h[6*to_index[i] + l]];
+							retval = in_bool_calculator(vertex_indices, 5, vertex_index_candidate_0, &check_result);						
+							if (check_result == 0)
+							{
+								vertex_indices[counter] = vertex_index_candidate_0;
+								latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
+								longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
+								++counter;
+							}
+							retval = in_bool_calculator(vertex_indices, 5, vertex_index_candidate_1, &check_result);						
+							if (check_result == 0)
+							{
+								vertex_indices[counter] = vertex_index_candidate_1;
+								latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
+								longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
+								++counter;
+							}
 						}
-						retval = in_bool_calculator(vertex_indices, 6, vertex_index_candidate_1, &check_result);						
-						if (check_result == 0)
+						if (counter != 5)
+							printf("Problem 15 in TRSK implementation detected.\n");
+						for (int l = 0; l < 5; ++l)
 						{
-							vertex_indices[counter] = vertex_index_candidate_1;
-							latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
-							longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
-							++counter;
+							if (vertex_indices[l] < 0 || vertex_indices[l] >= NUMBER_OF_DUAL_SCALARS_H)
+								printf("Problem 5 in TRSK implementation detected.\n");
+							for (int m = l + 1; m < 5; ++m)
+							{
+								if (vertex_indices[l] == vertex_indices[m])
+									printf("Problem 23 in TRSK implementation detected.\n");
+							}
 						}
-					}
-					if (counter != 6)
-						printf("Problem 16 in TRSK implementation detected.\n");
-					for (int l = 0; l < 6; ++l)
-					{
-						if (vertex_indices[l] < 0 || vertex_indices[l] >= NUMBER_OF_DUAL_SCALARS_H)
-							printf("Problem 6 in TRSK implementation detected.\n");
-						for (int m = l + 1; m < 6; ++m)
+						retval = sort_edge_indices(latitude_vertices, longitude_vertices, 5, indices_resorted);
+						for (int l = 0; l < 5; ++l)
 						{
-							if (vertex_indices[l] == vertex_indices[m])
-								printf("Problem 24 in TRSK implementation detected.\n");
+							for (int m = l + 1; m < 5; ++m)
+							{
+								if (indices_resorted[l] == indices_resorted[m] || indices_resorted[l] < 0 || indices_resorted[l] > 4)
+									printf("Problem 27 in TRSK implementation detected.\n");
+							}
 						}
-					}
-					retval = sort_edge_indices(latitude_vertices, longitude_vertices, 6, indices_resorted);
-					for (int l = 0; l < 6; ++l)
-					{
-						latitude_vertices[l] = latitude_vertices[indices_resorted[l]];
-						longitude_vertices[l] = longitude_vertices[indices_resorted[l]];
-						vertex_indices_resorted[l] = vertex_indices[indices_resorted[l]];
-					}
-					for (int l = 0; l < 6; ++l)
-					{
-						for (int m = 0; m < 6; ++m)
+						for (int l = 0; l < 5; ++l)
+							vertex_indices_resorted[l] = vertex_indices[indices_resorted[l]];
+						for (int l = 0; l < 5; ++l)
 						{
-							if ((from_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[l] && to_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[(l + 1)%6]) || (to_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[l] && from_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[(l + 1)%6]))
-								edge_indices[l] = adjacent_vector_indices_h[6*to_index[i] + m];
+							for (int m = 0; m < 5; ++m)
+							{
+								if ((from_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[l] && to_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[(l + 1)%5]) || (to_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[l] && from_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[(l + 1)%5]))
+									edge_indices[l] = adjacent_vector_indices_h[6*to_index[i] + m];
+							}
 						}
-					}
-					for (int l = 0; l < 6; ++l)
-					{
-						if (edge_indices[l] < 0 || edge_indices[l] >= NUMBER_OF_VECTORS_H)
+						for (int l = 0; l < 5; ++l)
 						{
-							printf("Problem 10 in TRSK implementation detected.\n");
+							if (edge_indices[l] < 0 || edge_indices[l] >= NUMBER_OF_VECTORS_H)
+							{
+								printf("Problem 9 in TRSK implementation detected.\n");
+							}
+							for (int m = l + 1; m < 5; ++m)
+							{
+								if (edge_indices[l] == edge_indices[m])
+									printf("Problem 20 in TRSK implementation detected.\n");
+							}
 						}
-						for (int m = l + 1; m < 6; ++m)
+						for (int l = 0; l < 5; ++l)
 						{
-							if (edge_indices[l] == edge_indices[m])
-								printf("Problem 21 in TRSK implementation detected.\n");
+							latitude_edges[l] = latitude_vector[edge_indices[l]];
+							longitude_edges[l] = longitude_vector[edge_indices[l]];
 						}
-					}
-					for (int l = 0; l < 6; ++l)
-					{
-						latitude_edges[l] = latitude_vector[edge_indices[l]];
-						longitude_edges[l] = longitude_vector[edge_indices[l]];
-					}
-					for (int l = 0; l < 6; ++l)	
-					{
-						if (l == 0)
-							retval = calc_triangle_face(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[5], longitude_edges[5], &triangle_0);
+						check_sum = 0;
+						for (int l = 0; l < 5; ++l)	
+						{
+							if (l == 0)
+								retval = calc_triangle_face(latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[4], longitude_edges[4], &triangle_0);
+							else
+								retval = calc_triangle_face(latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[l - 1], longitude_edges[l - 1], &triangle_0);
+							retval = calc_triangle_face(latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[l], longitude_edges[l], &triangle_1);
+							vector_of_areas[l] = pow(RADIUS + z_scalar[to_index[i]], 2)*(triangle_0 + triangle_1);
+							check_sum += vector_of_areas[l];
+						}
+						if (fabs(check_sum/area[to_index[i]] - 1) > 0.001)
+							printf("Problem 32 in TRSK implementation detected.\n");
+						for (int l = 0; l < 5; ++l)
+						{
+							if (edge_indices[l] == i)
+								last_index = l;
+							if (edge_indices[l] == recov_hor_par_pri_index[10*i + k])
+								first_index = (l + 1)%5;
+								
+						}
+						if (k == 9)
+							sum_of_weights = 0;
 						else
-							retval = calc_triangle_face(latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[l - 1], longitude_edges[l - 1], &triangle_0);
-						retval = calc_triangle_face(latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], latitude_vertices[l], longitude_vertices[l], latitude_edges[l], longitude_edges[l], &triangle_1);
-						vector_of_areas[l] = pow(RADIUS + z_scalar[to_index[i]], 2)*(triangle_0 + triangle_1);
+							double_sum_gen(vector_of_areas, 5, first_index, last_index, &sum_of_weights);
+						if (sum_of_weights < 0 || sum_of_weights/area[from_index[i]] > 1)
+							printf("Problem 36 in TRSK implementation detected\n");
 					}
-					for (int l = 0; l < 6; ++l)
+					else
 					{
-						if (edge_indices[l] == i)
-							last_index = l;
-						if (edge_indices[l] == recov_hor_par_pri_index[10*i + k])
-							first_index = (l + 1)%6;
-							
+						int vertex_indices[6];
+						int edge_indices[6];
+						int indices_resorted[6];
+						int vertex_indices_resorted[6];
+						double latitude_vertices[6];
+						double longitude_vertices[6];
+						double latitude_edges[6];
+						double longitude_edges[6];
+						double vector_of_areas[6];
+						for (int l = 0; l < 6; ++l)
+							vertex_indices[l] = -1;
+						counter = 0;
+						for (int l = 0; l < 6; ++l)
+						{
+							vertex_index_candidate_0 = from_index_dual[adjacent_vector_indices_h[6*to_index[i] + l]];
+							vertex_index_candidate_1 = to_index_dual[adjacent_vector_indices_h[6*to_index[i] + l]];
+							retval = in_bool_calculator(vertex_indices, 6, vertex_index_candidate_0, &check_result);						
+							if (check_result == 0)
+							{
+								vertex_indices[counter] = vertex_index_candidate_0;
+								latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
+								longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
+								++counter;
+							}
+							retval = in_bool_calculator(vertex_indices, 6, vertex_index_candidate_1, &check_result);						
+							if (check_result == 0)
+							{
+								vertex_indices[counter] = vertex_index_candidate_1;
+								latitude_vertices[counter] = latitude_scalar_dual[vertex_indices[counter]];
+								longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
+								++counter;
+							}
+						}
+						if (counter != 6)
+							printf("Problem 16 in TRSK implementation detected.\n");
+						for (int l = 0; l < 6; ++l)
+						{
+							if (vertex_indices[l] < 0 || vertex_indices[l] >= NUMBER_OF_DUAL_SCALARS_H)
+								printf("Problem 6 in TRSK implementation detected.\n");
+							for (int m = l + 1; m < 6; ++m)
+							{
+								if (vertex_indices[l] == vertex_indices[m])
+									printf("Problem 24 in TRSK implementation detected.\n");
+							}
+						}
+						retval = sort_edge_indices(latitude_vertices, longitude_vertices, 6, indices_resorted);
+						for (int l = 0; l < 6; ++l)
+						{
+							for (int m = l + 1; m < 6; ++m)
+							{
+								if (indices_resorted[l] == indices_resorted[m] || indices_resorted[l] < 0 || indices_resorted[l] > 5)
+									printf("Problem 28 in TRSK implementation detected.\n");
+							}
+						}
+						for (int l = 0; l < 6; ++l)
+							vertex_indices_resorted[l] = vertex_indices[indices_resorted[l]];
+						for (int l = 0; l < 6; ++l)
+						{
+							for (int m = 0; m < 6; ++m)
+							{
+								if ((from_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[l] && to_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[(l + 1)%6]) || (to_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[l] && from_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[(l + 1)%6]))
+									edge_indices[l] = adjacent_vector_indices_h[6*to_index[i] + m];
+							}
+						}
+						for (int l = 0; l < 6; ++l)
+						{
+							if (edge_indices[l] < 0 || edge_indices[l] >= NUMBER_OF_VECTORS_H)
+							{
+								printf("Problem 10 in TRSK implementation detected.\n");
+							}
+							for (int m = l + 1; m < 6; ++m)
+							{
+								if (edge_indices[l] == edge_indices[m])
+									printf("Problem 21 in TRSK implementation detected.\n");
+							}
+						}
+						for (int l = 0; l < 6; ++l)
+						{
+							latitude_edges[l] = latitude_vector[edge_indices[l]];
+							longitude_edges[l] = longitude_vector[edge_indices[l]];
+						}
+						check_sum = 0;
+						for (int l = 0; l < 6; ++l)	
+						{
+							if (l == 0)
+								retval = calc_triangle_face(latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[5], longitude_edges[5], &triangle_0);
+							else
+								retval = calc_triangle_face(latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[l - 1], longitude_edges[l - 1], &triangle_0);
+							retval = calc_triangle_face(latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[l], longitude_edges[l], &triangle_1);
+							vector_of_areas[l] = pow(RADIUS + z_scalar[to_index[i]], 2)*(triangle_0 + triangle_1);
+							check_sum += vector_of_areas[l];
+						}
+						if (fabs(check_sum/area[to_index[i]] - 1) > 0.001)
+							printf("Problem 33 in TRSK implementation detected.\n");
+						for (int l = 0; l < 6; ++l)
+						{
+							if (edge_indices[l] == i)
+								last_index = l;
+							if (edge_indices[l] == recov_hor_par_pri_index[10*i + k])
+								first_index = (l + 1)%6;
+						}
+						double_sum_gen(vector_of_areas, 6, first_index, last_index, &sum_of_weights);
+						if (sum_of_weights < 0 || sum_of_weights/area[from_index[i]] > 1)
+							printf("Problem 37 in TRSK implementation detected\n");
 					}
-					double_sum_gen(vector_of_areas, 6, first_index, last_index, &sum_of_weights);	
+					sum_of_weights = sum_of_weights/area[to_index[i]];
+					recov_hor_par_pri_weight[10*i + k] = sign_0*(sum_of_weights - 0.5)*sign_1;
 				}
-				sum_of_weights = sum_of_weights/area[to_index[i]];
-				recov_hor_par_pri_weight[10*i + k] = sign_0*(sum_of_weights - 0.5)*sign_1;
 			}
-			recov_hor_par_pri_weight[10*i + k] = (normal_distance_dual[recov_hor_par_pri_index[10*i + k]]/(RADIUS + z_vector_dual[recov_hor_par_pri_index[10*i + k]]))/(normal_distance[NUMBER_OF_VECTORS_V + i]/(RADIUS + z_vector_dual[NUMBER_OF_VECTORS_V + i]))*recov_hor_par_pri_weight[10*i + k];
+			recov_hor_par_pri_weight[10*i + k] = -normal_distance_dual[recov_hor_par_pri_index[10*i + k]]/normal_distance[NUMBER_OF_VECTORS_V + i]*recov_hor_par_pri_weight[10*i + k];
 		}
+		for (int j = 0; j < 10; ++j)
+		{
+			for (int k = j + 1; k < 10; ++k)
+			{
+				if (recov_hor_par_pri_index[10*i + j] == recov_hor_par_pri_index[10*i + k] && (recov_hor_par_pri_weight[10*i + j] != 0 && recov_hor_par_pri_weight[10*i + k] != 0))
+					printf("Problem 29 in TRSK implementation detected.\n");
+			}
+		}		
         sign = 1;
         find_angle_change(direction[i], direction_dual[i], &direction_change);
         if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
@@ -1615,6 +1662,34 @@ int main(int argc, char *argv[])
             recov_hor_ver_pri_weight[4*i + j] = 0.25;
         }
     }
+	double value_0, value_1, check_sum;
+	int second_index;
+	for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+	{
+		for (int j = 0; j < 10; ++j)
+		{
+			value_0 = normal_distance[NUMBER_OF_VECTORS_V + i]/normal_distance_dual[recov_hor_par_pri_index[10*i + j]]*recov_hor_par_pri_weight[10*i + j];
+			if (recov_hor_par_pri_index[10*i + j] != 0 || (recov_hor_par_pri_index[10*i + j] == 0 && recov_hor_par_pri_weight[10*i + j] != 0))
+			{
+				second_index = -1;			
+				for (int k = 0; k < 10; ++k)
+				{
+					if (recov_hor_par_pri_index[10*recov_hor_par_pri_index[10*i + j] + k] == i && recov_hor_par_pri_weight[10*recov_hor_par_pri_index[10*i + j] + k] != 0)
+						second_index = k;
+				}
+				if (second_index == -1)
+				{
+					printf("Problem 38 in TRSK implementation detected.\n");
+				}
+				value_1 = normal_distance[NUMBER_OF_VECTORS_V + recov_hor_par_pri_index[10*i + j]]/normal_distance_dual[i]*recov_hor_par_pri_weight[10*recov_hor_par_pri_index[10*i + j] + second_index];
+				check_sum = value_0 + value_1;
+				if (fabs(check_sum) > 0.001)
+				{
+					printf("Problem 39 in TRSK implementation detected.\n");
+				}
+			}
+		}
+	}
     free(rel_on_line_dual);
     free(face_of_cell_indices);
 	// free(adjacent_scalar_indices_for_cross); uncomment for old Coriolis reconstruction
@@ -1727,7 +1802,7 @@ int main(int argc, char *argv[])
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_h_6_index", 6*NUMBER_OF_SCALARS_H, &scalar_h_dimid_6)))
         ERR(retval);
 	if ((retval = nc_def_dim(ncid_g_prop, "vector_h_10_index", 10*NUMBER_OF_VECTORS_H, &vector_h_dimid_10)))
-		    ERR(retval);
+	    ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_h_11_index", 11*NUMBER_OF_VECTORS_H, &vector_h_dimid_11)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_h_2_index", 2*NUMBER_OF_VECTORS_H, &vector_h_dimid_2)))

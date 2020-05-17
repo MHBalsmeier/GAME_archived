@@ -16,32 +16,24 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     Scalar_field *density_flux_divergence = malloc(sizeof(Scalar_field));
     divergence(*density_flux, *density_flux_divergence, grid, 0);
     free(density_flux);
-    double mean_particle_mass = M_D/N_A;
-    double eff_particle_radius = 130e-12;
     int retval;
     Vector_field *diffusion_mass_flux = malloc(sizeof(Vector_field));
     Scalar_field *mass_source_rate = malloc(sizeof(Scalar_field));
     Scalar_field *temperature = malloc(sizeof(Scalar_field));
     Scalar_field *mass_diffusion_coeff_numerical_h = malloc(sizeof(Scalar_field));
 	Scalar_field *mass_diffusion_coeff_numerical_v = malloc(sizeof(Scalar_field));
-    double mass_diffusion_coeff, mass_diffusion_coeff_para_ratio_h, mass_diffusion_coeff_para_ratio_v;
     if (dissipation_on == 1)
     {
         temperature_diagnostics(current_state -> density_entropy, current_state -> density, *temperature);
         Vector_field *diffusion_mass_flux_pre = malloc(sizeof(Vector_field));
         retval = grad(current_state -> density, *diffusion_mass_flux_pre, grid);
-        for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
-        {
-            calc_diffusion_coeff((*temperature)[i], mean_particle_mass, current_state -> density[i], eff_particle_radius, &mass_diffusion_coeff);
-            mass_diffusion_coeff_para_ratio_h = pow(10, 5);
-			mass_diffusion_coeff_para_ratio_v = pow(10, 4);
-            (*mass_diffusion_coeff_numerical_h)[i] = mass_diffusion_coeff_para_ratio_h*mass_diffusion_coeff;
-            (*mass_diffusion_coeff_numerical_v)[i] = mass_diffusion_coeff_para_ratio_v*mass_diffusion_coeff;
-        }
+        retval = calc_mass_diffusion_coeffs(*temperature, current_state -> density, *mass_diffusion_coeff_numerical_h, *mass_diffusion_coeff_numerical_v);
         scalar_times_vector_h_v(*mass_diffusion_coeff_numerical_h, *mass_diffusion_coeff_numerical_v, *diffusion_mass_flux_pre, *diffusion_mass_flux, grid);
         free(diffusion_mass_flux_pre);
         retval = divergence(*diffusion_mass_flux, *mass_source_rate, grid, 0);
     }
+    free(mass_diffusion_coeff_numerical_h);
+	free(mass_diffusion_coeff_numerical_v);
     free(diffusion_mass_flux);
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
@@ -62,16 +54,19 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     inner(current_state -> wind, *laplace_wind_field, *u_dot_laplace_wind, grid);
     Scalar_field *temp_diffusion_heating = malloc(sizeof(Scalar_field));
     Vector_field *temperature_flux = malloc(sizeof(Vector_field));
+    Scalar_field *temp_diffusion_coeff_numerical_h = malloc(sizeof(Scalar_field));
+	Scalar_field *temp_diffusion_coeff_numerical_v = malloc(sizeof(Scalar_field));
     if (dissipation_on == 1)
     {
         Vector_field *temperature_flux_pre = malloc(sizeof(Vector_field));
         retval = grad(*temperature, *temperature_flux_pre, grid);
-        scalar_times_vector_h_v(*mass_diffusion_coeff_numerical_h, *mass_diffusion_coeff_numerical_v, *temperature_flux_pre, *temperature_flux, grid);
+        retval = calc_temp_diffusion_coeffs(*temperature, current_state -> density, *temp_diffusion_coeff_numerical_h, *temp_diffusion_coeff_numerical_v);
+        scalar_times_vector_h_v(*temp_diffusion_coeff_numerical_h, *temp_diffusion_coeff_numerical_v, *temperature_flux_pre, *temperature_flux, grid);
         free(temperature_flux_pre);
         retval = divergence(*temperature_flux, *temp_diffusion_heating, grid, 0);
     }
-    free(mass_diffusion_coeff_numerical_h);
-	free(mass_diffusion_coeff_numerical_v);
+    free(temp_diffusion_coeff_numerical_h);
+	free(temp_diffusion_coeff_numerical_v);
     free(temperature_flux);
     Scalar_field *pot_temp = malloc(sizeof(Scalar_field));
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
@@ -228,12 +223,9 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     return retval;
 }
 
-int calc_diffusion_coeff(double temperature, double particle_mass, double density, double particle_radius, double *result)
-{
-    double thermal_velocity = sqrt(8*K_B*temperature/(M_PI*particle_mass));
-    double particle_density = density/particle_mass;
-    double cross_section = 4*M_PI*pow(particle_radius, 2);
-    double mean_free_path = 1/(sqrt(2)*particle_density*cross_section);
-    *result = 1.0/3.0*thermal_velocity*mean_free_path;
-    return 0;
-}
+
+
+
+
+
+

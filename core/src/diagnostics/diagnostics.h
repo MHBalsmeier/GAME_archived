@@ -1,5 +1,7 @@
 int exner_pressure_diagnostics(Scalar_field, Scalar_field, Scalar_field);
 int temperature_diagnostics(Scalar_field, Scalar_field, Scalar_field);
+int calc_temp_diffusion_coeffs(Scalar_field, Scalar_field, Scalar_field, Scalar_field);
+int calc_mass_diffusion_coeffs(Scalar_field, Scalar_field, Scalar_field, Scalar_field);
 int global_scalar_integrator(Scalar_field, Grid *, double *);
 int recov_hor_par_dual(Dual_vector_field, long, long, double *, Grid *);
 int recov_hor_par_pri(Vector_field, long, long, double *, Grid *);

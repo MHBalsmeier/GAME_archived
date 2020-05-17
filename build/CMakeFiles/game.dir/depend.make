@@ -9,6 +9,9 @@ CMakeFiles/game.dir/src/coordinator.c.o: /home/max/my_code/game/core/src/io/io.h
 CMakeFiles/game.dir/src/coordinator.c.o: /home/max/my_code/game/core/src/r_operators/r_operators.h
 CMakeFiles/game.dir/src/coordinator.c.o: /home/max/my_code/game/core/src/time_stepping/time_stepping.h
 
+CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o: /home/max/my_code/game/core/src/diagnostics/calc_numerical_diffusion_coeffs.c
+CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
+
 CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c
 CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h

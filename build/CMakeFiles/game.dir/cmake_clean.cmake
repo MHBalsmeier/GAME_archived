@@ -21,6 +21,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/game.dir/src/time_stepping/runge_kutta_fourth_order.c.o"
   "CMakeFiles/game.dir/src/time_stepping/runge_kutta_third_order.c.o"
   "CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o"
+  "CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o"
   "CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.o"
   "CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.o"
   "CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.o"

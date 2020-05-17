@@ -5,6 +5,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
   "/home/max/my_code/game/core/src/coordinator.c" "/home/max/my_code/game/build/CMakeFiles/game.dir/src/coordinator.c.o"
+  "/home/max/my_code/game/core/src/diagnostics/calc_numerical_diffusion_coeffs.c" "/home/max/my_code/game/build/CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o"
   "/home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c" "/home/max/my_code/game/build/CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o"
   "/home/max/my_code/game/core/src/diagnostics/global_scalar_integral.c" "/home/max/my_code/game/build/CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.o"
   "/home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_dual.c" "/home/max/my_code/game/build/CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.o"

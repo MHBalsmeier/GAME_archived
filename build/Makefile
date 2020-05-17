@@ -207,6 +207,33 @@ src/coordinator.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/coordinator.c.s
 .PHONY : src/coordinator.c.s
 
+src/diagnostics/calc_numerical_diffusion_coeffs.o: src/diagnostics/calc_numerical_diffusion_coeffs.c.o
+
+.PHONY : src/diagnostics/calc_numerical_diffusion_coeffs.o
+
+# target to build an object file
+src/diagnostics/calc_numerical_diffusion_coeffs.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o
+.PHONY : src/diagnostics/calc_numerical_diffusion_coeffs.c.o
+
+src/diagnostics/calc_numerical_diffusion_coeffs.i: src/diagnostics/calc_numerical_diffusion_coeffs.c.i
+
+.PHONY : src/diagnostics/calc_numerical_diffusion_coeffs.i
+
+# target to preprocess a source file
+src/diagnostics/calc_numerical_diffusion_coeffs.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.i
+.PHONY : src/diagnostics/calc_numerical_diffusion_coeffs.c.i
+
+src/diagnostics/calc_numerical_diffusion_coeffs.s: src/diagnostics/calc_numerical_diffusion_coeffs.c.s
+
+.PHONY : src/diagnostics/calc_numerical_diffusion_coeffs.s
+
+# target to generate assembly for a file
+src/diagnostics/calc_numerical_diffusion_coeffs.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.s
+.PHONY : src/diagnostics/calc_numerical_diffusion_coeffs.c.s
+
 src/diagnostics/exner_pressure_diagnostics.o: src/diagnostics/exner_pressure_diagnostics.c.o
 
 .PHONY : src/diagnostics/exner_pressure_diagnostics.o
@@ -1061,6 +1088,9 @@ help:
 	@echo "... src/coordinator.o"
 	@echo "... src/coordinator.i"
 	@echo "... src/coordinator.s"
+	@echo "... src/diagnostics/calc_numerical_diffusion_coeffs.o"
+	@echo "... src/diagnostics/calc_numerical_diffusion_coeffs.i"
+	@echo "... src/diagnostics/calc_numerical_diffusion_coeffs.s"
 	@echo "... src/diagnostics/exner_pressure_diagnostics.o"
 	@echo "... src/diagnostics/exner_pressure_diagnostics.i"
 	@echo "... src/diagnostics/exner_pressure_diagnostics.s"

@@ -30,6 +30,14 @@ diagnostics/diagnostics.h
 time_stepping/time_stepping.h
 /home/max/my_code/game/core/src/time_stepping/time_stepping.h
 
+/home/max/my_code/game/core/src/diagnostics/calc_numerical_diffusion_coeffs.c
+../enum_and_typedefs.h
+/home/max/my_code/game/core/src/enum_and_typedefs.h
+stdlib.h
+-
+stdio.h
+-
+
 /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 
 /home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c
