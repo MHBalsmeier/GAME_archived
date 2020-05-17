@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
     double *latitude_vector = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
     double *longitude_vector = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
     double *direction = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
-    double *gravity = malloc(NUMBER_OF_VECTORS*sizeof(double));
+    double *gravity_eff = malloc(NUMBER_OF_VECTORS*sizeof(double));
     double *volume = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *area = malloc(NUMBER_OF_VECTORS*sizeof(double));
     double *recov_hor_par_pri_weight = calloc(10*NUMBER_OF_VECTORS_H, sizeof(double));
@@ -299,7 +299,8 @@ int main(int argc, char *argv[])
     double *pent_hex_face_unity_sphere = malloc(NUMBER_OF_VECTORS_V*sizeof(double));
     double *rel_on_line_dual = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
     double *exner_pressure_background = malloc(NUMBER_OF_SCALARS*sizeof(double));
-    double *pot_temp_background = malloc(NUMBER_OF_VECTORS*sizeof(double));
+	double *pot_temp_background = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    double *pot_temp_background_vector = malloc(NUMBER_OF_VECTORS*sizeof(double));
     int *to_index = malloc(NUMBER_OF_VECTORS_H*sizeof(int));
     int *from_index = malloc(NUMBER_OF_VECTORS_H*sizeof(int));
     int *recov_hor_par_pri_index = calloc(10*NUMBER_OF_VECTORS_H, sizeof(int));
@@ -915,7 +916,7 @@ int main(int argc, char *argv[])
                     }
                 }
             }
-            gravity[i] = 0;
+            gravity_eff[i] = 0;
             z_vector[i] = z_scalar[layer_index*NUMBER_OF_SCALARS_H];
             if (z_vector[i] <= 0)
                 printf("z_vector contains a non-positive value at a horizontal grid point.\n");
@@ -936,7 +937,7 @@ int main(int argc, char *argv[])
             if (z_vector[i] < 0)
                 printf("z_vector contains a negative value.\n");
             area[i] = pent_hex_face_unity_sphere[h_index]*pow(RADIUS + z_vector[i], 2);
-            gravity[i] = -GRAVITY_MEAN_SFC_ABS*pow(RADIUS, 2)/pow(RADIUS + z_vector[i], 2);
+            gravity_eff[i] = -GRAVITY_MEAN_SFC_ABS*pow(RADIUS, 2)/pow(RADIUS + z_vector[i], 2);
         }
     }
     free(pent_hex_face_unity_sphere);
@@ -1687,30 +1688,32 @@ int main(int argc, char *argv[])
     double T_str = 213.15;
     double T_sl = 288.15;
     double mean_msl_pressure = 101325;
-    double pressure_value, z_g;
+    double pressure_value, z_g, temperature_value;
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
         z_g = z_scalar[i]/(1 + z_scalar[i]/RADIUS);
         pressure_value = mean_msl_pressure*pow(T_sl/(T_sl - T_str + T_str*exp(z_g/z_scale_temp)), GRAVITY_MEAN_SFC_ABS*z_scale_temp/(R_D*T_str));
         exner_pressure_background[i] = pow(pressure_value/P_0, R_D/C_P);
+		temperature_value = T_str + (T_sl - T_str)*exp(-z_g/z_scale_temp);
+		pot_temp_background[i] = temperature_value*pow(P_0/pressure_value, R_D/C_P);
         if (exner_pressure_background[i] < 0)
             printf("exner_pressure_background contains a non-positive value.\n");
     }
-    double temperature_value;
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
         z_g = z_vector[i]/(1 + z_vector[i]/RADIUS);
         pressure_value = mean_msl_pressure*pow(T_sl/(T_sl - T_str + T_str*exp(z_g/z_scale_temp)), GRAVITY_MEAN_SFC_ABS*z_scale_temp/(R_D*T_str));
         temperature_value = T_str + (T_sl - T_str)*exp(-z_g/z_scale_temp);
-        pot_temp_background[i] = temperature_value*pow(P_0/pressure_value, R_D/C_P);
-        if (pot_temp_background[i] <= 0)
-            printf("pot_temp_background contains a non-positive value.\n");
+        pot_temp_background_vector[i] = temperature_value*pow(P_0/pressure_value, R_D/C_P);
+        if (pot_temp_background_vector[i] <= 0)
+            printf("pot_temp_background_vector contains a non-positive value.\n");
+		gravity_eff[i] = gravity_eff[i]/pot_temp_background_vector[i];
     }
     int ncid_g_prop;
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
     free(OUTPUT_FILE);
-    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id, vector_dual_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id;
+    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_eff_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id, vector_dual_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id;
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NUMBER_OF_SCALARS, &scalar_dimid)))
         ERR(retval);  
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_h_index", NUMBER_OF_SCALARS_H, &scalar_h_dimid)))
@@ -1745,7 +1748,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "exner_pressure_background", NC_DOUBLE, 1, &scalar_dimid, &exner_pressure_background_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "pot_temp_background", NC_DOUBLE, 1, &vector_dimid, &pot_temp_background_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "pot_temp_background", NC_DOUBLE, 1, &scalar_dimid, &pot_temp_background_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "latitude_scalar", NC_DOUBLE, 1, &scalar_h_dimid, &latitude_scalar_id)))
         ERR(retval);
@@ -1767,9 +1770,9 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, normal_distance_id, "units", strlen("m"), "m")))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "gravity", NC_DOUBLE, 1, &vector_dimid, &gravity_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "gravity_eff", NC_DOUBLE, 1, &vector_dimid, &gravity_eff_id)))
         ERR(retval);
-    if ((retval = nc_put_att_text(ncid_g_prop, gravity_id, "units", strlen("m/s^2"), "m/s^2")))
+    if ((retval = nc_put_att_text(ncid_g_prop, gravity_eff_id, "units", strlen("m/s^2"), "m/s^2")))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "volume", NC_DOUBLE, 1, &scalar_dimid, &volume_id)))
         ERR(retval);
@@ -1883,7 +1886,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, normal_distance_id, &normal_distance[0])))
         ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, gravity_id, &gravity[0])))
+    if ((retval = nc_put_var_double(ncid_g_prop, gravity_eff_id, &gravity_eff[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, volume_id, &volume[0])))
         ERR(retval);
@@ -1978,7 +1981,7 @@ int main(int argc, char *argv[])
     free(z_scalar);
     free(z_vector);
     free(normal_distance);
-    free(gravity);
+    free(gravity_eff);
     free(volume);
     free(area);
     free(recov_hor_par_dual_weight);

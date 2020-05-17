@@ -150,7 +150,7 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
                 temp_lowest_layer = exner_pressure*exp(state_write_out -> density_entropy[j + i*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]);
                 pressure_value = state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]*R_D*temp_lowest_layer;
                 temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[j + i*NUMBER_OF_SCALARS_H];
-                mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, -grid -> gravity[NUMBER_OF_LAYERS*NUMBER_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
+                mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, -grid -> pot_temp_background[(NUMBER_OF_LAYERS - 1)*NUMBER_OF_SCALARS_H + j]*grid -> gravity_eff[NUMBER_OF_LAYERS*NUMBER_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
                 mslp[j] = pressure_value/mslp_factor;
                 delta_z_temp = 2 - grid -> z_scalar[j + i*NUMBER_OF_SCALARS_H];
                 temp_upper = pow(R_D*state_write_out -> density[j + (i - 1)*NUMBER_OF_SCALARS_H]*exp(state_write_out -> density_entropy[j + (i - 1)*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + (i - 1)*NUMBER_OF_SCALARS_H])/P_0, R_D/C_V)*exp(state_write_out -> density_entropy[j + (i - 1)*NUMBER_OF_SCALARS_H]/state_write_out -> density[j + (i - 1)*NUMBER_OF_SCALARS_H]);

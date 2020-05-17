@@ -41,8 +41,8 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
         scalar_times_vector_h_v(*mass_diffusion_coeff_numerical_h, *mass_diffusion_coeff_numerical_v, *diffusion_mass_flux_pre, *diffusion_mass_flux, grid);
         free(diffusion_mass_flux_pre);
         retval = divergence(*diffusion_mass_flux, *mass_source_rate, grid, 0);
-        free(diffusion_mass_flux);
     }
+    free(diffusion_mass_flux);
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
         if (dissipation_on == 1)
@@ -68,10 +68,10 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
         retval = grad(*temperature, *temperature_flux_pre, grid);
         scalar_times_vector_h_v(*mass_diffusion_coeff_numerical_h, *mass_diffusion_coeff_numerical_v, *temperature_flux_pre, *temperature_flux, grid);
         free(temperature_flux_pre);
-        free(mass_diffusion_coeff_numerical_h);
-		free(mass_diffusion_coeff_numerical_v);
         retval = divergence(*temperature_flux, *temp_diffusion_heating, grid, 0);
     }
+    free(mass_diffusion_coeff_numerical_h);
+	free(mass_diffusion_coeff_numerical_v);
     free(temperature_flux);
     Scalar_field *pot_temp = malloc(sizeof(Scalar_field));
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
@@ -142,7 +142,6 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
         }
     }
     free(add_comp_mass_source_rates);
-    free(add_comp_heat_source_rates);
     free(add_comp_density);
     free(add_comp_density_flux);
     free(add_comp_flux_divergence);
@@ -172,6 +171,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
                 state_tendency -> add_comp_temps[i*NUMBER_OF_SCALARS + j] = ((*temperature)[j] - current_state -> add_comp_temps[i*NUMBER_OF_SCALARS + j])/delta_t;
         }
     }
+    free(add_comp_heat_source_rates);
     free(rad_heating);
     free(add_comp_temp);
     free(add_comp_velocity);
@@ -194,7 +194,6 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     free(exner_pressure_perturb);
     Vector_field *m_pressure_gradient_acc = malloc(sizeof(Vector_field));
     retval = scalar_times_vector(*pot_temp, *exner_pressure_perturb_gradient, *m_pressure_gradient_acc, grid);
-    free(pot_temp);
     free(exner_pressure_perturb_gradient);
     Vector_field *abs_curl_tend = malloc(sizeof(Vector_field));
     cross_product(current_state -> wind, *abs_curl, *abs_curl_tend, grid);
@@ -205,40 +204,23 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
         (*m_pressure_gradient_acc)[i] = C_P*(*m_pressure_gradient_acc)[i];
     Vector_field *m_e_kin_tend_2 = malloc(sizeof(Vector_field));
     grad(*e_kin_spec_2, *m_e_kin_tend_2, grid);
-    int check_energy_bool = 0;
-    double enery_integral = 0;
-    double z_value, z_g;
-    if (check_energy_bool == 1)
-    {
-        for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
-        {
-            enery_integral += (*e_kin_spec_2)[i]*current_state -> density[i]*grid -> volume[i];
-            z_value = grid -> z_scalar[i];
-            z_g = z_value/(1 + z_value/RADIUS);
-            enery_integral += -grid -> gravity[NUMBER_OF_LAYERS*NUMBER_OF_VECTORS_PER_LAYER]*z_g*current_state -> density[i]*grid -> volume[i];
-            enery_integral += C_V*(*temperature)[i]*current_state -> density[i]*grid -> volume[i];
-        }
-        printf("%lf\n", enery_integral);
-    }
     free(temperature);
     free(e_kin_spec_2);
-    double entropy_value, pot_temp_perturb;
+	Scalar_field *pot_temp_perturb = malloc(sizeof(Scalar_field));
+	for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+		(*pot_temp_perturb)[i] =  (*pot_temp)[i] - grid -> pot_temp_background[i];
+	free(pot_temp);
+	Vector_field *m_gravity_background_acc = malloc(sizeof(Vector_field));
+	retval = scalar_times_vector(*pot_temp_perturb, grid -> gravity_eff, *m_gravity_background_acc, grid);
+	free(pot_temp_perturb);
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
-        layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
-        h_index = i - layer_index*NUMBER_OF_VECTORS_PER_LAYER;
         if (i < NUMBER_OF_VECTORS_V || i >= NUMBER_OF_VECTORS - NUMBER_OF_VECTORS_V)
             state_tendency -> wind[i] = 0;
         else
-        {
-            if (h_index < NUMBER_OF_VECTORS_V)
-                entropy_value = 0.5*current_state -> density_entropy[h_index + (layer_index - 1)*NUMBER_OF_SCALARS_H]/current_state -> density[h_index + (layer_index - 1)*NUMBER_OF_SCALARS_H] + 0.5*current_state -> density_entropy[h_index + layer_index*NUMBER_OF_SCALARS_H]/current_state -> density[h_index + layer_index*NUMBER_OF_SCALARS_H];
-            else
-                entropy_value = 0.5*(current_state -> density_entropy[grid -> to_index[h_index - NUMBER_OF_VECTORS_V] + layer_index*NUMBER_OF_SCALARS_H]/current_state -> density[grid -> to_index[h_index - NUMBER_OF_VECTORS_V] + layer_index*NUMBER_OF_SCALARS_H] + current_state -> density_entropy[grid -> from_index[h_index - NUMBER_OF_VECTORS_V] + layer_index*NUMBER_OF_SCALARS_H]/current_state -> density[grid -> from_index[h_index - NUMBER_OF_VECTORS_V] + layer_index*NUMBER_OF_SCALARS_H]);
-            pot_temp_perturb = exp(entropy_value) - grid -> pot_temp_background[i];
-            state_tendency -> wind[i] = -(*m_pressure_gradient_acc)[i] + (*abs_curl_tend)[i] - 0.5*(*m_e_kin_tend_2)[i] - pot_temp_perturb/grid -> pot_temp_background[i]*grid -> gravity[i] + dissipation_on*viscosity_coeff*(*laplace_wind_field)[i];
-        }
+            state_tendency -> wind[i] = -(*m_pressure_gradient_acc)[i] - (*m_gravity_background_acc)[i] + (*abs_curl_tend)[i] - 0.5*(*m_e_kin_tend_2)[i] + dissipation_on*viscosity_coeff*(*laplace_wind_field)[i];
     }
+	free(m_gravity_background_acc);
     free(laplace_wind_field);
     free(abs_curl_tend);
     free(m_pressure_gradient_acc);
