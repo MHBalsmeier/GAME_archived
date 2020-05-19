@@ -68,6 +68,7 @@ Vector_field gravity_eff;
 int from_index[NUMBER_OF_VECTORS_H];
 int to_index[NUMBER_OF_VECTORS_H];
 double direction[NUMBER_OF_VECTORS_H];
+double z_surface[NUMBER_OF_SCALARS_H];
 int adjacent_vector_indices_h[6*NUMBER_OF_SCALARS_H];
 int adjacent_signs_h[6*NUMBER_OF_SCALARS_H];
 int vorticity_indices[6*NUMBER_OF_VECTORS_V];

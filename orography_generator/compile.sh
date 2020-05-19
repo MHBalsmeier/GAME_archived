@@ -1,1 +1,1 @@
-gcc orography_generator.c -l netcdf -lm -o orography_generator
+gcc orography_generator.c -lnetcdf -lgeos95 -lm -o orography_generator

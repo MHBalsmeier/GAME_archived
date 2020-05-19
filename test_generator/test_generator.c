@@ -3,10 +3,10 @@
 #include <string.h>
 #include <math.h>
 #include <netcdf.h>
-#include "/usr/src/eccodes/include/eccodes.h"
-#include "/lib/geos/include/geos.h"
-#include "/lib/addcomp/include/addcomp.h"
-#include "/lib/indextools/include/indextools.h"
+#include "eccodes.h"
+#include "geos95.h"
+#include "addcomp.h"
+#include "indextools.h"
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
@@ -31,7 +31,7 @@ const double U_0 = 35;
 const double ETA_0 = 0.252;
 const double TOA = 30000;
 const short MODE = 2;
-const short ORO_ID = 0;
+const short ORO_ID = 1;
 const int TEST_ID = 4;
 
 enum grid_integers {
@@ -41,6 +41,7 @@ NUMBER_OF_PENTAGONS = 12,
 NUMBER_OF_HEXAGONS = (int) (10*(pow(2, 2*RES_ID) - 1)),
 NUMBER_OF_EDGES = 3*NUMBER_OF_BASIC_TRIANGLES/2,
 NUMBER_OF_LAYERS = 6,
+NUMBER_OF_ORO_LAYERS = 4,
 NUMBER_OF_LEVELS = NUMBER_OF_LAYERS + 1,
 NUMBER_OF_SCALARS_H = NUMBER_OF_PENTAGONS + NUMBER_OF_HEXAGONS,
 NUMBER_OF_VECTORS_H = (5*NUMBER_OF_PENTAGONS/2 + 6/2*NUMBER_OF_HEXAGONS),
@@ -79,11 +80,11 @@ int main(int argc, char *argv[])
     int ncid, retval;
     short GEO_PROP_FILE_LENGTH = 100;
     char *GEO_PROP_FILE_PRE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(GEO_PROP_FILE_PRE, "../grid_generator/nc_files/B%dL%dT%d_M%d_O%d.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, MODE, ORO_ID);
+    sprintf(GEO_PROP_FILE_PRE, "../grid_generator/nc_files/B%dL%dT%d_M%d_O%d_OL%d.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, MODE, ORO_ID, NUMBER_OF_ORO_LAYERS);
     GEO_PROP_FILE_LENGTH = strlen(GEO_PROP_FILE_PRE);
     free(GEO_PROP_FILE_PRE);
     char *GEO_PROP_FILE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(GEO_PROP_FILE, "../grid_generator/nc_files/B%dL%dT%d_M%d_O%d.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, MODE, ORO_ID);
+    sprintf(GEO_PROP_FILE, "../grid_generator/nc_files/B%dL%dT%d_M%d_O%d_OL%d.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, MODE, ORO_ID, NUMBER_OF_ORO_LAYERS);
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         NCERR(retval);
     free(GEO_PROP_FILE);
@@ -125,11 +126,11 @@ int main(int argc, char *argv[])
     int err = 0;
     short OUTPUT_FILE_LENGTH = 100;
     char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(OUTPUT_FILE_PRE, "grib_files/test_%d_B%dL%dT%d_M%d_O%d.grb2", TEST_ID, RES_ID, NUMBER_OF_LAYERS, (int) TOA, MODE, ORO_ID);
+    sprintf(OUTPUT_FILE_PRE, "grib_files/test_%d_B%dL%dT%d_M%d_O%d_OL%d.grb2", TEST_ID, RES_ID, NUMBER_OF_LAYERS, (int) TOA, MODE, ORO_ID, NUMBER_OF_ORO_LAYERS);
     OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
     free(OUTPUT_FILE_PRE);
     char *OUTPUT_FILE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(OUTPUT_FILE, "grib_files/test_%d_B%dL%dT%d_M%d_O%d.grb2", TEST_ID, RES_ID, NUMBER_OF_LAYERS, (int) TOA, MODE, ORO_ID);
+    sprintf(OUTPUT_FILE, "grib_files/test_%d_B%dL%dT%d_M%d_O%d_OL%d.grb2", TEST_ID, RES_ID, NUMBER_OF_LAYERS, (int) TOA, MODE, ORO_ID, NUMBER_OF_ORO_LAYERS);
     codes_handle *handle_pot_temperature = NULL;
     codes_handle *handle_density = NULL;
     codes_handle *handle_wind_h = NULL;

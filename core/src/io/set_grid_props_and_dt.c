@@ -153,6 +153,8 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, z_scalar_id, &z_scalar[0])))
         ERR(retval);
+    if ((retval = nc_get_var_double(ncid, z_scalar_id, &z_scalar[0])))
+        ERR(retval);
     if ((retval = nc_get_var_double(ncid, z_vector_id, &z_vector[0])))
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, recov_hor_par_dual_weight_id, &recov_hor_par_dual_weight[0])))
@@ -282,7 +284,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         if (grid -> area[i] <= 0)
             grid_check_failed();
         grid -> z_vector[i] = z_vector[i];
-        if (grid -> z_vector[i] < -0)
+        if (grid -> z_vector[i] < -400)
             grid_check_failed();
         grid -> gravity_eff[i] = gravity_eff[i];
     }

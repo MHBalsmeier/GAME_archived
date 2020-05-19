@@ -31,7 +31,12 @@ if short_name == "pt":
 if short_name == "prmsl":
     variable_name = "MSLP - 1000 hPa";
     rescale = 0.01;
-    shift = -1000 + 13.25;
+    shift = -1000;
+    unit_string = "hPa";
+if short_name == "pres":
+    variable_name = "Surface pressure - 1000 hPa";
+    rescale = 0.01;
+    shift = -1000;
     unit_string = "hPa";
 if short_name == "u":
     variable_name = "Zonal wind";
