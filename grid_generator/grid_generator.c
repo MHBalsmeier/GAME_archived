@@ -72,6 +72,7 @@ int write_scalar_coordinates(int, int, int, int, int, int, int, double[], double
 int find_triangles_per_face(int, int *);
 int find_triangle_edge_points_from_dual_scalar_on_face_index(int, int, int, int *, int *, int *, int[][3], int[][3], int[][3]);
 int find_triangle_on_face_index_from_dual_scalar_on_face_index(int, int, int *, int *, int *, int *);
+int find_v_vector_indices_for_dual_scalar_z(int [], int [], int [], int, int []);
 
 int main(int argc, char *argv[])
 {
@@ -475,12 +476,24 @@ int main(int argc, char *argv[])
     free(latitude_ico);
     free(longitude_ico);
 	double z_oro_off = TOA*(NUMBER_OF_ORO_LAYERS + 0.0)/NUMBER_OF_LAYERS;
+	double z_vertical_vector_pre[NUMBER_OF_LAYERS + 1];
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
         layer_index = i/NUMBER_OF_SCALARS_H;
-		z_scalar[i] = TOA - layer_index*1000;
+		h_index = i - layer_index*NUMBER_OF_SCALARS_H;
+		for (int j = 0; j < NUMBER_OF_LAYERS + 1; ++j)
+		{
+			if (j >= NUMBER_OF_LAYERS - NUMBER_OF_ORO_LAYERS)
+				z_vertical_vector_pre[j] = z_surface[h_index] + (z_oro_off - z_surface[h_index])/NUMBER_OF_ORO_LAYERS*(NUMBER_OF_LAYERS - j);
+			else
+				z_vertical_vector_pre[j] = TOA - (TOA - z_oro_off)/(NUMBER_OF_LAYERS - NUMBER_OF_ORO_LAYERS)*j;
+		}
+		z_scalar[i] = 0.5*(z_vertical_vector_pre[layer_index] + z_vertical_vector_pre[layer_index + 1]);
         if (z_scalar[i] <= 0)
+		{
             printf("z_scalar contains a non-positive value.\n");
+			exit(1);
+		}
     }
     double triangle_face;
     for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
@@ -593,12 +606,21 @@ int main(int argc, char *argv[])
     {
         triangle_sum_unit_sphere += triangle_face_unit_sphere[i];
         if (triangle_face_unit_sphere[i] <= 0)
+		{
             printf("triangle_face_unit_sphere contains a non-positive value.\n");
+			exit(1);
+		}
         if (fabs(triangle_face_unit_sphere[i]/triangle_avg_unit_sphere_ideal - 1) > 0.4)
+		{
             printf("Triangles on unit sphere have significantly different surfaces.\n");
+			exit(1);
+		}
     }
     if (fabs(triangle_sum_unit_sphere/(4*M_PI) - 1) > 1e-13)
+	{
         printf("Sum of faces of triangles on unit sphere does not match face of unit sphere.\n");
+		exit(1);
+	}
     free(x_unity);
     free(y_unity);
     free(z_unity);
@@ -726,7 +748,10 @@ int main(int argc, char *argv[])
             if (from_index[j] == i || to_index[j] == i)
             {
                 if (from_index[j] == to_index[j])
+				{
                     printf("It is from_index == to_index at some point.\n");
+					exit(1);
+				}
                 adjacent_vector_indices_h[6*i + counter] = j;
                 vorticity_indices_dual[6*i + counter] = j;
                 sign = 1;
@@ -755,7 +780,10 @@ int main(int argc, char *argv[])
                 trouble_detected = 0;
         }
         if (trouble_detected == 1)
+		{
             printf("Trouble detected, place 1.\n");
+			exit(1);
+		}
         if (i < NUMBER_OF_PENTAGONS)
         {
             adjacent_vector_indices_h[6*i + 5] = -1;
@@ -785,7 +813,10 @@ int main(int argc, char *argv[])
                 }
             }
             if (double_check > 1)
+			{
                 printf("Same vector twice in adjacent_vector_indices_h of same grid cell.\n");
+				exit(1);
+			}
         }
         if (sign_sum_check != 0)
             printf("Problem with adjacent_signs_h.\n");
@@ -820,13 +851,19 @@ int main(int argc, char *argv[])
             }
         }
         if (counter != 3)
+		{
             printf("Trouble detected, place 0.\n");
+			exit(1);
+		}
     }
     for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
     {
         find_angle_change(direction[i], direction_dual[i], &direction_change);
         if (fabs(rad2deg(direction_change)) < ORTH_CRITERION_DEG || fabs(rad2deg(direction_change)) > 90 + (90 - ORTH_CRITERION_DEG))
+		{
             printf("Grid non-orthogonal.\n");
+			exit(1);
+		}
     }
     int check_0, check_1, check_2;
     for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
@@ -888,15 +925,23 @@ int main(int argc, char *argv[])
     {
         pent_hex_sum_unity_sphere += pent_hex_face_unity_sphere[i];
         if (pent_hex_face_unity_sphere[i] <= 0)
+		{
             printf("pent_hex_face_unity_sphere contains a non-positive value.\n");
+			exit(1);
+		}
         if (fabs(pent_hex_face_unity_sphere[i]/pent_hex_avg_unity_sphere_ideal - 1) > 0.4)
+		{
             printf("Pentagons and hexagons on unity sphere have significantly different surfaces.\n");
+			exit(1);
+		}
     }
     if (fabs(pent_hex_sum_unity_sphere/(4*M_PI) - 1) > 1e-12)
 	{
         printf("Sum of faces of pentagons and hexagons on unity sphere does not match face of unit sphere.\n");
+		exit(1);
 	}
 	int dual_scalar_h_index;
+	int index_vector_for_dual_scalar_z[3];
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
         layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
@@ -911,30 +956,39 @@ int main(int argc, char *argv[])
                 retval = find_coords_from_triangle_on_face_index(triangle_on_face_index, RES_ID, &coord_0, &coord_1, &coord_0_points_amount);
 				dual_scalar_h_index = face_index*TRIANGLES_PER_FACE + 1 + 2*triangle_on_face_index + coord_1;
                 dual_scalar_index = layer_index*NUMBER_OF_DUAL_SCALARS_H + dual_scalar_h_index;
-                z_scalar_dual[dual_scalar_index] = 1.0/3*(z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*dual_scalar_h_index + 0]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*dual_scalar_h_index + 1]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*dual_scalar_h_index + 2]]);
-                z_scalar_dual[dual_scalar_index - 1] = 1.0/3*(z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*(dual_scalar_h_index - 1) + 0]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*(dual_scalar_h_index - 1) + 1]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*(dual_scalar_h_index - 1) + 2]]);
+				retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices, dual_scalar_h_index, index_vector_for_dual_scalar_z);
+                z_scalar_dual[dual_scalar_index] = 1.0/3*(z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
+				retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices, dual_scalar_h_index - 1, index_vector_for_dual_scalar_z);
+                z_scalar_dual[dual_scalar_index - 1] = 1.0/3*(z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
                 if (layer_index == NUMBER_OF_LAYERS - 1)
                 {
-                	z_scalar_dual[dual_scalar_index + NUMBER_OF_DUAL_SCALARS_H] = 1.0/3*(z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*dual_scalar_h_index + 0]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*dual_scalar_h_index + 1]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*dual_scalar_h_index + 2]]);
-                	z_scalar_dual[dual_scalar_index + NUMBER_OF_DUAL_SCALARS_H - 1] = 1.0/3*(z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*(dual_scalar_h_index - 1) + 0]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*(dual_scalar_h_index - 1) + 1]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*(dual_scalar_h_index - 1) + 2]]);
+					retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices, dual_scalar_h_index, index_vector_for_dual_scalar_z);
+                	z_scalar_dual[dual_scalar_index + NUMBER_OF_DUAL_SCALARS_H] = 1.0/3*(z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
+					retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices, dual_scalar_h_index - 1, index_vector_for_dual_scalar_z);
+                	z_scalar_dual[dual_scalar_index + NUMBER_OF_DUAL_SCALARS_H - 1] = 1.0/3*(z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
                 }
                 if (coord_0 == coord_0_points_amount - 1)
                 {
-                	z_scalar_dual[dual_scalar_index + 1] = 1.0/3*(z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*(dual_scalar_h_index + 1) + 0]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*(dual_scalar_h_index + 1) + 1]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*(dual_scalar_h_index + 1) + 2]]);
+					retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices, dual_scalar_h_index + 1, index_vector_for_dual_scalar_z);
+                	z_scalar_dual[dual_scalar_index + 1] = 1.0/3*(z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
                     if (layer_index == NUMBER_OF_LAYERS - 1)
-            			z_scalar_dual[dual_scalar_index + 1 + NUMBER_OF_DUAL_SCALARS_H] = 1.0/3*(z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*(dual_scalar_h_index + 1) + 0]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*(dual_scalar_h_index + 1) + 1]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*(dual_scalar_h_index + 1) + 2]]);
+            			z_scalar_dual[dual_scalar_index + 1 + NUMBER_OF_DUAL_SCALARS_H] = 1.0/3*(z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
                     if (coord_1 == POINTS_PER_EDGE - 1)
                     {
-                		z_scalar_dual[dual_scalar_index + 2] = 1.0/3*(z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*(dual_scalar_h_index + 2) + 0]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*(dual_scalar_h_index + 2) + 1]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*(dual_scalar_h_index + 2) + 2]]);
+						retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices, dual_scalar_h_index + 2, index_vector_for_dual_scalar_z);
+                		z_scalar_dual[dual_scalar_index + 2] = 1.0/3*(z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
                         if (layer_index == NUMBER_OF_LAYERS - 1)
-            				z_scalar_dual[dual_scalar_index + 2 + NUMBER_OF_DUAL_SCALARS_H] = 1.0/3*(z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*(dual_scalar_h_index + 2) + 0]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*(dual_scalar_h_index + 2) + 1]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + vorticity_indices[3*(dual_scalar_h_index + 2) + 2]]);
+            				z_scalar_dual[dual_scalar_index + 2 + NUMBER_OF_DUAL_SCALARS_H] = 1.0/3*(z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
                     }
                 }
             }
             gravity_eff[i] = 0;
             z_vector[i] = 0.5*(z_scalar[layer_index*NUMBER_OF_SCALARS_H + to_index[h_index - NUMBER_OF_VECTORS_V]] + z_scalar[layer_index*NUMBER_OF_SCALARS_H + from_index[h_index - NUMBER_OF_VECTORS_V]]);
             if (z_vector[i] <= 0)
+			{
                 printf("z_vector contains a non-positive value at a horizontal grid point.\n");
+				exit(1);
+			}
             normal_distance[i] = calculate_distance_h(latitude_scalar[from_index[h_index - NUMBER_OF_VECTORS_V]], longitude_scalar[from_index[h_index - NUMBER_OF_VECTORS_V]], latitude_scalar[to_index[h_index - NUMBER_OF_VECTORS_V]], longitude_scalar[to_index[h_index - NUMBER_OF_VECTORS_V]], RADIUS + z_vector[i]);
         }
         else
@@ -943,12 +997,12 @@ int main(int argc, char *argv[])
             lower_index = h_index + layer_index*NUMBER_OF_SCALARS_H;
             if (layer_index == 0)
 			{
-                normal_distance[i] = TOA*(1 - (layer_index + 0.0)/NUMBER_OF_LAYERS) - z_scalar[lower_index];;
+                normal_distance[i] = TOA - z_scalar[lower_index];
             	z_vector[i] = TOA;
 			}
             else if (layer_index == NUMBER_OF_LAYERS)
 			{
-                normal_distance[i] = z_scalar[upper_index] - 0;
+                normal_distance[i] = z_scalar[upper_index] - z_surface[h_index];
 				z_vector[i] = z_surface[h_index];
 			}
             else
@@ -957,7 +1011,10 @@ int main(int argc, char *argv[])
 				z_vector[i] = z_scalar[lower_index] + 0.5*normal_distance[i];
 			}
             if (z_vector[i] < z_surface[h_index])
+			{
                 printf("z_vector lays below surface.\n");
+				exit(1);
+			}
             area[i] = pent_hex_face_unity_sphere[h_index]*pow(RADIUS + z_vector[i], 2);
             gravity_eff[i] = -GRAVITY_MEAN_SFC_ABS*pow(RADIUS, 2)/pow(RADIUS + z_vector[i], 2);
         }
@@ -966,7 +1023,10 @@ int main(int argc, char *argv[])
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
         if (normal_distance[i] <= 0)
+		{
             printf("normal_distance contains a non-positive value.\n");
+			exit(1);
+		}
     }
     double volume_sum, volume_sum_ideal;
     volume_sum = 0;
@@ -982,11 +1042,17 @@ int main(int argc, char *argv[])
     }
     volume_sum_ideal = find_volume(4*M_PI*pow(RADIUS, 2), RADIUS, RADIUS + z_vector[0]);
     if (fabs(volume_sum/volume_sum_ideal - 1) > 1e-12)
+	{
         printf("Sum of volumes of grid boxes does not match volume of entire atmosphere.\n");
+		// exit(1);
+	}
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
         if (volume[i] <= 0)
+		{
             printf("volume contains a non-positive value.\n");
+			exit(1);
+		}
     }
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; ++i)
     {
@@ -1026,9 +1092,15 @@ int main(int argc, char *argv[])
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; ++i)
     {
         if (area_dual[i] <= 0)
+		{
             printf("area_dual contains a non-positive value.\n");
+			exit(1);
+		}
         if (normal_distance_dual[i] <= 0)
+		{
             printf("normal_distance_dual contains a non-positive value.\n");
+			exit(1);
+		}
     }
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
@@ -1046,7 +1118,10 @@ int main(int argc, char *argv[])
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
         if (area[i] <= 0)
+		{
             printf("area contains a non-positive value.\n");
+			exit(1);
+		}
     }
     /* int bool_0, bool_1, first_found;
     int cell_0_for_cross, cell_1_for_cross;
@@ -1155,7 +1230,10 @@ int main(int argc, char *argv[])
 				if (adjacent_vector_indices_h[6*from_index[i] + k] == i)
 					offset += 1;
 				if (offset > 1)
+				{
 					printf("Problem 1 in TRSK implementation detected.\n");
+					exit(1);
+				}
 				recov_hor_par_pri_index[10*i + k] = adjacent_vector_indices_h[6*from_index[i] + k + offset];
 				if (recov_hor_par_pri_index[10*i + k] == -1)
 				{
@@ -1165,7 +1243,10 @@ int main(int argc, char *argv[])
 				else
 				{
 					if (recov_hor_par_pri_index[10*i + k] < 0 || recov_hor_par_pri_index[10*i + k] >= NUMBER_OF_VECTORS_H)
+					{
 						printf("Problem 11 in TRSK implementation detected.\n");
+						exit(1);
+					}
 					sign_1 = -1;
 					if (from_index[recov_hor_par_pri_index[10*i + k]] == from_index[i])
 						sign_1 = 1;
@@ -1205,15 +1286,24 @@ int main(int argc, char *argv[])
 							}
 						}
 						if (counter != 5)
+						{
 							printf("Problem 13 in TRSK implementation detected.\n");
+							exit(1);
+						}
 						for (int l = 0; l < 5; ++l)
 						{
 							if (vertex_indices[l] < 0 || vertex_indices[l] >= NUMBER_OF_DUAL_SCALARS_H)
+							{
 								printf("Problem 3 in TRSK implementation detected.\n");
+								exit(1);
+							}
 							for (int m = l + 1; m < 5; ++m)
 							{
 								if (vertex_indices[l] == vertex_indices[m])
+								{
 									printf("Problem 17 in TRSK implementation detected.\n");
+									exit(1);
+								}
 							}
 						}
 						retval = sort_edge_indices(latitude_vertices, longitude_vertices, 5, indices_resorted);
@@ -1222,7 +1312,10 @@ int main(int argc, char *argv[])
 							for (int m = l + 1; m < 5; ++m)
 							{
 								if (indices_resorted[l] == indices_resorted[m] || indices_resorted[l] < 0 || indices_resorted[l] > 4)
+								{
 									printf("Problem 25 in TRSK implementation detected.\n");
+									exit(1);
+								}
 							}
 						}
 						for (int l = 0; l < 5; ++l)
@@ -1240,11 +1333,15 @@ int main(int argc, char *argv[])
 							if (edge_indices[l] < 0 || edge_indices[l] >= NUMBER_OF_VECTORS_H)
 							{
 								printf("Problem 7 in TRSK implementation detected.\n");
+								exit(1);
 							}
 							for (int m = l + 1; m < 5; ++m)
 							{
 								if (edge_indices[l] == edge_indices[m])
+								{
 									printf("Problem 18 in TRSK implementation detected.\n");
+									exit(1);
+								}
 							}
 						}
 						for (int l = 0; l < 5; ++l)
@@ -1264,7 +1361,10 @@ int main(int argc, char *argv[])
 							check_sum += vector_of_areas[l];
 						}
 						if (fabs(check_sum/area[from_index[i]] - 1) > 0.001)
+						{
 							printf("Problem 30 in TRSK implementation detected.\n");
+							exit(1);
+						}
 						for (int l = 0; l < 5; ++l)
 						{
 							if (edge_indices[l] == i)
@@ -1277,7 +1377,10 @@ int main(int argc, char *argv[])
 						else
 							double_sum_gen(vector_of_areas, 5, first_index, last_index, &sum_of_weights);
 						if (sum_of_weights < 0 || sum_of_weights/area[from_index[i]] > 1)
+						{
 							printf("Problem 34 in TRSK implementation detected\n");
+							exit(1);
+						}
 					}
 					else
 					{
@@ -1315,15 +1418,24 @@ int main(int argc, char *argv[])
 							}
 						}
 						if (counter != 6)
+						{
 							printf("Problem 14 in TRSK implementation detected.\n");
+							exit(1);
+						}
 						for (int l = 0; l < 6; ++l)
 						{
 							if (vertex_indices[l] < 0 || vertex_indices[l] >= NUMBER_OF_DUAL_SCALARS_H)
+							{
 								printf("Problem 4 in TRSK implementation detected.\n");
+								exit(1);
+							}
 							for (int m = l + 1; m < 6; ++m)
 							{
 								if (vertex_indices[l] == vertex_indices[m])
+								{
 									printf("Problem 22 in TRSK implementation detected.\n");
+									exit(1);
+								}
 							}
 						}
 						retval = sort_edge_indices(latitude_vertices, longitude_vertices, 6, indices_resorted);
@@ -1332,7 +1444,10 @@ int main(int argc, char *argv[])
 							for (int m = l + 1; m < 6; ++m)
 							{
 								if (indices_resorted[l] == indices_resorted[m] || indices_resorted[l] < 0 || indices_resorted[l] > 5)
+								{
 									printf("Problem 26 in TRSK implementation detected.\n");
+									exit(1);
+								}
 							}
 						}
 						for (int l = 0; l < 6; ++l)
@@ -1350,11 +1465,15 @@ int main(int argc, char *argv[])
 							if (edge_indices[l] < 0 || edge_indices[l] >= NUMBER_OF_VECTORS_H)
 							{
 								printf("Problem 8 in TRSK implementation detected.\n");
+								exit(1);
 							}
 							for (int m = l + 1; m < 6; ++m)
 							{
 								if (edge_indices[l] == edge_indices[m])
+								{
 									printf("Problem 19 in TRSK implementation detected.\n");
+									exit(1);
+								}
 							}
 						}
 						for (int l = 0; l < 6; ++l)
@@ -1374,7 +1493,10 @@ int main(int argc, char *argv[])
 							check_sum += vector_of_areas[l];
 						}
 						if (fabs(check_sum/area[from_index[i]] - 1) > 0.001)
+						{
 							printf("Problem 31 in TRSK implementation detected.\n");
+							exit(1);
+						}
 						for (int l = 0; l < 6; ++l)
 						{
 							if (edge_indices[l] == i)
@@ -1384,7 +1506,10 @@ int main(int argc, char *argv[])
 						}
 						double_sum_gen(vector_of_areas, 6, first_index, last_index, &sum_of_weights);
 						if (sum_of_weights < 0 || sum_of_weights/area[from_index[i]] > 1)
+						{
 							printf("Problem 35 in TRSK implementation detected\n");
+							exit(1);
+						}
 					}
 					sum_of_weights = sum_of_weights/area[from_index[i]];
 					recov_hor_par_pri_weight[10*i + k] = sign_0*(sum_of_weights - 0.5)*sign_1;
@@ -1398,7 +1523,10 @@ int main(int argc, char *argv[])
 				if (adjacent_vector_indices_h[6*to_index[i] + k - 5] == i)
 					offset += 1;
 				if (offset > 1)
+				{
 					printf("Problem 2 in TRSK implementation detected.\n");
+					exit(1);
+				}
 				recov_hor_par_pri_index[10*i + k] = adjacent_vector_indices_h[6*to_index[i] + k - 5 + offset];
 				if (recov_hor_par_pri_index[10*i + k] == -1)
 				{
@@ -1408,7 +1536,10 @@ int main(int argc, char *argv[])
 				else
 				{
 					if (recov_hor_par_pri_index[10*i + k] < 0 || recov_hor_par_pri_index[10*i + k] >= NUMBER_OF_VECTORS_H)
+					{
 						printf("Problem 12 in TRSK implementation detected.\n");
+						exit(1);
+					}
 					sign_1 = -1;
 					if (from_index[recov_hor_par_pri_index[10*i + k]] == to_index[i])
 						sign_1 = 1;
@@ -1448,15 +1579,24 @@ int main(int argc, char *argv[])
 							}
 						}
 						if (counter != 5)
+						{
 							printf("Problem 15 in TRSK implementation detected.\n");
+							exit(1);
+						}
 						for (int l = 0; l < 5; ++l)
 						{
 							if (vertex_indices[l] < 0 || vertex_indices[l] >= NUMBER_OF_DUAL_SCALARS_H)
+							{
 								printf("Problem 5 in TRSK implementation detected.\n");
+								exit(1);
+							}
 							for (int m = l + 1; m < 5; ++m)
 							{
 								if (vertex_indices[l] == vertex_indices[m])
+								{
 									printf("Problem 23 in TRSK implementation detected.\n");
+									exit(1);
+								}
 							}
 						}
 						retval = sort_edge_indices(latitude_vertices, longitude_vertices, 5, indices_resorted);
@@ -1465,7 +1605,10 @@ int main(int argc, char *argv[])
 							for (int m = l + 1; m < 5; ++m)
 							{
 								if (indices_resorted[l] == indices_resorted[m] || indices_resorted[l] < 0 || indices_resorted[l] > 4)
+								{
 									printf("Problem 27 in TRSK implementation detected.\n");
+									exit(1);
+								}
 							}
 						}
 						for (int l = 0; l < 5; ++l)
@@ -1483,11 +1626,15 @@ int main(int argc, char *argv[])
 							if (edge_indices[l] < 0 || edge_indices[l] >= NUMBER_OF_VECTORS_H)
 							{
 								printf("Problem 9 in TRSK implementation detected.\n");
+								exit(1);
 							}
 							for (int m = l + 1; m < 5; ++m)
 							{
 								if (edge_indices[l] == edge_indices[m])
+								{
 									printf("Problem 20 in TRSK implementation detected.\n");
+									exit(1);
+								}
 							}
 						}
 						for (int l = 0; l < 5; ++l)
@@ -1507,7 +1654,10 @@ int main(int argc, char *argv[])
 							check_sum += vector_of_areas[l];
 						}
 						if (fabs(check_sum/area[to_index[i]] - 1) > 0.001)
+						{
 							printf("Problem 32 in TRSK implementation detected.\n");
+							exit(1);
+						}
 						for (int l = 0; l < 5; ++l)
 						{
 							if (edge_indices[l] == i)
@@ -1521,7 +1671,10 @@ int main(int argc, char *argv[])
 						else
 							double_sum_gen(vector_of_areas, 5, first_index, last_index, &sum_of_weights);
 						if (sum_of_weights < 0 || sum_of_weights/area[from_index[i]] > 1)
+						{
 							printf("Problem 36 in TRSK implementation detected\n");
+							exit(1);
+						}
 					}
 					else
 					{
@@ -1559,15 +1712,24 @@ int main(int argc, char *argv[])
 							}
 						}
 						if (counter != 6)
+						{
 							printf("Problem 16 in TRSK implementation detected.\n");
+							exit(1);
+						}
 						for (int l = 0; l < 6; ++l)
 						{
 							if (vertex_indices[l] < 0 || vertex_indices[l] >= NUMBER_OF_DUAL_SCALARS_H)
+							{
 								printf("Problem 6 in TRSK implementation detected.\n");
+								exit(1);
+							}
 							for (int m = l + 1; m < 6; ++m)
 							{
 								if (vertex_indices[l] == vertex_indices[m])
+								{
 									printf("Problem 24 in TRSK implementation detected.\n");
+									exit(1);
+								}
 							}
 						}
 						retval = sort_edge_indices(latitude_vertices, longitude_vertices, 6, indices_resorted);
@@ -1576,7 +1738,10 @@ int main(int argc, char *argv[])
 							for (int m = l + 1; m < 6; ++m)
 							{
 								if (indices_resorted[l] == indices_resorted[m] || indices_resorted[l] < 0 || indices_resorted[l] > 5)
+								{
 									printf("Problem 28 in TRSK implementation detected.\n");
+									exit(1);
+								}
 							}
 						}
 						for (int l = 0; l < 6; ++l)
@@ -1594,11 +1759,15 @@ int main(int argc, char *argv[])
 							if (edge_indices[l] < 0 || edge_indices[l] >= NUMBER_OF_VECTORS_H)
 							{
 								printf("Problem 10 in TRSK implementation detected.\n");
+								exit(1);
 							}
 							for (int m = l + 1; m < 6; ++m)
 							{
 								if (edge_indices[l] == edge_indices[m])
+								{
 									printf("Problem 21 in TRSK implementation detected.\n");
+									exit(1);
+								}
 							}
 						}
 						for (int l = 0; l < 6; ++l)
@@ -1618,7 +1787,10 @@ int main(int argc, char *argv[])
 							check_sum += vector_of_areas[l];
 						}
 						if (fabs(check_sum/area[to_index[i]] - 1) > 0.001)
+						{
 							printf("Problem 33 in TRSK implementation detected.\n");
+							exit(1);
+						}
 						for (int l = 0; l < 6; ++l)
 						{
 							if (edge_indices[l] == i)
@@ -1628,7 +1800,10 @@ int main(int argc, char *argv[])
 						}
 						double_sum_gen(vector_of_areas, 6, first_index, last_index, &sum_of_weights);
 						if (sum_of_weights < 0 || sum_of_weights/area[from_index[i]] > 1)
+						{
 							printf("Problem 37 in TRSK implementation detected\n");
+							exit(1);
+						}
 					}
 					sum_of_weights = sum_of_weights/area[to_index[i]];
 					recov_hor_par_pri_weight[10*i + k] = sign_0*(sum_of_weights - 0.5)*sign_1;
@@ -1641,7 +1816,10 @@ int main(int argc, char *argv[])
 			for (int k = j + 1; k < 10; ++k)
 			{
 				if (recov_hor_par_pri_index[10*i + j] == recov_hor_par_pri_index[10*i + k] && (recov_hor_par_pri_weight[10*i + j] != 0 && recov_hor_par_pri_weight[10*i + k] != 0))
+				{
 					printf("Problem 29 in TRSK implementation detected.\n");
+					exit(1);
+				}
 			}
 		}		
         sign = 1;
@@ -1705,12 +1883,14 @@ int main(int argc, char *argv[])
 				if (second_index == -1)
 				{
 					printf("Problem 38 in TRSK implementation detected.\n");
+					exit(1);
 				}
 				value_1 = normal_distance[NUMBER_OF_VECTORS_V + recov_hor_par_pri_index[10*i + j]]/normal_distance_dual[i]*recov_hor_par_pri_weight[10*recov_hor_par_pri_index[10*i + j] + second_index];
 				check_sum = value_0 + value_1;
 				if (fabs(check_sum) > 0.001)
 				{
 					printf("Problem 39 in TRSK implementation detected.\n");
+					exit(1);
 				}
 			}
 		}
@@ -1797,7 +1977,10 @@ int main(int argc, char *argv[])
 		temperature_value = T_str + (T_sl - T_str)*exp(-z_g/z_scale_temp);
 		pot_temp_background[i] = temperature_value*pow(P_0/pressure_value, R_D/C_P);
         if (exner_pressure_background[i] < 0)
+		{
             printf("exner_pressure_background contains a non-positive value.\n");
+			exit(1);
+		}
     }
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
@@ -1806,7 +1989,10 @@ int main(int argc, char *argv[])
         temperature_value = T_str + (T_sl - T_str)*exp(-z_g/z_scale_temp);
         pot_temp_background_vector[i] = temperature_value*pow(P_0/pressure_value, R_D/C_P);
         if (pot_temp_background_vector[i] <= 0)
+		{
             printf("pot_temp_background_vector contains a non-positive value.\n");
+			exit(1);
+		}
 		gravity_eff[i] = gravity_eff[i]/pot_temp_background_vector[i];
     }
     int ncid_g_prop;
@@ -2129,6 +2315,7 @@ int main(int argc, char *argv[])
     free(h_curl_signs_dual);
     free(area_dual);
 	free(z_surface);
+	printf("Finished.\n");
     return 0;
 }
 
@@ -2512,6 +2699,48 @@ int find_triangles_per_face(int res_id, int *number_of_triangles_per_face)
     *number_of_triangles_per_face = (int) (pow(4, res_id));
     return 0;
 }
+
+int find_v_vector_indices_for_dual_scalar_z(int from_index[], int to_index[], int vorticity_indices[], int dual_scalar_h_index, int index_vector_for_dual_scalar_z[])
+{
+	int counter = 0;
+	int check_result, retval;
+	index_vector_for_dual_scalar_z[0] = -1;
+	index_vector_for_dual_scalar_z[1] = -1;
+	index_vector_for_dual_scalar_z[2] = -1;
+	for (int k = 0; k < 3; ++k)
+	{
+		retval = in_bool_calculator(index_vector_for_dual_scalar_z, 3, from_index[vorticity_indices[3*dual_scalar_h_index + k]], &check_result);
+		if (check_result == 0)
+		{
+			index_vector_for_dual_scalar_z[counter] = from_index[vorticity_indices[3*dual_scalar_h_index + k]];
+			counter++;
+		}
+		retval = in_bool_calculator(index_vector_for_dual_scalar_z, 3, to_index[vorticity_indices[3*dual_scalar_h_index + k]], &check_result);
+		if (check_result == 0)
+		{
+			index_vector_for_dual_scalar_z[counter] = to_index[vorticity_indices[3*dual_scalar_h_index + k]];
+			counter++;
+		}
+	}
+	if (counter != 3)
+	{
+		printf("Error in function find_v_vector_indices_for_dual_scalar_z.\n");
+		exit(1);
+	}
+	if (retval != 0)
+		return 1;
+	else
+		return 0;
+}
+
+
+
+
+
+
+
+
+
 
 
 
