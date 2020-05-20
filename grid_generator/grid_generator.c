@@ -23,6 +23,7 @@
 1	
 2	new grid generation
 */
+
 const int MODE = 2;
 const double TOA = 30000.0;
 const double SCALE_HEIGHT = 8000.0;
@@ -941,6 +942,57 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	int dual_scalar_h_index;
+    for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
+    {
+        layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
+        h_index = i - layer_index*NUMBER_OF_VECTORS_PER_LAYER;
+        if (h_index >= NUMBER_OF_VECTORS_V)
+        {
+            gravity_eff[i] = 0;
+            z_vector[i] = 0.5*(z_scalar[layer_index*NUMBER_OF_SCALARS_H + to_index[h_index - NUMBER_OF_VECTORS_V]] + z_scalar[layer_index*NUMBER_OF_SCALARS_H + from_index[h_index - NUMBER_OF_VECTORS_V]]);
+            if (z_vector[i] <= 0)
+			{
+                printf("z_vector contains a non-positive value at a horizontal grid point.\n");
+				exit(1);
+			}
+            normal_distance[i] = calculate_distance_h(latitude_scalar[from_index[h_index - NUMBER_OF_VECTORS_V]], longitude_scalar[from_index[h_index - NUMBER_OF_VECTORS_V]], latitude_scalar[to_index[h_index - NUMBER_OF_VECTORS_V]], longitude_scalar[to_index[h_index - NUMBER_OF_VECTORS_V]], RADIUS + z_vector[i]);
+        }
+        else
+        {
+            upper_index = h_index + (layer_index - 1)*NUMBER_OF_SCALARS_H;
+            lower_index = h_index + layer_index*NUMBER_OF_SCALARS_H;
+            if (layer_index == 0)
+			{
+                normal_distance[i] = TOA - z_scalar[lower_index];
+            	z_vector[i] = TOA;
+			}
+            else if (layer_index == NUMBER_OF_LAYERS)
+			{
+                normal_distance[i] = z_scalar[upper_index] - z_surface[h_index];
+				z_vector[i] = z_surface[h_index];
+			}
+            else
+			{
+                normal_distance[i] = z_scalar[upper_index] - z_scalar[lower_index];
+				z_vector[i] = z_scalar[lower_index] + 0.5*normal_distance[i];
+			}
+            if (z_vector[i] < z_surface[h_index])
+			{
+                printf("z_vector lays below surface.\n");
+				exit(1);
+			}
+            area[i] = pent_hex_face_unity_sphere[h_index]*pow(RADIUS + z_vector[i], 2);
+            gravity_eff[i] = -GRAVITY_MEAN_SFC_ABS*pow(RADIUS, 2)/pow(RADIUS + z_vector[i], 2);
+        }
+    }
+    for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
+    {
+        if (normal_distance[i] <= 0)
+		{
+            printf("normal_distance contains a non-positive value.\n");
+			exit(1);
+		}
+    }
 	int index_vector_for_dual_scalar_z[3];
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
@@ -982,52 +1034,38 @@ int main(int argc, char *argv[])
                     }
                 }
             }
-            gravity_eff[i] = 0;
-            z_vector[i] = 0.5*(z_scalar[layer_index*NUMBER_OF_SCALARS_H + to_index[h_index - NUMBER_OF_VECTORS_V]] + z_scalar[layer_index*NUMBER_OF_SCALARS_H + from_index[h_index - NUMBER_OF_VECTORS_V]]);
-            if (z_vector[i] <= 0)
-			{
-                printf("z_vector contains a non-positive value at a horizontal grid point.\n");
-				exit(1);
-			}
-            normal_distance[i] = calculate_distance_h(latitude_scalar[from_index[h_index - NUMBER_OF_VECTORS_V]], longitude_scalar[from_index[h_index - NUMBER_OF_VECTORS_V]], latitude_scalar[to_index[h_index - NUMBER_OF_VECTORS_V]], longitude_scalar[to_index[h_index - NUMBER_OF_VECTORS_V]], RADIUS + z_vector[i]);
-        }
-        else
-        {
-            upper_index = h_index + (layer_index - 1)*NUMBER_OF_SCALARS_H;
-            lower_index = h_index + layer_index*NUMBER_OF_SCALARS_H;
-            if (layer_index == 0)
-			{
-                normal_distance[i] = TOA - z_scalar[lower_index];
-            	z_vector[i] = TOA;
-			}
-            else if (layer_index == NUMBER_OF_LAYERS)
-			{
-                normal_distance[i] = z_scalar[upper_index] - z_surface[h_index];
-				z_vector[i] = z_surface[h_index];
-			}
-            else
-			{
-                normal_distance[i] = z_scalar[upper_index] - z_scalar[lower_index];
-				z_vector[i] = z_scalar[lower_index] + 0.5*normal_distance[i];
-			}
-            if (z_vector[i] < z_surface[h_index])
-			{
-                printf("z_vector lays below surface.\n");
-				exit(1);
-			}
-            area[i] = pent_hex_face_unity_sphere[h_index]*pow(RADIUS + z_vector[i], 2);
-            gravity_eff[i] = -GRAVITY_MEAN_SFC_ABS*pow(RADIUS, 2)/pow(RADIUS + z_vector[i], 2);
         }
     }
-    free(pent_hex_face_unity_sphere);
-    for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
-    {
-        if (normal_distance[i] <= 0)
+	int min_oro_index = find_min_index(z_surface, NUMBER_OF_SCALARS_H);
+	double min_oro = z_surface[min_oro_index];
+	for (int i = 0; i < NUMBER_OF_DUAL_SCALARS; ++i)
+	{
+		if (z_scalar_dual[i] > TOA)
 		{
-            printf("normal_distance contains a non-positive value.\n");
+			printf("z_scalar_dual has a point above top of atmosphere.\n");
 			exit(1);
 		}
-    }
+		if (z_scalar_dual[i] < min_oro)
+		{
+			printf("z_scalar_dual has a point below minimum of orography.\n");
+			exit(1);
+		}
+	}
+    free(pent_hex_face_unity_sphere);
+	double check_sum;
+	for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
+	{
+		check_sum = 0;
+		for (int j = 0; j < NUMBER_OF_LEVELS; ++j)
+		{
+			check_sum += normal_distance[i + j*NUMBER_OF_VECTORS_PER_LAYER];
+		}
+		if (fabs(check_sum/(TOA - z_surface[i]) - 1) > 1e-15)
+		{
+			printf("Problem 0 with vertical grid structure.\n");
+			exit(1);
+		}
+	}
     double volume_sum, volume_sum_ideal;
     volume_sum = 0;
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
@@ -1102,6 +1140,20 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
     }
+	for (int i = 0; i < NUMBER_OF_DUAL_SCALARS_H; ++i)
+	{
+		check_sum = 0;
+		for (int j = 0; j < NUMBER_OF_LAYERS; ++j)
+		{
+			check_sum += normal_distance_dual[i + NUMBER_OF_DUAL_VECTORS_H + j*NUMBER_OF_DUAL_VECTORS_PER_LAYER];
+		}
+		retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices, i, index_vector_for_dual_scalar_z);
+		if (fabs(check_sum/(TOA - 1.0/3*(z_surface[index_vector_for_dual_scalar_z[0]] + z_surface[index_vector_for_dual_scalar_z[1]] + z_surface[index_vector_for_dual_scalar_z[2]])) - 1) > 1e-15)
+		{
+			printf("Problem 1 with vertical grid structure.\n");
+			exit(1);
+		}
+	}
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
         layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
@@ -1865,7 +1917,7 @@ int main(int argc, char *argv[])
             recov_hor_ver_pri_weight[4*i + j] = 0.25;
         }
     }
-	double value_0, value_1, check_sum;
+	double value_0, value_1;
 	int second_index;
 	for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
 	{
