@@ -33,6 +33,15 @@ int main(int argc, char *argv[])
     rad_on = strtod(argv[8], NULL);
     int add_comps_on;
     add_comps_on = strtod(argv[9], NULL);
+    len = strlen(argv[10]);
+    char *OPERATOR = malloc((len + 1)*sizeof(char));
+    strcpy(OPERATOR, argv[10]);
+    int write_out_dry_mass_integral;
+    write_out_dry_mass_integral = strtod(argv[11], NULL);
+    int write_out_entropy_integral; 
+    write_out_entropy_integral = strtod(argv[12], NULL);
+    int write_out_energy_integral;
+    write_out_energy_integral = strtod(argv[13], NULL);
     for (int i = 0; i < 82 - 1; ++i)
         stars[i] = '*';
     stars[81] = '\n';
@@ -44,6 +53,7 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     printf("Use only legal if authorized by Max Henrik Balsmeier.\n");
     printf("What you want to do:\n");
+    printf("operator:\t\t\t%s\n", OPERATOR);
     printf("run time span:\t\t\t%d s\n", TOTAL_RUN_SPAN);
     printf("output written in intervals of\t%d s\n", WRITE_OUT_INTERVAL);
     printf("geo properties file:\t\t%s\n", GEO_PROP_FILE);
@@ -52,6 +62,7 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     printf("configuration information:\n");
     printf("number of layers: %d\n", NUMBER_OF_LAYERS);
+    printf("number of layers following orography: %d\n", NUMBER_OF_ORO_LAYERS);
     printf("number of scalar data points per layer: %d\n", NUMBER_OF_SCALARS_H);
     double surface = 4*M_PI*pow(RADIUS, 2);
     double points_per_axis = pow(NUMBER_OF_SCALARS_H, 0.5);
@@ -79,13 +90,28 @@ int main(int argc, char *argv[])
     double t_0;
     double t_write = t_init + WRITE_OUT_INTERVAL;
     t_0 = t_init;
+    double t_write_integral = t_init;
     State *state_0 = malloc(sizeof(State));
     *state_0 = *state_init;
     free(state_init);
     clock_t first_time, second_time;
     first_time = clock();
     State *state_p1 = malloc(sizeof(State));
+    if (write_out_dry_mass_integral == 1)
+		write_out_integral(state_0, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
+    if (write_out_entropy_integral == 1)
+		write_out_integral(state_0, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 1);
+    if (write_out_energy_integral == 1)
+		write_out_integral(state_0, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
+	t_write_integral += delta_t;
     runge_kutta_third_order(state_0, state_p1, delta_t, grid, dualgrid, dissipation_on, rad_on, add_comps_on);
+    if (write_out_dry_mass_integral == 1)
+		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
+    if (write_out_entropy_integral == 1)
+		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 1);
+    if (write_out_energy_integral == 1)
+		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
+	t_write_integral += delta_t;
     State *state_write = malloc(sizeof(State));
     double speed;
     if(t_0 + delta_t >= t_write && t_0 <= t_write)
@@ -104,6 +130,13 @@ int main(int argc, char *argv[])
         t_0 += delta_t;
         *state_0 = *state_p1;
         runge_kutta_third_order(state_0, state_p1, delta_t, grid, dualgrid, dissipation_on, rad_on, add_comps_on);
+    if (write_out_dry_mass_integral == 1)
+		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
+    if (write_out_entropy_integral == 1)
+		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 1);
+    if (write_out_energy_integral == 1)
+		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
+	t_write_integral += delta_t;
         if(t_0 + delta_t >= t_write && t_0 <= t_write)
         {
             interpolation_t(state_0, state_p1, state_write, t_0, t_0 + delta_t, t_write);
@@ -130,3 +163,21 @@ int main(int argc, char *argv[])
     printf("GAME over.\n");
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

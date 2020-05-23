@@ -260,6 +260,12 @@ stdio.h
 
 /home/max/my_code/game/core/src/r_operators/r_operators.h
 
+/home/max/my_code/game/core/src/r_operators/scalar_times_scalar.c
+../enum_and_typedefs.h
+/home/max/my_code/game/core/src/enum_and_typedefs.h
+stdio.h
+-
+
 /home/max/my_code/game/core/src/r_operators/scalar_times_vector.c
 ../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h

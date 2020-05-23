@@ -771,6 +771,68 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
     return 0;
 }
 
+int write_out_integral(State *state_write_out, double t_write, char output_foldername[], Grid *grid, Dualgrid *dualgrid, int integral_id)
+{
+	/*
+	integral_id:
+	0: dry mass
+	1: entropy
+	2: energy
+	*/
+    double global_integral = 0;
+    FILE *global_integral_file;
+    int INTEGRAL_FILE_LENGTH = 200;
+    char *INTEGRAL_FILE_PRE = malloc((INTEGRAL_FILE_LENGTH + 1)*sizeof(char));
+    if (integral_id == 0)
+   		sprintf(INTEGRAL_FILE_PRE, "%s/%s", output_foldername, "dry_mass");
+    if (integral_id == 1)
+   		sprintf(INTEGRAL_FILE_PRE, "%s/%s", output_foldername, "entropy");
+    if (integral_id == 2)
+   		sprintf(INTEGRAL_FILE_PRE, "%s/%s", output_foldername, "energy");
+    INTEGRAL_FILE_LENGTH = strlen(INTEGRAL_FILE_PRE);
+    char *INTEGRAL_FILE = malloc((INTEGRAL_FILE_LENGTH + 1)*sizeof(char));
+    sprintf(INTEGRAL_FILE, "%s", INTEGRAL_FILE_PRE);
+    free(INTEGRAL_FILE_PRE);
+    int retval;
+    if (integral_id == 0)
+    {
+    	global_integral_file = fopen(INTEGRAL_FILE, "a");
+    	global_scalar_integrator(state_write_out -> density, grid, &global_integral);
+    	fprintf(global_integral_file, "%lf\t%lf\n", t_write, global_integral);
+    	fclose(global_integral_file);
+    }
+    if (integral_id == 1)
+    {
+    	global_integral_file = fopen(INTEGRAL_FILE, "a");
+    	global_scalar_integrator(state_write_out -> density_entropy, grid, &global_integral);
+    	fprintf(global_integral_file, "%lf\t%lf\n", t_write, global_integral);
+    	fclose(global_integral_file);
+    }
+    if (integral_id == 2)
+    {
+    	double kinetic_integral, potential_integral, internal_integral;
+    	global_integral_file = fopen(INTEGRAL_FILE, "a");
+    	Scalar_field *e_kin_density_2 = malloc(sizeof(Scalar_field));
+    	retval = inner(state_write_out -> wind, state_write_out -> wind, *e_kin_density_2, grid, dualgrid);
+    	retval = scalar_times_scalar(state_write_out -> density, *e_kin_density_2, *e_kin_density_2, grid);
+    	global_scalar_integrator(*e_kin_density_2, grid, &kinetic_integral);
+    	free(e_kin_density_2);
+    	Scalar_field *pot_energy_density = malloc(sizeof(Scalar_field));
+    	retval = scalar_times_scalar(state_write_out -> density, grid -> gravity_potential, *pot_energy_density, grid);
+    	global_scalar_integrator(*pot_energy_density, grid, &potential_integral);
+    	free(pot_energy_density);
+    	Scalar_field *int_energy_density = malloc(sizeof(Scalar_field));
+    	retval = temperature_diagnostics(state_write_out -> density_entropy, state_write_out -> density, *int_energy_density);
+    	retval = scalar_times_scalar(state_write_out -> density, *int_energy_density, *int_energy_density, grid);
+    	global_scalar_integrator(*int_energy_density, grid, &internal_integral);
+    	fprintf(global_integral_file, "%lf\t%lf\t%lf\t%lf\n", t_write, 0.5*kinetic_integral, potential_integral, C_V*internal_integral);
+    	free(int_energy_density);
+    	fclose(global_integral_file);
+    }
+    free(INTEGRAL_FILE);
+	return 0;
+}
+
 int find_string_length_from_int(int input, int *answer)
 {
     *answer = 1;

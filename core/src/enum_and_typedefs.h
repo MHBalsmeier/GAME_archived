@@ -27,6 +27,7 @@ NUMBER_OF_PENTAGONS = 12,
 NUMBER_OF_HEXAGONS = (int) (10*(pow(2, 2*RES_ID) - 1)),
 NUMBER_OF_EDGES = 3*NUMBER_OF_BASIC_TRIANGLES/2,
 NUMBER_OF_LAYERS = 6,
+NUMBER_OF_ORO_LAYERS = 4,
 NUMBER_OF_LEVELS = NUMBER_OF_LAYERS + 1,
 NUMBER_OF_SCALARS_H = NUMBER_OF_PENTAGONS + NUMBER_OF_HEXAGONS,
 NUMBER_OF_VECTORS_H = (5*NUMBER_OF_PENTAGONS/2 + 6/2*NUMBER_OF_HEXAGONS),
@@ -65,6 +66,7 @@ Vector_field z_vector;
 Scalar_field exner_pressure_background;
 Scalar_field pot_temp_background;
 Vector_field gravity_eff;
+Scalar_field gravity_potential;
 int from_index[NUMBER_OF_VECTORS_H];
 int to_index[NUMBER_OF_VECTORS_H];
 double direction[NUMBER_OF_VECTORS_H];

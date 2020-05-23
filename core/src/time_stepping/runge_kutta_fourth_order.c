@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-int runge_kutta_fourth_order(State *state_0, State *state_p1, double delta_t, Grid *grid, Dualgrid *dualgrid, short dissipation_on, short rad_on, short add_comps_on)
+int runge_kutta_fourth_order(State *state_0, State *state_p1, double delta_t, Grid *grid, Dualgrid *dualgrid, int dissipation_on, int rad_on, int add_comps_on)
 {
     State *tendency_0 = malloc(sizeof(State));
     tendency(state_0, tendency_0, grid, dualgrid, dissipation_on, rad_on, add_comps_on, delta_t);
