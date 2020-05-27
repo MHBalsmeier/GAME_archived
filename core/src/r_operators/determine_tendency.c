@@ -92,8 +92,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
             total_density = current_state -> density[i];
             for (int k = 0; k < NUMBER_OF_ADD_COMPS; ++k)
                 total_density += current_state -> add_comp_densities[k*NUMBER_OF_SCALARS + i];
-			
-            state_tendency -> density_entropy[i] = -(*density_entropy_flux_divergence)[i] + 1/(C_P*(*temperature)[i])*(friction_heating + (*rad_heating)[i]*current_state -> density[i]/total_density + (*temp_diffusion_heating)[i] + add_comp_heat_source_rates[(NUMBER_OF_ADD_COMPS - 1)*NUMBER_OF_SCALARS + i]) + (*mass_source_rate)[i]*(current_state -> density_entropy[i]/current_state -> density[i] - R_D/C_P);
+            state_tendency -> density_entropy[i] = -(*density_entropy_flux_divergence)[i] + current_state -> density[i]/(KAPPA*(*temperature)[i])*(friction_heating + (*rad_heating)[i]*current_state -> density[i]/total_density + (*temp_diffusion_heating)[i] + add_comp_heat_source_rates[(NUMBER_OF_ADD_COMPS - 1)*NUMBER_OF_SCALARS + i]) + (*mass_source_rate)[i]*(1/KAPPA + current_state -> density_entropy[i]/current_state -> density[i]);
         }
         else
             state_tendency -> density_entropy[i] = -(*density_entropy_flux_divergence)[i];
