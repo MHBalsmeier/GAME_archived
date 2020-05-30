@@ -70,7 +70,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     free(temperature_flux);
     Scalar_field *pot_temp = malloc(sizeof(Scalar_field));
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
-        (*pot_temp)[i] = exp(current_state -> density_entropy[i]/current_state -> density[i]);
+        (*pot_temp)[i] = exp(current_state -> density_entropy[i]/(C_P*current_state -> density[i]) - K_B*N_A/(M_D*C_P)*log(1/P_0*K_B*K_B*pow(M_D/N_A*exp(5.0/3)/(M_PI*H_BAR*H_BAR), 1.5)));
     Scalar_field *exner_pressure = malloc(sizeof(Scalar_field));
     exner_pressure_diagnostics(current_state -> density_entropy, current_state -> density, *exner_pressure);
     double viscosity_coeff_molecular = 5*pow(10, -5);
@@ -92,7 +92,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
             total_density = current_state -> density[i];
             for (int k = 0; k < NUMBER_OF_ADD_COMPS; ++k)
                 total_density += current_state -> add_comp_densities[k*NUMBER_OF_SCALARS + i];
-            state_tendency -> density_entropy[i] = -(*density_entropy_flux_divergence)[i] + current_state -> density[i]/(KAPPA*(*temperature)[i])*(friction_heating + (*rad_heating)[i]*current_state -> density[i]/total_density + (*temp_diffusion_heating)[i] + add_comp_heat_source_rates[(NUMBER_OF_ADD_COMPS - 1)*NUMBER_OF_SCALARS + i]) + (*mass_source_rate)[i]*(1/KAPPA + current_state -> density_entropy[i]/current_state -> density[i]);
+            state_tendency -> density_entropy[i] = -(*density_entropy_flux_divergence)[i] + current_state -> density[i]*C_V/(*temperature)[i]*(0*friction_heating + (*rad_heating)[i]*current_state -> density[i]/total_density + (*temp_diffusion_heating)[i] + add_comp_heat_source_rates[(NUMBER_OF_ADD_COMPS - 1)*NUMBER_OF_SCALARS + i]) + C_V*(*mass_source_rate)[i];
         }
         else
             state_tendency -> density_entropy[i] = -(*density_entropy_flux_divergence)[i];

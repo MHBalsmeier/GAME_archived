@@ -16,6 +16,7 @@
 #define SEMIMAJOR 6378137.0
 #define SEMIMINOR 6356752.314
 #define RADIUS pow(SEMIMAJOR*SEMIMAJOR*SEMIMINOR, 1.0/3.0)
+#define H_BAR (6.62607015e-30)
 
 enum grid_integers {
 RES_ID = 4,

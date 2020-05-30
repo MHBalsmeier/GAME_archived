@@ -5,7 +5,11 @@
 
 int exner_pressure_diagnostics(Scalar_field density_entropy, Scalar_field density, Scalar_field exner_pressure)
 {
+	double pot_temp;
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
-        exner_pressure[i] = pow(R_D*density[i]*exp(density_entropy[i]/density[i])/P_0, R_D/C_V);
+    {
+    	pot_temp = exp(density_entropy[i]/(C_P*density[i]) - K_B*N_A/(M_D*C_P)*log(1/P_0*K_B*K_B*pow(M_D/N_A*exp(5.0/3)/(M_PI*H_BAR*H_BAR), 1.5)));
+        exner_pressure[i] = pow(R_D*density[i]*pot_temp/P_0, R_D/C_V);
+    }
     return 0;
 }
