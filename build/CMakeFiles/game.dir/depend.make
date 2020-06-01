@@ -12,13 +12,24 @@ CMakeFiles/game.dir/src/coordinator.c.o: /home/max/my_code/game/core/src/time_st
 CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o: /home/max/my_code/game/core/src/diagnostics/calc_numerical_diffusion_coeffs.c
 CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 
+CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/density_diagnostics.c
+CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
+
 CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c
 CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o: /home/max/my_code/game/core/src/r_operators/r_operators.h
 
+CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/gas_constant_diagnostics.c
+CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
+
 CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.o: /home/max/my_code/game/core/src/diagnostics/global_scalar_integral.c
 CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
+
+CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
+CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/pot_temp_diagnostics.c
+CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
+CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o: /home/max/my_code/game/core/src/r_operators/r_operators.h
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_dual.c
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
@@ -44,11 +55,15 @@ CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.o: /ho
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_pri.c
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 
+CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/spec_heat_cap_diagnostics.c
+CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
+
 CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/temperature_diagnostics.c
 CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.o: /home/max/my_code/game/core/src/r_operators/r_operators.h
 
+CMakeFiles/game.dir/src/io/init_state_setter.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 CMakeFiles/game.dir/src/io/init_state_setter.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/io/init_state_setter.c.o: /home/max/my_code/game/core/src/io/init_state_setter.c
 CMakeFiles/game.dir/src/io/init_state_setter.c.o: /home/max/my_code/game/core/src/io/io.h

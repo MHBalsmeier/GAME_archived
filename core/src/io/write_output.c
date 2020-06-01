@@ -140,23 +140,27 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
     double *sprate = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double pressure_value, mslp_factor, surface_p_factor, temp_lowest_layer, temp_mslp, temp_surface, exner_pressure, wind_0, wind_1, wind_u, wind_v, delta_z_temp, temp_gradient, temp_upper, temp_lower;
     double standard_vert_lapse_rate = 0.0065;
-    double pot_temp;
+    double pot_temp, condensates_density_sum, density_d_micro_value, density_v_micro_value;
     long unsigned length = 4;
     for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
     {
         z_height = grid -> z_scalar[i*NUMBER_OF_SCALARS_H];
         for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
         {
-            pot_temperature_h[j] = exp(state_write_out -> density_entropy[j + i*NUMBER_OF_SCALARS_H]/(C_P*state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]) - K_B*N_A/(M_D*C_P)*log(1/P_0*K_B*K_B*pow(M_D/N_A*exp(5.0/3)/(M_PI*H_BAR*H_BAR), 1.5)));
-            rho_h[j] = state_write_out -> density[j + i*NUMBER_OF_SCALARS_H];
+        	rho_h[j] = state_write_out -> density[j + i*NUMBER_OF_SCALARS_H];
+        	condensates_density_sum = calc_condensates_density_sum(i, j, state_write_out -> add_comp_densities);
+			pot_temperature_h[j] = pot_temp_diagnostics_single_value(state_write_out -> density_entropy[j + i*NUMBER_OF_SCALARS_H], rho_h[j], state_write_out -> add_comp_densities[NUMBER_OF_COND_ADD_COMPS*NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H], condensates_density_sum);
         }
         if (i == NUMBER_OF_LAYERS - 1)
         {
             for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
             {
-            	pot_temp = exp(state_write_out -> density_entropy[j + i*NUMBER_OF_SCALARS_H]/(C_P*state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]) - K_B*N_A/(M_D*C_P)*log(1/P_0*K_B*K_B*pow(M_D/N_A*exp(5.0/3)/(M_PI*H_BAR*H_BAR), 1.5)));
-                exner_pressure = pow(R_D*state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]*pot_temp/P_0, R_D/C_V);
-                temp_lowest_layer = exner_pressure*pot_temp;
+            	condensates_density_sum = calc_condensates_density_sum(i, j, state_write_out -> add_comp_densities);
+            	pot_temp = pot_temp_diagnostics_single_value(state_write_out -> density_entropy[j + i*NUMBER_OF_SCALARS_H], state_write_out -> density[j + i*NUMBER_OF_SCALARS_H], state_write_out -> add_comp_densities[NUMBER_OF_COND_ADD_COMPS*NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H], condensates_density_sum);
+            	density_d_micro_value = calc_micro_density(state_write_out -> density[j + i*NUMBER_OF_SCALARS_H], condensates_density_sum);
+            	density_v_micro_value = calc_micro_density(state_write_out -> add_comp_densities[NUMBER_OF_COND_ADD_COMPS*NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H], condensates_density_sum);
+                exner_pressure = exner_pressure_diagnostics_single_value(density_d_micro_value, density_v_micro_value, pot_temp);
+                temp_lowest_layer = temperature_diagnostics_single_value(exner_pressure, pot_temp);
                 pressure_value = state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]*R_D*temp_lowest_layer;
                 temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[j + i*NUMBER_OF_SCALARS_H];
                 mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, -grid -> pot_temp_background[(NUMBER_OF_LAYERS - 1)*NUMBER_OF_SCALARS_H + j]*grid -> gravity_eff[NUMBER_OF_LAYERS*NUMBER_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
@@ -165,10 +169,18 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
                 surface_p_factor = pow(1 - (temp_surface - temp_lowest_layer)/temp_surface, -grid -> pot_temp_background[(NUMBER_OF_LAYERS - 1)*NUMBER_OF_SCALARS_H + j]*grid -> gravity_eff[NUMBER_OF_LAYERS*NUMBER_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
 				surface_p[j] = pressure_value/surface_p_factor;
                 delta_z_temp = 2 - grid -> z_scalar[j + i*NUMBER_OF_SCALARS_H];
-                pot_temp = exp(state_write_out -> density_entropy[j + (i - 1)*NUMBER_OF_SCALARS_H]/(C_P*state_write_out -> density[j + (i - 1)*NUMBER_OF_SCALARS_H]) - K_B*N_A/(M_D*C_P)*log(1/P_0*K_B*K_B*pow(M_D/N_A*exp(5.0/3)/(M_PI*H_BAR*H_BAR), 1.5)));
-                temp_upper = pow(R_D*state_write_out -> density[j + (i - 1)*NUMBER_OF_SCALARS_H]*pot_temp/P_0, R_D/C_V)*pot_temp;
-                pot_temp = exp(state_write_out -> density_entropy[j + i*NUMBER_OF_SCALARS_H]/(C_P*state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]) - K_B*N_A/(M_D*C_P)*log(1/P_0*K_B*K_B*pow(M_D/N_A*exp(5.0/3)/(M_PI*H_BAR*H_BAR), 1.5)));
-                temp_lower = pow(R_D*state_write_out -> density[j + i*NUMBER_OF_SCALARS_H]*pot_temp/P_0, R_D/C_V)*pot_temp;
+            	condensates_density_sum = calc_condensates_density_sum(i - 1, j, state_write_out -> add_comp_densities);
+                pot_temp = pot_temp_diagnostics_single_value(state_write_out -> density_entropy[j + (i - 1)*NUMBER_OF_SCALARS_H], state_write_out -> density[j + (i - 1)*NUMBER_OF_SCALARS_H], state_write_out -> add_comp_densities[NUMBER_OF_COND_ADD_COMPS*NUMBER_OF_SCALARS + j + (i - 1)*NUMBER_OF_SCALARS_H], condensates_density_sum);
+            	density_d_micro_value = calc_micro_density(state_write_out -> density[j + (i - 1)*NUMBER_OF_SCALARS_H], condensates_density_sum);
+            	density_v_micro_value = calc_micro_density(state_write_out -> add_comp_densities[NUMBER_OF_COND_ADD_COMPS*NUMBER_OF_SCALARS + j + (i - 1)*NUMBER_OF_SCALARS_H], condensates_density_sum);
+                exner_pressure = exner_pressure_diagnostics_single_value(density_d_micro_value, density_v_micro_value, pot_temp);
+                temp_upper = temperature_diagnostics_single_value(exner_pressure, pot_temp);
+            	condensates_density_sum = calc_condensates_density_sum(i, j, state_write_out -> add_comp_densities);
+                pot_temp = pot_temp_diagnostics_single_value(state_write_out -> density_entropy[j + i*NUMBER_OF_SCALARS_H], state_write_out -> density[j + i*NUMBER_OF_SCALARS_H], state_write_out -> add_comp_densities[NUMBER_OF_COND_ADD_COMPS*NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H], condensates_density_sum);
+            	density_d_micro_value = calc_micro_density(state_write_out -> density[j + i*NUMBER_OF_SCALARS_H], condensates_density_sum);
+            	density_v_micro_value = calc_micro_density(state_write_out -> add_comp_densities[NUMBER_OF_COND_ADD_COMPS*NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H], condensates_density_sum);
+                exner_pressure = exner_pressure_diagnostics_single_value(density_d_micro_value, density_v_micro_value, pot_temp);
+                temp_lower = temperature_diagnostics_single_value(exner_pressure, pot_temp);
                 temp_gradient = (temp_upper - temp_lower)/(grid -> z_scalar[j + (i - 1)*NUMBER_OF_SCALARS_H] - grid -> z_scalar[j + i*NUMBER_OF_SCALARS_H]);
                 t2[j] = temp_lowest_layer + delta_z_temp*temp_gradient;
                 sprate[j] = 0;
@@ -826,10 +838,10 @@ int write_out_integral(State *state_write_out, double t_write, char output_folde
     	global_scalar_integrator(*pot_energy_density, grid, &potential_integral);
     	free(pot_energy_density);
     	Scalar_field *int_energy_density = malloc(sizeof(Scalar_field));
-    	retval = temperature_diagnostics(state_write_out -> density_entropy, state_write_out -> density, *int_energy_density);
+    	retval = temperature_diagnostics(state_write_out -> density_entropy, state_write_out -> density, state_write_out -> add_comp_densities, *int_energy_density);
     	retval = scalar_times_scalar(state_write_out -> density, *int_energy_density, *int_energy_density, grid);
     	global_scalar_integrator(*int_energy_density, grid, &internal_integral);
-    	fprintf(global_integral_file, "%lf\t%lf\t%lf\t%lf\n", t_write, 0.5*kinetic_integral, potential_integral, C_V*internal_integral);
+    	fprintf(global_integral_file, "%lf\t%lf\t%lf\t%lf\n", t_write, 0.5*kinetic_integral, potential_integral, C_D_V*internal_integral);
     	free(int_energy_density);
     	fclose(global_integral_file);
     }

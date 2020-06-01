@@ -2,12 +2,13 @@
 #include <stdio.h>
 #include "../enum_and_typedefs.h"
 #include "io.h"
+#include "../diagnostics/diagnostics.h"
 #include "eccodes.h"
 #include "time00.h"
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 
-int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
+int set_init_data(char FILE_NAME[], State *init_state, double *t_init, int add_comps_bool)
 {
     long unsigned int no_scalars_h = NUMBER_OF_SCALARS_H;
     long unsigned int no_vectors_h = NUMBER_OF_VECTORS_H;
@@ -34,6 +35,7 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
     double *wind_v = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     int retval;
     long data_date, data_time;
+    double R_h, c_h_v, density_h_micro;
     IN_FILE = fopen(FILE_NAME, "r");
     for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
     {
@@ -82,7 +84,10 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
         for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
         {
             init_state -> density[j + i*NUMBER_OF_SCALARS_H] = rho[j];
-            init_state -> density_entropy[j + i*NUMBER_OF_SCALARS_H] = rho[j]*(C_P*log(pot_temp[j]) + K_B*N_A/M_D*log(1/P_0*K_B*K_B*pow(M_D/N_A*exp(5.0/3)/(M_PI*H_BAR*H_BAR), 1.5)));
+            R_h = gas_constant_diagnostics(rho[j], water_vapour_density[j]);
+            c_h_v = spec_heat_cap_diagnostics_p(rho[j], water_vapour_density[j]);
+            density_h_micro = calc_micro_density(rho[j] + water_vapour_density[j], solid_water_density[j] + liquid_water_density[j]);
+            init_state -> density_entropy[j + i*NUMBER_OF_SCALARS_H] = rho[j]*(C_D_P*log(pot_temp[j]) + entropy_constant_d) + water_vapour_density[j]*(C_V_P*log(pot_temp[j]) + M_D/M_V*DELTA_C_V_P*R_h/c_h_v*log(R_h*pot_temp[j]*density_h_micro/P_0) + entropy_constant_d);
             if (NUMBER_OF_ADD_COMPS > 0)
             {
                 init_state -> add_comp_densities[j + i*NUMBER_OF_SCALARS_H] = solid_water_density[j];

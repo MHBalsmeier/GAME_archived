@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     State *state_init = malloc(sizeof(State));
     double t_init;
-    set_init_data(INIT_STATE_FILE, state_init, &t_init);
+    set_init_data(INIT_STATE_FILE, state_init, &t_init, add_comps_on);
     free(INIT_STATE_FILE);
     write_out(state_init, t_init, 0, OUTPUT_FOLDER, grid);
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);

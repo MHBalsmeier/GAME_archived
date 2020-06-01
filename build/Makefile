@@ -234,6 +234,33 @@ src/diagnostics/calc_numerical_diffusion_coeffs.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.s
 .PHONY : src/diagnostics/calc_numerical_diffusion_coeffs.c.s
 
+src/diagnostics/density_diagnostics.o: src/diagnostics/density_diagnostics.c.o
+
+.PHONY : src/diagnostics/density_diagnostics.o
+
+# target to build an object file
+src/diagnostics/density_diagnostics.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.o
+.PHONY : src/diagnostics/density_diagnostics.c.o
+
+src/diagnostics/density_diagnostics.i: src/diagnostics/density_diagnostics.c.i
+
+.PHONY : src/diagnostics/density_diagnostics.i
+
+# target to preprocess a source file
+src/diagnostics/density_diagnostics.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.i
+.PHONY : src/diagnostics/density_diagnostics.c.i
+
+src/diagnostics/density_diagnostics.s: src/diagnostics/density_diagnostics.c.s
+
+.PHONY : src/diagnostics/density_diagnostics.s
+
+# target to generate assembly for a file
+src/diagnostics/density_diagnostics.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.s
+.PHONY : src/diagnostics/density_diagnostics.c.s
+
 src/diagnostics/exner_pressure_diagnostics.o: src/diagnostics/exner_pressure_diagnostics.c.o
 
 .PHONY : src/diagnostics/exner_pressure_diagnostics.o
@@ -261,6 +288,33 @@ src/diagnostics/exner_pressure_diagnostics.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.s
 .PHONY : src/diagnostics/exner_pressure_diagnostics.c.s
 
+src/diagnostics/gas_constant_diagnostics.o: src/diagnostics/gas_constant_diagnostics.c.o
+
+.PHONY : src/diagnostics/gas_constant_diagnostics.o
+
+# target to build an object file
+src/diagnostics/gas_constant_diagnostics.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.o
+.PHONY : src/diagnostics/gas_constant_diagnostics.c.o
+
+src/diagnostics/gas_constant_diagnostics.i: src/diagnostics/gas_constant_diagnostics.c.i
+
+.PHONY : src/diagnostics/gas_constant_diagnostics.i
+
+# target to preprocess a source file
+src/diagnostics/gas_constant_diagnostics.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.i
+.PHONY : src/diagnostics/gas_constant_diagnostics.c.i
+
+src/diagnostics/gas_constant_diagnostics.s: src/diagnostics/gas_constant_diagnostics.c.s
+
+.PHONY : src/diagnostics/gas_constant_diagnostics.s
+
+# target to generate assembly for a file
+src/diagnostics/gas_constant_diagnostics.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.s
+.PHONY : src/diagnostics/gas_constant_diagnostics.c.s
+
 src/diagnostics/global_scalar_integral.o: src/diagnostics/global_scalar_integral.c.o
 
 .PHONY : src/diagnostics/global_scalar_integral.o
@@ -287,6 +341,33 @@ src/diagnostics/global_scalar_integral.s: src/diagnostics/global_scalar_integral
 src/diagnostics/global_scalar_integral.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.s
 .PHONY : src/diagnostics/global_scalar_integral.c.s
+
+src/diagnostics/pot_temp_diagnostics.o: src/diagnostics/pot_temp_diagnostics.c.o
+
+.PHONY : src/diagnostics/pot_temp_diagnostics.o
+
+# target to build an object file
+src/diagnostics/pot_temp_diagnostics.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o
+.PHONY : src/diagnostics/pot_temp_diagnostics.c.o
+
+src/diagnostics/pot_temp_diagnostics.i: src/diagnostics/pot_temp_diagnostics.c.i
+
+.PHONY : src/diagnostics/pot_temp_diagnostics.i
+
+# target to preprocess a source file
+src/diagnostics/pot_temp_diagnostics.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.i
+.PHONY : src/diagnostics/pot_temp_diagnostics.c.i
+
+src/diagnostics/pot_temp_diagnostics.s: src/diagnostics/pot_temp_diagnostics.c.s
+
+.PHONY : src/diagnostics/pot_temp_diagnostics.s
+
+# target to generate assembly for a file
+src/diagnostics/pot_temp_diagnostics.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.s
+.PHONY : src/diagnostics/pot_temp_diagnostics.c.s
 
 src/diagnostics/recover_components/recov_hor_par_dual.o: src/diagnostics/recover_components/recov_hor_par_dual.c.o
 
@@ -503,6 +584,33 @@ src/diagnostics/recover_components/recov_ver_1_pri.s: src/diagnostics/recover_co
 src/diagnostics/recover_components/recov_ver_1_pri.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.s
 .PHONY : src/diagnostics/recover_components/recov_ver_1_pri.c.s
+
+src/diagnostics/spec_heat_cap_diagnostics.o: src/diagnostics/spec_heat_cap_diagnostics.c.o
+
+.PHONY : src/diagnostics/spec_heat_cap_diagnostics.o
+
+# target to build an object file
+src/diagnostics/spec_heat_cap_diagnostics.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.o
+.PHONY : src/diagnostics/spec_heat_cap_diagnostics.c.o
+
+src/diagnostics/spec_heat_cap_diagnostics.i: src/diagnostics/spec_heat_cap_diagnostics.c.i
+
+.PHONY : src/diagnostics/spec_heat_cap_diagnostics.i
+
+# target to preprocess a source file
+src/diagnostics/spec_heat_cap_diagnostics.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.i
+.PHONY : src/diagnostics/spec_heat_cap_diagnostics.c.i
+
+src/diagnostics/spec_heat_cap_diagnostics.s: src/diagnostics/spec_heat_cap_diagnostics.c.s
+
+.PHONY : src/diagnostics/spec_heat_cap_diagnostics.s
+
+# target to generate assembly for a file
+src/diagnostics/spec_heat_cap_diagnostics.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.s
+.PHONY : src/diagnostics/spec_heat_cap_diagnostics.c.s
 
 src/diagnostics/temperature_diagnostics.o: src/diagnostics/temperature_diagnostics.c.o
 
@@ -1118,12 +1226,21 @@ help:
 	@echo "... src/diagnostics/calc_numerical_diffusion_coeffs.o"
 	@echo "... src/diagnostics/calc_numerical_diffusion_coeffs.i"
 	@echo "... src/diagnostics/calc_numerical_diffusion_coeffs.s"
+	@echo "... src/diagnostics/density_diagnostics.o"
+	@echo "... src/diagnostics/density_diagnostics.i"
+	@echo "... src/diagnostics/density_diagnostics.s"
 	@echo "... src/diagnostics/exner_pressure_diagnostics.o"
 	@echo "... src/diagnostics/exner_pressure_diagnostics.i"
 	@echo "... src/diagnostics/exner_pressure_diagnostics.s"
+	@echo "... src/diagnostics/gas_constant_diagnostics.o"
+	@echo "... src/diagnostics/gas_constant_diagnostics.i"
+	@echo "... src/diagnostics/gas_constant_diagnostics.s"
 	@echo "... src/diagnostics/global_scalar_integral.o"
 	@echo "... src/diagnostics/global_scalar_integral.i"
 	@echo "... src/diagnostics/global_scalar_integral.s"
+	@echo "... src/diagnostics/pot_temp_diagnostics.o"
+	@echo "... src/diagnostics/pot_temp_diagnostics.i"
+	@echo "... src/diagnostics/pot_temp_diagnostics.s"
 	@echo "... src/diagnostics/recover_components/recov_hor_par_dual.o"
 	@echo "... src/diagnostics/recover_components/recov_hor_par_dual.i"
 	@echo "... src/diagnostics/recover_components/recov_hor_par_dual.s"
@@ -1148,6 +1265,9 @@ help:
 	@echo "... src/diagnostics/recover_components/recov_ver_1_pri.o"
 	@echo "... src/diagnostics/recover_components/recov_ver_1_pri.i"
 	@echo "... src/diagnostics/recover_components/recov_ver_1_pri.s"
+	@echo "... src/diagnostics/spec_heat_cap_diagnostics.o"
+	@echo "... src/diagnostics/spec_heat_cap_diagnostics.i"
+	@echo "... src/diagnostics/spec_heat_cap_diagnostics.s"
 	@echo "... src/diagnostics/temperature_diagnostics.o"
 	@echo "... src/diagnostics/temperature_diagnostics.i"
 	@echo "... src/diagnostics/temperature_diagnostics.s"

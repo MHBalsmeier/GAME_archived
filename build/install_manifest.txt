@@ -2,6 +2,7 @@
 /home/max/compiled/game/core/../run.sh
 /home/max/compiled/game/input/vector_field_blueprint_res_id_2.grb2
 /home/max/compiled/game/input/test_4_B4L6T30000_M2_O0_OL4.grb2
+/home/max/compiled/game/input/test_3_B4L6T30000_M2_O1_OL4.grb2
 /home/max/compiled/game/input/scalar_field_blueprint_res_id_2.grb2
 /home/max/compiled/game/input/test_4_B4L6T30000_M2_O0.grb2
 /home/max/compiled/game/input/test_3_B4L6T30000_M2_O0.grb2

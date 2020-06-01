@@ -2,12 +2,17 @@
 #define N_A (6.0221409e23)
 #define K_B (1.380649e-23)
 #define M_D 0.028964420
+#define M_V 0.0180152
 #define R (N_A*K_B)
 #define R_D (R/M_D)
-#define C_P 1005.0
-#define C_V (C_P - R_D)
-#define KAPPA (C_P/C_V)
+#define R_V (R/M_V)
+#define C_D_P 1005.0
+#define C_D_V (C_D_P - R_D)
+#define C_V_P 1858.0
+#define C_V_V (C_V_P - R_V)
+#define DELTA_C_V_P (C_V_P - C_D_P)
 #define P_0 100000.0
+#define RHO_WATER 1024.0
 #define SECONDS_PER_MIN 60.0
 #define SECONDS_PER_HOUR 3600.0
 #define SECONDS_PER_DAY 86400.0
@@ -17,6 +22,8 @@
 #define SEMIMINOR 6356752.314
 #define RADIUS pow(SEMIMAJOR*SEMIMAJOR*SEMIMINOR, 1.0/3.0)
 #define H_BAR (6.62607015e-30)
+#define entropy_constant_d (K_B*N_A/M_D*log(1/P_0*K_B*K_B*pow(M_D/N_A*exp(5.0/3)/(M_PI*H_BAR*H_BAR), 1.5)))
+#define entropy_constant_v (K_B*N_A/M_V*log(1/P_0*K_B*K_B*pow(M_V/N_A*exp(5.0/3)/(M_PI*H_BAR*H_BAR), 1.5)))
 
 enum grid_integers {
 RES_ID = 4,
@@ -113,6 +120,7 @@ typedef struct state {
 Scalar_field density_entropy;
 Scalar_field density;
 Vector_field wind;
+// density order: solid, liquid, vapour
 Add_comp_densities add_comp_densities;
 Add_comp_temps add_comp_temps;
 } State;

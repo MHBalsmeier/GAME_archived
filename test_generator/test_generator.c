@@ -34,6 +34,14 @@ const short MODE = 2;
 const short ORO_ID = 1;
 const int TEST_ID = 4;
 
+/* test_ids:
+0:	standard atmosphere without orography
+1:	standard atmosphere without orography with one wind value != 0
+2:	JW test, (pseudo-)balanced state
+3:	JW test, with perturbation
+4:	JW test, with perturbation and moisture
+*/
+
 enum grid_integers {
 RES_ID = 4,
 NUMBER_OF_BASIC_TRIANGLES = 20,
@@ -231,7 +239,10 @@ int main(int argc, char *argv[])
                 if (eta >= ETA_T)
                 {
                     temperature[j] = T_0*pow(eta, R_D*GAMMA/G) + T_perturb;
-                    rel_humidity[j] += 0.7;
+                    if (TEST_ID == 4)
+	                    rel_humidity[j] = 0.7;
+	                else
+	                    rel_humidity[j] = 0;
                 }
                 else
                     temperature[j] = T_0*pow(eta, R_D*GAMMA/G) + DELTA_T*pow(ETA_T - eta, 5) + T_perturb;
@@ -498,7 +509,7 @@ int main(int argc, char *argv[])
                 eta = pressure_value/P_0;
                 eta_v = (eta - ETA_0)*M_PI/2; 
                 u = U_0*pow(cos(eta_v), 1.5)*pow(sin(2*lat), 2);
-                if (TEST_ID == 3)
+                if (TEST_ID == 3 || TEST_ID == 4)
                 {
                     distance = calculate_distance_h(lat, lon, lat_perturb, lon_perturb, SEMIMAJOR);
                     u += u_p*exp(-pow(distance/distance_scale, 2));
