@@ -31,6 +31,7 @@ set(CMAKE_DEPENDS_CHECK_C
   "/home/max/my_code/game/core/src/r_operators/cross_product.c" "/home/max/my_code/game/build/CMakeFiles/game.dir/src/r_operators/cross_product.c.o"
   "/home/max/my_code/game/core/src/r_operators/curl.c" "/home/max/my_code/game/build/CMakeFiles/game.dir/src/r_operators/curl.c.o"
   "/home/max/my_code/game/core/src/r_operators/determine_tendency.c" "/home/max/my_code/game/build/CMakeFiles/game.dir/src/r_operators/determine_tendency.c.o"
+  "/home/max/my_code/game/core/src/r_operators/dissipation.c" "/home/max/my_code/game/build/CMakeFiles/game.dir/src/r_operators/dissipation.c.o"
   "/home/max/my_code/game/core/src/r_operators/div.c" "/home/max/my_code/game/build/CMakeFiles/game.dir/src/r_operators/div.c.o"
   "/home/max/my_code/game/core/src/r_operators/grad.c" "/home/max/my_code/game/build/CMakeFiles/game.dir/src/r_operators/grad.c.o"
   "/home/max/my_code/game/core/src/r_operators/inner.c" "/home/max/my_code/game/build/CMakeFiles/game.dir/src/r_operators/inner.c.o"

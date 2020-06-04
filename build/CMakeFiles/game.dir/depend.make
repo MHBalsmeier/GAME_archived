@@ -106,6 +106,9 @@ CMakeFiles/game.dir/src/r_operators/determine_tendency.c.o: /home/max/my_code/ga
 CMakeFiles/game.dir/src/r_operators/determine_tendency.c.o: /home/max/my_code/game/core/src/r_operators/determine_tendency.c
 CMakeFiles/game.dir/src/r_operators/determine_tendency.c.o: /home/max/my_code/game/core/src/r_operators/r_operators.h
 
+CMakeFiles/game.dir/src/r_operators/dissipation.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
+CMakeFiles/game.dir/src/r_operators/dissipation.c.o: /home/max/my_code/game/core/src/r_operators/dissipation.c
+
 CMakeFiles/game.dir/src/r_operators/div.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 CMakeFiles/game.dir/src/r_operators/div.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/r_operators/div.c.o: /home/max/my_code/game/core/src/r_operators/div.c

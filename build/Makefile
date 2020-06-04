@@ -909,6 +909,33 @@ src/r_operators/determine_tendency.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/determine_tendency.c.s
 .PHONY : src/r_operators/determine_tendency.c.s
 
+src/r_operators/dissipation.o: src/r_operators/dissipation.c.o
+
+.PHONY : src/r_operators/dissipation.o
+
+# target to build an object file
+src/r_operators/dissipation.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/dissipation.c.o
+.PHONY : src/r_operators/dissipation.c.o
+
+src/r_operators/dissipation.i: src/r_operators/dissipation.c.i
+
+.PHONY : src/r_operators/dissipation.i
+
+# target to preprocess a source file
+src/r_operators/dissipation.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/dissipation.c.i
+.PHONY : src/r_operators/dissipation.c.i
+
+src/r_operators/dissipation.s: src/r_operators/dissipation.c.s
+
+.PHONY : src/r_operators/dissipation.s
+
+# target to generate assembly for a file
+src/r_operators/dissipation.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/dissipation.c.s
+.PHONY : src/r_operators/dissipation.c.s
+
 src/r_operators/div.o: src/r_operators/div.c.o
 
 .PHONY : src/r_operators/div.o
@@ -1274,6 +1301,9 @@ help:
 	@echo "... src/r_operators/determine_tendency.o"
 	@echo "... src/r_operators/determine_tendency.i"
 	@echo "... src/r_operators/determine_tendency.s"
+	@echo "... src/r_operators/dissipation.o"
+	@echo "... src/r_operators/dissipation.i"
+	@echo "... src/r_operators/dissipation.s"
 	@echo "... src/r_operators/div.o"
 	@echo "... src/r_operators/div.i"
 	@echo "... src/r_operators/div.s"

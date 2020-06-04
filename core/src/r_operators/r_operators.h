@@ -13,3 +13,4 @@ int scalar_times_vector(Scalar_field, Vector_field, Vector_field, Grid *);
 int scalar_times_vector_h_v(Scalar_field, Scalar_field, Vector_field, Vector_field, Grid *);
 int linear_combine_two_states(State *, State *, State *, double, double);
 int add_vector_fields(Vector_field, Vector_field, Vector_field);
+int dissipation(Vector_field, Scalar_field, Vector_field, Scalar_field, Grid *);

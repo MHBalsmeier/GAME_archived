@@ -26,6 +26,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/game.dir/src/r_operators/cross_product.c.o"
   "CMakeFiles/game.dir/src/r_operators/curl.c.o"
   "CMakeFiles/game.dir/src/r_operators/determine_tendency.c.o"
+  "CMakeFiles/game.dir/src/r_operators/dissipation.c.o"
   "CMakeFiles/game.dir/src/r_operators/div.c.o"
   "CMakeFiles/game.dir/src/r_operators/grad.c.o"
   "CMakeFiles/game.dir/src/r_operators/inner.c.o"

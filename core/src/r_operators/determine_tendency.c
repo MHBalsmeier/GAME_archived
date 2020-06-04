@@ -80,6 +80,9 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     if (add_comps_bool == 1)
         retval = calc_add_comp_source_rates(add_comp_mass_source_rates, add_comp_heat_source_rates, current_state -> add_comp_densities, current_state -> add_comp_temps, *temperature, NUMBER_OF_ADD_COMPS, NUMBER_OF_SCALARS, delta_t);
     double total_density, rho_h, c_h_v;
+    Vector_field *friction_acc = malloc(sizeof(Vector_field));
+    Scalar_field *heating_diss = malloc(sizeof(Scalar_field));
+    retval = dissipation(current_state -> wind, current_state -> density, *friction_acc, *heating_diss, grid);
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
         if (dissipation_on == 1)
@@ -89,12 +92,11 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
                 total_density += current_state -> add_comp_densities[k*NUMBER_OF_SCALARS + i];
             c_h_v = spec_heat_cap_diagnostics_v(current_state -> density[i], current_state -> add_comp_densities[NUMBER_OF_COND_ADD_COMPS*NUMBER_OF_SCALARS + i]);
             rho_h = current_state -> density[i] + current_state -> add_comp_densities[(NUMBER_OF_ADD_COMPS - 1)*NUMBER_OF_SCALARS + i];
-            state_tendency -> density_entropy[i] = -(*density_entropy_flux_divergence)[i] + current_state -> density[i]*c_h_v/(*temperature)[i]*((*rad_heating)[i]*rho_h/total_density + (*temp_diffusion_heating)[i] + add_comp_heat_source_rates[(NUMBER_OF_ADD_COMPS - 1)*NUMBER_OF_SCALARS + i]);
+            state_tendency -> density_entropy[i] = -(*density_entropy_flux_divergence)[i] + rho_h/total_density*1/(*temperature)[i]*((*temp_diffusion_heating)[i] + (*heating_diss)[i] + (*rad_heating)[i] + add_comp_heat_source_rates[(NUMBER_OF_ADD_COMPS - 1)*NUMBER_OF_SCALARS + i]);
         }
         else
             state_tendency -> density_entropy[i] = -(*density_entropy_flux_divergence)[i];
     }
-    free(temp_diffusion_heating);
     free(mass_source_rate);
     free(density_entropy_flux_divergence);
     Scalar_field *add_comp_density = malloc(sizeof(Scalar_field));
@@ -166,12 +168,14 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
             total_density = current_state -> density[j];
             for (int k = 0; k < NUMBER_OF_ADD_COMPS; ++k)
                 total_density += current_state -> add_comp_densities[k*NUMBER_OF_SCALARS + j];
-            if (current_state -> add_comp_densities[i*NUMBER_OF_SCALARS + j] > 0)
-                state_tendency -> add_comp_temps[i*NUMBER_OF_SCALARS + j] = (*add_comp_temp_adv)[j] + 1/c_p_cond*(*rad_heating)[j]/total_density + 1/(c_p_cond*current_state -> add_comp_densities[i*NUMBER_OF_SCALARS + j])*add_comp_heat_source_rates[i*NUMBER_OF_SCALARS + j];
+            if (current_state -> add_comp_densities[i*NUMBER_OF_SCALARS + j] > EPSILON_TRACERS)
+                state_tendency -> add_comp_temps[i*NUMBER_OF_SCALARS + j] = (*add_comp_temp_adv)[j] + 1/(c_p_cond*total_density)*((*temp_diffusion_heating)[j] + (*heating_diss)[j] + (*rad_heating)[j] + add_comp_heat_source_rates[i*NUMBER_OF_SCALARS + j]);
             else
-                state_tendency -> add_comp_temps[i*NUMBER_OF_SCALARS + j] = ((*temperature)[j] - current_state -> add_comp_temps[i*NUMBER_OF_SCALARS + j])/delta_t;
+                state_tendency -> add_comp_temps[i*NUMBER_OF_SCALARS + j] = -(current_state -> add_comp_temps[i*NUMBER_OF_SCALARS + j] - (*temperature)[j])/delta_t;
         }
     }
+    free(temp_diffusion_heating);
+    free(heating_diss);
     free(add_comp_heat_source_rates);
     free(rad_heating);
     free(add_comp_temp);
@@ -242,8 +246,9 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
         if (i < NUMBER_OF_VECTORS_V || i >= NUMBER_OF_VECTORS - NUMBER_OF_VECTORS_V)
             state_tendency -> wind[i] = 0;
         else
-            state_tendency -> wind[i] = -(*m_pressure_gradient_acc)[i] - add_comps_bool*(*m_pressure_gradient_acc_humid_corr)[i] - (*m_gravity_background_acc)[i] + (*abs_curl_tend)[i] - 0.5*(*m_e_kin_tend_2)[i];
+            state_tendency -> wind[i] = -(*m_pressure_gradient_acc)[i] - add_comps_bool*(*m_pressure_gradient_acc_humid_corr)[i] - (*m_gravity_background_acc)[i] + (*abs_curl_tend)[i] - 0.5*(*m_e_kin_tend_2)[i] + (*friction_acc)[i];
     }
+    free(friction_acc);
 	free(m_gravity_background_acc);
     free(abs_curl_tend);
     free(m_pressure_gradient_acc);

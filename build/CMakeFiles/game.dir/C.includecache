@@ -244,6 +244,10 @@ stdlib.h
 stdio.h
 -
 
+/home/max/my_code/game/core/src/r_operators/dissipation.c
+../enum_and_typedefs.h
+/home/max/my_code/game/core/src/enum_and_typedefs.h
+
 /home/max/my_code/game/core/src/r_operators/div.c
 ../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
