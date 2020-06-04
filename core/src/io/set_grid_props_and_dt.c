@@ -46,16 +46,12 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     int *vorticity_indices = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(int));
     int *h_curl_indices = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
     int *recov_hor_par_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(int));
-    int *vorticity_indices_dual = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
-    int *h_curl_indices_dual = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
     int *adjacent_scalar_indices_dual_h = malloc(3*NUMBER_OF_DUAL_SCALARS_H*sizeof(int));
     int *adjacent_signs_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(int));
     int *vorticity_signs = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(int));
     int *h_curl_signs = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
-    int *vorticity_signs_dual = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
-    int *h_curl_signs_dual = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
     int ncid, retval;
-    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id, direction_id, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id, gravity_eff_id, gravity_potential_id;
+    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, direction_id, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id, gravity_eff_id, gravity_potential_id;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "normal_distance", &normal_distance_id)))
@@ -126,19 +122,11 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "from_index_dual", &from_index_dual_id)))
         ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "vorticity_indices_dual", &vorticity_indices_dual_id)))
-        ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "h_curl_indices_dual", &h_curl_indices_dual_id)))
-        ERR(retval);
     if ((retval = nc_inq_varid(ncid, "adjacent_signs_h", &adjacent_signs_h_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "vorticity_signs", &vorticity_signs_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "h_curl_signs", &h_curl_signs_id)))
-        ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "vorticity_signs_dual", &vorticity_signs_dual_id)))
-        ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "h_curl_signs_dual", &h_curl_signs_dual_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "adjacent_scalar_indices_dual_h", &adjacent_scalar_indices_dual_h_id)))
         ERR(retval);
@@ -218,10 +206,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, from_index_dual_id, &from_index_dual[0])))
         ERR(retval);
-    if ((retval = nc_get_var_int(ncid, vorticity_indices_dual_id, &vorticity_indices_dual[0])))
-        ERR(retval);
-    if ((retval = nc_get_var_int(ncid, h_curl_indices_dual_id, &h_curl_indices_dual[0])))
-        ERR(retval);
     if ((retval = nc_get_var_int(ncid, adjacent_scalar_indices_dual_h_id, &adjacent_scalar_indices_dual_h[0])))
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, adjacent_signs_h_id, &adjacent_signs_h[0])))
@@ -229,10 +213,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     if ((retval = nc_get_var_int(ncid, vorticity_signs_id, &vorticity_signs[0])))
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, h_curl_signs_id, &h_curl_signs[0])))
-        ERR(retval);
-    if ((retval = nc_get_var_int(ncid, vorticity_signs_dual_id, &vorticity_signs_dual[0])))
-        ERR(retval);
-    if ((retval = nc_get_var_int(ncid, h_curl_signs_dual_id, &h_curl_signs_dual[0])))
         ERR(retval);
     if ((retval = nc_close(ncid)))
         ERR(retval);
@@ -253,7 +233,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         for (int j = 0; j < 3; ++j)
         {
             dualgrid -> vorticity_indices[3*i + j] = vorticity_indices[3*i +j];
-            if (dualgrid -> vorticity_indices[3*i + j] >= NUMBER_OF_VECTORS_H || grid -> vorticity_indices[3*i + j] < 0)
+            if (dualgrid -> vorticity_indices[3*i + j] >= NUMBER_OF_VECTORS_H)
                 grid_check_failed();
             dualgrid -> vorticity_signs[3*i + j] = vorticity_signs[3*i + j];
             if (fabs(dualgrid -> vorticity_signs[3*i + j]) > 1)
@@ -337,12 +317,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
             grid -> recov_hor_ver_pri_weight[4*i + j] = recov_hor_ver_pri_weight[4*i + j];
             if (fabs(grid -> recov_hor_ver_pri_weight[4*i + j]) >= 1.0001)
                 grid_check_failed();
-            grid -> h_curl_indices[4*i + j] = h_curl_indices_dual[4*i + j];
-            if (grid -> h_curl_indices[4*i + j] >= 2*NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_DUAL_VECTORS_V || grid -> h_curl_indices[4*i + j] < 0)
-                grid_check_failed();
-            grid -> h_curl_signs[4*i + j] = h_curl_signs_dual[4*i + j];
-            if (fabs(grid -> h_curl_signs[4*i + j]) > 1)
-                grid_check_failed();
         }
     }
     for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
@@ -372,12 +346,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
                 grid_check_failed();
             grid -> recov_ver_1_dual_weight[6*i + j] = recov_ver_1_dual_weight[6*i + j];
             if (fabs(grid -> recov_ver_1_dual_weight[6*i + j]) >= 1.0001)
-                grid_check_failed();
-            grid -> vorticity_indices[6*i + j] = vorticity_indices_dual[6*i + j];
-            if (grid -> vorticity_indices[6*i + j] >= NUMBER_OF_DUAL_VECTORS_H || grid -> vorticity_indices[6*i + j] < 0)
-                grid_check_failed();
-            grid -> vorticity_signs[6*i + j] = vorticity_signs_dual[6*i + j];
-            if (fabs(grid -> vorticity_signs[6*i + j]) > 1)
                 grid_check_failed();
         }
     }
@@ -452,13 +420,9 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     free(recov_ver_1_dual_index);
     free(to_index_dual);
     free(from_index_dual);
-    free(vorticity_indices_dual);
-    free(h_curl_indices_dual);
     free(adjacent_signs_h);
     free(vorticity_signs);
     free(h_curl_signs);
-    free(vorticity_signs_dual);
-    free(h_curl_signs_dual);
     return 0;
 }
 

@@ -585,6 +585,33 @@ src/diagnostics/recover_components/recov_ver_1_pri.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.s
 .PHONY : src/diagnostics/recover_components/recov_ver_1_pri.c.s
 
+src/diagnostics/ricci.o: src/diagnostics/ricci.c.o
+
+.PHONY : src/diagnostics/ricci.o
+
+# target to build an object file
+src/diagnostics/ricci.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/ricci.c.o
+.PHONY : src/diagnostics/ricci.c.o
+
+src/diagnostics/ricci.i: src/diagnostics/ricci.c.i
+
+.PHONY : src/diagnostics/ricci.i
+
+# target to preprocess a source file
+src/diagnostics/ricci.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/ricci.c.i
+.PHONY : src/diagnostics/ricci.c.i
+
+src/diagnostics/ricci.s: src/diagnostics/ricci.c.s
+
+.PHONY : src/diagnostics/ricci.s
+
+# target to generate assembly for a file
+src/diagnostics/ricci.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/ricci.c.s
+.PHONY : src/diagnostics/ricci.c.s
+
 src/diagnostics/spec_heat_cap_diagnostics.o: src/diagnostics/spec_heat_cap_diagnostics.c.o
 
 .PHONY : src/diagnostics/spec_heat_cap_diagnostics.o
@@ -855,33 +882,6 @@ src/r_operators/curl.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/curl.c.s
 .PHONY : src/r_operators/curl.c.s
 
-src/r_operators/curl_dual.o: src/r_operators/curl_dual.c.o
-
-.PHONY : src/r_operators/curl_dual.o
-
-# target to build an object file
-src/r_operators/curl_dual.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/curl_dual.c.o
-.PHONY : src/r_operators/curl_dual.c.o
-
-src/r_operators/curl_dual.i: src/r_operators/curl_dual.c.i
-
-.PHONY : src/r_operators/curl_dual.i
-
-# target to preprocess a source file
-src/r_operators/curl_dual.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/curl_dual.c.i
-.PHONY : src/r_operators/curl_dual.c.i
-
-src/r_operators/curl_dual.s: src/r_operators/curl_dual.c.s
-
-.PHONY : src/r_operators/curl_dual.s
-
-# target to generate assembly for a file
-src/r_operators/curl_dual.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/curl_dual.c.s
-.PHONY : src/r_operators/curl_dual.c.s
-
 src/r_operators/determine_tendency.o: src/r_operators/determine_tendency.c.o
 
 .PHONY : src/r_operators/determine_tendency.o
@@ -1016,33 +1016,6 @@ src/r_operators/laplace.s: src/r_operators/laplace.c.s
 src/r_operators/laplace.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/laplace.c.s
 .PHONY : src/r_operators/laplace.c.s
-
-src/r_operators/laplace_vec.o: src/r_operators/laplace_vec.c.o
-
-.PHONY : src/r_operators/laplace_vec.o
-
-# target to build an object file
-src/r_operators/laplace_vec.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/laplace_vec.c.o
-.PHONY : src/r_operators/laplace_vec.c.o
-
-src/r_operators/laplace_vec.i: src/r_operators/laplace_vec.c.i
-
-.PHONY : src/r_operators/laplace_vec.i
-
-# target to preprocess a source file
-src/r_operators/laplace_vec.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/laplace_vec.c.i
-.PHONY : src/r_operators/laplace_vec.c.i
-
-src/r_operators/laplace_vec.s: src/r_operators/laplace_vec.c.s
-
-.PHONY : src/r_operators/laplace_vec.s
-
-# target to generate assembly for a file
-src/r_operators/laplace_vec.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/laplace_vec.c.s
-.PHONY : src/r_operators/laplace_vec.c.s
 
 src/r_operators/linear_combine_two_states.o: src/r_operators/linear_combine_two_states.c.o
 
@@ -1265,6 +1238,9 @@ help:
 	@echo "... src/diagnostics/recover_components/recov_ver_1_pri.o"
 	@echo "... src/diagnostics/recover_components/recov_ver_1_pri.i"
 	@echo "... src/diagnostics/recover_components/recov_ver_1_pri.s"
+	@echo "... src/diagnostics/ricci.o"
+	@echo "... src/diagnostics/ricci.i"
+	@echo "... src/diagnostics/ricci.s"
 	@echo "... src/diagnostics/spec_heat_cap_diagnostics.o"
 	@echo "... src/diagnostics/spec_heat_cap_diagnostics.i"
 	@echo "... src/diagnostics/spec_heat_cap_diagnostics.s"
@@ -1295,9 +1271,6 @@ help:
 	@echo "... src/r_operators/curl.o"
 	@echo "... src/r_operators/curl.i"
 	@echo "... src/r_operators/curl.s"
-	@echo "... src/r_operators/curl_dual.o"
-	@echo "... src/r_operators/curl_dual.i"
-	@echo "... src/r_operators/curl_dual.s"
 	@echo "... src/r_operators/determine_tendency.o"
 	@echo "... src/r_operators/determine_tendency.i"
 	@echo "... src/r_operators/determine_tendency.s"
@@ -1313,9 +1286,6 @@ help:
 	@echo "... src/r_operators/laplace.o"
 	@echo "... src/r_operators/laplace.i"
 	@echo "... src/r_operators/laplace.s"
-	@echo "... src/r_operators/laplace_vec.o"
-	@echo "... src/r_operators/laplace_vec.i"
-	@echo "... src/r_operators/laplace_vec.s"
 	@echo "... src/r_operators/linear_combine_two_states.o"
 	@echo "... src/r_operators/linear_combine_two_states.i"
 	@echo "... src/r_operators/linear_combine_two_states.s"

@@ -1,14 +1,14 @@
 int calc_temp_diffusion_coeffs(Scalar_field, Scalar_field, Scalar_field, Scalar_field);
 int calc_mass_diffusion_coeffs(Scalar_field, Scalar_field, Scalar_field, Scalar_field);
 int global_scalar_integrator(Scalar_field, Grid *, double *);
-int recov_hor_par_dual(Dual_vector_field, long, long, double *, Grid *);
-int recov_hor_par_pri(Vector_field, long, long, double *, Grid *);
-int recov_hor_ver_dual(Dual_vector_field, long, long, double *, Grid *);
-int recov_hor_ver_pri(Vector_field, long, long, double *, Grid *);
-int recov_ver_0_dual(Dual_vector_field, long, long, double *, Grid *);
-int recov_ver_0_pri(Vector_field, long, long, double *, Grid *);
-int recov_ver_1_dual(Dual_vector_field, long, long, double *, Grid *);
-int recov_ver_1_pri(Vector_field, long, long, double *, Grid *);
+int recov_hor_par_dual(Dual_vector_field, int, int, double *, Grid *);
+int recov_hor_par_pri(Vector_field, int, int, double *, Grid *);
+int recov_hor_ver_dual(Dual_vector_field, int, int, double *, Grid *);
+int recov_hor_ver_pri(Vector_field, int, int, double *, Grid *);
+int recov_ver_0_dual(Dual_vector_field, int, int, double *, Grid *);
+int recov_ver_0_pri(Vector_field, int, int, double *, Grid *);
+int recov_ver_1_dual(Dual_vector_field, int, int, double *, Grid *);
+int recov_ver_1_pri(Vector_field, int, int, double *, Grid *);
 double spec_heat_cap_diagnostics_p(double, double);
 double spec_heat_cap_diagnostics_v(double, double);
 int pot_temp_diagnostics(Scalar_field, Scalar_field, Add_comp_densities, Scalar_field);
@@ -20,3 +20,5 @@ int temperature_diagnostics(Scalar_field, Scalar_field, Add_comp_densities, Scal
 double gas_constant_diagnostics(double, double);
 double calc_micro_density(double, double);
 double calc_condensates_density_sum(int, int, Add_comp_densities);
+int vertical_contravariant_normalized(Vector_field, int, int, Grid *, double *);
+int horizontal_covariant_normalized(Vector_field, int, int, Grid *, double *);

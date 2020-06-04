@@ -110,6 +110,12 @@ stdio.h
 ../../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
 
+/home/max/my_code/game/core/src/diagnostics/ricci.c
+../enum_and_typedefs.h
+/home/max/my_code/game/core/src/enum_and_typedefs.h
+math.h
+-
+
 /home/max/my_code/game/core/src/diagnostics/spec_heat_cap_diagnostics.c
 ../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
@@ -217,12 +223,8 @@ stdio.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
 stdio.h
 -
-
-/home/max/my_code/game/core/src/r_operators/curl_dual.c
-../enum_and_typedefs.h
-/home/max/my_code/game/core/src/enum_and_typedefs.h
-stdio.h
--
+../diagnostics/diagnostics.h
+/home/max/my_code/game/core/src/diagnostics/diagnostics.h
 
 /home/max/my_code/game/core/src/r_operators/determine_tendency.c
 ../enum_and_typedefs.h
@@ -245,12 +247,16 @@ stdio.h
 /home/max/my_code/game/core/src/r_operators/div.c
 ../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
+../diagnostics/diagnostics.h
+/home/max/my_code/game/core/src/diagnostics/diagnostics.h
 stdio.h
 -
 
 /home/max/my_code/game/core/src/r_operators/grad.c
 ../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
+../diagnostics/diagnostics.h
+/home/max/my_code/game/core/src/diagnostics/diagnostics.h
 stdio.h
 -
 
@@ -261,14 +267,6 @@ stdio.h
 -
 
 /home/max/my_code/game/core/src/r_operators/laplace.c
-../enum_and_typedefs.h
-/home/max/my_code/game/core/src/enum_and_typedefs.h
-r_operators.h
-/home/max/my_code/game/core/src/r_operators/r_operators.h
-stdlib.h
--
-
-/home/max/my_code/game/core/src/r_operators/laplace_vec.c
 ../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
 r_operators.h

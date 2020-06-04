@@ -55,6 +55,9 @@ CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.o: /ho
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_pri.c
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 
+CMakeFiles/game.dir/src/diagnostics/ricci.c.o: /home/max/my_code/game/core/src/diagnostics/ricci.c
+CMakeFiles/game.dir/src/diagnostics/ricci.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
+
 CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/spec_heat_cap_diagnostics.c
 CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 
@@ -94,20 +97,20 @@ CMakeFiles/game.dir/src/r_operators/cross_product.c.o: /home/max/my_code/game/co
 CMakeFiles/game.dir/src/r_operators/cross_product.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/r_operators/cross_product.c.o: /home/max/my_code/game/core/src/r_operators/cross_product.c
 
+CMakeFiles/game.dir/src/r_operators/curl.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 CMakeFiles/game.dir/src/r_operators/curl.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/r_operators/curl.c.o: /home/max/my_code/game/core/src/r_operators/curl.c
-
-CMakeFiles/game.dir/src/r_operators/curl_dual.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
-CMakeFiles/game.dir/src/r_operators/curl_dual.c.o: /home/max/my_code/game/core/src/r_operators/curl_dual.c
 
 CMakeFiles/game.dir/src/r_operators/determine_tendency.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 CMakeFiles/game.dir/src/r_operators/determine_tendency.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/r_operators/determine_tendency.c.o: /home/max/my_code/game/core/src/r_operators/determine_tendency.c
 CMakeFiles/game.dir/src/r_operators/determine_tendency.c.o: /home/max/my_code/game/core/src/r_operators/r_operators.h
 
+CMakeFiles/game.dir/src/r_operators/div.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 CMakeFiles/game.dir/src/r_operators/div.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/r_operators/div.c.o: /home/max/my_code/game/core/src/r_operators/div.c
 
+CMakeFiles/game.dir/src/r_operators/grad.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 CMakeFiles/game.dir/src/r_operators/grad.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/r_operators/grad.c.o: /home/max/my_code/game/core/src/r_operators/grad.c
 
@@ -117,10 +120,6 @@ CMakeFiles/game.dir/src/r_operators/inner.c.o: /home/max/my_code/game/core/src/r
 CMakeFiles/game.dir/src/r_operators/laplace.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/r_operators/laplace.c.o: /home/max/my_code/game/core/src/r_operators/laplace.c
 CMakeFiles/game.dir/src/r_operators/laplace.c.o: /home/max/my_code/game/core/src/r_operators/r_operators.h
-
-CMakeFiles/game.dir/src/r_operators/laplace_vec.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
-CMakeFiles/game.dir/src/r_operators/laplace_vec.c.o: /home/max/my_code/game/core/src/r_operators/laplace_vec.c
-CMakeFiles/game.dir/src/r_operators/laplace_vec.c.o: /home/max/my_code/game/core/src/r_operators/r_operators.h
 
 CMakeFiles/game.dir/src/r_operators/linear_combine_two_states.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/r_operators/linear_combine_two_states.c.o: /home/max/my_code/game/core/src/r_operators/linear_combine_two_states.c

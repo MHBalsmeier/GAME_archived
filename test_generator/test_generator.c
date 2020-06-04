@@ -250,6 +250,8 @@ int main(int argc, char *argv[])
             rho[j] = pressure[j]/(R_D*temperature[j]);
             pot_temperature[j] = temperature[j]*pow(P_0/pressure[j], R_D/C_P);
             water_vapour_density[j] = water_vapour_density_from_rel_humidity(rel_humidity[j], temperature[j], rho[j]);
+            if (water_vapour_density[j] < 0)
+            	printf("water_vapour_density negative.\n.");
             liquid_water_density[j] = 0;
             solid_water_density[j] = 0;
             liquid_water_temp[j] = temperature[j];

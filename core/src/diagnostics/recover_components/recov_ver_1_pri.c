@@ -1,6 +1,6 @@
 #include "../../enum_and_typedefs.h"
 
-int recov_ver_1_pri(Vector_field in_field, long layer_index, long h_index, double *component, Grid *grid)
+int recov_ver_1_pri(Vector_field in_field, int layer_index, int h_index, double *component, Grid *grid)
 {
     *component = 0;
     if (layer_index > 0 && layer_index < NUMBER_OF_LAYERS)

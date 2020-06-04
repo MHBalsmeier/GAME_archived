@@ -1,10 +1,11 @@
 #include "../enum_and_typedefs.h"
 #include <stdio.h>
+#include "../diagnostics/diagnostics.h"
 
 int curl(Vector_field in_field, Dual_vector_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
-    int layer_index, h_index, index_0, index_1, index_2, index_3, sign_0, sign_1, sign_2, sign_3;
-    double rhombus_circ, rhombus_area;
+    int layer_index, h_index, index_0, index_1, index_2, index_3, sign_0, sign_1, sign_2, sign_3, retval;
+    double rhombus_circ, rhombus_area, dist_0, dist_1, dist_2, dist_3, dist_0_pre, dist_2_pre, delta_z, covar_0, covar_2;
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; ++i)
     {
         layer_index = i/NUMBER_OF_DUAL_VECTORS_PER_LAYER;
@@ -52,9 +53,35 @@ int curl(Vector_field in_field, Dual_vector_field out_field, Grid *grid, Dualgri
                 sign_1 = dualgrid -> h_curl_signs[4*h_index + 1];
                 sign_2 = dualgrid -> h_curl_signs[4*h_index + 2];
                 sign_3 = dualgrid -> h_curl_signs[4*h_index + 3];
-                out_field[i] = 1/dualgrid -> area[i]*(grid -> normal_distance[index_0]*sign_0*in_field[index_0] + grid -> normal_distance[index_1]*sign_1*in_field[index_1] + grid -> normal_distance[index_2]*sign_2*in_field[index_2] + grid -> normal_distance[index_3]*sign_3*in_field[index_3]);
+                dist_0_pre = grid -> normal_distance[index_0];
+                dist_1 = grid -> normal_distance[index_1];
+                dist_2_pre = grid -> normal_distance[index_2];
+                dist_3 = grid -> normal_distance[index_3];
+                delta_z = grid -> z_scalar[layer_index*NUMBER_OF_SCALARS_H + grid -> to_index[dualgrid -> h_curl_indices[4*h_index + 2]]] - grid -> z_scalar[layer_index*NUMBER_OF_SCALARS_H + grid -> from_index[dualgrid -> h_curl_indices[4*h_index + 2]]];
+                dist_0 = sqrt(pow(dist_0_pre, 2) + pow(delta_z, 2));
+                delta_z = grid -> z_scalar[(layer_index - 1)*NUMBER_OF_SCALARS_H + grid -> to_index[dualgrid -> h_curl_indices[4*h_index + 2]]] - grid -> z_scalar[(layer_index - 1)*NUMBER_OF_SCALARS_H + grid -> from_index[dualgrid -> h_curl_indices[4*h_index + 2]]];
+                dist_2 = sqrt(pow(dist_2_pre, 2) + pow(delta_z, 2));
+                retval = horizontal_covariant_normalized(in_field, layer_index, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_0);
+                if (retval != 0)
+                	printf("Error in horizontal_covariant_normalized called at position 0 from curl.\n");
+                retval = horizontal_covariant_normalized(in_field, layer_index - 1, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_2);
+                if (retval != 0)
+                	printf("Error in horizontal_covariant_normalized called at position 1 from curl.\n");
+                out_field[i] = 1/dualgrid -> area[i]*(dist_0*sign_0*covar_0 + dist_1*sign_1*in_field[index_1] + dist_2*sign_2*covar_2 + dist_3*sign_3*in_field[index_3]);
             }
         }
     }
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+

@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     printf("*\t\t\t\t\t\t\t\t\t\t*\n");
     printf("*\t\t\t\tThis is the GAME\t\t\t\t*\n");
-    printf("*\t\t\tGlobal Geophysical Modelling Frame\t\t\t*\n");
+    printf("*\t\t\tGlobal Geophysical Modelling Framework\t\t\t*\n");
     printf("*\t\t\t\t\t\t\t\t\t\t*\n");
     printf("%s", stars);
     printf("Use only legal if authorized by Max Henrik Balsmeier.\n");
