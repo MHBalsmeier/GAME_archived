@@ -61,12 +61,20 @@ int curl(Vector_field in_field, Dual_vector_field out_field, Grid *grid, Dualgri
                 dist_0 = sqrt(pow(dist_0_pre, 2) + pow(delta_z, 2));
                 delta_z = grid -> z_scalar[(layer_index - 1)*NUMBER_OF_SCALARS_H + grid -> to_index[dualgrid -> h_curl_indices[4*h_index + 2]]] - grid -> z_scalar[(layer_index - 1)*NUMBER_OF_SCALARS_H + grid -> from_index[dualgrid -> h_curl_indices[4*h_index + 2]]];
                 dist_2 = sqrt(pow(dist_2_pre, 2) + pow(delta_z, 2));
-                retval = horizontal_covariant_normalized(in_field, layer_index, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_0);
-                if (retval != 0)
-                	printf("Error in horizontal_covariant_normalized called at position 0 from curl.\n");
-                retval = horizontal_covariant_normalized(in_field, layer_index - 1, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_2);
-                if (retval != 0)
-                	printf("Error in horizontal_covariant_normalized called at position 1 from curl.\n");
+                covar_0 = in_field[index_0];
+                if (layer_index >= NUMBER_OF_LAYERS - NUMBER_OF_ORO_LAYERS)
+                {
+                    retval = horizontal_covariant_normalized(in_field, layer_index, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_0);
+                    if (retval != 0)
+                        printf("Error in horizontal_covariant_normalized called at position 0 from curl.\n");
+                }
+                covar_2 = in_field[index_2];
+                if (layer_index >= NUMBER_OF_LAYERS - NUMBER_OF_ORO_LAYERS + 1)
+                {
+                    retval = horizontal_covariant_normalized(in_field, layer_index - 1, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_2);
+                    if (retval != 0)
+                        printf("Error in horizontal_covariant_normalized called at position 1 from curl.\n");
+                }
                 out_field[i] = 1/dualgrid -> area[i]*(dist_0*sign_0*covar_0 + dist_1*sign_1*in_field[index_1] + dist_2*sign_2*covar_2 + dist_3*sign_3*in_field[index_3]);
             }
         }
