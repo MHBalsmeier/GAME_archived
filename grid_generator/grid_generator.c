@@ -304,6 +304,7 @@ int main(int argc, char *argv[])
 	double *pot_temp_background = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *pot_temp_background_vector = malloc(NUMBER_OF_VECTORS*sizeof(double));
 	double *z_surface = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+	double *vertical_contravar_unit = malloc(3*NUMBER_OF_VECTORS_V*(NUMBER_OF_ORO_LAYERS + 1)*sizeof(double));
     int *to_index = malloc(NUMBER_OF_VECTORS_H*sizeof(int));
     int *from_index = malloc(NUMBER_OF_VECTORS_H*sizeof(int));
     int *recov_hor_par_pri_index = calloc(10*NUMBER_OF_VECTORS_H, sizeof(int));
@@ -1175,6 +1176,82 @@ int main(int argc, char *argv[])
             printf("area contains a non-positive value.\n");
 			exit(1);
 		}
+    }
+    
+    double x_value, y_value, z_value, normal_vector_global[3], local_basis_vector[3], local_x, local_y, local_z, tilting_angle, delta_x, delta_z, abs_value;
+    for (int i = 0; i < NUMBER_OF_ORO_LAYERS + 1; ++i)
+    {
+    	for (int j = 0; j < NUMBER_OF_VECTORS_V; ++j)
+    	{
+    		if (j < NUMBER_OF_PENTAGONS)
+    		{
+    			number_of_edges = 5;
+			}
+    		else
+    		{
+    			number_of_edges = 6;
+			}
+			normal_vector_global[0] = 0;
+			normal_vector_global[1] = 0;
+			normal_vector_global[2] = 0;
+    		for (int k = 0; k < number_of_edges; ++k)
+    		{
+    			layer_index = i + NUMBER_OF_LAYERS - NUMBER_OF_ORO_LAYERS;
+    			dual_vector_index = layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*j + k];
+    			delta_x = normal_distance_dual[dual_vector_index];
+    			delta_z = z_scalar_dual[layer_index*NUMBER_OF_DUAL_SCALARS_H + to_index_dual[adjacent_vector_indices_h[6*j + k]]] - z_scalar_dual[layer_index*NUMBER_OF_DUAL_SCALARS_H + from_index_dual[adjacent_vector_indices_h[6*j + k]]];
+    			tilting_angle = atan(delta_z/delta_x);
+    			local_x = -sin(tilting_angle)*cos(direction_dual[adjacent_vector_indices_h[6*j + k]]);
+    			local_y = -sin(tilting_angle)*sin(direction_dual[adjacent_vector_indices_h[6*j + k]]);
+    			local_z = cos(tilting_angle);	
+    			abs_value = sqrt(pow(local_x, 2) + pow(local_y, 2) + pow(local_z, 2));
+    			local_x = local_x/abs_value;
+    			local_y = local_y/abs_value;
+    			local_z = local_z/abs_value;
+    			calc_local_i(latitude_scalar[j], longitude_scalar[j], local_basis_vector);
+    			normal_vector_global[0] += local_x*local_basis_vector[0];
+    			normal_vector_global[1] += local_x*local_basis_vector[1];
+    			normal_vector_global[2] += local_x*local_basis_vector[2];
+    			calc_local_j(latitude_scalar[j], longitude_scalar[j], local_basis_vector);
+    			normal_vector_global[0] += local_y*local_basis_vector[0];
+    			normal_vector_global[1] += local_y*local_basis_vector[1];
+    			normal_vector_global[2] += local_y*local_basis_vector[2];
+    			calc_local_k(latitude_scalar[j], longitude_scalar[j], local_basis_vector);
+    			normal_vector_global[0] += local_z*local_basis_vector[0];
+    			normal_vector_global[1] += local_z*local_basis_vector[1];
+    			normal_vector_global[2] += local_z*local_basis_vector[2];
+    		}
+    		abs_value = sqrt(scalar_product_elementary(normal_vector_global, normal_vector_global));
+    		normal_vector_global[0] = normal_vector_global[0]/abs_value;
+    		normal_vector_global[1] = normal_vector_global[1]/abs_value;
+    		normal_vector_global[2] = normal_vector_global[2]/abs_value;
+    		calc_local_i(latitude_scalar[j], longitude_scalar[j], local_basis_vector);
+    		x_value = scalar_product_elementary(normal_vector_global, local_basis_vector);
+    		calc_local_j(latitude_scalar[j], longitude_scalar[j], local_basis_vector);
+    		y_value = scalar_product_elementary(normal_vector_global, local_basis_vector);
+    		calc_local_k(latitude_scalar[j], longitude_scalar[j], local_basis_vector);
+    		z_value = scalar_product_elementary(normal_vector_global, local_basis_vector);
+    		for (int k = 0; k < 3; ++k)
+    		{
+    			if (k == 0)
+    			{
+    				vertical_contravar_unit[i*3*NUMBER_OF_VECTORS_V + 3*j + k] = x_value;
+				}
+    			if (k == 1)
+    			{
+    				vertical_contravar_unit[i*3*NUMBER_OF_VECTORS_V + 3*j + k] = y_value;
+				}
+    			if (k == 2)
+    			{
+    				vertical_contravar_unit[i*3*NUMBER_OF_VECTORS_V + 3*j + k] = z_value;
+				}
+				if (fabs(vertical_contravar_unit[i*3*NUMBER_OF_VECTORS_V + 3*j + k]) > 1.000001)
+				{
+				    printf("fabs(vertical_contravar_unit) > 1 at some point.\n");
+					exit(1);
+				}
+			}
+    	}
     }
     /* int bool_0, bool_1, first_found;
     int cell_0_for_cross, cell_1_for_cross;
@@ -2053,7 +2130,7 @@ int main(int argc, char *argv[])
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
     free(OUTPUT_FILE);
-    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_eff_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id, vector_dual_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id, gravity_potential_id;
+    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_eff_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id, vector_dual_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id, gravity_potential_id, vertical_contravar_unit_id, vertical_contravar_unit_dimid;
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NUMBER_OF_SCALARS, &scalar_dimid)))
         ERR(retval);  
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_h_index", NUMBER_OF_SCALARS_H, &scalar_h_dimid)))
@@ -2076,6 +2153,8 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_v_6_index", 6*NUMBER_OF_VECTORS_V, &vector_v_dimid_6)))
         ERR(retval);
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_contravar_unit_index", 3*NUMBER_OF_VECTORS_V*(NUMBER_OF_ORO_LAYERS + 1), &vertical_contravar_unit_dimid)))
+        ERR(retval);        
     if ((retval = nc_def_dim(ncid_g_prop, "vector_index_h_dual", NUMBER_OF_DUAL_VECTORS_H, &vector_dual_h_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_dual_one_layer_dimid", NUMBER_OF_DUAL_VECTORS_PER_LAYER, &vector_dual_one_layer_dimid)))
@@ -2105,6 +2184,8 @@ int main(int argc, char *argv[])
     if ((retval = nc_def_var(ncid_g_prop, "gravity_potential", NC_DOUBLE, 1, &scalar_dimid, &gravity_potential_id)))
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, gravity_potential_id, "units", strlen("m^2/s^2"), "m^2/s^2")))
+        ERR(retval);
+    if ((retval = nc_def_var(ncid_g_prop, "vertical_contravar_unit", NC_DOUBLE, 1, &vertical_contravar_unit_dimid, &vertical_contravar_unit_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "z_surface", NC_DOUBLE, 1, &scalar_dimid, &z_surface_id)))
         ERR(retval);
@@ -2232,6 +2313,8 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, gravity_potential_id, &gravity_potential[0])))
         ERR(retval);
+    if ((retval = nc_put_var_double(ncid_g_prop, vertical_contravar_unit_id, &vertical_contravar_unit[0])))
+        ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, z_surface_id, &z_surface[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, z_vector_id, &z_vector[0])))
@@ -2322,6 +2405,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_close(ncid_g_prop)))
         ERR(retval);
+    free(vertical_contravar_unit);
     free(gravity_potential);
     free(exner_pressure_background);
     free(pot_temp_background);

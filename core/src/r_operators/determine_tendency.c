@@ -243,10 +243,16 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
 	free(pot_temp_perturb);
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
+    	layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
+    	h_index = i - layer_index*NUMBER_OF_VECTORS_PER_LAYER;
         if (i < NUMBER_OF_VECTORS_V || i >= NUMBER_OF_VECTORS - NUMBER_OF_VECTORS_V)
             state_tendency -> wind[i] = 0;
         else
-            state_tendency -> wind[i] = -(*m_pressure_gradient_acc)[i] - add_comps_bool*(*m_pressure_gradient_acc_humid_corr)[i] - (*m_gravity_background_acc)[i] + (*abs_curl_tend)[i] - 0.5*(*m_e_kin_tend_2)[i] + (*friction_acc)[i];
+        {
+            state_tendency -> wind[i] = -(*m_pressure_gradient_acc)[i] - add_comps_bool*(*m_pressure_gradient_acc_humid_corr)[i] - (*m_gravity_background_acc)[i] + (*abs_curl_tend)[i] - 0.5*(*m_e_kin_tend_2)[i] + (*friction_acc)[i];/*
+        if (h_index < NUMBER_OF_VECTORS_V)
+        	printf("%lf\n", state_tendency -> wind[i]);*/
+        }
     }
     free(friction_acc);
 	free(m_gravity_background_acc);

@@ -18,7 +18,7 @@ int divergence(Vector_field in_field, Scalar_field out_field, Grid *grid, int al
             comp_h += in_field[NUMBER_OF_VECTORS_V + layer_index*NUMBER_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]*grid -> adjacent_signs_h[6*h_index + j]*grid -> area[NUMBER_OF_VECTORS_V + layer_index*NUMBER_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]];
         if (layer_index == 0)
         {
-            contral_lower = in_field[NUMBER_OF_VECTORS_PER_LAYER + h_index];
+            contra_lower = in_field[NUMBER_OF_VECTORS_PER_LAYER + h_index];
             comp_v = -contra_lower*grid -> area[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER];
         }
         else if (layer_index == NUMBER_OF_LAYERS - 1)

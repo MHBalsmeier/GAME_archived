@@ -56,6 +56,7 @@ CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o
  /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_pri.c
  /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/diagnostics/ricci.c.o
+ /home/max/my_code/game/core/src/diagnostics/diagnostics.h
  /home/max/my_code/game/core/src/diagnostics/ricci.c
  /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.o

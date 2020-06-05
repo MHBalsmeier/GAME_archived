@@ -55,6 +55,7 @@ CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.o: /ho
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_pri.c
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 
+CMakeFiles/game.dir/src/diagnostics/ricci.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 CMakeFiles/game.dir/src/diagnostics/ricci.c.o: /home/max/my_code/game/core/src/diagnostics/ricci.c
 CMakeFiles/game.dir/src/diagnostics/ricci.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 

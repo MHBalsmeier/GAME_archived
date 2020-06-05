@@ -1,7 +1,7 @@
 #!/bin/bash
 operator=boss
 overwrite_run_id=1
-run_id=dry_reversible
+run_id=jw_balanced_dry_reversible
 run_span=400
 write_out_interval=200
 grid_props_file=/home/max/compiled/game/grids/B4L6T30000_M2_O1_OL4.nc

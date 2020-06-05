@@ -113,8 +113,10 @@ stdio.h
 /home/max/my_code/game/core/src/diagnostics/ricci.c
 ../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
-math.h
+stdio.h
 -
+diagnostics.h
+/home/max/my_code/game/core/src/diagnostics/diagnostics.h
 
 /home/max/my_code/game/core/src/diagnostics/spec_heat_cap_diagnostics.c
 ../enum_and_typedefs.h

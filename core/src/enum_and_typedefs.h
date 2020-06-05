@@ -76,6 +76,7 @@ Scalar_field exner_pressure_background;
 Scalar_field pot_temp_background;
 Vector_field gravity_eff;
 Scalar_field gravity_potential;
+double vertical_contravar_unit[3*NUMBER_OF_VECTORS_V*(NUMBER_OF_ORO_LAYERS + 1)];
 int from_index[NUMBER_OF_VECTORS_H];
 int to_index[NUMBER_OF_VECTORS_H];
 double direction[NUMBER_OF_VECTORS_H];
