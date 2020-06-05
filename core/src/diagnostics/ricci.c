@@ -18,7 +18,7 @@ int horizontal_covariant_normalized(Vector_field in_field, int layer_index, int 
 	int vector_index = layer_index*NUMBER_OF_VECTORS_PER_LAYER + NUMBER_OF_VECTORS_V + h_index;
 	double delta_z = z_scalar[grid -> to_index[vector_index]] - z_scalar[grid -> from_index[vector_index]];
 	double delta_x = grid -> normal_distance[];
-	double angle = atan(delta_z, delta_x);
+	double angle = atan(delta_z/delta_x);
 	double velocity_vector[3];
 	velocity_vector[0] = in_field[vector_index];
 	velocity_vector[1] = 0;
