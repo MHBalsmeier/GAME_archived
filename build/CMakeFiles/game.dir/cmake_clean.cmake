@@ -30,7 +30,6 @@ file(REMOVE_RECURSE
   "CMakeFiles/game.dir/src/r_operators/div.c.o"
   "CMakeFiles/game.dir/src/r_operators/grad.c.o"
   "CMakeFiles/game.dir/src/r_operators/inner.c.o"
-  "CMakeFiles/game.dir/src/r_operators/laplace.c.o"
   "CMakeFiles/game.dir/src/r_operators/linear_combine_two_states.c.o"
   "CMakeFiles/game.dir/src/r_operators/scalar_times_scalar.c.o"
   "CMakeFiles/game.dir/src/r_operators/scalar_times_vector.c.o"

@@ -121,10 +121,6 @@ CMakeFiles/game.dir/src/r_operators/grad.c.o: /home/max/my_code/game/core/src/r_
 CMakeFiles/game.dir/src/r_operators/inner.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/r_operators/inner.c.o: /home/max/my_code/game/core/src/r_operators/inner.c
 
-CMakeFiles/game.dir/src/r_operators/laplace.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
-CMakeFiles/game.dir/src/r_operators/laplace.c.o: /home/max/my_code/game/core/src/r_operators/laplace.c
-CMakeFiles/game.dir/src/r_operators/laplace.c.o: /home/max/my_code/game/core/src/r_operators/r_operators.h
-
 CMakeFiles/game.dir/src/r_operators/linear_combine_two_states.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/r_operators/linear_combine_two_states.c.o: /home/max/my_code/game/core/src/r_operators/linear_combine_two_states.c
 CMakeFiles/game.dir/src/r_operators/linear_combine_two_states.c.o: /home/max/my_code/game/core/src/r_operators/r_operators.h

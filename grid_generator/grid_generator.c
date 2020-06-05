@@ -27,7 +27,7 @@
 const int MODE = 2;
 const double TOA = 30000.0;
 const double SCALE_HEIGHT = 8000.0;
-const int ORO_ID = 1;
+const int ORO_ID = 2;
 const double ORTH_CRITERION_DEG = 89.996;
 
 enum grid_integers {

@@ -1017,33 +1017,6 @@ src/r_operators/inner.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/inner.c.s
 .PHONY : src/r_operators/inner.c.s
 
-src/r_operators/laplace.o: src/r_operators/laplace.c.o
-
-.PHONY : src/r_operators/laplace.o
-
-# target to build an object file
-src/r_operators/laplace.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/laplace.c.o
-.PHONY : src/r_operators/laplace.c.o
-
-src/r_operators/laplace.i: src/r_operators/laplace.c.i
-
-.PHONY : src/r_operators/laplace.i
-
-# target to preprocess a source file
-src/r_operators/laplace.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/laplace.c.i
-.PHONY : src/r_operators/laplace.c.i
-
-src/r_operators/laplace.s: src/r_operators/laplace.c.s
-
-.PHONY : src/r_operators/laplace.s
-
-# target to generate assembly for a file
-src/r_operators/laplace.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/laplace.c.s
-.PHONY : src/r_operators/laplace.c.s
-
 src/r_operators/linear_combine_two_states.o: src/r_operators/linear_combine_two_states.c.o
 
 .PHONY : src/r_operators/linear_combine_two_states.o
@@ -1313,9 +1286,6 @@ help:
 	@echo "... src/r_operators/inner.o"
 	@echo "... src/r_operators/inner.i"
 	@echo "... src/r_operators/inner.s"
-	@echo "... src/r_operators/laplace.o"
-	@echo "... src/r_operators/laplace.i"
-	@echo "... src/r_operators/laplace.s"
 	@echo "... src/r_operators/linear_combine_two_states.o"
 	@echo "... src/r_operators/linear_combine_two_states.i"
 	@echo "... src/r_operators/linear_combine_two_states.s"

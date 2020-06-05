@@ -16,7 +16,7 @@
 #define P_0 100000.0
 
 const int MODE = 2;
-const int ORO_ID = 1;
+const int ORO_ID = 2;
 const double U_0 = 35;
 const double ETA_0 = 0.252;
 const double ETA_T = 0.2;
@@ -28,8 +28,8 @@ const double DELTA_T = 4.8e5;
 /*
 ORO_ID:
 0	sphere
-1	JW test
-2	NASA orography
+1	sphere with Gaussian mountain at 0 / 0, H = 10 km
+2	JW test
 */
 
 int find_z_from_p(double, double, double *);
@@ -79,6 +79,7 @@ int main(int argc, char *argv[])
 	int scalar_index, retval;
     double *latitude_scalar = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double *longitude_scalar = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double distance;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "latitude_scalar", &latitude_scalar_id)))
@@ -97,12 +98,13 @@ int main(int argc, char *argv[])
 			oro[i] = 0;
 		if (ORO_ID == 1)
 		{
-			latitude = latitude_scalar[i];
-			find_z_from_p(latitude, P_0, &oro[i]);
+            distance = calculate_distance_h(latitude_scalar[i], longitude_scalar[i], 0, 0, RADIUS);
+			oro[i] = 10e3*exp(-pow(distance/100e3, 2));
 		}
 		if (ORO_ID == 2)
 		{
-			
+			latitude = latitude_scalar[i];
+			find_z_from_p(latitude, P_0, &oro[i]);
 		}
 	}
 	free(latitude_scalar);

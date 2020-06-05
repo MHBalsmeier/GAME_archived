@@ -272,14 +272,6 @@ stdio.h
 stdio.h
 -
 
-/home/max/my_code/game/core/src/r_operators/laplace.c
-../enum_and_typedefs.h
-/home/max/my_code/game/core/src/enum_and_typedefs.h
-r_operators.h
-/home/max/my_code/game/core/src/r_operators/r_operators.h
-stdlib.h
--
-
 /home/max/my_code/game/core/src/r_operators/linear_combine_two_states.c
 ../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h

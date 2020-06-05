@@ -31,15 +31,14 @@ const double U_0 = 35;
 const double ETA_0 = 0.252;
 const double TOA = 30000;
 const short MODE = 2;
-const short ORO_ID = 1;
 const int TEST_ID = 4;
 
 /* test_ids:
 0:	standard atmosphere without orography
-1:	standard atmosphere without orography with one wind value != 0
-2:	JW test, (pseudo-)balanced state
-3:	JW test, with perturbation
-4:	JW test, with perturbation and moisture
+1:	standard atmosphere with Gaussian mountain
+2:	JW test, dry, balanced
+3:	JW test, dry, perturbed
+4:	JW test, moist, perturbed
 */
 
 enum grid_integers {
@@ -78,6 +77,13 @@ int find_z_from_p(double, double, double *);
 
 int main(int argc, char *argv[])
 {
+	int ORO_ID;
+	if (TEST_ID == 0)
+		ORO_ID = 0;
+	if (TEST_ID == 1)
+		ORO_ID = 1;
+	if (TEST_ID > 1)
+		ORO_ID = 2;
     double *direction = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
     double *latitude_scalar = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double *longitude_scalar = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
@@ -205,7 +211,7 @@ int main(int argc, char *argv[])
     double lat, lon;
     double u, eta, eta_v, T_perturb, distance, pressure_value;
     double u_p = 1.0;
-    double distance_scale = SEMIMAJOR/10;
+    double distance_scale = RADIUS/10;
     double lat_perturb = 2*M_PI/9;
     double lon_perturb = M_PI/9;
     for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
@@ -235,7 +241,7 @@ int main(int argc, char *argv[])
                 pressure[j] = pressure_value;
                 eta = pressure[j]/P_0;
                 eta_v = (eta - ETA_0)*M_PI/2;
-                T_perturb = 3.0/4.0*eta*M_PI*U_0/R_D*sin(eta_v)*pow(cos(eta_v), 0.5)*((-2*pow(sin(lat), 6)*(pow(cos(lat), 2) + 1.0/3.0) + 10.0/63.0)*2*U_0*pow(cos(eta_v), 1.5) + SEMIMAJOR*OMEGA*(8.0/5.0*pow(cos(lat), 3)*(pow(sin(lat), 2) + 2.0/3.0) - M_PI/4.0));
+                T_perturb = 3.0/4.0*eta*M_PI*U_0/R_D*sin(eta_v)*pow(cos(eta_v), 0.5)*((-2*pow(sin(lat), 6)*(pow(cos(lat), 2) + 1.0/3.0) + 10.0/63.0)*2*U_0*pow(cos(eta_v), 1.5) + RADIUS*OMEGA*(8.0/5.0*pow(cos(lat), 3)*(pow(sin(lat), 2) + 2.0/3.0) - M_PI/4.0));
                 if (eta >= ETA_T)
                 {
                     temperature[j] = T_0*pow(eta, R_D*GAMMA/G) + T_perturb;
@@ -496,15 +502,8 @@ int main(int argc, char *argv[])
             lat = latitude_vector[j];
             lon = longitude_vector[j];
             z_height = z_vector[NUMBER_OF_VECTORS_V + j + i*NUMBER_OF_VECTORS_PER_LAYER];
-            if (TEST_ID == 0)
+            if (TEST_ID == 0 || TEST_ID == 1)
                 wind_h[j] = 0;
-            if (TEST_ID == 1)
-            {
-                if (i == NUMBER_OF_LAYERS - 2 && j == NUMBER_OF_SCALARS_H/2)
-                    wind_h[j] = 10;
-                else
-                    wind_h[j] = 0;
-            }
             if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4)
             {
                 find_pressure_value(lat, z_height, &pressure_value);
@@ -513,7 +512,7 @@ int main(int argc, char *argv[])
                 u = U_0*pow(cos(eta_v), 1.5)*pow(sin(2*lat), 2);
                 if (TEST_ID == 3 || TEST_ID == 4)
                 {
-                    distance = calculate_distance_h(lat, lon, lat_perturb, lon_perturb, SEMIMAJOR);
+                    distance = calculate_distance_h(lat, lon, lat_perturb, lon_perturb, RADIUS);
                     u += u_p*exp(-pow(distance/distance_scale, 2));
                 }
                 wind_h[j] = u*cos(direction[j]);
@@ -669,7 +668,7 @@ int find_z_from_p(double lat, double p, double *result)
         phi_bg = T_0*G/GAMMA*(1 - pow(eta, R_D*GAMMA/G));
     else
         phi_bg = T_0*G/GAMMA*(1 - pow(eta, R_D*GAMMA/G)) - R_D*DELTA_T*((log(eta/ETA_T) + 137.0/60.0)*pow(ETA_T, 5) - 5*eta*pow(ETA_T, 4) + 5*pow(ETA_T, 3)*pow(eta, 2) - 10.0/3.0*pow(ETA_T, 2)*pow(eta, 3) + 5.0/4.0*ETA_T*pow(eta, 4) - 1.0/5.0*pow(eta, 5));
-    phi_perturb = U_0*pow(cos(eta_v), 1.5)*((-2*pow(sin(lat), 6)*(pow(cos(lat), 2) + 1.0/3.0) + 10.0/63.0)*U_0*pow(cos(eta_v), 1.5) + SEMIMAJOR*OMEGA*(8.0/5.0*pow(cos(lat), 3)*(pow(sin(lat), 2) + 2.0/3.0) - M_PI/4.0));
+    phi_perturb = U_0*pow(cos(eta_v), 1.5)*((-2*pow(sin(lat), 6)*(pow(cos(lat), 2) + 1.0/3.0) + 10.0/63.0)*U_0*pow(cos(eta_v), 1.5) + RADIUS*OMEGA*(8.0/5.0*pow(cos(lat), 3)*(pow(sin(lat), 2) + 2.0/3.0) - M_PI/4.0));
     phi = phi_bg + phi_perturb;
     z = phi/G;
     *result = z;
