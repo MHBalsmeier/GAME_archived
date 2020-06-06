@@ -26,7 +26,6 @@
 
 const int MODE = 2;
 const double TOA = 30000.0;
-const double SCALE_HEIGHT = 8000.0;
 const int ORO_ID = 2;
 const double ORTH_CRITERION_DEG = 89.996;
 
@@ -37,7 +36,7 @@ NUMBER_OF_PENTAGONS = 12,
 NUMBER_OF_HEXAGONS = (int) (10*(pow(2, 2*RES_ID) - 1)),
 NUMBER_OF_EDGES = 3*NUMBER_OF_BASIC_TRIANGLES/2,
 NUMBER_OF_LAYERS = 6,
-NUMBER_OF_ORO_LAYERS = 8,
+NUMBER_OF_ORO_LAYERS = 4,
 NUMBER_OF_LEVELS = NUMBER_OF_LAYERS + 1,
 NUMBER_OF_SCALARS_H = NUMBER_OF_PENTAGONS + NUMBER_OF_HEXAGONS,
 NUMBER_OF_VECTORS_H = (5*NUMBER_OF_PENTAGONS/2 + 6/2*NUMBER_OF_HEXAGONS),
@@ -77,6 +76,11 @@ int find_v_vector_indices_for_dual_scalar_z(int [], int [], int [], int, int [])
 
 int main(int argc, char *argv[])
 {
+	if (NUMBER_OF_ORO_LAYERS >= NUMBER_OF_LAYERS)
+	{
+		printf("It is NUMBER_OF_ORO_LAYERS >= NUMBER_OF_LAYERS.\n");
+		exit(1);
+	}
     int OUTPUT_FILE_LENGTH = 100;
     char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
     sprintf(OUTPUT_FILE_PRE, "nc_files/B%dL%dT%d_M%d_O%d_OL%d.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, MODE, ORO_ID, NUMBER_OF_ORO_LAYERS);
@@ -1080,11 +1084,13 @@ int main(int argc, char *argv[])
         volume[i] = find_volume(base_area, radius_0, radius_1);
         volume_sum += volume[i];
     }
-    volume_sum_ideal = find_volume(4*M_PI*pow(RADIUS, 2), RADIUS, RADIUS + z_vector[0]);
+    volume_sum_ideal = 0;
+    for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
+    	volume_sum_ideal += find_volume(area[NUMBER_OF_VECTORS - NUMBER_OF_VECTORS_V + i], RADIUS + z_vector[NUMBER_OF_VECTORS- NUMBER_OF_VECTORS_V + i], RADIUS + TOA);
     if (fabs(volume_sum/volume_sum_ideal - 1) > 1e-12)
 	{
         printf("Sum of volumes of grid boxes does not match volume of entire atmosphere.\n");
-		// exit(1);
+		exit(1);
 	}
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
@@ -1251,6 +1257,27 @@ int main(int argc, char *argv[])
 					exit(1);
 				}
 			}
+    	}
+    }
+    double area_rescale_factor, dz, dh;
+	double area_rescale_factor_warning_begin = 0.1;
+	int contravar_unit_vector_index;
+    for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
+    {
+    	layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
+    	h_index = i - layer_index*NUMBER_OF_VECTORS_PER_LAYER;
+    	if (h_index < NUMBER_OF_VECTORS_V && layer_index >= NUMBER_OF_LAYERS - NUMBER_OF_ORO_LAYERS)
+    	{
+    		contravar_unit_vector_index = h_index + (layer_index - (NUMBER_OF_LAYERS - NUMBER_OF_ORO_LAYERS))*NUMBER_OF_VECTORS_V;
+    		dz = vertical_contravar_unit[3*contravar_unit_vector_index + 2];
+    		if (dz <= 0)
+    			printf("Error in horizontal face orography rescale calculation, position 0.\n");
+    		dh = sqrt(pow(vertical_contravar_unit[3*contravar_unit_vector_index + 0], 2) + pow(vertical_contravar_unit[3*contravar_unit_vector_index + 1], 2));
+    		tilting_angle = atan(dh/dz);
+    		area_rescale_factor = sqrt(1 + pow(tan(tilting_angle), 2));
+    		area[i] = area_rescale_factor*area[i];
+    		if (fabs(area_rescale_factor - 1) > area_rescale_factor_warning_begin)
+    			printf("It is area_rescale_factor > area_rescale_factor_warning_begin at some point.\n");
     	}
     }
     /* int bool_0, bool_1, first_found;

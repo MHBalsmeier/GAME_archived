@@ -104,6 +104,7 @@ double recov_ver_1_dual_weight[6*NUMBER_OF_VECTORS_V];
 typedef struct dualgrid {
 Dual_vector_field normal_distance;
 Dual_vector_field area;
+Dual_vector_field z_vector;
 double f_vec[NUMBER_OF_DUAL_VECTORS_PER_LAYER];
 int to_index[NUMBER_OF_DUAL_VECTORS_H];
 int from_index[NUMBER_OF_DUAL_VECTORS_H];
