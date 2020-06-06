@@ -15,7 +15,7 @@
 #define M_D 0.028964420
 #define R (N_A*K_B)
 #define R_D (R/M_D)
-#define P_0 100000.0
+#define P_0 100000
 #define OMEGA (7.292115e-5)
 #define C_P 1005.0
 
@@ -31,7 +31,7 @@ const double U_0 = 35;
 const double ETA_0 = 0.252;
 const double TOA = 30000;
 const short MODE = 2;
-const int TEST_ID = 4;
+const int TEST_ID = 0;
 
 /* test_ids:
 0:	standard atmosphere without orography
@@ -227,12 +227,12 @@ int main(int argc, char *argv[])
                 if (z_height < TROPO_HEIGHT)
                 {
                     temperature[j] = T_SFC + z_height*TEMP_GRADIENT;
-                    pressure[j] = P_0*pow(1 + TEMP_GRADIENT*z_height/T_SFC, -G/(R_D*TEMP_GRADIENT));
+                    pressure[j] = 101325*pow(1 + TEMP_GRADIENT*z_height/T_SFC, -G/(R_D*TEMP_GRADIENT));
                 }
                 else
                 {
                     temperature[j] = TROPO_TEMP;
-                    pressure[j] = P_0*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT/T_SFC, -G/(R_D*TEMP_GRADIENT))*exp(-G*(z_height - TROPO_HEIGHT)/(R_D*TROPO_TEMP));
+                    pressure[j] = 101325*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT/T_SFC, -G/(R_D*TEMP_GRADIENT))*exp(-G*(z_height - TROPO_HEIGHT)/(R_D*TROPO_TEMP));
                 }
             }
             if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4)
