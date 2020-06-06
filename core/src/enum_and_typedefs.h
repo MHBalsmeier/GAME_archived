@@ -21,9 +21,9 @@
 #define SEMIMAJOR 6378137.0
 #define SEMIMINOR 6356752.314
 #define RADIUS pow(SEMIMAJOR*SEMIMAJOR*SEMIMINOR, 1.0/3.0)
-#define H_BAR (6.62607015e-30)
-#define entropy_constant_d (K_B*N_A/M_D*log(1/P_0*K_B*K_B*pow(M_D/N_A*exp(5.0/3)/(M_PI*H_BAR*H_BAR), 1.5)))
-#define entropy_constant_v (K_B*N_A/M_V*log(1/P_0*K_B*K_B*pow(M_V/N_A*exp(5.0/3)/(M_PI*H_BAR*H_BAR), 1.5)))
+#define H_BAR (1.054571817e-34)
+#define entropy_constant_d (0.4*C_D_P*log(K_B/P_0*pow(M_D/N_A*K_B*exp(5.0/3)/(2*M_PI*H_BAR*H_BAR), 1.5)))
+#define entropy_constant_v (0.4*C_V_P*log(K_B/P_0*pow(M_V/N_A*K_B*exp(5.0/3)/(2*M_PI*H_BAR*H_BAR), 1.5)))
 #define EPSILON_TRACERS 0.00001
 
 enum grid_integers {
