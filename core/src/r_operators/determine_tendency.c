@@ -22,9 +22,9 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     Scalar_field *temperature = malloc(sizeof(Scalar_field));
     Scalar_field *mass_diffusion_coeff_numerical_h = malloc(sizeof(Scalar_field));
 	Scalar_field *mass_diffusion_coeff_numerical_v = malloc(sizeof(Scalar_field));
+	temperature_diagnostics(current_state -> entropy, current_state -> density, current_state -> add_comp_densities, *temperature);
     if (dissipation_on == 1)
     {
-        temperature_diagnostics(current_state -> density_entropy, current_state -> density, current_state -> add_comp_densities, *temperature);
         Vector_field *diffusion_mass_flux_pre = malloc(sizeof(Vector_field));
         retval = grad(current_state -> density, *diffusion_mass_flux_pre, grid);
         retval = calc_mass_diffusion_coeffs(*temperature, current_state -> density, *mass_diffusion_coeff_numerical_h, *mass_diffusion_coeff_numerical_v);
@@ -43,11 +43,11 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
             state_tendency -> density[i] = -(*density_flux_divergence)[i];
     }
     free(density_flux_divergence);
-    Vector_field *density_entropy_flux = malloc(sizeof(Vector_field));
-    scalar_times_vector(current_state -> density_entropy, current_state -> wind, *density_entropy_flux, grid);
-    Scalar_field *density_entropy_flux_divergence = malloc(sizeof(Scalar_field));
-    divergence(*density_entropy_flux, *density_entropy_flux_divergence, grid, 0);
-    free(density_entropy_flux);
+    Vector_field *entropy_flux = malloc(sizeof(Vector_field));
+    scalar_times_vector(current_state -> entropy, current_state -> wind, *entropy_flux, grid);
+    Scalar_field *entropy_flux_divergence = malloc(sizeof(Scalar_field));
+    divergence(*entropy_flux, *entropy_flux_divergence, grid, 0);
+    free(entropy_flux);
     Scalar_field *temp_diffusion_heating = malloc(sizeof(Scalar_field));
     Vector_field *temperature_flux = malloc(sizeof(Vector_field));
     Scalar_field *temp_diffusion_coeff_numerical_h = malloc(sizeof(Scalar_field));
@@ -71,12 +71,6 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     free(temp_diffusion_coeff_numerical_h);
 	free(temp_diffusion_coeff_numerical_v);
     free(temperature_flux);
-    Scalar_field *pot_temp = malloc(sizeof(Scalar_field));
-    retval = pot_temp_diagnostics(current_state -> density_entropy, current_state -> density, current_state -> add_comp_densities, *pot_temp);
-    if (retval != 0)
-    	printf("Error in pot_temp_diagnostics.\n");
-    Scalar_field *exner_pressure = malloc(sizeof(Scalar_field));
-    exner_pressure_diagnostics(current_state -> density_entropy, current_state -> density, current_state -> add_comp_densities, *exner_pressure);
     double viscosity_coeff_molecular = 5*pow(10, -5);
     double viscosity_coeff = pow(10, 5)*viscosity_coeff_molecular;
     Scalar_field *rad_heating = calloc(1, sizeof(Scalar_field));
@@ -99,13 +93,13 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
                 total_density += current_state -> add_comp_densities[k*NUMBER_OF_SCALARS + i];
             c_h_v = spec_heat_cap_diagnostics_v(current_state -> density[i], current_state -> add_comp_densities[NUMBER_OF_COND_ADD_COMPS*NUMBER_OF_SCALARS + i]);
             rho_h = current_state -> density[i] + current_state -> add_comp_densities[(NUMBER_OF_ADD_COMPS - 1)*NUMBER_OF_SCALARS + i];
-            state_tendency -> density_entropy[i] = -(*density_entropy_flux_divergence)[i] + 1/(*temperature)[i]*(rho_h/total_density*((*temp_diffusion_heating)[i] + (*heating_diss)[i] + (*rad_heating)[i]) + add_comp_heat_source_rates[(NUMBER_OF_ADD_COMPS - 1)*NUMBER_OF_SCALARS + i]);
+            state_tendency -> entropy[i] = -(*entropy_flux_divergence)[i] + 1/(*temperature)[i]*(rho_h/total_density*((*temp_diffusion_heating)[i] + (*heating_diss)[i] + (*rad_heating)[i]) + add_comp_heat_source_rates[(NUMBER_OF_ADD_COMPS - 1)*NUMBER_OF_SCALARS + i]);
         }
         else
-            state_tendency -> density_entropy[i] = -(*density_entropy_flux_divergence)[i];
+            state_tendency -> entropy[i] = -(*entropy_flux_divergence)[i];
     }
     free(mass_source_rate);
-    free(density_entropy_flux_divergence);
+    free(entropy_flux_divergence);
     Scalar_field *add_comp_density = malloc(sizeof(Scalar_field));
     Vector_field *add_comp_velocity = malloc(sizeof(Vector_field));
     Vector_field *add_comp_density_flux = malloc(sizeof(Vector_field));
@@ -197,57 +191,66 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
         (*abs_curl)[i] = dualgrid -> f_vec[i - layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER] + (*rel_curl)[i];
     }
     free(rel_curl);
-    Scalar_field *exner_pressure_perturb = malloc(sizeof(Scalar_field));
-    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
-        (*exner_pressure_perturb)[i] = (*exner_pressure)[i] - grid -> exner_pressure_background[i];
-    Vector_field *exner_pressure_perturb_gradient = malloc(sizeof(Vector_field));
-    grad(*exner_pressure_perturb, *exner_pressure_perturb_gradient, grid);
-    free(exner_pressure_perturb);
-    Vector_field *m_pressure_gradient_acc = malloc(sizeof(Vector_field));
-    Scalar_field *exner_pr_grad_pre_factor_m = malloc(sizeof(Scalar_field));
-    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
-    	(*exner_pr_grad_pre_factor_m)[i] = C_D_P*(*pot_temp)[i];
-    retval = scalar_times_vector(*exner_pr_grad_pre_factor_m, *exner_pressure_perturb_gradient, *m_pressure_gradient_acc, grid);
-    free(exner_pressure_perturb_gradient);
-    Vector_field *m_pressure_gradient_acc_humid_corr = malloc(sizeof(Vector_field));
-    Vector_field *exner_pressure_gradient = malloc(sizeof(Vector_field));
-    grad(*exner_pressure, *exner_pressure_gradient, grid);
-    double condensates_density_sum, c_h_p, xi_1, xi_2, R_h, density_d_micro_value, density_v_micro_value;
+    Scalar_field *specific_entropy = malloc(sizeof(Scalar_field));
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
-    	layer_index = i/NUMBER_OF_SCALARS_H;
-    	h_index = i - layer_index*NUMBER_OF_SCALARS_H;
-    	c_h_p = spec_heat_cap_diagnostics_p(current_state -> density[i], current_state -> add_comp_densities[NUMBER_OF_COND_ADD_COMPS*NUMBER_OF_SCALARS + i]);
-    	c_h_v = spec_heat_cap_diagnostics_v(current_state -> density[i], current_state -> add_comp_densities[NUMBER_OF_COND_ADD_COMPS*NUMBER_OF_SCALARS + i]);
-    	condensates_density_sum = calc_condensates_density_sum(layer_index, h_index, current_state -> add_comp_densities);
-    	density_d_micro_value = calc_micro_density(current_state -> density[i], condensates_density_sum);
-    	density_v_micro_value = calc_micro_density(current_state -> add_comp_densities[NUMBER_OF_COND_ADD_COMPS*NUMBER_OF_SCALARS + i], condensates_density_sum);
-    	total_density = current_state -> density[i] + current_state -> add_comp_densities[NUMBER_OF_COND_ADD_COMPS*NUMBER_OF_SCALARS + i] + condensates_density_sum;
-    	R_h = gas_constant_diagnostics(density_d_micro_value, density_v_micro_value);
-    	xi_1 = R_D*c_h_v/(R_h*C_D_V) - 1;
-    	xi_2 = (density_d_micro_value + density_v_micro_value)*c_h_p/(C_D_P*total_density) - 1;
-    	(*exner_pr_grad_pre_factor_m)[i] = xi_2*C_D_P*(*pot_temp)[i] + P_0/total_density*xi_1*pow((*exner_pressure)[i], C_D_V/R_D - 1);
+    	rho_h = current_state -> density[i] + current_state -> add_comp_densities[(NUMBER_OF_ADD_COMPS - 1)*NUMBER_OF_SCALARS + i];
+    	(*specific_entropy)[i] = current_state -> entropy[i]/rho_h;
+	}
+    Vector_field *specific_entropy_gradient = malloc(sizeof(Vector_field));
+    retval = grad(*specific_entropy, *specific_entropy_gradient, grid);
+    if (retval != 0)
+    	printf("grad called at position 0 from tendency errored out, exit code %d.\n", retval);
+	free(specific_entropy);
+	Vector_field *pressure_gradient_acc_1 = malloc(sizeof(Vector_field));
+	retval = scalar_times_vector(*temperature, *specific_entropy_gradient, *pressure_gradient_acc_1, grid);
+	if (retval != 0)
+		printf("scalar_times_vector called at position 0 from tendency errored out, exit code %d.\n", retval);
+	free(specific_entropy_gradient);
+	Vector_field *temp_gradient_times_c_h_p = malloc(sizeof(Vector_field));
+    retval = grad(*temperature, *temp_gradient_times_c_h_p, grid);
+    if (retval != 0)
+    	printf("grad called at position 1 from tendency errored out, exit code %d.\n", retval);
+    free(temperature);
+    Scalar_field *c_h_p_field = malloc(sizeof(Scalar_field));
+    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+    	(*c_h_p_field)[i] = spec_heat_cap_diagnostics_p(current_state -> density[i], current_state -> add_comp_densities[NUMBER_OF_COND_ADD_COMPS*NUMBER_OF_SCALARS + i]);	
+	retval = scalar_times_vector(*c_h_p_field, *temp_gradient_times_c_h_p, *temp_gradient_times_c_h_p, grid);
+	if (retval != 0)
+		printf("scalar_times_vector called at position 2 from tendency errored out, exit code %d.\n", retval);
+	free(c_h_p_field);
+    Vector_field *pressure_gradient_acc = malloc(sizeof(Vector_field));
+    for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
+    {
+    	(*pressure_gradient_acc)[i] = -(*temp_gradient_times_c_h_p)[i] + (*pressure_gradient_acc_1)[i];
     }
-    free(exner_pressure);
-    retval = scalar_times_vector(*exner_pr_grad_pre_factor_m, *exner_pressure_gradient, *m_pressure_gradient_acc_humid_corr, grid);
-    free(exner_pressure_gradient);
-   	free(exner_pr_grad_pre_factor_m);
+    free(pressure_gradient_acc_1);
+    free(temp_gradient_times_c_h_p);
+    Scalar_field *pressure_gradient_decel_factor = malloc(sizeof(Scalar_field));
+    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+    {
+    	rho_h = current_state -> density[i] + current_state -> add_comp_densities[(NUMBER_OF_ADD_COMPS - 1)*NUMBER_OF_SCALARS + i];
+        total_density = current_state -> density[i];
+        for (int k = 0; k < NUMBER_OF_ADD_COMPS; ++k)
+            total_density += current_state -> add_comp_densities[k*NUMBER_OF_SCALARS + i];
+    	(*pressure_gradient_decel_factor)[i] = rho_h/total_density;
+    }
+	retval = scalar_times_vector(*pressure_gradient_decel_factor, *pressure_gradient_acc, *pressure_gradient_acc, grid);
+	if (retval != 0)
+		printf("scalar_times_vector called at position 1 from tendency errored out, exit code %d.\n", retval);
+    free(pressure_gradient_decel_factor);
     Vector_field *abs_curl_tend = malloc(sizeof(Vector_field));
     cross_product(current_state -> wind, *abs_curl, *abs_curl_tend, grid);
     free(abs_curl);
-    Scalar_field *e_kin_spec_2 = malloc(sizeof(Scalar_field));
-    inner(current_state -> wind, current_state -> wind, *e_kin_spec_2, grid, dualgrid);
-    Vector_field *m_e_kin_tend_2 = malloc(sizeof(Vector_field));
-    grad(*e_kin_spec_2, *m_e_kin_tend_2, grid);
-    free(temperature);
-    free(e_kin_spec_2);
-	Scalar_field *pot_temp_perturb = malloc(sizeof(Scalar_field));
-	for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
-		(*pot_temp_perturb)[i] =  (*pot_temp)[i] - grid -> pot_temp_background[i];
-	free(pot_temp);
-	Vector_field *m_gravity_background_acc = malloc(sizeof(Vector_field));
-	retval = scalar_times_vector(*pot_temp_perturb, grid -> gravity_eff, *m_gravity_background_acc, grid);
-	free(pot_temp_perturb);
+    Scalar_field *mechanic_energy = malloc(sizeof(Scalar_field));
+    inner(current_state -> wind, current_state -> wind, *mechanic_energy, grid, dualgrid);
+    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+    	(*mechanic_energy)[i] = -grid -> gravity_potential[i] - 0.5*(*mechanic_energy)[i];
+    Vector_field *downgradient_mechanic_energy = malloc(sizeof(Vector_field));
+    grad(*mechanic_energy, *downgradient_mechanic_energy, grid);
+    if (retval != 0)
+    	printf("grad called at position 2 from tendency errored out, exit code %d.\n", retval);
+    free(mechanic_energy);
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
     	layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
@@ -255,16 +258,12 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
         if (i < NUMBER_OF_VECTORS_V || i >= NUMBER_OF_VECTORS - NUMBER_OF_VECTORS_V)
             state_tendency -> wind[i] = 0;
         else
-        {
-            state_tendency -> wind[i] = -(*m_pressure_gradient_acc)[i] - add_comps_bool*(*m_pressure_gradient_acc_humid_corr)[i] - (*m_gravity_background_acc)[i] + (*abs_curl_tend)[i] - 0.5*(*m_e_kin_tend_2)[i] + (*friction_acc)[i];
-      	}
+            state_tendency -> wind[i] = (*pressure_gradient_acc)[i] + (*abs_curl_tend)[i] + (*downgradient_mechanic_energy)[i] + (*friction_acc)[i];
     }
     free(friction_acc);
-	free(m_gravity_background_acc);
     free(abs_curl_tend);
-    free(m_pressure_gradient_acc);
-    free(m_pressure_gradient_acc_humid_corr);
-    free(m_e_kin_tend_2);
+    free(pressure_gradient_acc);
+    free(downgradient_mechanic_energy);
     return retval;
 }
 

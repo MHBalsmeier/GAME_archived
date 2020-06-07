@@ -72,10 +72,8 @@ Scalar_field volume;
 Vector_field area;
 Scalar_field z_scalar;
 Vector_field z_vector;
-Scalar_field exner_pressure_background;
-Scalar_field pot_temp_background;
-Vector_field gravity_eff;
 Scalar_field gravity_potential;
+Vector_field gravity;
 double vertical_contravar_unit[3*NUMBER_OF_VECTORS_V*(NUMBER_OF_ORO_LAYERS + 1)];
 int from_index[NUMBER_OF_VECTORS_H];
 int to_index[NUMBER_OF_VECTORS_H];
@@ -116,7 +114,7 @@ int adjacent_scalar_indices_dual_h[3*NUMBER_OF_DUAL_SCALARS_H];
 } Dualgrid;
 
 typedef struct state {
-Scalar_field density_entropy;
+Scalar_field entropy;
 Scalar_field density;
 Vector_field wind;
 // density order: solid, liquid, vapour

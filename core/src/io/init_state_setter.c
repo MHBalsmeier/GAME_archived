@@ -87,7 +87,7 @@ int set_init_data(char FILE_NAME[], State *init_state, double *t_init, int add_c
             R_h = gas_constant_diagnostics(rho[j], water_vapour_density[j]);
             c_h_v = spec_heat_cap_diagnostics_p(rho[j], water_vapour_density[j]);
             density_h_micro = calc_micro_density(rho[j] + water_vapour_density[j], solid_water_density[j] + liquid_water_density[j]);
-            init_state -> density_entropy[j + i*NUMBER_OF_SCALARS_H] = rho[j]*(C_D_P*log(pot_temp[j]) + entropy_constant_d) + water_vapour_density[j]*(C_V_P*log(pot_temp[j]) + M_D/M_V*DELTA_C_V_P*R_h/c_h_v*log(R_h*pot_temp[j]*density_h_micro/P_0) + entropy_constant_d);
+            init_state -> entropy[j + i*NUMBER_OF_SCALARS_H] = rho[j]*(C_D_P*log(pot_temp[j]) + entropy_constant_d) + water_vapour_density[j]*(C_V_P*log(pot_temp[j]) + M_D/M_V*DELTA_C_V_P*R_h/c_h_v*log(R_h*pot_temp[j]*density_h_micro/P_0) + entropy_constant_d);
             if (NUMBER_OF_ADD_COMPS > 0)
             {
                 init_state -> add_comp_densities[j + i*NUMBER_OF_SCALARS_H] = solid_water_density[j];

@@ -1,7 +1,7 @@
 disp_level=0
 disp_shortname=pres
 fig_save_path=~/figs/game_output/$run_id
-plot_integrals=0
+plot_integrals=1
 if [ -d $fig_save_path ]
 then
 rm -r $fig_save_path

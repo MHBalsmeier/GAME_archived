@@ -317,35 +317,9 @@ CMakeFiles/game.dir/src/time_stepping/runge_kutta_third_order.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/time_stepping/runge_kutta_third_order.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/time_stepping/runge_kutta_third_order.c -o CMakeFiles/game.dir/src/time_stepping/runge_kutta_third_order.c.s
 
-CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o: CMakeFiles/game.dir/flags.make
-CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building C object CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c
-
-CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c > CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.i
-
-CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c -o CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.s
-
-CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o: CMakeFiles/game.dir/flags.make
-CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/pot_temp_diagnostics.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building C object CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/pot_temp_diagnostics.c
-
-CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/pot_temp_diagnostics.c > CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.i
-
-CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/pot_temp_diagnostics.c -o CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.s
-
 CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/density_diagnostics.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building C object CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building C object CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/density_diagnostics.c
 
 CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.i: cmake_force
@@ -358,7 +332,7 @@ CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.s: cmake_force
 
 CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/spec_heat_cap_diagnostics.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building C object CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building C object CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/spec_heat_cap_diagnostics.c
 
 CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.i: cmake_force
@@ -371,7 +345,7 @@ CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.s: cmake_force
 
 CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/gas_constant_diagnostics.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building C object CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building C object CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/gas_constant_diagnostics.c
 
 CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.i: cmake_force
@@ -384,7 +358,7 @@ CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.s: cmake_force
 
 CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o: /home/max/my_code/game/core/src/diagnostics/calc_numerical_diffusion_coeffs.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building C object CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building C object CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o   -c /home/max/my_code/game/core/src/diagnostics/calc_numerical_diffusion_coeffs.c
 
 CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.i: cmake_force
@@ -397,7 +371,7 @@ CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.s: cmake_f
 
 CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.o: /home/max/my_code/game/core/src/diagnostics/global_scalar_integral.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building C object CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building C object CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.o   -c /home/max/my_code/game/core/src/diagnostics/global_scalar_integral.c
 
 CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.i: cmake_force
@@ -410,7 +384,7 @@ CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.s: cmake_force
 
 CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/temperature_diagnostics.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building C object CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building C object CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/temperature_diagnostics.c
 
 CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.i: cmake_force
@@ -420,6 +394,32 @@ CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.i: cmake_force
 CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/temperature_diagnostics.c -o CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.s
+
+CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o: CMakeFiles/game.dir/flags.make
+CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building C object CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c
+
+CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c > CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.i
+
+CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c -o CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.s
+
+CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o: CMakeFiles/game.dir/flags.make
+CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/pot_temp_diagnostics.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building C object CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/pot_temp_diagnostics.c
+
+CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/pot_temp_diagnostics.c > CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.i
+
+CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/pot_temp_diagnostics.c -o CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.s
 
 CMakeFiles/game.dir/src/diagnostics/ricci.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/ricci.c.o: /home/max/my_code/game/core/src/diagnostics/ricci.c
@@ -560,14 +560,14 @@ game_OBJECTS = \
 "CMakeFiles/game.dir/src/r_operators/dissipation.c.o" \
 "CMakeFiles/game.dir/src/time_stepping/runge_kutta_fourth_order.c.o" \
 "CMakeFiles/game.dir/src/time_stepping/runge_kutta_third_order.c.o" \
-"CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o" \
-"CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o" \
 "CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.o" \
 "CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.o" \
 "CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.o" \
 "CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o" \
 "CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.o" \
 "CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.o" \
+"CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o" \
+"CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o" \
 "CMakeFiles/game.dir/src/diagnostics/ricci.c.o" \
 "CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.o" \
 "CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o" \
@@ -601,14 +601,14 @@ game: CMakeFiles/game.dir/src/r_operators/scalar_times_vector_h_v.c.o
 game: CMakeFiles/game.dir/src/r_operators/dissipation.c.o
 game: CMakeFiles/game.dir/src/time_stepping/runge_kutta_fourth_order.c.o
 game: CMakeFiles/game.dir/src/time_stepping/runge_kutta_third_order.c.o
-game: CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o
-game: CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o
 game: CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.o
 game: CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.o
 game: CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.o
 game: CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o
 game: CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.o
 game: CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.o
+game: CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o
+game: CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o
 game: CMakeFiles/game.dir/src/diagnostics/ricci.c.o
 game: CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.o
 game: CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o
