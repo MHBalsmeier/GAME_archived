@@ -1,5 +1,5 @@
 #!/bin/bash
-operator=boss
+operator=Boss
 overwrite_run_id=1
 run_id=jw_balanced_dry_reversible
 run_span=400

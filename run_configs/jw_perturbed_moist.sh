@@ -1,5 +1,5 @@
 #!/bin/bash
-operator=boss
+operator=Boss
 overwrite_run_id=1
 run_id=jw_perturbed_moist
 run_span=400

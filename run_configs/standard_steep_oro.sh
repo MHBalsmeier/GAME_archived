@@ -1,5 +1,5 @@
 #!/bin/bash
-operator=boss
+operator=Boss
 overwrite_run_id=1
 run_id=standard_steep_oro
 run_span=400

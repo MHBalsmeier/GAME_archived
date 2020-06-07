@@ -48,10 +48,10 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     printf("*\t\t\t\t\t\t\t\t\t\t*\n");
     printf("*\t\t\t\tThis is the GAME\t\t\t\t*\n");
-    printf("*\t\t\tGlobal Geophysical Modelling Framework\t\t\t*\n");
+    printf("*\t\t\tGlobal Geophysical Modeling Framework\t\t\t*\n");
     printf("*\t\t\t\t\t\t\t\t\t\t*\n");
     printf("%s", stars);
-    printf("Use only legal if authorized by Max Henrik Balsmeier.\n");
+    printf("Use only legal if authorized by Max H. Balsmeier.\n");
     printf("What you want to do:\n");
     printf("operator:\t\t\t%s\n", OPERATOR);
     printf("run time span:\t\t\t%d s\n", TOTAL_RUN_SPAN);
