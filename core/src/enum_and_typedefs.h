@@ -101,16 +101,14 @@ double recov_ver_1_dual_weight[6*NUMBER_OF_VECTORS_V];
 
 typedef struct dualgrid {
 Dual_vector_field normal_distance;
-Dual_vector_field area;
 Dual_vector_field z_vector;
+double area[NUMBER_OF_DUAL_H_VECTORS + NUMBER_OF_H_VECTORS];
 double f_vec[NUMBER_OF_DUAL_VECTORS_PER_LAYER];
-int to_index[NUMBER_OF_DUAL_VECTORS_H];
-int from_index[NUMBER_OF_DUAL_VECTORS_H];
-int vorticity_indices[3*NUMBER_OF_DUAL_VECTORS_V];
-int vorticity_signs[3*NUMBER_OF_DUAL_VECTORS_V];
+int vorticity_indices[4*NUMBER_OF_VECTORS_H];
+int vorticity_signs[4*NUMBER_OF_VECTORS_H];
 int h_curl_indices[4*NUMBER_OF_DUAL_VECTORS_H];
 int h_curl_signs[4*NUMBER_OF_DUAL_VECTORS_H];
-int adjacent_scalar_indices_dual_h[3*NUMBER_OF_DUAL_SCALARS_H];
+int adjacent_vector_indices_h[3*NUMBER_OF_DUAL_SCALARS_H];
 } Dualgrid;
 
 typedef struct state {

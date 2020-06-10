@@ -299,7 +299,8 @@ int main(int argc, char *argv[])
     double *z_vector_dual = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(double));
     double *normal_distance_dual = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(double));
     double *direction_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(double));
-    double *area_dual = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(double));
+    double *area_dual_pre = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(double));
+    double *area_dual = malloc((NUMBER_OF_DUAL_H_VECTORS + NUMBER_OF_H_VECTORS)*sizeof(double));
     double *f_vec = malloc(NUMBER_OF_DUAL_VECTORS_PER_LAYER*sizeof(double));
     double *triangle_face_unit_sphere = malloc(NUMBER_OF_DUAL_VECTORS_V*sizeof(double));
     double *pent_hex_face_unity_sphere = malloc(NUMBER_OF_VECTORS_V*sizeof(double));
@@ -320,18 +321,17 @@ int main(int argc, char *argv[])
     int *recov_ver_0_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
     int *recov_ver_1_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
     int *adjacent_vector_indices_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(int));
-    int *vorticity_indices = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(int));
+    int *adjacent_vector_indices_dual_h = malloc(3*NUMBER_OF_DUAL_SCALARS_H*sizeof(int));
+    int *vorticity_indices_pre = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(int));
+    int *vorticity_indices = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
     int *h_curl_indices = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
     int *to_index_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
     int *from_index_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
-    int *vorticity_indices_dual = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
-    int *h_curl_indices_dual = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
     int *adjacent_scalar_indices_dual_h = malloc(3*NUMBER_OF_DUAL_SCALARS_H*sizeof(int));
     int *adjacent_signs_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(int));
-    int *vorticity_signs = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(int));
+    int *vorticity_signs_pre = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(int));
+    int *vorticity_signs = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
     int *h_curl_signs = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
-    int *vorticity_signs_dual = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
-    int *h_curl_signs_dual = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
     double lat_res, lon_res, base_area, base_distance, radius_0, radius_1, direction_change, x_point_0, y_point_0, z_point_0, x_point_1, y_point_1, z_point_1, x_res, y_res, z_res, rel_on_line;
     int face_index, face_index_0, face_index_1, h_index, on_face_index, layer_index, inner_index, upper_index, lower_index, coord_0_points_amount, coord_0, coord_1, index_0, index_1, triangle_on_face_index, on_edge_index, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_index, counter, primal_vector_index, dual_vector_index, number_of_triangles_per_face, edgepoint_0, edgepoint_1, edgepoint_2, points_per_edge, dual_scalar_on_face_index, base_index_old, base_index_down_triangles, base_index_up_triangles, old_triangle_on_line_index, first_face_found, edge_rel_to_face_0, edge_rel_to_face_1, edge_index, sign, small_triangle_edge_index, dump, points_upwards, points_downwards, last_triangle_bool, ncid, retval, z_surface_id, test_index;
 	int ORO_FILE_LENGTH = 100;
@@ -760,7 +760,6 @@ int main(int argc, char *argv[])
 					exit(1);
 				}
                 adjacent_vector_indices_h[6*i + counter] = j;
-                vorticity_indices_dual[6*i + counter] = j;
                 sign = 1;
                 if (from_index[j] == i)
                 {
@@ -776,7 +775,6 @@ int main(int argc, char *argv[])
                     if (rad2deg(direction_change) > ORTH_CRITERION_DEG)
                         sign = -1;
                 }
-                vorticity_signs_dual[6*i + counter] = sign;
                 ++counter;
             }
         }
@@ -795,9 +793,29 @@ int main(int argc, char *argv[])
         {
             adjacent_vector_indices_h[6*i + 5] = -1;
             adjacent_signs_h[6*i + 5] = 0;
-            vorticity_indices_dual[6*i + 5] = 0;
-            vorticity_signs_dual[6*i + 5] = 0;
         }
+    }
+    for (int i = 0; i < NUMBER_OF_DUAL_SCALARS_H; ++i)
+    {
+    	counter = 0;
+    	for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
+    	{
+    		if (from_index_dual[j] == i || to_index_dual[j] == i)
+    		{
+                if (from_index_dual[j] == to_index_dual[j])
+				{
+                    printf("It is from_index_dual == to_index_dual at some point.\n");
+					exit(1);
+				}
+                adjacent_vector_indices_dual_h[3*i + counter] = j;
+                counter++;
+            }
+    	}
+    	if (counter != 3)
+    	{
+    		printf("Error in adjacent_vector_indices_dual_h creation.\n");
+    		exit(1);
+    	}
     }
     int number_of_edges, double_check, sign_sum_check;
     for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
@@ -837,7 +855,7 @@ int main(int argc, char *argv[])
         {
             if (from_index_dual[j] == i || to_index_dual[j] == i)
             {
-                vorticity_indices[3*i + counter] = j;
+                vorticity_indices_pre[3*i + counter] = j;
                 sign = 1;
                 if (from_index_dual[j] == i)
                 {
@@ -853,7 +871,7 @@ int main(int argc, char *argv[])
                         sign = -1;
                     adjacent_scalar_indices_dual_h[3*i + counter] = from_index_dual[j];
                 }
-                vorticity_signs[3*i + counter] = sign;
+                vorticity_signs_pre[3*i + counter] = sign;
                 ++counter;
             }
         }
@@ -885,9 +903,9 @@ int main(int argc, char *argv[])
             counter = 0;
             for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_V; ++j)
             {
-                retval = in_bool_calculator(cell_vector_indices, 5, vorticity_indices[3*j + 0], &check_0);
-                retval = in_bool_calculator(cell_vector_indices, 5, vorticity_indices[3*j + 1], &check_1);
-                retval = in_bool_calculator(cell_vector_indices, 5, vorticity_indices[3*j + 2], &check_2);
+                retval = in_bool_calculator(cell_vector_indices, 5, vorticity_indices_pre[3*j + 0], &check_0);
+                retval = in_bool_calculator(cell_vector_indices, 5, vorticity_indices_pre[3*j + 1], &check_1);
+                retval = in_bool_calculator(cell_vector_indices, 5, vorticity_indices_pre[3*j + 2], &check_2);
                 if (check_0 == 1 || check_1 == 1 || check_2 == 1)
                 {
                     lat_points[counter] = latitude_scalar_dual[j];
@@ -910,9 +928,9 @@ int main(int argc, char *argv[])
             counter = 0;
             for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_V; ++j)
             {
-                retval = in_bool_calculator(cell_vector_indices, 6, vorticity_indices[3*j + 0], &check_0);
-                retval = in_bool_calculator(cell_vector_indices, 6, vorticity_indices[3*j + 1], &check_1);
-                retval = in_bool_calculator(cell_vector_indices, 6, vorticity_indices[3*j + 2], &check_2);
+                retval = in_bool_calculator(cell_vector_indices, 6, vorticity_indices_pre[3*j + 0], &check_0);
+                retval = in_bool_calculator(cell_vector_indices, 6, vorticity_indices_pre[3*j + 1], &check_1);
+                retval = in_bool_calculator(cell_vector_indices, 6, vorticity_indices_pre[3*j + 2], &check_2);
                 if (check_0 == 1 || check_1 == 1 || check_2 == 1)
                 {
                     lat_points[counter] = latitude_scalar_dual[j];
@@ -1014,26 +1032,26 @@ int main(int argc, char *argv[])
                 retval = find_coords_from_triangle_on_face_index(triangle_on_face_index, RES_ID, &coord_0, &coord_1, &coord_0_points_amount);
 				dual_scalar_h_index = face_index*TRIANGLES_PER_FACE + 1 + 2*triangle_on_face_index + coord_1;
                 dual_scalar_index = layer_index*NUMBER_OF_DUAL_SCALARS_H + dual_scalar_h_index;
-				retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices, dual_scalar_h_index, index_vector_for_dual_scalar_z);
+				retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index, index_vector_for_dual_scalar_z);
                 z_scalar_dual[dual_scalar_index] = 1.0/3*(z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
-				retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices, dual_scalar_h_index - 1, index_vector_for_dual_scalar_z);
+				retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index - 1, index_vector_for_dual_scalar_z);
                 z_scalar_dual[dual_scalar_index - 1] = 1.0/3*(z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
                 if (layer_index == NUMBER_OF_LAYERS - 1)
                 {
-					retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices, dual_scalar_h_index, index_vector_for_dual_scalar_z);
+					retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index, index_vector_for_dual_scalar_z);
                 	z_scalar_dual[dual_scalar_index + NUMBER_OF_DUAL_SCALARS_H] = 1.0/3*(z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
-					retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices, dual_scalar_h_index - 1, index_vector_for_dual_scalar_z);
+					retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index - 1, index_vector_for_dual_scalar_z);
                 	z_scalar_dual[dual_scalar_index + NUMBER_OF_DUAL_SCALARS_H - 1] = 1.0/3*(z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
                 }
                 if (coord_0 == coord_0_points_amount - 1)
                 {
-					retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices, dual_scalar_h_index + 1, index_vector_for_dual_scalar_z);
+					retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index + 1, index_vector_for_dual_scalar_z);
                 	z_scalar_dual[dual_scalar_index + 1] = 1.0/3*(z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
                     if (layer_index == NUMBER_OF_LAYERS - 1)
             			z_scalar_dual[dual_scalar_index + 1 + NUMBER_OF_DUAL_SCALARS_H] = 1.0/3*(z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
                     if (coord_1 == POINTS_PER_EDGE - 1)
                     {
-						retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices, dual_scalar_h_index + 2, index_vector_for_dual_scalar_z);
+						retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index + 2, index_vector_for_dual_scalar_z);
                 		z_scalar_dual[dual_scalar_index + 2] = 1.0/3*(z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
                         if (layer_index == NUMBER_OF_LAYERS - 1)
             				z_scalar_dual[dual_scalar_index + 2 + NUMBER_OF_DUAL_SCALARS_H] = 1.0/3*(z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
@@ -1110,7 +1128,7 @@ int main(int argc, char *argv[])
             lower_index = h_index - NUMBER_OF_DUAL_VECTORS_H + (layer_index + 1)*NUMBER_OF_DUAL_SCALARS_H;
             normal_distance_dual[i] = z_scalar_dual[upper_index] - z_scalar_dual[lower_index];
 			z_vector_dual[i] = z_scalar_dual[lower_index] + 0.5*normal_distance_dual[i];
-            area_dual[i] = pow(RADIUS + z_vector_dual[i], 2)*triangle_face_unit_sphere[h_index - NUMBER_OF_DUAL_VECTORS_H];
+            area_dual_pre[i] = pow(RADIUS + z_vector_dual[i], 2)*triangle_face_unit_sphere[h_index - NUMBER_OF_DUAL_VECTORS_H];
         }
         else
         {
@@ -1130,16 +1148,16 @@ int main(int argc, char *argv[])
                 radius_0 = RADIUS + z_scalar[layer_index*NUMBER_OF_SCALARS_H];
             primal_vector_index = (NUMBER_OF_LAYERS - 1)*NUMBER_OF_VECTORS_PER_LAYER + NUMBER_OF_VECTORS_V + h_index;
             base_distance = normal_distance[primal_vector_index]/(RADIUS + z_vector[primal_vector_index])*radius_0;
-            area_dual[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
+            area_dual_pre[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
             normal_distance_dual[i] = calculate_distance_h(latitude_scalar_dual[from_index_dual[h_index]], longitude_scalar_dual[from_index_dual[h_index]], latitude_scalar_dual[to_index_dual[h_index]], longitude_scalar_dual[to_index_dual[h_index]], RADIUS + z_vector_dual[i]);
         }
     }
     free(triangle_face_unit_sphere);
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; ++i)
     {
-        if (area_dual[i] <= 0)
+        if (area_dual_pre[i] <= 0)
 		{
-            printf("area_dual contains a non-positive value.\n");
+            printf("area_dual_pre contains a non-positive value.\n");
 			exit(1);
 		}
         if (normal_distance_dual[i] <= 0)
@@ -1155,7 +1173,7 @@ int main(int argc, char *argv[])
 		{
 			check_sum += normal_distance_dual[i + NUMBER_OF_DUAL_VECTORS_H + j*NUMBER_OF_DUAL_VECTORS_PER_LAYER];
 		}
-		retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices, i, index_vector_for_dual_scalar_z);
+		retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, i, index_vector_for_dual_scalar_z);
 		if (fabs(check_sum/(TOA - 1.0/3*(z_surface[index_vector_for_dual_scalar_z[0]] + z_surface[index_vector_for_dual_scalar_z[1]] + z_surface[index_vector_for_dual_scalar_z[2]])) - 1) > 1e-15)
 		{
 			printf("Problem 1 with vertical grid structure.\n");
@@ -1986,32 +2004,6 @@ int main(int argc, char *argv[])
         for (int j = 0; j < 4; ++j)
         {
             if (j == 0)
-            {
-                h_curl_indices_dual[4*i + j] = i + NUMBER_OF_DUAL_VECTORS_PER_LAYER;
-                h_curl_signs_dual[4*i + j] = sign;
-            }
-            if (j == 1)
-            {
-                if (sign == 1)
-                    h_curl_indices_dual[4*i + j] = to_index_dual[i];
-                else
-                    h_curl_indices_dual[4*i + j] = from_index_dual[i];
-                h_curl_signs_dual[4*i + j] = 1;
-            }
-            if (j == 2)
-            {
-                h_curl_indices_dual[4*i + j] = i;
-                h_curl_signs_dual[4*i + j] = -sign;
-            }
-            if (j == 3)
-            {
-                if (sign == 1)
-                    h_curl_indices_dual[4*i + j] = from_index_dual[i];
-                else
-                    h_curl_indices_dual[4*i + j] = to_index_dual[i];
-                h_curl_signs_dual[4*i + j] = -1;
-            }
-            if (j == 0)
                 recov_hor_ver_pri_index[4*i + j] = to_index[i];
             if (j == 1)
                 recov_hor_ver_pri_index[4*i + j] = from_index[i];
@@ -2121,6 +2113,101 @@ int main(int argc, char *argv[])
         }
     }
     free(direction_dual);
+    double area_0, area_1;
+    for (int i = 0; i < NUMBER_OF_DUAL_H_VECTORS + NUMBER_OF_H_VECTORS; ++i)
+    {
+    	layer_index = i/(NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H);
+    	h_index = i - layer_index*(NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H);
+    	if (h_index < NUMBER_OF_DUAL_VECTORS_H)
+    		area_dual[i] = area_dual_pre[layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + h_index];
+    	else
+    	{
+    		primal_vector_index = NUMBER_OF_VECTORS_V + h_index - NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_VECTORS_PER_LAYER;
+    		dual_vector_index = NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + to_index_dual[h_index - NUMBER_OF_DUAL_VECTORS_H];
+    		area_0 = area_dual_pre[dual_vector_index];
+    		area_rescale_factor = pow((RADIUS + z_vector[primal_vector_index])/(RADIUS + z_vector_dual[dual_vector_index]), 2);
+    		area_0 = area_rescale_factor*area_0;
+    		dual_vector_index = NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + from_index_dual[h_index - NUMBER_OF_DUAL_VECTORS_H];
+    		area_1 = area_dual_pre[dual_vector_index];
+    		area_rescale_factor = pow((RADIUS + z_vector[primal_vector_index])/(RADIUS + z_vector_dual[dual_vector_index]), 2);
+    		area_1 = area_rescale_factor*area_1;
+    		area_dual[i] = area_0 + area_1;
+    	}
+		if (area_dual[i] < 0)
+		{
+			printf("It is area_dual < 0 at some point.\n");
+			exit(1);
+		}
+    }
+    int indices_list_pre[6];
+    int signs_list_pre[6];
+    int indices_list[4];
+    int signs_list[4];
+    int double_indices[2];
+    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+    {
+    	counter = 0;
+    	for (int j = 0; j < 4; ++j)
+    		indices_list[j] = -1;
+    	for (int j = 0; j < 3; ++j)
+    	{
+			indices_list_pre[counter] = vorticity_indices_pre[3*to_index_dual[i] + j];
+			signs_list_pre[counter] = vorticity_signs_pre[3*to_index_dual[i] + j];
+			counter++;
+    	}
+    	for (int j = 0; j < 3; ++j)
+    	{
+			indices_list_pre[counter] = vorticity_indices_pre[3*from_index_dual[i] + j];
+			signs_list_pre[counter] = vorticity_signs_pre[3*from_index_dual[i] + j];
+			counter++;
+    	}
+		if (counter != 6)
+		{
+			printf("Error in vorticity_indices and vortictiy_signs creation from vorticity_indices_pre and vortictiy_signs_pre, position 0.\n");
+			exit(1);
+		}
+		for (int j = 0; j < 6; ++j)
+		{
+			for (int k = j + 1; k < 6; ++k)
+			{
+				if (indices_list[j] == indices_list[k])
+				{
+					double_indices[0] = j;
+					double_indices[1] = k;
+				}
+			}
+		}
+		counter = 0;
+    	for (int j = 0; j < 6; ++j)
+    	{
+    		if (j != double_indices[0] && j != double_indices[1])
+    		{
+				indices_list[counter] = indices_list_pre[j];
+				signs_list[counter] = signs_list_pre[j];
+				counter++;
+			}
+		}
+		if (counter != 4)
+		{
+			printf("Error in vorticity_indices and vortictiy_signs creation from vorticity_indices_pre and vortictiy_signs_pre, position 1.\n");
+			exit(1);
+		}
+    	for (int j = 0; j < 4; ++j)
+    	{
+			vorticity_indices[4*i + j] = indices_list[j];
+			vorticity_signs[4*i + j] = signs_list[j];
+			if (fabs(vorticity_signs[4*i + j]) > 1)
+			{
+				printf("Error in vorticity_indices and vortictiy_signs creation from vorticity_indices_pre and vortictiy_signs_pre, position 2.");
+				exit(1);
+			}
+			if (vorticity_indices[4*i + j] >= NUMBER_OF_VECTORS_H)
+			{
+				printf("Error in vorticity_indices and vortictiy_signs creation from vorticity_indices_pre and vortictiy_signs_pre, position 3.");
+				exit(1);
+			}
+		}
+    }
     double z_scale_temp = 10000;
     double T_str = 213.15;
     double T_sl = 288.15;
@@ -2156,12 +2243,14 @@ int main(int argc, char *argv[])
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
     free(OUTPUT_FILE);
-    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, to_index_dual_id, from_index_dual_id, vorticity_indices_dual_id, h_curl_indices_dual_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vorticity_signs_dual_id, h_curl_signs_dual_id, vector_dual_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id, gravity_potential_id, vertical_contravar_unit_id, vertical_contravar_unit_dimid;
+    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_hor_ver_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vector_dual_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id, gravity_potential_id, vertical_contravar_unit_id, vertical_contravar_unit_dimid, adjacent_vector_indices_dual_h_id, scalar_dual_h_dimid_3, vector_dual_area_dimid;
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NUMBER_OF_SCALARS, &scalar_dimid)))
         ERR(retval);  
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_h_index", NUMBER_OF_SCALARS_H, &scalar_h_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_dual_h_index", NUMBER_OF_DUAL_SCALARS_H, &scalar_dual_h_dimid)))
+        ERR(retval);
+    if ((retval = nc_def_dim(ncid_g_prop, "scalar_dual_h_3_index", 3*NUMBER_OF_DUAL_SCALARS_H, &scalar_dual_h_dimid_3)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_index", NUMBER_OF_VECTORS, &vector_dimid)))
         ERR(retval);
@@ -2186,6 +2275,8 @@ int main(int argc, char *argv[])
     if ((retval = nc_def_dim(ncid_g_prop, "vector_dual_one_layer_dimid", NUMBER_OF_DUAL_VECTORS_PER_LAYER, &vector_dual_one_layer_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_index_dual", NUMBER_OF_DUAL_VECTORS, &vector_dual_dimid)))
+        ERR(retval);
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_index_dual_area", NUMBER_OF_DUAL_H_VECTORS + NUMBER_OF_H_VECTORS, &vector_dual_area_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_dual_v_3_index", 3*NUMBER_OF_DUAL_VECTORS_V, &vector_dual_v_dimid_3)))
         ERR(retval);
@@ -2261,7 +2352,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, normal_distance_dual_id, "units", strlen("m"), "m")))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "area_dual", NC_DOUBLE, 1, &vector_dual_dimid, &area_dual_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "area_dual", NC_DOUBLE, 1, &vector_dual_area_dimid, &area_dual_id)))
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, area_dual_id, "units", strlen("m^2"), "m^2")))
         ERR(retval);
@@ -2281,7 +2372,9 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "adjacent_vector_indices_h", NC_INT, 1, &scalar_h_dimid_6, &adjacent_vector_indices_h_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "vorticity_indices", NC_INT, 1, &vector_dual_v_dimid_3, &vorticity_indices_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "adjacent_vector_indices_dual_h", NC_INT, 1, &scalar_dual_h_dimid_3, &adjacent_vector_indices_dual_h_id)))
+        ERR(retval);
+    if ((retval = nc_def_var(ncid_g_prop, "vorticity_indices", NC_INT, 1, &vector_h_dimid_4, &vorticity_indices_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "h_curl_indices", NC_INT, 1, &vector_dual_h_dimid_4, &h_curl_indices_id)))
         ERR(retval);
@@ -2301,25 +2394,13 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_dual_index", NC_INT, 1, &vector_v_dimid_6, &recov_ver_1_dual_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "to_index_dual", NC_INT, 1, &vector_dual_h_dimid, &to_index_dual_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "from_index_dual", NC_INT, 1, &vector_dual_h_dimid, &from_index_dual_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "vorticity_indices_dual", NC_INT, 1, &vector_v_dimid_6, &vorticity_indices_dual_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "h_curl_indices_dual", NC_INT, 1, &vector_h_dimid_4, &h_curl_indices_dual_id)))
-        ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "adjacent_scalar_indices_dual_h", NC_INT, 1, &vector_dual_v_dimid_3, &adjacent_scalar_indices_dual_h_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "adjacent_signs_h", NC_INT, 1, &scalar_h_dimid_6, &adjacent_signs_h_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "vorticity_signs", NC_INT, 1, &vector_dual_v_dimid_3, &vorticity_signs_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "vorticity_signs", NC_INT, 1, &vector_h_dimid_4, &vorticity_signs_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "h_curl_signs", NC_INT, 1, &vector_dual_h_dimid_4, &h_curl_signs_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "vorticity_signs_dual", NC_INT, 1, &vector_v_dimid_6, &vorticity_signs_dual_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "h_curl_signs_dual", NC_INT, 1, &vector_h_dimid_4, &h_curl_signs_dual_id)))
         ERR(retval);
     if ((retval = nc_enddef(ncid_g_prop)))
         ERR(retval);
@@ -2389,6 +2470,8 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, adjacent_vector_indices_h_id, &adjacent_vector_indices_h[0])))
         ERR(retval);
+    if ((retval = nc_put_var_int(ncid_g_prop, adjacent_vector_indices_dual_h_id, &adjacent_vector_indices_dual_h[0])))
+        ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, vorticity_indices_id, &vorticity_indices[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, h_curl_indices_id, &h_curl_indices[0])))
@@ -2409,14 +2492,6 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, recov_ver_1_dual_index_id, &recov_ver_1_dual_index[0])))
         ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, to_index_dual_id, &to_index_dual[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, from_index_dual_id, &from_index_dual[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, vorticity_indices_dual_id, &vorticity_indices_dual[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, h_curl_indices_dual_id, &h_curl_indices_dual[0])))
-        ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, adjacent_scalar_indices_dual_h_id, &adjacent_scalar_indices_dual_h[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, adjacent_signs_h_id, &adjacent_signs_h[0])))
@@ -2425,12 +2500,9 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, h_curl_signs_id, &h_curl_signs[0])))
         ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, vorticity_signs_dual_id, &vorticity_signs_dual[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, h_curl_signs_dual_id, &h_curl_signs_dual[0])))
-        ERR(retval);
     if ((retval = nc_close(ncid_g_prop)))
         ERR(retval);
+    free(adjacent_vector_indices_dual_h);
     free(vertical_contravar_unit);
     free(gravity_potential);
     free(exner_pressure_background);
@@ -2464,7 +2536,10 @@ int main(int argc, char *argv[])
     free(f_vec);
     free(to_index);
     free(from_index);
+    free(to_index_dual);
+    free(from_index_dual);
     free(adjacent_vector_indices_h);
+    free(vorticity_indices_pre);
     free(vorticity_indices);
     free(h_curl_indices);
     free(recov_hor_par_dual_index);
@@ -2475,15 +2550,11 @@ int main(int argc, char *argv[])
     free(recov_ver_0_dual_index);
     free(recov_ver_1_pri_index);
     free(recov_ver_1_dual_index);
-    free(to_index_dual);
-    free(from_index_dual);
-    free(vorticity_indices_dual);
-    free(h_curl_indices_dual);
     free(adjacent_signs_h);
+    free(vorticity_signs_pre);
     free(vorticity_signs);
     free(h_curl_signs);
-    free(vorticity_signs_dual);
-    free(h_curl_signs_dual);
+    free(area_dual_pre);
     free(area_dual);
 	free(z_surface);
 	printf("Finished.\n");
@@ -2871,7 +2942,7 @@ int find_triangles_per_face(int res_id, int *number_of_triangles_per_face)
     return 0;
 }
 
-int find_v_vector_indices_for_dual_scalar_z(int from_index[], int to_index[], int vorticity_indices[], int dual_scalar_h_index, int index_vector_for_dual_scalar_z[])
+int find_v_vector_indices_for_dual_scalar_z(int from_index[], int to_index[], int vorticity_indices_pre[], int dual_scalar_h_index, int index_vector_for_dual_scalar_z[])
 {
 	int counter = 0;
 	int check_result, retval;
@@ -2880,16 +2951,16 @@ int find_v_vector_indices_for_dual_scalar_z(int from_index[], int to_index[], in
 	index_vector_for_dual_scalar_z[2] = -1;
 	for (int k = 0; k < 3; ++k)
 	{
-		retval = in_bool_calculator(index_vector_for_dual_scalar_z, 3, from_index[vorticity_indices[3*dual_scalar_h_index + k]], &check_result);
+		retval = in_bool_calculator(index_vector_for_dual_scalar_z, 3, from_index[vorticity_indices_pre[3*dual_scalar_h_index + k]], &check_result);
 		if (check_result == 0)
 		{
-			index_vector_for_dual_scalar_z[counter] = from_index[vorticity_indices[3*dual_scalar_h_index + k]];
+			index_vector_for_dual_scalar_z[counter] = from_index[vorticity_indices_pre[3*dual_scalar_h_index + k]];
 			counter++;
 		}
-		retval = in_bool_calculator(index_vector_for_dual_scalar_z, 3, to_index[vorticity_indices[3*dual_scalar_h_index + k]], &check_result);
+		retval = in_bool_calculator(index_vector_for_dual_scalar_z, 3, to_index[vorticity_indices_pre[3*dual_scalar_h_index + k]], &check_result);
 		if (check_result == 0)
 		{
-			index_vector_for_dual_scalar_z[counter] = to_index[vorticity_indices[3*dual_scalar_h_index + k]];
+			index_vector_for_dual_scalar_z[counter] = to_index[vorticity_indices_pre[3*dual_scalar_h_index + k]];
 			counter++;
 		}
 	}

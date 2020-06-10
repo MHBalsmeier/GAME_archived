@@ -2,8 +2,8 @@
 operator=Boss
 overwrite_run_id=1
 run_id=standard_0_oro
-run_span=800
-write_out_interval=200
+run_span=900
+write_out_interval=300
 grid_props_file=/home/max/compiled/game/grids/B4L6T30000_M2_O0_OL4.nc
 init_state_filename=test_0_B4L6T30000_M2_O0_OL4.grb2
 init_state_file=/home/max/compiled/game/input/$init_state_filename

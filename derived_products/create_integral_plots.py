@@ -39,7 +39,7 @@ if write_out_energy_integral == 1:
 	fig = plt.figure(figsize = (fig_size, fig_size));
 	plt.title("Energy");
 	plt.xlabel("time since init / s");
-	plt.ylabel("relative to init value");
+	plt.ylabel("relative to init value of total energy / %");
 	data = np.genfromtxt(output_dir + "/energy");
 	time_vector = data[:, 0] - data[0, 0];
 	plt.xlim([min(time_vector), max(time_vector)]);
@@ -47,10 +47,10 @@ if write_out_energy_integral == 1:
 	potential_vector = data[:, 2];
 	internal_vector = data[:, 3];
 	total_begin = kinetic_vector[0] + potential_vector[0] + internal_vector[0];
-	plt.plot(time_vector, kinetic_vector/total_begin);
-	plt.plot(time_vector, potential_vector/total_begin);
-	plt.plot(time_vector, internal_vector/total_begin);
-	plt.plot(time_vector, (kinetic_vector + potential_vector + internal_vector)/total_begin);
+	plt.plot(time_vector, 100*(kinetic_vector - kinetic_vector[0])/total_begin);
+	plt.plot(time_vector, 100*(potential_vector - potential_vector[0])/total_begin);
+	plt.plot(time_vector, 100*(internal_vector - internal_vector[0])/total_begin);
+	plt.plot(time_vector, 100*(kinetic_vector + potential_vector + internal_vector - total_begin)/total_begin);
 	plt.legend(["kinetic", "potential", "internal", "total"]);
 	fig.savefig(fig_save_path + "/energy_integrals.png", dpi = 500);
 	plt.close();
