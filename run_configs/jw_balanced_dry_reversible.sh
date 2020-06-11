@@ -2,10 +2,10 @@
 operator=Boss
 overwrite_run_id=1
 run_id=jw_balanced_dry_reversible
-run_span=900
+run_span=1800
 write_out_interval=300
-grid_props_file=/home/max/compiled/game/grids/B4L6T30000_M2_O2_OL4.nc
-init_state_filename=test_2_B4L6T30000_M2_O2_OL4.grb2
+grid_props_file=/home/max/compiled/game/grids/B4L12T30000_M2_O2_OL8.nc
+init_state_filename=test_2_B4L12T30000_M2_O2_OL8.grb2
 init_state_file=/home/max/compiled/game/input/$init_state_filename
 output_dir_base=/home/max/compiled/game/output
 cfl_margin=0.2

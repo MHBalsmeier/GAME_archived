@@ -68,6 +68,14 @@ if short_name == "tcc":
     variable_name = "Total cloud cover";
     unit_string = "%";
     colormap = "Greys";
+if short_name == "den":
+    variable_name = "Dry air density";
+    unit_string = "g/m^3";
+    rescale = 1000;
+if short_name == "wz":
+    variable_name = "Vertical velocity";
+    unit_string = "m/s";
+    rescale = 1;
 
 disp_time_in_hr = 0;
 time_unit_string = "s";

@@ -19,6 +19,7 @@ if write_out_dry_mass_integral == 1:
 	plt.xlim([min(time_vector), max(time_vector)]);
 	dry_mass_vector = np.genfromtxt(output_dir + "/dry_mass")[:, 1];
 	plt.plot(time_vector, dry_mass_vector/dry_mass_vector[0]);
+	plt.grid();
 	fig.savefig(fig_save_path + "/dry_mass_integral.png", dpi = 500);
 	plt.close();
 	
@@ -32,6 +33,7 @@ if write_out_entropy_integral == 1:
 	plt.xlim([min(time_vector), max(time_vector)]);
 	entropy_vector = data[:, 1];
 	plt.plot(time_vector, entropy_vector/entropy_vector[0]);
+	plt.grid();
 	fig.savefig(fig_save_path + "/entropy_integral.png", dpi = 500);
 	plt.close();
 
@@ -52,6 +54,7 @@ if write_out_energy_integral == 1:
 	plt.plot(time_vector, 100*(internal_vector - internal_vector[0])/total_begin);
 	plt.plot(time_vector, 100*(kinetic_vector + potential_vector + internal_vector - total_begin)/total_begin);
 	plt.legend(["kinetic", "potential", "internal", "total"]);
+	plt.grid();
 	fig.savefig(fig_save_path + "/energy_integrals.png", dpi = 500);
 	plt.close();
 	

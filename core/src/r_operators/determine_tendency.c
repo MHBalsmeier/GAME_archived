@@ -194,7 +194,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     Scalar_field *specific_entropy = malloc(sizeof(Scalar_field));
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
-    	rho_h = current_state -> density[i] + current_state -> add_comp_densities[(NUMBER_OF_ADD_COMPS - 1)*NUMBER_OF_SCALARS + i];
+    	rho_h = current_state -> density[i] + current_state -> add_comp_densities[NUMBER_OF_COND_ADD_COMPS*NUMBER_OF_SCALARS + i];
     	(*specific_entropy)[i] = current_state -> entropy[i]/rho_h;
 	}
     Vector_field *specific_entropy_gradient = malloc(sizeof(Vector_field));
@@ -221,9 +221,7 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
 	free(c_h_p_field);
     Vector_field *pressure_gradient_acc = malloc(sizeof(Vector_field));
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
-    {
     	(*pressure_gradient_acc)[i] = -(*temp_gradient_times_c_h_p)[i] + (*pressure_gradient_acc_1)[i];
-    }
     free(pressure_gradient_acc_1);
     free(temp_gradient_times_c_h_p);
     Scalar_field *pressure_gradient_decel_factor = malloc(sizeof(Scalar_field));
@@ -242,15 +240,15 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     Vector_field *abs_curl_tend = malloc(sizeof(Vector_field));
     cross_product(current_state -> wind, *abs_curl, *abs_curl_tend, grid);
     free(abs_curl);
-    Scalar_field *mechanic_energy = malloc(sizeof(Scalar_field));
-    inner(current_state -> wind, current_state -> wind, *mechanic_energy, grid, dualgrid);
+    Scalar_field *macroscopic_energy = malloc(sizeof(Scalar_field));
+    inner(current_state -> wind, current_state -> wind, *macroscopic_energy, grid, dualgrid);
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
-    	(*mechanic_energy)[i] = -grid -> gravity_potential[i] - 0.5*(*mechanic_energy)[i];
-    Vector_field *downgradient_mechanic_energy = malloc(sizeof(Vector_field));
-    grad(*mechanic_energy, *downgradient_mechanic_energy, grid);
+    	(*macroscopic_energy)[i] = -grid -> gravity_potential[i] - 0.5*(*macroscopic_energy)[i];
+    Vector_field *downgradient_macroscopic_energy = malloc(sizeof(Vector_field));
+    grad(*macroscopic_energy, *downgradient_macroscopic_energy, grid);
     if (retval != 0)
     	printf("grad called at position 2 from tendency errored out, exit code %d.\n", retval);
-    free(mechanic_energy);
+    free(macroscopic_energy);
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
     	layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
@@ -258,12 +256,12 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
         if (i < NUMBER_OF_VECTORS_V || i >= NUMBER_OF_VECTORS - NUMBER_OF_VECTORS_V)
             state_tendency -> wind[i] = 0;
         else
-            state_tendency -> wind[i] = (*pressure_gradient_acc)[i] + (*abs_curl_tend)[i] + (*downgradient_mechanic_energy)[i] + (*friction_acc)[i];
+            state_tendency -> wind[i] = (*pressure_gradient_acc)[i] + (*abs_curl_tend)[i] + (*downgradient_macroscopic_energy)[i] + (*friction_acc)[i];
     }
     free(friction_acc);
     free(abs_curl_tend);
     free(pressure_gradient_acc);
-    free(downgradient_mechanic_energy);
+    free(downgradient_macroscopic_energy);
     return retval;
 }
 

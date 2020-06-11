@@ -93,6 +93,8 @@ stdio.h
 /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_ver_pri.c
 ../../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
+stdio.h
+-
 
 /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_dual.c
 ../../enum_and_typedefs.h

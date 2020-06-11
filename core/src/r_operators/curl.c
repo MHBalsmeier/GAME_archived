@@ -4,7 +4,7 @@
 
 int curl(Vector_field in_field, Dual_vector_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
-    int layer_index, h_index, index_0, index_1, index_2, index_3, sign_0, sign_1, sign_2, sign_3, retval, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h;
+    int layer_index, h_index, index_0, index_1, index_2, index_3, sign_0, sign_1, sign_2, sign_3, retval, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area;
     double rhombus_circ, dist_0, dist_1, dist_2, dist_3, dist_0_pre, dist_2_pre, delta_z, covar_0, covar_2, length_rescale_factor_0, length_rescale_factor_1, length_rescale_factor_2, length_rescale_factor_3, velocity_value_0, velocity_value_1, velocity_value_2, velocity_value_3, vertical_gradient;
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; ++i)
     {
@@ -33,6 +33,7 @@ int curl(Vector_field in_field, Dual_vector_field out_field, Grid *grid, Dualgri
                 if (sign_3 != -1 && sign_3 != 1)
                 	printf("Error in curl, position 3.\n");
                 edge_vector_index = NUMBER_OF_VECTORS_V + layer_index*NUMBER_OF_VECTORS_PER_LAYER + edge_vector_index_h;
+                edge_vector_index_dual_area = NUMBER_OF_DUAL_VECTORS_H + layer_index*(NUMBER_OF_VECTORS_H + NUMBER_OF_DUAL_VECTORS_H) + edge_vector_index_h;
                 if (layer_index >= NUMBER_OF_LAYERS - NUMBER_OF_ORO_LAYERS)
                 {
                 	length_rescale_factor_0 = (RADIUS + grid -> z_vector[edge_vector_index])/(RADIUS + grid -> z_vector[index_0]);
@@ -91,7 +92,7 @@ int curl(Vector_field in_field, Dual_vector_field out_field, Grid *grid, Dualgri
             	}
                 else
                 	rhombus_circ = grid -> normal_distance[index_0]*sign_0*in_field[index_0] + grid -> normal_distance[index_1]*sign_1*in_field[index_1] + grid -> normal_distance[index_2]*sign_2*in_field[index_2] + grid -> normal_distance[index_3]*sign_3*in_field[index_3];
-                out_field[i] += 1.0/3*rhombus_circ/dualgrid -> area[edge_vector_index];
+                out_field[i] += 1.0/3*rhombus_circ/dualgrid -> area[edge_vector_index_dual_area];
             }
         }
         else

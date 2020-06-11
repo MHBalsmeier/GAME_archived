@@ -35,8 +35,8 @@ NUMBER_OF_BASIC_TRIANGLES = 20,
 NUMBER_OF_PENTAGONS = 12,
 NUMBER_OF_HEXAGONS = (int) (10*(pow(2, 2*RES_ID) - 1)),
 NUMBER_OF_EDGES = 3*NUMBER_OF_BASIC_TRIANGLES/2,
-NUMBER_OF_LAYERS = 6,
-NUMBER_OF_ORO_LAYERS = 4,
+NUMBER_OF_LAYERS = 12,
+NUMBER_OF_ORO_LAYERS = 8,
 NUMBER_OF_LEVELS = NUMBER_OF_LAYERS + 1,
 NUMBER_OF_SCALARS_H = NUMBER_OF_PENTAGONS + NUMBER_OF_HEXAGONS,
 NUMBER_OF_VECTORS_H = (5*NUMBER_OF_PENTAGONS/2 + 6/2*NUMBER_OF_HEXAGONS),
@@ -88,7 +88,6 @@ double recov_hor_ver_dual_weight[2*NUMBER_OF_VECTORS_H];
 int recov_hor_par_pri_index[10*NUMBER_OF_VECTORS_H];
 double recov_hor_par_pri_weight[10*NUMBER_OF_VECTORS_H];
 int recov_hor_ver_pri_index[4*NUMBER_OF_VECTORS_H];
-double recov_hor_ver_pri_weight[4*NUMBER_OF_VECTORS_H];
 int recov_ver_0_pri_index[6*NUMBER_OF_VECTORS_V];
 double recov_ver_0_pri_weight[6*NUMBER_OF_VECTORS_V];
 int recov_ver_0_dual_index[6*NUMBER_OF_VECTORS_V];
