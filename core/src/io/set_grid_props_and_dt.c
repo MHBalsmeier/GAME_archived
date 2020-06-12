@@ -256,10 +256,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         	grid_check_failed();
         grid -> area[i] = area[i];
         if (grid -> area[i] <= 0)
-        {
-        	printf("here, %d\n", NUMBER_OF_VECTORS - 1 - i);
             grid_check_failed();
-        }
         grid -> z_vector[i] = z_vector[i];
         if (grid -> z_vector[i] < -400)
             grid_check_failed();

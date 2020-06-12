@@ -62,3 +62,17 @@ double inner_elementary(double vector_0[], double vector_1[])
 		result += vector_0[i]*vector_1[i];
 	return result;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

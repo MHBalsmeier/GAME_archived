@@ -2064,35 +2064,20 @@ int main(int argc, char *argv[])
         find_angle_change(direction_dual[i], direction[i], &direction_change);
         if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
             sign = -1;
-        for (int j = 0; j < 4; ++j)
-        {
-            if (j == 0)
-            {
-                h_curl_indices[4*i + j] = i + NUMBER_OF_VECTORS_PER_LAYER;
-                h_curl_signs[4*i + j] = sign;
-            }
-            if (j == 1)
-            {
-                if (sign == 1)
-                    h_curl_indices[4*i + j] = to_index[i];
-                else
-                    h_curl_indices[4*i + j] = from_index[i];
-                h_curl_signs[4*i + j] = 1;
-            }
-            if (j == 2)
-            {
-                h_curl_indices[4*i + j] = i;
-                h_curl_signs[4*i + j] = -sign;
-            }
-            if (j == 3)
-            {
-                if (sign == 1)
-                    h_curl_indices[4*i + j] = from_index[i];
-                else
-                    h_curl_indices[4*i + j] = to_index[i];
-                h_curl_signs[4*i + j] = -1;
-            }
-        }
+        h_curl_indices[4*i + 0] = i + NUMBER_OF_VECTORS_PER_LAYER;
+        h_curl_signs[4*i + 0] = sign;
+        if (sign == 1)
+            h_curl_indices[4*i + 1] = to_index[i];
+        else
+            h_curl_indices[4*i + 1] = from_index[i];
+        h_curl_signs[4*i + 1] = 1;
+        h_curl_indices[4*i + 2] = i;
+        h_curl_signs[4*i + 2] = -sign;
+        if (sign == 1)
+            h_curl_indices[4*i + 3] = from_index[i];
+        else
+            h_curl_indices[4*i + 3] = to_index[i];
+        h_curl_signs[4*i + 3] = -1;
     }
     free(direction_dual);
     double area_0, area_1, area_ratio;
@@ -2131,31 +2116,21 @@ int main(int argc, char *argv[])
     int double_indices[2];
     for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
     {
-    	counter = 0;
-    	for (int j = 0; j < 4; ++j)
-    		indices_list[j] = -1;
     	for (int j = 0; j < 3; ++j)
     	{
-			indices_list_pre[counter] = vorticity_indices_pre[3*to_index_dual[i] + j];
-			signs_list_pre[counter] = vorticity_signs_pre[3*to_index_dual[i] + j];
-			counter++;
+			indices_list_pre[j] = vorticity_indices_pre[3*to_index_dual[i] + j];
+			signs_list_pre[j] = vorticity_signs_pre[3*to_index_dual[i] + j];
     	}
     	for (int j = 0; j < 3; ++j)
     	{
-			indices_list_pre[counter] = vorticity_indices_pre[3*from_index_dual[i] + j];
-			signs_list_pre[counter] = vorticity_signs_pre[3*from_index_dual[i] + j];
-			counter++;
+			indices_list_pre[3 + j] = vorticity_indices_pre[3*from_index_dual[i] + j];
+			signs_list_pre[3 + j] = vorticity_signs_pre[3*from_index_dual[i] + j];
     	}
-		if (counter != 6)
-		{
-			printf("Error in vorticity_indices and vortictiy_signs creation from vorticity_indices_pre and vortictiy_signs_pre, position 0.\n");
-			exit(1);
-		}
 		for (int j = 0; j < 6; ++j)
 		{
 			for (int k = j + 1; k < 6; ++k)
 			{
-				if (indices_list[j] == indices_list[k])
+				if (indices_list_pre[j] == indices_list_pre[k])
 				{
 					double_indices[0] = j;
 					double_indices[1] = k;
@@ -2181,17 +2156,34 @@ int main(int argc, char *argv[])
     	{
 			vorticity_indices[4*i + j] = indices_list[j];
 			vorticity_signs[4*i + j] = signs_list[j];
-			if (fabs(vorticity_signs[4*i + j]) > 1)
+			if (vorticity_signs[4*i + j] != 1 && vorticity_signs[4*i + j] != -1)
 			{
 				printf("Error in vorticity_indices and vortictiy_signs creation from vorticity_indices_pre and vortictiy_signs_pre, position 2.");
 				exit(1);
 			}
-			if (vorticity_indices[4*i + j] >= NUMBER_OF_VECTORS_H)
+			if (vorticity_indices[4*i + j] >= NUMBER_OF_VECTORS_H || vorticity_indices[4*i + j] < 0)
 			{
 				printf("Error in vorticity_indices and vortictiy_signs creation from vorticity_indices_pre and vortictiy_signs_pre, position 3.");
 				exit(1);
 			}
 		}
+    }
+    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+    {
+    	counter = 0;
+    	for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
+    	{
+    		for (int k = 0; k < 4; ++k)
+    		{
+    			if (vorticity_indices[4*j + k] == i)
+    				++counter;
+    		}
+    	}
+    	if (counter != 4)
+    	{
+    		printf("Error in vorticity_indices, position 0.\n");
+    		exit(1);
+    	}
     }
     double z_scale_temp = 10000;
     double T_str = 213.15;

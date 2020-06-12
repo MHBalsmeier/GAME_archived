@@ -12,8 +12,8 @@ int calc_temp_diffusion_coeffs(Scalar_field *temperature, Scalar_field *density,
 	for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
         calc_diffusion_coeff((*temperature)[i], mean_particle_mass, (*density)[i], eff_particle_radius, &mass_diffusion_coeff);
-        mass_diffusion_coeff_para_ratio_h = pow(10, 8);
-		mass_diffusion_coeff_para_ratio_v = pow(10, 6);
+        mass_diffusion_coeff_para_ratio_h = pow(10, 7);
+		mass_diffusion_coeff_para_ratio_v = pow(10, 5);
         (*mass_diffusion_coeff_numerical_h)[i] = mass_diffusion_coeff_para_ratio_h*mass_diffusion_coeff;
         (*mass_diffusion_coeff_numerical_v)[i] = mass_diffusion_coeff_para_ratio_v*mass_diffusion_coeff;
     }
@@ -28,8 +28,8 @@ int calc_mass_diffusion_coeffs(Scalar_field *temperature, Scalar_field *density,
 	for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
         calc_diffusion_coeff((*temperature)[i], mean_particle_mass, (*density)[i], eff_particle_radius, &temp_diffusion_coeff);
-        temp_diffusion_coeff_para_ratio_h = pow(10, 8);
-		temp_diffusion_coeff_para_ratio_v = pow(10, 6);
+        temp_diffusion_coeff_para_ratio_h = pow(10, 7);
+		temp_diffusion_coeff_para_ratio_v = pow(10, 5);
         (*temp_diffusion_coeff_numerical_h)[i] = temp_diffusion_coeff_para_ratio_h*temp_diffusion_coeff;
         (*temp_diffusion_coeff_numerical_v)[i] = temp_diffusion_coeff_para_ratio_v*temp_diffusion_coeff;
     }
