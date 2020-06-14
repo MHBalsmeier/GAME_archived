@@ -65,17 +65,16 @@ int main(int argc, char *argv[])
 	free(OUTPUT_FILE_PRE);
 	char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
 	sprintf(OUTPUT_FILE, "nc_files/B%d_M%d_O%d.nc", RES_ID, MODE, ORO_ID);
-	int ncid, scalar_dimid, var_dimid, oro_id, latitude_scalar_id, longitude_scalar_id;
+	int ncid, scalar_h_dimid, var_dimid, oro_id, latitude_scalar_id, longitude_scalar_id;
 	double *oro, latitude;
 	oro = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-	int dimids[1];
     int GEO_PROP_FILE_LENGTH = 100;
     char *GEO_PROP_FILE_PRE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(GEO_PROP_FILE_PRE, "../grid_generator/nc_files/B%dL6T30000_M%d_O0_OL4.nc", RES_ID, MODE);
+    sprintf(GEO_PROP_FILE_PRE, "../grid_generator/nc_files/B%dL26T30000_M%d_O0_OL17.nc", RES_ID, MODE);
     GEO_PROP_FILE_LENGTH = strlen(GEO_PROP_FILE_PRE);
     free(GEO_PROP_FILE_PRE);
     char *GEO_PROP_FILE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(GEO_PROP_FILE, "../grid_generator/nc_files/B%dL6T30000_M%d_O0_OL4.nc", RES_ID, MODE);
+    sprintf(GEO_PROP_FILE, "../grid_generator/nc_files/B%dL26T30000_M%d_O0_OL17.nc", RES_ID, MODE);
 	int scalar_index, retval;
     double *latitude_scalar = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double *longitude_scalar = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
@@ -92,7 +91,7 @@ int main(int argc, char *argv[])
         ERR(retval);
 	if ((retval = nc_close(ncid)))
 	  ERR(retval);
-	for (int i = 0; i < NUMBER_OF_SCALARS_H; i++)
+	for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
 	{	
 		if (ORO_ID == 0)
 			oro[i] = 0;
@@ -111,10 +110,9 @@ int main(int argc, char *argv[])
 	free(longitude_scalar);
 	if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
 	  ERR(retval);
-	if ((retval = nc_def_dim(ncid, "scalar_index", NUMBER_OF_SCALARS_H, &scalar_dimid)))
+	if ((retval = nc_def_dim(ncid, "scalar_index", NUMBER_OF_SCALARS_H, &scalar_h_dimid)))
 	  ERR(retval);
-	dimids[0] = scalar_dimid;
-	if ((retval = nc_def_var(ncid, "z_surface", NC_DOUBLE, 1, dimids, &oro_id)))
+	if ((retval = nc_def_var(ncid, "z_surface", NC_DOUBLE, 1, &scalar_h_dimid, &oro_id)))
 	  ERR(retval);
 	if ((retval = nc_put_att_text(ncid, oro_id, "units", strlen(UNIT), UNIT)))
 	  ERR(retval);
@@ -127,8 +125,6 @@ int main(int argc, char *argv[])
 	free(oro);
 	return 0;
 }
-
-
 
 int find_z_from_p(double lat, double p, double *result)
 {
@@ -146,3 +142,17 @@ int find_z_from_p(double lat, double p, double *result)
     *result = z;
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

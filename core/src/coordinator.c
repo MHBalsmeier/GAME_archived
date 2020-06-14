@@ -31,8 +31,8 @@ int main(int argc, char *argv[])
     dissipation_on = strtod(argv[7], NULL);
     int rad_on;
     rad_on = strtod(argv[8], NULL);
-    int add_comps_on;
-    add_comps_on = strtod(argv[9], NULL);
+    int tracers_on;
+    tracers_on = strtod(argv[9], NULL);
     len = strlen(argv[10]);
     char *OPERATOR = malloc((len + 1)*sizeof(char));
     strcpy(OPERATOR, argv[10]);
@@ -42,6 +42,8 @@ int main(int argc, char *argv[])
     write_out_entropy_integral = strtod(argv[12], NULL);
     int write_out_energy_integral;
     write_out_energy_integral = strtod(argv[13], NULL);
+    int diffusion_on;
+    diffusion_on = strtod(argv[14], NULL);
     for (int i = 0; i < 82 - 1; ++i)
         stars[i] = '*';
     stars[81] = '\n';
@@ -83,7 +85,7 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     State *state_init = malloc(sizeof(State));
     double t_init;
-    set_init_data(INIT_STATE_FILE, state_init, &t_init, add_comps_on);
+    set_init_data(INIT_STATE_FILE, state_init, &t_init, tracers_on);
     free(INIT_STATE_FILE);
     write_out(state_init, t_init, 0, OUTPUT_FOLDER, grid);
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
@@ -104,7 +106,7 @@ int main(int argc, char *argv[])
     if (write_out_energy_integral == 1)
 		write_out_integral(state_0, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
 	t_write_integral += delta_t;
-    runge_kutta_third_order(state_0, state_p1, delta_t, grid, dualgrid, dissipation_on, rad_on, add_comps_on);
+    runge_kutta_third_order(state_0, state_p1, delta_t, grid, dualgrid, dissipation_on, rad_on, tracers_on, diffusion_on);
     if (write_out_dry_mass_integral == 1)
 		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
     if (write_out_entropy_integral == 1)
@@ -129,7 +131,7 @@ int main(int argc, char *argv[])
     {
         t_0 += delta_t;
         *state_0 = *state_p1;
-        runge_kutta_third_order(state_0, state_p1, delta_t, grid, dualgrid, dissipation_on, rad_on, add_comps_on);
+        runge_kutta_third_order(state_0, state_p1, delta_t, grid, dualgrid, dissipation_on, rad_on, tracers_on, diffusion_on);
     if (write_out_dry_mass_integral == 1)
 		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
     if (write_out_entropy_integral == 1)

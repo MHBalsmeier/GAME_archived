@@ -13,6 +13,6 @@ echo done
 if [ $plot_integrals -eq 1 ]
 then
 echo plotting integrals ...
-python derived_products/create_integral_plots.py $fig_save_path $output_dir $write_out_dry_mass_integral $write_out_entropy_integral $write_out_energy_integral
+python derived_products/create_integral_plots.py $fig_save_path $output_dir $write_out_mass_dry_integral $write_out_entropy_gas_integral $write_out_energy_integral
 echo done
 fi

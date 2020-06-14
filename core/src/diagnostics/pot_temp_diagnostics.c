@@ -1,9 +1,9 @@
 #include "../enum_and_typedefs.h"
-#include "../r_operators/r_operators.h"
+#include "../spatial_operators/spatial_operators.h"
 #include "diagnostics.h"
 #include <stdio.h>
 
-int pot_temp_diagnostics(Scalar_field density_entropy, Scalar_field density, Add_comp_densities add_comp_densities, Scalar_field pot_temp)
+int pot_temp_diagnostics(Scalar_field density_entropy, Scalar_field density, Tracer_densities tracer_densities, Scalar_field pot_temp)
 {
 	double condensates_density_sum;
 	int layer_index, h_index;
@@ -11,8 +11,8 @@ int pot_temp_diagnostics(Scalar_field density_entropy, Scalar_field density, Add
     {
     	layer_index = i/NUMBER_OF_SCALARS_H;
     	h_index = i - layer_index*NUMBER_OF_SCALARS_H;
-    	condensates_density_sum = calc_condensates_density_sum(layer_index, h_index, add_comp_densities);
-    	pot_temp[i] = pot_temp_diagnostics_single_value(density_entropy[i], density[i], add_comp_densities[NUMBER_OF_COND_ADD_COMPS*NUMBER_OF_SCALARS + i], condensates_density_sum);
+    	condensates_density_sum = calc_condensates_density_sum(layer_index, h_index, tracer_densities);
+    	pot_temp[i] = pot_temp_diagnostics_single_value(density_entropy[i], density[i], tracer_densities[NUMBER_OF_CONDENSATED_TRACERS*NUMBER_OF_SCALARS + i], condensates_density_sum);
 	}
     return 0;
 }

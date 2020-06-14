@@ -57,7 +57,7 @@ int curl(Vector_field in_field, Dual_vector_field out_field, Grid *grid, Dualgri
                 index_3 = layer_index*NUMBER_OF_VECTORS_PER_LAYER + dualgrid -> h_curl_indices[4*h_index + 3];
                 sign_1 = dualgrid -> h_curl_signs[4*h_index + 1];
                 sign_3 = dualgrid -> h_curl_signs[4*h_index + 3];
-                out_field[i] = 1/dualgrid -> area[i]*(grid -> normal_distance[index_1]*sign_1*in_field[index_1] + grid -> normal_distance[index_3]*sign_3*in_field[index_3]);
+                out_field[i] = 1/dualgrid -> area[layer_index*(NUMBER_OF_VECTORS_H + NUMBER_OF_DUAL_VECTORS_H) + h_index]*(grid -> normal_distance[index_1]*sign_1*in_field[index_1] + grid -> normal_distance[index_3]*sign_3*in_field[index_3]);
             }
             else
             {
@@ -88,7 +88,7 @@ int curl(Vector_field in_field, Dual_vector_field out_field, Grid *grid, Dualgri
                     if (retval != 0)
                         printf("Error in horizontal_covariant_normalized called at position 1 from curl.\n");
                 }
-                out_field[i] = 1/dualgrid -> area[i]*(dist_0*sign_0*covar_0 + dist_1*sign_1*in_field[index_1] + dist_2*sign_2*covar_2 + dist_3*sign_3*in_field[index_3]);
+                out_field[i] = 1/dualgrid -> area[layer_index*(NUMBER_OF_VECTORS_H + NUMBER_OF_DUAL_VECTORS_H) + h_index]*(dist_0*sign_0*covar_0 + dist_1*sign_1*in_field[index_1] + dist_2*sign_2*covar_2 + dist_3*sign_3*in_field[index_3]);
             }
         }
     }

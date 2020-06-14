@@ -122,7 +122,7 @@ for i in range(int(max_interval/time_step) + 1):
     time_after_init = i*time_step;
     print("plotting movie element for t - t_init = " + str(time_after_init) + " s ...");
     fig = plt.figure(figsize = (fig_size, fig_size));
-    ax = plt.axes(projection=ccrs.Orthographic(central_latitude = 0, central_longitude = 20));
+    ax = plt.axes(projection=ccrs.Orthographic(central_latitude = 0, central_longitude = 0));
     ax.coastlines(resolution = "10m", linewidth = 2);
     lat_plot_deg = np.linspace(-90, 90, 1000);
     lon_plot_deg = np.linspace(-180, 180, 1000);

@@ -10,7 +10,7 @@ int cross_product(Vector_field a_field, Dual_vector_field b_field, Vector_field 
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
         layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
-        h_index = i - NUMBER_OF_VECTORS_PER_LAYER*layer_index;
+        h_index = i - layer_index*NUMBER_OF_VECTORS_PER_LAYER;
         if(h_index >= NUMBER_OF_VECTORS_V)
         {
             retval = recov_hor_par_pri(a_field, layer_index, h_index - NUMBER_OF_VECTORS_V, &component_0, grid);

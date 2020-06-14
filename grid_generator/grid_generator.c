@@ -35,8 +35,8 @@ NUMBER_OF_BASIC_TRIANGLES = 20,
 NUMBER_OF_PENTAGONS = 12,
 NUMBER_OF_HEXAGONS = (int) (10*(pow(2, 2*RES_ID) - 1)),
 NUMBER_OF_EDGES = 3*NUMBER_OF_BASIC_TRIANGLES/2,
-NUMBER_OF_LAYERS = 12,
-NUMBER_OF_ORO_LAYERS = 8,
+NUMBER_OF_LAYERS = 26,
+NUMBER_OF_ORO_LAYERS = 17,
 NUMBER_OF_LEVELS = NUMBER_OF_LAYERS + 1,
 NUMBER_OF_SCALARS_H = NUMBER_OF_PENTAGONS + NUMBER_OF_HEXAGONS,
 NUMBER_OF_VECTORS_H = (5*NUMBER_OF_PENTAGONS/2 + 6/2*NUMBER_OF_HEXAGONS),
@@ -787,7 +787,7 @@ int main(int argc, char *argv[])
     for (int i = 0; i < NUMBER_OF_DUAL_SCALARS_H; ++i)
     {
     	counter = 0;
-    	for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
+    	for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_H; ++j)
     	{
     		if (from_index_dual[j] == i || to_index_dual[j] == i)
     		{
@@ -1320,68 +1320,6 @@ int main(int argc, char *argv[])
                 sign = -1;
             recov_hor_par_dual_weight[2*i + j] = sign*0.5;
         }
-        /*first_found = 0;
-        for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
-        {
-            for (int k = 0; k < 5; ++k)
-            {
-                if (to_index[adjacent_vector_indices_h[6*j + k]] != j)
-                    adjacent_scalar_indices_for_cross[k] = to_index[adjacent_vector_indices_h[6*j + k]];
-                else
-                    adjacent_scalar_indices_for_cross[k] = from_index[adjacent_vector_indices_h[6*j + k]];
-            }
-            if (j < NUMBER_OF_PENTAGONS)
-                adjacent_scalar_indices_for_cross[5] = -1;
-            else
-            {
-                if (to_index[adjacent_vector_indices_h[6*j + 5]] != j)
-                    adjacent_scalar_indices_for_cross[5] = to_index[adjacent_vector_indices_h[6*j + 5]];
-                else
-                    adjacent_scalar_indices_for_cross[5] = from_index[adjacent_vector_indices_h[6*j + 5]];
-            }
-            retval = in_bool_calculator(adjacent_scalar_indices_for_cross, 6, from_index[i], &bool_0);
-            retval = in_bool_calculator(adjacent_scalar_indices_for_cross, 6, to_index[i], &bool_1);
-            if (bool_0 == 1 && bool_1 == 1)
-            {
-                if (first_found == 0)
-                {
-                    cell_0_for_cross = j;
-                    first_found = 1;
-                }
-                else
-                    cell_1_for_cross = j;
-            }
-        }
-        counter = 0;
-        for (int k = 0; k < 6; ++k)
-        {
-            if (to_index[adjacent_vector_indices_h[6*cell_0_for_cross + k]] == to_index[i] || from_index[adjacent_vector_indices_h[6*cell_0_for_cross + k]] == to_index[i] || to_index[adjacent_vector_indices_h[6*cell_0_for_cross + k]] == from_index[i] || from_index[adjacent_vector_indices_h[6*cell_0_for_cross + k]] == from_index[i])
-            {
-                face_of_cell_indices[counter] = k;
-                ++counter;
-            }
-        }
-        if (counter != 2)
-            printf("Trouble detected, place 2.\n");
-        recov_hor_par_pri_index[4*i] = adjacent_vector_indices_h[6*cell_0_for_cross + face_of_cell_indices[0]];
-        recov_hor_par_pri_weight[4*i] = 2.0/3.0*0.5*(cos(direction[i] + M_PI/2)*cos(direction[recov_hor_par_pri_index[4*i]]) + sin(direction[i] + M_PI/2)*sin(direction[recov_hor_par_pri_index[4*i]]));
-        recov_hor_par_pri_index[4*i + 1] = adjacent_vector_indices_h[6*cell_0_for_cross + face_of_cell_indices[1]];
-        recov_hor_par_pri_weight[4*i + 1] = 2.0/3.0*0.5*(cos(direction[i] + M_PI/2)*cos(direction[recov_hor_par_pri_index[4*i + 1]]) + sin(direction[i] + M_PI/2)*sin(direction[recov_hor_par_pri_index[4*i + 1]]));
-        counter = 0;
-        for (int k = 0; k < 6; ++k)
-        {
-            if (to_index[adjacent_vector_indices_h[6*cell_1_for_cross + k]] == to_index[i] || from_index[adjacent_vector_indices_h[6*cell_1_for_cross + k]] == to_index[i] || to_index[adjacent_vector_indices_h[6*cell_1_for_cross + k]] == from_index[i] || from_index[adjacent_vector_indices_h[6*cell_1_for_cross + k]] == from_index[i])
-            {
-                face_of_cell_indices[counter] = k;
-                ++counter;
-            }
-        }
-        if (counter != 2)
-            printf("Trouble detected, place 3.\n");
-        recov_hor_par_pri_index[4*i + 2] = adjacent_vector_indices_h[6*cell_1_for_cross + face_of_cell_indices[0]];
-        recov_hor_par_pri_weight[4*i + 2] = 2.0/3.0*0.5*(cos(direction[i] + M_PI/2)*cos(direction[recov_hor_par_pri_index[4*i + 2]]) + sin(direction[i] + M_PI/2)*sin(direction[recov_hor_par_pri_index[4*i + 2]]));
-        recov_hor_par_pri_index[4*i + 3] = adjacent_vector_indices_h[6*cell_1_for_cross + face_of_cell_indices[1]];
-        recov_hor_par_pri_weight[4*i + 3] = 2.0/3.0*0.5*(cos(direction[i] + M_PI/2)*cos(direction[recov_hor_par_pri_index[4*i + 3]]) + sin(direction[i] + M_PI/2)*sin(direction[recov_hor_par_pri_index[4*i + 3]])); uncomment for cold Coriolis reconstruction*/
 		/*
 		translation from TRSK paper:
 		sign_0: t_{e, v_2}
@@ -2079,6 +2017,43 @@ int main(int argc, char *argv[])
             h_curl_indices[4*i + 3] = to_index[i];
         h_curl_signs[4*i + 3] = -1;
     }
+    for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
+    {
+    	counter = 0;
+    	for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_H; ++j)
+    	{
+    		if (h_curl_indices[4*j + 1] == i || h_curl_indices[4*j + 3] == i)
+    			++counter;
+    	}
+    	if (i < NUMBER_OF_PENTAGONS && counter != 5)
+    	{
+    		printf("Error in h_curl_indices, position 0.\n");
+    		exit(1);
+		}
+    	if (i >= NUMBER_OF_PENTAGONS && counter != 6)
+    	{
+    		printf("Error in h_curl_indices, position 1.\n");
+    		exit(1);
+		}
+    }
+    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+    {
+    	counter = 0;
+    	for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_H; ++j)
+    	{
+    		if (h_curl_indices[4*j + 0] == i + NUMBER_OF_VECTORS_PER_LAYER || h_curl_indices[4*j + 2] == i)
+    		{
+    			++counter;
+    			if (h_curl_indices[4*j + 0] == i + NUMBER_OF_VECTORS_PER_LAYER && h_curl_indices[4*j + 2] == i)
+    				++counter;
+			}
+    	}
+    	if (counter != 2)
+    	{
+    		printf("Error in h_curl_indices, position 2.\n");
+    		exit(1);
+		}
+    }
     free(direction_dual);
     double area_0, area_1, area_ratio;
     for (int i = 0; i < NUMBER_OF_DUAL_H_VECTORS + NUMBER_OF_H_VECTORS; ++i)
@@ -2100,7 +2075,10 @@ int main(int argc, char *argv[])
     		area_1 = area_rescale_factor*area_1;
     		area_ratio = area_0/area_1;
     		if (fabs(area_ratio - 1) > 0.3)
-    			printf("Unrealistic area_ratio in rhombus area calculation.%lf\n", area_ratio);
+    		{
+    			printf("Unrealistic area_ratio in rhombus area calculation, position 0.\n");
+    			exit(1);
+			}
     		area_dual[i] = area_0 + area_1;
     	}
 		if (area_dual[i] <= 0)
@@ -2108,6 +2086,24 @@ int main(int argc, char *argv[])
 			printf("It is area_dual <= 0 at some point.\n");
 			exit(1);
 		}
+    }
+    double check_area, area_sum, mean_z;
+    for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
+    {
+    	mean_z = 0;
+    	for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
+    		mean_z += z_vector[NUMBER_OF_VECTORS_V + i*NUMBER_OF_VECTORS_PER_LAYER + j];
+    	mean_z = mean_z/NUMBER_OF_VECTORS_H;
+    	area_sum = 0;
+    	for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
+    		area_sum += 1.0/3*area_dual[NUMBER_OF_DUAL_VECTORS_H + i*(NUMBER_OF_VECTORS_H + NUMBER_OF_DUAL_VECTORS_H) + j];
+    	check_area = 4*M_PI*pow(RADIUS + mean_z, 2);
+    	area_ratio = check_area/area_sum;
+    	if (fabs(area_ratio - 1) > 0.00001)
+    	{
+    		printf("Unrealistic area_ratio in rhombus area calculation, position 1.\n");
+    		exit(1);
+    	}
     }
     int indices_list_pre[6];
     int signs_list_pre[6];

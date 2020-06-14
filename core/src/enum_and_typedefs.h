@@ -28,15 +28,15 @@
 
 enum grid_integers {
 RES_ID = 4,
-NUMBER_OF_ADD_COMPS = 3,
-NUMBER_OF_COND_ADD_COMPS = 2,
-NUMBER_OF_SOLID_ADD_COMPS = 1,
+NUMBER_OF_TRACERS = 3,
+NUMBER_OF_CONDENSATED_TRACERS = 2,
+NUMBER_OF_SOLID_TRACERS = 1,
 NUMBER_OF_BASIC_TRIANGLES = 20,
 NUMBER_OF_PENTAGONS = 12,
 NUMBER_OF_HEXAGONS = (int) (10*(pow(2, 2*RES_ID) - 1)),
 NUMBER_OF_EDGES = 3*NUMBER_OF_BASIC_TRIANGLES/2,
-NUMBER_OF_LAYERS = 12,
-NUMBER_OF_ORO_LAYERS = 8,
+NUMBER_OF_LAYERS = 26,
+NUMBER_OF_ORO_LAYERS = 17,
 NUMBER_OF_LEVELS = NUMBER_OF_LAYERS + 1,
 NUMBER_OF_SCALARS_H = NUMBER_OF_PENTAGONS + NUMBER_OF_HEXAGONS,
 NUMBER_OF_VECTORS_H = (5*NUMBER_OF_PENTAGONS/2 + 6/2*NUMBER_OF_HEXAGONS),
@@ -63,8 +63,8 @@ VECTOR_POINTS_PER_INNER_FACE = (int) (1.5*(pow(2, RES_ID) - 1)*pow(2, RES_ID))};
 typedef double Scalar_field[NUMBER_OF_SCALARS];
 typedef double Vector_field[NUMBER_OF_VECTORS];
 typedef double Dual_vector_field[NUMBER_OF_DUAL_VECTORS];
-typedef double Add_comp_densities[NUMBER_OF_ADD_COMPS*NUMBER_OF_SCALARS];
-typedef double Add_comp_temps[NUMBER_OF_COND_ADD_COMPS*NUMBER_OF_SCALARS];
+typedef double Tracer_densities[NUMBER_OF_TRACERS*NUMBER_OF_SCALARS];
+typedef double Tracer_density_temperatures[NUMBER_OF_CONDENSATED_TRACERS*NUMBER_OF_SCALARS];
 
 typedef struct grid {
 Vector_field normal_distance;
@@ -78,7 +78,6 @@ double vertical_contravar_unit[3*NUMBER_OF_VECTORS_V*(NUMBER_OF_ORO_LAYERS + 1)]
 int from_index[NUMBER_OF_VECTORS_H];
 int to_index[NUMBER_OF_VECTORS_H];
 double direction[NUMBER_OF_VECTORS_H];
-double z_surface[NUMBER_OF_SCALARS_H];
 int adjacent_vector_indices_h[6*NUMBER_OF_SCALARS_H];
 int adjacent_signs_h[6*NUMBER_OF_SCALARS_H];
 int recov_hor_par_dual_index[2*NUMBER_OF_VECTORS_H];
@@ -100,7 +99,6 @@ double recov_ver_1_dual_weight[6*NUMBER_OF_VECTORS_V];
 
 typedef struct dualgrid {
 Dual_vector_field normal_distance;
-Dual_vector_field z_vector;
 double area[NUMBER_OF_DUAL_H_VECTORS + NUMBER_OF_H_VECTORS];
 double f_vec[NUMBER_OF_DUAL_VECTORS_PER_LAYER];
 int vorticity_indices[4*NUMBER_OF_VECTORS_H];
@@ -111,10 +109,10 @@ int adjacent_vector_indices_h[3*NUMBER_OF_DUAL_SCALARS_H];
 } Dualgrid;
 
 typedef struct state {
-Scalar_field entropy;
-Scalar_field density;
-Vector_field wind;
+Scalar_field entropy_gas;
+Scalar_field density_dry;
+Vector_field velocity_gas;
 // density order: solid, liquid, vapour
-Add_comp_densities add_comp_densities;
-Add_comp_temps add_comp_temps;
+Tracer_densities tracer_densities;
+Tracer_density_temperatures tracer_density_temperatures;
 } State;

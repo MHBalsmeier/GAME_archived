@@ -1,7 +1,5 @@
 #include "../enum_and_typedefs.h"
-#include "io.h"
-#include "../r_operators/r_operators.h"
-#include <stdio.h>
+#include "../spatial_operators/spatial_operators.h"
 
 int interpolation_t(State *state_0, State *state_p1, State *state_write, double t_0, double t_p1, double t_write)
 {

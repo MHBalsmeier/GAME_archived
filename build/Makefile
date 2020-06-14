@@ -774,356 +774,302 @@ src/io/write_output.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/io/write_output.c.s
 .PHONY : src/io/write_output.c.s
 
-src/r_operators/add_vector_fields.o: src/r_operators/add_vector_fields.c.o
+src/spatial_operators/cross_product.o: src/spatial_operators/cross_product.c.o
 
-.PHONY : src/r_operators/add_vector_fields.o
-
-# target to build an object file
-src/r_operators/add_vector_fields.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/add_vector_fields.c.o
-.PHONY : src/r_operators/add_vector_fields.c.o
-
-src/r_operators/add_vector_fields.i: src/r_operators/add_vector_fields.c.i
-
-.PHONY : src/r_operators/add_vector_fields.i
-
-# target to preprocess a source file
-src/r_operators/add_vector_fields.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/add_vector_fields.c.i
-.PHONY : src/r_operators/add_vector_fields.c.i
-
-src/r_operators/add_vector_fields.s: src/r_operators/add_vector_fields.c.s
-
-.PHONY : src/r_operators/add_vector_fields.s
-
-# target to generate assembly for a file
-src/r_operators/add_vector_fields.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/add_vector_fields.c.s
-.PHONY : src/r_operators/add_vector_fields.c.s
-
-src/r_operators/adv_scalar.o: src/r_operators/adv_scalar.c.o
-
-.PHONY : src/r_operators/adv_scalar.o
+.PHONY : src/spatial_operators/cross_product.o
 
 # target to build an object file
-src/r_operators/adv_scalar.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/adv_scalar.c.o
-.PHONY : src/r_operators/adv_scalar.c.o
+src/spatial_operators/cross_product.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/cross_product.c.o
+.PHONY : src/spatial_operators/cross_product.c.o
 
-src/r_operators/adv_scalar.i: src/r_operators/adv_scalar.c.i
+src/spatial_operators/cross_product.i: src/spatial_operators/cross_product.c.i
 
-.PHONY : src/r_operators/adv_scalar.i
+.PHONY : src/spatial_operators/cross_product.i
 
 # target to preprocess a source file
-src/r_operators/adv_scalar.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/adv_scalar.c.i
-.PHONY : src/r_operators/adv_scalar.c.i
+src/spatial_operators/cross_product.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/cross_product.c.i
+.PHONY : src/spatial_operators/cross_product.c.i
 
-src/r_operators/adv_scalar.s: src/r_operators/adv_scalar.c.s
+src/spatial_operators/cross_product.s: src/spatial_operators/cross_product.c.s
 
-.PHONY : src/r_operators/adv_scalar.s
+.PHONY : src/spatial_operators/cross_product.s
 
 # target to generate assembly for a file
-src/r_operators/adv_scalar.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/adv_scalar.c.s
-.PHONY : src/r_operators/adv_scalar.c.s
+src/spatial_operators/cross_product.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/cross_product.c.s
+.PHONY : src/spatial_operators/cross_product.c.s
 
-src/r_operators/cross_product.o: src/r_operators/cross_product.c.o
+src/spatial_operators/curl.o: src/spatial_operators/curl.c.o
 
-.PHONY : src/r_operators/cross_product.o
+.PHONY : src/spatial_operators/curl.o
 
 # target to build an object file
-src/r_operators/cross_product.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/cross_product.c.o
-.PHONY : src/r_operators/cross_product.c.o
+src/spatial_operators/curl.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/curl.c.o
+.PHONY : src/spatial_operators/curl.c.o
 
-src/r_operators/cross_product.i: src/r_operators/cross_product.c.i
+src/spatial_operators/curl.i: src/spatial_operators/curl.c.i
 
-.PHONY : src/r_operators/cross_product.i
+.PHONY : src/spatial_operators/curl.i
 
 # target to preprocess a source file
-src/r_operators/cross_product.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/cross_product.c.i
-.PHONY : src/r_operators/cross_product.c.i
+src/spatial_operators/curl.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/curl.c.i
+.PHONY : src/spatial_operators/curl.c.i
 
-src/r_operators/cross_product.s: src/r_operators/cross_product.c.s
+src/spatial_operators/curl.s: src/spatial_operators/curl.c.s
 
-.PHONY : src/r_operators/cross_product.s
+.PHONY : src/spatial_operators/curl.s
 
 # target to generate assembly for a file
-src/r_operators/cross_product.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/cross_product.c.s
-.PHONY : src/r_operators/cross_product.c.s
+src/spatial_operators/curl.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/curl.c.s
+.PHONY : src/spatial_operators/curl.c.s
 
-src/r_operators/curl.o: src/r_operators/curl.c.o
+src/spatial_operators/determine_tendency.o: src/spatial_operators/determine_tendency.c.o
 
-.PHONY : src/r_operators/curl.o
+.PHONY : src/spatial_operators/determine_tendency.o
 
 # target to build an object file
-src/r_operators/curl.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/curl.c.o
-.PHONY : src/r_operators/curl.c.o
+src/spatial_operators/determine_tendency.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.o
+.PHONY : src/spatial_operators/determine_tendency.c.o
 
-src/r_operators/curl.i: src/r_operators/curl.c.i
+src/spatial_operators/determine_tendency.i: src/spatial_operators/determine_tendency.c.i
 
-.PHONY : src/r_operators/curl.i
+.PHONY : src/spatial_operators/determine_tendency.i
 
 # target to preprocess a source file
-src/r_operators/curl.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/curl.c.i
-.PHONY : src/r_operators/curl.c.i
+src/spatial_operators/determine_tendency.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.i
+.PHONY : src/spatial_operators/determine_tendency.c.i
 
-src/r_operators/curl.s: src/r_operators/curl.c.s
+src/spatial_operators/determine_tendency.s: src/spatial_operators/determine_tendency.c.s
 
-.PHONY : src/r_operators/curl.s
+.PHONY : src/spatial_operators/determine_tendency.s
 
 # target to generate assembly for a file
-src/r_operators/curl.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/curl.c.s
-.PHONY : src/r_operators/curl.c.s
+src/spatial_operators/determine_tendency.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.s
+.PHONY : src/spatial_operators/determine_tendency.c.s
 
-src/r_operators/determine_tendency.o: src/r_operators/determine_tendency.c.o
+src/spatial_operators/dissipation.o: src/spatial_operators/dissipation.c.o
 
-.PHONY : src/r_operators/determine_tendency.o
+.PHONY : src/spatial_operators/dissipation.o
 
 # target to build an object file
-src/r_operators/determine_tendency.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/determine_tendency.c.o
-.PHONY : src/r_operators/determine_tendency.c.o
+src/spatial_operators/dissipation.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/dissipation.c.o
+.PHONY : src/spatial_operators/dissipation.c.o
 
-src/r_operators/determine_tendency.i: src/r_operators/determine_tendency.c.i
+src/spatial_operators/dissipation.i: src/spatial_operators/dissipation.c.i
 
-.PHONY : src/r_operators/determine_tendency.i
+.PHONY : src/spatial_operators/dissipation.i
 
 # target to preprocess a source file
-src/r_operators/determine_tendency.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/determine_tendency.c.i
-.PHONY : src/r_operators/determine_tendency.c.i
+src/spatial_operators/dissipation.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/dissipation.c.i
+.PHONY : src/spatial_operators/dissipation.c.i
 
-src/r_operators/determine_tendency.s: src/r_operators/determine_tendency.c.s
+src/spatial_operators/dissipation.s: src/spatial_operators/dissipation.c.s
 
-.PHONY : src/r_operators/determine_tendency.s
+.PHONY : src/spatial_operators/dissipation.s
 
 # target to generate assembly for a file
-src/r_operators/determine_tendency.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/determine_tendency.c.s
-.PHONY : src/r_operators/determine_tendency.c.s
+src/spatial_operators/dissipation.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/dissipation.c.s
+.PHONY : src/spatial_operators/dissipation.c.s
 
-src/r_operators/dissipation.o: src/r_operators/dissipation.c.o
+src/spatial_operators/div.o: src/spatial_operators/div.c.o
 
-.PHONY : src/r_operators/dissipation.o
+.PHONY : src/spatial_operators/div.o
 
 # target to build an object file
-src/r_operators/dissipation.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/dissipation.c.o
-.PHONY : src/r_operators/dissipation.c.o
+src/spatial_operators/div.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/div.c.o
+.PHONY : src/spatial_operators/div.c.o
 
-src/r_operators/dissipation.i: src/r_operators/dissipation.c.i
+src/spatial_operators/div.i: src/spatial_operators/div.c.i
 
-.PHONY : src/r_operators/dissipation.i
+.PHONY : src/spatial_operators/div.i
 
 # target to preprocess a source file
-src/r_operators/dissipation.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/dissipation.c.i
-.PHONY : src/r_operators/dissipation.c.i
+src/spatial_operators/div.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/div.c.i
+.PHONY : src/spatial_operators/div.c.i
 
-src/r_operators/dissipation.s: src/r_operators/dissipation.c.s
+src/spatial_operators/div.s: src/spatial_operators/div.c.s
 
-.PHONY : src/r_operators/dissipation.s
+.PHONY : src/spatial_operators/div.s
 
 # target to generate assembly for a file
-src/r_operators/dissipation.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/dissipation.c.s
-.PHONY : src/r_operators/dissipation.c.s
+src/spatial_operators/div.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/div.c.s
+.PHONY : src/spatial_operators/div.c.s
 
-src/r_operators/div.o: src/r_operators/div.c.o
+src/spatial_operators/grad.o: src/spatial_operators/grad.c.o
 
-.PHONY : src/r_operators/div.o
+.PHONY : src/spatial_operators/grad.o
 
 # target to build an object file
-src/r_operators/div.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/div.c.o
-.PHONY : src/r_operators/div.c.o
+src/spatial_operators/grad.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/grad.c.o
+.PHONY : src/spatial_operators/grad.c.o
 
-src/r_operators/div.i: src/r_operators/div.c.i
+src/spatial_operators/grad.i: src/spatial_operators/grad.c.i
 
-.PHONY : src/r_operators/div.i
+.PHONY : src/spatial_operators/grad.i
 
 # target to preprocess a source file
-src/r_operators/div.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/div.c.i
-.PHONY : src/r_operators/div.c.i
+src/spatial_operators/grad.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/grad.c.i
+.PHONY : src/spatial_operators/grad.c.i
 
-src/r_operators/div.s: src/r_operators/div.c.s
+src/spatial_operators/grad.s: src/spatial_operators/grad.c.s
 
-.PHONY : src/r_operators/div.s
+.PHONY : src/spatial_operators/grad.s
 
 # target to generate assembly for a file
-src/r_operators/div.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/div.c.s
-.PHONY : src/r_operators/div.c.s
+src/spatial_operators/grad.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/grad.c.s
+.PHONY : src/spatial_operators/grad.c.s
 
-src/r_operators/grad.o: src/r_operators/grad.c.o
+src/spatial_operators/kinetic_energy.o: src/spatial_operators/kinetic_energy.c.o
 
-.PHONY : src/r_operators/grad.o
+.PHONY : src/spatial_operators/kinetic_energy.o
 
 # target to build an object file
-src/r_operators/grad.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/grad.c.o
-.PHONY : src/r_operators/grad.c.o
+src/spatial_operators/kinetic_energy.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.o
+.PHONY : src/spatial_operators/kinetic_energy.c.o
 
-src/r_operators/grad.i: src/r_operators/grad.c.i
+src/spatial_operators/kinetic_energy.i: src/spatial_operators/kinetic_energy.c.i
 
-.PHONY : src/r_operators/grad.i
+.PHONY : src/spatial_operators/kinetic_energy.i
 
 # target to preprocess a source file
-src/r_operators/grad.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/grad.c.i
-.PHONY : src/r_operators/grad.c.i
+src/spatial_operators/kinetic_energy.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.i
+.PHONY : src/spatial_operators/kinetic_energy.c.i
 
-src/r_operators/grad.s: src/r_operators/grad.c.s
+src/spatial_operators/kinetic_energy.s: src/spatial_operators/kinetic_energy.c.s
 
-.PHONY : src/r_operators/grad.s
+.PHONY : src/spatial_operators/kinetic_energy.s
 
 # target to generate assembly for a file
-src/r_operators/grad.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/grad.c.s
-.PHONY : src/r_operators/grad.c.s
+src/spatial_operators/kinetic_energy.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.s
+.PHONY : src/spatial_operators/kinetic_energy.c.s
 
-src/r_operators/inner.o: src/r_operators/inner.c.o
+src/spatial_operators/linear_combine_two_states.o: src/spatial_operators/linear_combine_two_states.c.o
 
-.PHONY : src/r_operators/inner.o
+.PHONY : src/spatial_operators/linear_combine_two_states.o
 
 # target to build an object file
-src/r_operators/inner.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/inner.c.o
-.PHONY : src/r_operators/inner.c.o
+src/spatial_operators/linear_combine_two_states.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/linear_combine_two_states.c.o
+.PHONY : src/spatial_operators/linear_combine_two_states.c.o
 
-src/r_operators/inner.i: src/r_operators/inner.c.i
+src/spatial_operators/linear_combine_two_states.i: src/spatial_operators/linear_combine_two_states.c.i
 
-.PHONY : src/r_operators/inner.i
+.PHONY : src/spatial_operators/linear_combine_two_states.i
 
 # target to preprocess a source file
-src/r_operators/inner.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/inner.c.i
-.PHONY : src/r_operators/inner.c.i
+src/spatial_operators/linear_combine_two_states.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/linear_combine_two_states.c.i
+.PHONY : src/spatial_operators/linear_combine_two_states.c.i
 
-src/r_operators/inner.s: src/r_operators/inner.c.s
+src/spatial_operators/linear_combine_two_states.s: src/spatial_operators/linear_combine_two_states.c.s
 
-.PHONY : src/r_operators/inner.s
+.PHONY : src/spatial_operators/linear_combine_two_states.s
 
 # target to generate assembly for a file
-src/r_operators/inner.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/inner.c.s
-.PHONY : src/r_operators/inner.c.s
+src/spatial_operators/linear_combine_two_states.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/linear_combine_two_states.c.s
+.PHONY : src/spatial_operators/linear_combine_two_states.c.s
 
-src/r_operators/linear_combine_two_states.o: src/r_operators/linear_combine_two_states.c.o
+src/spatial_operators/scalar_times_scalar.o: src/spatial_operators/scalar_times_scalar.c.o
 
-.PHONY : src/r_operators/linear_combine_two_states.o
+.PHONY : src/spatial_operators/scalar_times_scalar.o
 
 # target to build an object file
-src/r_operators/linear_combine_two_states.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/linear_combine_two_states.c.o
-.PHONY : src/r_operators/linear_combine_two_states.c.o
+src/spatial_operators/scalar_times_scalar.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/scalar_times_scalar.c.o
+.PHONY : src/spatial_operators/scalar_times_scalar.c.o
 
-src/r_operators/linear_combine_two_states.i: src/r_operators/linear_combine_two_states.c.i
+src/spatial_operators/scalar_times_scalar.i: src/spatial_operators/scalar_times_scalar.c.i
 
-.PHONY : src/r_operators/linear_combine_two_states.i
+.PHONY : src/spatial_operators/scalar_times_scalar.i
 
 # target to preprocess a source file
-src/r_operators/linear_combine_two_states.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/linear_combine_two_states.c.i
-.PHONY : src/r_operators/linear_combine_two_states.c.i
+src/spatial_operators/scalar_times_scalar.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/scalar_times_scalar.c.i
+.PHONY : src/spatial_operators/scalar_times_scalar.c.i
 
-src/r_operators/linear_combine_two_states.s: src/r_operators/linear_combine_two_states.c.s
+src/spatial_operators/scalar_times_scalar.s: src/spatial_operators/scalar_times_scalar.c.s
 
-.PHONY : src/r_operators/linear_combine_two_states.s
+.PHONY : src/spatial_operators/scalar_times_scalar.s
 
 # target to generate assembly for a file
-src/r_operators/linear_combine_two_states.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/linear_combine_two_states.c.s
-.PHONY : src/r_operators/linear_combine_two_states.c.s
+src/spatial_operators/scalar_times_scalar.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/scalar_times_scalar.c.s
+.PHONY : src/spatial_operators/scalar_times_scalar.c.s
 
-src/r_operators/scalar_times_scalar.o: src/r_operators/scalar_times_scalar.c.o
+src/spatial_operators/scalar_times_vector.o: src/spatial_operators/scalar_times_vector.c.o
 
-.PHONY : src/r_operators/scalar_times_scalar.o
+.PHONY : src/spatial_operators/scalar_times_vector.o
 
 # target to build an object file
-src/r_operators/scalar_times_scalar.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/scalar_times_scalar.c.o
-.PHONY : src/r_operators/scalar_times_scalar.c.o
+src/spatial_operators/scalar_times_vector.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.o
+.PHONY : src/spatial_operators/scalar_times_vector.c.o
 
-src/r_operators/scalar_times_scalar.i: src/r_operators/scalar_times_scalar.c.i
+src/spatial_operators/scalar_times_vector.i: src/spatial_operators/scalar_times_vector.c.i
 
-.PHONY : src/r_operators/scalar_times_scalar.i
+.PHONY : src/spatial_operators/scalar_times_vector.i
 
 # target to preprocess a source file
-src/r_operators/scalar_times_scalar.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/scalar_times_scalar.c.i
-.PHONY : src/r_operators/scalar_times_scalar.c.i
+src/spatial_operators/scalar_times_vector.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.i
+.PHONY : src/spatial_operators/scalar_times_vector.c.i
 
-src/r_operators/scalar_times_scalar.s: src/r_operators/scalar_times_scalar.c.s
+src/spatial_operators/scalar_times_vector.s: src/spatial_operators/scalar_times_vector.c.s
 
-.PHONY : src/r_operators/scalar_times_scalar.s
+.PHONY : src/spatial_operators/scalar_times_vector.s
 
 # target to generate assembly for a file
-src/r_operators/scalar_times_scalar.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/scalar_times_scalar.c.s
-.PHONY : src/r_operators/scalar_times_scalar.c.s
+src/spatial_operators/scalar_times_vector.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.s
+.PHONY : src/spatial_operators/scalar_times_vector.c.s
 
-src/r_operators/scalar_times_vector.o: src/r_operators/scalar_times_vector.c.o
+src/spatial_operators/scalar_times_vector_h_v.o: src/spatial_operators/scalar_times_vector_h_v.c.o
 
-.PHONY : src/r_operators/scalar_times_vector.o
+.PHONY : src/spatial_operators/scalar_times_vector_h_v.o
 
 # target to build an object file
-src/r_operators/scalar_times_vector.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/scalar_times_vector.c.o
-.PHONY : src/r_operators/scalar_times_vector.c.o
+src/spatial_operators/scalar_times_vector_h_v.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.o
+.PHONY : src/spatial_operators/scalar_times_vector_h_v.c.o
 
-src/r_operators/scalar_times_vector.i: src/r_operators/scalar_times_vector.c.i
+src/spatial_operators/scalar_times_vector_h_v.i: src/spatial_operators/scalar_times_vector_h_v.c.i
 
-.PHONY : src/r_operators/scalar_times_vector.i
-
-# target to preprocess a source file
-src/r_operators/scalar_times_vector.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/scalar_times_vector.c.i
-.PHONY : src/r_operators/scalar_times_vector.c.i
-
-src/r_operators/scalar_times_vector.s: src/r_operators/scalar_times_vector.c.s
-
-.PHONY : src/r_operators/scalar_times_vector.s
-
-# target to generate assembly for a file
-src/r_operators/scalar_times_vector.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/scalar_times_vector.c.s
-.PHONY : src/r_operators/scalar_times_vector.c.s
-
-src/r_operators/scalar_times_vector_h_v.o: src/r_operators/scalar_times_vector_h_v.c.o
-
-.PHONY : src/r_operators/scalar_times_vector_h_v.o
-
-# target to build an object file
-src/r_operators/scalar_times_vector_h_v.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/scalar_times_vector_h_v.c.o
-.PHONY : src/r_operators/scalar_times_vector_h_v.c.o
-
-src/r_operators/scalar_times_vector_h_v.i: src/r_operators/scalar_times_vector_h_v.c.i
-
-.PHONY : src/r_operators/scalar_times_vector_h_v.i
+.PHONY : src/spatial_operators/scalar_times_vector_h_v.i
 
 # target to preprocess a source file
-src/r_operators/scalar_times_vector_h_v.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/scalar_times_vector_h_v.c.i
-.PHONY : src/r_operators/scalar_times_vector_h_v.c.i
+src/spatial_operators/scalar_times_vector_h_v.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.i
+.PHONY : src/spatial_operators/scalar_times_vector_h_v.c.i
 
-src/r_operators/scalar_times_vector_h_v.s: src/r_operators/scalar_times_vector_h_v.c.s
+src/spatial_operators/scalar_times_vector_h_v.s: src/spatial_operators/scalar_times_vector_h_v.c.s
 
-.PHONY : src/r_operators/scalar_times_vector_h_v.s
+.PHONY : src/spatial_operators/scalar_times_vector_h_v.s
 
 # target to generate assembly for a file
-src/r_operators/scalar_times_vector_h_v.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/r_operators/scalar_times_vector_h_v.c.s
-.PHONY : src/r_operators/scalar_times_vector_h_v.c.s
+src/spatial_operators/scalar_times_vector_h_v.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.s
+.PHONY : src/spatial_operators/scalar_times_vector_h_v.c.s
 
 src/time_stepping/runge_kutta_fourth_order.o: src/time_stepping/runge_kutta_fourth_order.c.o
 
@@ -1259,45 +1205,39 @@ help:
 	@echo "... src/io/write_output.o"
 	@echo "... src/io/write_output.i"
 	@echo "... src/io/write_output.s"
-	@echo "... src/r_operators/add_vector_fields.o"
-	@echo "... src/r_operators/add_vector_fields.i"
-	@echo "... src/r_operators/add_vector_fields.s"
-	@echo "... src/r_operators/adv_scalar.o"
-	@echo "... src/r_operators/adv_scalar.i"
-	@echo "... src/r_operators/adv_scalar.s"
-	@echo "... src/r_operators/cross_product.o"
-	@echo "... src/r_operators/cross_product.i"
-	@echo "... src/r_operators/cross_product.s"
-	@echo "... src/r_operators/curl.o"
-	@echo "... src/r_operators/curl.i"
-	@echo "... src/r_operators/curl.s"
-	@echo "... src/r_operators/determine_tendency.o"
-	@echo "... src/r_operators/determine_tendency.i"
-	@echo "... src/r_operators/determine_tendency.s"
-	@echo "... src/r_operators/dissipation.o"
-	@echo "... src/r_operators/dissipation.i"
-	@echo "... src/r_operators/dissipation.s"
-	@echo "... src/r_operators/div.o"
-	@echo "... src/r_operators/div.i"
-	@echo "... src/r_operators/div.s"
-	@echo "... src/r_operators/grad.o"
-	@echo "... src/r_operators/grad.i"
-	@echo "... src/r_operators/grad.s"
-	@echo "... src/r_operators/inner.o"
-	@echo "... src/r_operators/inner.i"
-	@echo "... src/r_operators/inner.s"
-	@echo "... src/r_operators/linear_combine_two_states.o"
-	@echo "... src/r_operators/linear_combine_two_states.i"
-	@echo "... src/r_operators/linear_combine_two_states.s"
-	@echo "... src/r_operators/scalar_times_scalar.o"
-	@echo "... src/r_operators/scalar_times_scalar.i"
-	@echo "... src/r_operators/scalar_times_scalar.s"
-	@echo "... src/r_operators/scalar_times_vector.o"
-	@echo "... src/r_operators/scalar_times_vector.i"
-	@echo "... src/r_operators/scalar_times_vector.s"
-	@echo "... src/r_operators/scalar_times_vector_h_v.o"
-	@echo "... src/r_operators/scalar_times_vector_h_v.i"
-	@echo "... src/r_operators/scalar_times_vector_h_v.s"
+	@echo "... src/spatial_operators/cross_product.o"
+	@echo "... src/spatial_operators/cross_product.i"
+	@echo "... src/spatial_operators/cross_product.s"
+	@echo "... src/spatial_operators/curl.o"
+	@echo "... src/spatial_operators/curl.i"
+	@echo "... src/spatial_operators/curl.s"
+	@echo "... src/spatial_operators/determine_tendency.o"
+	@echo "... src/spatial_operators/determine_tendency.i"
+	@echo "... src/spatial_operators/determine_tendency.s"
+	@echo "... src/spatial_operators/dissipation.o"
+	@echo "... src/spatial_operators/dissipation.i"
+	@echo "... src/spatial_operators/dissipation.s"
+	@echo "... src/spatial_operators/div.o"
+	@echo "... src/spatial_operators/div.i"
+	@echo "... src/spatial_operators/div.s"
+	@echo "... src/spatial_operators/grad.o"
+	@echo "... src/spatial_operators/grad.i"
+	@echo "... src/spatial_operators/grad.s"
+	@echo "... src/spatial_operators/kinetic_energy.o"
+	@echo "... src/spatial_operators/kinetic_energy.i"
+	@echo "... src/spatial_operators/kinetic_energy.s"
+	@echo "... src/spatial_operators/linear_combine_two_states.o"
+	@echo "... src/spatial_operators/linear_combine_two_states.i"
+	@echo "... src/spatial_operators/linear_combine_two_states.s"
+	@echo "... src/spatial_operators/scalar_times_scalar.o"
+	@echo "... src/spatial_operators/scalar_times_scalar.i"
+	@echo "... src/spatial_operators/scalar_times_scalar.s"
+	@echo "... src/spatial_operators/scalar_times_vector.o"
+	@echo "... src/spatial_operators/scalar_times_vector.i"
+	@echo "... src/spatial_operators/scalar_times_vector.s"
+	@echo "... src/spatial_operators/scalar_times_vector_h_v.o"
+	@echo "... src/spatial_operators/scalar_times_vector_h_v.i"
+	@echo "... src/spatial_operators/scalar_times_vector_h_v.s"
 	@echo "... src/time_stepping/runge_kutta_fourth_order.o"
 	@echo "... src/time_stepping/runge_kutta_fourth_order.i"
 	@echo "... src/time_stepping/runge_kutta_fourth_order.s"
