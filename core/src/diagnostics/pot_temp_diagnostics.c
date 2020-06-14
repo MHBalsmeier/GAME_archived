@@ -23,7 +23,6 @@ double pot_temp_diagnostics_single_value(double density_entropy_value, double de
 	double density_d_micro_value = calc_micro_density(density_d_value, condensates_density_sum);
 	double density_v_micro_value = calc_micro_density(density_v_value, condensates_density_sum);
 	double density_h_micro_value = density_d_micro_value + density_v_micro_value;
-	double c_h_v = spec_heat_cap_diagnostics_p(density_d_micro_value, density_v_micro_value);
 	double R_h = gas_constant_diagnostics(density_d_micro_value, density_v_micro_value);
 	double f_1 = density_d_value*C_D_P + density_v_value*C_V_P + density_v_value*M_D/M_V*DELTA_C_V_P*R_D/C_D_V;
 	double f_2 = density_d_value*entropy_constant_d + density_v_value*entropy_constant_v;

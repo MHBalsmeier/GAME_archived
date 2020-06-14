@@ -5,7 +5,7 @@
 int curl(Vector_field in_field, Dual_vector_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
     int layer_index, h_index, index, sign, retval, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area;
-    double rhombus_circ, dist_0, dist_1, dist_2, dist_3, dist_0_pre, dist_2_pre, delta_z, covar_0, covar_2, length_rescale_factor_0, length_rescale_factor, velocity_value, vertical_gradient;
+    double rhombus_circ, dist_0, dist_1, dist_2, dist_3, dist_0_pre, dist_2_pre, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient;
     int index_0, index_1, index_2, index_3, sign_0, sign_1, sign_2, sign_3;
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; ++i)
     {

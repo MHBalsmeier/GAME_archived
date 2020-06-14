@@ -25,7 +25,9 @@ int divergence(Vector_field in_field, Scalar_field out_field, Grid *grid, int al
         {
         	retval = vertical_contravariant_normalized(in_field, layer_index, h_index, grid, &contra_upper);
             if (retval != 0)
+            {
             	printf("Error in vertical_contravariant_normalized called at position 1 from divergence.\n");
+        	}
         	retval = vertical_contravariant_normalized(in_field, layer_index + 1, h_index, grid, &contra_lower);
             if (retval != 0)
             	printf("Error in vertical_contravariant_normalized called at position 2 from divergence.\n");

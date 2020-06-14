@@ -210,7 +210,9 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     Vector_field *specific_entropy_gradient = malloc(sizeof(Vector_field));
     retval = grad(*specific_entropy, *specific_entropy_gradient, grid);
     if (retval != 0)
+    {
     	printf("grad called at position 0 from tendency errored out, exit code %d.\n", retval);
+	}
 	free(specific_entropy);
 	Vector_field *pressure_gradient_acc_1 = malloc(sizeof(Vector_field));
 	retval = scalar_times_vector(*temperature, *specific_entropy_gradient, *pressure_gradient_acc_1, grid);
@@ -224,7 +226,9 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     free(temperature);
     Scalar_field *c_h_p_field = malloc(sizeof(Scalar_field));
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
-    	(*c_h_p_field)[i] = spec_heat_cap_diagnostics_p(current_state -> density_dry[i], current_state -> tracer_densities[NUMBER_OF_CONDENSATED_TRACERS*NUMBER_OF_SCALARS + i]);	
+    {
+    	(*c_h_p_field)[i] = spec_heat_cap_diagnostics_p(current_state -> density_dry[i], current_state -> tracer_densities[NUMBER_OF_CONDENSATED_TRACERS*NUMBER_OF_SCALARS + i]);
+	}
 	retval = scalar_times_vector(*c_h_p_field, *temp_gradient_times_c_h_p, *temp_gradient_times_c_h_p, grid);
 	if (retval != 0)
 		printf("scalar_times_vector called at position 2 from tendency errored out, exit code %d.\n", retval);
@@ -259,12 +263,35 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     if (retval != 0)
     	printf("grad called at position 2 from tendency errored out, exit code %d.\n", retval);
     free(macroscopic_energy);
+    int layer_index_oro;
+    double u_lowest_tendency, v_lowest_tendency, n_x, n_y, n_z;
+    double check_value;
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
     	layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
     	h_index = i - layer_index*NUMBER_OF_VECTORS_PER_LAYER;
-        if (i < NUMBER_OF_VECTORS_V || i >= NUMBER_OF_VECTORS - NUMBER_OF_VECTORS_V)
+        if (i < NUMBER_OF_VECTORS_V)
             state_tendency -> velocity_gas[i] = 0;
+        else if (i >= NUMBER_OF_VECTORS - NUMBER_OF_VECTORS_V)
+        {
+			layer_index_oro = layer_index - (NUMBER_OF_LAYERS - NUMBER_OF_ORO_LAYERS);
+			n_x = grid -> vertical_contravar_unit[3*(layer_index_oro*NUMBER_OF_VECTORS_V + h_index) + 0];
+			n_y = grid -> vertical_contravar_unit[3*(layer_index_oro*NUMBER_OF_VECTORS_V + h_index) + 1];
+			n_z = grid -> vertical_contravar_unit[3*(layer_index_oro*NUMBER_OF_VECTORS_V + h_index) + 2];			
+			retval = recov_ver_0_pri(state_tendency -> velocity_gas, layer_index, h_index, &u_lowest_tendency, grid);
+			if (retval != 0)
+				printf("Error in recov_ver_pri_0 called at position 0 from horizontal_covariant_normalized.\n");
+			retval = recov_ver_1_pri(state_tendency -> velocity_gas, layer_index, h_index, &v_lowest_tendency, grid);
+			if (retval != 0)
+				printf("Error in recov_ver_pri_1 called at position 0 from horizontal_covariant_normalized.\n");
+        	state_tendency -> velocity_gas[i] = -1/n_z*(n_x*u_lowest_tendency + n_y*v_lowest_tendency);
+        	vertical_contravariant_normalized(current_state -> velocity_gas, layer_index, h_index, grid, &check_value);
+        	if (fabs(check_value) > 0.001)
+        	{
+        		printf("Error with lower boundary condition.\n");
+        		exit(1);	
+    		}
+        }
         else
         {
         	if (dissipation_on == 1)

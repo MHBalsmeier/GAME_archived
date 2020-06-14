@@ -74,6 +74,8 @@ Scalar_field z_scalar;
 Vector_field z_vector;
 Scalar_field gravity_potential;
 Vector_field gravity;
+double e_kin_weights[14*NUMBER_OF_SCALARS];
+int e_kin_indices[14*NUMBER_OF_SCALARS];
 double vertical_contravar_unit[3*NUMBER_OF_VECTORS_V*(NUMBER_OF_ORO_LAYERS + 1)];
 int from_index[NUMBER_OF_VECTORS_H];
 int to_index[NUMBER_OF_VECTORS_H];

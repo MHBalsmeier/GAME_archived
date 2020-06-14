@@ -39,7 +39,6 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
     int retval;
     FILE *OUT_GRIB;
     OUT_GRIB = fopen(OUTPUT_FILE, "w+");
-    double z_height;
     int init_year, init_month, init_day, init_hour, init_minute, init_second, init_microsecond;
     find_hour_from_time_coord(t_init, &init_year, &init_month, &init_day, &init_hour, &init_minute, &init_second, &init_microsecond);
     long data_date = 10000*init_year + 100*init_month + init_day;
@@ -76,7 +75,6 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
     codes_handle *handle_sprate = NULL;
     for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
     {
-        z_height = grid -> z_scalar[i*NUMBER_OF_SCALARS_H];
         for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
         {
         	rho_h[j] = state_write_out -> density_dry[j + i*NUMBER_OF_SCALARS_H];
@@ -822,6 +820,11 @@ int write_out_integral(State *state_write_out, double t_write, char output_folde
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
     	Scalar_field *e_kin_density = malloc(sizeof(Scalar_field));
     	retval = kinetic_energy(state_write_out -> velocity_gas, *e_kin_density, grid, dualgrid);
+    	if (retval != 0)
+    	{
+    		printf("Error in kinetic_energy called from write_output, position 0. Answer is %d.\n", retval);
+    		exit(1);
+    	}
     	retval = scalar_times_scalar(state_write_out -> density_dry, *e_kin_density, *e_kin_density);
     	global_scalar_integrator(*e_kin_density, grid, &kinetic_integral);
     	free(e_kin_density);

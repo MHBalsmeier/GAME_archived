@@ -309,6 +309,8 @@ int main(int argc, char *argv[])
     double *pot_temp_background_vector = malloc(NUMBER_OF_VECTORS*sizeof(double));
 	double *z_surface = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
 	double *vertical_contravar_unit = malloc(3*NUMBER_OF_VECTORS_V*(NUMBER_OF_ORO_LAYERS + 1)*sizeof(double));
+	double *e_kin_weights = malloc(14*NUMBER_OF_SCALARS*sizeof(double));
+	int *e_kin_indices = malloc(14*NUMBER_OF_SCALARS*sizeof(double));
     int *to_index = malloc(NUMBER_OF_VECTORS_H*sizeof(int));
     int *from_index = malloc(NUMBER_OF_VECTORS_H*sizeof(int));
     int *recov_hor_par_pri_index = calloc(10*NUMBER_OF_VECTORS_H, sizeof(int));
@@ -1130,11 +1132,11 @@ int main(int argc, char *argv[])
             if (layer_index == 0)
                 radius_1 = RADIUS + z_vector_dual[i];
             else
-                radius_1 = RADIUS + z_scalar[(layer_index - 1)*NUMBER_OF_SCALARS_H];
+                radius_1 = RADIUS + z_vector[NUMBER_OF_VECTORS_V + h_index + (layer_index - 1)*NUMBER_OF_VECTORS_PER_LAYER];
             if (layer_index == NUMBER_OF_LAYERS)
-                radius_0 = RADIUS;
+                radius_0 = RADIUS + z_vector_dual[i];
             else
-                radius_0 = RADIUS + z_scalar[layer_index*NUMBER_OF_SCALARS_H];
+                radius_0 = RADIUS + z_vector[NUMBER_OF_VECTORS_V + h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER];
             primal_vector_index = (NUMBER_OF_LAYERS - 1)*NUMBER_OF_VECTORS_PER_LAYER + NUMBER_OF_VECTORS_V + h_index;
             base_distance = normal_distance[primal_vector_index]/(RADIUS + z_vector[primal_vector_index])*radius_0;
             area_dual_pre[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
@@ -1191,6 +1193,209 @@ int main(int argc, char *argv[])
 		}
     }
     
+    double cell_base_area;
+    double alpha_1 = 3.0/4;
+    alpha_1 = 1;
+    double alpha_2 = 1 - alpha_1;
+    double triangle_face_0, triangle_face_1;
+    double z_value_0, z_value_1, z_value_2, z_triangle_mean, partial_volume, kite_area_0, kite_area_1, kite_area, triangle_area_0, triangle_area_1, triangle_area_0_for_kite, triangle_area_1_for_kite, triangle_area_for_kite;
+    int second_index, index_found, neighbouring_cell_h_index, vertex_index;
+    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+    {
+    	layer_index = i/NUMBER_OF_SCALARS_H;
+    	h_index = i - layer_index*NUMBER_OF_SCALARS_H;
+    	number_of_edges = 6;
+    	if (h_index < NUMBER_OF_PENTAGONS)
+    		number_of_edges = 5;
+    	cell_base_area = area[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER];
+    	base_area = cell_base_area*pow((RADIUS + z_scalar[i])/(RADIUS + z_vector[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER]), 2);
+    	for (int j = 0; j < 6; ++j)
+    	{
+    		if (j < 5 || h_index >= NUMBER_OF_PENTAGONS)
+    		{
+				e_kin_indices[14*i + j] = NUMBER_OF_VECTORS_V + layer_index*NUMBER_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j];
+				retval = calc_triangle_face(latitude_scalar[h_index], longitude_scalar[h_index], latitude_vector[adjacent_vector_indices_h[6*h_index + j]], longitude_vector[adjacent_vector_indices_h[6*h_index + j]], latitude_scalar_dual[from_index_dual[adjacent_vector_indices_h[6*h_index + j]]], longitude_scalar_dual[from_index_dual[adjacent_vector_indices_h[6*h_index + j]]], &triangle_face_0);
+				if (retval != 0)
+				{
+					printf("Error in e_kin calculation, position 0.\n");
+					exit(1);
+				}
+				z_value_0 = z_scalar[i];
+				z_value_1 = z_vector[NUMBER_OF_VECTORS_V + layer_index*NUMBER_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]];
+				z_value_2 = z_vector_dual[NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + from_index_dual[adjacent_vector_indices_h[6*h_index + j]]];
+				z_triangle_mean = 1.0/3*(z_value_0 + z_value_1 + z_value_2);
+				triangle_face_0 = triangle_face_0*pow(RADIUS + z_triangle_mean, 2);
+				retval = calc_triangle_face(latitude_scalar[h_index], longitude_scalar[h_index], latitude_vector[adjacent_vector_indices_h[6*h_index + j]], longitude_vector[adjacent_vector_indices_h[6*h_index + j]], latitude_scalar_dual[to_index_dual[adjacent_vector_indices_h[6*h_index + j]]], longitude_scalar_dual[to_index_dual[adjacent_vector_indices_h[6*h_index + j]]], &triangle_face_1);
+				if (retval != 0)
+				{
+					printf("Error in e_kin calculation, position 1.\n");
+					exit(1);
+				}
+				z_value_0 = z_scalar[i];
+				z_value_1 = z_vector[NUMBER_OF_VECTORS_V + layer_index*NUMBER_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]];
+				z_value_2 = z_vector_dual[NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + to_index_dual[adjacent_vector_indices_h[6*h_index + j]]];
+				z_triangle_mean = 1.0/3*(z_value_0 + z_value_1 + z_value_2);
+				triangle_face_1 = triangle_face_1*pow(RADIUS + z_triangle_mean, 2);
+				retval = calc_triangle_face(latitude_scalar[h_index], longitude_scalar[h_index], latitude_vector[adjacent_vector_indices_h[6*h_index + j]], longitude_vector[adjacent_vector_indices_h[6*h_index + j]], latitude_scalar_dual[from_index_dual[adjacent_vector_indices_h[6*h_index + j]]], longitude_scalar_dual[from_index_dual[adjacent_vector_indices_h[6*h_index + j]]], &triangle_area_0);
+				if (retval != 0)
+				{
+					printf("Error in e_kin calculation, position 2.\n");
+					exit(1);
+				}
+				second_index = -1;
+				for (int k = 0; k < number_of_edges; ++k)
+				{
+					if (k != j && (to_index_dual[adjacent_vector_indices_h[6*h_index + k]] == from_index_dual[adjacent_vector_indices_h[6*h_index + j]] || from_index_dual[adjacent_vector_indices_h[6*h_index + k]] == from_index_dual[adjacent_vector_indices_h[6*h_index + j]]))
+						second_index = k;
+				}
+				if (second_index == -1)
+				{
+					printf("Error with second_index in kinetic energy calculation, position 0.\n");
+					exit(1);
+				}
+				retval = calc_triangle_face(latitude_scalar[h_index], longitude_scalar[h_index], latitude_vector[adjacent_vector_indices_h[6*h_index + second_index]], longitude_vector[adjacent_vector_indices_h[6*h_index + second_index]], latitude_scalar_dual[from_index_dual[adjacent_vector_indices_h[6*h_index + j]]], longitude_scalar_dual[from_index_dual[adjacent_vector_indices_h[6*h_index + j]]], &triangle_area_1);
+				if (retval != 0)
+				{
+					printf("Error in e_kin calculation, position 3.\n");
+					exit(1);
+				}
+				kite_area_0 = triangle_area_0 + triangle_area_1;
+				retval = calc_triangle_face(latitude_scalar[h_index], longitude_scalar[h_index], latitude_vector[adjacent_vector_indices_h[6*h_index + j]], longitude_vector[adjacent_vector_indices_h[6*h_index + j]], latitude_scalar_dual[to_index_dual[adjacent_vector_indices_h[6*h_index + j]]], longitude_scalar_dual[to_index_dual[adjacent_vector_indices_h[6*h_index + j]]], &triangle_area_0);
+				if (retval != 0)
+				{
+					printf("Error in e_kin calculation, position 4.\n");
+					exit(1);
+				}
+				second_index = -1;
+				for (int k = 0; k < number_of_edges; ++k)
+				{
+					if (k != j && (to_index_dual[adjacent_vector_indices_h[6*h_index + k]] == to_index_dual[adjacent_vector_indices_h[6*h_index + j]] || from_index_dual[adjacent_vector_indices_h[6*h_index + k]] == to_index_dual[adjacent_vector_indices_h[6*h_index + j]]))
+						second_index = k;
+				}
+				if (second_index == -1)
+				{
+					printf("Error with second_index in kinetic energy calculation, position 1.\n");
+					exit(1);
+				}
+				retval = calc_triangle_face(latitude_scalar[h_index], longitude_scalar[h_index], latitude_vector[adjacent_vector_indices_h[6*h_index + second_index]], longitude_vector[adjacent_vector_indices_h[6*h_index + second_index]], latitude_scalar_dual[to_index_dual[adjacent_vector_indices_h[6*h_index + j]]], longitude_scalar_dual[to_index_dual[adjacent_vector_indices_h[6*h_index + j]]], &triangle_area_1);
+				if (retval != 0)
+				{
+					printf("Error in e_kin calculation, position 5.\n");
+					exit(1);
+				}
+				kite_area_1 = triangle_area_0 + triangle_area_1;
+				kite_area_0 = kite_area_0*pow(RADIUS + z_vector_dual[NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + from_index_dual[adjacent_vector_indices_h[6*h_index + j]]], 2);
+				kite_area_1 = kite_area_1*pow(RADIUS + z_vector_dual[NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + to_index_dual[adjacent_vector_indices_h[6*h_index + j]]], 2);
+				neighbouring_cell_h_index = from_index[adjacent_vector_indices_h[6*h_index + j]];
+				if (neighbouring_cell_h_index == h_index)
+					neighbouring_cell_h_index = to_index[adjacent_vector_indices_h[6*h_index + j]];
+				retval = calc_triangle_face(latitude_scalar[h_index], longitude_scalar[h_index], latitude_scalar[neighbouring_cell_h_index], longitude_scalar[neighbouring_cell_h_index], latitude_scalar_dual[from_index_dual[adjacent_vector_indices_h[6*h_index + j]]], longitude_scalar_dual[from_index_dual[adjacent_vector_indices_h[6*h_index + j]]], &triangle_area_0_for_kite);
+				if (retval != 0)
+				{
+					printf("Error in e_kin calculation, position 8.\n");
+					exit(1);
+				}
+				retval = calc_triangle_face(latitude_scalar[h_index], longitude_scalar[h_index], latitude_scalar[neighbouring_cell_h_index], longitude_scalar[neighbouring_cell_h_index], latitude_scalar_dual[to_index_dual[adjacent_vector_indices_h[6*h_index + j]]], longitude_scalar_dual[to_index_dual[adjacent_vector_indices_h[6*h_index + j]]], &triangle_area_1_for_kite);
+				if (retval != 0)
+				{
+					printf("Error in e_kin calculation, position 9.\n");
+					exit(1);
+				}
+				triangle_area_0_for_kite = triangle_area_0_for_kite*pow(z_vector_dual[NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + from_index_dual[adjacent_vector_indices_h[6*h_index + j]]], 2);
+				triangle_area_1_for_kite = triangle_area_1_for_kite*pow(z_vector_dual[NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + to_index_dual[adjacent_vector_indices_h[6*h_index + j]]], 2);
+				e_kin_weights[14*i + j] = alpha_1*(triangle_face_0 + triangle_face_1)/base_area + alpha_2*(kite_area_0/base_area*triangle_area_0_for_kite/area_dual_pre[NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + from_index_dual[adjacent_vector_indices_h[6*h_index + j]]] + kite_area_1/base_area*triangle_area_1_for_kite/area_dual_pre[NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + to_index_dual[adjacent_vector_indices_h[6*h_index + j]]]);
+			}
+			else
+			{
+				e_kin_indices[14*i + j] = 0;
+				e_kin_weights[14*i + j] = 0;
+			}
+		}
+    	for (int j = 6; j < 12; ++j)
+    	{
+    		vertex_index = from_index_dual[adjacent_vector_indices_h[6*h_index + j - 6]];
+    		if (j < 11 || h_index >= NUMBER_OF_PENTAGONS)
+    		{
+				second_index = -1;
+				for (int k = 0; k < number_of_edges; ++k)
+				{
+					if (k != j && (to_index_dual[adjacent_vector_indices_h[6*h_index + k]] == vertex_index || from_index_dual[adjacent_vector_indices_h[6*h_index + k]] == vertex_index))
+						second_index = k;
+				}
+				if (second_index == -1)
+				{
+					printf("Error with second_index in kinetic energy calculation, position 2.\n");
+					exit(1);
+				}
+				index_found = 0;
+				if (adjacent_vector_indices_dual_h[3*vertex_index + 0] == adjacent_vector_indices_h[6*h_index + j - 6] || adjacent_vector_indices_dual_h[3*vertex_index + 0] == adjacent_vector_indices_h[6*h_index + second_index])
+				{
+					index_found = 1;
+				}
+				if (adjacent_vector_indices_dual_h[3*vertex_index + 1] == adjacent_vector_indices_h[6*h_index + j - 6] || adjacent_vector_indices_dual_h[3*vertex_index + 1] == adjacent_vector_indices_h[6*h_index + second_index])
+					index_found = 2;
+				e_kin_indices[14*i + j] = NUMBER_OF_VECTORS_V + layer_index*NUMBER_OF_VECTORS_PER_LAYER + adjacent_vector_indices_dual_h[3*vertex_index + index_found];
+				retval = calc_triangle_face(latitude_scalar[h_index], longitude_scalar[h_index], latitude_vector[adjacent_vector_indices_h[6*h_index + j - 6]], longitude_vector[adjacent_vector_indices_h[6*h_index + j - 6]], latitude_scalar_dual[vertex_index], longitude_scalar_dual[vertex_index], &triangle_area_0);
+				if (retval != 0)
+				{
+					printf("Error in e_kin calculation, position 6.\n");
+					exit(1);
+				}
+				retval = calc_triangle_face(latitude_scalar[h_index], longitude_scalar[h_index], latitude_vector[adjacent_vector_indices_h[6*h_index + second_index]], longitude_vector[adjacent_vector_indices_h[6*h_index + second_index]], latitude_scalar_dual[vertex_index], longitude_scalar_dual[vertex_index], &triangle_area_1);
+				if (retval != 0)
+				{
+					printf("Error in e_kin calculation, position 7.\n");
+					exit(1);
+				}
+				kite_area = triangle_area_0 + triangle_area_1;
+				kite_area = kite_area*pow(RADIUS + z_vector_dual[NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + vertex_index], 2);
+				retval = calc_triangle_face(latitude_scalar[to_index[adjacent_vector_indices_dual_h[3*vertex_index + index_found]]], longitude_scalar[to_index[adjacent_vector_indices_dual_h[3*vertex_index + index_found]]], latitude_scalar[from_index[adjacent_vector_indices_dual_h[3*vertex_index + index_found]]], longitude_scalar[from_index[adjacent_vector_indices_dual_h[3*vertex_index + index_found]]], latitude_scalar_dual[vertex_index], longitude_scalar_dual[vertex_index], &triangle_area_for_kite);
+				if (retval != 0)
+				{
+					printf("Error in e_kin calculation, position 10.\n");
+					exit(1);
+				}
+				triangle_area_for_kite = triangle_area_for_kite*pow(z_vector_dual[NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + vertex_index], 2);
+				e_kin_weights[14*i + j] = alpha_2*kite_area/base_area*triangle_area_for_kite/area_dual_pre[NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + vertex_index];
+			}
+			else
+			{
+				e_kin_indices[14*i + j] = 0;
+				e_kin_weights[14*i + j] = 0;    	
+			}
+    	}
+    	e_kin_indices[14*i + 12] = h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER;
+    	partial_volume = find_volume(base_area, RADIUS + z_scalar[i], RADIUS + z_vector[e_kin_indices[14*i + 12]]);
+    	e_kin_weights[14*i + 12] = 0.5*partial_volume/volume[i];
+    	e_kin_indices[14*i + 13] = h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER;
+    	partial_volume = find_volume(cell_base_area, RADIUS + z_vector[e_kin_indices[14*i + 13]], RADIUS + z_scalar[i]);
+    	e_kin_weights[14*i + 13] = 0.5*partial_volume/volume[i];
+    }
+    double e_kin_weights_sum;
+    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+    {
+    	e_kin_weights_sum = 0;
+    	for (int j = 0; j < 14; ++j)
+    	{
+    		if (e_kin_indices[14*i + j] < 0 || e_kin_indices[14*i + j] >= NUMBER_OF_VECTORS)
+    		{
+    			printf("Error in e_kin_indices, position 0.\n");
+    			exit(1);
+    		}
+    		e_kin_weights_sum += e_kin_weights[14*i + j];
+    		if (e_kin_weights[14*i + j] < 0)
+    		{
+    			printf("Error in e_kin_weights, position 0.\n");
+    			exit(1);
+    		}
+    	}    	
+		if (fabs(e_kin_weights_sum - 1.5) > 0.000001)
+		{
+			printf("%lf\n", e_kin_weights_sum);
+			printf("Error in e_kin_weights, position 1.\n");
+			exit(1);
+		}
+    }
     double x_value, y_value, z_value, normal_vector_global[3], local_basis_vector[3], local_x, local_y, local_z, tilting_angle, delta_x, delta_z, abs_value;
     for (int i = 0; i < NUMBER_OF_ORO_LAYERS + 1; ++i)
     {
@@ -1935,7 +2140,6 @@ int main(int argc, char *argv[])
         recov_hor_ver_pri_index[4*i + 3] = from_index[i] + NUMBER_OF_VECTORS_PER_LAYER;
     }
 	double value_0, value_1;
-	int second_index;
 	for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
 	{
 		for (int j = 0; j < 10; ++j)
@@ -2105,6 +2309,24 @@ int main(int argc, char *argv[])
     		exit(1);
     	}
     }
+    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_H; ++i)
+    {
+    	area_ratio = area_dual[i]/area_dual[i + NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H];
+    	if (fabs(area_ratio - 0.5) > 0.0001)
+    	{
+    		printf("Unrealistic value in area_ratio of area_dual, position 0.\n");
+    		exit(1);
+    	}
+    }
+    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_H; ++i)
+    {
+    	area_ratio = area_dual[i + (NUMBER_OF_LAYERS - 1)*(NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H)]/area_dual[i + (NUMBER_OF_LAYERS - 1)*(NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H) + NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H];
+    	if (fabs(area_ratio - 2) > 0.001)
+    	{
+    		printf("Unrealistic value in area_ratio of area_dual, position 1.\n");
+    		exit(1);
+    	}
+    }
     int indices_list_pre[6];
     int signs_list_pre[6];
     int indices_list[4];
@@ -2216,9 +2438,11 @@ int main(int argc, char *argv[])
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
     free(OUTPUT_FILE);
-    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vector_dual_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id, gravity_potential_id, vertical_contravar_unit_id, vertical_contravar_unit_dimid, adjacent_vector_indices_dual_h_id, scalar_dual_h_dimid_3, vector_dual_area_dimid;
+    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vector_dual_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id, gravity_potential_id, vertical_contravar_unit_id, vertical_contravar_unit_dimid, adjacent_vector_indices_dual_h_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_14_dimid, e_kin_indices_id;
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NUMBER_OF_SCALARS, &scalar_dimid)))
-        ERR(retval);  
+        ERR(retval);
+    if ((retval = nc_def_dim(ncid_g_prop, "scalar_14_index", 14*NUMBER_OF_SCALARS, &scalar_14_dimid)))
+        ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_h_index", NUMBER_OF_SCALARS_H, &scalar_h_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_dual_h_index", NUMBER_OF_DUAL_SCALARS_H, &scalar_dual_h_dimid)))
@@ -2337,6 +2561,10 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "longitude_vector", NC_DOUBLE, 1, &vector_h_dimid, &longitude_vector_id)))
         ERR(retval);
+    if ((retval = nc_def_var(ncid_g_prop, "e_kin_weights", NC_DOUBLE, 1, &scalar_14_dimid, &e_kin_weights_id)))
+        ERR(retval);
+    if ((retval = nc_def_var(ncid_g_prop, "e_kin_indices", NC_INT, 1, &scalar_14_dimid, &e_kin_indices_id)))
+        ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "to_index", NC_INT, 1, &vector_h_dimid, &to_index_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "from_index", NC_INT, 1, &vector_h_dimid, &from_index_id)))
@@ -2405,6 +2633,8 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, area_id, &area[0])))
         ERR(retval);
+    if ((retval = nc_put_var_double(ncid_g_prop, e_kin_weights_id, &e_kin_weights[0])))
+        ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, recov_hor_par_dual_weight_id, &recov_hor_par_dual_weight[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, recov_hor_ver_dual_weight_id, &recov_hor_ver_dual_weight[0])))
@@ -2441,6 +2671,8 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, adjacent_vector_indices_dual_h_id, &adjacent_vector_indices_dual_h[0])))
         ERR(retval);
+    if ((retval = nc_put_var_int(ncid_g_prop, e_kin_indices_id, &e_kin_indices[0])))
+        ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, vorticity_indices_id, &vorticity_indices[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, h_curl_indices_id, &h_curl_indices[0])))
@@ -2471,6 +2703,8 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_close(ncid_g_prop)))
         ERR(retval);
+    free(e_kin_weights);
+    free(e_kin_indices);
     free(adjacent_vector_indices_dual_h);
     free(vertical_contravar_unit);
     free(gravity_potential);

@@ -27,7 +27,7 @@ int vertical_contravariant_normalized(Vector_field in_field, int layer_index, in
 	unit_vector[0] = grid -> vertical_contravar_unit[3*(layer_index_oro*NUMBER_OF_VECTORS_V + h_index) + 0];
 	unit_vector[1] = grid -> vertical_contravar_unit[3*(layer_index_oro*NUMBER_OF_VECTORS_V + h_index) + 1];
 	unit_vector[2] = grid -> vertical_contravar_unit[3*(layer_index_oro*NUMBER_OF_VECTORS_V + h_index) + 2];
-	if (unit_vector[2] < -0.00001 || unit_vector[2] > 1.00001)
+	if (unit_vector[2] < 1 - 0.00001 || unit_vector[2] > 1.00001)
 		return 3;
 	*result = inner_elementary(velocity_vector, unit_vector);
 	return 0;
