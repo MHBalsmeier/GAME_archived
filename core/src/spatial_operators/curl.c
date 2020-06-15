@@ -2,52 +2,48 @@
 #include <stdio.h>
 #include "../diagnostics/diagnostics.h"
 
-int curl(Vector_field in_field, Dual_vector_field out_field, Grid *grid, Dualgrid *dualgrid)
+int curl(Vector_field in_field, Curl_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
     int layer_index, h_index, index, sign, retval, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area;
     double rhombus_circ, dist_0, dist_1, dist_2, dist_3, dist_0_pre, dist_2_pre, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient;
     int index_0, index_1, index_2, index_3, sign_0, sign_1, sign_2, sign_3;
-    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; ++i)
+    for (int i = 0; i < NUMBER_OF_LAYERS*(NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H) + NUMBER_OF_DUAL_VECTORS_H; ++i)
     {
-        layer_index = i/NUMBER_OF_DUAL_VECTORS_PER_LAYER;
-        h_index = i - layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER;
+        layer_index = i/(NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H);
+        h_index = i - layer_index*(NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H);
         if (h_index >= NUMBER_OF_DUAL_VECTORS_H)
         {
-            out_field[i] = 0;
-            for (int j = 0; j < 3; ++j)
-            {
-				edge_vector_index_h = dualgrid -> adjacent_vector_indices_h[3*(h_index - NUMBER_OF_DUAL_VECTORS_H) + j];
-		        edge_vector_index = NUMBER_OF_VECTORS_V + layer_index*NUMBER_OF_VECTORS_PER_LAYER + edge_vector_index_h;
-		        edge_vector_index_dual_area = NUMBER_OF_DUAL_VECTORS_H + layer_index*(NUMBER_OF_VECTORS_H + NUMBER_OF_DUAL_VECTORS_H) + edge_vector_index_h;
-            	rhombus_circ = 0;
-            	for (int k = 0; k < 4; ++k)
-            	{
-					index = NUMBER_OF_VECTORS_V + layer_index*NUMBER_OF_VECTORS_PER_LAYER + dualgrid -> vorticity_indices[4*edge_vector_index_h + k];
-				    sign = dualgrid -> vorticity_signs[4*edge_vector_index_h + k];
-				    if (sign != -1 && sign != 1)
-				    	printf("Error in curl, position 0.\n");
-			    	velocity_value = in_field[index];
-			    	length_rescale_factor = 1;
-			        if (layer_index >= NUMBER_OF_LAYERS - NUMBER_OF_ORO_LAYERS)
-			        {
-	            		length_rescale_factor = (RADIUS + grid -> z_vector[edge_vector_index])/(RADIUS + grid -> z_vector[index]);
-			        	delta_z = grid -> z_vector[edge_vector_index] - grid -> z_vector[index];
-			        	if (delta_z > 0)
-			        		index_for_vertical_gradient = index - NUMBER_OF_VECTORS_PER_LAYER;
-			        	else
-			        	{
-			        		if (layer_index == NUMBER_OF_LAYERS - 1)
-			        			index_for_vertical_gradient = index - NUMBER_OF_VECTORS_PER_LAYER;
-			        		else
-			        			index_for_vertical_gradient = index + NUMBER_OF_VECTORS_PER_LAYER;
-			        	}
-			        	vertical_gradient = (in_field[index] - in_field[index_for_vertical_gradient])/(grid -> z_vector[index] - grid -> z_vector[index_for_vertical_gradient]);
-			        	velocity_value += delta_z*vertical_gradient;
-        			}
-        			rhombus_circ += length_rescale_factor*grid -> normal_distance[index]*sign*velocity_value;
-            	}
-            	out_field[i] += 1.0/3*rhombus_circ/dualgrid -> area[edge_vector_index_dual_area];
+			edge_vector_index_h = h_index - NUMBER_OF_DUAL_VECTORS_H;
+	        edge_vector_index = NUMBER_OF_VECTORS_V + layer_index*NUMBER_OF_VECTORS_PER_LAYER + edge_vector_index_h;
+	        edge_vector_index_dual_area = NUMBER_OF_DUAL_VECTORS_H + layer_index*(NUMBER_OF_VECTORS_H + NUMBER_OF_DUAL_VECTORS_H) + edge_vector_index_h;
+        	rhombus_circ = 0;
+        	for (int k = 0; k < 4; ++k)
+        	{
+				index = NUMBER_OF_VECTORS_V + layer_index*NUMBER_OF_VECTORS_PER_LAYER + dualgrid -> vorticity_indices[4*edge_vector_index_h + k];
+			    sign = dualgrid -> vorticity_signs[4*edge_vector_index_h + k];
+			    if (sign != -1 && sign != 1)
+			    	printf("Error in curl, position 0.\n");
+		    	velocity_value = in_field[index];
+		    	length_rescale_factor = 1;
+		        if (layer_index >= NUMBER_OF_LAYERS - NUMBER_OF_ORO_LAYERS)
+		        {
+            		length_rescale_factor = (RADIUS + grid -> z_vector[edge_vector_index])/(RADIUS + grid -> z_vector[index]);
+		        	delta_z = grid -> z_vector[edge_vector_index] - grid -> z_vector[index];
+		        	if (delta_z > 0)
+		        		index_for_vertical_gradient = index - NUMBER_OF_VECTORS_PER_LAYER;
+		        	else
+		        	{
+		        		if (layer_index == NUMBER_OF_LAYERS - 1)
+		        			index_for_vertical_gradient = index - NUMBER_OF_VECTORS_PER_LAYER;
+		        		else
+		        			index_for_vertical_gradient = index + NUMBER_OF_VECTORS_PER_LAYER;
+		        	}
+		        	vertical_gradient = (in_field[index] - in_field[index_for_vertical_gradient])/(grid -> z_vector[index] - grid -> z_vector[index_for_vertical_gradient]);
+		        	velocity_value += delta_z*vertical_gradient;
+    			}
+    			rhombus_circ += length_rescale_factor*grid -> normal_distance[index]*sign*velocity_value;
         	}
+        	out_field[i] = rhombus_circ/dualgrid -> area[edge_vector_index_dual_area];
         }
         else
         {

@@ -1,6 +1,6 @@
 int grad(Scalar_field, Vector_field, Grid *);
-int curl(Vector_field, Dual_vector_field, Grid *, Dualgrid *);
-int cross_product(Vector_field, Dual_vector_field, Vector_field, Grid *);
+int curl(Vector_field, Curl_field, Grid *, Dualgrid *);
+int coriolis_gen(Vector_field, Dual_vector_field, Vector_field, Grid *);
 int kinetic_energy(Vector_field, Scalar_field, Grid *, Dualgrid *);
 int divergence(Vector_field, Scalar_field, Grid *, int);
 int tendency(State *, State *, Grid *, Dualgrid*, int, int, int, double, int);

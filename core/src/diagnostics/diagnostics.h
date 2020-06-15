@@ -1,13 +1,13 @@
 int calc_temp_diffusion_coeffs(Scalar_field, Scalar_field, Scalar_field, Scalar_field);
 int calc_mass_diffusion_coeffs(Scalar_field, Scalar_field, Scalar_field, Scalar_field);
 int global_scalar_integrator(Scalar_field, Grid *, double *);
-int recov_hor_par_dual(Dual_vector_field, int, int, double *, Grid *);
+int recov_hor_par_curl(Curl_field, int, int, double *, Grid *);
+int trsk_modified(Vector_field, Curl_field, int, int, double *, Grid *);
 int recov_hor_par_pri(Vector_field, int, int, double *, Grid *);
-int recov_hor_ver_dual(Dual_vector_field, int, int, double *, Grid *);
 int recov_hor_ver_pri(Vector_field, int, int, double *, Grid *);
-int recov_ver_0_dual(Dual_vector_field, int, int, double *, Grid *);
+int recov_ver_0_curl(Dual_vector_field, int, int, double *, Grid *);
 int recov_ver_0_pri(Vector_field, int, int, double *, Grid *);
-int recov_ver_1_dual(Dual_vector_field, int, int, double *, Grid *);
+int recov_ver_1_curl(Dual_vector_field, int, int, double *, Grid *);
 int recov_ver_1_pri(Vector_field, int, int, double *, Grid *);
 double spec_heat_cap_diagnostics_p(double, double);
 double spec_heat_cap_diagnostics_v(double, double);

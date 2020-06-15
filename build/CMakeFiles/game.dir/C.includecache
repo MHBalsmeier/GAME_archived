@@ -76,17 +76,11 @@ diagnostics.h
 stdio.h
 -
 
-/home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_dual.c
+/home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_curl.c
 ../../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
-stdio.h
--
 
 /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_pri.c
-../../enum_and_typedefs.h
-/home/max/my_code/game/core/src/enum_and_typedefs.h
-
-/home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_ver_dual.c
 ../../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
 
@@ -96,7 +90,7 @@ stdio.h
 stdio.h
 -
 
-/home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_dual.c
+/home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_curl.c
 ../../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
 
@@ -104,13 +98,19 @@ stdio.h
 ../../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
 
-/home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_dual.c
+/home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_curl.c
 ../../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
 
 /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_pri.c
 ../../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
+
+/home/max/my_code/game/core/src/diagnostics/recover_components/trsk_modified.c
+../../enum_and_typedefs.h
+/home/max/my_code/game/core/src/enum_and_typedefs.h
+stdio.h
+-
 
 /home/max/my_code/game/core/src/diagnostics/ricci.c
 ../enum_and_typedefs.h
@@ -190,7 +190,7 @@ geos95.h
 atmostracers.h
 /home/max/my_code/game/core/src/io/atmostracers.h
 
-/home/max/my_code/game/core/src/spatial_operators/cross_product.c
+/home/max/my_code/game/core/src/spatial_operators/coriolis_gen.c
 ../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
 ../diagnostics/diagnostics.h

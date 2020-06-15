@@ -369,32 +369,32 @@ src/diagnostics/pot_temp_diagnostics.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.s
 .PHONY : src/diagnostics/pot_temp_diagnostics.c.s
 
-src/diagnostics/recover_components/recov_hor_par_dual.o: src/diagnostics/recover_components/recov_hor_par_dual.c.o
+src/diagnostics/recover_components/recov_hor_par_curl.o: src/diagnostics/recover_components/recov_hor_par_curl.c.o
 
-.PHONY : src/diagnostics/recover_components/recov_hor_par_dual.o
+.PHONY : src/diagnostics/recover_components/recov_hor_par_curl.o
 
 # target to build an object file
-src/diagnostics/recover_components/recov_hor_par_dual.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.o
-.PHONY : src/diagnostics/recover_components/recov_hor_par_dual.c.o
+src/diagnostics/recover_components/recov_hor_par_curl.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.o
+.PHONY : src/diagnostics/recover_components/recov_hor_par_curl.c.o
 
-src/diagnostics/recover_components/recov_hor_par_dual.i: src/diagnostics/recover_components/recov_hor_par_dual.c.i
+src/diagnostics/recover_components/recov_hor_par_curl.i: src/diagnostics/recover_components/recov_hor_par_curl.c.i
 
-.PHONY : src/diagnostics/recover_components/recov_hor_par_dual.i
+.PHONY : src/diagnostics/recover_components/recov_hor_par_curl.i
 
 # target to preprocess a source file
-src/diagnostics/recover_components/recov_hor_par_dual.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.i
-.PHONY : src/diagnostics/recover_components/recov_hor_par_dual.c.i
+src/diagnostics/recover_components/recov_hor_par_curl.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.i
+.PHONY : src/diagnostics/recover_components/recov_hor_par_curl.c.i
 
-src/diagnostics/recover_components/recov_hor_par_dual.s: src/diagnostics/recover_components/recov_hor_par_dual.c.s
+src/diagnostics/recover_components/recov_hor_par_curl.s: src/diagnostics/recover_components/recov_hor_par_curl.c.s
 
-.PHONY : src/diagnostics/recover_components/recov_hor_par_dual.s
+.PHONY : src/diagnostics/recover_components/recov_hor_par_curl.s
 
 # target to generate assembly for a file
-src/diagnostics/recover_components/recov_hor_par_dual.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.s
-.PHONY : src/diagnostics/recover_components/recov_hor_par_dual.c.s
+src/diagnostics/recover_components/recov_hor_par_curl.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.s
+.PHONY : src/diagnostics/recover_components/recov_hor_par_curl.c.s
 
 src/diagnostics/recover_components/recov_hor_par_pri.o: src/diagnostics/recover_components/recov_hor_par_pri.c.o
 
@@ -423,33 +423,6 @@ src/diagnostics/recover_components/recov_hor_par_pri.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.s
 .PHONY : src/diagnostics/recover_components/recov_hor_par_pri.c.s
 
-src/diagnostics/recover_components/recov_hor_ver_dual.o: src/diagnostics/recover_components/recov_hor_ver_dual.c.o
-
-.PHONY : src/diagnostics/recover_components/recov_hor_ver_dual.o
-
-# target to build an object file
-src/diagnostics/recover_components/recov_hor_ver_dual.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_dual.c.o
-.PHONY : src/diagnostics/recover_components/recov_hor_ver_dual.c.o
-
-src/diagnostics/recover_components/recov_hor_ver_dual.i: src/diagnostics/recover_components/recov_hor_ver_dual.c.i
-
-.PHONY : src/diagnostics/recover_components/recov_hor_ver_dual.i
-
-# target to preprocess a source file
-src/diagnostics/recover_components/recov_hor_ver_dual.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_dual.c.i
-.PHONY : src/diagnostics/recover_components/recov_hor_ver_dual.c.i
-
-src/diagnostics/recover_components/recov_hor_ver_dual.s: src/diagnostics/recover_components/recov_hor_ver_dual.c.s
-
-.PHONY : src/diagnostics/recover_components/recov_hor_ver_dual.s
-
-# target to generate assembly for a file
-src/diagnostics/recover_components/recov_hor_ver_dual.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_dual.c.s
-.PHONY : src/diagnostics/recover_components/recov_hor_ver_dual.c.s
-
 src/diagnostics/recover_components/recov_hor_ver_pri.o: src/diagnostics/recover_components/recov_hor_ver_pri.c.o
 
 .PHONY : src/diagnostics/recover_components/recov_hor_ver_pri.o
@@ -477,32 +450,32 @@ src/diagnostics/recover_components/recov_hor_ver_pri.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.s
 .PHONY : src/diagnostics/recover_components/recov_hor_ver_pri.c.s
 
-src/diagnostics/recover_components/recov_ver_0_dual.o: src/diagnostics/recover_components/recov_ver_0_dual.c.o
+src/diagnostics/recover_components/recov_ver_0_curl.o: src/diagnostics/recover_components/recov_ver_0_curl.c.o
 
-.PHONY : src/diagnostics/recover_components/recov_ver_0_dual.o
+.PHONY : src/diagnostics/recover_components/recov_ver_0_curl.o
 
 # target to build an object file
-src/diagnostics/recover_components/recov_ver_0_dual.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_dual.c.o
-.PHONY : src/diagnostics/recover_components/recov_ver_0_dual.c.o
+src/diagnostics/recover_components/recov_ver_0_curl.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.o
+.PHONY : src/diagnostics/recover_components/recov_ver_0_curl.c.o
 
-src/diagnostics/recover_components/recov_ver_0_dual.i: src/diagnostics/recover_components/recov_ver_0_dual.c.i
+src/diagnostics/recover_components/recov_ver_0_curl.i: src/diagnostics/recover_components/recov_ver_0_curl.c.i
 
-.PHONY : src/diagnostics/recover_components/recov_ver_0_dual.i
+.PHONY : src/diagnostics/recover_components/recov_ver_0_curl.i
 
 # target to preprocess a source file
-src/diagnostics/recover_components/recov_ver_0_dual.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_dual.c.i
-.PHONY : src/diagnostics/recover_components/recov_ver_0_dual.c.i
+src/diagnostics/recover_components/recov_ver_0_curl.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.i
+.PHONY : src/diagnostics/recover_components/recov_ver_0_curl.c.i
 
-src/diagnostics/recover_components/recov_ver_0_dual.s: src/diagnostics/recover_components/recov_ver_0_dual.c.s
+src/diagnostics/recover_components/recov_ver_0_curl.s: src/diagnostics/recover_components/recov_ver_0_curl.c.s
 
-.PHONY : src/diagnostics/recover_components/recov_ver_0_dual.s
+.PHONY : src/diagnostics/recover_components/recov_ver_0_curl.s
 
 # target to generate assembly for a file
-src/diagnostics/recover_components/recov_ver_0_dual.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_dual.c.s
-.PHONY : src/diagnostics/recover_components/recov_ver_0_dual.c.s
+src/diagnostics/recover_components/recov_ver_0_curl.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.s
+.PHONY : src/diagnostics/recover_components/recov_ver_0_curl.c.s
 
 src/diagnostics/recover_components/recov_ver_0_pri.o: src/diagnostics/recover_components/recov_ver_0_pri.c.o
 
@@ -531,32 +504,32 @@ src/diagnostics/recover_components/recov_ver_0_pri.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.s
 .PHONY : src/diagnostics/recover_components/recov_ver_0_pri.c.s
 
-src/diagnostics/recover_components/recov_ver_1_dual.o: src/diagnostics/recover_components/recov_ver_1_dual.c.o
+src/diagnostics/recover_components/recov_ver_1_curl.o: src/diagnostics/recover_components/recov_ver_1_curl.c.o
 
-.PHONY : src/diagnostics/recover_components/recov_ver_1_dual.o
+.PHONY : src/diagnostics/recover_components/recov_ver_1_curl.o
 
 # target to build an object file
-src/diagnostics/recover_components/recov_ver_1_dual.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.o
-.PHONY : src/diagnostics/recover_components/recov_ver_1_dual.c.o
+src/diagnostics/recover_components/recov_ver_1_curl.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.o
+.PHONY : src/diagnostics/recover_components/recov_ver_1_curl.c.o
 
-src/diagnostics/recover_components/recov_ver_1_dual.i: src/diagnostics/recover_components/recov_ver_1_dual.c.i
+src/diagnostics/recover_components/recov_ver_1_curl.i: src/diagnostics/recover_components/recov_ver_1_curl.c.i
 
-.PHONY : src/diagnostics/recover_components/recov_ver_1_dual.i
+.PHONY : src/diagnostics/recover_components/recov_ver_1_curl.i
 
 # target to preprocess a source file
-src/diagnostics/recover_components/recov_ver_1_dual.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.i
-.PHONY : src/diagnostics/recover_components/recov_ver_1_dual.c.i
+src/diagnostics/recover_components/recov_ver_1_curl.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.i
+.PHONY : src/diagnostics/recover_components/recov_ver_1_curl.c.i
 
-src/diagnostics/recover_components/recov_ver_1_dual.s: src/diagnostics/recover_components/recov_ver_1_dual.c.s
+src/diagnostics/recover_components/recov_ver_1_curl.s: src/diagnostics/recover_components/recov_ver_1_curl.c.s
 
-.PHONY : src/diagnostics/recover_components/recov_ver_1_dual.s
+.PHONY : src/diagnostics/recover_components/recov_ver_1_curl.s
 
 # target to generate assembly for a file
-src/diagnostics/recover_components/recov_ver_1_dual.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.s
-.PHONY : src/diagnostics/recover_components/recov_ver_1_dual.c.s
+src/diagnostics/recover_components/recov_ver_1_curl.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.s
+.PHONY : src/diagnostics/recover_components/recov_ver_1_curl.c.s
 
 src/diagnostics/recover_components/recov_ver_1_pri.o: src/diagnostics/recover_components/recov_ver_1_pri.c.o
 
@@ -584,6 +557,33 @@ src/diagnostics/recover_components/recov_ver_1_pri.s: src/diagnostics/recover_co
 src/diagnostics/recover_components/recov_ver_1_pri.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.s
 .PHONY : src/diagnostics/recover_components/recov_ver_1_pri.c.s
+
+src/diagnostics/recover_components/trsk_modified.o: src/diagnostics/recover_components/trsk_modified.c.o
+
+.PHONY : src/diagnostics/recover_components/trsk_modified.o
+
+# target to build an object file
+src/diagnostics/recover_components/trsk_modified.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.o
+.PHONY : src/diagnostics/recover_components/trsk_modified.c.o
+
+src/diagnostics/recover_components/trsk_modified.i: src/diagnostics/recover_components/trsk_modified.c.i
+
+.PHONY : src/diagnostics/recover_components/trsk_modified.i
+
+# target to preprocess a source file
+src/diagnostics/recover_components/trsk_modified.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.i
+.PHONY : src/diagnostics/recover_components/trsk_modified.c.i
+
+src/diagnostics/recover_components/trsk_modified.s: src/diagnostics/recover_components/trsk_modified.c.s
+
+.PHONY : src/diagnostics/recover_components/trsk_modified.s
+
+# target to generate assembly for a file
+src/diagnostics/recover_components/trsk_modified.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.s
+.PHONY : src/diagnostics/recover_components/trsk_modified.c.s
 
 src/diagnostics/ricci.o: src/diagnostics/ricci.c.o
 
@@ -774,32 +774,32 @@ src/io/write_output.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/io/write_output.c.s
 .PHONY : src/io/write_output.c.s
 
-src/spatial_operators/cross_product.o: src/spatial_operators/cross_product.c.o
+src/spatial_operators/coriolis_gen.o: src/spatial_operators/coriolis_gen.c.o
 
-.PHONY : src/spatial_operators/cross_product.o
+.PHONY : src/spatial_operators/coriolis_gen.o
 
 # target to build an object file
-src/spatial_operators/cross_product.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/cross_product.c.o
-.PHONY : src/spatial_operators/cross_product.c.o
+src/spatial_operators/coriolis_gen.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.o
+.PHONY : src/spatial_operators/coriolis_gen.c.o
 
-src/spatial_operators/cross_product.i: src/spatial_operators/cross_product.c.i
+src/spatial_operators/coriolis_gen.i: src/spatial_operators/coriolis_gen.c.i
 
-.PHONY : src/spatial_operators/cross_product.i
+.PHONY : src/spatial_operators/coriolis_gen.i
 
 # target to preprocess a source file
-src/spatial_operators/cross_product.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/cross_product.c.i
-.PHONY : src/spatial_operators/cross_product.c.i
+src/spatial_operators/coriolis_gen.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.i
+.PHONY : src/spatial_operators/coriolis_gen.c.i
 
-src/spatial_operators/cross_product.s: src/spatial_operators/cross_product.c.s
+src/spatial_operators/coriolis_gen.s: src/spatial_operators/coriolis_gen.c.s
 
-.PHONY : src/spatial_operators/cross_product.s
+.PHONY : src/spatial_operators/coriolis_gen.s
 
 # target to generate assembly for a file
-src/spatial_operators/cross_product.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/cross_product.c.s
-.PHONY : src/spatial_operators/cross_product.c.s
+src/spatial_operators/coriolis_gen.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.s
+.PHONY : src/spatial_operators/coriolis_gen.c.s
 
 src/spatial_operators/curl.o: src/spatial_operators/curl.c.o
 
@@ -1160,30 +1160,30 @@ help:
 	@echo "... src/diagnostics/pot_temp_diagnostics.o"
 	@echo "... src/diagnostics/pot_temp_diagnostics.i"
 	@echo "... src/diagnostics/pot_temp_diagnostics.s"
-	@echo "... src/diagnostics/recover_components/recov_hor_par_dual.o"
-	@echo "... src/diagnostics/recover_components/recov_hor_par_dual.i"
-	@echo "... src/diagnostics/recover_components/recov_hor_par_dual.s"
+	@echo "... src/diagnostics/recover_components/recov_hor_par_curl.o"
+	@echo "... src/diagnostics/recover_components/recov_hor_par_curl.i"
+	@echo "... src/diagnostics/recover_components/recov_hor_par_curl.s"
 	@echo "... src/diagnostics/recover_components/recov_hor_par_pri.o"
 	@echo "... src/diagnostics/recover_components/recov_hor_par_pri.i"
 	@echo "... src/diagnostics/recover_components/recov_hor_par_pri.s"
-	@echo "... src/diagnostics/recover_components/recov_hor_ver_dual.o"
-	@echo "... src/diagnostics/recover_components/recov_hor_ver_dual.i"
-	@echo "... src/diagnostics/recover_components/recov_hor_ver_dual.s"
 	@echo "... src/diagnostics/recover_components/recov_hor_ver_pri.o"
 	@echo "... src/diagnostics/recover_components/recov_hor_ver_pri.i"
 	@echo "... src/diagnostics/recover_components/recov_hor_ver_pri.s"
-	@echo "... src/diagnostics/recover_components/recov_ver_0_dual.o"
-	@echo "... src/diagnostics/recover_components/recov_ver_0_dual.i"
-	@echo "... src/diagnostics/recover_components/recov_ver_0_dual.s"
+	@echo "... src/diagnostics/recover_components/recov_ver_0_curl.o"
+	@echo "... src/diagnostics/recover_components/recov_ver_0_curl.i"
+	@echo "... src/diagnostics/recover_components/recov_ver_0_curl.s"
 	@echo "... src/diagnostics/recover_components/recov_ver_0_pri.o"
 	@echo "... src/diagnostics/recover_components/recov_ver_0_pri.i"
 	@echo "... src/diagnostics/recover_components/recov_ver_0_pri.s"
-	@echo "... src/diagnostics/recover_components/recov_ver_1_dual.o"
-	@echo "... src/diagnostics/recover_components/recov_ver_1_dual.i"
-	@echo "... src/diagnostics/recover_components/recov_ver_1_dual.s"
+	@echo "... src/diagnostics/recover_components/recov_ver_1_curl.o"
+	@echo "... src/diagnostics/recover_components/recov_ver_1_curl.i"
+	@echo "... src/diagnostics/recover_components/recov_ver_1_curl.s"
 	@echo "... src/diagnostics/recover_components/recov_ver_1_pri.o"
 	@echo "... src/diagnostics/recover_components/recov_ver_1_pri.i"
 	@echo "... src/diagnostics/recover_components/recov_ver_1_pri.s"
+	@echo "... src/diagnostics/recover_components/trsk_modified.o"
+	@echo "... src/diagnostics/recover_components/trsk_modified.i"
+	@echo "... src/diagnostics/recover_components/trsk_modified.s"
 	@echo "... src/diagnostics/ricci.o"
 	@echo "... src/diagnostics/ricci.i"
 	@echo "... src/diagnostics/ricci.s"
@@ -1205,9 +1205,9 @@ help:
 	@echo "... src/io/write_output.o"
 	@echo "... src/io/write_output.i"
 	@echo "... src/io/write_output.s"
-	@echo "... src/spatial_operators/cross_product.o"
-	@echo "... src/spatial_operators/cross_product.i"
-	@echo "... src/spatial_operators/cross_product.s"
+	@echo "... src/spatial_operators/coriolis_gen.o"
+	@echo "... src/spatial_operators/coriolis_gen.i"
+	@echo "... src/spatial_operators/coriolis_gen.s"
 	@echo "... src/spatial_operators/curl.o"
 	@echo "... src/spatial_operators/curl.i"
 	@echo "... src/spatial_operators/curl.s"

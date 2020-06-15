@@ -284,13 +284,13 @@ int main(int argc, char *argv[])
     double *gravity = malloc(NUMBER_OF_VECTORS*sizeof(double));
     double *volume = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *area = malloc(NUMBER_OF_VECTORS*sizeof(double));
-    double *recov_hor_par_pri_weight = calloc(10*NUMBER_OF_VECTORS_H, sizeof(double));
-    double *recov_hor_par_dual_weight = malloc(2*NUMBER_OF_VECTORS_H*sizeof(double));
-    double *recov_hor_ver_dual_weight = malloc(2*NUMBER_OF_VECTORS_H*sizeof(double));
+    double *trsk_modified_weights = calloc(10*NUMBER_OF_VECTORS_H, sizeof(double));
+    double *recov_hor_par_curl_weight = malloc(2*NUMBER_OF_VECTORS_H*sizeof(double));
+    double *recov_hor_ver_curl_weight = malloc(2*NUMBER_OF_VECTORS_H*sizeof(double));
     double *recov_ver_0_pri_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
     double *recov_ver_1_pri_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
-    double *recov_ver_0_dual_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
-    double *recov_ver_1_dual_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
+    double *recov_ver_0_curl_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
+    double *recov_ver_1_curl_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
     double *latitude_scalar_dual = malloc(NUMBER_OF_DUAL_SCALARS_H*sizeof(double));
     double *longitude_scalar_dual = malloc(NUMBER_OF_DUAL_SCALARS_H*sizeof(double));
     double *z_scalar_dual = malloc(NUMBER_OF_DUAL_SCALARS*sizeof(double));
@@ -300,7 +300,7 @@ int main(int argc, char *argv[])
     double *direction_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(double));
     double *area_dual_pre = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(double));
     double *area_dual = malloc((NUMBER_OF_DUAL_H_VECTORS + NUMBER_OF_H_VECTORS)*sizeof(double));
-    double *f_vec = malloc(NUMBER_OF_DUAL_VECTORS_PER_LAYER*sizeof(double));
+    double *f_vec = malloc((NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H)*sizeof(double));
     double *triangle_face_unit_sphere = malloc(NUMBER_OF_DUAL_VECTORS_V*sizeof(double));
     double *pent_hex_face_unity_sphere = malloc(NUMBER_OF_VECTORS_V*sizeof(double));
     double *rel_on_line_dual = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
@@ -313,14 +313,12 @@ int main(int argc, char *argv[])
 	int *e_kin_indices = malloc(14*NUMBER_OF_SCALARS*sizeof(double));
     int *to_index = malloc(NUMBER_OF_VECTORS_H*sizeof(int));
     int *from_index = malloc(NUMBER_OF_VECTORS_H*sizeof(int));
-    int *recov_hor_par_pri_index = calloc(10*NUMBER_OF_VECTORS_H, sizeof(int));
+    int *trsk_modified_velocity_indices = calloc(10*NUMBER_OF_VECTORS_H, sizeof(int));
+    int *trsk_modified_curl_indices = calloc(10*NUMBER_OF_VECTORS_H, sizeof(int));
     int *recov_hor_ver_pri_index = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
-    int *recov_hor_par_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(int));
-    int *recov_hor_ver_dual_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(int));
-    int *recov_ver_0_pri_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
-    int *recov_ver_1_pri_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
-    int *recov_ver_0_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
-    int *recov_ver_1_dual_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
+    int *recov_hor_par_curl_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(int));
+    int *recov_hor_ver_curl_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(int));
+    int *recov_ver_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
     int *adjacent_vector_indices_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(int));
     int *adjacent_vector_indices_dual_h = malloc(3*NUMBER_OF_DUAL_SCALARS_H*sizeof(int));
     int *vorticity_indices_pre = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(int));
@@ -635,10 +633,7 @@ int main(int argc, char *argv[])
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_PER_LAYER; ++i)
     {
         if (i >= NUMBER_OF_DUAL_VECTORS_H)
-        {
             latitude_vector_dual[i] = latitude_scalar_dual[i - NUMBER_OF_DUAL_VECTORS_H];
-            f_vec[i] = 2*OMEGA*sin(latitude_vector_dual[i]);
-        }
         else
         {
             if (i < NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))
@@ -744,8 +739,14 @@ int main(int argc, char *argv[])
             if (fabs(rel_on_line_dual[i] - 0.5) > 0.14)
                 printf("Bisection warning.\n");
             direction_dual[i] = find_geodetic_direction(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], rel_on_line_dual[i]);
-            f_vec[i] = 2*OMEGA*cos(latitude_vector_dual[i])*sin(direction_dual[i]);
         }
+    }
+    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H; ++i)
+    {
+        if (i >= NUMBER_OF_DUAL_VECTORS_H)
+        	f_vec[i] = 2*OMEGA*sin(latitude_vector[i - NUMBER_OF_DUAL_VECTORS_H]);
+        else
+        	f_vec[i] = 2*OMEGA*cos(latitude_vector_dual[i])*sin(direction_dual[i]);
     }
     int trouble_detected = 0;
     for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
@@ -1510,26 +1511,26 @@ int main(int argc, char *argv[])
         {
             if (j == 0)
             {
-                recov_hor_ver_dual_index[2*i + j] = to_index_dual[i];
-                recov_hor_ver_dual_weight[2*i + j] = rel_on_line_dual[i];
+                recov_hor_ver_curl_index[2*i + j] = to_index_dual[i];
+                recov_hor_ver_curl_weight[2*i + j] = rel_on_line_dual[i];
             }
             else
             {
-                recov_hor_ver_dual_index[2*i + j] = from_index_dual[i];
-                recov_hor_ver_dual_weight[2*i + j] = 1 - recov_hor_ver_dual_weight[2*i + 0];
+                recov_hor_ver_curl_index[2*i + j] = from_index_dual[i];
+                recov_hor_ver_curl_weight[2*i + j] = 1 - recov_hor_ver_curl_weight[2*i + 0];
             }
             sign = 1;
-            recov_hor_par_dual_index[2*i + j] = i + j*NUMBER_OF_DUAL_VECTORS_PER_LAYER;
+            recov_hor_par_curl_index[2*i + j] = i + j*NUMBER_OF_DUAL_VECTORS_PER_LAYER;
             find_angle_change(direction[i], direction_dual[i], &direction_change);
             if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
                 sign = -1;
-            recov_hor_par_dual_weight[2*i + j] = sign*0.5;
+            recov_hor_par_curl_weight[2*i + j] = sign*0.5;
         }
 		/*
 		translation from TRSK paper:
 		sign_0: t_{e, v_2}
 		sign_1: n_{e', i}
-		recov_hor_par_pri_weight: w
+		trsk_modified_weights: w
 		*/
 		offset = 0;
 		double triangle_0, triangle_1, check_sum;
@@ -1546,21 +1547,29 @@ int main(int argc, char *argv[])
 					printf("Problem 1 in TRSK implementation detected.\n");
 					exit(1);
 				}
-				recov_hor_par_pri_index[10*i + k] = adjacent_vector_indices_h[6*from_index[i] + k + offset];
-				if (recov_hor_par_pri_index[10*i + k] == -1)
+				trsk_modified_velocity_indices[10*i + k] = adjacent_vector_indices_h[6*from_index[i] + k + offset];
+				trsk_modified_curl_indices[10*i + k] = adjacent_vector_indices_h[6*from_index[i] + k + offset];
+				if (trsk_modified_velocity_indices[10*i + k] == -1)
 				{
-					recov_hor_par_pri_index[10*i + k] = 0;
-					recov_hor_par_pri_weight[10*i + k] = 0;
+					trsk_modified_velocity_indices[10*i + k] = 0;
+					trsk_modified_weights[10*i + k] = 0;
 				}
+				if (trsk_modified_curl_indices[10*i + k] == -1)
+					trsk_modified_curl_indices[10*i + k] = 0;
 				else
 				{
-					if (recov_hor_par_pri_index[10*i + k] < 0 || recov_hor_par_pri_index[10*i + k] >= NUMBER_OF_VECTORS_H)
+					if (trsk_modified_velocity_indices[10*i + k] < 0 || trsk_modified_velocity_indices[10*i + k] >= NUMBER_OF_VECTORS_H)
 					{
-						printf("Problem 11 in TRSK implementation detected.\n");
+						printf("Problem 11a in TRSK implementation detected.\n");
+						exit(1);
+					}
+					if (trsk_modified_curl_indices[10*i + k] < 0 || trsk_modified_curl_indices[10*i + k] >= NUMBER_OF_VECTORS_H)
+					{
+						printf("Problem 11b in TRSK implementation detected.\n");
 						exit(1);
 					}
 					sign_1 = -1;
-					if (from_index[recov_hor_par_pri_index[10*i + k]] == from_index[i])
+					if (from_index[trsk_modified_velocity_indices[10*i + k]] == from_index[i])
 						sign_1 = 1;
 					if (from_index[i] < NUMBER_OF_PENTAGONS)
 					{
@@ -1681,7 +1690,7 @@ int main(int argc, char *argv[])
 						{
 							if (edge_indices[l] == i)
 								last_index = l;
-							if (edge_indices[l] == recov_hor_par_pri_index[10*i + k])
+							if (edge_indices[l] == trsk_modified_velocity_indices[10*i + k])
 								first_index = (l + 1)%5;
 						}
 						if (k == 4)
@@ -1813,7 +1822,7 @@ int main(int argc, char *argv[])
 						{
 							if (edge_indices[l] == i)
 								last_index = l;
-							if (edge_indices[l] == recov_hor_par_pri_index[10*i + k])
+							if (edge_indices[l] == trsk_modified_velocity_indices[10*i + k])
 								first_index = (l + 1)%6;
 						}
 						double_sum_gen(vector_of_areas, 6, first_index, last_index, &sum_of_weights);
@@ -1824,7 +1833,7 @@ int main(int argc, char *argv[])
 						}
 					}
 					sum_of_weights = sum_of_weights/area[from_index[i]];
-					recov_hor_par_pri_weight[10*i + k] = sign_0*(sum_of_weights - 0.5)*sign_1;
+					trsk_modified_weights[10*i + k] = sign_0*(sum_of_weights - 0.5)*sign_1;
 				}
 			}
 			else
@@ -1839,21 +1848,29 @@ int main(int argc, char *argv[])
 					printf("Problem 2 in TRSK implementation detected.\n");
 					exit(1);
 				}
-				recov_hor_par_pri_index[10*i + k] = adjacent_vector_indices_h[6*to_index[i] + k - 5 + offset];
-				if (recov_hor_par_pri_index[10*i + k] == -1)
+				trsk_modified_velocity_indices[10*i + k] = adjacent_vector_indices_h[6*to_index[i] + k - 5 + offset];
+				trsk_modified_curl_indices[10*i + k] = adjacent_vector_indices_h[6*to_index[i] + k - 5 + offset];
+				if (trsk_modified_velocity_indices[10*i + k] == -1)
 				{
-					recov_hor_par_pri_index[10*i + k] = 0;
-					recov_hor_par_pri_weight[10*i + k] = 0;
+					trsk_modified_velocity_indices[10*i + k] = 0;
+					trsk_modified_weights[10*i + k] = 0;
 				}
+				if (trsk_modified_curl_indices[10*i + k] == -1)
+					trsk_modified_curl_indices[10*i + k] = 0;
 				else
 				{
-					if (recov_hor_par_pri_index[10*i + k] < 0 || recov_hor_par_pri_index[10*i + k] >= NUMBER_OF_VECTORS_H)
+					if (trsk_modified_velocity_indices[10*i + k] < 0 || trsk_modified_velocity_indices[10*i + k] >= NUMBER_OF_VECTORS_H)
 					{
-						printf("Problem 12 in TRSK implementation detected.\n");
+						printf("Problem 12a in TRSK implementation detected.\n");
+						exit(1);
+					}
+					if (trsk_modified_curl_indices[10*i + k] < 0 || trsk_modified_curl_indices[10*i + k] >= NUMBER_OF_VECTORS_H)
+					{
+						printf("Problem 12b in TRSK implementation detected.\n");
 						exit(1);
 					}
 					sign_1 = -1;
-					if (from_index[recov_hor_par_pri_index[10*i + k]] == to_index[i])
+					if (from_index[trsk_modified_velocity_indices[10*i + k]] == to_index[i])
 						sign_1 = 1;
 					if (to_index[i] < NUMBER_OF_PENTAGONS)
 					{
@@ -1974,7 +1991,7 @@ int main(int argc, char *argv[])
 						{
 							if (edge_indices[l] == i)
 								last_index = l;
-							if (edge_indices[l] == recov_hor_par_pri_index[10*i + k])
+							if (edge_indices[l] == trsk_modified_velocity_indices[10*i + k])
 								first_index = (l + 1)%5;
 								
 						}
@@ -2107,7 +2124,7 @@ int main(int argc, char *argv[])
 						{
 							if (edge_indices[l] == i)
 								last_index = l;
-							if (edge_indices[l] == recov_hor_par_pri_index[10*i + k])
+							if (edge_indices[l] == trsk_modified_velocity_indices[10*i + k])
 								first_index = (l + 1)%6;
 						}
 						double_sum_gen(vector_of_areas, 6, first_index, last_index, &sum_of_weights);
@@ -2118,16 +2135,16 @@ int main(int argc, char *argv[])
 						}
 					}
 					sum_of_weights = sum_of_weights/area[to_index[i]];
-					recov_hor_par_pri_weight[10*i + k] = sign_0*(sum_of_weights - 0.5)*sign_1;
+					trsk_modified_weights[10*i + k] = sign_0*(sum_of_weights - 0.5)*sign_1;
 				}
 			}
-			recov_hor_par_pri_weight[10*i + k] = -normal_distance_dual[recov_hor_par_pri_index[10*i + k]]/normal_distance[NUMBER_OF_VECTORS_V + i]*recov_hor_par_pri_weight[10*i + k];
+			trsk_modified_weights[10*i + k] = -normal_distance_dual[trsk_modified_velocity_indices[10*i + k]]/normal_distance[NUMBER_OF_VECTORS_V + i]*trsk_modified_weights[10*i + k];
 		}
 		for (int j = 0; j < 10; ++j)
 		{
 			for (int k = j + 1; k < 10; ++k)
 			{
-				if (recov_hor_par_pri_index[10*i + j] == recov_hor_par_pri_index[10*i + k] && (recov_hor_par_pri_weight[10*i + j] != 0 && recov_hor_par_pri_weight[10*i + k] != 0))
+				if (trsk_modified_velocity_indices[10*i + j] == trsk_modified_velocity_indices[10*i + k] && (trsk_modified_weights[10*i + j] != 0 && trsk_modified_weights[10*i + k] != 0))
 				{
 					printf("Problem 29 in TRSK implementation detected.\n");
 					exit(1);
@@ -2144,13 +2161,13 @@ int main(int argc, char *argv[])
 	{
 		for (int j = 0; j < 10; ++j)
 		{
-			value_0 = normal_distance[NUMBER_OF_VECTORS_V + i]/normal_distance_dual[recov_hor_par_pri_index[10*i + j]]*recov_hor_par_pri_weight[10*i + j];
-			if (recov_hor_par_pri_index[10*i + j] != 0 || (recov_hor_par_pri_index[10*i + j] == 0 && recov_hor_par_pri_weight[10*i + j] != 0))
+			value_0 = normal_distance[NUMBER_OF_VECTORS_V + i]/normal_distance_dual[trsk_modified_velocity_indices[10*i + j]]*trsk_modified_weights[10*i + j];
+			if (trsk_modified_velocity_indices[10*i + j] != 0 || (trsk_modified_velocity_indices[10*i + j] == 0 && trsk_modified_weights[10*i + j] != 0))
 			{
 				second_index = -1;			
 				for (int k = 0; k < 10; ++k)
 				{
-					if (recov_hor_par_pri_index[10*recov_hor_par_pri_index[10*i + j] + k] == i && recov_hor_par_pri_weight[10*recov_hor_par_pri_index[10*i + j] + k] != 0)
+					if (trsk_modified_velocity_indices[10*trsk_modified_velocity_indices[10*i + j] + k] == i && trsk_modified_weights[10*trsk_modified_velocity_indices[10*i + j] + k] != 0)
 						second_index = k;
 				}
 				if (second_index == -1)
@@ -2158,7 +2175,7 @@ int main(int argc, char *argv[])
 					printf("Problem 38 in TRSK implementation detected.\n");
 					exit(1);
 				}
-				value_1 = normal_distance[NUMBER_OF_VECTORS_V + recov_hor_par_pri_index[10*i + j]]/normal_distance_dual[i]*recov_hor_par_pri_weight[10*recov_hor_par_pri_index[10*i + j] + second_index];
+				value_1 = normal_distance[NUMBER_OF_VECTORS_V + trsk_modified_velocity_indices[10*i + j]]/normal_distance_dual[i]*trsk_modified_weights[10*trsk_modified_velocity_indices[10*i + j] + second_index];
 				check_sum = value_0 + value_1;
 				if (fabs(check_sum) > 0.001)
 				{
@@ -2179,25 +2196,19 @@ int main(int argc, char *argv[])
             weight_prefactor = 2.0/5.0;
         for (int j = 0; j < 6; ++j)
         {
-            recov_ver_0_pri_index[6*i + j] = adjacent_vector_indices_h[6*i + j];
-            recov_ver_0_pri_weight[6*i + j] = weight_prefactor*cos(direction[recov_ver_0_pri_index[6*i + j]]);
-            recov_ver_0_dual_index[6*i + j] = adjacent_vector_indices_h[6*i + j];
-            recov_ver_0_dual_weight[6*i + j] = weight_prefactor*cos(direction_dual[recov_ver_0_dual_index[6*i + j]]);
-            recov_ver_1_pri_index[6*i + j] = adjacent_vector_indices_h[6*i + j];
-            recov_ver_1_pri_weight[6*i + j] = weight_prefactor*sin(direction[recov_ver_1_pri_index[6*i + j]]);
-            recov_ver_1_dual_index[6*i + j] = adjacent_vector_indices_h[6*i + j];
-            recov_ver_1_dual_weight[6*i + j] = weight_prefactor*sin(direction_dual[recov_ver_1_dual_index[6*i + j]]);
+            recov_ver_index[6*i + j] = adjacent_vector_indices_h[6*i + j];
+            recov_ver_0_pri_weight[6*i + j] = weight_prefactor*cos(direction[recov_ver_index[6*i + j]]);
+            recov_ver_0_curl_weight[6*i + j] = weight_prefactor*cos(direction_dual[recov_ver_index[6*i + j]]);
+            recov_ver_1_pri_weight[6*i + j] = weight_prefactor*sin(direction[recov_ver_index[6*i + j]]);
+            recov_ver_1_curl_weight[6*i + j] = weight_prefactor*sin(direction_dual[recov_ver_index[6*i + j]]);
         }
         if (i < NUMBER_OF_PENTAGONS)
         {
-            recov_ver_0_pri_index[6*i + 5] = 0;
-            recov_ver_1_pri_index[6*i + 5] = 0;
-            recov_ver_0_dual_index[6*i + 5] = 0;
-            recov_ver_1_dual_index[6*i + 5] = 0;
+            recov_ver_index[6*i + 5] = 0;
             recov_ver_0_pri_weight[6*i + 5] = 0;
             recov_ver_1_pri_weight[6*i + 5] = 0;
-            recov_ver_0_dual_weight[6*i + 5] = 0;
-            recov_ver_1_dual_weight[6*i + 5] = 0;
+            recov_ver_0_curl_weight[6*i + 5] = 0;
+            recov_ver_1_curl_weight[6*i + 5] = 0;
         }
     }
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_H; ++i)
@@ -2438,7 +2449,7 @@ int main(int argc, char *argv[])
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
     free(OUTPUT_FILE);
-    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_dual_weight_id, recov_hor_ver_dual_weight_id, recov_hor_par_pri_weight_id, recov_ver_0_pri_weight_id, recov_ver_0_dual_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_dual_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_dual_index_id, recov_hor_ver_dual_index_id, recov_hor_par_pri_index_id, recov_hor_ver_pri_index_id, recov_ver_0_pri_index_id, recov_ver_0_dual_index_id, recov_ver_1_pri_index_id, recov_ver_1_dual_index_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vector_dual_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id, gravity_potential_id, vertical_contravar_unit_id, vertical_contravar_unit_dimid, adjacent_vector_indices_dual_h_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_14_dimid, e_kin_indices_id;
+    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_curl_weight_id, recov_hor_ver_curl_weight_id, trsk_modified_weights_id, recov_ver_0_pri_weight_id, recov_ver_0_curl_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_curl_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_curl_index_id, recov_hor_ver_curl_index_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, recov_hor_ver_pri_index_id, recov_ver_index_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vector_curl_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id, gravity_potential_id, vertical_contravar_unit_id, vertical_contravar_unit_dimid, adjacent_vector_indices_dual_h_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_14_dimid, e_kin_indices_id;
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NUMBER_OF_SCALARS, &scalar_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_14_index", 14*NUMBER_OF_SCALARS, &scalar_14_dimid)))
@@ -2469,7 +2480,7 @@ int main(int argc, char *argv[])
         ERR(retval);        
     if ((retval = nc_def_dim(ncid_g_prop, "vector_index_h_dual", NUMBER_OF_DUAL_VECTORS_H, &vector_dual_h_dimid)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_dual_one_layer_dimid", NUMBER_OF_DUAL_VECTORS_PER_LAYER, &vector_dual_one_layer_dimid)))
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_curl_one_layer_dimid", NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H, &vector_curl_one_layer_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_index_dual", NUMBER_OF_DUAL_VECTORS, &vector_dual_dimid)))
         ERR(retval);
@@ -2525,19 +2536,19 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, area_id, "units", strlen("m^2"), "m^2")))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_par_dual_weight", NC_DOUBLE, 1, &vector_h_dimid_2, &recov_hor_par_dual_weight_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_par_curl_weight", NC_DOUBLE, 1, &vector_h_dimid_2, &recov_hor_par_curl_weight_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_ver_dual_weight", NC_DOUBLE, 1, &vector_h_dimid_2, &recov_hor_ver_dual_weight_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_ver_curl_weight", NC_DOUBLE, 1, &vector_h_dimid_2, &recov_hor_ver_curl_weight_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_par_pri_weight", NC_DOUBLE, 1, &vector_h_dimid_10, &recov_hor_par_pri_weight_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "trsk_modified_weights", NC_DOUBLE, 1, &vector_h_dimid_10, &trsk_modified_weights_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_dual_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_0_dual_weight_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_curl_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_0_curl_weight_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_pri_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_0_pri_weight_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_pri_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_1_pri_weight_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_dual_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_1_dual_weight_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_curl_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_1_curl_weight_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "z_vector_dual", NC_DOUBLE, 1, &vector_dual_dimid, &z_vector_dual_id)))
         ERR(retval);
@@ -2551,7 +2562,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, area_dual_id, "units", strlen("m^2"), "m^2")))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "f_vec", NC_DOUBLE, 1, &vector_dual_one_layer_dimid, &f_vec_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "f_vec", NC_DOUBLE, 1, &vector_curl_one_layer_dimid, &f_vec_id)))
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, f_vec_id, "units", strlen("1/s"), "1/s")))
         ERR(retval);
@@ -2577,21 +2588,17 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "h_curl_indices", NC_INT, 1, &vector_dual_h_dimid_4, &h_curl_indices_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_par_dual_index", NC_INT, 1, &vector_h_dimid_2, &recov_hor_par_dual_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_par_curl_index", NC_INT, 1, &vector_h_dimid_2, &recov_hor_par_curl_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_ver_dual_index", NC_INT, 1, &vector_h_dimid_2, &recov_hor_ver_dual_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_ver_curl_index", NC_INT, 1, &vector_h_dimid_2, &recov_hor_ver_curl_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_hor_par_pri_index", NC_INT, 1, &vector_h_dimid_10, &recov_hor_par_pri_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "trsk_modified_velocity_indices", NC_INT, 1, &vector_h_dimid_10, &trsk_modified_velocity_indices_id)))
+        ERR(retval);
+    if ((retval = nc_def_var(ncid_g_prop, "trsk_modified_curl_indices", NC_INT, 1, &vector_h_dimid_10, &trsk_modified_curl_indices_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "recov_hor_ver_pri_index", NC_INT, 1, &vector_h_dimid_4, &recov_hor_ver_pri_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_pri_index", NC_INT, 1, &vector_v_dimid_6, &recov_ver_0_pri_index_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_dual_index", NC_INT, 1, &vector_v_dimid_6, &recov_ver_0_dual_index_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_pri_index", NC_INT, 1, &vector_v_dimid_6, &recov_ver_1_pri_index_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_dual_index", NC_INT, 1, &vector_v_dimid_6, &recov_ver_1_dual_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_index", NC_INT, 1, &vector_v_dimid_6, &recov_ver_index_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "adjacent_scalar_indices_dual_h", NC_INT, 1, &vector_dual_v_dimid_3, &adjacent_scalar_indices_dual_h_id)))
         ERR(retval);
@@ -2635,19 +2642,19 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, e_kin_weights_id, &e_kin_weights[0])))
         ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, recov_hor_par_dual_weight_id, &recov_hor_par_dual_weight[0])))
+    if ((retval = nc_put_var_double(ncid_g_prop, recov_hor_par_curl_weight_id, &recov_hor_par_curl_weight[0])))
         ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, recov_hor_ver_dual_weight_id, &recov_hor_ver_dual_weight[0])))
+    if ((retval = nc_put_var_double(ncid_g_prop, recov_hor_ver_curl_weight_id, &recov_hor_ver_curl_weight[0])))
         ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, recov_hor_par_pri_weight_id, &recov_hor_par_pri_weight[0])))
+    if ((retval = nc_put_var_double(ncid_g_prop, trsk_modified_weights_id, &trsk_modified_weights[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, recov_ver_0_pri_weight_id, &recov_ver_0_pri_weight[0])))
         ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, recov_ver_0_dual_weight_id, &recov_ver_0_dual_weight[0])))
+    if ((retval = nc_put_var_double(ncid_g_prop, recov_ver_0_curl_weight_id, &recov_ver_0_curl_weight[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, recov_ver_1_pri_weight_id, &recov_ver_1_pri_weight[0])))
         ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, recov_ver_1_dual_weight_id, &recov_ver_1_dual_weight[0])))
+    if ((retval = nc_put_var_double(ncid_g_prop, recov_ver_1_curl_weight_id, &recov_ver_1_curl_weight[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, z_vector_dual_id, &z_vector_dual[0])))
         ERR(retval);
@@ -2677,21 +2684,17 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, h_curl_indices_id, &h_curl_indices[0])))
         ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, recov_hor_par_dual_index_id, &recov_hor_par_dual_index[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, recov_hor_par_curl_index_id, &recov_hor_par_curl_index[0])))
         ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, recov_hor_ver_dual_index_id, &recov_hor_ver_dual_index[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, recov_hor_ver_curl_index_id, &recov_hor_ver_curl_index[0])))
         ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, recov_hor_par_pri_index_id, &recov_hor_par_pri_index[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, trsk_modified_velocity_indices_id, &trsk_modified_velocity_indices[0])))
+        ERR(retval);
+    if ((retval = nc_put_var_int(ncid_g_prop, trsk_modified_curl_indices_id, &trsk_modified_curl_indices[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, recov_hor_ver_pri_index_id, &recov_hor_ver_pri_index[0])))
         ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, recov_ver_0_pri_index_id, &recov_ver_0_pri_index[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, recov_ver_0_dual_index_id, &recov_ver_0_dual_index[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, recov_ver_1_pri_index_id, &recov_ver_1_pri_index[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, recov_ver_1_dual_index_id, &recov_ver_1_dual_index[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, recov_ver_index_id, &recov_ver_index[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, adjacent_scalar_indices_dual_h_id, &adjacent_scalar_indices_dual_h[0])))
         ERR(retval);
@@ -2722,13 +2725,13 @@ int main(int argc, char *argv[])
     free(gravity);
     free(volume);
     free(area);
-    free(recov_hor_par_dual_weight);
-    free(recov_hor_ver_dual_weight);
-    free(recov_hor_par_pri_weight);
+    free(recov_hor_par_curl_weight);
+    free(recov_hor_ver_curl_weight);
+    free(trsk_modified_weights);
     free(recov_ver_0_pri_weight);
-    free(recov_ver_0_dual_weight);
+    free(recov_ver_0_curl_weight);
     free(recov_ver_1_pri_weight);
-    free(recov_ver_1_dual_weight);
+    free(recov_ver_1_curl_weight);
     free(latitude_scalar_dual);
     free(longitude_scalar_dual);
     free(z_scalar_dual);
@@ -2744,14 +2747,12 @@ int main(int argc, char *argv[])
     free(vorticity_indices_pre);
     free(vorticity_indices);
     free(h_curl_indices);
-    free(recov_hor_par_dual_index);
-    free(recov_hor_ver_dual_index);
-    free(recov_hor_par_pri_index);
+    free(recov_hor_par_curl_index);
+    free(recov_hor_ver_curl_index);
+    free(trsk_modified_velocity_indices);
+    free(trsk_modified_curl_indices);
     free(recov_hor_ver_pri_index);
-    free(recov_ver_0_pri_index);
-    free(recov_ver_0_dual_index);
-    free(recov_ver_1_pri_index);
-    free(recov_ver_1_dual_index);
+    free(recov_ver_index);
     free(adjacent_signs_h);
     free(vorticity_signs_pre);
     free(vorticity_signs);

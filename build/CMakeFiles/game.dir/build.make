@@ -122,18 +122,18 @@ CMakeFiles/game.dir/src/io/write_output.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/io/write_output.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/io/write_output.c -o CMakeFiles/game.dir/src/io/write_output.c.s
 
-CMakeFiles/game.dir/src/spatial_operators/cross_product.c.o: CMakeFiles/game.dir/flags.make
-CMakeFiles/game.dir/src/spatial_operators/cross_product.c.o: /home/max/my_code/game/core/src/spatial_operators/cross_product.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/game.dir/src/spatial_operators/cross_product.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/cross_product.c.o   -c /home/max/my_code/game/core/src/spatial_operators/cross_product.c
+CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.o: CMakeFiles/game.dir/flags.make
+CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.o: /home/max/my_code/game/core/src/spatial_operators/coriolis_gen.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.o   -c /home/max/my_code/game/core/src/spatial_operators/coriolis_gen.c
 
-CMakeFiles/game.dir/src/spatial_operators/cross_product.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/spatial_operators/cross_product.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/cross_product.c > CMakeFiles/game.dir/src/spatial_operators/cross_product.c.i
+CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/coriolis_gen.c > CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.i
 
-CMakeFiles/game.dir/src/spatial_operators/cross_product.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/spatial_operators/cross_product.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/cross_product.c -o CMakeFiles/game.dir/src/spatial_operators/cross_product.c.s
+CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/coriolis_gen.c -o CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.s
 
 CMakeFiles/game.dir/src/spatial_operators/div.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/spatial_operators/div.c.o: /home/max/my_code/game/core/src/spatial_operators/div.c
@@ -408,48 +408,35 @@ CMakeFiles/game.dir/src/diagnostics/ricci.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/ricci.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/ricci.c -o CMakeFiles/game.dir/src/diagnostics/ricci.c.s
 
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.o: CMakeFiles/game.dir/flags.make
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_dual.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_dual.c
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.o: CMakeFiles/game.dir/flags.make
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_curl.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_curl.c
 
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_dual.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.i
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_curl.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.i
 
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_dual.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.s
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_curl.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.s
 
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o: CMakeFiles/game.dir/flags.make
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_pri.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_pri.c
+CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.o: CMakeFiles/game.dir/flags.make
+CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/trsk_modified.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/trsk_modified.c
 
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_pri.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.i
+CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/trsk_modified.c > CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.i
 
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_pri.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.s
-
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_dual.c.o: CMakeFiles/game.dir/flags.make
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_dual.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_ver_dual.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_dual.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_dual.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_ver_dual.c
-
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_dual.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_dual.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_ver_dual.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_dual.c.i
-
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_dual.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_dual.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_ver_dual.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_dual.c.s
+CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/trsk_modified.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.s
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_ver_pri.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_ver_pri.c
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.i: cmake_force
@@ -460,22 +447,22 @@ CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.s: cm
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_ver_pri.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.s
 
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_dual.c.o: CMakeFiles/game.dir/flags.make
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_dual.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_dual.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_dual.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_dual.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_dual.c
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.o: CMakeFiles/game.dir/flags.make
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_curl.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_curl.c
 
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_dual.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_dual.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_dual.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_dual.c.i
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_curl.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.i
 
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_dual.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_dual.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_dual.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_dual.c.s
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_curl.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.s
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_pri.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_pri.c
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.i: cmake_force
@@ -486,22 +473,22 @@ CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.s: cmak
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_pri.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.s
 
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.o: CMakeFiles/game.dir/flags.make
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_dual.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_dual.c
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.o: CMakeFiles/game.dir/flags.make
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_curl.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_curl.c
 
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_dual.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.i
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_curl.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.i
 
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_dual.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.s
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_curl.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.s
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_pri.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_pri.c
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.i: cmake_force
@@ -512,6 +499,19 @@ CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.s: cmak
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_pri.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.s
 
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o: CMakeFiles/game.dir/flags.make
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_pri.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_pri.c
+
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_pri.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.i
+
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_pri.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.s
+
 # Object files for target game
 game_OBJECTS = \
 "CMakeFiles/game.dir/src/coordinator.c.o" \
@@ -519,7 +519,7 @@ game_OBJECTS = \
 "CMakeFiles/game.dir/src/io/interpolation_t.c.o" \
 "CMakeFiles/game.dir/src/io/set_grid_props_and_dt.c.o" \
 "CMakeFiles/game.dir/src/io/write_output.c.o" \
-"CMakeFiles/game.dir/src/spatial_operators/cross_product.c.o" \
+"CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.o" \
 "CMakeFiles/game.dir/src/spatial_operators/div.c.o" \
 "CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.o" \
 "CMakeFiles/game.dir/src/spatial_operators/curl.c.o" \
@@ -541,14 +541,14 @@ game_OBJECTS = \
 "CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o" \
 "CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o" \
 "CMakeFiles/game.dir/src/diagnostics/ricci.c.o" \
-"CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.o" \
-"CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o" \
-"CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_dual.c.o" \
+"CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.o" \
+"CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.o" \
 "CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.o" \
-"CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_dual.c.o" \
+"CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.o" \
 "CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.o" \
-"CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.o" \
-"CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o"
+"CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.o" \
+"CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o" \
+"CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o"
 
 # External object files for target game
 game_EXTERNAL_OBJECTS =
@@ -558,7 +558,7 @@ game: CMakeFiles/game.dir/src/io/init_state_setter.c.o
 game: CMakeFiles/game.dir/src/io/interpolation_t.c.o
 game: CMakeFiles/game.dir/src/io/set_grid_props_and_dt.c.o
 game: CMakeFiles/game.dir/src/io/write_output.c.o
-game: CMakeFiles/game.dir/src/spatial_operators/cross_product.c.o
+game: CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.o
 game: CMakeFiles/game.dir/src/spatial_operators/div.c.o
 game: CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.o
 game: CMakeFiles/game.dir/src/spatial_operators/curl.c.o
@@ -580,14 +580,14 @@ game: CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.o
 game: CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o
 game: CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o
 game: CMakeFiles/game.dir/src/diagnostics/ricci.c.o
-game: CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.o
-game: CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o
-game: CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_dual.c.o
+game: CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.o
+game: CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.o
 game: CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.o
-game: CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_dual.c.o
+game: CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.o
 game: CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.o
-game: CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.o
+game: CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.o
 game: CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o
+game: CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o
 game: CMakeFiles/game.dir/build.make
 game: CMakeFiles/game.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_36) "Linking C executable game"

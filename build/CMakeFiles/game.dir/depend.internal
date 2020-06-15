@@ -31,29 +31,29 @@ CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o
  /home/max/my_code/game/core/src/diagnostics/pot_temp_diagnostics.c
  /home/max/my_code/game/core/src/enum_and_typedefs.h
  /home/max/my_code/game/core/src/spatial_operators/spatial_operators.h
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_dual.c.o
- /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_dual.c
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.o
+ /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_curl.c
  /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o
  /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_pri.c
  /home/max/my_code/game/core/src/enum_and_typedefs.h
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_dual.c.o
- /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_ver_dual.c
- /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.o
  /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_ver_pri.c
  /home/max/my_code/game/core/src/enum_and_typedefs.h
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_dual.c.o
- /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_dual.c
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.o
+ /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_curl.c
  /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.o
  /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_pri.c
  /home/max/my_code/game/core/src/enum_and_typedefs.h
-CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_dual.c.o
- /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_dual.c
+CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.o
+ /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_curl.c
  /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o
  /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_pri.c
+ /home/max/my_code/game/core/src/enum_and_typedefs.h
+CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.o
+ /home/max/my_code/game/core/src/diagnostics/recover_components/trsk_modified.c
  /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/diagnostics/ricci.c.o
  /home/max/my_code/game/core/src/diagnostics/diagnostics.h
@@ -85,10 +85,10 @@ CMakeFiles/game.dir/src/io/write_output.c.o
  /home/max/my_code/game/core/src/io/io.h
  /home/max/my_code/game/core/src/io/write_output.c
  /home/max/my_code/game/core/src/spatial_operators/spatial_operators.h
-CMakeFiles/game.dir/src/spatial_operators/cross_product.c.o
+CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.o
  /home/max/my_code/game/core/src/diagnostics/diagnostics.h
  /home/max/my_code/game/core/src/enum_and_typedefs.h
- /home/max/my_code/game/core/src/spatial_operators/cross_product.c
+ /home/max/my_code/game/core/src/spatial_operators/coriolis_gen.c
 CMakeFiles/game.dir/src/spatial_operators/curl.c.o
  /home/max/my_code/game/core/src/diagnostics/diagnostics.h
  /home/max/my_code/game/core/src/enum_and_typedefs.h

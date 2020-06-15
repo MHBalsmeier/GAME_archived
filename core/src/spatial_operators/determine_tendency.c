@@ -192,13 +192,14 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     free(tracer_heat_source_rates);
     free(heating_diss);
     free(rad_heating);
-    Dual_vector_field *rel_curl = malloc(sizeof(Dual_vector_field));
+    Curl_field *rel_curl = malloc(sizeof(Curl_field));
     curl(current_state -> velocity_gas, *rel_curl, grid, dualgrid);
-    Dual_vector_field *abs_curl = malloc(sizeof(Dual_vector_field));
-    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; ++i)
+    Curl_field *abs_curl = malloc(sizeof(Curl_field));
+    for (int i = 0; i < NUMBER_OF_LAYERS*(NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H) + NUMBER_OF_DUAL_VECTORS_H; ++i)
     {
-        layer_index = i/NUMBER_OF_DUAL_VECTORS_PER_LAYER;
-        (*abs_curl)[i] = dualgrid -> f_vec[i - layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER] + (*rel_curl)[i];
+        layer_index = i/(NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H);
+        h_index = i - layer_index*(NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H);
+        (*abs_curl)[i] = dualgrid -> f_vec[h_index] + (*rel_curl)[i];
     }
     free(rel_curl);
     Scalar_field *specific_entropy = malloc(sizeof(Scalar_field));
@@ -249,10 +250,18 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     }
 	retval = scalar_times_vector(*pressure_gradient_decel_factor, *pressure_gradient_acc, *pressure_gradient_acc, grid);
 	if (retval != 0)
+	{
 		printf("scalar_times_vector called at position 1 from tendency errored out, exit code %d.\n", retval);
+		exit(1);
+	}
     free(pressure_gradient_decel_factor);
     Vector_field *abs_curl_tend = malloc(sizeof(Vector_field));
-    cross_product(current_state -> velocity_gas, *abs_curl, *abs_curl_tend, grid);
+    retval = coriolis_gen(current_state -> velocity_gas, *abs_curl, *abs_curl_tend, grid);
+    if (retval != 0)
+    {
+    	printf(".Error in coriolis_gen, exit code is %d.\n", retval);
+    	exit(1);
+    }
     free(abs_curl);
     Scalar_field *macroscopic_energy = malloc(sizeof(Scalar_field));
     kinetic_energy(current_state -> velocity_gas, *macroscopic_energy, grid, dualgrid);
