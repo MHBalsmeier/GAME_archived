@@ -379,9 +379,9 @@ int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid)
 {
     double max_speed = 350;
     double min_dist_horizontal = RADIUS;
-    double min_dist_vertical = RADIUS;
-    double delta_t_horizontal;
-    double delta_t_vertical;
+    double delta_t_candidate;
+    double brunt_vaisala_max = 0.03;
+    double delta_t_buoyancy = 2/brunt_vaisala_max;
     for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
     {
         for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
@@ -390,19 +390,11 @@ int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid)
                 min_dist_horizontal = grid -> normal_distance[NUMBER_OF_VECTORS_V + i*NUMBER_OF_VECTORS_PER_LAYER + j];
         }
     }
-    for (int i = 1; i < NUMBER_OF_LEVELS - 1; ++i)
-    {
-        for (int j = 0; j < NUMBER_OF_VECTORS_V; ++j)
-        {
-            if (grid -> normal_distance[i*NUMBER_OF_VECTORS_PER_LAYER + j] < min_dist_vertical)
-                min_dist_vertical = grid -> normal_distance[i*NUMBER_OF_VECTORS_PER_LAYER + j];
-        }
-    }
-    delta_t_horizontal = (1 - cfl_margin)*min_dist_horizontal/max_speed;
-    delta_t_vertical = (1 - cfl_margin)*min_dist_vertical/max_speed;
-    *delta_t = delta_t_vertical;
-    if (delta_t_horizontal < delta_t_vertical)
-        *delta_t = delta_t_horizontal;
+    delta_t_candidate = (1 - cfl_margin)*min_dist_horizontal/max_speed;
+    if (delta_t_buoyancy < delta_t_candidate)
+        *delta_t = delta_t_buoyancy/30;
+    else
+    	*delta_t = (1 - cfl_margin)*delta_t_candidate;
     return 1;
 }
 

@@ -1548,24 +1548,16 @@ int main(int argc, char *argv[])
 					exit(1);
 				}
 				trsk_modified_velocity_indices[10*i + k] = adjacent_vector_indices_h[6*from_index[i] + k + offset];
-				trsk_modified_curl_indices[10*i + k] = adjacent_vector_indices_h[6*from_index[i] + k + offset];
 				if (trsk_modified_velocity_indices[10*i + k] == -1)
 				{
 					trsk_modified_velocity_indices[10*i + k] = 0;
 					trsk_modified_weights[10*i + k] = 0;
 				}
-				if (trsk_modified_curl_indices[10*i + k] == -1)
-					trsk_modified_curl_indices[10*i + k] = 0;
 				else
 				{
 					if (trsk_modified_velocity_indices[10*i + k] < 0 || trsk_modified_velocity_indices[10*i + k] >= NUMBER_OF_VECTORS_H)
 					{
-						printf("Problem 11a in TRSK implementation detected.\n");
-						exit(1);
-					}
-					if (trsk_modified_curl_indices[10*i + k] < 0 || trsk_modified_curl_indices[10*i + k] >= NUMBER_OF_VECTORS_H)
-					{
-						printf("Problem 11b in TRSK implementation detected.\n");
+						printf("Problem 11 in TRSK implementation detected.\n");
 						exit(1);
 					}
 					sign_1 = -1;
@@ -1849,24 +1841,16 @@ int main(int argc, char *argv[])
 					exit(1);
 				}
 				trsk_modified_velocity_indices[10*i + k] = adjacent_vector_indices_h[6*to_index[i] + k - 5 + offset];
-				trsk_modified_curl_indices[10*i + k] = adjacent_vector_indices_h[6*to_index[i] + k - 5 + offset];
 				if (trsk_modified_velocity_indices[10*i + k] == -1)
 				{
 					trsk_modified_velocity_indices[10*i + k] = 0;
 					trsk_modified_weights[10*i + k] = 0;
 				}
-				if (trsk_modified_curl_indices[10*i + k] == -1)
-					trsk_modified_curl_indices[10*i + k] = 0;
 				else
 				{
 					if (trsk_modified_velocity_indices[10*i + k] < 0 || trsk_modified_velocity_indices[10*i + k] >= NUMBER_OF_VECTORS_H)
 					{
-						printf("Problem 12a in TRSK implementation detected.\n");
-						exit(1);
-					}
-					if (trsk_modified_curl_indices[10*i + k] < 0 || trsk_modified_curl_indices[10*i + k] >= NUMBER_OF_VECTORS_H)
-					{
-						printf("Problem 12b in TRSK implementation detected.\n");
+						printf("Problem 12 in TRSK implementation detected.\n");
 						exit(1);
 					}
 					sign_1 = -1;
@@ -2140,6 +2124,41 @@ int main(int argc, char *argv[])
 			}
 			trsk_modified_weights[10*i + k] = -normal_distance_dual[trsk_modified_velocity_indices[10*i + k]]/normal_distance[NUMBER_OF_VECTORS_V + i]*trsk_modified_weights[10*i + k];
 		}
+		// modification following Gassmann (2018)
+		if (to_index[i] < NUMBER_OF_PENTAGONS)
+			trsk_modified_curl_indices[10*i + 0] = trsk_modified_velocity_indices[10*i + 8];
+		else
+			trsk_modified_curl_indices[10*i + 0] = trsk_modified_velocity_indices[10*i + 9];
+		trsk_modified_curl_indices[10*i + 1] = trsk_modified_velocity_indices[10*i + 0];
+		if (from_index[i] < NUMBER_OF_PENTAGONS)
+		{
+			trsk_modified_curl_indices[10*i + 2] = trsk_modified_velocity_indices[10*i + 3];
+			trsk_modified_curl_indices[10*i + 3] = trsk_modified_velocity_indices[10*i + 5];
+			trsk_modified_curl_indices[10*i + 4] = 0;
+		}
+		else
+		{
+			trsk_modified_curl_indices[10*i + 2] = trsk_modified_velocity_indices[10*i + 2];
+			trsk_modified_curl_indices[10*i + 3] = trsk_modified_velocity_indices[10*i + 4];
+			trsk_modified_curl_indices[10*i + 4] = trsk_modified_velocity_indices[10*i + 5];
+		}
+		if (from_index[i] < NUMBER_OF_PENTAGONS)
+			trsk_modified_curl_indices[10*i + 5] = trsk_modified_velocity_indices[10*i + 3];
+		else
+			trsk_modified_curl_indices[10*i + 5] = trsk_modified_velocity_indices[10*i + 4];
+		trsk_modified_curl_indices[10*i + 6] = trsk_modified_velocity_indices[10*i + 5];
+		if (to_index[i] < NUMBER_OF_PENTAGONS)
+		{
+			trsk_modified_curl_indices[10*i + 7] = trsk_modified_velocity_indices[10*i + 8];
+			trsk_modified_curl_indices[10*i + 8] = trsk_modified_velocity_indices[10*i + 0];
+			trsk_modified_curl_indices[10*i + 9] = 0;
+		}
+		else
+		{
+			trsk_modified_curl_indices[10*i + 7] = trsk_modified_velocity_indices[10*i + 7];
+			trsk_modified_curl_indices[10*i + 8] = trsk_modified_velocity_indices[10*i + 9];
+			trsk_modified_curl_indices[10*i + 9] = trsk_modified_velocity_indices[10*i + 0];
+		}
 		for (int j = 0; j < 10; ++j)
 		{
 			for (int k = j + 1; k < 10; ++k)
@@ -2149,6 +2168,14 @@ int main(int argc, char *argv[])
 					printf("Problem 29 in TRSK implementation detected.\n");
 					exit(1);
 				}
+			}
+		}
+		for (int j = 0; j < 10; ++j)
+		{
+			if (trsk_modified_curl_indices[10*i + j] < 0 || trsk_modified_curl_indices[10*i + j] >= NUMBER_OF_VECTORS_H)
+			{
+				printf("Problem 30 in TRSK implementation detected.\n");
+				exit(1);
 			}
 		}
         recov_hor_ver_pri_index[4*i + 0] = to_index[i];

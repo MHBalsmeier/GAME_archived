@@ -819,7 +819,7 @@ int write_out_integral(State *state_write_out, double t_write, char output_folde
     	double kinetic_integral, potential_integral, internal_integral;
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
     	Scalar_field *e_kin_density = malloc(sizeof(Scalar_field));
-    	retval = kinetic_energy(state_write_out -> velocity_gas, *e_kin_density, grid, dualgrid);
+    	retval = kinetic_energy(state_write_out -> velocity_gas, *e_kin_density, grid);
     	if (retval != 0)
     	{
     		printf("Error in kinetic_energy called from write_output, position 0. Answer is %d.\n", retval);

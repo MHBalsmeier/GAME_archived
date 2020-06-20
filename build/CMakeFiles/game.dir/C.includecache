@@ -29,6 +29,8 @@ diagnostics/diagnostics.h
 /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 time_stepping/time_stepping.h
 /home/max/my_code/game/core/src/time_stepping/time_stepping.h
+atmosrad.h
+/home/max/my_code/game/core/src/atmosrad.h
 
 /home/max/my_code/game/core/src/diagnostics/calc_numerical_diffusion_coeffs.c
 ../enum_and_typedefs.h
@@ -280,7 +282,9 @@ stdio.h
 
 /home/max/my_code/game/core/src/spatial_operators/spatial_operators.h
 
-/home/max/my_code/game/core/src/time_stepping/runge_kutta_fourth_order.c
+/home/max/my_code/game/core/src/time_stepping/lower_boundary_solver.c
+
+/home/max/my_code/game/core/src/time_stepping/manage_time_stepping.c
 ../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
 ../spatial_operators/spatial_operators.h
@@ -294,19 +298,7 @@ stdlib.h
 stdio.h
 -
 
-/home/max/my_code/game/core/src/time_stepping/runge_kutta_third_order.c
-../enum_and_typedefs.h
-/home/max/my_code/game/core/src/enum_and_typedefs.h
-../spatial_operators/spatial_operators.h
-/home/max/my_code/game/core/src/spatial_operators/spatial_operators.h
-time_stepping.h
 /home/max/my_code/game/core/src/time_stepping/time_stepping.h
-../diagnostics/diagnostics.h
-/home/max/my_code/game/core/src/diagnostics/diagnostics.h
-stdlib.h
--
-stdio.h
--
 
-/home/max/my_code/game/core/src/time_stepping/time_stepping.h
+/home/max/my_code/game/core/src/time_stepping/vertical_slice_solver.c
 

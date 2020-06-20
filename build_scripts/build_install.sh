@@ -10,4 +10,6 @@ mkdir build && cd build
 cmake -DCMAKE_INSTALL_PREFIX=$aim_dir ../core
 make
 ctest
+make install
+chmod +x $aim_dir/run.sh
 cd ..

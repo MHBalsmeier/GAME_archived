@@ -32,8 +32,9 @@ file(REMOVE_RECURSE
   "CMakeFiles/game.dir/src/spatial_operators/scalar_times_scalar.c.o"
   "CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.o"
   "CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.o"
-  "CMakeFiles/game.dir/src/time_stepping/runge_kutta_fourth_order.c.o"
-  "CMakeFiles/game.dir/src/time_stepping/runge_kutta_third_order.c.o"
+  "CMakeFiles/game.dir/src/time_stepping/lower_boundary_solver.c.o"
+  "CMakeFiles/game.dir/src/time_stepping/manage_time_stepping.c.o"
+  "CMakeFiles/game.dir/src/time_stepping/vertical_slice_solver.c.o"
   "game"
   "game.pdb"
 )
