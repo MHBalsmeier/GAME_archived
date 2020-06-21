@@ -4,8 +4,8 @@ int main(int argc, char *argv[])
 {
     clock_t begin;
     begin = clock();
-    Grid *grid = malloc(sizeof(Grid));
-    Dualgrid *dualgrid = malloc(sizeof(Dualgrid));
+    Grid *grid = calloc(1, sizeof(Grid));
+    Dualgrid *dualgrid = calloc(1, sizeof(Dualgrid));
     size_t len = strlen(argv[1]);
     char *TOTAL_RUN_SPAN_PRE = malloc((len + 1)*sizeof(char));
     strcpy(TOTAL_RUN_SPAN_PRE, argv[1]);
@@ -103,9 +103,9 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     printf("It begins.\n");
     printf("%s", stars);
-    State *state_init = malloc(sizeof(State));
+    State *state_init = calloc(1, sizeof(State));
     double t_init;
-    set_init_data(INIT_STATE_FILE, state_init, &t_init, tracers_on);
+    set_init_data(INIT_STATE_FILE, state_init, &t_init);
     free(INIT_STATE_FILE);
     write_out(state_init, t_init, 0, OUTPUT_FOLDER, grid);
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
@@ -113,12 +113,12 @@ int main(int argc, char *argv[])
     double t_write = t_init + WRITE_OUT_INTERVAL;
     t_0 = t_init;
     double t_write_integral = t_init;
-    State *state_0 = malloc(sizeof(State));
+    State *state_0 = calloc(1, sizeof(State));
     *state_0 = *state_init;
     free(state_init);
     clock_t first_time, second_time;
     first_time = clock();
-    State *state_p1 = malloc(sizeof(State));
+    State *state_p1 = calloc(1, sizeof(State));
     if (write_out_dry_mass_integral == 1)
 		write_out_integral(state_0, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
     if (write_out_entropy_integral == 1)
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
     if (write_out_energy_integral == 1)
 		write_out_integral(state_0, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
 	int retval;
-	Scalar_field *radiation_tendency = malloc(sizeof(Scalar_field));
+	Scalar_field *radiation_tendency = calloc(1, sizeof(Scalar_field));
     if (rad_on == 1)
     {
 		retval = calc_rad_heating(*radiation_tendency, NUMBER_OF_SCALARS);
@@ -146,40 +146,41 @@ int main(int argc, char *argv[])
     int counter = 0;
     double *tracer_mass_source_rates = calloc(NUMBER_OF_TRACERS*NUMBER_OF_SCALARS, sizeof(double));
     double *tracer_heat_source_rates = calloc(NUMBER_OF_TRACERS*NUMBER_OF_SCALARS, sizeof(double));
-    State *state_tendency = malloc(sizeof(State));
-    Vector_field *mass_dry_flux_density = malloc(sizeof(Vector_field));
-    Scalar_field *mass_dry_flux_density_divergence = malloc(sizeof(Scalar_field));
-    Scalar_field *temperature = malloc(sizeof(Scalar_field));
-    Vector_field *entropy_gas_flux_density = malloc(sizeof(Vector_field));
-    Scalar_field *entropy_gas_flux_density_divergence = malloc(sizeof(Scalar_field));
-    Scalar_field *temp_diffusion_heating = malloc(sizeof(Scalar_field));
-    Vector_field *temp_gradient = malloc(sizeof(Vector_field));
+    State *state_tendency = calloc(1, sizeof(State));
+    Vector_field *mass_dry_flux_density = calloc(1, sizeof(Vector_field));
+    Scalar_field *mass_dry_flux_density_divergence = calloc(1, sizeof(Scalar_field));
+    Scalar_field *temperature = calloc(1, sizeof(Scalar_field));
+    Vector_field *entropy_gas_flux_density = calloc(1, sizeof(Vector_field));
+    Scalar_field *entropy_gas_flux_density_divergence = calloc(1, sizeof(Scalar_field));
+    Scalar_field *temp_diffusion_heating = calloc(1, sizeof(Scalar_field));
+    Vector_field *temp_gradient = calloc(1, sizeof(Vector_field));
     Vector_field *friction_acc = calloc(1, sizeof(Vector_field));
     Scalar_field *heating_diss = calloc(1, sizeof(Scalar_field));
-    Scalar_field *specific_entropy = malloc(sizeof(Scalar_field));
-    Vector_field *downgradient_macroscopic_energy = malloc(sizeof(Vector_field));
-    Vector_field *abs_curl_tend = malloc(sizeof(Vector_field));
-    Curl_field *rel_curl = malloc(sizeof(Curl_field));
-    Curl_field *abs_curl = malloc(sizeof(Curl_field));
-    Vector_field *pressure_gradient_acc = malloc(sizeof(Vector_field));
-    Vector_field *specific_entropy_gradient = malloc(sizeof(Vector_field));
-    Scalar_field *c_h_p_field = malloc(sizeof(Scalar_field));
-    Scalar_field *macroscopic_energy = malloc(sizeof(Scalar_field));
-    Scalar_field *pressure_gradient_decel_factor = malloc(sizeof(Scalar_field));
-    Scalar_field *pressure_gradient_acc_1 = malloc(sizeof(Vector_field));
-    Scalar_field *diffusion_coeff_numerical_h = malloc(sizeof(Scalar_field));
-    Scalar_field *diffusion_coeff_numerical_v = malloc(sizeof(Scalar_field));
-    Vector_field *mass_dry_diffusion_flux_density = malloc(sizeof(Vector_field));
-    Scalar_field *mass_dry_diffusion_source_rate = malloc(sizeof(Scalar_field));
-    Vector_field *temperature_flux_density = malloc(sizeof(Vector_field));
-    Scalar_field *tracer_density = malloc(sizeof(Scalar_field));
-    Vector_field *tracer_velocity = malloc(sizeof(Vector_field));
-    Vector_field *tracer_flux_density = malloc(sizeof(Vector_field));
-    Scalar_field *tracer_flux_density_divergence = malloc(sizeof(Scalar_field));
-    Scalar_field *tracer_density_temperature = malloc(sizeof(Scalar_field));
-    Vector_field *tracer_temperature_flux_density = malloc(sizeof(Vector_field));
-    Scalar_field *tracer_temperature_flux_density_divergence = malloc(sizeof(Scalar_field));
-    manage_time_stepping(state_0, state_p1, delta_t, grid, dualgrid, dissipation_on, rad_on, tracers_on, diffusion_on, *radiation_tendency, tracers_update, tracers_dynamics_delta_t_ratio, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divergence, *temperature, *entropy_gas_flux_density, *entropy_gas_flux_density_divergence, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *rel_curl, *abs_curl, *downgradient_macroscopic_energy, *pressure_gradient_acc, *abs_curl_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divergence, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divergence);
+    Scalar_field *specific_entropy = calloc(1, sizeof(Scalar_field));
+    Vector_field *downgradient_macroscopic_energy = calloc(1, sizeof(Vector_field));
+    Vector_field *abs_curl_tend = calloc(1, sizeof(Vector_field));
+    Curl_field *rel_curl = calloc(1, sizeof(Curl_field));
+    Curl_field *abs_curl = calloc(1, sizeof(Curl_field));
+    Vector_field *pressure_gradient_acc = calloc(1, sizeof(Vector_field));
+    Vector_field *specific_entropy_gradient = calloc(1, sizeof(Vector_field));
+    Scalar_field *c_h_p_field = calloc(1, sizeof(Scalar_field));
+    Scalar_field *macroscopic_energy = calloc(1, sizeof(Scalar_field));
+    Scalar_field *pressure_gradient_decel_factor = calloc(1, sizeof(Scalar_field));
+    Scalar_field *pressure_gradient_acc_1 = calloc(1, sizeof(Vector_field));
+    Scalar_field *diffusion_coeff_numerical_h = calloc(1, sizeof(Scalar_field));
+    Scalar_field *diffusion_coeff_numerical_v = calloc(1, sizeof(Scalar_field));
+    Vector_field *mass_dry_diffusion_flux_density = calloc(1, sizeof(Vector_field));
+    Scalar_field *mass_dry_diffusion_source_rate = calloc(1, sizeof(Scalar_field));
+    Vector_field *temperature_flux_density = calloc(1, sizeof(Vector_field));
+    Scalar_field *tracer_density = calloc(1, sizeof(Scalar_field));
+    Vector_field *tracer_velocity = calloc(1, sizeof(Vector_field));
+    Vector_field *tracer_flux_density = calloc(1, sizeof(Vector_field));
+    Scalar_field *tracer_flux_density_divergence = calloc(1, sizeof(Scalar_field));
+    Scalar_field *tracer_density_temperature = calloc(1, sizeof(Scalar_field));
+    Vector_field *tracer_temperature_flux_density = calloc(1, sizeof(Vector_field));
+    Scalar_field *tracer_temperature_flux_density_divergence = calloc(1, sizeof(Scalar_field));
+    int rad_update = 1;
+    manage_time_stepping(state_0, state_p1, delta_t, grid, dualgrid, dissipation_on, rad_update*rad_on, tracers_on, diffusion_on, *radiation_tendency, tracers_update, tracers_dynamics_delta_t_ratio, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divergence, *temperature, *entropy_gas_flux_density, *entropy_gas_flux_density_divergence, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *rel_curl, *abs_curl, *downgradient_macroscopic_energy, *pressure_gradient_acc, *abs_curl_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divergence, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divergence);
     tracers_update = 0;
     counter += 1;
     if (write_out_dry_mass_integral == 1)
@@ -189,9 +190,9 @@ int main(int argc, char *argv[])
     if (write_out_energy_integral == 1)
 		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
 	t_write_integral += delta_t;
-    State *state_write = malloc(sizeof(State));
+    State *state_write = calloc(1, sizeof(State));
     double speed;
-    int rad_update = 0;
+    rad_update = 0;
     double t_rad_update = t_0 + radiation_delta_t;
     if(t_0 <= t_write && t_0 + delta_t >= t_write)
     {
@@ -285,7 +286,7 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     free(stars);
     clock_t end = clock();
-    speed = CLOCKS_PER_SEC*TOTAL_RUN_SPAN/((double) end - begin);
+    speed = CLOCKS_PER_SEC*(TOTAL_RUN_SPAN + 300)/((double) end - begin);
     printf("average speed: %lf\n", speed);
     printf("GAME over.\n");
     return 0;

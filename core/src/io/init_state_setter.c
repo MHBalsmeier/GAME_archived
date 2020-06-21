@@ -7,7 +7,7 @@
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 
-int set_init_data(char FILE_NAME[], State *init_state, double *t_init, int add_comps_bool)
+int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
 {
     long unsigned int no_scalars_h = NUMBER_OF_SCALARS_H;
     long unsigned int no_vectors_h = NUMBER_OF_VECTORS_H;
