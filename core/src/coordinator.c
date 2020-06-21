@@ -107,10 +107,20 @@ int main(int argc, char *argv[])
     double t_init;
     set_init_data(INIT_STATE_FILE, state_init, &t_init);
     free(INIT_STATE_FILE);
-    write_out(state_init, t_init, 0, OUTPUT_FOLDER, grid);
+    int min_no_of_output_steps = 600/delta_t;
+    double *wind_h_lowest_layer_array = calloc(1, min_no_of_output_steps*NUMBER_OF_VECTORS_H*sizeof(double));
+    double t_write = t_init;
+    int h_index, time_step_10_m_wind;
+	for (int i = 0; i < min_no_of_output_steps*NUMBER_OF_VECTORS_H; ++i)
+	{
+		time_step_10_m_wind = i/NUMBER_OF_VECTORS_H;
+		h_index = i - time_step_10_m_wind*NUMBER_OF_VECTORS_H;
+    	wind_h_lowest_layer_array[time_step_10_m_wind*NUMBER_OF_VECTORS_H + h_index] = state_init -> velocity_gas[NUMBER_OF_VECTORS - NUMBER_OF_VECTORS_PER_LAYER + h_index];
+    }
+    write_out(state_init, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, OUTPUT_FOLDER, grid);
+    t_write += WRITE_OUT_INTERVAL;
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     double t_0;
-    double t_write = t_init + WRITE_OUT_INTERVAL;
     t_0 = t_init;
     double t_write_integral = t_init;
     State *state_0 = calloc(1, sizeof(State));
@@ -194,17 +204,8 @@ int main(int argc, char *argv[])
     double speed;
     rad_update = 0;
     double t_rad_update = t_0 + radiation_delta_t;
-    if(t_0 <= t_write && t_0 + delta_t >= t_write)
-    {
-        interpolation_t(state_0, state_p1, state_write, t_0, t_0 + delta_t, t_write);
-        write_out(state_write, t_init, t_write, OUTPUT_FOLDER, grid);
-        t_write += WRITE_OUT_INTERVAL;
-        second_time = clock();
-        speed = CLOCKS_PER_SEC*WRITE_OUT_INTERVAL/((double) second_time - first_time);
-        printf("current speed: %lf\n", speed);
-        first_time = clock();
-        printf("run progress: %f h\n", (t_0 + delta_t - t_init)/SECONDS_PER_HOUR);
-    }
+    int wind_10_m_step_counter = 0;
+    int second_write_out_bool = 1;
     while (t_0 + delta_t < t_init + TOTAL_RUN_SPAN + 300)
     {
     	if (counter%tracers_dynamics_delta_t_ratio == 0)
@@ -221,26 +222,46 @@ int main(int argc, char *argv[])
         else
         	rad_update = 0;
         manage_time_stepping(state_0, state_p1, delta_t, grid, dualgrid, dissipation_on, rad_update*rad_on, tracers_on, diffusion_on, *radiation_tendency, tracers_update, tracers_dynamics_delta_t_ratio, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divergence, *temperature, *entropy_gas_flux_density, *entropy_gas_flux_density_divergence, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *rel_curl, *abs_curl, *downgradient_macroscopic_energy, *pressure_gradient_acc, *abs_curl_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divergence, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divergence);
-    if (write_out_dry_mass_integral == 1)
-		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
-    if (write_out_entropy_integral == 1)
-		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 1);
-    if (write_out_energy_integral == 1)
-		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
-	t_write_integral += delta_t;
+		if (write_out_dry_mass_integral == 1)
+			write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
+		if (write_out_entropy_integral == 1)
+			write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 1);
+		if (write_out_energy_integral == 1)
+			write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
+		t_write_integral += delta_t;
         if(t_0 + delta_t >= t_write && t_0 <= t_write)
-        {
             interpolation_t(state_0, state_p1, state_write, t_0, t_0 + delta_t, t_write);
-            write_out(state_write, t_init, t_write, OUTPUT_FOLDER, grid);
+        if (t_0 >= t_write - 300)
+        {
+        	if (wind_10_m_step_counter < min_no_of_output_steps)
+        	{
+		    	for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+		    		wind_h_lowest_layer_array[wind_10_m_step_counter*NUMBER_OF_VECTORS_H + i] = state_0 -> velocity_gas[NUMBER_OF_VECTORS - NUMBER_OF_VECTORS_PER_LAYER + i];
+		    	wind_10_m_step_counter += 1;
+        	}
+        }
+        if(t_0 + delta_t >= t_write + 300 && t_0 <= t_write + 300)
+        {
+            write_out(state_write, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, OUTPUT_FOLDER, grid);
             t_write += WRITE_OUT_INTERVAL;
             second_time = clock();
-            speed = CLOCKS_PER_SEC*WRITE_OUT_INTERVAL/((double) second_time - first_time);
+            if (second_write_out_bool == 1)
+            {
+            	speed = (CLOCKS_PER_SEC*(WRITE_OUT_INTERVAL + 300))/((double) second_time - first_time);
+            	second_write_out_bool = 0;
+        	}
+            else
+            	speed = CLOCKS_PER_SEC*WRITE_OUT_INTERVAL/((double) second_time - first_time);
             printf("current speed: %lf\n", speed);
             first_time = clock();
             printf("run progress: %f h\n", (t_0 + delta_t - t_init)/SECONDS_PER_HOUR);
+            for (int i = 0; i < min_no_of_output_steps*NUMBER_OF_VECTORS_H; ++i)
+            	wind_h_lowest_layer_array[i] = 0;
+            wind_10_m_step_counter = 0;
         }
     	counter += 1;
     }
+    free(wind_h_lowest_layer_array);
     free(tracer_temperature_flux_density_divergence);
     free(tracer_temperature_flux_density);
     free(tracer_density_temperature);
@@ -291,8 +312,6 @@ int main(int argc, char *argv[])
     printf("GAME over.\n");
     return 0;
 }
-
-
 
 
 

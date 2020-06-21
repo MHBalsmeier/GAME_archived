@@ -54,6 +54,9 @@ if short_name == "10u":
 if short_name == "10v":
     variable_name = "10 m meridional wind";
     unit_string = "m/s";
+if short_name == "gust":
+    variable_name = "10 m gusts";
+    unit_string = "m/s";
 if short_name == "rprate":
     variable_name = "Liquid precipitation rate";
     unit_string = "mm/h";

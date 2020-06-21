@@ -50,6 +50,7 @@ int manage_time_stepping(State *state_0, State *state_p1, double delta_t, Grid *
 			exit(1);	
 		}
 	}
+	
     return 0;
 }
 

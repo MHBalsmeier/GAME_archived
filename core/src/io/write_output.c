@@ -10,7 +10,9 @@
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 
-int write_out(State *state_write_out, double t_init, double t_write, char output_foldername[], Grid *grid)
+double calc_std_dev(double [], int);
+
+int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, char output_foldername[], Grid *grid)
 {
     int str_len;
     find_string_length_from_int((int) t_write - t_init, &str_len);
@@ -48,8 +50,6 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
     double *wind_u_h = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
     double *wind_v_h = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
     double *wind_w_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *wind_u_10m = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
-    double *wind_v_10m = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
     double *mslp = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double *surface_p = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double *t2 = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
@@ -65,14 +65,15 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
     codes_handle *handle_wind_u_h = NULL;
     codes_handle *handle_wind_v_h = NULL;
     codes_handle *handle_wind_w_h = NULL;
-    codes_handle *handle_wind_u_10m = NULL;
-    codes_handle *handle_wind_v_10m = NULL;
+    codes_handle *handle_wind_u_10m_mean = NULL;
+    codes_handle *handle_wind_v_10m_mean = NULL;
     codes_handle *handle_mslp = NULL;
     codes_handle *handle_surface_p = NULL;
     codes_handle *handle_t2 = NULL;
     codes_handle *handle_tcdc = NULL;
     codes_handle *handle_rprate = NULL;
     codes_handle *handle_sprate = NULL;
+    codes_handle *handle_wind_10m_gusts = NULL;
     for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
     {
         for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
@@ -608,107 +609,209 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
         if ((retval = codes_write_message(handle_wind_v_h, OUTPUT_FILE, "a")))
             ECCERR(retval);
 		codes_handle_delete(handle_wind_v_h);
-        if (i == NUMBER_OF_LAYERS - 1)
-        {
-            for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
-            {
-                wind_u_10m[j] = 0.667*wind_u_h[j];
-                wind_v_10m[j] = 0.667*wind_v_h[j];
-            }
-			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
-			handle_wind_u_10m = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
-			if (err != 0)
-				ECCERR(err);
-			fclose(SAMPLE_FILE);
-            if ((retval = codes_set_long(handle_wind_u_10m, "discipline", 0)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_u_10m, "centre", 255)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_u_10m, "significanceOfReferenceTime", 1)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_u_10m, "productionStatusOfProcessedData", 1)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_u_10m, "typeOfProcessedData", 1)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_u_10m, "indicatorOfUnitOfTimeRange", 13)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_u_10m, "stepUnits", 13)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_u_10m, "dataDate", data_date)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_u_10m, "dataTime", data_time)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_u_10m, "forecastTime", t_write - t_init)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_u_10m, "stepRange", t_write - t_init)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_u_10m, "typeOfGeneratingProcess", 1)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_u_10m, "parameterCategory", 2)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_u_10m, "parameterNumber", 2)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_u_10m, "typeOfFirstFixedSurface", 103)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_u_10m, "scaledValueOfFirstFixedSurface", 10)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_u_10m, "scaleFactorOfFirstFixedSurface", 1)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_u_10m, "level", 10)))
-                ECCERR(retval);
-            if ((retval = codes_set_double_array(handle_wind_u_10m, "values", wind_u_10m, NUMBER_OF_VECTORS_H)))
-                ECCERR(retval);
-            if ((retval = codes_write_message(handle_wind_u_10m, OUTPUT_FILE, "a")))
-                ECCERR(retval);
-			codes_handle_delete(handle_wind_u_10m);
-			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
-			handle_wind_v_10m = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
-			if (err != 0)
-				ECCERR(err);
-			fclose(SAMPLE_FILE);
-            if ((retval = codes_set_long(handle_wind_v_10m, "discipline", 0)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_v_10m, "centre", 255)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_v_10m, "significanceOfReferenceTime", 1)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_v_10m, "productionStatusOfProcessedData", 1)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_v_10m, "typeOfProcessedData", 1)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_v_10m, "indicatorOfUnitOfTimeRange", 13)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_v_10m, "stepUnits", 13)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_v_10m, "dataDate", data_date)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_v_10m, "dataTime", data_time)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_v_10m, "forecastTime", t_write - t_init)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_v_10m, "stepRange", t_write - t_init)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_v_10m, "typeOfGeneratingProcess", 1)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_v_10m, "parameterCategory", 2)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_v_10m, "parameterNumber", 3)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_v_10m, "typeOfFirstFixedSurface", 103)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_v_10m, "scaledValueOfFirstFixedSurface", 10)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_v_10m, "scaleFactorOfFirstFixedSurface", 1)))
-                ECCERR(retval);
-            if ((retval = codes_set_long(handle_wind_v_10m, "level", 10)))
-                ECCERR(retval);
-            if ((retval = codes_set_double_array(handle_wind_v_10m, "values", wind_v_10m, NUMBER_OF_VECTORS_H)))
-                ECCERR(retval);
-            if ((retval = codes_write_message(handle_wind_v_10m, OUTPUT_FILE, "a")))
-                ECCERR(retval);
-			codes_handle_delete(handle_wind_v_10m);
-        }
     }
+	double *wind_10_m_both_dir_array = malloc(2*min_no_of_output_steps*NUMBER_OF_VECTORS_H*sizeof(double));
+	double wind_10_m_downscale_factor = 0.667;
+	double wind_tangential;
+	int time_step_10_m_wind, h_index;
+	double *wind_10_m_speed = malloc(min_no_of_output_steps*NUMBER_OF_VECTORS_H*sizeof(double));
+	double *wind_10_m_mean_u = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
+	double *wind_10_m_mean_v = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
+	for (int j = 0; j < min_no_of_output_steps*NUMBER_OF_VECTORS_H; ++j)
+	{
+		time_step_10_m_wind = j/NUMBER_OF_VECTORS_H;
+		h_index = j - time_step_10_m_wind*NUMBER_OF_VECTORS_H;
+	    wind_10_m_both_dir_array[2*j + 0] = wind_10_m_downscale_factor*wind_h_lowest_layer_array[j];
+	    wind_tangential = 0;
+		for (int i = 0; i < 10; ++i)
+			wind_tangential += grid -> trsk_modified_weights[10*h_index + i]*wind_h_lowest_layer_array[time_step_10_m_wind*NUMBER_OF_VECTORS_H + grid -> trsk_modified_velocity_indices[10*h_index + i]];
+	    wind_10_m_both_dir_array[2*j + 1] = wind_10_m_downscale_factor*wind_tangential;
+	    wind_10_m_speed[j] = sqrt(pow(wind_10_m_both_dir_array[2*j + 0], 2) + pow(wind_10_m_both_dir_array[2*j + 1], 2));
+	    if (time_step_10_m_wind == 0)
+	    {
+	    	wind_10_m_mean_u[h_index] = 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 0];
+	    	wind_10_m_mean_v[h_index] = 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 1];
+	    }
+	    else
+	    {
+	    	wind_10_m_mean_u[h_index] += 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 0];
+	    	wind_10_m_mean_v[h_index] += 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 1];
+	    }
+	}
+	for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+	{
+        retval = passive_turn(wind_10_m_mean_u[i], wind_10_m_mean_v[i], -grid -> direction[i], &wind_u, &wind_v);
+        if (retval != 0)
+        {
+        	printf("Error in passive_turn called at position 0 from write_out.\n");
+        	exit(1);
+        }
+        wind_10_m_mean_u[i] = wind_u;
+        wind_10_m_mean_v[i] = wind_v;
+	}
+	double standard_deviation;
+	double gusts_parameter = 3;
+	double *wind_10_m_gusts_speed = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
+	double *vector_for_std_deviation = malloc(min_no_of_output_steps*sizeof(double));
+	double wind_speed_10_m_mean;
+	for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+	{
+		wind_speed_10_m_mean = 0;
+		for (int j = 0; j < min_no_of_output_steps; ++j)
+		{
+			vector_for_std_deviation[j] = wind_10_m_speed[j*NUMBER_OF_VECTORS_H + i];
+			wind_speed_10_m_mean += 1.0/min_no_of_output_steps*wind_10_m_speed[j*NUMBER_OF_VECTORS_H + i];
+		}
+		standard_deviation = calc_std_dev(vector_for_std_deviation, min_no_of_output_steps);
+		if (t_write != t_init)
+			wind_10_m_gusts_speed[i] = wind_speed_10_m_mean + gusts_parameter*standard_deviation;
+		else
+			wind_10_m_gusts_speed[i] = (1 + 0.2)*wind_speed_10_m_mean;
+	}
+	free(vector_for_std_deviation);
+	SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
+	handle_wind_u_10m_mean = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
+	if (err != 0)
+		ECCERR(err);
+	fclose(SAMPLE_FILE);
+	if ((retval = codes_set_long(handle_wind_u_10m_mean, "discipline", 0)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_u_10m_mean, "centre", 255)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_u_10m_mean, "significanceOfReferenceTime", 1)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_u_10m_mean, "productionStatusOfProcessedData", 1)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_u_10m_mean, "typeOfProcessedData", 1)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_u_10m_mean, "indicatorOfUnitOfTimeRange", 13)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_u_10m_mean, "stepUnits", 13)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_u_10m_mean, "dataDate", data_date)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_u_10m_mean, "dataTime", data_time)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_u_10m_mean, "forecastTime", t_write - t_init)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_u_10m_mean, "stepRange", t_write - t_init)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_u_10m_mean, "typeOfGeneratingProcess", 1)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_u_10m_mean, "parameterCategory", 2)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_u_10m_mean, "parameterNumber", 2)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_u_10m_mean, "typeOfFirstFixedSurface", 103)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_u_10m_mean, "scaledValueOfFirstFixedSurface", 10)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_u_10m_mean, "scaleFactorOfFirstFixedSurface", 1)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_u_10m_mean, "level", 10)))
+	    ECCERR(retval);
+	if ((retval = codes_set_double_array(handle_wind_u_10m_mean, "values", wind_10_m_mean_u, NUMBER_OF_VECTORS_H)))
+	    ECCERR(retval);
+	if ((retval = codes_write_message(handle_wind_u_10m_mean, OUTPUT_FILE, "a")))
+	    ECCERR(retval);
+	codes_handle_delete(handle_wind_u_10m_mean);
+	free(wind_10_m_mean_u);
+	SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
+	handle_wind_v_10m_mean = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
+	if (err != 0)
+		ECCERR(err);
+	fclose(SAMPLE_FILE);
+	if ((retval = codes_set_long(handle_wind_v_10m_mean, "discipline", 0)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_v_10m_mean, "centre", 255)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_v_10m_mean, "significanceOfReferenceTime", 1)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_v_10m_mean, "productionStatusOfProcessedData", 1)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_v_10m_mean, "typeOfProcessedData", 1)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_v_10m_mean, "indicatorOfUnitOfTimeRange", 13)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_v_10m_mean, "stepUnits", 13)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_v_10m_mean, "dataDate", data_date)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_v_10m_mean, "dataTime", data_time)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_v_10m_mean, "forecastTime", t_write - t_init)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_v_10m_mean, "stepRange", t_write - t_init)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_v_10m_mean, "typeOfGeneratingProcess", 1)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_v_10m_mean, "parameterCategory", 2)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_v_10m_mean, "parameterNumber", 3)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_v_10m_mean, "typeOfFirstFixedSurface", 103)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_v_10m_mean, "scaledValueOfFirstFixedSurface", 10)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_v_10m_mean, "scaleFactorOfFirstFixedSurface", 1)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_v_10m_mean, "level", 10)))
+	    ECCERR(retval);
+	if ((retval = codes_set_double_array(handle_wind_v_10m_mean, "values", wind_10_m_mean_v, NUMBER_OF_VECTORS_H)))
+	    ECCERR(retval);
+	if ((retval = codes_write_message(handle_wind_v_10m_mean, OUTPUT_FILE, "a")))
+	    ECCERR(retval);
+	free(wind_10_m_mean_v);
+	codes_handle_delete(handle_wind_v_10m_mean);
+	SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
+	handle_wind_10m_gusts = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
+	if (err != 0)
+		ECCERR(err);
+	fclose(SAMPLE_FILE);
+	if ((retval = codes_set_long(handle_wind_10m_gusts, "discipline", 0)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_10m_gusts, "centre", 255)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_10m_gusts, "significanceOfReferenceTime", 1)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_10m_gusts, "productionStatusOfProcessedData", 1)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_10m_gusts, "typeOfProcessedData", 1)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_10m_gusts, "indicatorOfUnitOfTimeRange", 13)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_10m_gusts, "stepUnits", 13)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_10m_gusts, "dataDate", data_date)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_10m_gusts, "dataTime", data_time)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_10m_gusts, "forecastTime", t_write - t_init)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_10m_gusts, "stepRange", t_write - t_init)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_10m_gusts, "typeOfGeneratingProcess", 1)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_10m_gusts, "parameterCategory", 2)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_10m_gusts, "parameterNumber", 22)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_10m_gusts, "typeOfFirstFixedSurface", 103)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_10m_gusts, "scaledValueOfFirstFixedSurface", 10)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_10m_gusts, "scaleFactorOfFirstFixedSurface", 1)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle_wind_10m_gusts, "level", 10)))
+	    ECCERR(retval);
+	if ((retval = codes_set_double_array(handle_wind_10m_gusts, "values", wind_10_m_gusts_speed, NUMBER_OF_VECTORS_H)))
+	    ECCERR(retval);
+	if ((retval = codes_write_message(handle_wind_10m_gusts, OUTPUT_FILE, "a")))
+	    ECCERR(retval);
+	codes_handle_delete(handle_wind_10m_gusts);
+	free(wind_10_m_speed);
+	free(wind_10_m_gusts_speed);
+	free(wind_10_m_both_dir_array);
     free(t2);
     free(mslp);
     free(surface_p);
@@ -719,8 +822,6 @@ int write_out(State *state_write_out, double t_init, double t_write, char output
     free(rho_h);
     free(wind_u_h);
     free(wind_v_h);
-    free(wind_u_10m);
-    free(wind_v_10m);
 	SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 	handle_wind_w_h = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 	if (err != 0)
@@ -842,6 +943,18 @@ int write_out_integral(State *state_write_out, double t_write, char output_folde
     }
     free(INTEGRAL_FILE);
 	return 0;
+}
+
+double calc_std_dev(double vector_for_std_deviation[], int no_of_values)
+{
+	double mean = 0;
+	for (int i = 0; i < no_of_values; ++i)
+		mean += 1.0/no_of_values*vector_for_std_deviation[i];
+	double result = 0;
+	for (int i = 0; i < no_of_values; ++i)
+		result += pow(vector_for_std_deviation[i] - mean, 2);
+	result = 1/sqrt(no_of_values)*sqrt(result);
+	return result;
 }
 
 int find_string_length_from_int(int input, int *answer)
