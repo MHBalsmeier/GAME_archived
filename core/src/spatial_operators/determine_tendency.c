@@ -1,8 +1,8 @@
 #include "../enum_and_typedefs.h"
 #include "spatial_operators.h"
 #include "../diagnostics/diagnostics.h"
-#include "atmosrad.h"
 #include "atmostracers.h"
+#include "rte-rrtmgp-c.h"
 #include "surface.h"
 #include <stdlib.h>
 #include <stdio.h>

@@ -29,8 +29,8 @@ diagnostics/diagnostics.h
 /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 time_stepping/time_stepping.h
 /home/max/my_code/game/core/src/time_stepping/time_stepping.h
-atmosrad.h
-/home/max/my_code/game/core/src/atmosrad.h
+rte-rrtmgp-c.h
+/home/max/my_code/game/core/src/rte-rrtmgp-c.h
 
 /home/max/my_code/game/core/src/diagnostics/calc_numerical_diffusion_coeffs.c
 ../enum_and_typedefs.h
@@ -217,10 +217,10 @@ spatial_operators.h
 /home/max/my_code/game/core/src/spatial_operators/spatial_operators.h
 ../diagnostics/diagnostics.h
 /home/max/my_code/game/core/src/diagnostics/diagnostics.h
-atmosrad.h
-/home/max/my_code/game/core/src/spatial_operators/atmosrad.h
 atmostracers.h
 /home/max/my_code/game/core/src/spatial_operators/atmostracers.h
+rte-rrtmgp-c.h
+/home/max/my_code/game/core/src/spatial_operators/rte-rrtmgp-c.h
 surface.h
 /home/max/my_code/game/core/src/spatial_operators/surface.h
 stdlib.h

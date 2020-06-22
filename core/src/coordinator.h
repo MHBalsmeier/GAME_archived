@@ -7,4 +7,4 @@
 #include "spatial_operators/spatial_operators.h"
 #include "diagnostics/diagnostics.h"
 #include "time_stepping/time_stepping.h"
-#include "atmosrad.h"
+#include "rte-rrtmgp-c.h"
