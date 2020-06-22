@@ -1,0 +1,139 @@
+\documentclass{article}
+\usepackage{graphicx, paralist, listings, fancybox, geometry, caption, floatrow, xcolor, color, colortbl, fancyhdr, amsmath, mathtools}
+\usepackage{fouriernc}
+\usepackage[T1]{fontenc}
+\geometry{a4paper, top = 15mm, left = 5mm, right = 5mm, bottom = 17mm}
+\fancypagestyle{plain}{
+\fancyhead[L]{GAME Documentation}
+\fancyhead[R]{\textsc{Balsmeier}}
+\fancyfoot[C]{\thepage}
+\addtolength\footskip{12pt}}
+\definecolor{table_green}{rgb}{0, 0.6, 0}
+\title{GAME Documentaion}
+\author{Max H. Balsmeier}
+\date{}
+\newcommand{\md}[1]{\frac{D#1}{Dt}}
+\newcommand{\omegabi}{\text{{\osgbi ω}}}
+\newcommand{\mubi}{\text{{\osgbi μ}}}
+\newcommand{\sigmabi}{\text{{\osgbi σ}}}
+\newcommand{\epsilonbi}{\text{{\osgbi ϵ}}}
+\newcommand{\etabi}{\text{{\osgbi η}}}
+\newcommand{\zetabi}{\text{{\osgbi ζ}}}
+
+\begin{document}
+
+\maketitle
+
+The \textit{speed} $s$ of a model is defined by
+%
+\begin{eqnarray}
+s \coloneqq \frac{\Delta t}{\Delta\tilde{t}},
+\end{eqnarray}
+%
+where $\Delta t$ is the time step of the model and $\Delta\tilde{t}$ is the duration it takes to integrate from one time step to the next.
+
+\section{NWP mode}
+\label{sec:nwp_mode}
+
+In NWP mode, one wants to be able to integrate one day within 8.5 minutes, which corresponds to $s = \frac{24\cdot 60}{8.5} = 169$. As a general rule, one can say that the computation time is in equal parts needed for data assimilation, the dynamical core and the processes involving moisture and radiation. Thus, the dynamical core has a mimimum speed of
+%
+\begin{eqnarray}
+s \geq 509.
+\end{eqnarray}
+
+\subsection{Parallelization}
+\label{sec:parallelization}
+
+\section{3D-var}
+\label{sec:3d-var}
+
+Let $\mathbf{X}$ be the state vector of the model atmosphere and $\mathbf{X}_B$ be the background state vector from a previous forecast. $\mathbf{Y}$ shall denounce the vector of observations valid at the analysis time. $\mathbf{Y}$ differs from $\mathbf{X}$ in size and the elements of $\mathbf{Y}$ are not observed at model grid points nor are they the prognostic model variables. Meta data must be available about the elements of $\mathbf{Y}$ containing information about the points of observation and what has actually been measured. The procedure \textit{3D-var} is based on the minimization of a cost function $J = J\left(\mathbf{X}\right) \geq 0$ containing three terms:
+%
+\begin{itemize}
+\item The distance between the analysis and the background state.
+\item The distance between the analysis and the observations.
+\item The distance between the analysis and the balance equation. This term vanishes at high resolutions.
+\end{itemize}
+
+Thus, one arrives at
+%
+\begin{center}
+\doublebox{\parbox{0.8\textwidth}{
+\begin{center}
+\begin{eqnarray}
+J\left(\mathbf{X}\right) = \left(\mathbf{X} - \mathbf{X}_B\right)^T\overleftrightarrow{A}_B\left(\mathbf{X} - \mathbf{X}_B\right)^T + \left(\mathbf{Y} - \overleftrightarrow{H}\mathbf{X}\right)^T\overleftrightarrow{A}_O\left(\mathbf{Y} - \overleftrightarrow{H}\mathbf{X}\right)^T\label{eq:3d-var_cost_function}
+\end{eqnarray}
+\end{center}
+}}
+\end{center}
+%
+Becasue of Eq. it is indeed
+%
+\begin{eqnarray}
+J \geq 0.
+\end{eqnarray}
+%
+At the minimum of $J$,
+%
+\begin{eqnarray}
+\nabla J = 0
+\end{eqnarray}
+%
+holds. From Eq. one obtains
+%
+\begin{eqnarray}
+\nabla J = 2\overleftrightarrow{A}_B\left(\mathbf{X} - \mathbf{X}_B\right) + 2\overleftrightarrow{A}_O\left(\mathbf{Y} - \overleftrightarrow{H}\mathbf{X}\right).
+\end{eqnarray}
+
+The observations used come from a time window $\left[-\frac{T}{2}, \frac{T}{2}\right]$ around the analysis time and are all taken to be valid at the analysis time. $T = 3$ h is a typical value..
+
+\section{4D-var}
+\label{sec:4d-var}
+
+\textit{4D-Var} is based on 3D-var but also takes the time dimension into account. The cost function $J$ is generalized as
+%
+\begin{eqnarray}
+J = J_{\text{3D-Var}} + \sum_{n = 1}^NJ_n,
+\end{eqnarray}
+%
+where $N$ is the number of time steps involved (excluding the analysis time itself) and $J_n$ is the cost function at the time step $n$. $J_{\text{3D-Var}}$ is defined as in Eq. \eqref{eq:3d-var_cost_function}. Let $\mathbf{Y}_n$ be the vector of observations valid at the time step $n$. At every time step this vector might be of different size and of different meaning. $\mathbf{X}_n$ shall be the state vector valid at the time step $n$, which is deduced by the initial state vector $\mathbf{X}$ via
+%
+\begin{eqnarray}
+\mathbf{X}_n = M_n\left(\mathbf{X}\right),
+\end{eqnarray}
+%
+where $M_n$ is the model integration to step $n$. From $M_n$ one deduces the so-called \textit{tangent linear model operator} $\overleftrightarrow{M}_n$, which is a matrix. Thus, one obtains
+%
+\begin{center}
+\doublebox{\parbox{0.8\textwidth}{
+\begin{center}
+\begin{eqnarray}
+J_n = \left(\mathbf{Y}_n - \overleftrightarrow{H}_n\overleftrightarrow{M}_n\mathbf{X}\right)^T\overleftrightarrow{A}_{O, n}\left(\mathbf{Y}_n - \overleftrightarrow{H}_n\overleftrightarrow{M}_n\mathbf{X}\right).
+\end{eqnarray}
+\end{center}
+}}
+\end{center}
+%
+The observations used come from a time window $\left[-\frac{T}{2}, \frac{T}{2}\right]$ around the analysis time and are taken to be valid at individual time steps $n\Delta t$. $T = 6$ h and $\Delta t = 15$ min are typical values.
+
+\section{MOS}
+\label{sec:mos}
+
+By saving all forrecasts for 0, 6, 12, 18 Z and the GDAS analyses, MOS-relevant data can be collected.
+
+\appendix
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
