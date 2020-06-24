@@ -1,0 +1,107 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.1 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nty/global//global/global}
+    \entry{doi:10.1029/2019MS001621}{article}{}
+      \name{author}{3}{}{%
+        {{hash=a41c4b00f179546302c87c54e4a54a1e}{%
+           family={Pincus},
+           familyi={P\bibinitperiod},
+           given={Robert},
+           giveni={R\bibinitperiod}}}%
+        {{hash=93c56bea992f8d51ebb451a3c3336336}{%
+           family={Mlawer},
+           familyi={M\bibinitperiod},
+           given={Eli\bibnamedelima J.},
+           giveni={E\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+        {{hash=c8f901ee2198de6dcbb4c65258248ef9}{%
+           family={Delamere},
+           familyi={D\bibinitperiod},
+           given={Jennifer\bibnamedelima S.},
+           giveni={J\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+      }
+      \strng{namehash}{1c52340b33c4bdf954613c896f4b0d2a}
+      \strng{fullhash}{1c52340b33c4bdf954613c896f4b0d2a}
+      \strng{bibnamehash}{1c52340b33c4bdf954613c896f4b0d2a}
+      \strng{authorbibnamehash}{1c52340b33c4bdf954613c896f4b0d2a}
+      \strng{authornamehash}{1c52340b33c4bdf954613c896f4b0d2a}
+      \strng{authorfullhash}{1c52340b33c4bdf954613c896f4b0d2a}
+      \field{sortinit}{P}
+      \field{sortinithash}{bb5b15f2db90f7aef79bb9e83defefcb}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Abstract This paper describes the initial implementation of a new toolbox that seeks to balance accuracy, efficiency, and flexibility in radiation calculations for dynamical models. The toolbox consists of two related code bases: Radiative Transfer for Energetics (RTE), which computes fluxes given a radiative transfer problem defined in terms of optical properties, boundary conditions, and source functions; and RRTM for General circulation model applications—Parallel (RRTMGP), which combines data and algorithms to map a physical description of the gaseous atmosphere into such a radiative transfer problem. The toolbox is an implementation of well-established ideas, including the use of a k-distribution to represent the spectral variation of absorption by gases and the use of two-stream, plane-parallel methods for solving the radiative transfer equation. The focus is instead on accuracy, by basing the k-distribution on state-of-the-art spectroscopy and on the sometimes-conflicting goals of flexibility and efficiency. Flexibility is facilitated by making extensive use of computational objects encompassing code and data, the latter provisioned at runtime and potentially tailored to specific problems. The computational objects provide robust access to a set of high-efficiency computational kernels that can be adapted to new computational environments. Accuracy is obtained by careful choice of algorithms and through tuning and validation of the k-distribution against benchmark calculations. Flexibility with respect to the host model implies user responsibility for maps between clouds and aerosols and the radiative transfer problem, although comprehensive examples are provided for clouds.}
+      \field{journaltitle}{Journal of Advances in Modeling Earth Systems}
+      \field{number}{10}
+      \field{title}{Balancing Accuracy, Efficiency, and Flexibility in Radiation Calculations for Dynamical Models}
+      \field{volume}{11}
+      \field{year}{2019}
+      \field{pages}{3074\bibrangedash 3089}
+      \range{pages}{16}
+      \verb{doi}
+      \verb 10.1029/2019MS001621
+      \endverb
+      \verb{eprint}
+      \verb https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2019MS001621
+      \endverb
+      \verb{urlraw}
+      \verb https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2019MS001621
+      \endverb
+      \verb{url}
+      \verb https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2019MS001621
+      \endverb
+      \keyw{radiation,atmospheric model,parameterization}
+    \endentry
+    \entry{rte-rrtmgp-github}{online}{}
+      \field{sortinit}{R}
+      \field{sortinithash}{b9c68a358aea118dfa887b6e902414a7}
+      \field{labeltitlesource}{title}
+      \field{day}{22}
+      \field{month}{6}
+      \field{title}{RTE-RRTMGP github repository}
+      \field{year}{2020}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://github.com/earth-system-radiation/rte-rrtmgp
+      \endverb
+      \verb{url}
+      \verb https://github.com/earth-system-radiation/rte-rrtmgp
+      \endverb
+    \endentry
+    \entry{rte-rrtmgp-c-github}{online}{}
+      \field{sortinit}{R}
+      \field{sortinithash}{b9c68a358aea118dfa887b6e902414a7}
+      \field{labeltitlesource}{title}
+      \field{day}{22}
+      \field{month}{6}
+      \field{title}{RTE-RRTMGP-C github repository}
+      \field{year}{2020}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://github.com/MHBalsmeier/rte-rrtmgp-c
+      \endverb
+      \verb{url}
+      \verb https://github.com/MHBalsmeier/rte-rrtmgp-c
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

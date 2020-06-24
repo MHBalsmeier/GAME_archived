@@ -1,12 +1,12 @@
 import numpy as np;
 import sys;
-import help_scripts_game_derived.read_model_output as rmo;
+import help_scripts_game_plotting.read_model_output as rmo;
 from matplotlib.colors import BoundaryNorm;
 import cartopy.feature as cfeature;
 import iris;
-import help_scripts_game_derived.game_grid_generator as ggg;
-import help_scripts_game_derived.dist_stuff as ds;
-import help_scripts_game_derived.conversions as conv;
+import help_scripts_game_plotting.game_grid_generator as ggg;
+import help_scripts_game_plotting.dist_stuff as ds;
+import help_scripts_game_plotting.conversions as conv;
 import matplotlib.pyplot as plt;
 import matplotlib as mpl;
 import cartopy.crs as ccrs;

@@ -3,7 +3,6 @@
 #include "../diagnostics/diagnostics.h"
 #include "atmostracers.h"
 #include "rte-rrtmgp-c.h"
-#include "surface.h"
 #include <stdlib.h>
 #include <stdio.h>
 
