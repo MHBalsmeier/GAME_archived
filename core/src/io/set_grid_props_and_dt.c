@@ -220,17 +220,17 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
        if (grid -> gravity_potential[i] <= 0)
        		grid_check_failed();
        e_kin_weight_sum = 0;
-       for (int j = 0; j < 14; ++j)
+       for (int j = 0; j < 12; ++j)
        {
-           grid -> e_kin_weights[14*i + j] = e_kin_weights[14*i + j];
-           if (grid -> e_kin_weights[14*i + j] > 0.3 || grid -> e_kin_weights[14*i + j] < 0)
+           grid -> e_kin_weights[12*i + j] = e_kin_weights[14*i + j];
+           if (grid -> e_kin_weights[12*i + j] > 0.3 || grid -> e_kin_weights[12*i + j] < 0)
            	   grid_check_failed();
-           e_kin_weight_sum += grid -> e_kin_weights[14*i + j];
-           grid -> e_kin_indices[14*i + j] = e_kin_indices[14*i + j];
-           if (grid -> e_kin_indices[14*i + j] < 0 || grid -> e_kin_indices[14*i + j] >= NUMBER_OF_VECTORS)
+           e_kin_weight_sum += grid -> e_kin_weights[12*i + j];
+           grid -> e_kin_indices[12*i + j] = e_kin_indices[14*i + j];
+           if (grid -> e_kin_indices[12*i + j] < 0 || grid -> e_kin_indices[12*i + j] >= NUMBER_OF_VECTORS)
            	   grid_check_failed();
        }
-       if (fabs(e_kin_weight_sum - 1.5) > 0.01)
+       if (fabs(e_kin_weight_sum - 1.0) > 0.01)
        	   grid_check_failed();
     }
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)

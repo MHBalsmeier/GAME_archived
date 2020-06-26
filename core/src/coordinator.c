@@ -3,6 +3,10 @@ This source file is part of the Global Geophysical Modeling Frame (GAME), which 
 Github repository: https://github.com/MHBalsmeier/game
 */
 
+/*
+The main organizes the model, manages the time stepping, calls model output, collects the lowest model layer wind for 10 m wind mean and so on. All the memory needed for integration is allocated and freed here for efficiency (I wonder if this is really relevant).
+*/
+
 #include "coordinator.h"
 
 int main(int argc, char *argv[])
@@ -72,7 +76,7 @@ int main(int argc, char *argv[])
     printf("*\t\t\tGlobal Atmospheric Modeling Framework\t\t\t*\n");
     printf("*\t\t\t\t\t\t\t\t\t\t*\n");
     printf("%s", stars);
-    printf("Use only legal if authorized by Max H. Balsmeier.\n");
+    printf("Released under the MIT license, visit https://github.com/MHBalsmeier/game for more information.\n");
     printf("What you want to do:\n");
     printf("operator:\t\t\t%s\n", OPERATOR);
     free(OPERATOR);

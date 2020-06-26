@@ -93,11 +93,6 @@ CMakeFiles/game.dir/src/spatial_operators/curl.c.o: /home/max/my_code/game/core/
 CMakeFiles/game.dir/src/spatial_operators/curl.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/spatial_operators/curl.c.o: /home/max/my_code/game/core/src/spatial_operators/curl.c
 
-CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
-CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
-CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.o: /home/max/my_code/game/core/src/spatial_operators/determine_tendency.c
-CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.o: /home/max/my_code/game/core/src/spatial_operators/spatial_operators.h
-
 CMakeFiles/game.dir/src/spatial_operators/dissipation.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/spatial_operators/dissipation.c.o: /home/max/my_code/game/core/src/spatial_operators/dissipation.c
 
@@ -108,6 +103,11 @@ CMakeFiles/game.dir/src/spatial_operators/div.c.o: /home/max/my_code/game/core/s
 CMakeFiles/game.dir/src/spatial_operators/grad.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 CMakeFiles/game.dir/src/spatial_operators/grad.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/spatial_operators/grad.c.o: /home/max/my_code/game/core/src/spatial_operators/grad.c
+
+CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
+CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
+CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.o: /home/max/my_code/game/core/src/spatial_operators/horizontal_tendencies.c
+CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.o: /home/max/my_code/game/core/src/spatial_operators/spatial_operators.h
 
 CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.o: /home/max/my_code/game/core/src/spatial_operators/kinetic_energy.c
@@ -125,6 +125,8 @@ CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.o: /home/max/my_
 CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.o: /home/max/my_code/game/core/src/spatial_operators/scalar_times_vector_h_v.c
 
+CMakeFiles/game.dir/src/time_stepping/lower_boundary_solver.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
+CMakeFiles/game.dir/src/time_stepping/lower_boundary_solver.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/time_stepping/lower_boundary_solver.c.o: /home/max/my_code/game/core/src/time_stepping/lower_boundary_solver.c
 
 CMakeFiles/game.dir/src/time_stepping/manage_time_stepping.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h

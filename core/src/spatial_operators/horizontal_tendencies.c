@@ -11,7 +11,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdlib.h>
 #include <stdio.h>
 
-int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int dissipation_on, int rad_update, int tracers_on, double delta_t, int diffusion_on, Scalar_field radiation_tendency, int tracers_update, int tracers_dynamics_delta_t_ratio, double tracer_mass_source_rates[], double tracer_heat_source_rates[], Vector_field mass_dry_flux_density, Scalar_field mass_dry_flux_density_divergence, Scalar_field temperature, Vector_field entropy_gas_flux_density, Scalar_field entropy_gas_flux_density_divergence, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Vector_field friction_acc, Scalar_field heating_diss, Scalar_field specific_entropy, Curl_field rel_curl, Curl_field abs_curl, Vector_field downgradient_macroscopic_energy, Vector_field pressure_gradient_acc, Vector_field abs_curl_tend, Vector_field specific_entropy_gradient, Scalar_field c_h_p_field, Scalar_field macroscopic_energy, Scalar_field pressure_gradient_decel_factor, Vector_field pressure_gradient_acc_1, Scalar_field diffusion_coeff_numerical_h, Scalar_field diffusion_coeff_numerical_v, Vector_field mass_dry_diffusion_flux_density, Scalar_field mass_dry_diffusion_source_rate, Vector_field temperature_flux_density, Scalar_field tracer_density, Vector_field tracer_velocity, Vector_field tracer_flux_density, Scalar_field tracer_flux_density_divergence, Scalar_field tracer_density_temperature, Vector_field tracer_temperature_flux_density, Scalar_field tracer_temperature_flux_density_divergence)
+int horizontal_tendencies(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int dissipation_on, int rad_update, int tracers_on, double delta_t, int diffusion_on, Scalar_field radiation_tendency, int tracers_update, int tracers_dynamics_delta_t_ratio, double tracer_mass_source_rates[], double tracer_heat_source_rates[], Vector_field mass_dry_flux_density, Scalar_field mass_dry_flux_density_divergence, Scalar_field temperature, Vector_field entropy_gas_flux_density, Scalar_field entropy_gas_flux_density_divergence, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Vector_field friction_acc, Scalar_field heating_diss, Scalar_field specific_entropy, Curl_field rel_curl, Curl_field abs_curl, Vector_field downgradient_macroscopic_energy, Vector_field pressure_gradient_acc, Vector_field abs_curl_tend, Vector_field specific_entropy_gradient, Scalar_field c_h_p_field, Scalar_field macroscopic_energy, Scalar_field pressure_gradient_decel_factor, Vector_field pressure_gradient_acc_1, Scalar_field diffusion_coeff_numerical_h, Scalar_field diffusion_coeff_numerical_v, Vector_field mass_dry_diffusion_flux_density, Scalar_field mass_dry_diffusion_source_rate, Vector_field temperature_flux_density, Scalar_field tracer_density, Vector_field tracer_velocity, Vector_field tracer_flux_density, Scalar_field tracer_flux_density_divergence, Scalar_field tracer_density_temperature, Vector_field tracer_temperature_flux_density, Scalar_field tracer_temperature_flux_density_divergence)
 {
     scalar_times_vector(current_state -> density_dry, current_state -> velocity_gas, mass_dry_flux_density, grid);
     divergence(mass_dry_flux_density, mass_dry_flux_density_divergence, grid, 0);
@@ -234,8 +234,8 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
     	printf("grad called at position 4 from tendency errored out, exit code %d.\n", retval);
     	exit(1);
 	}
-    int layer_index_oro;
-    double u_lowest_tendency, v_lowest_tendency, n_x, n_y, n_z;
+    int layer_index_oro, hor_non_trad_cori_sign;
+    double u_lowest_tendency, v_lowest_tendency, n_x, n_y, n_z, metric_term, vertical_velocity, hor_non_trad_cori_term;
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
     	layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
@@ -265,9 +265,31 @@ int tendency(State *current_state, State *state_tendency, Grid *grid, Dualgrid *
         else
         {
         	if (dissipation_on == 1)
-            	state_tendency -> velocity_gas[i] = pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i] + friction_acc[i];
+        	{
+        		if (h_index >= NUMBER_OF_VECTORS_V)
+        		{
+        			recov_hor_ver_pri(current_state -> velocity_gas, layer_index, h_index - NUMBER_OF_VECTORS_V, &vertical_velocity, grid);
+        			metric_term = -vertical_velocity*current_state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
+        			hor_non_trad_cori_sign = -dualgrid -> h_curl_signs[4*(h_index - NUMBER_OF_VECTORS_V) + 0];
+        			hor_non_trad_cori_term = hor_non_trad_cori_sign*vertical_velocity*dualgrid -> f_vec[h_index - NUMBER_OF_VECTORS_V];
+            		state_tendency -> velocity_gas[i] = pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i] + hor_non_trad_cori_term + metric_term + friction_acc[i];
+        		}
+            	else
+            		state_tendency -> velocity_gas[i] = pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i] + friction_acc[i];
+        	}
             else
-            	state_tendency -> velocity_gas[i] = pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i];
+            {
+        		if (h_index >= NUMBER_OF_VECTORS_V)
+        		{
+        			recov_hor_ver_pri(current_state -> velocity_gas, layer_index, h_index - NUMBER_OF_VECTORS_V, &vertical_velocity, grid);
+        			metric_term = -vertical_velocity*current_state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
+        			hor_non_trad_cori_sign = -dualgrid -> h_curl_signs[4*(h_index - NUMBER_OF_VECTORS_V) + 0];
+        			hor_non_trad_cori_term = hor_non_trad_cori_sign*vertical_velocity*dualgrid -> f_vec[h_index - NUMBER_OF_VECTORS_V];
+            		state_tendency -> velocity_gas[i] = pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i] + hor_non_trad_cori_term + metric_term;
+        		}
+            	else
+            		state_tendency -> velocity_gas[i] = pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i];
+        	}
         }
     }
     return retval;

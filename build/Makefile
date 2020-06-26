@@ -828,33 +828,6 @@ src/spatial_operators/curl.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/curl.c.s
 .PHONY : src/spatial_operators/curl.c.s
 
-src/spatial_operators/determine_tendency.o: src/spatial_operators/determine_tendency.c.o
-
-.PHONY : src/spatial_operators/determine_tendency.o
-
-# target to build an object file
-src/spatial_operators/determine_tendency.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.o
-.PHONY : src/spatial_operators/determine_tendency.c.o
-
-src/spatial_operators/determine_tendency.i: src/spatial_operators/determine_tendency.c.i
-
-.PHONY : src/spatial_operators/determine_tendency.i
-
-# target to preprocess a source file
-src/spatial_operators/determine_tendency.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.i
-.PHONY : src/spatial_operators/determine_tendency.c.i
-
-src/spatial_operators/determine_tendency.s: src/spatial_operators/determine_tendency.c.s
-
-.PHONY : src/spatial_operators/determine_tendency.s
-
-# target to generate assembly for a file
-src/spatial_operators/determine_tendency.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.s
-.PHONY : src/spatial_operators/determine_tendency.c.s
-
 src/spatial_operators/dissipation.o: src/spatial_operators/dissipation.c.o
 
 .PHONY : src/spatial_operators/dissipation.o
@@ -935,6 +908,33 @@ src/spatial_operators/grad.s: src/spatial_operators/grad.c.s
 src/spatial_operators/grad.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/grad.c.s
 .PHONY : src/spatial_operators/grad.c.s
+
+src/spatial_operators/horizontal_tendencies.o: src/spatial_operators/horizontal_tendencies.c.o
+
+.PHONY : src/spatial_operators/horizontal_tendencies.o
+
+# target to build an object file
+src/spatial_operators/horizontal_tendencies.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.o
+.PHONY : src/spatial_operators/horizontal_tendencies.c.o
+
+src/spatial_operators/horizontal_tendencies.i: src/spatial_operators/horizontal_tendencies.c.i
+
+.PHONY : src/spatial_operators/horizontal_tendencies.i
+
+# target to preprocess a source file
+src/spatial_operators/horizontal_tendencies.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.i
+.PHONY : src/spatial_operators/horizontal_tendencies.c.i
+
+src/spatial_operators/horizontal_tendencies.s: src/spatial_operators/horizontal_tendencies.c.s
+
+.PHONY : src/spatial_operators/horizontal_tendencies.s
+
+# target to generate assembly for a file
+src/spatial_operators/horizontal_tendencies.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.s
+.PHONY : src/spatial_operators/horizontal_tendencies.c.s
 
 src/spatial_operators/kinetic_energy.o: src/spatial_operators/kinetic_energy.c.o
 
@@ -1238,9 +1238,6 @@ help:
 	@echo "... src/spatial_operators/curl.o"
 	@echo "... src/spatial_operators/curl.i"
 	@echo "... src/spatial_operators/curl.s"
-	@echo "... src/spatial_operators/determine_tendency.o"
-	@echo "... src/spatial_operators/determine_tendency.i"
-	@echo "... src/spatial_operators/determine_tendency.s"
 	@echo "... src/spatial_operators/dissipation.o"
 	@echo "... src/spatial_operators/dissipation.i"
 	@echo "... src/spatial_operators/dissipation.s"
@@ -1250,6 +1247,9 @@ help:
 	@echo "... src/spatial_operators/grad.o"
 	@echo "... src/spatial_operators/grad.i"
 	@echo "... src/spatial_operators/grad.s"
+	@echo "... src/spatial_operators/horizontal_tendencies.o"
+	@echo "... src/spatial_operators/horizontal_tendencies.i"
+	@echo "... src/spatial_operators/horizontal_tendencies.s"
 	@echo "... src/spatial_operators/kinetic_energy.o"
 	@echo "... src/spatial_operators/kinetic_energy.i"
 	@echo "... src/spatial_operators/kinetic_energy.s"

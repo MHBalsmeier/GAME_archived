@@ -1,5 +1,5 @@
 #!/bin/bash
-operator=Boss
+operator=MHB
 overwrite_run_id=1
 run_id=standard_0_oro
 run_span=3600

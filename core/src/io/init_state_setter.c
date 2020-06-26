@@ -8,7 +8,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include "io.h"
 #include "../diagnostics/diagnostics.h"
 #include "eccodes.h"
-#include "time00.h"
+#include "geos95.h"
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 

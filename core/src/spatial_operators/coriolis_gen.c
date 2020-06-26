@@ -19,8 +19,7 @@ int coriolis_gen(Vector_field a_field, Curl_field b_field, Vector_field out_fiel
         if (h_index >= NUMBER_OF_VECTORS_V)
         {
             retval = trsk_modified(a_field, b_field, layer_index, h_index - NUMBER_OF_VECTORS_V, &term_0, grid);
-            retval = recov_hor_par_curl(b_field, layer_index, h_index - NUMBER_OF_VECTORS_V, &component_1, grid);
-            retval = recov_hor_ver_pri(a_field, layer_index, h_index - NUMBER_OF_VECTORS_V, &component_2, grid);
+		    out_field[i] = term_0;
         }
         else
         {
@@ -29,9 +28,9 @@ int coriolis_gen(Vector_field a_field, Curl_field b_field, Vector_field out_fiel
             retval = recov_ver_1_pri(a_field, layer_index, h_index, &component_2, grid);
             retval = recov_ver_1_curl(b_field, layer_index, h_index, &component_3, grid);
         	term_0 = component_0*component_3;
+		    term_1 = component_1*component_2;
+		    out_field[i] = term_0 - term_1;
         }
-        term_1 = component_1*component_2;
-        out_field[i] = term_0 - term_1;
     }
     return retval;
 }

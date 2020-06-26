@@ -1,5 +1,5 @@
 #!/bin/bash
-operator=Boss
+operator=MHB
 overwrite_run_id=1
 run_id=jw_perturbed_dry_irreversible
 run_span=3600

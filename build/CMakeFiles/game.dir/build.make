@@ -174,18 +174,18 @@ CMakeFiles/game.dir/src/spatial_operators/curl.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/spatial_operators/curl.c.s"
 	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/curl.c -o CMakeFiles/game.dir/src/spatial_operators/curl.c.s
 
-CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.o: CMakeFiles/game.dir/flags.make
-CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.o: /home/max/my_code/game/core/src/spatial_operators/determine_tendency.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building C object CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.o   -c /home/max/my_code/game/core/src/spatial_operators/determine_tendency.c
+CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.o: CMakeFiles/game.dir/flags.make
+CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.o: /home/max/my_code/game/core/src/spatial_operators/horizontal_tendencies.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building C object CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.o   -c /home/max/my_code/game/core/src/spatial_operators/horizontal_tendencies.c
 
-CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/determine_tendency.c > CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.i
+CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.i"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/horizontal_tendencies.c > CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.i
 
-CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/determine_tendency.c -o CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.s
+CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.s"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/horizontal_tendencies.c -o CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.s
 
 CMakeFiles/game.dir/src/spatial_operators/grad.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/spatial_operators/grad.c.o: /home/max/my_code/game/core/src/spatial_operators/grad.c
@@ -536,7 +536,7 @@ game_OBJECTS = \
 "CMakeFiles/game.dir/src/spatial_operators/div.c.o" \
 "CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.o" \
 "CMakeFiles/game.dir/src/spatial_operators/curl.c.o" \
-"CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.o" \
+"CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.o" \
 "CMakeFiles/game.dir/src/spatial_operators/grad.c.o" \
 "CMakeFiles/game.dir/src/spatial_operators/linear_combine_two_states.c.o" \
 "CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.o" \
@@ -576,7 +576,7 @@ game: CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.o
 game: CMakeFiles/game.dir/src/spatial_operators/div.c.o
 game: CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.o
 game: CMakeFiles/game.dir/src/spatial_operators/curl.c.o
-game: CMakeFiles/game.dir/src/spatial_operators/determine_tendency.c.o
+game: CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.o
 game: CMakeFiles/game.dir/src/spatial_operators/grad.c.o
 game: CMakeFiles/game.dir/src/spatial_operators/linear_combine_two_states.c.o
 game: CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.o

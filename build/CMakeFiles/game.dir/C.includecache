@@ -151,8 +151,8 @@ io.h
 /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 eccodes.h
 /home/max/my_code/game/core/src/io/eccodes.h
-time00.h
-/home/max/my_code/game/core/src/io/time00.h
+geos95.h
+/home/max/my_code/game/core/src/io/geos95.h
 
 /home/max/my_code/game/core/src/io/interpolation_t.c
 ../enum_and_typedefs.h
@@ -210,22 +210,6 @@ stdio.h
 ../diagnostics/diagnostics.h
 /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 
-/home/max/my_code/game/core/src/spatial_operators/determine_tendency.c
-../enum_and_typedefs.h
-/home/max/my_code/game/core/src/enum_and_typedefs.h
-spatial_operators.h
-/home/max/my_code/game/core/src/spatial_operators/spatial_operators.h
-../diagnostics/diagnostics.h
-/home/max/my_code/game/core/src/diagnostics/diagnostics.h
-atmostracers.h
-/home/max/my_code/game/core/src/spatial_operators/atmostracers.h
-rte-rrtmgp-c.h
-/home/max/my_code/game/core/src/spatial_operators/rte-rrtmgp-c.h
-stdlib.h
--
-stdio.h
--
-
 /home/max/my_code/game/core/src/spatial_operators/dissipation.c
 ../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
@@ -243,6 +227,22 @@ stdio.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
 ../diagnostics/diagnostics.h
 /home/max/my_code/game/core/src/diagnostics/diagnostics.h
+stdio.h
+-
+
+/home/max/my_code/game/core/src/spatial_operators/horizontal_tendencies.c
+../enum_and_typedefs.h
+/home/max/my_code/game/core/src/enum_and_typedefs.h
+spatial_operators.h
+/home/max/my_code/game/core/src/spatial_operators/spatial_operators.h
+../diagnostics/diagnostics.h
+/home/max/my_code/game/core/src/diagnostics/diagnostics.h
+atmostracers.h
+/home/max/my_code/game/core/src/spatial_operators/atmostracers.h
+rte-rrtmgp-c.h
+/home/max/my_code/game/core/src/spatial_operators/rte-rrtmgp-c.h
+stdlib.h
+-
 stdio.h
 -
 
@@ -281,6 +281,14 @@ stdio.h
 /home/max/my_code/game/core/src/spatial_operators/spatial_operators.h
 
 /home/max/my_code/game/core/src/time_stepping/lower_boundary_solver.c
+../enum_and_typedefs.h
+/home/max/my_code/game/core/src/enum_and_typedefs.h
+../diagnostics/diagnostics.h
+/home/max/my_code/game/core/src/diagnostics/diagnostics.h
+stdio.h
+-
+stdlib.h
+-
 
 /home/max/my_code/game/core/src/time_stepping/manage_time_stepping.c
 ../enum_and_typedefs.h
