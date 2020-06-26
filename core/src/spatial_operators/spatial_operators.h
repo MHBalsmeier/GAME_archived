@@ -1,3 +1,8 @@
+/*
+This source file is part of the Global Geophysical Modeling Frame (GAME), which is released under the MIT license.
+Github repository: https://github.com/MHBalsmeier/game
+*/
+
 int grad(Scalar_field, Vector_field, Grid *);
 int curl(Vector_field, Curl_field, Grid *, Dualgrid *);
 int coriolis_gen(Vector_field, Dual_vector_field, Vector_field, Grid *);

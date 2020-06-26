@@ -1,3 +1,8 @@
+/*
+This source file is part of the Global Geophysical Modeling Frame (GAME), which is released under the MIT license.
+Github repository: https://github.com/MHBalsmeier/game
+*/
+
 int set_grid_properties(Grid *, Dualgrid *, char[]);
 int calc_delta_t(double, double *, Grid *);
 int interpolation_t(State *, State *, State *, double, double, double);

@@ -1,3 +1,8 @@
+/*
+This source file is part of the Global Geophysical Modeling Frame (GAME), which is released under the MIT license.
+Github repository: https://github.com/MHBalsmeier/game
+*/
+
 int calc_temp_diffusion_coeffs(Scalar_field, Scalar_field, Scalar_field, Scalar_field);
 int calc_mass_diffusion_coeffs(Scalar_field, Scalar_field, Scalar_field, Scalar_field);
 int global_scalar_integrator(Scalar_field, Grid *, double *);

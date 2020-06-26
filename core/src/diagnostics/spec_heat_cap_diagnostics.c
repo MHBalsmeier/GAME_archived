@@ -1,3 +1,8 @@
+/*
+This source file is part of the Global Geophysical Modeling Frame (GAME), which is released under the MIT license.
+Github repository: https://github.com/MHBalsmeier/game
+*/
+
 #include "../enum_and_typedefs.h"
 
 double spec_heat_cap_diagnostics_p(double density_d_micro_value, double density_v_micro_value)

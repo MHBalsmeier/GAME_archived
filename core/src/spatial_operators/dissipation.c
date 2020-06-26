@@ -1,3 +1,8 @@
+/*
+This source file is part of the Global Geophysical Modeling Frame (GAME), which is released under the MIT license.
+Github repository: https://github.com/MHBalsmeier/game
+*/
+
 #include "../enum_and_typedefs.h"
 
 int dissipation(Vector_field velocity, Scalar_field density, Vector_field friction_acc, Scalar_field heating, Grid *grid)

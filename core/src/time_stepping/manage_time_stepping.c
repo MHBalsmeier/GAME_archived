@@ -1,3 +1,8 @@
+/*
+This source file is part of the Global Geophysical Modeling Frame (GAME), which is released under the MIT license.
+Github repository: https://github.com/MHBalsmeier/game
+*/
+
 #include "../enum_and_typedefs.h"
 #include "../spatial_operators/spatial_operators.h"
 #include "time_stepping.h"
@@ -7,6 +12,7 @@
 
 int manage_time_stepping(State *state_0, State *state_p1, double delta_t, Grid *grid, Dualgrid *dualgrid, int dissipation_on, int rad_update, int tracers_on, int diffusion_on, Scalar_field radiation_tendency, int tracers_update, int tracers_dynamics_delta_t_ratio, double tracer_mass_source_rates[], double tracer_heat_source_rates[], State *state_tendency, Vector_field mass_dry_flux_density, Scalar_field mass_dry_flux_density_divergence, Scalar_field temperature, Vector_field entropy_gas_flux_density, Scalar_field entropy_gas_flux_density_divergence, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Vector_field friction_acc, Scalar_field heating_diss, Scalar_field specific_entropy, Curl_field rel_curl, Curl_field abs_curl, Vector_field downgradient_macroscopic_energy, Vector_field pressure_gradient_acc, Vector_field abs_curl_tend, Vector_field specific_entropy_gradient, Scalar_field c_h_p_field, Scalar_field macroscopic_energy, Scalar_field pressure_gradient_decel_factor, Vector_field pressure_gradient_acc_1, Scalar_field diffusion_coeff_numerical_h, Scalar_field diffusion_coeff_numerical_v, Vector_field mass_dry_diffusion_flux_density, Scalar_field mass_dry_diffusion_source_rate, Vector_field temperature_flux_density, Scalar_field tracer_density, Vector_field tracer_velocity, Vector_field tracer_flux_density, Scalar_field tracer_flux_density_divergence, Scalar_field tracer_density_temperature, Vector_field tracer_temperature_flux_density, Scalar_field tracer_temperature_flux_density_divergence)
 {
+
     tendency(state_0, state_tendency, grid, dualgrid, 0, 0, 0, delta_t, 0, radiation_tendency, 0, tracers_dynamics_delta_t_ratio, tracer_mass_source_rates, tracer_heat_source_rates, mass_dry_flux_density, mass_dry_flux_density_divergence, temperature, entropy_gas_flux_density, entropy_gas_flux_density_divergence, temp_diffusion_heating, temp_gradient, friction_acc, heating_diss, specific_entropy, rel_curl, abs_curl, downgradient_macroscopic_energy, pressure_gradient_acc, abs_curl_tend, specific_entropy_gradient, c_h_p_field, macroscopic_energy, pressure_gradient_decel_factor, pressure_gradient_acc_1, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, mass_dry_diffusion_flux_density, mass_dry_diffusion_source_rate, temperature_flux_density, tracer_density, tracer_velocity, tracer_flux_density, tracer_flux_density_divergence, tracer_density_temperature, tracer_temperature_flux_density, tracer_temperature_flux_density_divergence);
     State *state_mod_1 = malloc(sizeof(State));
     linear_combine_two_states(state_0, state_tendency, state_mod_1, 1, delta_t);

@@ -1,3 +1,8 @@
+/*
+This source file is part of the Global Geophysical Modeling Frame (GAME), which is released under the MIT license.
+Github repository: https://github.com/MHBalsmeier/game
+*/
+
 #include "../../enum_and_typedefs.h"
 
 int recov_ver_1_curl(Curl_field in_field, int layer_index, int h_index, double *component, Grid *grid)

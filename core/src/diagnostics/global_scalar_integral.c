@@ -1,3 +1,8 @@
+/*
+This source file is part of the Global Geophysical Modeling Frame (GAME), which is released under the MIT license.
+Github repository: https://github.com/MHBalsmeier/game
+*/
+
 #include "../enum_and_typedefs.h"
 
 int global_scalar_integrator(Scalar_field density_gen, Grid *grid, double *result)
