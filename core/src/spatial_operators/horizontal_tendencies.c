@@ -11,7 +11,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdlib.h>
 #include <stdio.h>
 
-int horizontal_tendencies(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int dissipation_on, int rad_update, int tracers_on, double delta_t, int diffusion_on, Scalar_field radiation_tendency, int tracers_update, int tracers_dynamics_delta_t_ratio, double tracer_mass_source_rates[], double tracer_heat_source_rates[], Vector_field mass_dry_flux_density, Scalar_field mass_dry_flux_density_divergence, Scalar_field temperature, Vector_field entropy_gas_flux_density, Scalar_field entropy_gas_flux_density_divergence, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Vector_field friction_acc, Scalar_field heating_diss, Scalar_field specific_entropy, Curl_field rel_curl, Curl_field abs_curl, Vector_field downgradient_macroscopic_energy, Vector_field pressure_gradient_acc, Vector_field abs_curl_tend, Vector_field specific_entropy_gradient, Scalar_field c_h_p_field, Scalar_field macroscopic_energy, Scalar_field pressure_gradient_decel_factor, Vector_field pressure_gradient_acc_1, Scalar_field diffusion_coeff_numerical_h, Scalar_field diffusion_coeff_numerical_v, Vector_field mass_dry_diffusion_flux_density, Scalar_field mass_dry_diffusion_source_rate, Vector_field temperature_flux_density, Scalar_field tracer_density, Vector_field tracer_velocity, Vector_field tracer_flux_density, Scalar_field tracer_flux_density_divergence, Scalar_field tracer_density_temperature, Vector_field tracer_temperature_flux_density, Scalar_field tracer_temperature_flux_density_divergence)
+int horizontal_tendencies(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int dissipation_on, int rad_update, int tracers_on, double delta_t, int diffusion_on, Scalar_field radiation_tendency, int tracers_phase_transitions_on, double tracer_mass_source_rates[], double tracer_heat_source_rates[], Vector_field mass_dry_flux_density, Scalar_field mass_dry_flux_density_divergence, Scalar_field temperature, Vector_field entropy_gas_flux_density, Scalar_field entropy_gas_flux_density_divergence, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Vector_field friction_acc, Scalar_field heating_diss, Scalar_field specific_entropy, Curl_field rel_curl, Curl_field abs_curl, Vector_field downgradient_macroscopic_energy, Vector_field pressure_gradient_acc, Vector_field abs_curl_tend, Vector_field specific_entropy_gradient, Scalar_field c_h_p_field, Scalar_field macroscopic_energy, Scalar_field pressure_gradient_decel_factor, Vector_field pressure_gradient_acc_1, Scalar_field diffusion_coeff_numerical_h, Scalar_field diffusion_coeff_numerical_v, Vector_field mass_dry_diffusion_flux_density, Scalar_field mass_dry_diffusion_source_rate, Vector_field temperature_flux_density, Scalar_field tracer_density, Vector_field tracer_velocity, Vector_field tracer_flux_density, Scalar_field tracer_flux_density_divergence, Scalar_field tracer_density_temperature, Vector_field tracer_temperature_flux_density, Scalar_field tracer_temperature_flux_density_divergence)
 {
     scalar_times_vector(current_state -> density_dry, current_state -> velocity_gas, mass_dry_flux_density, grid);
     divergence(mass_dry_flux_density, mass_dry_flux_density_divergence, grid, 0);
@@ -89,20 +89,27 @@ int horizontal_tendencies(State *current_state, State *state_tendency, Grid *gri
                 total_density += current_state -> tracer_densities[k*NUMBER_OF_SCALARS + i];
             c_h_v = spec_heat_cap_diagnostics_v(current_state -> density_dry[i], current_state -> tracer_densities[NUMBER_OF_CONDENSATED_TRACERS*NUMBER_OF_SCALARS + i]);
             rho_h = current_state -> density_dry[i] + current_state -> tracer_densities[NUMBER_OF_CONDENSATED_TRACERS*NUMBER_OF_SCALARS + i];
-            state_tendency -> entropy_gas[i] = -entropy_gas_flux_density_divergence[i] + 1/temperature[i]*(rho_h/total_density*(temp_diffusion_heating[i] + heating_diss[i] + radiation_tendency[i]) + tracers_on*tracer_heat_source_rates[NUMBER_OF_CONDENSATED_TRACERS*NUMBER_OF_SCALARS + i]);
+            state_tendency -> entropy_gas[i] = -entropy_gas_flux_density_divergence[i] + 1/temperature[i]*(rho_h/total_density*(temp_diffusion_heating[i] + heating_diss[i] + radiation_tendency[i]) + tracers_on*tracers_phase_transitions_on*tracer_heat_source_rates[NUMBER_OF_CONDENSATED_TRACERS*NUMBER_OF_SCALARS + i]);
         }
         else
             state_tendency -> entropy_gas[i] = -entropy_gas_flux_density_divergence[i] + 1/temperature[i]*radiation_tendency[i];
     }
     double c_v_cond;
     int h_index, layer_index;
-    if (tracers_update == 1)
+    if (tracers_on == 1)
     {
-        retval = calc_h2otracers_source_rates(tracer_mass_source_rates, tracer_heat_source_rates, current_state -> tracer_densities, current_state -> tracer_density_temperatures, temperature, NUMBER_OF_TRACERS, NUMBER_OF_SCALARS, tracers_dynamics_delta_t_ratio*delta_t);
-		if (retval != 0)
-		{
-			printf("Error in calc_h2otracers_source_rates called from tendency, position 0, exit code was %d.", retval);
-			exit(1);
+    	/*
+    	phase transitions are on only at the third RK step
+    	only then, they are also updated
+    	*/
+    	if (tracers_phase_transitions_on == 1)
+    	{
+		    retval = calc_h2otracers_source_rates(tracer_mass_source_rates, tracer_heat_source_rates, current_state -> tracer_densities, current_state -> tracer_density_temperatures, temperature, NUMBER_OF_TRACERS, NUMBER_OF_SCALARS, delta_t);
+			if (retval != 0)
+			{
+				printf("Error in calc_h2otracers_source_rates called from tendency, position 0, exit code was %d.", retval);
+				exit(1);
+			}
 		}
 		for (int i = 0; i < NUMBER_OF_TRACERS; ++i)
 		{
@@ -130,9 +137,9 @@ int horizontal_tendencies(State *current_state, State *state_tendency, Grid *gri
 				    total_density = current_state -> density_dry[j];
 				    for (int k = 0; k < NUMBER_OF_TRACERS; ++k)
 				        total_density += current_state -> tracer_densities[k*NUMBER_OF_SCALARS + j];
-			        state_tendency -> tracer_density_temperatures[i*NUMBER_OF_SCALARS + j] = -tracer_temperature_flux_density_divergence[j] + current_state -> tracer_densities[i*NUMBER_OF_SCALARS + j]/(c_v_cond*total_density)*(temp_diffusion_heating[j] + heating_diss[j] + radiation_tendency[j]) + 1/c_v_cond*tracer_heat_source_rates[i*NUMBER_OF_SCALARS + j] + tracer_density_temperature[j]*tracer_mass_source_rates[i*NUMBER_OF_SCALARS + j];
-			        if (current_state -> tracer_densities[i*NUMBER_OF_SCALARS + j] + tracers_dynamics_delta_t_ratio*delta_t*state_tendency -> tracer_densities[i*NUMBER_OF_SCALARS + j] < 0)
-				        state_tendency -> tracer_density_temperatures[i*NUMBER_OF_SCALARS + j] = -current_state -> tracer_density_temperatures[i*NUMBER_OF_SCALARS + j]/(tracers_dynamics_delta_t_ratio*delta_t);
+			        state_tendency -> tracer_density_temperatures[i*NUMBER_OF_SCALARS + j] = -tracer_temperature_flux_density_divergence[j] + current_state -> tracer_densities[i*NUMBER_OF_SCALARS + j]/(c_v_cond*total_density)*(temp_diffusion_heating[j] + heating_diss[j] + radiation_tendency[j]) + 1/c_v_cond*tracers_phase_transitions_on*tracer_heat_source_rates[i*NUMBER_OF_SCALARS + j] + tracer_density_temperature[j]*tracers_phase_transitions_on*tracer_mass_source_rates[i*NUMBER_OF_SCALARS + j];
+			        if (current_state -> tracer_densities[i*NUMBER_OF_SCALARS + j] + delta_t*state_tendency -> tracer_densities[i*NUMBER_OF_SCALARS + j] < 0)
+				        state_tendency -> tracer_density_temperatures[i*NUMBER_OF_SCALARS + j] = -current_state -> tracer_density_temperatures[i*NUMBER_OF_SCALARS + j]/delta_t;
 				}
 		    }
 		    else
@@ -141,9 +148,9 @@ int horizontal_tendencies(State *current_state, State *state_tendency, Grid *gri
 		        retval = divergence(tracer_flux_density, tracer_flux_density_divergence, grid, 0);
 				for (int j = 0; j < NUMBER_OF_SCALARS; ++j)
 				{
-				    state_tendency -> tracer_densities[i*NUMBER_OF_SCALARS + j] = -tracer_flux_density_divergence[j] + tracer_mass_source_rates[i*NUMBER_OF_SCALARS + j];
-				    if (current_state -> tracer_densities[i*NUMBER_OF_SCALARS + j] + tracers_dynamics_delta_t_ratio*delta_t*state_tendency -> tracer_densities[i*NUMBER_OF_SCALARS + j] < 0)
-				        state_tendency -> tracer_densities[i*NUMBER_OF_SCALARS + j] = -current_state -> tracer_densities[i*NUMBER_OF_SCALARS + j]/(tracers_dynamics_delta_t_ratio*delta_t);
+				    state_tendency -> tracer_densities[i*NUMBER_OF_SCALARS + j] = -tracer_flux_density_divergence[j] + tracers_phase_transitions_on*tracer_mass_source_rates[i*NUMBER_OF_SCALARS + j];
+				    if (current_state -> tracer_densities[i*NUMBER_OF_SCALARS + j] + delta_t*state_tendency -> tracer_densities[i*NUMBER_OF_SCALARS + j] < 0)
+				        state_tendency -> tracer_densities[i*NUMBER_OF_SCALARS + j] = -current_state -> tracer_densities[i*NUMBER_OF_SCALARS + j]/delta_t;
 	            }
 		    }
 		}

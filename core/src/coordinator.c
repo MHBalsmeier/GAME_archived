@@ -60,13 +60,6 @@ int main(int argc, char *argv[])
     diffusion_on = strtod(argv[14], NULL);
     double radiation_delta_t;
     radiation_delta_t = strtof(argv[15], NULL);
-    int tracers_dynamics_delta_t_ratio;
-    tracers_dynamics_delta_t_ratio = strtod(argv[16], NULL);
-    if (tracers_dynamics_delta_t_ratio < 1)
-    {
-    	printf("It is tracers_dynamics_delta_t_ratio < 1.\n");
-    	exit(1);
-    }
     for (int i = 0; i < 82 - 1; ++i)
         stars[i] = '*';
     stars[81] = '\n';
@@ -161,7 +154,6 @@ int main(int argc, char *argv[])
     		(*radiation_tendency)[i] = 0;
     }
 	t_write_integral += delta_t;
-	int tracers_update = 1;
     int counter = 0;
     double *tracer_mass_source_rates = calloc(NUMBER_OF_TRACERS*NUMBER_OF_SCALARS, sizeof(double));
     double *tracer_heat_source_rates = calloc(NUMBER_OF_TRACERS*NUMBER_OF_SCALARS, sizeof(double));
@@ -199,8 +191,7 @@ int main(int argc, char *argv[])
     Vector_field *tracer_temperature_flux_density = calloc(1, sizeof(Vector_field));
     Scalar_field *tracer_temperature_flux_density_divergence = calloc(1, sizeof(Scalar_field));
     int rad_update = 1;
-    manage_time_stepping(state_0, state_p1, delta_t, grid, dualgrid, dissipation_on, rad_update*rad_on, tracers_on, diffusion_on, *radiation_tendency, tracers_update, tracers_dynamics_delta_t_ratio, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divergence, *temperature, *entropy_gas_flux_density, *entropy_gas_flux_density_divergence, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *rel_curl, *abs_curl, *downgradient_macroscopic_energy, *pressure_gradient_acc, *abs_curl_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divergence, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divergence);
-    tracers_update = 0;
+    manage_time_stepping(state_0, state_p1, delta_t, grid, dualgrid, dissipation_on, rad_update*rad_on, tracers_on, diffusion_on, *radiation_tendency, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divergence, *temperature, *entropy_gas_flux_density, *entropy_gas_flux_density_divergence, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *rel_curl, *abs_curl, *downgradient_macroscopic_energy, *pressure_gradient_acc, *abs_curl_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divergence, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divergence);
     counter += 1;
     if (write_out_dry_mass_integral == 1)
 		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
@@ -217,10 +208,6 @@ int main(int argc, char *argv[])
     int second_write_out_bool = 1;
     while (t_0 + delta_t < t_init + TOTAL_RUN_SPAN + 300)
     {
-    	if (counter%tracers_dynamics_delta_t_ratio == 0)
-    		tracers_update = 1;
-    	else
-    		tracers_update = 0;
         t_0 += delta_t;
         *state_0 = *state_p1;
         if (t_0 <= t_rad_update && t_0 + delta_t >= t_rad_update)
@@ -230,7 +217,7 @@ int main(int argc, char *argv[])
         }
         else
         	rad_update = 0;
-        manage_time_stepping(state_0, state_p1, delta_t, grid, dualgrid, dissipation_on, rad_update*rad_on, tracers_on, diffusion_on, *radiation_tendency, tracers_update, tracers_dynamics_delta_t_ratio, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divergence, *temperature, *entropy_gas_flux_density, *entropy_gas_flux_density_divergence, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *rel_curl, *abs_curl, *downgradient_macroscopic_energy, *pressure_gradient_acc, *abs_curl_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divergence, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divergence);
+        manage_time_stepping(state_0, state_p1, delta_t, grid, dualgrid, dissipation_on, rad_update*rad_on, tracers_on, diffusion_on, *radiation_tendency, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divergence, *temperature, *entropy_gas_flux_density, *entropy_gas_flux_density_divergence, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *rel_curl, *abs_curl, *downgradient_macroscopic_energy, *pressure_gradient_acc, *abs_curl_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divergence, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divergence);
 		if (write_out_dry_mass_integral == 1)
 			write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
 		if (write_out_entropy_integral == 1)

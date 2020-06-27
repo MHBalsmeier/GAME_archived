@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.5.21)  21 JUN 2020 11:16
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.5.21)  27 JUN 2020 21:03
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -683,29 +683,24 @@ LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 4
 (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2019/12/16 v2.5j Standard LaTeX font definitions
 )
-Overfull \hbox (21.55707pt too wide) in paragraph at lines 56--56
- []|\T1/fnc/m/n/10 tracers_dynamics_delta_t_ratio| 
- []
-
-
-Overfull \hbox (11.91327pt too wide) in paragraph at lines 57--57
+Overfull \hbox (11.91327pt too wide) in paragraph at lines 56--56
  []|\T1/fnc/m/n/10 write_out_mass_dry_integral| 
  []
 
 
-Overfull \hbox (22.93378pt too wide) in paragraph at lines 58--58
+Overfull \hbox (22.93378pt too wide) in paragraph at lines 57--57
  []|\T1/fnc/m/n/10 write_out_entropy_gas_integral| 
  []
 
 LaTeX Font Info:    Font shape `T1/fnc/m/sc' will be
-(Font)              scaled to size 9.29993pt on input line 67.
+(Font)              scaled to size 9.29993pt on input line 66.
 [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 ] [2] (./game_handbook.aux) ) 
 Here is how much of TeX's memory you used:
  8159 strings out of 481239
  117259 string characters out of 5920377
- 564137 words of memory out of 5000000
+ 563137 words of memory out of 5000000
  23286 multiletter control sequences out of 15000+600000
  575111 words of font info for 84 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -718,7 +713,7 @@ ve/texmf-dist/fonts/type1/public/fourier/fourier-ms.pfb></usr/share/texmf/fonts
 urw/ncntrsbk/uncb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk
 /uncr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncri8a.pfb
 >
-Output written on game_handbook.pdf (2 pages, 67631 bytes).
+Output written on game_handbook.pdf (2 pages, 67532 bytes).
 PDF statistics:
  37 PDF objects out of 1000 (max. 8388607)
  26 compressed objects within 1 object stream

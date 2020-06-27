@@ -14,7 +14,6 @@ dissipation_on=1
 tracers_on=1
 rad_on=0
 radiation_delta_t=3600
-tracers_dynamics_delta_t_ratio=3
 write_out_mass_dry_integral=1
 write_out_entropy_gas_integral=1
 write_out_energy_integral=1
