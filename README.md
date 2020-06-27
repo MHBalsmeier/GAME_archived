@@ -10,6 +10,10 @@ The handbook of the model can be found in the subdirectory handbook. It contains
 
 ## Prerequisites
 
+* atmostracers (https://github.com/MHBalsmeier/atmostracers)
+* rte-rrtmgp-c (https://github.com/MHBalsmeier/rte-rrtmgp-c)
+* geos95 (https://github.com/MHBalsmeier/geos95, only for grid generator)
+
 ## Download
 
 ## Build and install
