@@ -16,4 +16,4 @@ The handbook of the model can be found in the subdirectory handbook. It contains
 
 # Running the model
 
-See handbook-
+See handbook.
