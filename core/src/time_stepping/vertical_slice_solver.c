@@ -1,5 +1,5 @@
 /*
-This source file is part of the Global Geophysical Modeling Frame (GAME), which is released under the MIT license.
+This source file is part of the Global Atmospheric Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/MHBalsmeier/game
 The vertical advection of horizontal momentum is organized here.
 */
