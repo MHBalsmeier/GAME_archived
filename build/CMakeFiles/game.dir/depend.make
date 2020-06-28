@@ -135,5 +135,7 @@ CMakeFiles/game.dir/src/time_stepping/manage_time_stepping.c.o: /home/max/my_cod
 CMakeFiles/game.dir/src/time_stepping/manage_time_stepping.c.o: /home/max/my_code/game/core/src/time_stepping/manage_time_stepping.c
 CMakeFiles/game.dir/src/time_stepping/manage_time_stepping.c.o: /home/max/my_code/game/core/src/time_stepping/time_stepping.h
 
+CMakeFiles/game.dir/src/time_stepping/vertical_slice_solver.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
+CMakeFiles/game.dir/src/time_stepping/vertical_slice_solver.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/time_stepping/vertical_slice_solver.c.o: /home/max/my_code/game/core/src/time_stepping/vertical_slice_solver.c
 

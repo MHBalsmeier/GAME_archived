@@ -307,4 +307,12 @@ stdio.h
 /home/max/my_code/game/core/src/time_stepping/time_stepping.h
 
 /home/max/my_code/game/core/src/time_stepping/vertical_slice_solver.c
+../enum_and_typedefs.h
+/home/max/my_code/game/core/src/enum_and_typedefs.h
+stdlib.h
+-
+stdio.h
+-
+../diagnostics/diagnostics.h
+/home/max/my_code/game/core/src/diagnostics/diagnostics.h
 
