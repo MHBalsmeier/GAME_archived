@@ -774,6 +774,33 @@ src/io/write_output.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/io/write_output.c.s
 .PHONY : src/io/write_output.c.s
 
+src/spatial_operators/calc_tendencies.o: src/spatial_operators/calc_tendencies.c.o
+
+.PHONY : src/spatial_operators/calc_tendencies.o
+
+# target to build an object file
+src/spatial_operators/calc_tendencies.c.o:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.o
+.PHONY : src/spatial_operators/calc_tendencies.c.o
+
+src/spatial_operators/calc_tendencies.i: src/spatial_operators/calc_tendencies.c.i
+
+.PHONY : src/spatial_operators/calc_tendencies.i
+
+# target to preprocess a source file
+src/spatial_operators/calc_tendencies.c.i:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.i
+.PHONY : src/spatial_operators/calc_tendencies.c.i
+
+src/spatial_operators/calc_tendencies.s: src/spatial_operators/calc_tendencies.c.s
+
+.PHONY : src/spatial_operators/calc_tendencies.s
+
+# target to generate assembly for a file
+src/spatial_operators/calc_tendencies.c.s:
+	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.s
+.PHONY : src/spatial_operators/calc_tendencies.c.s
+
 src/spatial_operators/coriolis_gen.o: src/spatial_operators/coriolis_gen.c.o
 
 .PHONY : src/spatial_operators/coriolis_gen.o
@@ -908,33 +935,6 @@ src/spatial_operators/grad.s: src/spatial_operators/grad.c.s
 src/spatial_operators/grad.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/grad.c.s
 .PHONY : src/spatial_operators/grad.c.s
-
-src/spatial_operators/horizontal_tendencies.o: src/spatial_operators/horizontal_tendencies.c.o
-
-.PHONY : src/spatial_operators/horizontal_tendencies.o
-
-# target to build an object file
-src/spatial_operators/horizontal_tendencies.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.o
-.PHONY : src/spatial_operators/horizontal_tendencies.c.o
-
-src/spatial_operators/horizontal_tendencies.i: src/spatial_operators/horizontal_tendencies.c.i
-
-.PHONY : src/spatial_operators/horizontal_tendencies.i
-
-# target to preprocess a source file
-src/spatial_operators/horizontal_tendencies.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.i
-.PHONY : src/spatial_operators/horizontal_tendencies.c.i
-
-src/spatial_operators/horizontal_tendencies.s: src/spatial_operators/horizontal_tendencies.c.s
-
-.PHONY : src/spatial_operators/horizontal_tendencies.s
-
-# target to generate assembly for a file
-src/spatial_operators/horizontal_tendencies.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.s
-.PHONY : src/spatial_operators/horizontal_tendencies.c.s
 
 src/spatial_operators/kinetic_energy.o: src/spatial_operators/kinetic_energy.c.o
 
@@ -1232,6 +1232,9 @@ help:
 	@echo "... src/io/write_output.o"
 	@echo "... src/io/write_output.i"
 	@echo "... src/io/write_output.s"
+	@echo "... src/spatial_operators/calc_tendencies.o"
+	@echo "... src/spatial_operators/calc_tendencies.i"
+	@echo "... src/spatial_operators/calc_tendencies.s"
 	@echo "... src/spatial_operators/coriolis_gen.o"
 	@echo "... src/spatial_operators/coriolis_gen.i"
 	@echo "... src/spatial_operators/coriolis_gen.s"
@@ -1247,9 +1250,6 @@ help:
 	@echo "... src/spatial_operators/grad.o"
 	@echo "... src/spatial_operators/grad.i"
 	@echo "... src/spatial_operators/grad.s"
-	@echo "... src/spatial_operators/horizontal_tendencies.o"
-	@echo "... src/spatial_operators/horizontal_tendencies.i"
-	@echo "... src/spatial_operators/horizontal_tendencies.s"
 	@echo "... src/spatial_operators/kinetic_energy.o"
 	@echo "... src/spatial_operators/kinetic_energy.i"
 	@echo "... src/spatial_operators/kinetic_energy.s"

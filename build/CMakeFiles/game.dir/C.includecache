@@ -192,6 +192,22 @@ geos95.h
 atmostracers.h
 /home/max/my_code/game/core/src/io/atmostracers.h
 
+/home/max/my_code/game/core/src/spatial_operators/calc_tendencies.c
+../enum_and_typedefs.h
+/home/max/my_code/game/core/src/enum_and_typedefs.h
+spatial_operators.h
+/home/max/my_code/game/core/src/spatial_operators/spatial_operators.h
+../diagnostics/diagnostics.h
+/home/max/my_code/game/core/src/diagnostics/diagnostics.h
+atmostracers.h
+/home/max/my_code/game/core/src/spatial_operators/atmostracers.h
+rte-rrtmgp-c.h
+/home/max/my_code/game/core/src/spatial_operators/rte-rrtmgp-c.h
+stdlib.h
+-
+stdio.h
+-
+
 /home/max/my_code/game/core/src/spatial_operators/coriolis_gen.c
 ../enum_and_typedefs.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
@@ -227,22 +243,6 @@ stdio.h
 /home/max/my_code/game/core/src/enum_and_typedefs.h
 ../diagnostics/diagnostics.h
 /home/max/my_code/game/core/src/diagnostics/diagnostics.h
-stdio.h
--
-
-/home/max/my_code/game/core/src/spatial_operators/horizontal_tendencies.c
-../enum_and_typedefs.h
-/home/max/my_code/game/core/src/enum_and_typedefs.h
-spatial_operators.h
-/home/max/my_code/game/core/src/spatial_operators/spatial_operators.h
-../diagnostics/diagnostics.h
-/home/max/my_code/game/core/src/diagnostics/diagnostics.h
-atmostracers.h
-/home/max/my_code/game/core/src/spatial_operators/atmostracers.h
-rte-rrtmgp-c.h
-/home/max/my_code/game/core/src/spatial_operators/rte-rrtmgp-c.h
-stdlib.h
--
 stdio.h
 -
 

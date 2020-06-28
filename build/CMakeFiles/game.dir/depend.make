@@ -85,6 +85,11 @@ CMakeFiles/game.dir/src/io/write_output.c.o: /home/max/my_code/game/core/src/io/
 CMakeFiles/game.dir/src/io/write_output.c.o: /home/max/my_code/game/core/src/io/write_output.c
 CMakeFiles/game.dir/src/io/write_output.c.o: /home/max/my_code/game/core/src/spatial_operators/spatial_operators.h
 
+CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
+CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
+CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.o: /home/max/my_code/game/core/src/spatial_operators/calc_tendencies.c
+CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.o: /home/max/my_code/game/core/src/spatial_operators/spatial_operators.h
+
 CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.o: /home/max/my_code/game/core/src/spatial_operators/coriolis_gen.c
@@ -103,11 +108,6 @@ CMakeFiles/game.dir/src/spatial_operators/div.c.o: /home/max/my_code/game/core/s
 CMakeFiles/game.dir/src/spatial_operators/grad.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 CMakeFiles/game.dir/src/spatial_operators/grad.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/spatial_operators/grad.c.o: /home/max/my_code/game/core/src/spatial_operators/grad.c
-
-CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.o: /home/max/my_code/game/core/src/diagnostics/diagnostics.h
-CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
-CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.o: /home/max/my_code/game/core/src/spatial_operators/horizontal_tendencies.c
-CMakeFiles/game.dir/src/spatial_operators/horizontal_tendencies.c.o: /home/max/my_code/game/core/src/spatial_operators/spatial_operators.h
 
 CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.o: /home/max/my_code/game/core/src/enum_and_typedefs.h
 CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.o: /home/max/my_code/game/core/src/spatial_operators/kinetic_energy.c
