@@ -13,3 +13,4 @@ Github repository: https://github.com/MHBalsmeier/game
 #include "diagnostics/diagnostics.h"
 #include "time_stepping/time_stepping.h"
 #include "rte-rrtmgp-c.h"
+#include <mpi.h>

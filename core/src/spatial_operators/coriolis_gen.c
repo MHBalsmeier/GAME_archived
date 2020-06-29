@@ -12,13 +12,13 @@ int coriolis_gen(Vector_field a_field, Curl_field b_field, Vector_field out_fiel
 {
     double component_0, component_1, component_2, component_3, term_0, term_1;
     int layer_index, h_index, retval;
-    for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
+    for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
-        layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
-        h_index = i - layer_index*NUMBER_OF_VECTORS_PER_LAYER;
-        if (h_index >= NUMBER_OF_VECTORS_V)
+        layer_index = i/NO_OF_VECTORS_PER_LAYER;
+        h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
+        if (h_index >= NO_OF_VECTORS_V)
         {
-            retval = trsk_modified(a_field, b_field, layer_index, h_index - NUMBER_OF_VECTORS_V, &term_0, grid);
+            retval = trsk_modified(a_field, b_field, layer_index, h_index - NO_OF_VECTORS_V, &term_0, grid);
 		    out_field[i] = term_0;
         }
         else

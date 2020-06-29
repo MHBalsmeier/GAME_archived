@@ -60,470 +60,470 @@ include CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/coordinator.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/coordinator.c.o: /home/max/my_code/game/core/src/coordinator.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/game.dir/src/coordinator.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/coordinator.c.o   -c /home/max/my_code/game/core/src/coordinator.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/coordinator.c.o   -c /home/max/my_code/game/core/src/coordinator.c
 
 CMakeFiles/game.dir/src/coordinator.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/coordinator.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/coordinator.c > CMakeFiles/game.dir/src/coordinator.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/coordinator.c > CMakeFiles/game.dir/src/coordinator.c.i
 
 CMakeFiles/game.dir/src/coordinator.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/coordinator.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/coordinator.c -o CMakeFiles/game.dir/src/coordinator.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/coordinator.c -o CMakeFiles/game.dir/src/coordinator.c.s
 
 CMakeFiles/game.dir/src/io/init_state_setter.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/io/init_state_setter.c.o: /home/max/my_code/game/core/src/io/init_state_setter.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/game.dir/src/io/init_state_setter.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/io/init_state_setter.c.o   -c /home/max/my_code/game/core/src/io/init_state_setter.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/io/init_state_setter.c.o   -c /home/max/my_code/game/core/src/io/init_state_setter.c
 
 CMakeFiles/game.dir/src/io/init_state_setter.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/io/init_state_setter.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/io/init_state_setter.c > CMakeFiles/game.dir/src/io/init_state_setter.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/io/init_state_setter.c > CMakeFiles/game.dir/src/io/init_state_setter.c.i
 
 CMakeFiles/game.dir/src/io/init_state_setter.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/io/init_state_setter.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/io/init_state_setter.c -o CMakeFiles/game.dir/src/io/init_state_setter.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/io/init_state_setter.c -o CMakeFiles/game.dir/src/io/init_state_setter.c.s
 
 CMakeFiles/game.dir/src/io/interpolation_t.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/io/interpolation_t.c.o: /home/max/my_code/game/core/src/io/interpolation_t.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/game.dir/src/io/interpolation_t.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/io/interpolation_t.c.o   -c /home/max/my_code/game/core/src/io/interpolation_t.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/io/interpolation_t.c.o   -c /home/max/my_code/game/core/src/io/interpolation_t.c
 
 CMakeFiles/game.dir/src/io/interpolation_t.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/io/interpolation_t.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/io/interpolation_t.c > CMakeFiles/game.dir/src/io/interpolation_t.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/io/interpolation_t.c > CMakeFiles/game.dir/src/io/interpolation_t.c.i
 
 CMakeFiles/game.dir/src/io/interpolation_t.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/io/interpolation_t.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/io/interpolation_t.c -o CMakeFiles/game.dir/src/io/interpolation_t.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/io/interpolation_t.c -o CMakeFiles/game.dir/src/io/interpolation_t.c.s
 
 CMakeFiles/game.dir/src/io/set_grid_props_and_dt.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/io/set_grid_props_and_dt.c.o: /home/max/my_code/game/core/src/io/set_grid_props_and_dt.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/game.dir/src/io/set_grid_props_and_dt.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/io/set_grid_props_and_dt.c.o   -c /home/max/my_code/game/core/src/io/set_grid_props_and_dt.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/io/set_grid_props_and_dt.c.o   -c /home/max/my_code/game/core/src/io/set_grid_props_and_dt.c
 
 CMakeFiles/game.dir/src/io/set_grid_props_and_dt.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/io/set_grid_props_and_dt.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/io/set_grid_props_and_dt.c > CMakeFiles/game.dir/src/io/set_grid_props_and_dt.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/io/set_grid_props_and_dt.c > CMakeFiles/game.dir/src/io/set_grid_props_and_dt.c.i
 
 CMakeFiles/game.dir/src/io/set_grid_props_and_dt.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/io/set_grid_props_and_dt.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/io/set_grid_props_and_dt.c -o CMakeFiles/game.dir/src/io/set_grid_props_and_dt.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/io/set_grid_props_and_dt.c -o CMakeFiles/game.dir/src/io/set_grid_props_and_dt.c.s
 
 CMakeFiles/game.dir/src/io/write_output.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/io/write_output.c.o: /home/max/my_code/game/core/src/io/write_output.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/game.dir/src/io/write_output.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/io/write_output.c.o   -c /home/max/my_code/game/core/src/io/write_output.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/io/write_output.c.o   -c /home/max/my_code/game/core/src/io/write_output.c
 
 CMakeFiles/game.dir/src/io/write_output.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/io/write_output.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/io/write_output.c > CMakeFiles/game.dir/src/io/write_output.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/io/write_output.c > CMakeFiles/game.dir/src/io/write_output.c.i
 
 CMakeFiles/game.dir/src/io/write_output.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/io/write_output.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/io/write_output.c -o CMakeFiles/game.dir/src/io/write_output.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/io/write_output.c -o CMakeFiles/game.dir/src/io/write_output.c.s
 
 CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.o: /home/max/my_code/game/core/src/spatial_operators/coriolis_gen.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.o   -c /home/max/my_code/game/core/src/spatial_operators/coriolis_gen.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.o   -c /home/max/my_code/game/core/src/spatial_operators/coriolis_gen.c
 
 CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/coriolis_gen.c > CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/coriolis_gen.c > CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.i
 
 CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/coriolis_gen.c -o CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/coriolis_gen.c -o CMakeFiles/game.dir/src/spatial_operators/coriolis_gen.c.s
 
 CMakeFiles/game.dir/src/spatial_operators/div.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/spatial_operators/div.c.o: /home/max/my_code/game/core/src/spatial_operators/div.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object CMakeFiles/game.dir/src/spatial_operators/div.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/div.c.o   -c /home/max/my_code/game/core/src/spatial_operators/div.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/div.c.o   -c /home/max/my_code/game/core/src/spatial_operators/div.c
 
 CMakeFiles/game.dir/src/spatial_operators/div.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/spatial_operators/div.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/div.c > CMakeFiles/game.dir/src/spatial_operators/div.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/div.c > CMakeFiles/game.dir/src/spatial_operators/div.c.i
 
 CMakeFiles/game.dir/src/spatial_operators/div.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/spatial_operators/div.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/div.c -o CMakeFiles/game.dir/src/spatial_operators/div.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/div.c -o CMakeFiles/game.dir/src/spatial_operators/div.c.s
 
 CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.o: /home/max/my_code/game/core/src/spatial_operators/kinetic_energy.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building C object CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.o   -c /home/max/my_code/game/core/src/spatial_operators/kinetic_energy.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.o   -c /home/max/my_code/game/core/src/spatial_operators/kinetic_energy.c
 
 CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/kinetic_energy.c > CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/kinetic_energy.c > CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.i
 
 CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/kinetic_energy.c -o CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/kinetic_energy.c -o CMakeFiles/game.dir/src/spatial_operators/kinetic_energy.c.s
 
 CMakeFiles/game.dir/src/spatial_operators/curl.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/spatial_operators/curl.c.o: /home/max/my_code/game/core/src/spatial_operators/curl.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building C object CMakeFiles/game.dir/src/spatial_operators/curl.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/curl.c.o   -c /home/max/my_code/game/core/src/spatial_operators/curl.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/curl.c.o   -c /home/max/my_code/game/core/src/spatial_operators/curl.c
 
 CMakeFiles/game.dir/src/spatial_operators/curl.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/spatial_operators/curl.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/curl.c > CMakeFiles/game.dir/src/spatial_operators/curl.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/curl.c > CMakeFiles/game.dir/src/spatial_operators/curl.c.i
 
 CMakeFiles/game.dir/src/spatial_operators/curl.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/spatial_operators/curl.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/curl.c -o CMakeFiles/game.dir/src/spatial_operators/curl.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/curl.c -o CMakeFiles/game.dir/src/spatial_operators/curl.c.s
 
 CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.o: /home/max/my_code/game/core/src/spatial_operators/calc_tendencies.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building C object CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.o   -c /home/max/my_code/game/core/src/spatial_operators/calc_tendencies.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.o   -c /home/max/my_code/game/core/src/spatial_operators/calc_tendencies.c
 
 CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/calc_tendencies.c > CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/calc_tendencies.c > CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.i
 
 CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/calc_tendencies.c -o CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/calc_tendencies.c -o CMakeFiles/game.dir/src/spatial_operators/calc_tendencies.c.s
 
 CMakeFiles/game.dir/src/spatial_operators/grad.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/spatial_operators/grad.c.o: /home/max/my_code/game/core/src/spatial_operators/grad.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building C object CMakeFiles/game.dir/src/spatial_operators/grad.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/grad.c.o   -c /home/max/my_code/game/core/src/spatial_operators/grad.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/grad.c.o   -c /home/max/my_code/game/core/src/spatial_operators/grad.c
 
 CMakeFiles/game.dir/src/spatial_operators/grad.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/spatial_operators/grad.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/grad.c > CMakeFiles/game.dir/src/spatial_operators/grad.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/grad.c > CMakeFiles/game.dir/src/spatial_operators/grad.c.i
 
 CMakeFiles/game.dir/src/spatial_operators/grad.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/spatial_operators/grad.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/grad.c -o CMakeFiles/game.dir/src/spatial_operators/grad.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/grad.c -o CMakeFiles/game.dir/src/spatial_operators/grad.c.s
 
 CMakeFiles/game.dir/src/spatial_operators/linear_combine_two_states.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/spatial_operators/linear_combine_two_states.c.o: /home/max/my_code/game/core/src/spatial_operators/linear_combine_two_states.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building C object CMakeFiles/game.dir/src/spatial_operators/linear_combine_two_states.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/linear_combine_two_states.c.o   -c /home/max/my_code/game/core/src/spatial_operators/linear_combine_two_states.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/linear_combine_two_states.c.o   -c /home/max/my_code/game/core/src/spatial_operators/linear_combine_two_states.c
 
 CMakeFiles/game.dir/src/spatial_operators/linear_combine_two_states.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/spatial_operators/linear_combine_two_states.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/linear_combine_two_states.c > CMakeFiles/game.dir/src/spatial_operators/linear_combine_two_states.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/linear_combine_two_states.c > CMakeFiles/game.dir/src/spatial_operators/linear_combine_two_states.c.i
 
 CMakeFiles/game.dir/src/spatial_operators/linear_combine_two_states.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/spatial_operators/linear_combine_two_states.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/linear_combine_two_states.c -o CMakeFiles/game.dir/src/spatial_operators/linear_combine_two_states.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/linear_combine_two_states.c -o CMakeFiles/game.dir/src/spatial_operators/linear_combine_two_states.c.s
 
 CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.o: /home/max/my_code/game/core/src/spatial_operators/scalar_times_vector.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building C object CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.o   -c /home/max/my_code/game/core/src/spatial_operators/scalar_times_vector.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.o   -c /home/max/my_code/game/core/src/spatial_operators/scalar_times_vector.c
 
 CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/scalar_times_vector.c > CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/scalar_times_vector.c > CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.i
 
 CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/scalar_times_vector.c -o CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/scalar_times_vector.c -o CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.s
 
 CMakeFiles/game.dir/src/spatial_operators/scalar_times_scalar.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/spatial_operators/scalar_times_scalar.c.o: /home/max/my_code/game/core/src/spatial_operators/scalar_times_scalar.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building C object CMakeFiles/game.dir/src/spatial_operators/scalar_times_scalar.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/scalar_times_scalar.c.o   -c /home/max/my_code/game/core/src/spatial_operators/scalar_times_scalar.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/scalar_times_scalar.c.o   -c /home/max/my_code/game/core/src/spatial_operators/scalar_times_scalar.c
 
 CMakeFiles/game.dir/src/spatial_operators/scalar_times_scalar.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/spatial_operators/scalar_times_scalar.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/scalar_times_scalar.c > CMakeFiles/game.dir/src/spatial_operators/scalar_times_scalar.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/scalar_times_scalar.c > CMakeFiles/game.dir/src/spatial_operators/scalar_times_scalar.c.i
 
 CMakeFiles/game.dir/src/spatial_operators/scalar_times_scalar.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/spatial_operators/scalar_times_scalar.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/scalar_times_scalar.c -o CMakeFiles/game.dir/src/spatial_operators/scalar_times_scalar.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/scalar_times_scalar.c -o CMakeFiles/game.dir/src/spatial_operators/scalar_times_scalar.c.s
 
 CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.o: /home/max/my_code/game/core/src/spatial_operators/scalar_times_vector_h_v.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building C object CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.o   -c /home/max/my_code/game/core/src/spatial_operators/scalar_times_vector_h_v.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.o   -c /home/max/my_code/game/core/src/spatial_operators/scalar_times_vector_h_v.c
 
 CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/scalar_times_vector_h_v.c > CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/scalar_times_vector_h_v.c > CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.i
 
 CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/scalar_times_vector_h_v.c -o CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/scalar_times_vector_h_v.c -o CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.s
 
 CMakeFiles/game.dir/src/spatial_operators/dissipation.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/spatial_operators/dissipation.c.o: /home/max/my_code/game/core/src/spatial_operators/dissipation.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building C object CMakeFiles/game.dir/src/spatial_operators/dissipation.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/dissipation.c.o   -c /home/max/my_code/game/core/src/spatial_operators/dissipation.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/spatial_operators/dissipation.c.o   -c /home/max/my_code/game/core/src/spatial_operators/dissipation.c
 
 CMakeFiles/game.dir/src/spatial_operators/dissipation.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/spatial_operators/dissipation.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/dissipation.c > CMakeFiles/game.dir/src/spatial_operators/dissipation.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/spatial_operators/dissipation.c > CMakeFiles/game.dir/src/spatial_operators/dissipation.c.i
 
 CMakeFiles/game.dir/src/spatial_operators/dissipation.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/spatial_operators/dissipation.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/dissipation.c -o CMakeFiles/game.dir/src/spatial_operators/dissipation.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/spatial_operators/dissipation.c -o CMakeFiles/game.dir/src/spatial_operators/dissipation.c.s
 
 CMakeFiles/game.dir/src/time_stepping/manage_time_stepping.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/time_stepping/manage_time_stepping.c.o: /home/max/my_code/game/core/src/time_stepping/manage_time_stepping.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building C object CMakeFiles/game.dir/src/time_stepping/manage_time_stepping.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/time_stepping/manage_time_stepping.c.o   -c /home/max/my_code/game/core/src/time_stepping/manage_time_stepping.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/time_stepping/manage_time_stepping.c.o   -c /home/max/my_code/game/core/src/time_stepping/manage_time_stepping.c
 
 CMakeFiles/game.dir/src/time_stepping/manage_time_stepping.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/time_stepping/manage_time_stepping.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/time_stepping/manage_time_stepping.c > CMakeFiles/game.dir/src/time_stepping/manage_time_stepping.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/time_stepping/manage_time_stepping.c > CMakeFiles/game.dir/src/time_stepping/manage_time_stepping.c.i
 
 CMakeFiles/game.dir/src/time_stepping/manage_time_stepping.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/time_stepping/manage_time_stepping.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/time_stepping/manage_time_stepping.c -o CMakeFiles/game.dir/src/time_stepping/manage_time_stepping.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/time_stepping/manage_time_stepping.c -o CMakeFiles/game.dir/src/time_stepping/manage_time_stepping.c.s
 
 CMakeFiles/game.dir/src/time_stepping/vertical_slice_solver.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/time_stepping/vertical_slice_solver.c.o: /home/max/my_code/game/core/src/time_stepping/vertical_slice_solver.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building C object CMakeFiles/game.dir/src/time_stepping/vertical_slice_solver.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/time_stepping/vertical_slice_solver.c.o   -c /home/max/my_code/game/core/src/time_stepping/vertical_slice_solver.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/time_stepping/vertical_slice_solver.c.o   -c /home/max/my_code/game/core/src/time_stepping/vertical_slice_solver.c
 
 CMakeFiles/game.dir/src/time_stepping/vertical_slice_solver.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/time_stepping/vertical_slice_solver.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/time_stepping/vertical_slice_solver.c > CMakeFiles/game.dir/src/time_stepping/vertical_slice_solver.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/time_stepping/vertical_slice_solver.c > CMakeFiles/game.dir/src/time_stepping/vertical_slice_solver.c.i
 
 CMakeFiles/game.dir/src/time_stepping/vertical_slice_solver.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/time_stepping/vertical_slice_solver.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/time_stepping/vertical_slice_solver.c -o CMakeFiles/game.dir/src/time_stepping/vertical_slice_solver.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/time_stepping/vertical_slice_solver.c -o CMakeFiles/game.dir/src/time_stepping/vertical_slice_solver.c.s
 
 CMakeFiles/game.dir/src/time_stepping/lower_boundary_solver.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/time_stepping/lower_boundary_solver.c.o: /home/max/my_code/game/core/src/time_stepping/lower_boundary_solver.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building C object CMakeFiles/game.dir/src/time_stepping/lower_boundary_solver.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/time_stepping/lower_boundary_solver.c.o   -c /home/max/my_code/game/core/src/time_stepping/lower_boundary_solver.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/time_stepping/lower_boundary_solver.c.o   -c /home/max/my_code/game/core/src/time_stepping/lower_boundary_solver.c
 
 CMakeFiles/game.dir/src/time_stepping/lower_boundary_solver.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/time_stepping/lower_boundary_solver.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/time_stepping/lower_boundary_solver.c > CMakeFiles/game.dir/src/time_stepping/lower_boundary_solver.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/time_stepping/lower_boundary_solver.c > CMakeFiles/game.dir/src/time_stepping/lower_boundary_solver.c.i
 
 CMakeFiles/game.dir/src/time_stepping/lower_boundary_solver.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/time_stepping/lower_boundary_solver.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/time_stepping/lower_boundary_solver.c -o CMakeFiles/game.dir/src/time_stepping/lower_boundary_solver.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/time_stepping/lower_boundary_solver.c -o CMakeFiles/game.dir/src/time_stepping/lower_boundary_solver.c.s
 
 CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/density_diagnostics.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building C object CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/density_diagnostics.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/density_diagnostics.c
 
 CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/density_diagnostics.c > CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/density_diagnostics.c > CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.i
 
 CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/density_diagnostics.c -o CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/density_diagnostics.c -o CMakeFiles/game.dir/src/diagnostics/density_diagnostics.c.s
 
 CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/spec_heat_cap_diagnostics.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building C object CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/spec_heat_cap_diagnostics.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/spec_heat_cap_diagnostics.c
 
 CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/spec_heat_cap_diagnostics.c > CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/spec_heat_cap_diagnostics.c > CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.i
 
 CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/spec_heat_cap_diagnostics.c -o CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/spec_heat_cap_diagnostics.c -o CMakeFiles/game.dir/src/diagnostics/spec_heat_cap_diagnostics.c.s
 
 CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/gas_constant_diagnostics.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building C object CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/gas_constant_diagnostics.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/gas_constant_diagnostics.c
 
 CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/gas_constant_diagnostics.c > CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/gas_constant_diagnostics.c > CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.i
 
 CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/gas_constant_diagnostics.c -o CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/gas_constant_diagnostics.c -o CMakeFiles/game.dir/src/diagnostics/gas_constant_diagnostics.c.s
 
 CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o: /home/max/my_code/game/core/src/diagnostics/calc_numerical_diffusion_coeffs.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building C object CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o   -c /home/max/my_code/game/core/src/diagnostics/calc_numerical_diffusion_coeffs.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.o   -c /home/max/my_code/game/core/src/diagnostics/calc_numerical_diffusion_coeffs.c
 
 CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/calc_numerical_diffusion_coeffs.c > CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/calc_numerical_diffusion_coeffs.c > CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.i
 
 CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/calc_numerical_diffusion_coeffs.c -o CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/calc_numerical_diffusion_coeffs.c -o CMakeFiles/game.dir/src/diagnostics/calc_numerical_diffusion_coeffs.c.s
 
 CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.o: /home/max/my_code/game/core/src/diagnostics/global_scalar_integral.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building C object CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.o   -c /home/max/my_code/game/core/src/diagnostics/global_scalar_integral.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.o   -c /home/max/my_code/game/core/src/diagnostics/global_scalar_integral.c
 
 CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/global_scalar_integral.c > CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/global_scalar_integral.c > CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.i
 
 CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/global_scalar_integral.c -o CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/global_scalar_integral.c -o CMakeFiles/game.dir/src/diagnostics/global_scalar_integral.c.s
 
 CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/temperature_diagnostics.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building C object CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/temperature_diagnostics.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/temperature_diagnostics.c
 
 CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/temperature_diagnostics.c > CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/temperature_diagnostics.c > CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.i
 
 CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/temperature_diagnostics.c -o CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/temperature_diagnostics.c -o CMakeFiles/game.dir/src/diagnostics/temperature_diagnostics.c.s
 
 CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building C object CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c
 
 CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c > CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c > CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.i
 
 CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c -o CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/exner_pressure_diagnostics.c -o CMakeFiles/game.dir/src/diagnostics/exner_pressure_diagnostics.c.s
 
 CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o: /home/max/my_code/game/core/src/diagnostics/pot_temp_diagnostics.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building C object CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/pot_temp_diagnostics.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.o   -c /home/max/my_code/game/core/src/diagnostics/pot_temp_diagnostics.c
 
 CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/pot_temp_diagnostics.c > CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/pot_temp_diagnostics.c > CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.i
 
 CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/pot_temp_diagnostics.c -o CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/pot_temp_diagnostics.c -o CMakeFiles/game.dir/src/diagnostics/pot_temp_diagnostics.c.s
 
 CMakeFiles/game.dir/src/diagnostics/ricci.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/ricci.c.o: /home/max/my_code/game/core/src/diagnostics/ricci.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building C object CMakeFiles/game.dir/src/diagnostics/ricci.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/ricci.c.o   -c /home/max/my_code/game/core/src/diagnostics/ricci.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/ricci.c.o   -c /home/max/my_code/game/core/src/diagnostics/ricci.c
 
 CMakeFiles/game.dir/src/diagnostics/ricci.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/ricci.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/ricci.c > CMakeFiles/game.dir/src/diagnostics/ricci.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/ricci.c > CMakeFiles/game.dir/src/diagnostics/ricci.c.i
 
 CMakeFiles/game.dir/src/diagnostics/ricci.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/ricci.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/ricci.c -o CMakeFiles/game.dir/src/diagnostics/ricci.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/ricci.c -o CMakeFiles/game.dir/src/diagnostics/ricci.c.s
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_curl.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_curl.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_curl.c
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_curl.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_curl.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.i
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_curl.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_curl.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_curl.c.s
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/trsk_modified.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/trsk_modified.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/trsk_modified.c
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/trsk_modified.c > CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/trsk_modified.c > CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.i
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/trsk_modified.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/trsk_modified.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/trsk_modified.c.s
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_ver_pri.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_ver_pri.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_ver_pri.c
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_ver_pri.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_ver_pri.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.i
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_ver_pri.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_ver_pri.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_ver_pri.c.s
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_curl.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_curl.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_curl.c
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_curl.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_curl.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.i
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_curl.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_curl.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_curl.c.s
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_pri.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_pri.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_pri.c
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_pri.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_pri.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.i
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_pri.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_0_pri.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_0_pri.c.s
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_curl.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_curl.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_curl.c
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_curl.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_curl.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.i
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_curl.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_curl.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_curl.c.s
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_pri.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_pri.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_pri.c
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_pri.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_pri.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.i
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_pri.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_ver_1_pri.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_ver_1_pri.c.s
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o: CMakeFiles/game.dir/flags.make
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o: /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_pri.c
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/max/my_code/game/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_36) "Building C object CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_pri.c
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.o   -c /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_pri.c
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_pri.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.i
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_pri.c > CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.i
 
 CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_pri.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.s
+	mpicc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/max/my_code/game/core/src/diagnostics/recover_components/recov_hor_par_pri.c -o CMakeFiles/game.dir/src/diagnostics/recover_components/recov_hor_par_pri.c.s
 
 # Object files for target game
 game_OBJECTS = \

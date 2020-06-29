@@ -8,7 +8,7 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int kinetic_energy(Vector_field in_field, Scalar_field out_field, Grid *grid)
 {
-    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+    for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         out_field[i] = 0;
         for (int j = 0; j < 12; ++j)

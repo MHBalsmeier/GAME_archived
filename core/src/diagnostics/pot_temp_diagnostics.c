@@ -12,12 +12,12 @@ int pot_temp_diagnostics(Scalar_field density_entropy, Scalar_field density, Tra
 {
 	double condensates_density_sum;
 	int layer_index, h_index;
-    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+    for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-    	layer_index = i/NUMBER_OF_SCALARS_H;
-    	h_index = i - layer_index*NUMBER_OF_SCALARS_H;
+    	layer_index = i/NO_OF_SCALARS_H;
+    	h_index = i - layer_index*NO_OF_SCALARS_H;
     	condensates_density_sum = calc_condensates_density_sum(layer_index, h_index, tracer_densities);
-    	pot_temp[i] = pot_temp_diagnostics_single_value(density_entropy[i], density[i], tracer_densities[NUMBER_OF_CONDENSATED_TRACERS*NUMBER_OF_SCALARS + i], condensates_density_sum);
+    	pot_temp[i] = pot_temp_diagnostics_single_value(density_entropy[i], density[i], tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i], condensates_density_sum);
 	}
     return 0;
 }

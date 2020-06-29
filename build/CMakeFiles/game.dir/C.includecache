@@ -31,6 +31,8 @@ time_stepping/time_stepping.h
 /home/max/my_code/game/core/src/time_stepping/time_stepping.h
 rte-rrtmgp-c.h
 /home/max/my_code/game/core/src/rte-rrtmgp-c.h
+mpi.h
+-
 
 /home/max/my_code/game/core/src/diagnostics/calc_numerical_diffusion_coeffs.c
 ../enum_and_typedefs.h
@@ -315,4 +317,6 @@ stdio.h
 -
 ../diagnostics/diagnostics.h
 /home/max/my_code/game/core/src/diagnostics/diagnostics.h
+omp.h
+-
 

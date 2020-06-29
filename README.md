@@ -6,13 +6,18 @@ The documentation can be found in the subdirectory doc. It contains a full descr
 
 The handbook of the model can be found in the subdirectory handbook. It contains information on how to configure and run the model.
 
-# Installing the model
-
 ## Prerequisites
 
 * atmostracers (https://github.com/MHBalsmeier/atmostracers)
 * rte-rrtmgp-c (https://github.com/MHBalsmeier/rte-rrtmgp-c)
 * geos95 (https://github.com/MHBalsmeier/geos95, only for grid generator)
+* eccodes library ()
+* netcdf library
+* CMake
+* OpenMPI
+* OpenMP
+
+# Installing the model
 
 ## Download
 

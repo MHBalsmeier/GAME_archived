@@ -21,9 +21,9 @@ double calc_micro_density(double density_macro, double condensates_density_sum)
 double calc_condensates_density_sum(int layer_index, int h_index, Tracer_densities tracer_densities)
 {
 	double result = 0;
-	for (int i = 0; i < NUMBER_OF_CONDENSATED_TRACERS; ++i)
-		result += tracer_densities[i*NUMBER_OF_SCALARS + layer_index*NUMBER_OF_SCALARS_H + h_index];
-	if (result < -NUMBER_OF_CONDENSATED_TRACERS*EPSILON_TRACERS)
+	for (int i = 0; i < NO_OF_CONDENSATED_TRACERS; ++i)
+		result += tracer_densities[i*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + h_index];
+	if (result < -NO_OF_CONDENSATED_TRACERS*EPSILON_TRACERS)
 	{
 		printf("Error: condensates_density_sum negative.\n");
 		exit(1);

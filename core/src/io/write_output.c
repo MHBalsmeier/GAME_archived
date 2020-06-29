@@ -50,17 +50,17 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     find_hour_from_time_coord(t_init, &init_year, &init_month, &init_day, &init_hour, &init_minute, &init_second, &init_microsecond);
     long data_date = 10000*init_year + 100*init_month + init_day;
     long data_time = init_hour;
-    double *pot_temperature_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *rho_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *wind_u_h = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
-    double *wind_v_h = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
-    double *wind_w_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *mslp = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *surface_p = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *t2 = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *tcdc = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *rprate = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *sprate = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *pot_temperature_h = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *rho_h = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *wind_u_h = malloc(NO_OF_VECTORS_H*sizeof(double));
+    double *wind_v_h = malloc(NO_OF_VECTORS_H*sizeof(double));
+    double *wind_w_h = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *mslp = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *surface_p = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *t2 = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *tcdc = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *rprate = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *sprate = malloc(NO_OF_SCALARS_H*sizeof(double));
     double pressure_value, mslp_factor, surface_p_factor, temp_lowest_layer, temp_mslp, temp_surface, exner_pressure, wind_0, wind_1, wind_u, wind_v, delta_z_temp, temp_gradient, temp_upper, temp_lower;
     double standard_vert_lapse_rate = 0.0065;
     double pot_temp, condensates_density_sum, density_d_micro_value, density_v_micro_value;
@@ -79,61 +79,61 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     codes_handle *handle_rprate = NULL;
     codes_handle *handle_sprate = NULL;
     codes_handle *handle_wind_10m_gusts = NULL;
-    for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
+    for (int i = 0; i < NO_OF_LAYERS; ++i)
     {
-        for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
+        for (int j = 0; j < NO_OF_SCALARS_H; ++j)
         {
-        	rho_h[j] = state_write_out -> density_dry[j + i*NUMBER_OF_SCALARS_H];
+        	rho_h[j] = state_write_out -> density_dry[j + i*NO_OF_SCALARS_H];
         	condensates_density_sum = calc_condensates_density_sum(i, j, state_write_out -> tracer_densities);
-			pot_temperature_h[j] = pot_temp_diagnostics_single_value(state_write_out -> entropy_gas[j + i*NUMBER_OF_SCALARS_H], rho_h[j], state_write_out -> tracer_densities[NUMBER_OF_CONDENSATED_TRACERS*NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H], condensates_density_sum);
+			pot_temperature_h[j] = pot_temp_diagnostics_single_value(state_write_out -> entropy_gas[j + i*NO_OF_SCALARS_H], rho_h[j], state_write_out -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j + i*NO_OF_SCALARS_H], condensates_density_sum);
         }
-        if (i == NUMBER_OF_LAYERS - 1)
+        if (i == NO_OF_LAYERS - 1)
         {
-            for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
+            for (int j = 0; j < NO_OF_SCALARS_H; ++j)
             {
             	condensates_density_sum = calc_condensates_density_sum(i, j, state_write_out -> tracer_densities);
-            	pot_temp = pot_temp_diagnostics_single_value(state_write_out -> entropy_gas[j + i*NUMBER_OF_SCALARS_H], state_write_out -> density_dry[j + i*NUMBER_OF_SCALARS_H], state_write_out -> tracer_densities[NUMBER_OF_CONDENSATED_TRACERS*NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H], condensates_density_sum);
-            	density_d_micro_value = calc_micro_density(state_write_out -> density_dry[j + i*NUMBER_OF_SCALARS_H], condensates_density_sum);
-            	density_v_micro_value = calc_micro_density(state_write_out -> tracer_densities[NUMBER_OF_CONDENSATED_TRACERS*NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H], condensates_density_sum);
+            	pot_temp = pot_temp_diagnostics_single_value(state_write_out -> entropy_gas[j + i*NO_OF_SCALARS_H], state_write_out -> density_dry[j + i*NO_OF_SCALARS_H], state_write_out -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j + i*NO_OF_SCALARS_H], condensates_density_sum);
+            	density_d_micro_value = calc_micro_density(state_write_out -> density_dry[j + i*NO_OF_SCALARS_H], condensates_density_sum);
+            	density_v_micro_value = calc_micro_density(state_write_out -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j + i*NO_OF_SCALARS_H], condensates_density_sum);
                 exner_pressure = exner_pressure_diagnostics_single_value(density_d_micro_value, density_v_micro_value, pot_temp);
                 temp_lowest_layer = temperature_diagnostics_single_value(exner_pressure, pot_temp);
-                pressure_value = state_write_out -> density_dry[j + i*NUMBER_OF_SCALARS_H]*R_D*temp_lowest_layer;
-                temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[j + i*NUMBER_OF_SCALARS_H];
-                mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, -grid -> gravity[NUMBER_OF_LAYERS*NUMBER_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
+                pressure_value = state_write_out -> density_dry[j + i*NO_OF_SCALARS_H]*R_D*temp_lowest_layer;
+                temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[j + i*NO_OF_SCALARS_H];
+                mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, -grid -> gravity[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
                 mslp[j] = pressure_value/mslp_factor;
-				temp_surface = temp_lowest_layer + standard_vert_lapse_rate*(grid -> z_scalar[j + i*NUMBER_OF_SCALARS_H] - grid -> z_vector[NUMBER_OF_VECTORS - NUMBER_OF_VECTORS_V + j]);
-                surface_p_factor = pow(1 - (temp_surface - temp_lowest_layer)/temp_surface, -grid -> gravity[NUMBER_OF_LAYERS*NUMBER_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
+				temp_surface = temp_lowest_layer + standard_vert_lapse_rate*(grid -> z_scalar[j + i*NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_V + j]);
+                surface_p_factor = pow(1 - (temp_surface - temp_lowest_layer)/temp_surface, -grid -> gravity[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
 				surface_p[j] = pressure_value/surface_p_factor;
-                delta_z_temp = 2 - grid -> z_scalar[j + i*NUMBER_OF_SCALARS_H];
+                delta_z_temp = 2 - grid -> z_scalar[j + i*NO_OF_SCALARS_H];
             	condensates_density_sum = calc_condensates_density_sum(i - 1, j, state_write_out -> tracer_densities);
-                pot_temp = pot_temp_diagnostics_single_value(state_write_out -> entropy_gas[j + (i - 1)*NUMBER_OF_SCALARS_H], state_write_out -> density_dry[j + (i - 1)*NUMBER_OF_SCALARS_H], state_write_out -> tracer_densities[NUMBER_OF_CONDENSATED_TRACERS*NUMBER_OF_SCALARS + j + (i - 1)*NUMBER_OF_SCALARS_H], condensates_density_sum);
-            	density_d_micro_value = calc_micro_density(state_write_out -> density_dry[j + (i - 1)*NUMBER_OF_SCALARS_H], condensates_density_sum);
-            	density_v_micro_value = calc_micro_density(state_write_out -> tracer_densities[NUMBER_OF_CONDENSATED_TRACERS*NUMBER_OF_SCALARS + j + (i - 1)*NUMBER_OF_SCALARS_H], condensates_density_sum);
+                pot_temp = pot_temp_diagnostics_single_value(state_write_out -> entropy_gas[j + (i - 1)*NO_OF_SCALARS_H], state_write_out -> density_dry[j + (i - 1)*NO_OF_SCALARS_H], state_write_out -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j + (i - 1)*NO_OF_SCALARS_H], condensates_density_sum);
+            	density_d_micro_value = calc_micro_density(state_write_out -> density_dry[j + (i - 1)*NO_OF_SCALARS_H], condensates_density_sum);
+            	density_v_micro_value = calc_micro_density(state_write_out -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j + (i - 1)*NO_OF_SCALARS_H], condensates_density_sum);
                 exner_pressure = exner_pressure_diagnostics_single_value(density_d_micro_value, density_v_micro_value, pot_temp);
                 temp_upper = temperature_diagnostics_single_value(exner_pressure, pot_temp);
             	condensates_density_sum = calc_condensates_density_sum(i, j, state_write_out -> tracer_densities);
-                pot_temp = pot_temp_diagnostics_single_value(state_write_out -> entropy_gas[j + i*NUMBER_OF_SCALARS_H], state_write_out -> density_dry[j + i*NUMBER_OF_SCALARS_H], state_write_out -> tracer_densities[NUMBER_OF_CONDENSATED_TRACERS*NUMBER_OF_SCALARS + i*NUMBER_OF_SCALARS_H + j], condensates_density_sum);
-            	density_d_micro_value = calc_micro_density(state_write_out -> density_dry[j + i*NUMBER_OF_SCALARS_H], condensates_density_sum);
-            	density_v_micro_value = calc_micro_density(state_write_out -> tracer_densities[NUMBER_OF_CONDENSATED_TRACERS*NUMBER_OF_SCALARS + j + i*NUMBER_OF_SCALARS_H], condensates_density_sum);
+                pot_temp = pot_temp_diagnostics_single_value(state_write_out -> entropy_gas[j + i*NO_OF_SCALARS_H], state_write_out -> density_dry[j + i*NO_OF_SCALARS_H], state_write_out -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i*NO_OF_SCALARS_H + j], condensates_density_sum);
+            	density_d_micro_value = calc_micro_density(state_write_out -> density_dry[j + i*NO_OF_SCALARS_H], condensates_density_sum);
+            	density_v_micro_value = calc_micro_density(state_write_out -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j + i*NO_OF_SCALARS_H], condensates_density_sum);
                 exner_pressure = exner_pressure_diagnostics_single_value(density_d_micro_value, density_v_micro_value, pot_temp);
                 temp_lower = temperature_diagnostics_single_value(exner_pressure, pot_temp);
-                temp_gradient = (temp_upper - temp_lower)/(grid -> z_scalar[j + (i - 1)*NUMBER_OF_SCALARS_H] - grid -> z_scalar[j + i*NUMBER_OF_SCALARS_H]);
+                temp_gradient = (temp_upper - temp_lower)/(grid -> z_scalar[j + (i - 1)*NO_OF_SCALARS_H] - grid -> z_scalar[j + i*NO_OF_SCALARS_H]);
                 t2[j] = temp_lowest_layer + delta_z_temp*temp_gradient;
                 sprate[j] = 0;
                 rprate[j] = 0;
                 tcdc[j] = 0;
-                for (int k = 0; k < NUMBER_OF_CONDENSATED_TRACERS; ++k)
+                for (int k = 0; k < NO_OF_CONDENSATED_TRACERS; ++k)
                 {
-                    for (int l = 0; l < NUMBER_OF_LAYERS; ++l)
+                    for (int l = 0; l < NO_OF_LAYERS; ++l)
                     {
-                        if (state_write_out -> tracer_densities[k*NUMBER_OF_SCALARS + l*NUMBER_OF_SCALARS_H + j] > 0)
+                        if (state_write_out -> tracer_densities[k*NO_OF_SCALARS + l*NO_OF_SCALARS_H + j] > 0)
                             tcdc[j] = 100*1;
                     }
                 }
-                for (int k = 0; k < NUMBER_OF_SOLID_TRACERS; ++k)
-                    sprate[j] += fmax(ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NUMBER_OF_SCALARS + i*NUMBER_OF_SCALARS_H + j], 0);
-                for (int k = NUMBER_OF_SOLID_TRACERS; k < NUMBER_OF_CONDENSATED_TRACERS; ++k)
-                    rprate[j] += fmax(ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NUMBER_OF_SCALARS + i*NUMBER_OF_SCALARS_H + j], 0);
+                for (int k = 0; k < NO_OF_SOLID_TRACERS; ++k)
+                    sprate[j] += fmax(ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + i*NO_OF_SCALARS_H + j], 0);
+                for (int k = NO_OF_SOLID_TRACERS; k < NO_OF_CONDENSATED_TRACERS; ++k)
+                    rprate[j] += fmax(ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + i*NO_OF_SCALARS_H + j], 0);
             }
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_mslp = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
@@ -176,7 +176,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
                 ECCERR(retval);
             if ((retval = codes_set_long(handle_mslp, "level", 0)))
                 ECCERR(retval);
-            if ((retval = codes_set_double_array(handle_mslp, "values", mslp, NUMBER_OF_SCALARS_H)))
+            if ((retval = codes_set_double_array(handle_mslp, "values", mslp, NO_OF_SCALARS_H)))
                 ECCERR(retval);
 			codes_handle_delete(handle_mslp);
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
@@ -222,7 +222,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
                 ECCERR(retval);
             if ((retval = codes_set_long(handle_surface_p, "level", 0)))
                 ECCERR(retval);
-            if ((retval = codes_set_double_array(handle_surface_p, "values", surface_p, NUMBER_OF_SCALARS_H)))
+            if ((retval = codes_set_double_array(handle_surface_p, "values", surface_p, NO_OF_SCALARS_H)))
                 ECCERR(retval);
             if ((retval = codes_write_message(handle_surface_p, OUTPUT_FILE, "a")))
                 ECCERR(retval);
@@ -268,7 +268,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
                 ECCERR(retval);
             if ((retval = codes_set_long(handle_t2, "level", 2)))
                 ECCERR(retval);
-            if ((retval = codes_set_double_array(handle_t2, "values", t2, NUMBER_OF_SCALARS_H)))
+            if ((retval = codes_set_double_array(handle_t2, "values", t2, NO_OF_SCALARS_H)))
                 ECCERR(retval);
             if ((retval = codes_write_message(handle_t2, OUTPUT_FILE, "a")))
                 ECCERR(retval);
@@ -314,7 +314,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
                 ECCERR(retval);
             if ((retval = codes_set_long(handle_rprate, "level", 0)))
                 ECCERR(retval);
-            if ((retval = codes_set_double_array(handle_rprate, "values", rprate, NUMBER_OF_SCALARS_H)))
+            if ((retval = codes_set_double_array(handle_rprate, "values", rprate, NO_OF_SCALARS_H)))
                 ECCERR(retval);
             if ((retval = codes_write_message(handle_rprate, OUTPUT_FILE, "a")))
                 ECCERR(retval);
@@ -360,7 +360,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
                 ECCERR(retval);
             if ((retval = codes_set_long(handle_sprate, "level", 0)))
                 ECCERR(retval);
-            if ((retval = codes_set_double_array(handle_sprate, "values", sprate, NUMBER_OF_SCALARS_H)))
+            if ((retval = codes_set_double_array(handle_sprate, "values", sprate, NO_OF_SCALARS_H)))
                 ECCERR(retval);
             if ((retval = codes_write_message(handle_sprate, OUTPUT_FILE, "a")))
                 ECCERR(retval);
@@ -408,7 +408,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
                 ECCERR(retval);
             if ((retval = codes_set_string(handle_tcdc, "shortName", "tcc", &length)))
                 ECCERR(retval);
-            if ((retval = codes_set_double_array(handle_tcdc, "values", tcdc, NUMBER_OF_SCALARS_H)))
+            if ((retval = codes_set_double_array(handle_tcdc, "values", tcdc, NO_OF_SCALARS_H)))
                 ECCERR(retval);
             if ((retval = codes_write_message(handle_tcdc, OUTPUT_FILE, "a")))
                 ECCERR(retval);
@@ -455,7 +455,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
             ECCERR(retval);
         if ((retval = codes_set_long(handle_pot_temperature_h, "level", i)))
             ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_pot_temperature_h, "values", pot_temperature_h, NUMBER_OF_SCALARS_H)))
+        if ((retval = codes_set_double_array(handle_pot_temperature_h, "values", pot_temperature_h, NO_OF_SCALARS_H)))
             ECCERR(retval);
         if (i == 0)
         {
@@ -509,14 +509,14 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
             ECCERR(retval);
         if ((retval = codes_set_long(handle_density_h, "level", i)))
             ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_density_h, "values", rho_h, NUMBER_OF_SCALARS_H)))
+        if ((retval = codes_set_double_array(handle_density_h, "values", rho_h, NO_OF_SCALARS_H)))
             ECCERR(retval);
         if ((retval = codes_write_message(handle_density_h, OUTPUT_FILE, "a")))
             ECCERR(retval);
 		codes_handle_delete(handle_density_h);
-        for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
+        for (int j = 0; j < NO_OF_VECTORS_H; ++j)
         {
-            wind_0 = state_write_out -> velocity_gas[j + i*NUMBER_OF_VECTORS_H + (i + 1)*NUMBER_OF_VECTORS_V];
+            wind_0 = state_write_out -> velocity_gas[j + i*NO_OF_VECTORS_H + (i + 1)*NO_OF_VECTORS_V];
             retval = recov_hor_par_pri(state_write_out -> velocity_gas, i, j, &wind_1, grid);
             retval = passive_turn(wind_0, wind_1, -grid -> direction[j], &wind_u, &wind_v);
             wind_u_h[j] = wind_u;
@@ -563,7 +563,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
             ECCERR(retval);
         if ((retval = codes_set_long(handle_wind_u_h, "level", i)))
             ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_wind_u_h, "values", wind_u_h, NUMBER_OF_VECTORS_H)))
+        if ((retval = codes_set_double_array(handle_wind_u_h, "values", wind_u_h, NO_OF_VECTORS_H)))
             ECCERR(retval);
         if ((retval = codes_write_message(handle_wind_u_h, OUTPUT_FILE, "a")))
             ECCERR(retval);
@@ -609,27 +609,27 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
             ECCERR(retval);
         if ((retval = codes_set_long(handle_wind_v_h, "level", i)))
             ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_wind_v_h, "values", wind_v_h, NUMBER_OF_VECTORS_H)))
+        if ((retval = codes_set_double_array(handle_wind_v_h, "values", wind_v_h, NO_OF_VECTORS_H)))
             ECCERR(retval);
         if ((retval = codes_write_message(handle_wind_v_h, OUTPUT_FILE, "a")))
             ECCERR(retval);
 		codes_handle_delete(handle_wind_v_h);
     }
-	double *wind_10_m_both_dir_array = malloc(2*min_no_of_output_steps*NUMBER_OF_VECTORS_H*sizeof(double));
+	double *wind_10_m_both_dir_array = malloc(2*min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
 	double wind_10_m_downscale_factor = 0.667;
 	double wind_tangential;
 	int time_step_10_m_wind, h_index;
-	double *wind_10_m_speed = malloc(min_no_of_output_steps*NUMBER_OF_VECTORS_H*sizeof(double));
-	double *wind_10_m_mean_u = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
-	double *wind_10_m_mean_v = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
-	for (int j = 0; j < min_no_of_output_steps*NUMBER_OF_VECTORS_H; ++j)
+	double *wind_10_m_speed = malloc(min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
+	double *wind_10_m_mean_u = malloc(NO_OF_VECTORS_H*sizeof(double));
+	double *wind_10_m_mean_v = malloc(NO_OF_VECTORS_H*sizeof(double));
+	for (int j = 0; j < min_no_of_output_steps*NO_OF_VECTORS_H; ++j)
 	{
-		time_step_10_m_wind = j/NUMBER_OF_VECTORS_H;
-		h_index = j - time_step_10_m_wind*NUMBER_OF_VECTORS_H;
+		time_step_10_m_wind = j/NO_OF_VECTORS_H;
+		h_index = j - time_step_10_m_wind*NO_OF_VECTORS_H;
 	    wind_10_m_both_dir_array[2*j + 0] = wind_10_m_downscale_factor*wind_h_lowest_layer_array[j];
 	    wind_tangential = 0;
 		for (int i = 0; i < 10; ++i)
-			wind_tangential += grid -> trsk_modified_weights[10*h_index + i]*wind_h_lowest_layer_array[time_step_10_m_wind*NUMBER_OF_VECTORS_H + grid -> trsk_modified_velocity_indices[10*h_index + i]];
+			wind_tangential += grid -> trsk_modified_weights[10*h_index + i]*wind_h_lowest_layer_array[time_step_10_m_wind*NO_OF_VECTORS_H + grid -> trsk_modified_velocity_indices[10*h_index + i]];
 	    wind_10_m_both_dir_array[2*j + 1] = wind_10_m_downscale_factor*wind_tangential;
 	    wind_10_m_speed[j] = sqrt(pow(wind_10_m_both_dir_array[2*j + 0], 2) + pow(wind_10_m_both_dir_array[2*j + 1], 2));
 	    if (time_step_10_m_wind == 0)
@@ -643,7 +643,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	    	wind_10_m_mean_v[h_index] += 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 1];
 	    }
 	}
-	for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 	{
         retval = passive_turn(wind_10_m_mean_u[i], wind_10_m_mean_v[i], -grid -> direction[i], &wind_u, &wind_v);
         if (retval != 0)
@@ -656,16 +656,16 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	}
 	double standard_deviation;
 	double gusts_parameter = 3;
-	double *wind_10_m_gusts_speed = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
+	double *wind_10_m_gusts_speed = malloc(NO_OF_VECTORS_H*sizeof(double));
 	double *vector_for_std_deviation = malloc(min_no_of_output_steps*sizeof(double));
 	double wind_speed_10_m_mean;
-	for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 	{
 		wind_speed_10_m_mean = 0;
 		for (int j = 0; j < min_no_of_output_steps; ++j)
 		{
-			vector_for_std_deviation[j] = wind_10_m_speed[j*NUMBER_OF_VECTORS_H + i];
-			wind_speed_10_m_mean += 1.0/min_no_of_output_steps*wind_10_m_speed[j*NUMBER_OF_VECTORS_H + i];
+			vector_for_std_deviation[j] = wind_10_m_speed[j*NO_OF_VECTORS_H + i];
+			wind_speed_10_m_mean += 1.0/min_no_of_output_steps*wind_10_m_speed[j*NO_OF_VECTORS_H + i];
 		}
 		standard_deviation = calc_std_dev(vector_for_std_deviation, min_no_of_output_steps);
 		if (t_write != t_init)
@@ -715,7 +715,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	    ECCERR(retval);
 	if ((retval = codes_set_long(handle_wind_u_10m_mean, "level", 10)))
 	    ECCERR(retval);
-	if ((retval = codes_set_double_array(handle_wind_u_10m_mean, "values", wind_10_m_mean_u, NUMBER_OF_VECTORS_H)))
+	if ((retval = codes_set_double_array(handle_wind_u_10m_mean, "values", wind_10_m_mean_u, NO_OF_VECTORS_H)))
 	    ECCERR(retval);
 	if ((retval = codes_write_message(handle_wind_u_10m_mean, OUTPUT_FILE, "a")))
 	    ECCERR(retval);
@@ -762,7 +762,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	    ECCERR(retval);
 	if ((retval = codes_set_long(handle_wind_v_10m_mean, "level", 10)))
 	    ECCERR(retval);
-	if ((retval = codes_set_double_array(handle_wind_v_10m_mean, "values", wind_10_m_mean_v, NUMBER_OF_VECTORS_H)))
+	if ((retval = codes_set_double_array(handle_wind_v_10m_mean, "values", wind_10_m_mean_v, NO_OF_VECTORS_H)))
 	    ECCERR(retval);
 	if ((retval = codes_write_message(handle_wind_v_10m_mean, OUTPUT_FILE, "a")))
 	    ECCERR(retval);
@@ -809,7 +809,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	    ECCERR(retval);
 	if ((retval = codes_set_long(handle_wind_10m_gusts, "level", 10)))
 	    ECCERR(retval);
-	if ((retval = codes_set_double_array(handle_wind_10m_gusts, "values", wind_10_m_gusts_speed, NUMBER_OF_VECTORS_H)))
+	if ((retval = codes_set_double_array(handle_wind_10m_gusts, "values", wind_10_m_gusts_speed, NO_OF_VECTORS_H)))
 	    ECCERR(retval);
 	if ((retval = codes_write_message(handle_wind_10m_gusts, OUTPUT_FILE, "a")))
 	    ECCERR(retval);
@@ -832,10 +832,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	if (err != 0)
 	    ECCERR(err);
 	fclose(SAMPLE_FILE);
-    for (int i = 0; i < NUMBER_OF_LEVELS; ++i)
+    for (int i = 0; i < NO_OF_LEVELS; ++i)
     {
-        for (int j = 0; j < NUMBER_OF_VECTORS_V; j++)
-            wind_w_h[j] = state_write_out -> velocity_gas[j + i*NUMBER_OF_VECTORS_PER_LAYER];
+        for (int j = 0; j < NO_OF_VECTORS_V; j++)
+            wind_w_h[j] = state_write_out -> velocity_gas[j + i*NO_OF_VECTORS_PER_LAYER];
         if ((retval = codes_set_long(handle_wind_w_h, "discipline", 0)))
             ECCERR(retval);
         if ((retval = codes_set_long(handle_wind_w_h, "centre", 255)))
@@ -872,7 +872,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
             ECCERR(retval);
         if ((retval = codes_set_long(handle_wind_w_h, "level", i)))
             ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_wind_w_h, "values", wind_v_h, NUMBER_OF_VECTORS_V)))
+        if ((retval = codes_set_double_array(handle_wind_w_h, "values", wind_v_h, NO_OF_VECTORS_V)))
             ECCERR(retval);
         if ((retval = codes_write_message(handle_wind_w_h, OUTPUT_FILE, "a")))
             ECCERR(retval);
