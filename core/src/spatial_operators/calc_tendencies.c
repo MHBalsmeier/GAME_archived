@@ -13,7 +13,7 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int explicit_momentum_tendencies(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int dissipation_on, int tracers_on, Scalar_field temperature, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Vector_field friction_acc, Scalar_field heating_diss, Scalar_field specific_entropy, Curl_field rel_curl, Curl_field abs_curl, Vector_field downgradient_macroscopic_energy, Vector_field pressure_gradient_acc, Vector_field abs_curl_tend, Vector_field specific_entropy_gradient, Scalar_field c_h_p_field, Scalar_field macroscopic_energy, Scalar_field pressure_gradient_decel_factor, Vector_field pressure_gradient_acc_1)
 {
-	int retval;
+	int retval = temperature_diagnostics(current_state -> entropy_gas, current_state -> density_dry, current_state -> tracer_densities, temperature);
     if (dissipation_on == 1)
     {
 		retval = dissipation(current_state -> velocity_gas, current_state -> density_dry, friction_acc, heating_diss, grid);
@@ -133,7 +133,9 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
             		state_tendency -> velocity_gas[i] = pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i] + hor_non_trad_cori_term + metric_term + friction_acc[i];
         		}
             	else
+            	{
             		state_tendency -> velocity_gas[i] = pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i] + friction_acc[i];
+        		}
         	}
             else
             {
@@ -157,7 +159,7 @@ int calc_partially_implicit_divergences(State *current_state, State *next_state,
 {
     scalar_times_vector(current_state -> density_dry, next_state -> velocity_gas, mass_dry_flux_density, grid);
     divergence(mass_dry_flux_density, mass_dry_flux_density_divergence, grid, 0);
-	int retval = temperature_diagnostics(current_state -> entropy_gas, current_state -> density_dry, current_state -> tracer_densities, temperature);
+    int retval;
     if (diffusion_on == 1)
     {
         retval = grad(current_state -> density_dry, mass_dry_diffusion_flux_density, grid);
@@ -286,7 +288,9 @@ int calc_partially_implicit_divergences(State *current_state, State *next_state,
             state_tendency -> entropy_gas[i] = -entropy_gas_flux_density_divergence[i] + 1/temperature[i]*(rho_h/total_density*(temp_diffusion_heating[i] + dissipation_on*heating_diss[i] + radiation_tendency[i]) + tracers_on*phase_transitions_on*tracer_heat_source_rates[NUMBER_OF_CONDENSATED_TRACERS*NUMBER_OF_SCALARS + i]);
         }
         else
+        {
             state_tendency -> entropy_gas[i] = -entropy_gas_flux_density_divergence[i] + 1/temperature[i]*radiation_tendency[i];
+        }
     }
     return retval;
 }

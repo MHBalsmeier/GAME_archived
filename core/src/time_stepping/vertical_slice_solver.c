@@ -12,7 +12,7 @@ The vertical advection of horizontal momentum is organized here.
 int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency, double delta_t, Grid *grid)
 {
 	/*
-	Implicit vertical advection of vertical momentum (Cramk-Nicolson).
+	Implicit vertical advection of vertical momentum (Crank-Nicolson).
 	Procedure derived in Kompendium.
 	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
 	*/
@@ -38,7 +38,7 @@ int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency
 				delta_z = grid -> z_vector[NUMBER_OF_VECTORS_V + j*NUMBER_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[NUMBER_OF_VECTORS_V + (j + 1)*NUMBER_OF_VECTORS_PER_LAYER + i];
 			else
 				delta_z = grid -> z_vector[NUMBER_OF_VECTORS_V + j*NUMBER_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[NUMBER_OF_VECTORS_V + (j + 2)*NUMBER_OF_VECTORS_PER_LAYER + i];
-			a_vector[j] = vertical_velocity[j]*delta_t/(2*delta_z);
+			a_vector[j] = vertical_velocity[j + 1]*delta_t/(2*delta_z);
 			if (j == 0)
 				delta_z = grid -> z_vector[NUMBER_OF_VECTORS_V + j*NUMBER_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[NUMBER_OF_VECTORS_V + (j + 1)*NUMBER_OF_VECTORS_PER_LAYER + i];
 			else
@@ -84,6 +84,7 @@ int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency
 		for (int j = NUMBER_OF_LAYERS - 2; j >= 0; --j)
 		{
 			state_p1 -> velocity_gas[NUMBER_OF_VECTORS_V + j*NUMBER_OF_VECTORS_PER_LAYER + i] = d_prime_vector[j] - c_prime_vector[j]*state_p1 -> velocity_gas[NUMBER_OF_VECTORS_V + (j + 1)*NUMBER_OF_VECTORS_PER_LAYER + i];
+			
 		}
 	}
 	free(vertical_velocity);
@@ -117,8 +118,10 @@ int three_band_solver_ver(State *state_0, State *state_p1, State *state_tendency
 		for (int j = 0; j < NUMBER_OF_LAYERS - 1; ++j)
 		{
 			vertical_velocity[j] = state_0 -> velocity_gas[i + (j + 1)*NUMBER_OF_VECTORS_PER_LAYER];
+			vertical_velocity[j] = 0;
 		}
 		vertical_velocity[NUMBER_OF_LAYERS - 1] = state_p1 -> velocity_gas[i + NUMBER_OF_LAYERS*NUMBER_OF_VECTORS_PER_LAYER];
+		vertical_velocity[NUMBER_OF_LAYERS - 1] = 0;
 		// filling up the original vectors
 		for (int j = 0; j < NUMBER_OF_LAYERS - 2; ++j)
 		{
@@ -129,13 +132,13 @@ int three_band_solver_ver(State *state_0, State *state_p1, State *state_tendency
 		c_vector[0] = -vertical_velocity[0]*delta_t/delta_z;
 		for (int j = 1; j < NUMBER_OF_LAYERS - 2; ++j)
 		{
-			delta_z = grid -> z_vector[(j - 1)*NUMBER_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 1)*NUMBER_OF_VECTORS_PER_LAYER + i];
+			delta_z = grid -> z_vector[j*NUMBER_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 2)*NUMBER_OF_VECTORS_PER_LAYER + i];
 			c_vector[j] = -vertical_velocity[j]*delta_t/delta_z;
 		}
 		for (int j = 0; j < NUMBER_OF_LAYERS - 1; ++j)
 		{
 			b_vector[j] = 1;
-			d_vector[j] = state_0 -> velocity_gas[j*NUMBER_OF_VECTORS_PER_LAYER + i] + delta_t*state_tendency -> velocity_gas[j*NUMBER_OF_VECTORS_PER_LAYER + i];
+			d_vector[j] = state_0 -> velocity_gas[(j + 1)*NUMBER_OF_VECTORS_PER_LAYER + i] + delta_t*state_tendency -> velocity_gas[(j + 1)*NUMBER_OF_VECTORS_PER_LAYER + i];
 		}
 		delta_z = grid -> z_vector[(NUMBER_OF_LAYERS - 2)*NUMBER_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[NUMBER_OF_LAYERS*NUMBER_OF_VECTORS_PER_LAYER + i];
 		d_vector[NUMBER_OF_LAYERS - 2] += delta_t*vertical_velocity[NUMBER_OF_LAYERS - 2]*vertical_velocity[NUMBER_OF_LAYERS - 1]/delta_z;
@@ -151,11 +154,12 @@ int three_band_solver_ver(State *state_0, State *state_p1, State *state_tendency
 			d_prime_vector[j] = (d_vector[j] - d_prime_vector[j - 1]*a_vector[j])/(b_vector[j] - c_prime_vector[j - 1]*a_vector[j]);
 		}
 		// finally, the solution is done here
-		state_p1 -> velocity_gas[(NUMBER_OF_LAYERS - 1)*NUMBER_OF_VECTORS_PER_LAYER + i] = d_prime_vector[NUMBER_OF_LAYERS - 1];
+		state_p1 -> velocity_gas[(NUMBER_OF_LAYERS - 1)*NUMBER_OF_VECTORS_PER_LAYER + i] = d_prime_vector[NUMBER_OF_LAYERS - 2];
 		for (int j = NUMBER_OF_LAYERS - 2; j >= 1; --j)
 		{
-			state_p1 -> velocity_gas[j*NUMBER_OF_VECTORS_PER_LAYER + i] = d_prime_vector[j] - c_prime_vector[j]*state_p1 -> velocity_gas[(j + 1)*NUMBER_OF_VECTORS_PER_LAYER + i];
+			state_p1 -> velocity_gas[j*NUMBER_OF_VECTORS_PER_LAYER + i] = d_prime_vector[j - 1] - c_prime_vector[j]*state_p1 -> velocity_gas[(j + 1)*NUMBER_OF_VECTORS_PER_LAYER + i];
 		}
+		state_p1 -> velocity_gas[i] = 0;
 	}
 	free(vertical_velocity);
 	free(a_vector);

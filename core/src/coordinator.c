@@ -126,11 +126,13 @@ int main(int argc, char *argv[])
     t_0 = t_init;
     double t_write_integral = t_init;
     State *state_0 = calloc(1, sizeof(State));
+    set_state_to_zero(state_0);
     *state_0 = *state_init;
     free(state_init);
     clock_t first_time, second_time;
     first_time = clock();
     State *state_p1 = calloc(1, sizeof(State));
+    set_state_to_zero(state_p1);
     if (write_out_dry_mass_integral == 1)
 		write_out_integral(state_0, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
     if (write_out_entropy_integral == 1)
@@ -158,6 +160,7 @@ int main(int argc, char *argv[])
     double *tracer_mass_source_rates = calloc(NUMBER_OF_TRACERS*NUMBER_OF_SCALARS, sizeof(double));
     double *tracer_heat_source_rates = calloc(NUMBER_OF_TRACERS*NUMBER_OF_SCALARS, sizeof(double));
     State *state_tendency = calloc(1, sizeof(State));
+    set_state_to_zero(state_tendency);
     Vector_field *mass_dry_flux_density = calloc(1, sizeof(Vector_field));
     Scalar_field *mass_dry_flux_density_divergence = calloc(1, sizeof(Scalar_field));
     Scalar_field *temperature = calloc(1, sizeof(Scalar_field));
@@ -201,6 +204,7 @@ int main(int argc, char *argv[])
 		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
 	t_write_integral += delta_t;
     State *state_write = calloc(1, sizeof(State));
+    set_state_to_zero(state_write);
     double speed;
     rad_update = 0;
     double t_rad_update = t_0 + radiation_delta_t;
