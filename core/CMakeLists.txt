@@ -5,7 +5,7 @@ add_executable(game src/coordinator.c src/io/init_state_setter.c src/io/interpol
 add_definitions(-Wall)
 find_package(OpenMP)
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 target_link_libraries(game eccodes m netcdf geos95 rte-rrtmgp-c atmostracers)
 install(TARGETS game DESTINATION core)
 install(FILES ../run.sh DESTINATION core/..)

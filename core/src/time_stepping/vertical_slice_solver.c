@@ -26,7 +26,6 @@ int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency
 	double *vertical_velocity = malloc(NO_OF_LAYERS*sizeof(double));
 	double delta_z, delta_v, dvdz;
 	int i;
-	// #pragma omp parallel for default(shared)
 	for (i = 0; i < NO_OF_VECTORS_H; ++i)
 	{
 		// diagnozing the vertical velocity

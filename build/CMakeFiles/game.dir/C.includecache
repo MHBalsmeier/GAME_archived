@@ -33,6 +33,8 @@ rte-rrtmgp-c.h
 /home/max/my_code/game/core/src/rte-rrtmgp-c.h
 mpi.h
 -
+omp.h
+-
 
 /home/max/my_code/game/core/src/diagnostics/calc_numerical_diffusion_coeffs.c
 ../enum_and_typedefs.h
