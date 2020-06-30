@@ -11,7 +11,7 @@ The handbook of the model can be found in the subdirectory handbook. It contains
 * atmostracers (https://github.com/MHBalsmeier/atmostracers)
 * rte-rrtmgp-c (https://github.com/MHBalsmeier/rte-rrtmgp-c)
 * geos95 (https://github.com/MHBalsmeier/geos95, only for grid generator)
-* eccodes library ()
+* eccodes library (installation manual: https://mhbalsmeier.github.io/tutorials/eccodes_on_ubuntu.html)
 * netcdf library
 * CMake
 * OpenMPI
