@@ -1,4 +1,4 @@
-The Global Geophysical Modeling Frame (GAME) is a global non-hydrostatic hexagonal C grid dynamical core with the possibility to advect a variable number of tracers. For the source terms, it makes use of the atmostracers library. For radiation, it is coupled to RTE+RRTMGP via the C binding rte-rrtmgp-c (not yet).
+The Global Atmospheric Modeling Framework (GAME) is a global non-hydrostatic hexagonal C grid dynamical core with the possibility to advect a variable number of tracers. For the source terms, it makes use of the atmostracers library. For radiation, it is coupled to RTE+RRTMGP via the C binding rte-rrtmgp-c (not yet).
 
 ## Documents
 

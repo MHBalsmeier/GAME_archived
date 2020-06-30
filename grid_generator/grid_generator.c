@@ -9,8 +9,6 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <string.h>
 #include <math.h>
 #include "geos95.h"
-#include "conv.h"
-#include "indextools.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 #define OMEGA (7.292115e-5)
