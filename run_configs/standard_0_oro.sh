@@ -18,4 +18,5 @@ write_out_mass_dry_integral=1
 write_out_entropy_gas_integral=1
 write_out_energy_integral=1
 export OMP_NUM_THREADS=4
+number_of_cpus=1
 source run.sh
