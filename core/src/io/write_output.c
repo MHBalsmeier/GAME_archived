@@ -872,7 +872,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
             ECCERR(retval);
         if ((retval = codes_set_long(handle_wind_w_h, "level", i)))
             ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_wind_w_h, "values", wind_v_h, NO_OF_VECTORS_V)))
+        if ((retval = codes_set_double_array(handle_wind_w_h, "values", wind_w_h, NO_OF_VECTORS_V)))
             ECCERR(retval);
         if ((retval = codes_write_message(handle_wind_w_h, OUTPUT_FILE, "a")))
             ECCERR(retval);

@@ -60,3 +60,31 @@ int divv(Vector_field in_field, Scalar_field out_field, Grid *grid, int allow_su
     }
     return 0;
 }
+
+int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
+{
+    int number_of_edges, layer_index, h_index;
+    double comp_h;
+    for (int i = 0; i < NO_OF_SCALARS; ++i)
+    {
+        comp_h = 0;
+        layer_index = i/NO_OF_SCALARS_H;
+        h_index = i - layer_index*NO_OF_SCALARS_H;
+        number_of_edges = 6;
+        if (h_index < NO_OF_PENTAGONS)
+            number_of_edges = 5;
+        for (int j = 0; j < number_of_edges; ++j)
+            comp_h += in_field[NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]*grid -> adjacent_signs_h[6*h_index + j]*grid -> area[NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]];
+        out_field[i] = 1/grid -> volume[i]*comp_h;
+    }
+    return 0;
+}
+
+
+
+
+
+
+
+
+

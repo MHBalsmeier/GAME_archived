@@ -39,7 +39,6 @@ int main(int argc, char *argv[])
     len = strlen(argv[5]);
     char *OUTPUT_FOLDER = malloc((len + 1)*sizeof(char));
     strcpy(OUTPUT_FOLDER, argv[5]);
-    char *stars  = malloc(82*sizeof(char));
     double cfl_margin = strtof(argv[6], NULL);
     int dissipation_on;
     dissipation_on = strtod(argv[7], NULL);
@@ -60,9 +59,11 @@ int main(int argc, char *argv[])
     diffusion_on = strtod(argv[14], NULL);
     double radiation_delta_t;
     radiation_delta_t = strtof(argv[15], NULL);
-    for (int i = 0; i < 82 - 1; ++i)
+    char *stars  = malloc(83*sizeof(char));
+    for (int i = 0; i < 81; ++i)
         stars[i] = '*';
     stars[81] = '\n';
+    stars[82] = '\0';
     printf("%s", stars);
     printf("*\t\t\t\t\t\t\t\t\t\t*\n");
     printf("*\t\t\t\tThis is the GAME\t\t\t\t*\n");

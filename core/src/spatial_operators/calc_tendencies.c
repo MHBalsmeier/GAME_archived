@@ -158,7 +158,7 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
 int calc_partially_implicit_divvs(State *current_state, State *next_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int dissipation_on, int rad_update, int tracers_on, double delta_t, int diffusion_on, Scalar_field radiation_tendency, int phase_transitions_on, double tracer_mass_source_rates[], double tracer_heat_source_rates[], Vector_field mass_dry_flux_density, Scalar_field mass_dry_flux_density_divv, Scalar_field temperature, Vector_field entropy_gas_flux_density, Scalar_field entropy_gas_flux_density_divv, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Scalar_field heating_diss, Scalar_field diffusion_coeff_numerical_h, Scalar_field diffusion_coeff_numerical_v, Vector_field mass_dry_diffusion_flux_density, Scalar_field mass_dry_diffusion_source_rate, Vector_field temperature_flux_density, Scalar_field tracer_density, Vector_field tracer_velocity, Vector_field tracer_flux_density, Scalar_field tracer_flux_density_divv, Scalar_field tracer_density_temperature, Vector_field tracer_temperature_flux_density, Scalar_field tracer_temperature_flux_density_divv)
 {
     scalar_times_vector(current_state -> density_dry, next_state -> velocity_gas, mass_dry_flux_density, grid);
-    divv(mass_dry_flux_density, mass_dry_flux_density_divv, grid, 0);
+    divv_h(mass_dry_flux_density, mass_dry_flux_density_divv, grid);
     int retval;
     if (diffusion_on == 1)
     {

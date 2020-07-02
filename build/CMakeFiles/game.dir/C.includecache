@@ -321,4 +321,6 @@ stdio.h
 /home/max/my_code/game/core/src/diagnostics/diagnostics.h
 omp.h
 -
+../spatial_operators/spatial_operators.h
+/home/max/my_code/game/core/src/spatial_operators/spatial_operators.h
 

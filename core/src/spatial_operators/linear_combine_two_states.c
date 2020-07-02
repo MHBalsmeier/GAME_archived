@@ -28,7 +28,6 @@ int linear_combine_two_states_scalars(State *state_0, State *state_1, State *sta
 {
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-        state_out -> density_dry[i] = coeff_0*state_0 -> density_dry[i] + coeff_1*state_1 -> density_dry[i];
         state_out -> entropy_gas[i] = coeff_0*state_0 -> entropy_gas[i] + coeff_1*state_1 -> entropy_gas[i];
         for (int j = 0; j < NO_OF_TRACERS; ++j)
         {

@@ -9,6 +9,9 @@ The vertical advection of horizontal momentum is organized here.
 #include <stdio.h>
 #include "../diagnostics/diagnostics.h"
 #include <omp.h>
+#include "../spatial_operators/spatial_operators.h"
+
+int thomas_algorithm(double [], double [], double [], double [], double [], double [], double [], int);
 
 int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency, double delta_t, Grid *grid)
 {
@@ -24,6 +27,7 @@ int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency
 	double *c_prime_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
 	double *d_prime_vector = malloc(NO_OF_LAYERS*sizeof(double));
 	double *vertical_velocity = malloc(NO_OF_LAYERS*sizeof(double));
+	double *solution_vector = malloc(NO_OF_LAYERS*sizeof(double));
 	double delta_z, delta_v, dvdz;
 	int i;
 	for (i = 0; i < NO_OF_VECTORS_H; ++i)
@@ -70,25 +74,13 @@ int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency
 			dvdz = delta_v/delta_z;
 			d_vector[j] = state_0 -> velocity_gas[NO_OF_VECTORS_V + j*NO_OF_VECTORS_PER_LAYER + i] + delta_t*state_tendency -> velocity_gas[NO_OF_VECTORS_V + j*NO_OF_VECTORS_PER_LAYER + i] - vertical_velocity[j]*delta_t/2*dvdz;
 		}
-		// modified vectors
-		c_prime_vector[0] = c_vector[0]/b_vector[0];
-		for (int j = 1; j < NO_OF_LAYERS - 1; ++j)
+		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, NO_OF_LAYERS);
+		for (int j = 0; j < NO_OF_LAYERS; ++j)
 		{
-			c_prime_vector[j] = c_vector[j]/(b_vector[j] - c_prime_vector[j - 1]*a_vector[j]);
-		}
-		d_prime_vector[0] = d_vector[0]/b_vector[0];
-		for (int j = 1; j < NO_OF_LAYERS; ++j)
-		{
-			d_prime_vector[j] = (d_vector[j] - d_prime_vector[j - 1]*a_vector[j])/(b_vector[j] - c_prime_vector[j - 1]*a_vector[j]);
-		}
-		// finally, the solution is done here
-		state_p1 -> velocity_gas[NO_OF_VECTORS_V + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i] = d_prime_vector[NO_OF_LAYERS - 1];
-		for (int j = NO_OF_LAYERS - 2; j >= 0; --j)
-		{
-			state_p1 -> velocity_gas[NO_OF_VECTORS_V + j*NO_OF_VECTORS_PER_LAYER + i] = d_prime_vector[j] - c_prime_vector[j]*state_p1 -> velocity_gas[NO_OF_VECTORS_V + (j + 1)*NO_OF_VECTORS_PER_LAYER + i];
-			
+			state_p1 -> velocity_gas[NO_OF_VECTORS_V + j*NO_OF_VECTORS_PER_LAYER + i] = solution_vector[j];
 		}
 	}
+	free(solution_vector);
 	free(vertical_velocity);
 	free(a_vector);
 	free(b_vector);
@@ -99,7 +91,7 @@ int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency
 	return 0;
 }
 
-int three_band_solver_ver(State *state_0, State *state_p1, State *state_tendency, double delta_t, Grid *grid)
+int three_band_solver_ver_vel(State *state_0, State *state_p1, State *state_tendency, double delta_t, Grid *grid)
 {
 	/*
 	Implicit vertical advection of vertical momentum (Euler).
@@ -113,6 +105,7 @@ int three_band_solver_ver(State *state_0, State *state_p1, State *state_tendency
 	double *c_prime_vector = malloc((NO_OF_LAYERS - 2)*sizeof(double));
 	double *d_prime_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
 	double *vertical_velocity = malloc(NO_OF_LAYERS*sizeof(double));
+	double *solution_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
 	double delta_z;
 	int i;
 	for (i = 0; i < NO_OF_VECTORS_V; ++i)
@@ -145,25 +138,14 @@ int three_band_solver_ver(State *state_0, State *state_p1, State *state_tendency
 		}
 		delta_z = grid -> z_vector[(NO_OF_LAYERS - 2)*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i];
 		d_vector[NO_OF_LAYERS - 2] += delta_t*vertical_velocity[NO_OF_LAYERS - 2]*vertical_velocity[NO_OF_LAYERS - 1]/delta_z;
-		// modified vectors
-		c_prime_vector[0] = c_vector[0]/b_vector[0];
-		for (int j = 1; j < NO_OF_LAYERS - 2; ++j)
-		{
-			c_prime_vector[j] = c_vector[j]/(b_vector[j] - c_prime_vector[j - 1]*a_vector[j]);
-		}
-		d_prime_vector[0] = d_vector[0]/b_vector[0];
-		for (int j = 1; j < NO_OF_LAYERS - 1; ++j)
-		{
-			d_prime_vector[j] = (d_vector[j] - d_prime_vector[j - 1]*a_vector[j])/(b_vector[j] - c_prime_vector[j - 1]*a_vector[j]);
-		}
-		// finally, the solution is done here
-		state_p1 -> velocity_gas[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i] = d_prime_vector[NO_OF_LAYERS - 2];
-		for (int j = NO_OF_LAYERS - 2; j >= 1; --j)
-		{
-			state_p1 -> velocity_gas[j*NO_OF_VECTORS_PER_LAYER + i] = d_prime_vector[j - 1] - c_prime_vector[j]*state_p1 -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
-		}
+		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, NO_OF_LAYERS - 1);
 		state_p1 -> velocity_gas[i] = 0;
+		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+		{
+			state_p1 -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] = solution_vector[j];
+		}
 	}
+	free(solution_vector);
 	free(vertical_velocity);
 	free(a_vector);
 	free(b_vector);
@@ -174,11 +156,94 @@ int three_band_solver_ver(State *state_0, State *state_p1, State *state_tendency
 	return 0;
 }
 
+int three_band_solver_ver_den_dry(State *state_0, State *state_p1, State *state_tendency, double delta_t, Grid *grid)
+{
+	/*
+	Implicit vertical advection of dry mass (Euler).
+	Procedure derived in Kompendium.
+	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
+	*/
+	double *a_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
+	double *b_vector = malloc(NO_OF_LAYERS*sizeof(double));
+	double *c_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
+	double *d_vector = malloc(NO_OF_LAYERS*sizeof(double));
+	double *c_prime_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
+	double *d_prime_vector = malloc(NO_OF_LAYERS*sizeof(double));
+	double *vertical_flux_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
+	double *solution_vector = malloc(NO_OF_LAYERS*sizeof(double));
+	double area;
+	int i;
+	for (i = 0; i < NO_OF_SCALARS_H; ++i)
+	{
+		// diagnozing the vertical flux
+		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+		{
+			area = grid -> area[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
+			if (j + 1 >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
+				vertical_contravariant_normalized(state_p1 -> velocity_gas, j + 1, i, grid, &vertical_flux_vector[j]);
+			else
+				vertical_flux_vector[j] = state_p1 -> velocity_gas[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
+			vertical_flux_vector[j] = area*vertical_flux_vector[j];
+		}
+		// filling up the original vectors
+		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+		{
+			a_vector[j] = delta_t/(2*grid -> volume[i + (j + 1)*NO_OF_SCALARS_H])*vertical_flux_vector[j];
+			c_vector[j] = -delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[j];
+		}
+		for (int j = 0; j < NO_OF_LAYERS; ++j)
+		{
+			if (j == 0)
+			{
+				b_vector[j] = 1 - delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[0];
+			}
+			else if (j == NO_OF_LAYERS - 1)
+			{
+				b_vector[j] = 1 + delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[j - 1];
+			}
+			else
+			{
+				b_vector[j] = 1 + delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*(vertical_flux_vector[j - 1] - vertical_flux_vector[j]);
+			}
+			d_vector[j] = state_0 -> density_dry[j*NO_OF_SCALARS_H + i] + delta_t*state_tendency -> density_dry[j*NO_OF_SCALARS_H + i];
+		}
+		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, NO_OF_LAYERS);
+		for (int j = 0; j < NO_OF_LAYERS; ++j)
+		{
+			state_p1 -> density_dry[j*NO_OF_SCALARS_H + i] = solution_vector[j];
+		}
+	}
+	free(solution_vector);
+	free(vertical_flux_vector);
+	free(a_vector);
+	free(b_vector);
+	free(c_vector);
+	free(d_vector);
+	free(c_prime_vector);
+	free(d_prime_vector);
+	return 0;
+}
 
-
-
-
-
+int thomas_algorithm(double a_vector[], double b_vector[], double c_vector[], double d_vector[], double c_prime_vector[], double d_prime_vector[], double solution_vector[], int solution_length)
+{
+	// https://de.wikipedia.org/wiki/Thomas-Algorithmus
+	c_prime_vector[0] = c_vector[0]/b_vector[0];
+	for (int j = 1; j < solution_length - 1; ++j)
+	{
+		c_prime_vector[j] = c_vector[j]/(b_vector[j] - c_prime_vector[j - 1]*a_vector[j - 1]);
+	}
+	d_prime_vector[0] = d_vector[0]/b_vector[0];
+	for (int j = 1; j < solution_length; ++j)
+	{
+		d_prime_vector[j] = (d_vector[j] - d_prime_vector[j - 1]*a_vector[j - 1])/(b_vector[j] - c_prime_vector[j - 1]*a_vector[j - 1]);
+	}
+	solution_vector[solution_length - 1] = d_prime_vector[solution_length - 1];
+	for (int j = solution_length - 2; j >= 0; --j)
+	{
+		solution_vector[j] = d_prime_vector[j] - c_prime_vector[j]*solution_vector[j + 1];
+	}
+	return 0;
+}
 
 
 
