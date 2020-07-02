@@ -13,7 +13,8 @@ int explicit_momentum_tendencies(State *, State *, Grid *, Dualgrid *, int, int,
 int calc_partially_implicit_divvs(State *, State *, State *, Grid *, Dualgrid *, int, int, int, double, int, Scalar_field, int, double [], double [], Vector_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, Vector_field, Scalar_field, Vector_field, Vector_field, Scalar_field, Scalar_field, Vector_field, Scalar_field);
 int scalar_times_scalar(Scalar_field, Scalar_field, Scalar_field);
 int scalar_times_vector(Scalar_field, Vector_field, Vector_field, Grid *);
-int scalar_times_vector_h_v(Scalar_field, Scalar_field, Vector_field, Vector_field, Grid *);
+int scalar_times_vector_scalar_h_v(Scalar_field, Scalar_field, Vector_field, Vector_field, Grid *);
+int scalar_times_vector_vector_h_v(Scalar_field, Scalar_field, Vector_field, Vector_field, Grid *);
 int linear_combine_two_states(State *, State *, State *, double, double);
 int linear_combine_two_states_scalars(State *, State *, State *, double, double);
 int dissipation(Vector_field, Scalar_field, Vector_field, Scalar_field, Grid *);

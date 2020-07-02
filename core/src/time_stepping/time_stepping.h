@@ -8,3 +8,4 @@ int solve_lower_boundary(State *, Grid *);
 int three_band_solver_hor(State *, State *, State *, double, Grid *);
 int three_band_solver_ver_vel(State *, State *, State *, double, Grid *);
 int three_band_solver_ver_den_dry(State *, State *, State *, double, Grid *);
+int three_band_solver_ver_entropy_gas(State *, State *, State *, double, Grid *);

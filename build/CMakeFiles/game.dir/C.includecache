@@ -276,12 +276,6 @@ stdio.h
 stdio.h
 -
 
-/home/max/my_code/game/core/src/spatial_operators/scalar_times_vector_h_v.c
-../enum_and_typedefs.h
-/home/max/my_code/game/core/src/enum_and_typedefs.h
-stdio.h
--
-
 /home/max/my_code/game/core/src/spatial_operators/spatial_operators.h
 
 /home/max/my_code/game/core/src/time_stepping/lower_boundary_solver.c

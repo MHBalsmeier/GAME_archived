@@ -132,7 +132,7 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
         			hor_non_trad_cori_term = hor_non_trad_cori_sign*vertical_velocity*dualgrid -> f_vec[h_index - NO_OF_VECTORS_V];
             		state_tendency -> velocity_gas[i] = pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i] + hor_non_trad_cori_term + metric_term + friction_acc[i];
         		}
-            	else
+            	if (h_index < NO_OF_VECTORS_V)
             	{
             		state_tendency -> velocity_gas[i] = pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i] + friction_acc[i];
         		}
@@ -147,8 +147,10 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
         			hor_non_trad_cori_term = hor_non_trad_cori_sign*vertical_velocity*dualgrid -> f_vec[h_index - NO_OF_VECTORS_V];
             		state_tendency -> velocity_gas[i] = pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i] + hor_non_trad_cori_term + metric_term;
         		}
-            	else
+        		if (h_index < NO_OF_VECTORS_V)
+        		{
             		state_tendency -> velocity_gas[i] = pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i];
+        		}
         	}
         }
     }
@@ -169,7 +171,7 @@ int calc_partially_implicit_divvs(State *current_state, State *next_state, State
 			exit(1);
 		}
         retval = calc_mass_diffusion_coeffs(temperature, current_state -> density_dry, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v);
-        scalar_times_vector_h_v(diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, mass_dry_diffusion_flux_density, mass_dry_diffusion_flux_density, grid);
+        scalar_times_vector_scalar_h_v(diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, mass_dry_diffusion_flux_density, mass_dry_diffusion_flux_density, grid);
         retval = divv(mass_dry_diffusion_flux_density, mass_dry_diffusion_source_rate, grid, 0);
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 	        state_tendency -> density_dry[i] = -mass_dry_flux_density_divv[i] + mass_dry_diffusion_source_rate[i];
@@ -180,7 +182,7 @@ int calc_partially_implicit_divvs(State *current_state, State *next_state, State
         	state_tendency -> density_dry[i] = -mass_dry_flux_density_divv[i];
     }
     scalar_times_vector(current_state -> entropy_gas, next_state -> velocity_gas, entropy_gas_flux_density, grid);
-    divv(entropy_gas_flux_density, entropy_gas_flux_density_divv, grid, 0);
+    divv_h(entropy_gas_flux_density, entropy_gas_flux_density_divv, grid);
     if (rad_update == 1)
     {
         retval = calc_rad_heating(radiation_tendency, NO_OF_SCALARS);
@@ -200,7 +202,7 @@ int calc_partially_implicit_divvs(State *current_state, State *next_state, State
     if (diffusion_on == 1)
     {
         retval = calc_temp_diffusion_coeffs(temperature, current_state -> density_dry, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v);
-        scalar_times_vector_h_v(diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, temp_gradient, temperature_flux_density, grid);
+        scalar_times_vector_scalar_h_v(diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, temp_gradient, temperature_flux_density, grid);
         retval = divv(temperature_flux_density, temp_diffusion_heating, grid, 0);
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
@@ -242,9 +244,10 @@ int calc_partially_implicit_divvs(State *current_state, State *next_state, State
 		        {
 		            layer_index = j/NO_OF_VECTORS_PER_LAYER;
 		            h_index = j - layer_index*NO_OF_VECTORS_PER_LAYER;
-		            tracer_velocity[j] = next_state -> velocity_gas[j];
 		            if (h_index < NO_OF_VECTORS_V)
-		                tracer_velocity[j] -= ret_sink_velocity(i, 0, 0.001);
+		                tracer_velocity[j] = current_state -> velocity_gas[j] - ret_sink_velocity(i, 0, 0.001);
+		            else
+		            	tracer_velocity[j] = next_state -> velocity_gas[j];
 		        }
 		        retval = scalar_times_vector(tracer_density, tracer_velocity, tracer_flux_density, grid);
 		        retval = divv(tracer_flux_density, tracer_flux_density_divv, grid, 1);
@@ -265,7 +268,7 @@ int calc_partially_implicit_divvs(State *current_state, State *next_state, State
 		    }
 		    else
 		    {
-		        retval = scalar_times_vector(tracer_density, next_state -> velocity_gas, tracer_flux_density, grid);
+		        retval = scalar_times_vector_vector_h_v(tracer_density, next_state -> velocity_gas, current_state -> velocity_gas, tracer_flux_density, grid);
 		        retval = divv(tracer_flux_density, tracer_flux_density_divv, grid, 0);
 				for (int j = 0; j < NO_OF_SCALARS; ++j)
 				{

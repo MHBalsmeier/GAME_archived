@@ -22,14 +22,16 @@ int manage_time_stepping(State *state_0, State *state_p1, double delta_t, Grid *
     three_band_solver_ver_vel(state_0, state_p1, state_tendency, delta_t/3, grid);
     calc_partially_implicit_divvs(state_0, state_p1, state_tendency, grid, dualgrid, 0, rad_update, tracers_on, delta_t, 0, radiation_tendency, 0, tracer_mass_source_rates, tracer_heat_source_rates, mass_dry_flux_density, mass_dry_flux_density_divv, temperature, entropy_gas_flux_density, entropy_gas_flux_density_divv, temp_diffusion_heating, temp_gradient, heating_diss, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, mass_dry_diffusion_flux_density, mass_dry_diffusion_source_rate, temperature_flux_density, tracer_density, tracer_velocity, tracer_flux_density, tracer_flux_density_divv, tracer_density_temperature, tracer_temperature_flux_density, tracer_temperature_flux_density_divv);
     three_band_solver_ver_den_dry(state_0, state_p1, state_tendency, delta_t/3, grid);
+    three_band_solver_ver_entropy_gas(state_0, state_p1, state_tendency, delta_t/3, grid);
     linear_combine_two_states_scalars(state_0, state_tendency, state_p1, 1, delta_t/3);
 	// second step
     explicit_momentum_tendencies(state_p1, state_tendency, grid, dualgrid, dissipation_on, tracers_on, temperature, temp_diffusion_heating, temp_gradient, friction_acc, heating_diss, specific_entropy, rel_curl, abs_curl, downgradient_macroscopic_energy, pressure_gradient_acc, abs_curl_tend, specific_entropy_gradient, c_h_p_field, macroscopic_energy, pressure_gradient_decel_factor, pressure_gradient_acc_1);
     three_band_solver_hor(state_0, state_p1, state_tendency, delta_t/2, grid);
     solve_lower_boundary(state_p1, grid);
     three_band_solver_ver_vel(state_0, state_p1, state_tendency, delta_t/2, grid);
-    calc_partially_implicit_divvs(state_0, state_p1, state_tendency, grid, dualgrid, 0, rad_update, tracers_on, delta_t, 0, radiation_tendency, 0, tracer_mass_source_rates, tracer_heat_source_rates, mass_dry_flux_density, mass_dry_flux_density_divv, temperature, entropy_gas_flux_density, entropy_gas_flux_density_divv, temp_diffusion_heating, temp_gradient, heating_diss, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, mass_dry_diffusion_flux_density, mass_dry_diffusion_source_rate, temperature_flux_density, tracer_density, tracer_velocity, tracer_flux_density, tracer_flux_density_divv, tracer_density_temperature, tracer_temperature_flux_density, tracer_temperature_flux_density_divv);
+    calc_partially_implicit_divvs(state_p1, state_p1, state_tendency, grid, dualgrid, 0, rad_update, tracers_on, delta_t, 0, radiation_tendency, 0, tracer_mass_source_rates, tracer_heat_source_rates, mass_dry_flux_density, mass_dry_flux_density_divv, temperature, entropy_gas_flux_density, entropy_gas_flux_density_divv, temp_diffusion_heating, temp_gradient, heating_diss, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, mass_dry_diffusion_flux_density, mass_dry_diffusion_source_rate, temperature_flux_density, tracer_density, tracer_velocity, tracer_flux_density, tracer_flux_density_divv, tracer_density_temperature, tracer_temperature_flux_density, tracer_temperature_flux_density_divv);
     three_band_solver_ver_den_dry(state_0, state_p1, state_tendency, delta_t/2, grid);
+    three_band_solver_ver_entropy_gas(state_0, state_p1, state_tendency, delta_t/2, grid);
     linear_combine_two_states_scalars(state_0, state_tendency, state_p1, 1, delta_t/2);
 	// third step
     /*
@@ -39,8 +41,9 @@ int manage_time_stepping(State *state_0, State *state_p1, double delta_t, Grid *
     three_band_solver_hor(state_0, state_p1, state_tendency, delta_t, grid);
     solve_lower_boundary(state_p1, grid);
     three_band_solver_ver_vel(state_0, state_p1, state_tendency, delta_t, grid);
-    calc_partially_implicit_divvs(state_0, state_p1, state_tendency, grid, dualgrid, dissipation_on, rad_update, tracers_on, delta_t, diffusion_on, radiation_tendency, 1, tracer_mass_source_rates, tracer_heat_source_rates, mass_dry_flux_density, mass_dry_flux_density_divv, temperature, entropy_gas_flux_density, entropy_gas_flux_density_divv, temp_diffusion_heating, temp_gradient, heating_diss, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, mass_dry_diffusion_flux_density, mass_dry_diffusion_source_rate, temperature_flux_density, tracer_density, tracer_velocity, tracer_flux_density, tracer_flux_density_divv, tracer_density_temperature, tracer_temperature_flux_density, tracer_temperature_flux_density_divv);
+    calc_partially_implicit_divvs(state_p1, state_p1, state_tendency, grid, dualgrid, dissipation_on, rad_update, tracers_on, delta_t, diffusion_on, radiation_tendency, 1, tracer_mass_source_rates, tracer_heat_source_rates, mass_dry_flux_density, mass_dry_flux_density_divv, temperature, entropy_gas_flux_density, entropy_gas_flux_density_divv, temp_diffusion_heating, temp_gradient, heating_diss, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, mass_dry_diffusion_flux_density, mass_dry_diffusion_source_rate, temperature_flux_density, tracer_density, tracer_velocity, tracer_flux_density, tracer_flux_density_divv, tracer_density_temperature, tracer_temperature_flux_density, tracer_temperature_flux_density_divv);
     three_band_solver_ver_den_dry(state_0, state_p1, state_tendency, delta_t, grid);
+    three_band_solver_ver_entropy_gas(state_0, state_p1, state_tendency, delta_t, grid);
     linear_combine_two_states_scalars(state_0, state_tendency, state_p1, 1, delta_t);
     return 0;
 }

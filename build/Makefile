@@ -1044,33 +1044,6 @@ src/spatial_operators/scalar_times_vector.c.s:
 	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector.c.s
 .PHONY : src/spatial_operators/scalar_times_vector.c.s
 
-src/spatial_operators/scalar_times_vector_h_v.o: src/spatial_operators/scalar_times_vector_h_v.c.o
-
-.PHONY : src/spatial_operators/scalar_times_vector_h_v.o
-
-# target to build an object file
-src/spatial_operators/scalar_times_vector_h_v.c.o:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.o
-.PHONY : src/spatial_operators/scalar_times_vector_h_v.c.o
-
-src/spatial_operators/scalar_times_vector_h_v.i: src/spatial_operators/scalar_times_vector_h_v.c.i
-
-.PHONY : src/spatial_operators/scalar_times_vector_h_v.i
-
-# target to preprocess a source file
-src/spatial_operators/scalar_times_vector_h_v.c.i:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.i
-.PHONY : src/spatial_operators/scalar_times_vector_h_v.c.i
-
-src/spatial_operators/scalar_times_vector_h_v.s: src/spatial_operators/scalar_times_vector_h_v.c.s
-
-.PHONY : src/spatial_operators/scalar_times_vector_h_v.s
-
-# target to generate assembly for a file
-src/spatial_operators/scalar_times_vector_h_v.c.s:
-	$(MAKE) -f CMakeFiles/game.dir/build.make CMakeFiles/game.dir/src/spatial_operators/scalar_times_vector_h_v.c.s
-.PHONY : src/spatial_operators/scalar_times_vector_h_v.c.s
-
 src/time_stepping/lower_boundary_solver.o: src/time_stepping/lower_boundary_solver.c.o
 
 .PHONY : src/time_stepping/lower_boundary_solver.o
@@ -1262,9 +1235,6 @@ help:
 	@echo "... src/spatial_operators/scalar_times_vector.o"
 	@echo "... src/spatial_operators/scalar_times_vector.i"
 	@echo "... src/spatial_operators/scalar_times_vector.s"
-	@echo "... src/spatial_operators/scalar_times_vector_h_v.o"
-	@echo "... src/spatial_operators/scalar_times_vector_h_v.i"
-	@echo "... src/spatial_operators/scalar_times_vector_h_v.s"
 	@echo "... src/time_stepping/lower_boundary_solver.o"
 	@echo "... src/time_stepping/lower_boundary_solver.i"
 	@echo "... src/time_stepping/lower_boundary_solver.s"
