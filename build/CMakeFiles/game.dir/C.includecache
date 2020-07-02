@@ -317,4 +317,6 @@ omp.h
 -
 ../spatial_operators/spatial_operators.h
 /home/max/my_code/game/core/src/spatial_operators/spatial_operators.h
+atmostracers.h
+/home/max/my_code/game/core/src/time_stepping/atmostracers.h
 

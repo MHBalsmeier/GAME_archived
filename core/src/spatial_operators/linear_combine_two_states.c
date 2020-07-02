@@ -24,22 +24,6 @@ int linear_combine_two_states(State *state_0, State *state_1, State *state_out, 
     return 0;
 }
 
-int linear_combine_two_states_scalars(State *state_0, State *state_1, State *state_out, double coeff_0, double coeff_1)
-{
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
-    {
-        for (int j = 0; j < NO_OF_TRACERS; ++j)
-        {
-            state_out -> tracer_densities[j*NO_OF_SCALARS + i] = coeff_0*state_0 -> tracer_densities[j*NO_OF_SCALARS + i] + coeff_1*state_1 -> tracer_densities[j*NO_OF_SCALARS + i];
-        }
-        for (int j = 0; j < NO_OF_CONDENSATED_TRACERS; ++j)
-        {
-            state_out -> tracer_density_temperatures[j*NO_OF_SCALARS + i] = coeff_0*state_0 -> tracer_density_temperatures[j*NO_OF_SCALARS + i] + coeff_1*state_1 -> tracer_density_temperatures[j*NO_OF_SCALARS + i];
-    	}
-    }
-    return 0;
-}
-
 int set_state_to_zero(State *state)
 {
     for (int i = 0; i < NO_OF_SCALARS; ++i)

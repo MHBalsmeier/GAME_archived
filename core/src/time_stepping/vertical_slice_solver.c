@@ -10,6 +10,7 @@ The vertical advection of horizontal momentum is organized here.
 #include "../diagnostics/diagnostics.h"
 #include <omp.h>
 #include "../spatial_operators/spatial_operators.h"
+#include "atmostracers.h"
 
 int thomas_algorithm(double [], double [], double [], double [], double [], double [], double [], int);
 
@@ -35,7 +36,7 @@ int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency
 		// diagnozing the vertical velocity
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
 		{
-			recov_hor_ver_pri(state_0 -> velocity_gas, j, i, &vertical_velocity[j], grid);
+			recov_hor_ver_pri(state_p1 -> velocity_gas, j, i, &vertical_velocity[j], grid);
 		}
 		// filling up the original vectors
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
@@ -113,7 +114,7 @@ int three_band_solver_ver_vel(State *state_0, State *state_p1, State *state_tend
 		// extracting the vertical velocity
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
-			vertical_velocity[j] = state_0 -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
+			vertical_velocity[j] = state_p1 -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
 			vertical_velocity[j] = 0;
 		}
 		vertical_velocity[NO_OF_LAYERS - 1] = state_p1 -> velocity_gas[i + NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER];
@@ -227,7 +228,7 @@ int three_band_solver_ver_den_dry(State *state_0, State *state_p1, State *state_
 int three_band_solver_ver_entropy_gas(State *state_0, State *state_p1, State *state_tendency, double delta_t, Grid *grid)
 {
 	/*
-	Implicit vertical advection of dry mass (Euler).
+	Implicit vertical advection of the entropy of the gas phase (Euler).
 	Procedure derived in Kompendium.
 	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
 	*/
@@ -279,6 +280,162 @@ int three_band_solver_ver_entropy_gas(State *state_0, State *state_p1, State *st
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
 		{
 			state_p1 -> entropy_gas[j*NO_OF_SCALARS_H + i] = solution_vector[j];
+		}
+	}
+	free(solution_vector);
+	free(vertical_flux_vector);
+	free(a_vector);
+	free(b_vector);
+	free(c_vector);
+	free(d_vector);
+	free(c_prime_vector);
+	free(d_prime_vector);
+	return 0;
+}
+
+int three_band_solver_ver_tracers(State *state_0, State *state_p1, State *state_tendency, double delta_t, Grid *grid)
+{
+	/*
+	Implicit vertical advection of tracers (Euler).
+	Procedure derived in Kompendium.
+	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
+	*/
+	double *a_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
+	double *b_vector = malloc(NO_OF_LAYERS*sizeof(double));
+	double *c_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
+	double *d_vector = malloc(NO_OF_LAYERS*sizeof(double));
+	double *c_prime_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
+	double *d_prime_vector = malloc(NO_OF_LAYERS*sizeof(double));
+	double *solution_vector = malloc(NO_OF_LAYERS*sizeof(double));
+	double *vertical_flux_vector = malloc(NO_OF_LAYERS*sizeof(double));
+	double area;
+	int i;
+	for (i = 0; i < NO_OF_SCALARS_H; ++i)
+	{
+		for (int k = 0; k < NO_OF_CONDENSATED_TRACERS; ++k)
+		{
+			// tracer masses
+			// diagnozing the vertical flux
+			for (int j = 0; j < NO_OF_LAYERS; ++j)
+			{
+				area = grid -> area[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
+				if (j + 1 >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
+				{
+					vertical_contravariant_normalized(state_p1 -> velocity_gas, j + 1, i, grid, &vertical_flux_vector[j]);
+					// small metric terms neglected here
+					vertical_flux_vector[j] -= ret_sink_velocity(i, 0, 0.001);
+				}
+				else
+					vertical_flux_vector[j] = state_p1 -> velocity_gas[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
+				vertical_flux_vector[j] = area*vertical_flux_vector[j];
+			}
+			// filling up the original vectors
+			for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+			{
+				a_vector[j] = delta_t/(2*grid -> volume[i + (j + 1)*NO_OF_SCALARS_H])*vertical_flux_vector[j];
+				c_vector[j] = -delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[j];
+			}
+			for (int j = 0; j < NO_OF_LAYERS; ++j)
+			{
+				if (j == 0)
+				{
+					b_vector[j] = 1 - delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[0];
+				}
+				else
+				{
+					b_vector[j] = 1 + delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*(vertical_flux_vector[j - 1] - vertical_flux_vector[j]);
+				}
+				d_vector[j] = state_0 -> tracer_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] + delta_t*state_tendency -> tracer_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+			}
+			thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, NO_OF_LAYERS);
+			for (int j = 0; j < NO_OF_LAYERS; ++j)
+			{
+				state_p1 -> tracer_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = solution_vector[j];
+				// limiter
+				if (state_p1 -> tracer_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] < 0)
+					state_p1 -> tracer_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = 0;
+			}
+			// tracer temberature densities
+			// diagnozing the vertical flux
+			for (int j = 0; j < NO_OF_LAYERS; ++j)
+			{
+				area = grid -> area[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
+				if (j + 1 >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
+				{
+					vertical_contravariant_normalized(state_p1 -> velocity_gas, j + 1, i, grid, &vertical_flux_vector[j]);
+					// small metric term negelcted here
+					vertical_flux_vector[j] -= ret_sink_velocity(i, 0, 0.001);
+				}
+				else
+					vertical_flux_vector[j] = state_p1 -> velocity_gas[k*NO_OF_SCALARS + NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
+				vertical_flux_vector[j] = area*vertical_flux_vector[j];
+			}
+			// filling up the original vectors
+			for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+			{
+				a_vector[j] = delta_t/(2*grid -> volume[i + (j + 1)*NO_OF_SCALARS_H])*vertical_flux_vector[j];
+				c_vector[j] = -delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[j];
+			}
+			for (int j = 0; j < NO_OF_LAYERS; ++j)
+			{
+				if (j == 0)
+				{
+					b_vector[j] = 1 - delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[0];
+				}
+				else
+				{
+					b_vector[j] = 1 + delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*(vertical_flux_vector[j - 1] - vertical_flux_vector[j]);
+				}
+				d_vector[j] = state_0 -> tracer_density_temperatures[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] + delta_t*state_tendency -> tracer_density_temperatures[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+			}
+			thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, NO_OF_LAYERS);
+			for (int j = 0; j < NO_OF_LAYERS; ++j)
+			{
+				state_p1 -> tracer_density_temperatures[j*NO_OF_SCALARS_H + i] = solution_vector[j];
+				// limiter
+				if (state_p1 -> tracer_density_temperatures[j*NO_OF_SCALARS_H + i] < 0)
+					state_p1 -> tracer_density_temperatures[j*NO_OF_SCALARS_H + i] = 0;
+			}
+		}
+		// water vaour
+		// diagnozing the vertical flux
+		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+		{
+			area = grid -> area[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
+			if (j + 1 >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
+				vertical_contravariant_normalized(state_p1 -> velocity_gas, j + 1, i, grid, &vertical_flux_vector[j]);
+			else
+				vertical_flux_vector[j] = state_p1 -> velocity_gas[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
+			vertical_flux_vector[j] = area*vertical_flux_vector[j];
+		}
+		// filling up the original vectors
+		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+		{
+			a_vector[j] = delta_t/(2*grid -> volume[i + (j + 1)*NO_OF_SCALARS_H])*vertical_flux_vector[j];
+			c_vector[j] = -delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[j];
+		}
+		for (int j = 0; j < NO_OF_LAYERS; ++j)
+		{
+			if (j == 0)
+			{
+				b_vector[j] = 1 - delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[0];
+			}
+			else if (j == NO_OF_LAYERS - 1)
+			{
+				b_vector[j] = 1 + delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[j - 1];
+			}
+			else
+			{
+				b_vector[j] = 1 + delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*(vertical_flux_vector[j - 1] - vertical_flux_vector[j]);
+			}
+			d_vector[j] = state_0 -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] + delta_t*state_tendency -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+		}
+		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, NO_OF_LAYERS);
+		for (int j = 0; j < NO_OF_LAYERS; ++j)
+		{
+			state_p1 -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = solution_vector[j];
+			if (state_p1 -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] < 0)
+				state_p1 -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = 0;
 		}
 	}
 	free(solution_vector);
