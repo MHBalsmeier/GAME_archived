@@ -1,5 +1,5 @@
 /*
-This source file is part of the Global Geophysical Modeling Frame (GAME), which is released under the MIT license.
+This source file is part of the Global Atmospheric Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/MHBalsmeier/game
 */
 
@@ -30,6 +30,7 @@ Github repository: https://github.com/MHBalsmeier/game
 const int MODE = 2;
 const double TOA = 30000.0;
 const int ORO_ID = 2;
+// code fails for ORO_ID = 2 (steep orography test)
 const double ORTH_CRITERION_DEG = 89.996;
 
 enum grid_integers {
@@ -1196,7 +1197,6 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
     }
-    
     double cell_base_area;
     double alpha_1 = 3.0/4;
     alpha_1 = 1;

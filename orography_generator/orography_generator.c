@@ -1,5 +1,5 @@
 /*
-This source file is part of the Global Geophysical Modeling Frame (GAME), which is released under the MIT license.
+This source file is part of the Global Atmospheric Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/MHBalsmeier/game
 */
 
@@ -86,6 +86,7 @@ int main(int argc, char *argv[])
     double distance;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
+    free(GEO_PROP_FILE);
     if ((retval = nc_inq_varid(ncid, "latitude_scalar", &latitude_scalar_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "longitude_scalar", &longitude_scalar_id)))
@@ -115,6 +116,7 @@ int main(int argc, char *argv[])
 	free(longitude_scalar);
 	if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
 	  ERR(retval);
+	free(OUTPUT_FILE);
 	if ((retval = nc_def_dim(ncid, "scalar_index", NUMBER_OF_SCALARS_H, &scalar_h_dimid)))
 	  ERR(retval);
 	if ((retval = nc_def_var(ncid, "z_surface", NC_DOUBLE, 1, &scalar_h_dimid, &oro_id)))

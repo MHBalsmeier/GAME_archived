@@ -1,16 +1,19 @@
+% This source file is part of the Global Atmospheric Modeling Framework (GAME), which is released under the MIT license.
+% Github repository: https://github.com/MHBalsmeier/game
+
 \documentclass{article}
 \usepackage{graphicx, paralist, listings, geometry, caption, floatrow, xcolor, color, colortbl, fancyhdr, amsmath, mathtools}
 \usepackage{fouriernc}
 \usepackage[T1]{fontenc}
 \geometry{a4paper, top = 15mm, left = 5mm, right = 5mm, bottom = 17mm}
 \fancypagestyle{plain}{
-\fancyhead[L]{GAME Handbook}
-\fancyhead[R]{\textsc{Balsmeier}}
+\fancyhead[L]{GAME handbook}
+\fancyhead[R]{\textsc{GAME development team}}
 \fancyfoot[C]{\thepage}
 \addtolength\footskip{12pt}}
 \definecolor{table_green}{rgb}{0, 0.6, 0}
 \title{GAME Handbook}
-\author{Max H. Balsmeier}
+\author{GAME Development Team}
 \date{}
 \newcommand{\md}[1]{\frac{D#1}{Dt}}
 \newcommand{\omegabi}{\text{{\osgbi ω}}}
@@ -29,7 +32,7 @@
 
 All physical quantities in this document are to be multiplied with their respective SI units.
 
-\lstinputlisting[language = Bash, caption = {Example input file.}]{jw_perturbed_moist.sh}\label{lst:input_file_example}
+\lstinputlisting[language = Bash, caption = {Example input file.}, frame = on]{jw_perturbed_moist.sh}\label{lst:input_file_example}
 
 Listing \ref{lst:input_file_example} is an example of an input file. Table \ref{tab:input_file_explanation} explains the meanings of the variables.
 
@@ -62,6 +65,14 @@ Listing \ref{lst:input_file_example} is an example of an input file. Table \ref{
 \label{tab:input_file_explanation}
 \end{table}
 \renewcommand{\arraystretch}{1}
+
+\section{Grid generation procedure}
+\label{sec:grid_generation_procedure}
+
+In order to generate a new grid, first compile and run the grid generator with \texttt{ORO\_ID = 0}. Then, run the orography generator with the desired \texttt{ORO\_ID}. Finally, run the grid generator again, this time with the desired \texttt{ORO\_ID}.
+
+\section{Test state generation procedure}
+\label{sec:test_state_generation_procedure}
 
 \end{document}
 

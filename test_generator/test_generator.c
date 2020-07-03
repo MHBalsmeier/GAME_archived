@@ -10,8 +10,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <netcdf.h>
 #include "eccodes.h"
 #include "geos95.h"
-#include "addcomp.h"
-#include "indextools.h"
+#include "atmostracers.h"
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
@@ -36,7 +35,7 @@ const double U_0 = 35;
 const double ETA_0 = 0.252;
 const double TOA = 30000;
 const short MODE = 2;
-const int TEST_ID = 0;
+const int TEST_ID = 4;
 
 /* test_ids:
 0:	standard atmosphere without orography
