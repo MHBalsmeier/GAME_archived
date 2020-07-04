@@ -13,6 +13,10 @@ The vertical advection of horizontal momentum is organized here.
 #include "atmostracers.h"
 
 int thomas_algorithm(double [], double [], double [], double [], double [], double [], double [], int);
+int candiate_has_converged(State *, int, double []);
+int convergence_checker(double [], double []);
+int modify_candidate(double [], double [], double [], double);
+int calc_implicit_tendencies(double [], double [], Grid *, int, double []);
 
 int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency, double delta_t, Grid *grid)
 {
@@ -98,6 +102,7 @@ int three_band_solver_ver_vel(State *state_0, State *state_p1, State *state_tend
 	Implicit vertical advection of vertical momentum (Euler).
 	Procedure derived in Kompendium.
 	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
+	Can be considered a preconditioner for the vertical sound wave solver.
 	*/
 	double *a_vector = malloc((NO_OF_LAYERS - 2)*sizeof(double));
 	double *b_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
@@ -163,6 +168,7 @@ int three_band_solver_ver_den_dry(State *state_0, State *state_p1, State *state_
 	Implicit vertical advection of dry mass (Euler).
 	Procedure derived in Kompendium.
 	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
+	Can be considered a preconditioner for the vertical sound wave solver.
 	*/
 	double *a_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
 	double *b_vector = malloc(NO_OF_LAYERS*sizeof(double));
@@ -231,6 +237,7 @@ int three_band_solver_ver_entropy_gas(State *state_0, State *state_p1, State *st
 	Implicit vertical advection of the entropy of the gas phase (Euler).
 	Procedure derived in Kompendium.
 	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
+	Can be considered a preconditioner for the vertical sound wave solver.
 	*/
 	double *a_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
 	double *b_vector = malloc(NO_OF_LAYERS*sizeof(double));
@@ -446,6 +453,186 @@ int three_band_solver_ver_tracers(State *state_0, State *state_p1, State *state_
 	free(d_vector);
 	free(c_prime_vector);
 	free(d_prime_vector);
+	return 0;
+}
+
+int vertical_sound_wave_solver(State *state_0, State *state_p1, State *state_tendency, double delta_t, Grid *grid, Vector_field pressure_gradient_acc, int step_counter)
+{
+	/*
+	This is the iterative solver required for stabilizing vertically propagating sound waves.
+	*/
+	double *candidate_vector = malloc((2*NO_OF_LAYERS + NO_OF_LAYERS - 1)*sizeof(double));
+	double *candidate_vector_result = malloc((2*NO_OF_LAYERS + NO_OF_LAYERS - 1)*sizeof(double));
+	double *implicit_tendency = malloc((2*NO_OF_LAYERS + NO_OF_LAYERS - 1)*sizeof(double));
+	int has_converged, number_of_iterations;
+	double *vertical_velocity_gradient = malloc((NO_OF_LAYERS - 1)*sizeof(double));
+	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+	{	
+		for (int j = 0; j < NO_OF_LAYERS; ++j)
+		{
+			candidate_vector[3*j] = state_p1 -> density_dry[i + j*NO_OF_SCALARS_H];
+			candidate_vector[3*j + 1] = state_p1 -> entropy_gas[i + j*NO_OF_SCALARS_H];
+		}
+		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+		{
+			candidate_vector[3*j + 2] = state_p1 -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
+		}
+		has_converged = 0;
+		number_of_iterations = 0;
+		while (has_converged == 0)
+		{
+			calc_implicit_tendencies(candidate_vector, implicit_tendency, grid, i, vertical_velocity_gradient);
+			for (int j = 0; j < NO_OF_LAYERS; ++j)
+			{
+				candidate_vector_result[3*j] = state_0 -> density_dry[i + j*NO_OF_SCALARS_H] + delta_t*state_tendency -> density_dry[i + j*NO_OF_SCALARS_H] + delta_t*implicit_tendency[3*j];
+				candidate_vector_result[3*j + 1] = state_0 -> entropy_gas[i + j*NO_OF_SCALARS_H] + delta_t*state_tendency -> entropy_gas[i + j*NO_OF_SCALARS_H] + delta_t*implicit_tendency[3*j + 1];
+				/*if (step_counter == 2)
+				{
+					printf("%d\n", number_of_iterations);
+					printf("%lf\n", implicit_tendency[3*j]);
+				}*/
+			}
+			for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+			{
+				candidate_vector_result[3*j + 2] = state_0 -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] + delta_t*(state_tendency -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] - pressure_gradient_acc[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]) + delta_t*implicit_tendency[3*j + 2];
+			}
+			has_converged = convergence_checker(candidate_vector_result, candidate_vector);
+			if (has_converged == 0)
+			{
+				modify_candidate(candidate_vector_result, candidate_vector, vertical_velocity_gradient, delta_t);
+			}
+			++number_of_iterations;
+		}
+		candiate_has_converged(state_p1, i, candidate_vector);
+	}
+	free(vertical_velocity_gradient);
+	free(implicit_tendency);
+	free(candidate_vector);
+	free(candidate_vector_result);
+	return 0;
+}
+
+int calc_implicit_tendencies(double candidate_vector[], double implicit_tendency[], Grid *grid, int h_index, double vertical_velocity_gradient[])
+{
+	double *dry_mass_vector = malloc(NO_OF_LAYERS*sizeof(double));
+	double *entropy_vector = malloc(NO_OF_LAYERS*sizeof(double));
+	double *vertical_velocity_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
+	for (int j = 0; j < NO_OF_LAYERS; ++j)
+	{
+		dry_mass_vector[j] = candidate_vector[3*j];
+		entropy_vector[j] = candidate_vector[3*j + 1];
+	}
+	for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+	{
+		vertical_velocity_vector[j] = candidate_vector[3*j + 2];
+	}
+	double *dry_mass_flux_density = malloc((NO_OF_LAYERS - 1)*sizeof(double));
+	scalar_times_vector_v_column(dry_mass_vector, vertical_velocity_vector, dry_mass_flux_density);
+	double *entropy_flux_density = malloc((NO_OF_LAYERS - 1)*sizeof(double));
+	scalar_times_vector_v_column(entropy_vector, vertical_velocity_vector, entropy_flux_density);
+	double *dry_mass_flux_density_divergence = malloc(NO_OF_LAYERS*sizeof(double));
+	divv_v_columns(dry_mass_flux_density, dry_mass_flux_density_divergence, h_index, grid);
+	double *entropy_flux_density_divergence = malloc(NO_OF_LAYERS*sizeof(double));
+	divv_v_columns(entropy_flux_density, entropy_flux_density_divergence, h_index, grid);
+	for (int j = 0; j < NO_OF_LAYERS; ++j)
+	{
+		implicit_tendency[3*j] = -dry_mass_flux_density_divergence[j];
+		implicit_tendency[3*j + 1] = -entropy_flux_density_divergence[j];
+	}
+	double *temperature_vector = malloc(NO_OF_LAYERS*sizeof(double));
+	double pot_temp_value, exner_pressure_value;
+	for (int j = 0; j < NO_OF_LAYERS; ++j)
+	{
+    	pot_temp_value = pot_temp_diagnostics_single_value(entropy_vector[j], dry_mass_vector[j], 0.0, 0.0);
+        exner_pressure_value = exner_pressure_diagnostics_single_value(dry_mass_vector[j], 0.0, pot_temp_value);
+		temperature_vector[j] = temperature_diagnostics_single_value(exner_pressure_value, pot_temp_value);
+	}
+	double *pressure_gradient_acc_vector_0 = malloc((NO_OF_LAYERS - 1)*sizeof(double));
+	grad_v_scalar_column(temperature_vector, pressure_gradient_acc_vector_0, h_index, grid);
+	double *pressure_gradient_acc_vector_1 = malloc((NO_OF_LAYERS - 1)*sizeof(double));
+	double *entropy_specific_vector = malloc(NO_OF_LAYERS*sizeof(double));
+	for (int j = 0; j < NO_OF_LAYERS; ++j)
+		entropy_specific_vector[j] = entropy_vector[j]/dry_mass_vector[j];
+	grad_v_scalar_column(entropy_specific_vector, pressure_gradient_acc_vector_1, h_index, grid);
+	free(entropy_specific_vector);
+	scalar_times_vector_v_column(temperature_vector, pressure_gradient_acc_vector_1, pressure_gradient_acc_vector_1);
+	double *pressure_gradient_acc_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
+	for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+	{
+		pressure_gradient_acc_vector[j] = -C_D_P*pressure_gradient_acc_vector_0[j] + pressure_gradient_acc_vector_1[j];
+	}
+	grad_v_vector_column(vertical_velocity_vector, vertical_velocity_gradient, h_index, grid);
+	for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+	{
+		implicit_tendency[3*j + 2] = -vertical_velocity_vector[j]*vertical_velocity_gradient[j] + pressure_gradient_acc_vector[j];
+	}
+	free(pressure_gradient_acc_vector);
+	free(pressure_gradient_acc_vector_0);
+	free(pressure_gradient_acc_vector_1);
+	free(dry_mass_vector);
+	free(entropy_vector);
+	free(vertical_velocity_vector);
+	free(entropy_flux_density);
+	free(dry_mass_flux_density);
+	free(entropy_flux_density_divergence);
+	free(dry_mass_flux_density_divergence);
+	return 0;
+}
+
+int modify_candidate(double candidate_vector_result[], double candidate_vector[], double dwdz_vector[], double delta_t)
+{
+	double dwdz;
+	for (int i = 0; i < NO_OF_LAYERS; ++i)
+	{
+		if (i == 0)
+			dwdz = 0.5*dwdz_vector[0];
+		else if (i == NO_OF_LAYERS - 1)
+			dwdz = 0.5*dwdz_vector[i - 1];
+		else
+			dwdz = 0.5*(dwdz_vector[i - 1] + dwdz_vector[i]);
+		candidate_vector[3*i + 0] = candidate_vector[3*i + 0] + (candidate_vector_result[3*i + 0] - candidate_vector[3*i + 0] - 0.5*delta_t*dwdz);
+		candidate_vector[3*i + 1] = candidate_vector[3*i + 1] + (candidate_vector_result[3*i + 1] - candidate_vector[3*i + 1] - 0.5*delta_t*dwdz);
+	}
+	for (int i = 0; i < NO_OF_LAYERS - 1; ++i)
+	{
+		candidate_vector[3*i + 2] = candidate_vector[3*i + 2] + (candidate_vector_result[3*i + 2] - candidate_vector[3*i + 2] - 0.5*delta_t*dwdz_vector[i]);
+	}
+	return 0;
+}
+
+int convergence_checker(double candidate_vector_result[], double candidate_vector[])
+{
+	// this functions checks wether the vertical sound wave solver has converged
+	int result = 1;
+	double density_criterion = 0.001;
+	double entropy_criterion = 0.1;
+	double vertical_velocity_criterion = 0.001;
+	for (int j = 0; j < NO_OF_LAYERS; ++j)
+	{
+		if (fabs(candidate_vector_result[3*j + 0] - candidate_vector[3*j + 0]) >= density_criterion)
+			result = 0;
+		if (fabs(candidate_vector_result[3*j + 1] - candidate_vector[3*j + 1]) >= entropy_criterion)
+			result = 0;
+	}
+	for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+	{
+		if (fabs(candidate_vector_result[3*j + 2] - candidate_vector[3*j + 2]) >= vertical_velocity_criterion)
+			result = 0;
+	}
+	return result;
+}
+
+int candiate_has_converged(State *state_p1, int h_index, double candidate_vector[])
+{
+	for (int i = 0; i < NO_OF_LAYERS; ++i)
+	{
+		state_p1 -> density_dry[h_index + i*NO_OF_SCALARS_H] = candidate_vector[3*i];
+		state_p1 -> entropy_gas[h_index + i*NO_OF_SCALARS_H] = candidate_vector[3*i + 1];
+	}
+	for (int i = 0; i < NO_OF_LAYERS - 1; ++i)
+	{
+		state_p1 -> velocity_gas[h_index + (i + 1)*NO_OF_VECTORS_PER_LAYER] = candidate_vector[3*i + 2];
+	}
 	return 0;
 }
 

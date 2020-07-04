@@ -10,3 +10,4 @@ int three_band_solver_ver_vel(State *, State *, State *, double, Grid *);
 int three_band_solver_ver_den_dry(State *, State *, State *, double, Grid *);
 int three_band_solver_ver_entropy_gas(State *, State *, State *, double, Grid *);
 int three_band_solver_ver_tracers(State *, State *, State *, double, Grid *);
+int vertical_sound_wave_solver(State *, State *, State *, double, Grid *, Vector_field, int);

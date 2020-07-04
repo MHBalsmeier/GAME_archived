@@ -14,7 +14,11 @@ int calc_partially_implicit_divvs(State *, State *, Grid *, Dualgrid *, int, int
 int scalar_times_scalar(Scalar_field, Scalar_field, Scalar_field);
 int scalar_times_vector(Scalar_field, Vector_field, Vector_field, Grid *);
 int scalar_times_vector_scalar_h_v(Scalar_field, Scalar_field, Vector_field, Vector_field, Grid *);
-int scalar_times_vector_vector_h_v(Scalar_field, Scalar_field, Vector_field, Vector_field, Grid *);
+int scalar_times_vector_vector_h_v(Scalar_field, Vector_field, Vector_field, Vector_field, Grid *);
+int scalar_times_vector_v_column(double [], double [], double []);
 int linear_combine_two_states(State *, State *, State *, double, double);
 int dissipation(Vector_field, Scalar_field, Vector_field, Scalar_field, Grid *);
 int set_state_to_zero(State *);
+int divv_v_columns(double [], double [], int, Grid *);
+int grad_v_vector_column(double [], double [], int, Grid *);
+int grad_v_scalar_column(double [], double [], int, Grid *);

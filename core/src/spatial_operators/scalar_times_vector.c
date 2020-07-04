@@ -109,7 +109,12 @@ int scalar_times_vector_vector_h_v(Scalar_field in_field_0, Vector_field in_fiel
     return 0;
 }
 
-
+int scalar_times_vector_v_column(double scalar_vector[], double vertical_velocity_vector[], double result[])
+{
+	for (int i = 0; i < NO_OF_LAYERS - 1; ++i)
+		result[i] = 0.5*(scalar_vector[i] + scalar_vector[i + 1])*vertical_velocity_vector[i];
+	return 0;
+}
 
 
 

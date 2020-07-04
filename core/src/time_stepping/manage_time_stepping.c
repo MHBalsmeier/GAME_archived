@@ -45,8 +45,10 @@ int manage_time_stepping(State *state_0, State *state_p1, double delta_t, Grid *
 		calc_partially_implicit_divvs(state_p1, state_tendency, grid, dualgrid, dissipation_on, rad_update, tracers_on, delta_t, diffusion_on, radiation_tendency, phase_trans_on, tracer_mass_source_rates, tracer_heat_source_rates, mass_dry_flux_density, mass_dry_flux_density_divv, temperature, entropy_gas_flux_density, entropy_gas_flux_density_divv, temp_diffusion_heating, temp_gradient, heating_diss, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, mass_dry_diffusion_flux_density, mass_dry_diffusion_source_rate, temperature_flux_density, tracer_density, tracer_velocity, tracer_flux_density, tracer_flux_density_divv, tracer_density_temperature, tracer_temperature_flux_density, tracer_temperature_flux_density_divv, diff_update);
 		three_band_solver_ver_den_dry(state_0, state_p1, state_tendency, delta_t/(3 - i), grid);
 		three_band_solver_ver_entropy_gas(state_0, state_p1, state_tendency, delta_t/(3 - i), grid);
-		// iterative vertical implicit column solver goes here
+		vertical_sound_wave_solver(state_0, state_p1, state_tendency, delta_t/(3 - i), grid, pressure_gradient_acc, i);
 		// implicit vertical tracer advection
+		if (i == 2)
+			exit(1);
 		if (tracers_on == 1)
 			three_band_solver_ver_tracers(state_0, state_p1, state_tendency, delta_t/(3 - i), grid);
     }
