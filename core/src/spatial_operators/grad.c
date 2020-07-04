@@ -44,7 +44,7 @@ int grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
     return 0;
 }
 
-int grad_v_vector_column(double vertical_velocity[], double grad_vector[], int h_index, Grid *grid)
+int grad_v_vector_column_to_vector_points(double vertical_velocity[], double grad_vector[], int h_index, Grid *grid)
 {
 	for (int i = 0; i < NO_OF_LAYERS - 1; ++i)
 	{
@@ -58,12 +58,25 @@ int grad_v_vector_column(double vertical_velocity[], double grad_vector[], int h
 	return 0;
 }
 
-
 int grad_v_scalar_column(double scalar_property[], double grad_vector[], int h_index, Grid *grid)
 {
 	for (int i = 0; i < NO_OF_LAYERS - 1; ++i)
 	{
 		grad_vector[i] = (scalar_property[i] - scalar_property[i + 1])/(grid -> z_scalar[h_index + i*NO_OF_SCALARS_H] - grid -> z_scalar[h_index + (i + 1)*NO_OF_SCALARS_H]);
+	}
+	return 0;
+}
+
+int grad_v_vector_column_to_scalar_points(double vertical_velocity[], double grad_vector[], int h_index, Grid *grid)
+{
+	for (int i = 0; i < NO_OF_LAYERS; ++i)
+	{
+		if (i == 0)
+			grad_vector[i] = -vertical_velocity[0]/(grid -> z_vector[h_index + i*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[h_index + (i + 1)*NO_OF_VECTORS_PER_LAYER]);
+		else if (i == NO_OF_LAYERS - 1)
+			grad_vector[i] = vertical_velocity[i - 1]/(grid -> z_vector[h_index + i*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[h_index + (i + 1)*NO_OF_VECTORS_PER_LAYER]);
+		else
+			grad_vector[i] = (vertical_velocity[i - 1] - vertical_velocity[i])/(grid -> z_vector[h_index + i*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[h_index + (i + 1)*NO_OF_VECTORS_PER_LAYER]);
 	}
 	return 0;
 }

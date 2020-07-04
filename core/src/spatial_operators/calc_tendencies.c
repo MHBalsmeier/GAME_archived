@@ -11,8 +11,15 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdlib.h>
 #include <stdio.h>
 
-int explicit_momentum_tendencies(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int dissipation_on, int tracers_on, Scalar_field temperature, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Vector_field friction_acc, Scalar_field heating_diss, Scalar_field specific_entropy, Curl_field rel_curl, Curl_field abs_curl, Vector_field downgradient_macroscopic_energy, Vector_field pressure_gradient_acc, Vector_field abs_curl_tend, Vector_field specific_entropy_gradient, Scalar_field c_h_p_field, Scalar_field macroscopic_energy, Scalar_field pressure_gradient_decel_factor, Vector_field pressure_gradient_acc_1, int diss_update, Vector_field temp_gradient_times_c_h_p)
-{
+int explicit_momentum_tendencies(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int dissipation_on, int tracers_on, Scalar_field temperature, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Vector_field friction_acc, Scalar_field heating_diss, Scalar_field specific_entropy, Curl_field rel_curl, Curl_field abs_curl, Vector_field downgradient_macroscopic_energy, Vector_field pressure_gradient_acc, Vector_field abs_curl_tend, Vector_field specific_entropy_gradient, Scalar_field c_h_p_field, Scalar_field macroscopic_energy, Scalar_field pressure_gradient_decel_factor, Vector_field pressure_gradient_acc_1, int diss_update, Vector_field temp_gradient_times_c_h_p, Vector_field pressure_gradient_acc_old, int rk_step, int first_step_bool)
+{	
+	double old_hor_grad_weight = R_D/C_D_P - 0.5;
+	double new_hor_grad_weight = C_D_V/C_D_P + 0.5;
+	if (first_step_bool == 1 || first_step_bool == 0)
+	{
+		old_hor_grad_weight = 0;
+		new_hor_grad_weight = 1;
+	}
 	int retval = temperature_diagnostics(current_state -> entropy_gas, current_state -> density_dry, current_state -> tracer_densities, temperature);
     if (diss_update == 1)
     {
@@ -73,9 +80,23 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
 		printf("scalar_times_vector called at position 2 from tendency errored out, exit code %d.\n", retval);
 		exit(1);
 	}
-    for (int i = 0; i < NO_OF_VECTORS; ++i)
-    {
-    	pressure_gradient_acc[i] = -temp_gradient_times_c_h_p[i] + pressure_gradient_acc_1[i];
+	if (rk_step == 0)
+	{
+		*pressure_gradient_acc_old = *pressure_gradient_acc;
+		for (int i = 0; i < NO_OF_VECTORS; ++i)
+		{
+			pressure_gradient_acc[i] = -temp_gradient_times_c_h_p[i] + pressure_gradient_acc_1[i];
+		}
+	}
+	else
+	{
+		for (int i = 0; i < NO_OF_VECTORS; ++i)
+		{
+			layer_index = i/NO_OF_VECTORS_PER_LAYER;
+			h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
+			if (h_index < NO_OF_VECTORS_V)
+				pressure_gradient_acc[i] = -temp_gradient_times_c_h_p[i] + pressure_gradient_acc_1[i];
+		}	
 	}
 	double total_density;
 	if (tracers_on == 1)
@@ -130,7 +151,7 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
         			metric_term = -vertical_velocity*current_state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
         			hor_non_trad_cori_sign = -dualgrid -> h_curl_signs[4*(h_index - NO_OF_VECTORS_V) + 0];
         			hor_non_trad_cori_term = hor_non_trad_cori_sign*vertical_velocity*dualgrid -> f_vec[h_index - NO_OF_VECTORS_V];
-            		state_tendency -> velocity_gas[i] = pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i] + hor_non_trad_cori_term + metric_term + friction_acc[i];
+            		state_tendency -> velocity_gas[i] = old_hor_grad_weight*pressure_gradient_acc_old[i] + new_hor_grad_weight*pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i] + hor_non_trad_cori_term + metric_term + friction_acc[i];
         		}
             	if (h_index < NO_OF_VECTORS_V)
             	{
@@ -145,7 +166,7 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
         			metric_term = -vertical_velocity*current_state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
         			hor_non_trad_cori_sign = -dualgrid -> h_curl_signs[4*(h_index - NO_OF_VECTORS_V) + 0];
         			hor_non_trad_cori_term = hor_non_trad_cori_sign*vertical_velocity*dualgrid -> f_vec[h_index - NO_OF_VECTORS_V];
-            		state_tendency -> velocity_gas[i] = pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i] + hor_non_trad_cori_term + metric_term;
+            		state_tendency -> velocity_gas[i] = old_hor_grad_weight*pressure_gradient_acc_old[i] + new_hor_grad_weight*pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i] + hor_non_trad_cori_term + metric_term;
         		}
         		if (h_index < NO_OF_VECTORS_V)
         		{

@@ -59,6 +59,10 @@ int main(int argc, char *argv[])
     diffusion_on = strtod(argv[14], NULL);
     double radiation_delta_t;
     radiation_delta_t = strtof(argv[15], NULL);
+    int column_mode;
+   	column_mode = strtod(argv[16], NULL);
+    int column_index;
+   	column_index = strtod(argv[17], NULL);
     char *stars  = malloc(83*sizeof(char));
     for (int i = 0; i < 81; ++i)
         stars[i] = '*';
@@ -71,28 +75,44 @@ int main(int argc, char *argv[])
     printf("*\t\t\t\t\t\t\t\t\t\t*\n");
     printf("%s", stars);
     printf("Released under the MIT license, visit https://github.com/MHBalsmeier/game for more information.\n");
-    printf("What you want to do:\n");
-    printf("operator:\t\t\t%s\n", OPERATOR);
-    free(OPERATOR);
-    printf("run time span:\t\t\t%d s\n", TOTAL_RUN_SPAN);
-    printf("output written in intervals of\t%d s\n", WRITE_OUT_INTERVAL);
-    printf("geo properties file:\t\t%s\n", GEO_PROP_FILE);
-    printf("initialization state file:\t%s\n", INIT_STATE_FILE);
-    printf("output directory:\t\t%s\n", OUTPUT_FOLDER);
-    printf("%s", stars);
-    printf("configuration information:\n");
-    printf("number of layers: %d\n", NO_OF_LAYERS);
-    printf("number of layers following orography: %d\n", NO_OF_ORO_LAYERS);
-    printf("number of scalar data points per layer: %d\n", NO_OF_SCALARS_H);
-    double surface = 4*M_PI*pow(RADIUS, 2);
-    double points_per_axis = pow(NO_OF_SCALARS_H, 0.5);
-    int eff_hor_res_km = 1e-3*pow(surface, 0.5)/points_per_axis;
-    printf("effective horizontal resolution: %d km\n", eff_hor_res_km);
-    printf("number of horizontal vectors per layer: %d\n", NO_OF_VECTORS_H);
-    printf("number of scalar data points: %d\n", NO_OF_SCALARS);
-    printf("number of vectors: %d\n", NO_OF_VECTORS);
-    printf("number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
-    printf("reading grid data and checking ... ");
+   	if (column_mode == 1 && (column_index < 0 || column_index >= NO_OF_SCALARS_H))
+   	{
+   		printf("Error: column mode is on but column index is out of scope.");
+   		exit(1);
+   	}
+   	else if (column_mode == 1)
+   	{
+   		printf("Single column simulation.\n");
+		printf("number of layers: %d\n", NO_OF_LAYERS);
+		printf("number of layers following orography: %d\n", NO_OF_ORO_LAYERS);
+		printf("column index:%d\n", column_index);
+   		return 0;
+   	}
+   	else
+   	{
+		printf("What you want to do:\n");
+		printf("operator:\t\t\t%s\n", OPERATOR);
+		free(OPERATOR);
+		printf("run time span:\t\t\t%d s\n", TOTAL_RUN_SPAN);
+		printf("output written in intervals of\t%d s\n", WRITE_OUT_INTERVAL);
+		printf("geo properties file:\t\t%s\n", GEO_PROP_FILE);
+		printf("initialization state file:\t%s\n", INIT_STATE_FILE);
+		printf("output directory:\t\t%s\n", OUTPUT_FOLDER);
+		printf("%s", stars);
+		printf("configuration information:\n");
+		printf("number of layers: %d\n", NO_OF_LAYERS);
+		printf("number of layers following orography: %d\n", NO_OF_ORO_LAYERS);
+		printf("number of scalar data points per layer: %d\n", NO_OF_SCALARS_H);
+		double surface = 4*M_PI*pow(RADIUS, 2);
+		double points_per_axis = pow(NO_OF_SCALARS_H, 0.5);
+		int eff_hor_res_km = 1e-3*pow(surface, 0.5)/points_per_axis;
+		printf("effective horizontal resolution: %d km\n", eff_hor_res_km);
+		printf("number of horizontal vectors per layer: %d\n", NO_OF_VECTORS_H);
+		printf("number of scalar data points: %d\n", NO_OF_SCALARS);
+		printf("number of vectors: %d\n", NO_OF_VECTORS);
+		printf("number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
+		printf("reading grid data and checking ... ");
+    }
     set_grid_properties(grid, dualgrid, GEO_PROP_FILE);
     free(GEO_PROP_FILE);
     double delta_t;
@@ -161,7 +181,9 @@ int main(int argc, char *argv[])
     double *tracer_mass_source_rates = calloc(NO_OF_TRACERS*NO_OF_SCALARS, sizeof(double));
     double *tracer_heat_source_rates = calloc(NO_OF_TRACERS*NO_OF_SCALARS, sizeof(double));
     State *state_tendency = calloc(1, sizeof(State));
+    State *state_tendency_precond = calloc(1, sizeof(State));
     set_state_to_zero(state_tendency);
+    set_state_to_zero(state_tendency_precond);
     Vector_field *mass_dry_flux_density = calloc(1, sizeof(Vector_field));
     Scalar_field *mass_dry_flux_density_divv = calloc(1, sizeof(Scalar_field));
     Scalar_field *temperature = calloc(1, sizeof(Scalar_field));
@@ -195,9 +217,10 @@ int main(int argc, char *argv[])
     Vector_field *tracer_temperature_flux_density = calloc(1, sizeof(Vector_field));
     Scalar_field *tracer_temperature_flux_density_divv = calloc(1, sizeof(Scalar_field));
     Vector_field *temp_gradient_times_c_h_p = calloc(1, sizeof(Vector_field));
+    Vector_field *pressure_gradient_acc_old = calloc(1, sizeof(Vector_field));
     int rad_update = 1;
     *state_p1 = *state_0;
-    manage_time_stepping(state_0, state_p1, delta_t, grid, dualgrid, dissipation_on, rad_update*rad_on, tracers_on, diffusion_on, *radiation_tendency, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divv, *temperature, *entropy_gas_flux_density, *entropy_gas_flux_density_divv, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *rel_curl, *abs_curl, *downgradient_macroscopic_energy, *pressure_gradient_acc, *abs_curl_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divv, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divv, *temp_gradient_times_c_h_p);
+    manage_time_stepping(state_0, state_p1, state_tendency_precond, delta_t, grid, dualgrid, dissipation_on, rad_update*rad_on, tracers_on, diffusion_on, *radiation_tendency, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divv, *temperature, *entropy_gas_flux_density, *entropy_gas_flux_density_divv, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *rel_curl, *abs_curl, *downgradient_macroscopic_energy, *pressure_gradient_acc, *abs_curl_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divv, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divv, *temp_gradient_times_c_h_p, *pressure_gradient_acc_old, 1);
     counter += 1;
     if (write_out_dry_mass_integral == 1)
 		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
@@ -225,7 +248,7 @@ int main(int argc, char *argv[])
         }
         else
         	rad_update = 0;
-        manage_time_stepping(state_0, state_p1, delta_t, grid, dualgrid, dissipation_on, rad_update*rad_on, tracers_on, diffusion_on, *radiation_tendency, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divv, *temperature, *entropy_gas_flux_density, *entropy_gas_flux_density_divv, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *rel_curl, *abs_curl, *downgradient_macroscopic_energy, *pressure_gradient_acc, *abs_curl_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divv, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divv, *temp_gradient_times_c_h_p);
+        manage_time_stepping(state_0, state_p1, state_tendency_precond, delta_t, grid, dualgrid, dissipation_on, rad_update*rad_on, tracers_on, diffusion_on, *radiation_tendency, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divv, *temperature, *entropy_gas_flux_density, *entropy_gas_flux_density_divv, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *rel_curl, *abs_curl, *downgradient_macroscopic_energy, *pressure_gradient_acc, *abs_curl_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divv, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divv, *temp_gradient_times_c_h_p, *pressure_gradient_acc_old, 0);
 		if (write_out_dry_mass_integral == 1)
 			write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
 		if (write_out_entropy_integral == 1)
@@ -266,6 +289,8 @@ int main(int argc, char *argv[])
     	counter += 1;
     }
     MPI_Finalize();
+    free(state_tendency_precond);
+    free(pressure_gradient_acc_old);
     free(temp_gradient_times_c_h_p);
     free(wind_h_lowest_layer_array);
     free(tracer_temperature_flux_density_divv);
