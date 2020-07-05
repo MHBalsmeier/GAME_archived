@@ -11,7 +11,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdlib.h>
 #include <stdio.h>
 
-int explicit_momentum_tendencies(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int dissipation_on, int tracers_on, Scalar_field temperature, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Vector_field friction_acc, Scalar_field heating_diss, Scalar_field specific_entropy, Curl_field rel_curl, Curl_field abs_curl, Vector_field downgradient_macroscopic_energy, Vector_field pressure_gradient_acc, Vector_field abs_curl_tend, Vector_field specific_entropy_gradient, Scalar_field c_h_p_field, Scalar_field macroscopic_energy, Scalar_field pressure_gradient_decel_factor, Vector_field pressure_gradient_acc_1, int diss_update, Vector_field temp_gradient_times_c_h_p, Vector_field pressure_gradient_acc_old, int rk_step, int first_step_bool)
+int explicit_momentum_tendencies(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int dissipation_on, int tracers_on, Scalar_field temperature, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Vector_field friction_acc, Scalar_field heating_diss, Scalar_field specific_entropy, Curl_field rel_curl, Curl_field abs_curl, Vector_field gradient_geopotential_energy, Vector_field pressure_gradient_acc, Vector_field abs_curl_tend, Vector_field specific_entropy_gradient, Scalar_field c_h_p_field, Scalar_field e_kin_h, Scalar_field pressure_gradient_decel_factor, Vector_field pressure_gradient_acc_1, int diss_update, Vector_field temp_gradient_times_c_h_p, Vector_field pressure_gradient_acc_old, int no_step, int first_step_bool, Vector_field e_kin_h_grad)
 {	
 	double old_hor_grad_weight = R_D/C_D_P - 0.5;
 	double new_hor_grad_weight = C_D_V/C_D_P + 0.5;
@@ -80,7 +80,7 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
 		printf("scalar_times_vector called at position 2 from tendency errored out, exit code %d.\n", retval);
 		exit(1);
 	}
-	if (rk_step == 0)
+	if (no_step == 0)
 	{
 		*pressure_gradient_acc_old = *pressure_gradient_acc;
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
@@ -124,10 +124,9 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
     	printf("Error in coriolis_gen, exit code is %d.\n", retval);
     	exit(1);
     }
-    kinetic_energy(current_state -> velocity_gas, macroscopic_energy, grid);
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
-    	macroscopic_energy[i] = -grid -> gravity_potential[i] - macroscopic_energy[i];
-    grad(macroscopic_energy, downgradient_macroscopic_energy, grid);
+    kinetic_energy(current_state -> velocity_gas, e_kin_h, grid);
+    grad(e_kin_h, e_kin_h_grad, grid);
+    grad(grid -> gravity_potential, gradient_geopotential_energy, grid);
     if (retval != 0)
     {
     	printf("grad called at position 4 from tendency errored out, exit code %d.\n", retval);
@@ -151,11 +150,11 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
         			metric_term = -vertical_velocity*current_state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
         			hor_non_trad_cori_sign = -dualgrid -> h_curl_signs[4*(h_index - NO_OF_VECTORS_V) + 0];
         			hor_non_trad_cori_term = hor_non_trad_cori_sign*vertical_velocity*dualgrid -> f_vec[h_index - NO_OF_VECTORS_V];
-            		state_tendency -> velocity_gas[i] = old_hor_grad_weight*pressure_gradient_acc_old[i] + new_hor_grad_weight*pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i] + hor_non_trad_cori_term + metric_term + friction_acc[i];
+            		state_tendency -> velocity_gas[i] = old_hor_grad_weight*pressure_gradient_acc_old[i] + new_hor_grad_weight*pressure_gradient_acc[i] + abs_curl_tend[i] - gradient_geopotential_energy[i] - e_kin_h_grad[i] + hor_non_trad_cori_term + metric_term + friction_acc[i];
         		}
             	if (h_index < NO_OF_VECTORS_V)
             	{
-            		state_tendency -> velocity_gas[i] = pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i] + friction_acc[i];
+            		state_tendency -> velocity_gas[i] = abs_curl_tend[i] - e_kin_h_grad[i] + friction_acc[i];
         		}
         	}
             else
@@ -166,11 +165,11 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
         			metric_term = -vertical_velocity*current_state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
         			hor_non_trad_cori_sign = -dualgrid -> h_curl_signs[4*(h_index - NO_OF_VECTORS_V) + 0];
         			hor_non_trad_cori_term = hor_non_trad_cori_sign*vertical_velocity*dualgrid -> f_vec[h_index - NO_OF_VECTORS_V];
-            		state_tendency -> velocity_gas[i] = old_hor_grad_weight*pressure_gradient_acc_old[i] + new_hor_grad_weight*pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i] + hor_non_trad_cori_term + metric_term;
+            		state_tendency -> velocity_gas[i] = old_hor_grad_weight*pressure_gradient_acc_old[i] + new_hor_grad_weight*pressure_gradient_acc[i] + abs_curl_tend[i] - gradient_geopotential_energy[i] - e_kin_h_grad[i] + hor_non_trad_cori_term + metric_term;
         		}
         		if (h_index < NO_OF_VECTORS_V)
         		{
-            		state_tendency -> velocity_gas[i] = pressure_gradient_acc[i] + abs_curl_tend[i] + downgradient_macroscopic_energy[i];
+            		state_tendency -> velocity_gas[i] = abs_curl_tend[i] - e_kin_h_grad[i];
         		}
         	}
         }

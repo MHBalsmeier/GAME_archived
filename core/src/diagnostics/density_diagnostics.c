@@ -15,6 +15,11 @@ double calc_micro_density(double density_macro, double condensates_density_sum)
 		printf("Error: microscopic density negative.\n");
 		exit(1);
 	}
+	if (isnan(result))
+	{
+		printf("Error: microscopic density is nan.\n");
+		exit(1);
+	}
 	return result;
 }
 

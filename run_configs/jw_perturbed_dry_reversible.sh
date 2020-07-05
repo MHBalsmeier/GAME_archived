@@ -2,7 +2,7 @@
 operator=MHB
 overwrite_run_id=1
 run_id=jw_perturbed_dry_reversible
-run_span=3600
+run_span=7200
 write_out_interval=900
 grid_props_file=grids/B4L26T30000_M2_O2_OL17.nc
 init_state_filename=test_3_B4L26T30000_M2_O2_OL17.grb2

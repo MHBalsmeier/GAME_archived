@@ -13,10 +13,6 @@ The vertical advection of horizontal momentum is organized here.
 #include "atmostracers.h"
 
 int thomas_algorithm(double [], double [], double [], double [], double [], double [], double [], int);
-int candiate_has_converged(State *, int, double []);
-int convergence_checker(double [], double []);
-int modify_candidate(double [], double [], double, int);
-int calc_implicit_tendencies(double [], double [], Grid *, int, double [], double [], double []);
 
 int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency, double delta_t, Grid *grid)
 {
@@ -34,7 +30,7 @@ int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency
 	double *vertical_velocity = malloc(NO_OF_LAYERS*sizeof(double));
 	double *solution_vector = malloc(NO_OF_LAYERS*sizeof(double));
 	double delta_z, delta_v, dvdz;
-	double implicit_weight = 1;
+	double implicit_weight = 0.5;
 	double explicit_weight = 1 - implicit_weight;
 	int i;
 	for (i = 0; i < NO_OF_VECTORS_H; ++i)
@@ -98,7 +94,7 @@ int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency
 	return 0;
 }
 
-int three_band_solver_ver_vel(State *state_0, State *state_p1, State *state_tendency, double delta_t, Grid *grid)
+int three_band_solver_ver_vel_adv(State *state_0, State *state_p1, State *state_tendency, double delta_t, Grid *grid)
 {
 	/*
 	Implicit vertical advection of vertical momentum (Euler).
@@ -121,7 +117,7 @@ int three_band_solver_ver_vel(State *state_0, State *state_p1, State *state_tend
 		// extracting the vertical velocity
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
-			vertical_velocity[j] = state_p1 -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
+			vertical_velocity[j] = state_0 -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
 			vertical_velocity[j] = 0;
 		}
 		vertical_velocity[NO_OF_LAYERS - 1] = state_p1 -> velocity_gas[i + NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER];
@@ -155,6 +151,72 @@ int three_band_solver_ver_vel(State *state_0, State *state_p1, State *state_tend
 	}
 	free(solution_vector);
 	free(vertical_velocity);
+	free(a_vector);
+	free(b_vector);
+	free(c_vector);
+	free(d_vector);
+	free(c_prime_vector);
+	free(d_prime_vector);
+	return 0;
+}
+
+int three_band_solver_ver_sound_waves(State *state_0, State *state_p1, State *state_tendency, Vector_field pressure_gradient_acc_1, Vector_field gradient_geopotential_energy, Scalar_field temperature, Scalar_field temperature_density, Vector_field temperature_flux_density, Scalar_field temperature_flux_density_divv, Scalar_field wind_field_divv, double delta_t, Grid *grid)
+{
+	/*
+	Implicit vertical advection of vertical momentum (Euler).
+	Procedure derived in Kompendium.
+	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
+	Can be considered a preconditioner for the vertical sound wave solver.
+	*/
+	scalar_times_scalar(state_0 -> density_dry, temperature, temperature_density);
+	scalar_times_vector(temperature_density, state_p1 -> velocity_gas, temperature_flux_density, grid);
+	divv(temperature_flux_density, temperature_flux_density_divv, grid, 0);
+	divv_h(state_p1 -> velocity_gas, wind_field_divv, grid);
+	double *a_vector = malloc((2*NO_OF_LAYERS - 2)*sizeof(double));
+	double *b_vector = malloc((2*NO_OF_LAYERS - 1)*sizeof(double));
+	double *c_vector = malloc((2*NO_OF_LAYERS - 2)*sizeof(double));
+	double *d_vector = malloc((2*NO_OF_LAYERS - 1)*sizeof(double));
+	double *c_prime_vector = malloc((2*NO_OF_LAYERS - 2)*sizeof(double));
+	double *d_prime_vector = malloc((2*NO_OF_LAYERS - 1)*sizeof(double));
+	double *solution_vector = malloc((2*NO_OF_LAYERS - 1)*sizeof(double));
+	double delta_z;
+	int i;
+	for (i = 0; i < NO_OF_VECTORS_V; ++i)
+	{
+		// filling up the original vectors
+		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+		{
+			delta_z = grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i];
+			a_vector[2*j] = delta_t*C_D_P/delta_z*1/state_0 -> density_dry[i + j*NO_OF_SCALARS_H];
+			a_vector[2*j + 1] = delta_t*R_D/C_D_V*temperature_density[i + (j + 1)*NO_OF_SCALARS_H]*grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H];
+		}
+		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+		{
+			c_vector[2*j] = -delta_t*R_D/C_D_V*temperature_density[i + j*NO_OF_SCALARS_H]*grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + j*NO_OF_SCALARS_H];
+			delta_z = grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i];
+			c_vector[2*j + 1] = -delta_t*C_D_P/delta_z*1/state_0 -> density_dry[i + (j + 1)*NO_OF_SCALARS_H];
+		}
+		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+		{
+			b_vector[2*j] = 1;
+			b_vector[2*j + 1] = 1;
+			d_vector[2*j] = temperature_density[j*NO_OF_SCALARS_H + i] + delta_t*(-temperature_flux_density_divv[j*NO_OF_SCALARS_H + i] - R_D/C_D_V*temperature_density[j*NO_OF_SCALARS_H + i]*wind_field_divv[j*NO_OF_SCALARS_H + i]);
+			d_vector[2*j + 1] = state_p1 -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + delta_t*(pressure_gradient_acc_1[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - gradient_geopotential_energy[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]);
+		}
+		b_vector[2*NO_OF_LAYERS - 2] = 1;
+		d_vector[2*NO_OF_LAYERS - 2] = temperature_density[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + delta_t*(-temperature_flux_density_divv[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] - R_D/C_D_V*temperature_density[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]*wind_field_divv[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]);
+		// calling the algorithm to solve the system of linear equations
+		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, 2*NO_OF_LAYERS - 1);
+		// writing the result into the new state
+		state_p1 -> velocity_gas[i] = 0;
+		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+		{
+			temperature_density[i + j*NO_OF_SCALARS_H] = solution_vector[2*j];
+			state_p1 -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] = solution_vector[2*j + 1];
+		}
+		temperature_density[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H] = solution_vector[2*(NO_OF_LAYERS - 1)];
+	}
+	free(solution_vector);
 	free(a_vector);
 	free(b_vector);
 	free(c_vector);
@@ -455,167 +517,6 @@ int three_band_solver_ver_tracers(State *state_0, State *state_p1, State *state_
 	free(d_vector);
 	free(c_prime_vector);
 	free(d_prime_vector);
-	return 0;
-}
-
-int vertical_sound_wave_solver(State *state_0, State *state_p1, State *state_tendency_precond, State *state_tendency, double delta_t, Grid *grid, Vector_field temp_gradient_times_c_h_p, Vector_field pressure_gradient_acc_1)
-{
-	/*
-	This is the iterative solver required for stabilizing vertically propagating sound waves.
-	*/
-	double *candidate_vector = malloc((NO_OF_LAYERS + NO_OF_LAYERS - 1)*sizeof(double));
-	double *candidate_vector_result = malloc((NO_OF_LAYERS + NO_OF_LAYERS - 1)*sizeof(double));
-	double *fixed_component = malloc((NO_OF_LAYERS + NO_OF_LAYERS - 1)*sizeof(double));
-	double *implicit_tendency = malloc((NO_OF_LAYERS + NO_OF_LAYERS - 1)*sizeof(double));
-	double *explicit_tendency = malloc((NO_OF_LAYERS + NO_OF_LAYERS - 1)*sizeof(double));
-	double *pot_temp_vector = malloc(NO_OF_LAYERS*sizeof(double));
-	double *temp_vector_begin = malloc(NO_OF_LAYERS*sizeof(double));
-	int has_converged;
-	int step_counter = 0;
-	double exner_pressure_value;
-	double implicit_weight = 0.4;
-	double explicit_weight = 1 - implicit_weight;
-	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-	{
-		for (int j = 0; j < NO_OF_LAYERS; ++j)
-		{
-			candidate_vector[2*j] = state_p1 -> density_dry[i + j*NO_OF_SCALARS_H];
-			fixed_component[2*j] = state_0 -> density_dry[i + j*NO_OF_SCALARS_H] + delta_t*state_tendency -> density_dry[i + j*NO_OF_SCALARS_H];
-			pot_temp_vector[j] = pot_temp_diagnostics_single_value(state_p1 -> entropy_gas[i + j*NO_OF_SCALARS_H], candidate_vector[2*j], 0, 0);
-			exner_pressure_value = exner_pressure_diagnostics_single_value(candidate_vector[2*j], 0, pot_temp_vector[j]);
-			temp_vector_begin[j] = temperature_diagnostics_single_value(exner_pressure_value, pot_temp_vector[j]);
-			explicit_tendency[2*j] = state_tendency_precond -> density_dry[i + j*NO_OF_SCALARS_H];
-		}
-		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
-		{
-			candidate_vector[2*j + 1] = state_p1 -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
-			fixed_component[2*j + 1] = state_0 -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] + delta_t*(state_tendency -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] + temp_gradient_times_c_h_p[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] - pressure_gradient_acc_1[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]);
-			explicit_tendency[2*j + 1] = state_tendency_precond -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
-		}
-		has_converged = 0;
-		step_counter = 0;
-		while (has_converged == 0 && step_counter < 1)
-		{
-			calc_implicit_tendencies(candidate_vector, implicit_tendency, grid, i, pot_temp_vector, temp_vector_begin, pressure_gradient_acc_1);
-			for (int j = 0; j < NO_OF_LAYERS; ++j)
-			{
-				candidate_vector_result[2*j] = fixed_component[2*j] + delta_t*(implicit_weight*implicit_tendency[2*j] + explicit_weight*explicit_tendency[2*j]);
-			}
-			for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
-			{
-				candidate_vector_result[2*j + 1] = fixed_component[2*j + 1] + delta_t*(implicit_weight*implicit_tendency[2*j + 1] + explicit_weight*explicit_tendency[2*j + 1]);
-			}
-			has_converged = convergence_checker(candidate_vector_result, candidate_vector);
-			if (has_converged == 0)
-			{
-				modify_candidate(candidate_vector_result, candidate_vector, delta_t, step_counter);
-			}
-			++step_counter;
-		}
-		candiate_has_converged(state_p1, i, candidate_vector);
-	}
-	free(explicit_tendency);
-	free(temp_vector_begin);
-	free(pot_temp_vector);
-	free(fixed_component);
-	free(implicit_tendency);
-	free(candidate_vector);
-	free(candidate_vector_result);
-	return step_counter/NO_OF_SCALARS_H;
-}
-
-int calc_implicit_tendencies(double candidate_vector[], double implicit_tendency[], Grid *grid, int h_index, double pot_temp_vector[], double temp_vector_begin[], double pressure_gradient_acc_1[])
-{
-	double *temp_vector = malloc(NO_OF_LAYERS*sizeof(double));
-	double exner_pressure_value;
-	for (int i = 0; i < NO_OF_LAYERS; ++i)
-	{
-		exner_pressure_value = exner_pressure_diagnostics_single_value(candidate_vector[2*i], 0, pot_temp_vector[i]);
-		temp_vector[i] = temperature_diagnostics_single_value(exner_pressure_value, pot_temp_vector[i]);
-	}
-	double *flux_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *vertical_velocity_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	for (int i = 0; i < NO_OF_LAYERS - 1; ++i)
-	{
-		flux_vector[i] = 0.5*(candidate_vector[2*i + 0] + candidate_vector[2*i + 2])*candidate_vector[2*i + 1];
-		vertical_velocity_vector[i] = candidate_vector[2*i + 1];
-	}
-	double *dwdz_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	grad_v_vector_column_to_vector_points(vertical_velocity_vector, dwdz_vector, h_index, grid);
-	double *dfluxdz = malloc(NO_OF_LAYERS*sizeof(double));
-	divv_v_columns(flux_vector, dfluxdz, h_index, grid);
-	double *dtempdz = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	grad_v_scalar_column(temp_vector, dtempdz, h_index, grid);
-	for (int i = 0; i < NO_OF_LAYERS; ++i)
-	{
-		implicit_tendency[2*i + 0] = -dfluxdz[i];
-	}
-	for (int i = 0; i < NO_OF_LAYERS - 1; ++i)
-	{
-		implicit_tendency[2*i + 1] = -C_D_P*dtempdz[i] + 0.5*(temp_vector[i] + temp_vector[i + 1])/(0.5*(temp_vector_begin[i] + temp_vector_begin[i + 1]))*pressure_gradient_acc_1[h_index + (i + 1)*NO_OF_VECTORS_PER_LAYER] - vertical_velocity_vector[i]*dwdz_vector[i];
-	}
-	free(dwdz_vector);
-	free(vertical_velocity_vector);
-	free(flux_vector);
-	free(temp_vector);
-	free(dfluxdz);
-	free(dtempdz);
-	return 0;
-}
-
-int modify_candidate(double candidate_vector_result[], double candidate_vector[], double delta_t, int step)
-{
-	if (step%2 == 0)
-	{
-		for (int i = 0; i < NO_OF_LAYERS; ++i)
-		{
-			candidate_vector[2*i + 0] = candidate_vector[2*i + 0] - 1*(candidate_vector[2*i + 0] - candidate_vector_result[2*i + 0]);
-		}
-	}
-	else
-	{
-		for (int i = 0; i < NO_OF_LAYERS - 1; ++i)
-		{
-			candidate_vector[2*i + 1] = candidate_vector[2*i + 1] - 1*(candidate_vector[2*i + 1] - candidate_vector_result[2*i + 1]);
-		}
-	}
-	return 0;
-}
-
-int convergence_checker(double candidate_vector_result[], double candidate_vector[])
-{
-	// this functions checks wether the vertical sound wave solver has converged
-	int result = 1;
-	double density_criterion = 0.001;
-	double vertical_velocity_criterion = 0.001;
-	for (int j = 0; j < NO_OF_LAYERS; ++j)
-	{
-		if (fabs(candidate_vector_result[2*j + 0] - candidate_vector[2*j + 0]) >= density_criterion)
-			result = 0;
-	}
-	for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
-	{
-		if (fabs(candidate_vector_result[2*j + 1] - candidate_vector[2*j + 1]) >= vertical_velocity_criterion)
-			result = 0;
-	}
-	return result;
-}
-
-int candiate_has_converged(State *state_p1, int h_index, double candidate_vector[])
-{
-	for (int i = 0; i < NO_OF_LAYERS; ++i)
-	{
-		state_p1 -> density_dry[h_index + i*NO_OF_SCALARS_H] = candidate_vector[2*i];
-		if (state_p1 -> density_dry[h_index + i*NO_OF_SCALARS_H] <= 0)
-		{
-			printf("Iteration lead to a non-positive density value.\n");
-			exit(1);
-		}
-	}
-	for (int i = 0; i < NO_OF_LAYERS - 1; ++i)
-	{
-		state_p1 -> velocity_gas[h_index + (i + 1)*NO_OF_VECTORS_PER_LAYER] = candidate_vector[2*i + 1];
-	}
 	return 0;
 }
 

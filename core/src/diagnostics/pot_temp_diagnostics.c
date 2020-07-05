@@ -35,3 +35,15 @@ double pot_temp_diagnostics_single_value(double density_entropy_value, double de
 	double result = exp((density_entropy_value - f_2 - f_3)/f_1);
 	return result;
 }
+
+int diagnoze_global_entropy(Scalar_field temperature_density, State *state)
+{
+	double temp_value, pot_temp_value;
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		temp_value = temperature_density[i]/state -> density_dry[i];
+		pot_temp_value = temp_value*pow(P_0/(R_D*temperature_density[i]), R_D/C_D_P);
+		state -> entropy_gas[i] = state -> density_dry[i]*(C_D_P*log(pot_temp_value) + entropy_constant_d);
+	}
+	return 0;
+}
