@@ -21,4 +21,4 @@ column_mode=0
 column_index=10
 export OMP_NUM_THREADS=4
 number_of_cpus=1
-source run.sh
+source core/run.sh
