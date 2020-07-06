@@ -1,1 +1,3 @@
-./grid_generator/nc_fiiles/*
+# these files are too large
+grid_generator/nc_fiiles/B5L26T30000_M2_O0_OL17.nc
+grid_generator/nc_fiiles/B5L26T30000_M2_O2_OL17.nc
