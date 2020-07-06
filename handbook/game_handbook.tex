@@ -69,7 +69,16 @@ Listing \ref{lst:input_file_example} is an example of an input file. Table \ref{
 \section{Grid generation procedure}
 \label{sec:grid_generation_procedure}
 
-In order to generate a new grid, first compile and run the grid generator with \texttt{ORO\_ID = 0}. Then, run the orography generator with the desired \texttt{ORO\_ID}. Finally, run the grid generator again, this time with the desired \texttt{ORO\_ID}.
+A grid is determined by the following four properties:
+
+\begin{itemize}
+\item the resolution, specified via the parameter \texttt{RES\_ID}
+\item the orography, specified via the parameter \texttt{ORO\_ID}
+\item the height of the top of the atmosphere, specified via the parameter \texttt{TOA}
+\item the number of layers, specified via the parameter \texttt{NUMBER\_OF\_LAYERS}
+\end{itemize}
+
+The grid generator needs to be recompiled for every specific resolution, therefore change the constant \texttt{RES\_ID} in the source file \texttt{grid\_generator.c} and execute the bash script \texttt{compile.sh}
 
 \section{Test state generation procedure}
 \label{sec:test_state_generation_procedure}

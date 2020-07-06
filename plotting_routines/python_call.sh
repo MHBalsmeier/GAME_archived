@@ -1,5 +1,5 @@
-disp_level=0
-disp_shortname=pres
+disp_level=10
+disp_shortname=10v
 fig_save_path=~/figs/game_output/$run_id
 plot_integrals=1
 if [ -d $fig_save_path ]

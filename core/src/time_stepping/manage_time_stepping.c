@@ -62,7 +62,7 @@ int manage_time_stepping(State *state_0, State *state_p1, State *state_p2, State
 	if (tracers_on == 1)
 		three_band_solver_ver_tracers(state_p1, state_p2, state_tendency, delta_t, grid);
 	// weights of the tendencies
-	double first_tendency_weight = 0.5;
+	double first_tendency_weight = 0.47;
 	double second_tendency_weight = 1 - first_tendency_weight;
 	// dtermining the actual tendency
     linear_combine_two_states(state_tendency_precond, state_tendency, state_tendency, first_tendency_weight, second_tendency_weight);
