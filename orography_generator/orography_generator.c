@@ -20,8 +20,6 @@ Github repository: https://github.com/MHBalsmeier/game
 #define OMEGA (7.292115e-5)
 #define P_0 100000.0
 
-const int MODE = 2;
-const int ORO_ID = 2;
 const double U_0 = 35;
 const double ETA_0 = 0.252;
 const double ETA_T = 0.2;
@@ -62,24 +60,26 @@ SCALAR_POINTS_PER_INNER_FACE = (int) (0.5*(pow(2, RES_ID) - 2)*(pow(2, RES_ID) -
 VECTOR_POINTS_PER_INNER_FACE = (int) (1.5*(pow(2, RES_ID) - 1)*pow(2, RES_ID))};
 
 int main(int argc, char *argv[])
-{
+{	
+	int ORO_ID;
+   	ORO_ID = strtod(argv[1], NULL);
 	int OUTPUT_FILE_LENGTH = 100;
 	char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-	sprintf(OUTPUT_FILE_PRE, "nc_files/B%d_M%d_O%d.nc", RES_ID, MODE, ORO_ID);
+	sprintf(OUTPUT_FILE_PRE, "nc_files/B%d_O%d.nc", RES_ID, ORO_ID);
 	OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
 	free(OUTPUT_FILE_PRE);
 	char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-	sprintf(OUTPUT_FILE, "nc_files/B%d_M%d_O%d.nc", RES_ID, MODE, ORO_ID);
+	sprintf(OUTPUT_FILE, "nc_files/B%d_O%d.nc", RES_ID, ORO_ID);
 	int ncid, scalar_h_dimid, var_dimid, oro_id, latitude_scalar_id, longitude_scalar_id;
 	double *oro, latitude;
 	oro = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     int GEO_PROP_FILE_LENGTH = 100;
     char *GEO_PROP_FILE_PRE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(GEO_PROP_FILE_PRE, "../grid_generator/nc_files/B%dL26T30000_M%d_O0_OL17.nc", RES_ID, MODE);
+    sprintf(GEO_PROP_FILE_PRE, "../grid_generator/nc_files/B%dL26T30000_O0_OL17.nc", RES_ID);
     GEO_PROP_FILE_LENGTH = strlen(GEO_PROP_FILE_PRE);
     free(GEO_PROP_FILE_PRE);
     char *GEO_PROP_FILE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(GEO_PROP_FILE, "../grid_generator/nc_files/B%dL26T30000_M%d_O0_OL17.nc", RES_ID, MODE);
+    sprintf(GEO_PROP_FILE, "../grid_generator/nc_files/B%dL26T30000_O0_OL17.nc", RES_ID);
 	int scalar_index, retval;
     double *latitude_scalar = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double *longitude_scalar = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
