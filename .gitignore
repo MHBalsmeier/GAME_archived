@@ -1,3 +1,5 @@
 # these files are too large
-grid_generator/nc_files/B5L26T30000_O0_OL17.nc
 build
+*.pyc
+*.nc
+*.grb2
