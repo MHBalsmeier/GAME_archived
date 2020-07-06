@@ -23,3 +23,4 @@ int divv_v_columns(double [], double [], int, Grid *);
 int grad_v_vector_column_to_vector_points(double [], double [], int, Grid *);
 int grad_v_scalar_column(double [], double [], int, Grid *);
 int grad_v_vector_column_to_scalar_points(double [], double [], int, Grid *);
+int grad_v_scalar_column_to_scalar_points(double [], double [], int, Grid *);

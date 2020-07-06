@@ -32,8 +32,8 @@ int manage_time_stepping(State *state_0, State *state_p1, State *state_p2, State
 	three_band_solver_ver_sound_waves(state_0, state_p1, state_tendency_precond, pressure_gradient_acc_1, gradient_geopotential_energy, temperature, temperature_density, temperature_flux_density, temperature_flux_density_divv, wind_field_divv, delta_t, grid);
 	// now that the new vertical velocity is known, the new dry density can be calculated via implicit vertical advection
 	three_band_solver_ver_den_dry(state_0, state_p1, state_tendency_precond, delta_t, grid);
-	// Here, the global entropy density is calculated via the equation of state. Maybe the linearized equation of state will have to be used later.
-	diagnoze_global_entropy(temperature_density, state_p1);
+	// Here, the global entropy density is calculated via its generalized equation of state.
+	three_band_solver_ver_entropy_gas(state_0, state_p1, state_tendency_precond, delta_t, grid);
 	// diagnozing the tendency
 	linear_combine_two_states(state_0, state_p1, state_tendency_precond, -1/delta_t, 1/delta_t);
 	// vertical tracer advection with 3-band matrices
@@ -54,8 +54,8 @@ int manage_time_stepping(State *state_0, State *state_p1, State *state_p2, State
 	three_band_solver_ver_sound_waves(state_p1, state_p2, state_tendency, pressure_gradient_acc_1, gradient_geopotential_energy, temperature, temperature_density, temperature_flux_density, temperature_flux_density_divv, wind_field_divv, delta_t, grid);
 	// now that the new vertical velocity is known, the new dry density can be calculated via implicit vertical advection
 	three_band_solver_ver_den_dry(state_p1, state_p2, state_tendency, delta_t, grid);
-	// Here, the global entropy density is calculated via the equation of state. Maybe the linearized equation of state will have to be used later.
-	diagnoze_global_entropy(temperature_density, state_p2);
+	// Here, the global entropy density is calculated via its generalized equation of state.
+	three_band_solver_ver_entropy_gas(state_p1, state_p2, state_tendency, delta_t, grid);
 	// diagnozing the tendency
 	linear_combine_two_states(state_p1, state_p2, state_tendency, -1/delta_t, 1/delta_t);
 	// vertical tracer advection with 3-band matrices

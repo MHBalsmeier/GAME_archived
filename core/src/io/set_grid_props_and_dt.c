@@ -186,12 +186,16 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         {
             grid -> adjacent_vector_indices_h[6*i + j] = adjacent_vector_indices_h[6*i + j];
             if (grid -> adjacent_vector_indices_h[6*i + j] >= NO_OF_VECTORS_H || grid -> adjacent_vector_indices_h[6*i + j] < -1)
+            {
                 grid_check_failed();
+            }
             grid -> adjacent_signs_h[6*i + j] = adjacent_signs_h[6*i + j];
             if (grid -> adjacent_signs_h[6*i + j] != -1 && grid -> adjacent_signs_h[6*i + j] != 1)
             {
             	if (i >= NO_OF_PENTAGONS || j != 5 || grid -> adjacent_signs_h[6*i + j] != 0)
-                	grid_check_failed();
+            	{
+               		grid_check_failed(); 	
+            	}
         	}
         }
     }
@@ -207,6 +211,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
                 grid_check_failed();
         }
     }
+    printf("here\n");
     double e_kin_weight_sum = 0;
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
@@ -397,7 +402,7 @@ int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid)
     }
     delta_t_candidate = (1 - cfl_margin)*min_dist_horizontal/max_speed;
     if (delta_t_buoyancy < delta_t_candidate)
-        *delta_t = (1 - cfl_margin)*delta_t_buoyancy/20;
+        *delta_t = (1 - cfl_margin)*delta_t_buoyancy/5;
     else
     	*delta_t = (1 - cfl_margin)*delta_t_candidate;
     return 1;

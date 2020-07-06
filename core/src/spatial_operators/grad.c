@@ -67,6 +67,26 @@ int grad_v_scalar_column(double scalar_property[], double grad_vector[], int h_i
 	return 0;
 }
 
+int grad_v_scalar_column_to_scalar_points(double scalar_property[], double grad_at_scalars[], int h_index, Grid *grid)
+{
+	for (int i = 0; i < NO_OF_LAYERS; ++i)
+	{
+		if (i == 0)
+		{
+			grad_at_scalars[i] = (scalar_property[i] - scalar_property[i + 1])/(grid -> z_scalar[h_index + i*NO_OF_SCALARS_H] - grid -> z_scalar[h_index + (i + 1)*NO_OF_SCALARS_H]);
+		}
+		else if (i == NO_OF_LAYERS - 1)
+		{
+			grad_at_scalars[i] = (scalar_property[i - 1] - scalar_property[i])/(grid -> z_scalar[h_index + (i - 1)*NO_OF_SCALARS_H] - grid -> z_scalar[h_index + i*NO_OF_SCALARS_H]);
+		}
+		else
+		{
+			grad_at_scalars[i] = (scalar_property[i - 1] - scalar_property[i + 1])/(grid -> z_scalar[h_index + (i - 1)*NO_OF_SCALARS_H] - grid -> z_scalar[h_index + (i + 1)*NO_OF_SCALARS_H]);
+		}
+	}
+	return 0;
+}
+
 int grad_v_vector_column_to_scalar_points(double vertical_velocity[], double grad_vector[], int h_index, Grid *grid)
 {
 	for (int i = 0; i < NO_OF_LAYERS; ++i)

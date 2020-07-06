@@ -31,10 +31,10 @@ const int MODE = 2;
 const double TOA = 30000.0;
 const int ORO_ID = 2;
 // code fails for ORO_ID = 2 (steep orography test)
-const double ORTH_CRITERION_DEG = 89.996;
+const double ORTH_CRITERION_DEG = 89.99;
 
 enum grid_integers {
-RES_ID = 4,
+RES_ID = 5,
 NUMBER_OF_BASIC_TRIANGLES = 20,
 NUMBER_OF_PENTAGONS = 12,
 NUMBER_OF_HEXAGONS = (int) (10*(pow(2, 2*RES_ID) - 1)),
@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
     char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
     sprintf(OUTPUT_FILE, "nc_files/B%dL%dT%d_M%d_O%d_OL%d.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, MODE, ORO_ID, NUMBER_OF_ORO_LAYERS);
     double *latitude_ico = malloc(12*sizeof(double));
+    printf("Building icosahedron ... ");
     latitude_ico[0] = M_PI/2;
     latitude_ico[1] = M_PI/6;
     latitude_ico[2] = M_PI/6;
@@ -273,6 +274,8 @@ int main(int argc, char *argv[])
             }
         }
     }
+    printf("finished.\n");
+    printf("Allocating memory ... ");
     double *x_unity = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double *y_unity = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double *z_unity = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
@@ -335,23 +338,37 @@ int main(int argc, char *argv[])
     int *vorticity_signs_pre = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(int));
     int *vorticity_signs = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
     int *h_curl_signs = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
+    printf("finished.\n");
     double lat_res, lon_res, base_area, base_distance, radius_0, radius_1, direction_change, x_point_0, y_point_0, z_point_0, x_point_1, y_point_1, z_point_1, x_res, y_res, z_res, rel_on_line;
     int face_index, face_index_0, face_index_1, h_index, on_face_index, layer_index, inner_index, upper_index, lower_index, coord_0_points_amount, coord_0, coord_1, index_0, index_1, triangle_on_face_index, on_edge_index, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_index, counter, primal_vector_index, dual_vector_index, number_of_triangles_per_face, edgepoint_0, edgepoint_1, edgepoint_2, points_per_edge, dual_scalar_on_face_index, base_index_old, base_index_down_triangles, base_index_up_triangles, old_triangle_on_line_index, first_face_found, edge_rel_to_face_0, edge_rel_to_face_1, edge_index, sign, small_triangle_edge_index, dump, points_upwards, points_downwards, last_triangle_bool, ncid, retval, z_surface_id, test_index;
-	int ORO_FILE_LENGTH = 100;
-    char *ORO_FILE_PRE = malloc((ORO_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(ORO_FILE_PRE, "../orography_generator/nc_files/B%d_M%d_O%d.nc", RES_ID, MODE, ORO_ID);
-    ORO_FILE_LENGTH = strlen(ORO_FILE_PRE);
-    free(ORO_FILE_PRE);
-    char *ORO_FILE = malloc((ORO_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(ORO_FILE, "../orography_generator/nc_files/B%d_M%d_O%d.nc", RES_ID, MODE, ORO_ID);	    
-	if ((retval = nc_open(ORO_FILE, NC_NOWRITE, &ncid)))
-        ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "z_surface", &z_surface_id)))
-        ERR(retval);		
-    if ((retval = nc_get_var_double(ncid, z_surface_id, &z_surface[0])))
-        ERR(retval);
-    if ((retval = nc_close(ncid)))
-        ERR(retval);
+    printf("Reading orography data ... ");
+    if (ORO_ID != 0)
+    {
+		int ORO_FILE_LENGTH = 100;
+		char *ORO_FILE_PRE = malloc((ORO_FILE_LENGTH + 1)*sizeof(char));
+		sprintf(ORO_FILE_PRE, "../orography_generator/nc_files/B%d_M%d_O%d.nc", RES_ID, MODE, ORO_ID);
+		ORO_FILE_LENGTH = strlen(ORO_FILE_PRE);
+		free(ORO_FILE_PRE);
+		char *ORO_FILE = malloc((ORO_FILE_LENGTH + 1)*sizeof(char));
+		sprintf(ORO_FILE, "../orography_generator/nc_files/B%d_M%d_O%d.nc", RES_ID, MODE, ORO_ID);	    
+		if ((retval = nc_open(ORO_FILE, NC_NOWRITE, &ncid)))
+		    ERR(retval);
+		if ((retval = nc_inq_varid(ncid, "z_surface", &z_surface_id)))
+		    ERR(retval);		
+		if ((retval = nc_get_var_double(ncid, z_surface_id, &z_surface[0])))
+		    ERR(retval);
+		if ((retval = nc_close(ncid)))
+		    ERR(retval);
+    }
+    else
+    {
+    	for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
+    	{
+    		z_surface[i] = 0;
+    	}
+    }
+    printf("finished.\n");
+    printf("Establishing horizontal grid structure ... ");
     if (NUMBER_OF_VECTORS_H != NUMBER_OF_DUAL_VECTORS_H)
         printf("It is NUMBER_OF_VECTORS_H != NUMBER_OF_DUAL_VECTORS_H.\n");
     for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
@@ -626,7 +643,7 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
     }
-    if (fabs(triangle_sum_unit_sphere/(4*M_PI) - 1) > 1e-13)
+    if (fabs(triangle_sum_unit_sphere/(4*M_PI) - 1) > 1e-11)
 	{
         printf("Sum of faces of triangles on unit sphere does not match face of unit sphere.\n");
 		exit(1);
@@ -745,6 +762,7 @@ int main(int argc, char *argv[])
             direction_dual[i] = find_geodetic_direction(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], rel_on_line_dual[i]);
         }
     }
+    printf("finished.\n");
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H; ++i)
     {
         if (i >= NUMBER_OF_DUAL_VECTORS_H)
@@ -1375,6 +1393,7 @@ int main(int argc, char *argv[])
     	partial_volume = find_volume(cell_base_area, RADIUS + z_vector[e_kin_indices[14*i + 13]], RADIUS + z_scalar[i]);
     	e_kin_weights[14*i + 13] = 0.5*partial_volume/volume[i];
     }
+    printf("checking kinetic energy weights sum ...\n");
     double e_kin_weights_sum;
     for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
     {
@@ -1400,6 +1419,7 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
     }
+    printf("passed\n");
     double x_value, y_value, z_value, normal_vector_global[3], local_basis_vector[3], local_x, local_y, local_z, tilting_angle, delta_x, delta_z, abs_value;
     for (int i = 0; i < NUMBER_OF_ORO_LAYERS + 1; ++i)
     {
@@ -2480,6 +2500,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     free(OUTPUT_FILE);
     int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_curl_weight_id, recov_hor_ver_curl_weight_id, trsk_modified_weights_id, recov_ver_0_pri_weight_id, recov_ver_0_curl_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_curl_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_curl_index_id, recov_hor_ver_curl_index_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, recov_hor_ver_pri_index_id, recov_ver_index_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vector_curl_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, exner_pressure_background_id, pot_temp_background_id, gravity_potential_id, vertical_contravar_unit_id, vertical_contravar_unit_dimid, adjacent_vector_indices_dual_h_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_14_dimid, e_kin_indices_id;
+    printf("starting to write to output file ...\n");
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NUMBER_OF_SCALARS, &scalar_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_14_index", 14*NUMBER_OF_SCALARS, &scalar_14_dimid)))
@@ -2542,7 +2563,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "vertical_contravar_unit", NC_DOUBLE, 1, &vertical_contravar_unit_dimid, &vertical_contravar_unit_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "z_surface", NC_DOUBLE, 1, &scalar_dimid, &z_surface_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "z_surface", NC_DOUBLE, 1, &scalar_h_dimid, &z_surface_id)))
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, z_surface_id, "units", strlen("m"), "m")))
         ERR(retval);

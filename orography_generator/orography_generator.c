@@ -40,7 +40,7 @@ ORO_ID:
 int find_z_from_p(double, double, double *);
 
 enum grid_integers {
-RES_ID = 4,
+RES_ID = 5,
 NUMBER_OF_BASIC_TRIANGLES = 20,
 NUMBER_OF_PENTAGONS = 12,
 NUMBER_OF_HEXAGONS = (int) (10*(pow(2, 2*RES_ID) - 1)),

@@ -1,5 +1,5 @@
 /*
-This source file is part of the Global Geophysical Modeling Frame (GAME), which is released under the MIT license.
+This source file is part of the Global Atmospheric Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/MHBalsmeier/game
 */
 
@@ -35,7 +35,7 @@ const double U_0 = 35;
 const double ETA_0 = 0.252;
 const double TOA = 30000;
 const short MODE = 2;
-const int TEST_ID = 4;
+const int TEST_ID = 3;
 
 /* test_ids:
 0:	standard atmosphere without orography
@@ -46,7 +46,7 @@ const int TEST_ID = 4;
 */
 
 enum grid_integers {
-RES_ID = 4,
+RES_ID = 5,
 NUMBER_OF_BASIC_TRIANGLES = 20,
 NUMBER_OF_PENTAGONS = 12,
 NUMBER_OF_HEXAGONS = (int) (10*(pow(2, 2*RES_ID) - 1)),
@@ -137,10 +137,8 @@ int main(int argc, char *argv[])
         NCERR(retval);
     if ((retval = nc_close(ncid)))
         NCERR(retval);
-    char *SAMPLE_FILE_SCALAR = "grib_files/scalar_field_blueprint_res_id_2.grb2";
-    char *SAMPLE_FILE_VECTOR = "grib_files/vector_field_blueprint_res_id_2.grb2";
-    FILE *SAMPLE_SCALAR;
-    FILE *SAMPLE_VECTOR;
+    char *SAMPLE_FILE = "grib_files/grib_template.grb2";
+    FILE *SAMPLE;
     int err = 0;
     short OUTPUT_FILE_LENGTH = 100;
     char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
@@ -172,46 +170,46 @@ int main(int argc, char *argv[])
     double *wind_v = malloc(NUMBER_OF_VECTORS_V*sizeof(double));
     const double TROPO_TEMP = T_SFC + TROPO_HEIGHT*TEMP_GRADIENT;
     double z_height;
-    SAMPLE_SCALAR = fopen(SAMPLE_FILE_SCALAR, "r");
-    handle_pot_temperature = codes_handle_new_from_file(NULL, SAMPLE_SCALAR, PRODUCT_GRIB, &err);
+    SAMPLE = fopen(SAMPLE_FILE, "r");
+    handle_pot_temperature = codes_handle_new_from_file(NULL, SAMPLE, PRODUCT_GRIB, &err);
     if (err != 0)
         ECCERR(err);
-    fclose(SAMPLE_SCALAR);
-    SAMPLE_SCALAR = fopen(SAMPLE_FILE_SCALAR, "r");
-    handle_density = codes_handle_new_from_file(NULL, SAMPLE_SCALAR, PRODUCT_GRIB, &err);
+    fclose(SAMPLE);
+    SAMPLE = fopen(SAMPLE_FILE, "r");
+    handle_density = codes_handle_new_from_file(NULL, SAMPLE, PRODUCT_GRIB, &err);
     if (err != 0)
         ECCERR(err);
-    fclose(SAMPLE_SCALAR);
-    SAMPLE_SCALAR = fopen(SAMPLE_FILE_SCALAR, "r");
-    handle_water_vapour_density = codes_handle_new_from_file(NULL, SAMPLE_SCALAR, PRODUCT_GRIB, &err);
+    fclose(SAMPLE);
+    SAMPLE = fopen(SAMPLE_FILE, "r");
+    handle_water_vapour_density = codes_handle_new_from_file(NULL, SAMPLE, PRODUCT_GRIB, &err);
     if (err != 0)
         ECCERR(err);
-    fclose(SAMPLE_SCALAR);
-    SAMPLE_SCALAR = fopen(SAMPLE_FILE_SCALAR, "r");
-    handle_liquid_water_density = codes_handle_new_from_file(NULL, SAMPLE_SCALAR, PRODUCT_GRIB, &err);
+    fclose(SAMPLE);
+    SAMPLE = fopen(SAMPLE_FILE, "r");
+    handle_liquid_water_density = codes_handle_new_from_file(NULL, SAMPLE, PRODUCT_GRIB, &err);
     if (err != 0)
         ECCERR(err);
-    fclose(SAMPLE_SCALAR);
-    SAMPLE_SCALAR = fopen(SAMPLE_FILE_SCALAR, "r");
-    handle_solid_water_density = codes_handle_new_from_file(NULL, SAMPLE_SCALAR, PRODUCT_GRIB, &err);
+    fclose(SAMPLE);
+    SAMPLE = fopen(SAMPLE_FILE, "r");
+    handle_solid_water_density = codes_handle_new_from_file(NULL, SAMPLE, PRODUCT_GRIB, &err);
     if (err != 0)
         ECCERR(err);
-    fclose(SAMPLE_SCALAR);
-    SAMPLE_SCALAR = fopen(SAMPLE_FILE_SCALAR, "r");
-    handle_liquid_water_temp = codes_handle_new_from_file(NULL, SAMPLE_SCALAR, PRODUCT_GRIB, &err);
+    fclose(SAMPLE);
+    SAMPLE = fopen(SAMPLE_FILE, "r");
+    handle_liquid_water_temp = codes_handle_new_from_file(NULL, SAMPLE, PRODUCT_GRIB, &err);
     if (err != 0)
         ECCERR(err);
-    fclose(SAMPLE_SCALAR);
-    SAMPLE_SCALAR = fopen(SAMPLE_FILE_SCALAR, "r");
-    handle_solid_water_temp = codes_handle_new_from_file(NULL, SAMPLE_SCALAR, PRODUCT_GRIB, &err);
+    fclose(SAMPLE);
+    SAMPLE = fopen(SAMPLE_FILE, "r");
+    handle_solid_water_temp = codes_handle_new_from_file(NULL, SAMPLE, PRODUCT_GRIB, &err);
     if (err != 0)
         ECCERR(err);
-    fclose(SAMPLE_SCALAR);
-    SAMPLE_VECTOR = fopen(SAMPLE_FILE_VECTOR, "r");
-    handle_wind_h = codes_handle_new_from_file(NULL, SAMPLE_VECTOR, PRODUCT_GRIB, &err);
+    fclose(SAMPLE);
+    SAMPLE = fopen(SAMPLE_FILE, "r");
+    handle_wind_h = codes_handle_new_from_file(NULL, SAMPLE, PRODUCT_GRIB, &err);
     if (err != 0)
         ECCERR(err);
-    fclose(SAMPLE_VECTOR);
+    fclose(SAMPLE);
     double lat, lon;
     double u, eta, eta_v, T_perturb, distance, pressure_value;
     double u_p = 1.0;
@@ -566,11 +564,11 @@ int main(int argc, char *argv[])
     codes_handle_delete(handle_solid_water_density);
     codes_handle_delete(handle_liquid_water_temp);
     codes_handle_delete(handle_solid_water_temp);
-    SAMPLE_SCALAR = fopen(SAMPLE_FILE_SCALAR, "r");
-    handle_wind_v = codes_handle_new_from_file(NULL, SAMPLE_SCALAR, PRODUCT_GRIB, &err);
+    SAMPLE = fopen(SAMPLE_FILE, "r");
+    handle_wind_v = codes_handle_new_from_file(NULL, SAMPLE, PRODUCT_GRIB, &err);
     if (err != 0)
         ECCERR(err);
-    fclose(SAMPLE_SCALAR);
+    fclose(SAMPLE);
     for (int i = 0; i < NUMBER_OF_LEVELS; ++i)
     {
         for (int j = 0; j < NUMBER_OF_VECTORS_V; ++j)
