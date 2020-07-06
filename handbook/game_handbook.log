@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.5.21)  3 JUL 2020 20:57
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.5.21)  6 JUL 2020 23:10
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -692,19 +692,26 @@ Overfull \hbox (22.93378pt too wide) in paragraph at lines 60--60
  []|\T1/fnc/m/n/10 write_out_entropy_gas_integral| 
  []
 
+LaTeX Font Info:    Trying to load font information for TS1+fnc on input line 7
+5.
+(/usr/share/texlive/texmf-dist/tex/latex/fouriernc/ts1fnc.fd
+File: ts1fnc.fd 2005/12/13 font definitions for TS1/fnc.
+)
+LaTeX Font Info:    Font shape `TS1/fnc/m/n' will be
+(Font)              scaled to size 9.29993pt on input line 75.
 LaTeX Font Info:    Font shape `T1/fnc/m/sc' will be
-(Font)              scaled to size 9.29993pt on input line 77.
-[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
+(Font)              scaled to size 9.29993pt on input line 86.
+ [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 ] [2] (./game_handbook.aux) ) 
 Here is how much of TeX's memory you used:
- 8161 strings out of 481239
- 117327 string characters out of 5920377
+ 8185 strings out of 481239
+ 117727 string characters out of 5920377
  564218 words of memory out of 5000000
- 23288 multiletter control sequences out of 15000+600000
- 575111 words of font info for 84 fonts, out of 8000000 for 9000
+ 23308 multiletter control sequences out of 15000+600000
+ 575421 words of font info for 85 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 41i,16n,51p,288b,1238s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 41i,16n,51p,257b,1238s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/cm-super/cm-supe
 r-t1.enc}{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share
 /texlive/texmf-dist/fonts/type1/public/fourier/fourier-ml.pfb></usr/share/texli
@@ -713,7 +720,7 @@ ve/texmf-dist/fonts/type1/public/fourier/fourier-ms.pfb></usr/share/texmf/fonts
 urw/ncntrsbk/uncb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk
 /uncr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncri8a.pfb
 >
-Output written on game_handbook.pdf (2 pages, 70793 bytes).
+Output written on game_handbook.pdf (2 pages, 74937 bytes).
 PDF statistics:
  37 PDF objects out of 1000 (max. 8388607)
  26 compressed objects within 1 object stream
