@@ -35,15 +35,6 @@ const double U_0 = 35;
 const double ETA_0 = 0.252;
 const double TOA = 30000;
 const short MODE = 2;
-const int TEST_ID = 3;
-
-/* test_ids:
-0:	standard atmosphere without orography
-1:	standard atmosphere with Gaussian mountain
-2:	JW test, dry, balanced
-3:	JW test, dry, perturbed
-4:	JW test, moist, perturbed
-*/
 
 enum grid_integers {
 RES_ID = 5,
@@ -81,6 +72,8 @@ int find_z_from_p(double, double, double *);
 
 int main(int argc, char *argv[])
 {
+	int TEST_ID;
+   	TEST_ID = strtod(argv[1], NULL);
 	int ORO_ID;
 	if (TEST_ID == 0)
 		ORO_ID = 0;
