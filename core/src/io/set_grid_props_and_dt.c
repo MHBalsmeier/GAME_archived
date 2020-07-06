@@ -211,7 +211,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
                 grid_check_failed();
         }
     }
-    printf("here\n");
     double e_kin_weight_sum = 0;
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
