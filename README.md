@@ -23,6 +23,4 @@ The handbook of the model can be found in the subdirectory handbook. It contains
 
 ### Build and install
 
-## Running the model
-
-See handbook.
+For further information see the handbook.
