@@ -1,11 +1,11 @@
 #!/bin/bash
-operator=Boss
+operator=MHB
 overwrite_run_id=1
 run_id=jw_perturbed_moist
 run_span=3600
 write_out_interval=900
-grid_props_file=/home/max/compiled/game/grids/B4L26T30000_M2_O2_OL17.nc
-init_state_filename=test_4_B4L26T30000_M2_O2_OL17.grb2
+grid_props_file=/home/max/compiled/game/grids/B5L26T30000_O2_OL17.nc
+init_state_filename=test_4_B5L26T30000_O2_OL17.grb2
 init_state_file=/home/max/compiled/game/input/$init_state_filename
 output_dir_base=/home/max/compiled/game/output
 cfl_margin=0.2
