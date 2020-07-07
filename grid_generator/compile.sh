@@ -1,3 +1,6 @@
+# This source file is part of the Global Atmospheric Modeling Framework (GAME), which is released under the MIT license.
+# Github repository: https://github.com/MHBalsmeier/game
+
 echo "Starting to compile grid generator ..."
 mpicc -O3 grid_generator.c discrete_coordinate_trafos.c -lnetcdf -lm -lgeos95 -Wall -o grid_generator
 if [ $? -ne 0 ]

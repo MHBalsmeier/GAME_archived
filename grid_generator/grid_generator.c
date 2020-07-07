@@ -4,7 +4,7 @@ Github repository: https://github.com/MHBalsmeier/game
 */
 
 #include "discrete_coordinate_trafos.h"
-#include "enum_and_typedefs.h"
+#include "enum.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <netcdf.h>
@@ -44,187 +44,13 @@ int main(int argc, char *argv[])
     char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
     sprintf(OUTPUT_FILE, "nc_files/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
     double *latitude_ico = malloc(12*sizeof(double));
-    printf("Building icosahedron ... ");
-    latitude_ico[0] = M_PI/2;
-    latitude_ico[1] = M_PI/6;
-    latitude_ico[2] = M_PI/6;
-    latitude_ico[3] = M_PI/6;
-    latitude_ico[4] = M_PI/6;
-    latitude_ico[5] = M_PI/6;
-    latitude_ico[6] = -M_PI/6;
-    latitude_ico[7] = -M_PI/6;
-    latitude_ico[8] = -M_PI/6;
-    latitude_ico[9] = -M_PI/6;
-    latitude_ico[10] = -M_PI/6;
-    latitude_ico[11] = -M_PI/2;
     double *longitude_ico = malloc(12*sizeof(double));
-    longitude_ico[0] = 0;
-    longitude_ico[1] = 0;
-    longitude_ico[2] = 1*2*M_PI/5;
-    longitude_ico[3] = 2*2*M_PI/5;
-    longitude_ico[4] = 3*2*M_PI/5;
-    longitude_ico[5] = 4*2*M_PI/5;
-    longitude_ico[6] = 2*M_PI/10;
-    longitude_ico[7] = 2*M_PI/10 + 1*2*M_PI/5;
-    longitude_ico[8] = 2*M_PI/10 + 2*2*M_PI/5;
-    longitude_ico[9] = 2*M_PI/10 + 3*2*M_PI/5;
-    longitude_ico[10] = 2*M_PI/10 + 4*2*M_PI/5;    
-    longitude_ico[11] = 0;
     int edge_vertices[NUMBER_OF_EDGES][2];
-    edge_vertices[0][0] = 0;
-    edge_vertices[0][1] = 1;
-    edge_vertices[1][0] = 0;
-    edge_vertices[1][1] = 2;
-    edge_vertices[2][0] = 0;
-    edge_vertices[2][1] = 3;
-    edge_vertices[3][0] = 0;
-    edge_vertices[3][1] = 4;
-    edge_vertices[4][0] = 0;
-    edge_vertices[4][1] = 5;
-    edge_vertices[5][0] = 1;
-    edge_vertices[5][1] = 2;
-    edge_vertices[6][0] = 2;
-    edge_vertices[6][1] = 3;
-    edge_vertices[7][0] = 3;
-    edge_vertices[7][1] = 4;
-    edge_vertices[8][0] = 4;
-    edge_vertices[8][1] = 5;
-    edge_vertices[9][0] = 5;
-    edge_vertices[9][1] = 1;
-    edge_vertices[10][0] = 1;
-    edge_vertices[10][1] = 6;
-    edge_vertices[11][0] = 2;
-    edge_vertices[11][1] = 6;
-    edge_vertices[12][0] = 2;
-    edge_vertices[12][1] = 7;
-    edge_vertices[13][0] = 3;
-    edge_vertices[13][1] = 7;
-    edge_vertices[14][0] = 3;
-    edge_vertices[14][1] = 8;
-    edge_vertices[15][0] = 4;
-    edge_vertices[15][1] = 8;
-    edge_vertices[16][0] = 4;
-    edge_vertices[16][1] = 9;
-    edge_vertices[17][0] = 5;
-    edge_vertices[17][1] = 9;
-    edge_vertices[18][0] = 5;
-    edge_vertices[18][1] = 10;
-    edge_vertices[19][0] = 1;
-    edge_vertices[19][1] = 10;
-    edge_vertices[20][0] = 10;
-    edge_vertices[20][1] = 6;
-    edge_vertices[21][0] = 6;
-    edge_vertices[21][1] = 7;
-    edge_vertices[22][0] = 7;
-    edge_vertices[22][1] = 8;
-    edge_vertices[23][0] = 8;
-    edge_vertices[23][1] = 9;
-    edge_vertices[24][0] = 9;
-    edge_vertices[24][1] = 10;
-    edge_vertices[25][0] = 6;
-    edge_vertices[25][1] = 11;
-    edge_vertices[26][0] = 7;
-    edge_vertices[26][1] = 11;
-    edge_vertices[27][0] = 8;
-    edge_vertices[27][1] = 11;
-    edge_vertices[28][0] = 9;
-    edge_vertices[28][1] = 11;
-    edge_vertices[29][0] = 10;
-    edge_vertices[29][1] = 11;
     int face_vertices[20][3];
-    face_vertices[0][0] = 0;
-    face_vertices[0][1] = 1;
-    face_vertices[0][2] = 2;
-    face_vertices[1][0] = 0;
-    face_vertices[1][1] = 2;
-    face_vertices[1][2] = 3;
-    face_vertices[2][0] = 0;
-    face_vertices[2][1] = 3;
-    face_vertices[2][2] = 4;
-    face_vertices[3][0] = 0;
-    face_vertices[3][1] = 4;
-    face_vertices[3][2] = 5;
-    face_vertices[4][0] = 0;
-    face_vertices[4][1] = 5;
-    face_vertices[4][2] = 1;
-    face_vertices[5][0] = 1;
-    face_vertices[5][1] = 10;
-    face_vertices[5][2] = 6;
-    face_vertices[6][0] = 6;
-    face_vertices[6][1] = 2;
-    face_vertices[6][2] = 1;
-    face_vertices[7][0] = 2;
-    face_vertices[7][1] = 6;
-    face_vertices[7][2] = 7;
-    face_vertices[8][0] = 7;
-    face_vertices[8][1] = 3;
-    face_vertices[8][2] = 2;
-    face_vertices[9][0] = 3;
-    face_vertices[9][1] = 7;
-    face_vertices[9][2] = 8;
-    face_vertices[10][0] = 8;
-    face_vertices[10][1] = 4;
-    face_vertices[10][2] = 3;
-    face_vertices[11][0] = 4;
-    face_vertices[11][1] = 8;
-    face_vertices[11][2] = 9;
-    face_vertices[12][0] = 9;
-    face_vertices[12][1] = 5;
-    face_vertices[12][2] = 4;
-    face_vertices[13][0] = 5;
-    face_vertices[13][1] = 9;
-    face_vertices[13][2] = 10;
-    face_vertices[14][0] = 10;
-    face_vertices[14][1] = 1;
-    face_vertices[14][2] = 5;
-    face_vertices[15][0] = 11;
-    face_vertices[15][1] = 6;
-    face_vertices[15][2] = 10;
-    face_vertices[16][0] = 11;
-    face_vertices[16][1] = 7;
-    face_vertices[16][2] = 6;
-    face_vertices[17][0] = 11;
-    face_vertices[17][1] = 8;
-    face_vertices[17][2] = 7;
-    face_vertices[18][0] = 11;
-    face_vertices[18][1] = 9;
-    face_vertices[18][2] = 8;
-    face_vertices[19][0] = 11;
-    face_vertices[19][1] = 10;
-    face_vertices[19][2] = 9;
     int face_edges[20][3];
     int face_edges_reverse[20][3];
-    int edge_other_vertex_index, check_index;
-    for (int i = 0; i < 20; ++i)
-    {
-        for (int j = 0; j < 3; ++j)
-        {
-            for (int k = 0; k < 30; ++k)
-            {
-                if (edge_vertices[k][0] == face_vertices[i][j] || edge_vertices[k][1] == face_vertices[i][j])
-                {
-                    if (edge_vertices[k][0] == face_vertices[i][j])
-                        edge_other_vertex_index = 1;
-                    if (edge_vertices[k][1] == face_vertices[i][j])
-                        edge_other_vertex_index = 0;
-                    if (j == 0)
-                        check_index = 1;
-                    if (j == 1)
-                        check_index = 2;
-                    if (j == 2)
-                        check_index = 0;
-                    if (edge_vertices[k][edge_other_vertex_index] == face_vertices[i][check_index])
-                    {
-                        face_edges[i][j] = k;
-                        if (edge_other_vertex_index == 1)
-                            face_edges_reverse[i][j] = 0;
-                        if (edge_other_vertex_index == 0)
-                            face_edges_reverse[i][j] = 1;
-                    }
-                }
-            }
-        }
-    }
+    printf("Building icosahedron ... ");
+	build_icosahedron(latitude_ico, longitude_ico, edge_vertices, face_vertices, face_edges, face_edges_reverse);
     printf("finished.\n");
     printf("Allocating memory ... ");
     double *x_unity = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
@@ -2648,7 +2474,6 @@ int main(int argc, char *argv[])
     free(area_dual_pre);
     free(area_dual);
 	free(z_surface);
-	printf("Grid generated and saved successfully.\n");
     return 0;
 }
 

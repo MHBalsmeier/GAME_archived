@@ -1,3 +1,8 @@
+/*
+This source file is part of the Global Atmospheric Modeling Framework (GAME), which is released under the MIT license.
+Github repository: https://github.com/MHBalsmeier/game
+*/
+
 int find_triangle_on_face_index_from_dual_scalar_on_face_index(int, int, int *, int *, int *, int *);
 int find_triangle_edge_points_from_dual_scalar_on_face_index(int, int, int, int *, int *, int *, int [][3], int face_edges[][3], int face_edges_reverse[][3]);
 int find_points_per_edge(int, int *);
@@ -11,6 +16,7 @@ int find_coords_from_triangle_on_face_index(int, int, int *, int *, int *);
 int find_triangle_on_face_index_from_coords(int, int, int, int *);
 int find_triangle_indices_from_h_vector_index(int, int, int *, int *, int *, int *, int *, int *, int *, int *, int [][3], int [][3], int [][2], int [][3]);
 int find_triangle_edge_points(int, int, int, int *, int *, int *, int *, int *, int *, int *, int [][3], int [][3], int [][3]);
+int build_icosahedron(double [], double [], int [][2], int [][3], int [][3], int [][3]);
 
 
 
