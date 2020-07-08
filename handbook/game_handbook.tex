@@ -87,12 +87,12 @@ The grid generator needs to be recompiled for every specific resolution, top hei
 \subsection{Generating a new orography file}
 \label{sec:generating_a_new_orography_file}
 
-Orography files are generated with the code residing in the directory \texttt{orography\_generator}. Firstly, change the parameter \texttt{RES\_ID} in the file \texttt{orography\_generator.c} to the desired value and compile. Then source the bash scribt \texttt{run.sh} with the desired \texttt{oro\_id}.
+Orography files are generated with the code residing in the directory \texttt{orography\_generator/src}. Firstly, change the parameter \texttt{RES\_ID} in the file \texttt{orography\_generator.c} to the desired value and compile. Then source the bash scribt \texttt{run.sh} with the desired \texttt{oro\_id}.
 
 \subsection{Generating a new test state file}
 \label{sec:generating_a_new_test_state_file}
 
-A new test state can be generated with the code in the directory \texttt{test\_generator}. Therefore, firstly change the parameters \texttt{RES\_ID}, \texttt{NUMBER\_OF\_LAYERS} and \texttt{NUMBER\_OF\_ORO\_LAYERS} in the file \texttt{test\_generator.c}. Then compile by sourcing the file \texttt{compile.sh} before executing the file \texttt{run.sh} with the specific \texttt{test\_id}.
+A new test state can be generated with the code in the directory \texttt{test\_generator/src}. Therefore, firstly change the parameters \texttt{RES\_ID}, \texttt{NUMBER\_OF\_LAYERS} and \texttt{NUMBER\_OF\_ORO\_LAYERS} in the file \texttt{test\_generator.c}. Then compile by sourcing the file \texttt{compile.sh} before executing the file \texttt{run.sh} with the specific \texttt{test\_id}.
 
 \end{document}
 

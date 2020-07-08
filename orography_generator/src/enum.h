@@ -1,3 +1,5 @@
+#include <math.h>
+
 enum grid_integers {
 RES_ID = 5,
 NUMBER_OF_BASIC_TRIANGLES = 20,

@@ -30,8 +30,6 @@ int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency
 	double *vertical_velocity = malloc(NO_OF_LAYERS*sizeof(double));
 	double *solution_vector = malloc(NO_OF_LAYERS*sizeof(double));
 	double delta_z, delta_v, dvdz;
-	double implicit_weight = 0.5;
-	double explicit_weight = 1 - implicit_weight;
 	int i;
 	for (i = 0; i < NO_OF_VECTORS_H; ++i)
 	{
@@ -47,25 +45,25 @@ int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency
 				delta_z = grid -> z_vector[NO_OF_VECTORS_V + j*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[NO_OF_VECTORS_V + (j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 			else
 				delta_z = grid -> z_vector[NO_OF_VECTORS_V + j*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[NO_OF_VECTORS_V + (j + 2)*NO_OF_VECTORS_PER_LAYER + i];
-			a_vector[j] = implicit_weight*vertical_velocity[j + 1]*delta_t/(2*delta_z);
+			a_vector[j] = 0.5*vertical_velocity[j + 1]*delta_t/(2*delta_z);
 			if (j == 0)
 				delta_z = grid -> z_vector[NO_OF_VECTORS_V + j*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[NO_OF_VECTORS_V + (j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 			else
 				delta_z = grid -> z_vector[NO_OF_VECTORS_V + (j - 1)*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[NO_OF_VECTORS_V + (j + 1)*NO_OF_VECTORS_PER_LAYER + i];
-			c_vector[j] = -implicit_weight*vertical_velocity[j]*delta_t/(2*delta_z);
+			c_vector[j] = -0.5*vertical_velocity[j]*delta_t/(2*delta_z);
 		}
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
 		{
 			if (j == 0)
 			{
 				delta_z = grid -> z_vector[NO_OF_VECTORS_V + j*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[NO_OF_VECTORS_V + (j + 1)*NO_OF_VECTORS_PER_LAYER + i];
-				b_vector[j] = 1 + implicit_weight*delta_t*vertical_velocity[j]/(2*delta_z);
+				b_vector[j] = 1 + 0.5*delta_t*vertical_velocity[j]/(2*delta_z);
 				delta_v = state_0 -> velocity_gas[NO_OF_VECTORS_V + j*NO_OF_VECTORS_PER_LAYER + i] - state_0 -> velocity_gas[NO_OF_VECTORS_V + (j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 			}
 			else if (j == NO_OF_LAYERS - 1)
 			{
 				delta_z = grid -> z_vector[NO_OF_VECTORS_V + (j - 1)*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[NO_OF_VECTORS_V + j*NO_OF_VECTORS_PER_LAYER + i];
-				b_vector[j] = 1 - implicit_weight*delta_t*vertical_velocity[j]/(2*delta_z);
+				b_vector[j] = 1 - 0.5*delta_t*vertical_velocity[j]/(2*delta_z);
 				delta_v = state_0 -> velocity_gas[NO_OF_VECTORS_V + (j - 1)*NO_OF_VECTORS_PER_LAYER + i] - state_0 -> velocity_gas[NO_OF_VECTORS_V + j*NO_OF_VECTORS_PER_LAYER + i];
 			}
 			else
@@ -75,7 +73,7 @@ int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency
 				delta_v = state_0 -> velocity_gas[NO_OF_VECTORS_V + (j - 1)*NO_OF_VECTORS_PER_LAYER + i] - state_0 -> velocity_gas[NO_OF_VECTORS_V + (j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 			}
 			dvdz = delta_v/delta_z;
-			d_vector[j] = state_0 -> velocity_gas[NO_OF_VECTORS_V + j*NO_OF_VECTORS_PER_LAYER + i] + delta_t*state_tendency -> velocity_gas[NO_OF_VECTORS_V + j*NO_OF_VECTORS_PER_LAYER + i] - explicit_weight*vertical_velocity[j]*delta_t/2*dvdz;
+			d_vector[j] = state_0 -> velocity_gas[NO_OF_VECTORS_V + j*NO_OF_VECTORS_PER_LAYER + i] + delta_t*state_tendency -> velocity_gas[NO_OF_VECTORS_V + j*NO_OF_VECTORS_PER_LAYER + i];
 		}
 		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, NO_OF_LAYERS);
 		for (int j = 0; j < NO_OF_LAYERS; ++j)

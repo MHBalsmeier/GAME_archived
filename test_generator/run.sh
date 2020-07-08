@@ -10,7 +10,7 @@
 
 test_id=3
 echo "Starting the test state generation ..."
-./test_generator $test_id
+mpirun -np 1 ./test_generator $test_id
 if [ $? -ne 0 ]
 then
 echo -e ${RED}Test state file creation failed.$NC
