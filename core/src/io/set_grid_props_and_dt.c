@@ -216,16 +216,27 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     {
         grid -> volume[i] = volume[i];
         if (grid -> volume[i] <= 0)
-            grid_check_failed();
+        {
+            grid_check_failed();   
+      	}
         grid -> z_scalar[i] = z_scalar[i];
         if (grid -> z_scalar[i] <= 0)
-            grid_check_failed();
-       grid -> gravity_potential[i] = gravity_potential[i];
-       if (grid -> gravity_potential[i] <= 0)
-       		grid_check_failed();
-       e_kin_weight_sum = 0;
-       for (int j = 0; j < 12; ++j)
-       {
+        {
+            grid_check_failed();   
+      	}
+       	grid -> gravity_potential[i] = gravity_potential[i];
+       	if (grid -> gravity_potential[i] <= 0)
+        {
+        	printf("here\n");
+            grid_check_failed();   
+      	}
+        if (grid -> z_scalar[i] <= 0)
+        {
+            grid_check_failed();   
+  		}
+       	e_kin_weight_sum = 0;
+       	for (int j = 0; j < 12; ++j)
+		{
            grid -> e_kin_weights[12*i + j] = e_kin_weights[14*i + j];
            if (grid -> e_kin_weights[12*i + j] > 0.3 || grid -> e_kin_weights[12*i + j] < 0)
            	   grid_check_failed();
@@ -233,10 +244,13 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
            grid -> e_kin_indices[12*i + j] = e_kin_indices[14*i + j];
            if (grid -> e_kin_indices[12*i + j] < 0 || grid -> e_kin_indices[12*i + j] >= NO_OF_VECTORS)
            	   grid_check_failed();
-       }
-       if (fabs(e_kin_weight_sum - 1.0) > 0.01)
-       	   grid_check_failed();
+       	}
+       	if (fabs(e_kin_weight_sum - 1.0) > 0.01)
+       	{
+			grid_check_failed();
+   	   	}
     }
+    printf("here\n");
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         grid -> normal_distance[i] = normal_distance[i];

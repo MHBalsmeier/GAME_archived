@@ -2167,6 +2167,10 @@ int main(int argc, char *argv[])
     		exit(1);
     	}
     }
+    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+    {
+    	gravity_potential[i] = -GRAVITY_MEAN_SFC_ABS*(RADIUS*RADIUS/(RADIUS + z_scalar[i]) - RADIUS);
+    }
     int ncid_g_prop;
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
