@@ -3,7 +3,7 @@ This source file is part of the Global Atmospheric Modeling Framework (GAME), wh
 Github repository: https://github.com/MHBalsmeier/game
 */
 
-#include "discrete_coordinate_trafos.h"
+#include "grid_generator.h"
 #include "enum.h"
 #include <stdlib.h>
 #include <stdio.h>

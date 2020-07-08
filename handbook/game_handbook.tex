@@ -1,6 +1,3 @@
-% This source file is part of the Global Atmospheric Modeling Framework (GAME), which is released under the MIT license.
-% Github repository: https://github.com/MHBalsmeier/game
-
 \documentclass{article}
 \usepackage{graphicx, paralist, listings, geometry, caption, floatrow, xcolor, color, colortbl, fancyhdr, amsmath, mathtools}
 \usepackage{fouriernc}
@@ -39,7 +36,7 @@ Listing \ref{lst:input_file_example} is an example of an input file. Table \ref{
 \renewcommand{\arraystretch}{1.2}
 \begin{table}
 \centering
-\begin{tabular}{|>{\centering}p{4.0 cm}|>{\centering}p{3 cm}|>{\centering}p{7 cm}|}
+\begin{tabular}{|>{\centering}p{5.0 cm}|>{\centering}p{3 cm}|>{\centering}p{7 cm}|}
 \hline \textbf{name} & \textbf{domain} & \textbf{meaning} \tabularnewline
 \hline\hline operator & string & Operator of the model, for example \texttt{Company XYZ, Inc.} \tabularnewline
 \hline overwrite\_run\_id & 0, 1 & if 0: use auto-generated run\_id, if 1: use manually set run\_id (see next line) \tabularnewline
@@ -59,7 +56,7 @@ Listing \ref{lst:input_file_example} is an example of an input file. Table \ref{
 \hline write\_out\_mass\_dry\_integral & 0, 1 & Switch to decide wether a global integral of dry mass shall be written out at every time step. \tabularnewline
 \hline write\_out\_entropy\_gas\_integral & 0, 1 & Switch to decide wether a global integral of the entropy shall be written out at every time step. \tabularnewline
 \hline write\_out\_energy\_integral & 0, 1 & Switch to decide wether a global integral of the energy shall be written out at every time step. \tabularnewline
-\hline 
+\hline
 \end{tabular}
 \caption{Input file explanation.}
 \label{tab:input_file_explanation}
@@ -87,12 +84,45 @@ The grid generator needs to be recompiled for every specific resolution, top hei
 \subsection{Generating a new orography file}
 \label{sec:generating_a_new_orography_file}
 
-Orography files are generated with the code residing in the directory \texttt{orography\_generator/src}. Firstly, change the parameter \texttt{RES\_ID} in the file \texttt{orography\_generator.c} to the desired value and compile. Then source the bash scribt \texttt{run.sh} with the desired \texttt{oro\_id}.
+\renewcommand{\arraystretch}{1.2}
+\begin{table}
+\centering
+\begin{tabular}{|>{\centering}p{4.0 cm}|>{\centering}p{8 cm}|}
+\hline \textbf{\texttt{ORO\_ID}} & \textbf{description} \tabularnewline
+\hline\hline 0 & no orography \tabularnewline
+\hline 1 & orography of JW test \tabularnewline
+\hline 2 & Gaussian mountain of 8 km height and 224 m standard deviation located ad 0 N / 0 E\tabularnewline
+\hline
+\end{tabular}
+\caption{Definition of orography IDs.}
+\label{tab:oro_id_definition}
+\end{table}
+\renewcommand{\arraystretch}{1}
+
+Orography files are generated with the code residing in the directory \texttt{orography\_generator/src}. Firstly, change the parameter \texttt{RES\_ID} in the file \texttt{orography\_generator.c} to the desired value and compile. Then source the bash scribt \texttt{run.sh} with the desired \texttt{oro\_id}. Tab. \ref{tab:oro_id_definition} shows the definition of the orography IDs.
 
 \subsection{Generating a new test state file}
 \label{sec:generating_a_new_test_state_file}
 
-A new test state can be generated with the code in the directory \texttt{test\_generator/src}. Therefore, firstly change the parameters \texttt{RES\_ID}, \texttt{NUMBER\_OF\_LAYERS} and \texttt{NUMBER\_OF\_ORO\_LAYERS} in the file \texttt{test\_generator.c}. Then compile by sourcing the file \texttt{compile.sh} before executing the file \texttt{run.sh} with the specific \texttt{test\_id}.
+\renewcommand{\arraystretch}{1.2}
+\begin{table}
+\centering
+\begin{tabular}{|>{\centering}p{4.0 cm}|>{\centering}p{8 cm}|}
+\hline \textbf{\texttt{TEST\_ID}} & \textbf{description} \tabularnewline
+\hline\hline 0 & standard atmosphere \tabularnewline
+\hline\hline 1 & standard atmosphere with Gaussian mountain (\texttt{ORO\_ID} = 2) \tabularnewline
+\hline\hline 2 & JW dry unperturbed \tabularnewline
+\hline 3 & JW dry perturbed \tabularnewline
+\hline 4 & JW moist unperturbed \tabularnewline
+\hline 5 & JW moist perturbed \tabularnewline
+\hline
+\end{tabular}
+\caption{Definition of test IDs.}
+\label{tab:test_id_definition}
+\end{table}
+\renewcommand{\arraystretch}{1}
+
+A new test state can be generated with the code in the directory \texttt{test\_generator/src}. Therefore, firstly change the parameters \texttt{RES\_ID}, \texttt{NUMBER\_OF\_LAYERS} and \texttt{NUMBER\_OF\_ORO\_LAYERS} in the file \texttt{test\_generator.c}. Then compile by sourcing the file \texttt{compile.sh} before executing the file \texttt{run.sh} with the specific \texttt{test\_id}. Tab. \ref{tab:test_id_definition} shows the definition of the test IDs.
 
 \end{document}
 

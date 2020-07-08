@@ -2,6 +2,16 @@
 This source file is part of the Global Atmospheric Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/MHBalsmeier/game
 */
+/*
+Test states can be generated with this code. TEST_ID table:
+0:	standard atmosphere
+1:	standard atmosphere with Gaussian mountain
+2:	JW dry unperturbed
+3:	JW dry perturbed
+4:	JW moist unperturbed
+5:	JW moist perturbed
+For more specific details see handbook.
+*/
 
 #include <stdlib.h>
 #include "enum.h"
@@ -24,17 +34,20 @@ Github repository: https://github.com/MHBalsmeier/game
 #define OMEGA (7.292115e-5)
 #define C_P 1005.0
 
+// constants specifying the grid
+const double TOA = 30000;
+const double G = 9.80616;
+
+// constants needed for the JW test state
 const double TROPO_HEIGHT = 12e3;
 const double T_SFC = 273.15 + 15;
 double T_0 = 288;
 const double TEMP_GRADIENT = -0.65/100;
 double GAMMA = 0.005;
-const double G = 9.80616;
 const double DELTA_T = 4.8e5;
 const double ETA_T = 0.2;
 const double U_0 = 35;
 const double ETA_0 = 0.252;
-const double TOA = 30000;
 
 int find_pressure_value(double, double, double *);
 int find_z_from_p(double, double, double *);
@@ -43,6 +56,7 @@ int main(int argc, char *argv[])
 {
 	int TEST_ID;
    	TEST_ID = strtod(argv[1], NULL);
+   	// determining the orography ID as a function of the test ID
 	int ORO_ID;
 	if (TEST_ID == 0)
 		ORO_ID = 0;
@@ -186,6 +200,7 @@ int main(int argc, char *argv[])
             lon = longitude_scalar[j];
             z_height = z_scalar[i*NUMBER_OF_SCALARS_H + j];
             rel_humidity[j] = 0;
+            // standard atmosphere
             if (TEST_ID == 0 || TEST_ID == 1)
             {
                 if (z_height < TROPO_HEIGHT)
@@ -199,7 +214,8 @@ int main(int argc, char *argv[])
                     pressure[j] = 101325*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT/T_SFC, -G/(R_D*TEMP_GRADIENT))*exp(-G*(z_height - TROPO_HEIGHT)/(R_D*TROPO_TEMP));
                 }
             }
-            if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4)
+            // JW atmosphere
+            if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
             {
                 find_pressure_value(lat, z_height, &pressure_value);
                 pressure[j] = pressure_value;
@@ -209,7 +225,7 @@ int main(int argc, char *argv[])
                 if (eta >= ETA_T)
                 {
                     temperature[j] = T_0*pow(eta, R_D*GAMMA/G) + T_perturb;
-                    if (TEST_ID == 4)
+                    if (TEST_ID == 4 || TEST_ID == 5)
 	                    rel_humidity[j] = 0.7;
 	                else
 	                    rel_humidity[j] = 0;
@@ -466,9 +482,11 @@ int main(int argc, char *argv[])
             lat = latitude_vector[j];
             lon = longitude_vector[j];
             z_height = z_vector[NUMBER_OF_VECTORS_V + j + i*NUMBER_OF_VECTORS_PER_LAYER];
+            // standard atmosphere: no wind
             if (TEST_ID == 0 || TEST_ID == 1)
                 wind_h[j] = 0;
-            if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4)
+            // JW test: specific wind field
+            if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
             {
                 find_pressure_value(lat, z_height, &pressure_value);
                 eta = pressure_value/P_0;
@@ -598,6 +616,7 @@ int main(int argc, char *argv[])
 
 int find_pressure_value(double lat, double z_height, double *result)
 {
+	// this function finds the pressure at a given height (as a function of latitude) for the JW test by iterative calls to the function find_z_from_P
     double p = P_0/2;
     double precision = 0.0001;
     double z;
@@ -624,6 +643,7 @@ int find_pressure_value(double lat, double z_height, double *result)
 
 int find_z_from_p(double lat, double p, double *result)
 {
+	// this function converts a preessure value into a geomtrical height (as a function of latitude) for the JW test
     double z;
     double eta = p/P_0;
     double phi, phi_bg, phi_perturb;

@@ -3,6 +3,7 @@
 
 oro_id=2
 echo "Starting grid file creation."
+echo "Setup: oro_id = $oro_id."
 mpirun -np 1 ./grid_generator $oro_id
 if [ $? -ne 0 ]
 then
