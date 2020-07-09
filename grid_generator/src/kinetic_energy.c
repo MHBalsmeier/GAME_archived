@@ -208,7 +208,7 @@ int calc_kinetic_energy(double latitude_scalar[], double longitude_scalar[], int
 				exit(1);
 			}
 		}    	
-		if (fabs(e_kin_weights_sum - 1.5) > 0.000001)
+		if (fabs(e_kin_weights_sum - 1.5) > 0.01)
 		{
 			printf("%lf\n", e_kin_weights_sum);
 			printf("Error in e_kin_weights, position 1.\n");

@@ -115,143 +115,31 @@ int main(int argc, char *argv[])
     int *vorticity_signs = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
     int *h_curl_signs = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
     printf("finished.\n");
-    double lat_res, lon_res, base_area, base_distance, radius_0, radius_1, direction_change, x_point_0, y_point_0, z_point_0, x_point_1, y_point_1, z_point_1, x_res, y_res, z_res;
-    int face_index, face_index_0, face_index_1, h_index, on_face_index, layer_index, upper_index, lower_index, coord_0_points_amount, coord_0, coord_1, triangle_on_face_index, on_edge_index, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_index, counter, primal_vector_index, dual_vector_index, dual_scalar_on_face_index, first_face_found, edge_rel_to_face_0, edge_rel_to_face_1, edge_index, sign, small_triangle_edge_index, ncid, retval, z_surface_id;
+    double base_distance, radius_0, radius_1, direction_change;
+    int face_index, face_index_0, face_index_1, h_index, on_face_index, layer_index, upper_index, lower_index, coord_0_points_amount, coord_0, coord_1, triangle_on_face_index, on_edge_index, counter, primal_vector_index, dual_vector_index, first_face_found, edge_rel_to_face_0, edge_rel_to_face_1, edge_index, sign, small_triangle_edge_index, retval, z_surface_id;
     printf("Reading orography data ... ");
-    if (ORO_ID != 0)
-    {
-		int ORO_FILE_LENGTH = 100;
-		char *ORO_FILE_PRE = malloc((ORO_FILE_LENGTH + 1)*sizeof(char));
-		sprintf(ORO_FILE_PRE, "../orography_generator/nc_files/B%d_O%d.nc", RES_ID, ORO_ID);
-		ORO_FILE_LENGTH = strlen(ORO_FILE_PRE);
-		free(ORO_FILE_PRE);
-		char *ORO_FILE = malloc((ORO_FILE_LENGTH + 1)*sizeof(char));
-		sprintf(ORO_FILE, "../orography_generator/nc_files/B%d_O%d.nc", RES_ID, ORO_ID);	    
-		if ((retval = nc_open(ORO_FILE, NC_NOWRITE, &ncid)))
-		    ERR(retval);
-		if ((retval = nc_inq_varid(ncid, "z_surface", &z_surface_id)))
-		    ERR(retval);		
-		if ((retval = nc_get_var_double(ncid, z_surface_id, &z_surface[0])))
-		    ERR(retval);
-		if ((retval = nc_close(ncid)))
-		    ERR(retval);
-    }
-    else
-    {
-    	for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
-    	{
-    		z_surface[i] = 0;
-    	}
-    }
+	retval = set_orography(RES_ID, ORO_ID, z_surface);
     printf("finished.\n");
-    printf("Establishing horizontal grid structure ... ");
     if (NUMBER_OF_VECTORS_H != NUMBER_OF_DUAL_VECTORS_H)
     {
         printf("It is NUMBER_OF_VECTORS_H != NUMBER_OF_DUAL_VECTORS_H.\n");
     }
-    generate_horizontal_generators(latitude_ico, longitude_ico, latitude_scalar, longitude_scalar, x_unity, y_unity, z_unity, face_edges_reverse, face_edges, face_vertices);
-    double triangle_face;
-    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+    printf("Establishing horizontal grid structure ... ");
+    retval = generate_horizontal_generators(latitude_ico, longitude_ico, latitude_scalar, longitude_scalar, x_unity, y_unity, z_unity, face_edges_reverse, face_edges, face_vertices);
+    retval = set_from_to_index(from_index, to_index, face_edges, face_edges_reverse, face_vertices, edge_vertices);
+	retval = set_scalar_h_dual_coords(latitude_scalar_dual, longitude_scalar_dual, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
+	retval = set_vector_h_doubles(from_index, to_index, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, direction);
+    if (retval != 0)
     {
-        if (i < NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))
-        {
-            edge_index = i/(POINTS_PER_EDGE + 1);
-            on_edge_index = i - edge_index*(POINTS_PER_EDGE + 1);
-            if(on_edge_index == 0)
-            {
-                from_index[i] = edge_vertices[edge_index][0];
-                to_index[i] = NUMBER_OF_PENTAGONS + edge_index*POINTS_PER_EDGE;
-            }
-            else if (on_edge_index == POINTS_PER_EDGE)
-            {
-                from_index[i] = NUMBER_OF_PENTAGONS + (edge_index + 1)*POINTS_PER_EDGE - 1;
-                to_index[i] = edge_vertices[edge_index][1];
-            }
-            else
-            {
-                from_index[i] = NUMBER_OF_PENTAGONS + edge_index*POINTS_PER_EDGE + on_edge_index - 1;
-                to_index[i] = NUMBER_OF_PENTAGONS + edge_index*POINTS_PER_EDGE + on_edge_index;
-            }
-        }
-        else
-        {
-            retval = find_triangle_indices_from_h_vector_index(RES_ID, i, &point_0, &point_1, &point_2, &point_3, &point_4, &point_5, &dual_scalar_on_face_index, &small_triangle_edge_index, face_edges, face_vertices, edge_vertices, face_edges_reverse);
-            face_index = (i - NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
-            on_face_index = i - (NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
-            triangle_on_face_index = on_face_index/3;
-            retval += find_coords_from_triangle_on_face_index(triangle_on_face_index, RES_ID, &coord_0, &coord_1, &coord_0_points_amount);
-            dual_scalar_index = dual_scalar_on_face_index + face_index*NUMBER_OF_TRIANGLES/NUMBER_OF_BASIC_TRIANGLES;
-            if (small_triangle_edge_index == 0)
-            {
-                from_index[i] = point_0;
-                to_index[i] = point_2;
-            }
-            if (small_triangle_edge_index == 1)
-            {
-                from_index[i] = point_0;
-                to_index[i] = point_1;
-            }
-            if (small_triangle_edge_index == 2)
-            {
-                from_index[i] = point_2;
-                to_index[i] = point_1;
-            }
-            retval += find_voronoi_center_sphere(latitude_scalar[point_0], longitude_scalar[point_0], latitude_scalar[point_1], longitude_scalar[point_1], latitude_scalar[point_2], longitude_scalar[point_2], &lat_res, &lon_res);
-            latitude_scalar_dual[dual_scalar_index] = lat_res;
-            longitude_scalar_dual[dual_scalar_index] = lon_res;
-            retval += calc_triangle_face(latitude_scalar[point_0], longitude_scalar[point_0], latitude_scalar[point_1], longitude_scalar[point_1], latitude_scalar[point_2], longitude_scalar[point_2], &triangle_face);
-            triangle_face_unit_sphere[dual_scalar_index] = triangle_face;
-	        retval += find_voronoi_center_sphere(latitude_scalar[point_3], longitude_scalar[point_3], latitude_scalar[point_0], longitude_scalar[point_0], latitude_scalar[point_2], longitude_scalar[point_2], &lat_res, &lon_res);
-            latitude_scalar_dual[dual_scalar_index - 1] = lat_res;
-            longitude_scalar_dual[dual_scalar_index - 1] = lon_res;
-            retval += calc_triangle_face(latitude_scalar[point_3], longitude_scalar[point_3], latitude_scalar[point_0], longitude_scalar[point_0], latitude_scalar[point_2], longitude_scalar[point_2], &triangle_face);
-            triangle_face_unit_sphere[dual_scalar_index - 1] = triangle_face;
-            if (coord_0 == coord_0_points_amount - 1)
-            {
-                retval += find_voronoi_center_sphere(latitude_scalar[point_0], longitude_scalar[point_0], latitude_scalar[point_4], longitude_scalar[point_4], latitude_scalar[point_1], longitude_scalar[point_1], &lat_res, &lon_res);
-                latitude_scalar_dual[dual_scalar_index + 1] = lat_res;
-                longitude_scalar_dual[dual_scalar_index + 1] = lon_res;
-                retval += calc_triangle_face(latitude_scalar[point_0], longitude_scalar[point_0], latitude_scalar[point_4], longitude_scalar[point_4], latitude_scalar[point_1], longitude_scalar[point_1], &triangle_face);
-                triangle_face_unit_sphere[dual_scalar_index + 1] = triangle_face;
-                if (coord_1 == POINTS_PER_EDGE - 1)
-                {
-                    retval += find_voronoi_center_sphere(latitude_scalar[point_2], longitude_scalar[point_2], latitude_scalar[point_1], longitude_scalar[point_1], latitude_scalar[point_5], longitude_scalar[point_5], &lat_res, &lon_res);
-                    latitude_scalar_dual[dual_scalar_index + 2] = lat_res;
-                    longitude_scalar_dual[dual_scalar_index + 2] = lon_res;
-                    retval += calc_triangle_face(latitude_scalar[point_2], longitude_scalar[point_2], latitude_scalar[point_1], longitude_scalar[point_1], latitude_scalar[point_5], longitude_scalar[point_5], &triangle_face);
-                    triangle_face_unit_sphere[dual_scalar_index + 2] = triangle_face;
-                }
-            }
-        }
-        retval = find_global_normal(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], &x_point_0, &y_point_0, &z_point_0);
-        retval = find_global_normal(latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], &x_point_1, &y_point_1, &z_point_1);
-        retval = find_between_point(x_point_0, y_point_0, z_point_0, x_point_1, y_point_1, z_point_1, 0.5, &x_res, &y_res, &z_res);
-        retval = find_geos(x_res, y_res, z_res, &lat_res, &lon_res);
-        latitude_vector[i] = lat_res;
-        longitude_vector[i] = lon_res;
-        direction[i] = find_geodetic_direction(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], 0.5);
+    	printf("set_vector_h_doubles failed with exit code %d.\n", retval);
+    	exit(1);
     }
-    double triangle_sum_unit_sphere = 0;
-    double triangle_avg_unit_sphere_ideal = 4*M_PI/NUMBER_OF_TRIANGLES;
-    for (int i = 0; i < NUMBER_OF_DUAL_SCALARS_H; ++i)
+    retval = calc_triangle_face_unity(triangle_face_unit_sphere, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
+    if (retval != 0)
     {
-        triangle_sum_unit_sphere += triangle_face_unit_sphere[i];
-        if (triangle_face_unit_sphere[i] <= 0)
-		{
-            printf("triangle_face_unit_sphere contains a non-positive value.\n");
-			exit(1);
-		}
-        if (fabs(triangle_face_unit_sphere[i]/triangle_avg_unit_sphere_ideal - 1) > 0.4)
-		{
-            printf("Triangles on unit sphere have significantly different surfaces.\n");
-			exit(1);
-		}
+    	printf("calc_triangle_face_unity failed with exit code %d.\n", retval);
+    	exit(1);
     }
-    if (fabs(triangle_sum_unit_sphere/(4*M_PI) - 1) > 1e-12)
-	{
-        printf("Sum of faces of triangles on unit sphere does not match face of unit sphere.\n");
-		exit(1);
-	}
     free(x_unity);
     free(y_unity);
     free(z_unity);
@@ -372,45 +260,7 @@ int main(int argc, char *argv[])
     }
     printf("finished.\n");
     retval = set_f_vec(latitude_vector, direction_dual, latitude_vector_dual, f_vec);
-    int trouble_detected = 0;
-    for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
-    {
-        counter = 0;
-        for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
-        {
-            if (from_index[j] == i || to_index[j] == i)
-            {
-                if (from_index[j] == to_index[j])
-				{
-                    printf("It is from_index == to_index at some point.\n");
-					exit(1);
-				}
-                adjacent_vector_indices_h[6*i + counter] = j;
-                sign = 1;
-                if (from_index[j] == i)
-                    adjacent_signs_h[6*i + counter] = 1;
-                if (to_index[j] == i)
-                    adjacent_signs_h[6*i + counter] = -1;
-                ++counter;
-            }
-        }
-        if (counter != 6)
-        {
-            trouble_detected = 1;
-            if (counter == 5 && i < NUMBER_OF_PENTAGONS)
-                trouble_detected = 0;
-        }
-        if (trouble_detected == 1)
-		{
-            printf("Trouble detected, place 1.\n");
-			exit(1);
-		}
-        if (i < NUMBER_OF_PENTAGONS)
-        {
-            adjacent_vector_indices_h[6*i + 5] = -1;
-            adjacent_signs_h[6*i + 5] = 0;
-        }
-    }
+	retval = calc_adjacent_vector_indices_h(from_index, to_index, adjacent_signs_h, adjacent_vector_indices_h);
     for (int i = 0; i < NUMBER_OF_DUAL_SCALARS_H; ++i)
     {
     	counter = 0;
@@ -432,37 +282,6 @@ int main(int argc, char *argv[])
     		printf("Error in adjacent_vector_indices_dual_h creation.\n");
     		exit(1);
     	}
-    }
-    int number_of_edges, double_check, sign_sum_check;
-    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
-    {
-        counter = 0;
-        sign_sum_check = 0;
-        for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
-        {
-            number_of_edges = 6;
-            if (j < NUMBER_OF_PENTAGONS)
-                number_of_edges = 5;
-            double_check = 0;
-            for (int k = 0; k < number_of_edges; ++k)
-            {
-                if (adjacent_vector_indices_h[6*j + k] == i)
-                {
-                    ++counter;
-                    ++double_check;
-                    sign_sum_check += adjacent_signs_h[6*j + k];
-                }
-            }
-            if (double_check > 1)
-			{
-                printf("Same vector twice in adjacent_vector_indices_h of same grid cell.\n");
-				exit(1);
-			}
-        }
-        if (sign_sum_check != 0)
-            printf("Problem with adjacent_signs_h.\n");
-        if (counter != 2)
-            printf("Problem with adjacent_vector_indices_h.\n");
     }
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_V; ++i)
     {
@@ -506,86 +325,11 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
     }
-    int check_0, check_1, check_2;
-    for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
-    {
-        if (i < NUMBER_OF_PENTAGONS)
-        {
-            double *lat_points = malloc(5*sizeof(double));
-            double *lon_points = malloc(5*sizeof(double));
-            int *cell_vector_indices = malloc(5*sizeof(int));
-            for (int j = 0; j < 5; ++j)
-                cell_vector_indices[j] = adjacent_vector_indices_h[6*i + j];
-            counter = 0;
-            for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_V; ++j)
-            {
-                retval = in_bool_calculator(cell_vector_indices, 5, vorticity_indices_pre[3*j + 0], &check_0);
-                retval = in_bool_calculator(cell_vector_indices, 5, vorticity_indices_pre[3*j + 1], &check_1);
-                retval = in_bool_calculator(cell_vector_indices, 5, vorticity_indices_pre[3*j + 2], &check_2);
-                if (check_0 == 1 || check_1 == 1 || check_2 == 1)
-                {
-                    lat_points[counter] = latitude_scalar_dual[j];
-                    lon_points[counter] = longitude_scalar_dual[j];
-                    counter++;
-                }
-            }
-            retval = calc_spherical_polygon_face(lat_points, lon_points, 5, &pent_hex_face_unity_sphere[i]);
-            free(lat_points);
-            free(lon_points);
-            free(cell_vector_indices);
-        }
-        else
-        {
-            double *lat_points = malloc(6*sizeof(double));
-            double *lon_points = malloc(6*sizeof(double));
-            int *cell_vector_indices = malloc(6*sizeof(int));
-            for (int j = 0; j < 6; ++j)
-                cell_vector_indices[j] = adjacent_vector_indices_h[6*i + j];
-            counter = 0;
-            for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_V; ++j)
-            {
-                retval = in_bool_calculator(cell_vector_indices, 6, vorticity_indices_pre[3*j + 0], &check_0);
-                retval = in_bool_calculator(cell_vector_indices, 6, vorticity_indices_pre[3*j + 1], &check_1);
-                retval = in_bool_calculator(cell_vector_indices, 6, vorticity_indices_pre[3*j + 2], &check_2);
-                if (check_0 == 1 || check_1 == 1 || check_2 == 1)
-                {
-                    lat_points[counter] = latitude_scalar_dual[j];
-                    lon_points[counter] = longitude_scalar_dual[j];
-                    counter++;
-                }
-            }
-            retval = calc_spherical_polygon_face(lat_points, lon_points, 6, &pent_hex_face_unity_sphere[i]);
-            free(lat_points);
-            free(lon_points);
-            free(cell_vector_indices);
-        }
-    }
-    double pent_hex_sum_unity_sphere = 0;
-    double pent_hex_avg_unity_sphere_ideal = 4*M_PI/NUMBER_OF_SCALARS_H;
-    for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
-    {
-        pent_hex_sum_unity_sphere += pent_hex_face_unity_sphere[i];
-        if (pent_hex_face_unity_sphere[i] <= 0)
-		{
-            printf("pent_hex_face_unity_sphere contains a non-positive value.\n");
-			exit(1);
-		}
-        if (fabs(pent_hex_face_unity_sphere[i]/pent_hex_avg_unity_sphere_ideal - 1) > 0.4)
-		{
-            printf("Pentagons and hexagons on unity sphere have significantly different surfaces.\n");
-			exit(1);
-		}
-    }
-    if (fabs(pent_hex_sum_unity_sphere/(4*M_PI) - 1) > 1e-12)
-	{
-        printf("Sum of faces of pentagons and hexagons on unity sphere does not match face of unit sphere.\n");
-		exit(1);
-	}
+	calc_cell_face_unity(pent_hex_face_unity_sphere, latitude_scalar_dual, longitude_scalar_dual, adjacent_vector_indices_h, vorticity_indices_pre);
 	// building the vertical grid
    	double z_oro_off = TOA*(NUMBER_OF_ORO_LAYERS + 0.0)/NUMBER_OF_LAYERS;
 	double z_vertical_vector_pre[NUMBER_OF_LAYERS + 1];
 	retval = determine_z_scalar(z_scalar, z_vertical_vector_pre, z_surface, z_oro_off, TOA);
-	int dual_scalar_h_index;
     for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
     {
         layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
@@ -637,65 +381,6 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
     }
-	int index_vector_for_dual_scalar_z[3];
-    for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
-    {
-        layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
-        h_index = i - layer_index*NUMBER_OF_VECTORS_PER_LAYER;
-        if (h_index >= NUMBER_OF_VECTORS_V)
-        {
-            if (h_index - NUMBER_OF_VECTORS_V >= NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))
-            {
-                face_index = (h_index - NUMBER_OF_VECTORS_V - NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
-                on_face_index = h_index - NUMBER_OF_VECTORS_V - (NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
-                triangle_on_face_index = on_face_index/3;
-                retval = find_coords_from_triangle_on_face_index(triangle_on_face_index, RES_ID, &coord_0, &coord_1, &coord_0_points_amount);
-				dual_scalar_h_index = face_index*TRIANGLES_PER_FACE + 1 + 2*triangle_on_face_index + coord_1;
-                dual_scalar_index = layer_index*NUMBER_OF_DUAL_SCALARS_H + dual_scalar_h_index;
-				retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index, index_vector_for_dual_scalar_z);
-                z_scalar_dual[dual_scalar_index] = 1.0/3*(z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
-				retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index - 1, index_vector_for_dual_scalar_z);
-                z_scalar_dual[dual_scalar_index - 1] = 1.0/3*(z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
-                if (layer_index == NUMBER_OF_LAYERS - 1)
-                {
-					retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index, index_vector_for_dual_scalar_z);
-                	z_scalar_dual[dual_scalar_index + NUMBER_OF_DUAL_SCALARS_H] = 1.0/3*(z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
-					retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index - 1, index_vector_for_dual_scalar_z);
-                	z_scalar_dual[dual_scalar_index + NUMBER_OF_DUAL_SCALARS_H - 1] = 1.0/3*(z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
-                }
-                if (coord_0 == coord_0_points_amount - 1)
-                {
-					retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index + 1, index_vector_for_dual_scalar_z);
-                	z_scalar_dual[dual_scalar_index + 1] = 1.0/3*(z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
-                    if (layer_index == NUMBER_OF_LAYERS - 1)
-            			z_scalar_dual[dual_scalar_index + 1 + NUMBER_OF_DUAL_SCALARS_H] = 1.0/3*(z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
-                    if (coord_1 == POINTS_PER_EDGE - 1)
-                    {
-						retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index + 2, index_vector_for_dual_scalar_z);
-                		z_scalar_dual[dual_scalar_index + 2] = 1.0/3*(z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[layer_index*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
-                        if (layer_index == NUMBER_OF_LAYERS - 1)
-            				z_scalar_dual[dual_scalar_index + 2 + NUMBER_OF_DUAL_SCALARS_H] = 1.0/3*(z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[(layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
-                    }
-                }
-            }
-        }
-    }
-	int min_oro_index = find_min_index(z_surface, NUMBER_OF_SCALARS_H);
-	double min_oro = z_surface[min_oro_index];
-	for (int i = 0; i < NUMBER_OF_DUAL_SCALARS; ++i)
-	{
-		if (z_scalar_dual[i] > TOA)
-		{
-			printf("z_scalar_dual has a point above top of atmosphere.\n");
-			exit(1);
-		}
-		if (z_scalar_dual[i] < min_oro)
-		{
-			printf("z_scalar_dual has a point below minimum of orography.\n");
-			exit(1);
-		}
-	}
-    free(pent_hex_face_unity_sphere);
 	double check_sum;
 	for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
 	{
@@ -710,34 +395,8 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 	}
-    double volume_sum, volume_sum_ideal;
-    volume_sum = 0;
-    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
-    {
-        layer_index = i/NUMBER_OF_SCALARS_H;
-        h_index = i - layer_index*NUMBER_OF_SCALARS_H;
-        base_area = area[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER];
-        radius_0 = RADIUS + z_vector[h_index + (layer_index + 1)*NUMBER_OF_VECTORS_PER_LAYER];
-        radius_1 = RADIUS + z_vector[h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER];
-        volume[i] = find_volume(base_area, radius_0, radius_1);
-        volume_sum += volume[i];
-    }
-    volume_sum_ideal = 0;
-    for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
-    	volume_sum_ideal += find_volume(area[NUMBER_OF_VECTORS - NUMBER_OF_VECTORS_V + i], RADIUS + z_vector[NUMBER_OF_VECTORS- NUMBER_OF_VECTORS_V + i], RADIUS + TOA);
-    if (fabs(volume_sum/volume_sum_ideal - 1) > 1e-12)
-	{
-        printf("Sum of volumes of grid boxes does not match volume of entire atmosphere.\n");
-		exit(1);
-	}
-    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
-    {
-        if (volume[i] <= 0)
-		{
-            printf("volume contains a non-positive value.\n");
-			exit(1);
-		}
-    }
+    free(pent_hex_face_unity_sphere);
+	set_volume(volume, z_scalar_dual, z_vector, area, from_index, to_index, TOA, z_surface, vorticity_indices_pre);
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; ++i)
     {
         layer_index = i/NUMBER_OF_DUAL_VECTORS_PER_LAYER;
@@ -786,6 +445,7 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
     }
+	int index_vector_for_dual_scalar_z[3];
 	for (int i = 0; i < NUMBER_OF_DUAL_SCALARS_H; ++i)
 	{
 		check_sum = 0;
@@ -800,27 +460,8 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 	}
-    for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
-    {
-        layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
-        h_index = i - layer_index*NUMBER_OF_VECTORS_PER_LAYER;
-        if (h_index >= NUMBER_OF_VECTORS_V)
-        {
-            dual_vector_index = NUMBER_OF_LAYERS*NUMBER_OF_DUAL_VECTORS_PER_LAYER + h_index - NUMBER_OF_VECTORS_V;
-            radius_1 = RADIUS + z_vector_dual[h_index - NUMBER_OF_VECTORS_V + layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER];
-            radius_0 = RADIUS + z_vector_dual[h_index - NUMBER_OF_VECTORS_V + (layer_index + 1)*NUMBER_OF_DUAL_VECTORS_PER_LAYER];
-            base_distance = normal_distance_dual[dual_vector_index]/(RADIUS + z_vector_dual[dual_vector_index])*radius_0;
-            area[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
-        }
-    }
-    for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
-    {
-        if (area[i] <= 0)
-		{
-            printf("It is area <= 0 at some point, position 0.\n");
-			exit(1);
-		}
-    }
+	retval = calculate_vertical_faces(area, z_vector_dual, normal_distance_dual);
+	int number_of_edges;
     double x_value, y_value, z_value, normal_vector_global[3], local_basis_vector[3], local_x, local_y, local_z, tilting_angle, delta_x, delta_z, abs_value;
     for (int i = 0; i < NUMBER_OF_ORO_LAYERS + 1; ++i)
     {
@@ -923,32 +564,11 @@ int main(int argc, char *argv[])
     	}
     }
     // more advanced stuff: tangential vector reconstruction and kinetic energy
-    double weight_prefactor;
 	retval = calc_coriolis_weights(recov_hor_ver_curl_index, from_index_dual, to_index_dual, recov_hor_ver_curl_weight, recov_hor_ver_pri_index, trsk_modified_curl_indices, normal_distance, normal_distance_dual, to_index, area, z_scalar, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, trsk_modified_weights,  trsk_modified_velocity_indices, from_index, adjacent_vector_indices_h, direction, recov_hor_par_curl_weight, direction_dual, rel_on_line_dual, recov_hor_par_curl_index, ORTH_CRITERION_DEG);
+	// alpha is the kinetic energy parameter from Gassmann (2012) - necessary for avoiding Hollingsworth instability
     double alpha_1 = 3.0/4;
 	retval = calc_kinetic_energy(latitude_scalar, longitude_scalar, e_kin_indices, e_kin_weights, volume, adjacent_vector_indices_dual_h, alpha_1, to_index, from_index, area_dual_pre, area, z_scalar, z_vector, adjacent_vector_indices_h, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, to_index_dual, from_index_dual, z_vector_dual);
-    for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
-    {
-        weight_prefactor = 2.0/6.0;
-        if (i < NUMBER_OF_PENTAGONS)
-            weight_prefactor = 2.0/5.0;
-        for (int j = 0; j < 6; ++j)
-        {
-            recov_ver_index[6*i + j] = adjacent_vector_indices_h[6*i + j];
-            recov_ver_0_pri_weight[6*i + j] = weight_prefactor*cos(direction[recov_ver_index[6*i + j]]);
-            recov_ver_0_curl_weight[6*i + j] = weight_prefactor*cos(direction_dual[recov_ver_index[6*i + j]]);
-            recov_ver_1_pri_weight[6*i + j] = weight_prefactor*sin(direction[recov_ver_index[6*i + j]]);
-            recov_ver_1_curl_weight[6*i + j] = weight_prefactor*sin(direction_dual[recov_ver_index[6*i + j]]);
-        }
-        if (i < NUMBER_OF_PENTAGONS)
-        {
-            recov_ver_index[6*i + 5] = 0;
-            recov_ver_0_pri_weight[6*i + 5] = 0;
-            recov_ver_1_pri_weight[6*i + 5] = 0;
-            recov_ver_0_curl_weight[6*i + 5] = 0;
-            recov_ver_1_curl_weight[6*i + 5] = 0;
-        }
-    }
+    retval = set_recov_ver(recov_ver_index, adjacent_vector_indices_h, recov_ver_0_pri_weight, direction, recov_ver_0_curl_weight, direction_dual, recov_ver_1_pri_weight, recov_ver_1_curl_weight);
     for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_H; ++i)
     {
         sign = 1;

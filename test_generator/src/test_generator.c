@@ -492,7 +492,7 @@ int main(int argc, char *argv[])
                 eta = pressure_value/P_0;
                 eta_v = (eta - ETA_0)*M_PI/2; 
                 u = U_0*pow(cos(eta_v), 1.5)*pow(sin(2*lat), 2);
-                if (TEST_ID == 3 || TEST_ID == 4)
+                if (TEST_ID == 3 || TEST_ID == 5)
                 {
                     distance = calculate_distance_h(lat, lon, lat_perturb, lon_perturb, RADIUS);
                     u += u_p*exp(-pow(distance/distance_scale, 2));
@@ -556,7 +556,7 @@ int main(int argc, char *argv[])
             lat = latitude_scalar[j];
             lon = longitude_scalar[j];
             z_height = z_vector[j + i*NUMBER_OF_VECTORS_PER_LAYER];
-            if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4)
+            if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
                 wind_v[j] = 0;
         }
         if ((retval = codes_set_long(handle_wind_v, "discipline", 0)))

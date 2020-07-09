@@ -3,7 +3,7 @@ This source file is part of the Global Atmospheric Modeling Framework (GAME), wh
 Github repository: https://github.com/MHBalsmeier/game
 */
 /*
-In this file, the trangential vector reconstruction indices and weights are computed.
+In this file, vector reconstruction indices and weights are computed.
 */
 
 #include "grid_generator.h"
@@ -14,6 +14,9 @@ In this file, the trangential vector reconstruction indices and weights are comp
 
 int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[], int to_index_dual[], double recov_hor_ver_curl_weight[], int recov_hor_ver_pri_index[], int trsk_modified_curl_indices[], double normal_distance[], double normal_distance_dual[], int to_index[], double area[], double z_scalar[], double latitude_scalar[], double longitude_scalar[], double latitude_vector[], double longitude_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], double trsk_modified_weights[], int trsk_modified_velocity_indices[], int from_index[], int adjacent_vector_indices_h[], double direction[], double recov_hor_par_curl_weight[], double direction_dual[], double rel_on_line_dual[], int recov_hor_par_curl_index[], double ORTH_CRITERION_DEG)
 {
+	/*
+	This function implements the modified TRSK scheme proposed by Gassmann (2018).
+	*/
 	int *face_of_cell_indices = malloc(2*sizeof(int));
 	int offset, sign_0, sign_1, retval, sign, number_of_edges;
 	double check_sum, direction_change;
@@ -486,9 +489,33 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 	return retval;
 }
 
-
-
-
+int set_recov_ver(int recov_ver_index[], int adjacent_vector_indices_h[], double recov_ver_0_pri_weight[], double direction[], double recov_ver_0_curl_weight[], double direction_dual[], double recov_ver_1_pri_weight[], double recov_ver_1_curl_weight[])
+{
+	double weight_prefactor;
+	for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
+	{
+		weight_prefactor = 2.0/6.0;
+		if (i < NUMBER_OF_PENTAGONS)
+		    weight_prefactor = 2.0/5.0;
+		for (int j = 0; j < 6; ++j)
+		{
+		    recov_ver_index[6*i + j] = adjacent_vector_indices_h[6*i + j];
+		    recov_ver_0_pri_weight[6*i + j] = weight_prefactor*cos(direction[recov_ver_index[6*i + j]]);
+		    recov_ver_0_curl_weight[6*i + j] = weight_prefactor*cos(direction_dual[recov_ver_index[6*i + j]]);
+		    recov_ver_1_pri_weight[6*i + j] = weight_prefactor*sin(direction[recov_ver_index[6*i + j]]);
+		    recov_ver_1_curl_weight[6*i + j] = weight_prefactor*sin(direction_dual[recov_ver_index[6*i + j]]);
+		}
+		if (i < NUMBER_OF_PENTAGONS)
+		{
+		    recov_ver_index[6*i + 5] = 0;
+		    recov_ver_0_pri_weight[6*i + 5] = 0;
+		    recov_ver_1_pri_weight[6*i + 5] = 0;
+		    recov_ver_0_curl_weight[6*i + 5] = 0;
+		    recov_ver_1_curl_weight[6*i + 5] = 0;
+		}
+	}
+	return 0;
+}
 
 
 

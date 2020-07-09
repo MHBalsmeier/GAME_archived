@@ -1,0 +1,101 @@
+/*
+This source file is part of the Global Atmospheric Modeling Framework (GAME), which is released under the MIT license.
+Github repository: https://github.com/MHBalsmeier/game
+*/
+
+#include "grid_generator.h"
+#include "enum.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include "geos95.h"
+#include <netcdf.h>
+#include <math.h>
+#define ERRCODE 2
+#define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
+
+int calc_adjacent_vector_indices_h(int from_index[], int to_index[], int adjacent_signs_h[], int adjacent_vector_indices_h[])
+{
+    int trouble_detected = 0;
+    int counter;
+    for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
+    {
+        counter = 0;
+        for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
+        {
+            if (from_index[j] == i || to_index[j] == i)
+            {
+                if (from_index[j] == to_index[j])
+				{
+                    printf("It is from_index == to_index at some point.\n");
+					exit(1);
+				}
+                adjacent_vector_indices_h[6*i + counter] = j;
+                if (from_index[j] == i)
+                    adjacent_signs_h[6*i + counter] = 1;
+                if (to_index[j] == i)
+                    adjacent_signs_h[6*i + counter] = -1;
+                ++counter;
+            }
+        }
+        if (counter != 6)
+        {
+            trouble_detected = 1;
+            if (counter == 5 && i < NUMBER_OF_PENTAGONS)
+                trouble_detected = 0;
+        }
+        if (trouble_detected == 1)
+		{
+            printf("Trouble detected, place 1.\n");
+			exit(1);
+		}
+        if (i < NUMBER_OF_PENTAGONS)
+        {
+            adjacent_vector_indices_h[6*i + 5] = -1;
+            adjacent_signs_h[6*i + 5] = 0;
+        }
+    }
+    int number_of_edges, double_check, sign_sum_check;
+    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+    {
+        counter = 0;
+        sign_sum_check = 0;
+        for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
+        {
+            number_of_edges = 6;
+            if (j < NUMBER_OF_PENTAGONS)
+                number_of_edges = 5;
+            double_check = 0;
+            for (int k = 0; k < number_of_edges; ++k)
+            {
+                if (adjacent_vector_indices_h[6*j + k] == i)
+                {
+                    ++counter;
+                    ++double_check;
+                    sign_sum_check += adjacent_signs_h[6*j + k];
+                }
+            }
+            if (double_check > 1)
+			{
+                printf("Same vector twice in adjacent_vector_indices_h of same grid cell.\n");
+				exit(1);
+			}
+        }
+        if (sign_sum_check != 0)
+            printf("Problem with adjacent_signs_h.\n");
+        if (counter != 2)
+            printf("Problem with adjacent_vector_indices_h.\n");
+    }
+    return 0;
+}
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

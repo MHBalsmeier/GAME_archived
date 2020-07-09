@@ -22,14 +22,16 @@ int calc_kinetic_energy(double [], double [], int [], double [], double [], int 
 int calc_coriolis_weights(int [], int [], int [], double [], int [], int [], double [], double [], int [], double [], double [], double [], double [], double [], double [], double [], double [], double [], int [], int [], int [], double [], double [], double [], double [], int [], double);
 int determine_z_scalar(double [], double [], double [], double, double);
 int set_f_vec(double [], double [], double [], double []);
-
-
-
-
-
-
-
-
-
+int set_orography(int, int, double []);
+int calc_cell_face_unity(double [], double [], double [], int [], int []);
+int calculate_vertical_faces(double [], double [], double []);
+int set_recov_ver(int [], int [], double [], double [], double [], double [], double [], double []);
+int calc_triangle_face_unity(double [], double [], double [], int [][3], int [][3], int [][3], int [][2]);
+int set_vector_h_doubles(int [], int [], double [], double [], double [], double [], double []);
+int set_from_to_index(int [], int [], int [][3], int [][3], int [][3], int [][2]);
+int set_scalar_h_dual_coords(double [], double [], double [], double [], int [][3], int [][3], int [][3], int [][2]);
+int set_z_scalar_dual(double [], double [], int [], int [], int [], double [], double);
+int set_volume(double [], double [], double [], double [], int [], int [], double, double [], int []);
+int calc_adjacent_vector_indices_h(int [], int [], int [], int []);
 
 

@@ -8,7 +8,7 @@
 # 3:	JW test, dry, perturbed
 # 4:	JW test, moist, perturbed
 
-test_id=3
+test_id=4
 echo "Starting the test state generation ..."
 mpirun -np 1 ./test_generator $test_id
 if [ $? -ne 0 ]

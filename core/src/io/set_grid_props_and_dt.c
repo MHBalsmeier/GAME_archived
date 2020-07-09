@@ -417,7 +417,10 @@ int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid)
     if (delta_t_buoyancy < delta_t_candidate)
         *delta_t = (1 - cfl_margin)*delta_t_buoyancy;
     else
+    {
     	*delta_t = (1 - cfl_margin)*delta_t_candidate;
+	}
+	*delta_t = 0.2*(1 - cfl_margin)*delta_t_candidate;
     return 1;
 }
 
