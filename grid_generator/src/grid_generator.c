@@ -115,8 +115,7 @@ int main(int argc, char *argv[])
     int *vorticity_signs = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
     int *h_curl_signs = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
     printf("finished.\n");
-    double base_distance, radius_0, radius_1, direction_change;
-    int face_index, face_index_0, face_index_1, h_index, on_face_index, layer_index, upper_index, lower_index, coord_0_points_amount, coord_0, coord_1, triangle_on_face_index, on_edge_index, counter, primal_vector_index, dual_vector_index, first_face_found, edge_rel_to_face_0, edge_rel_to_face_1, edge_index, sign, small_triangle_edge_index, retval, z_surface_id;
+    int retval, z_surface_id;
     printf("Reading orography data ... ");
 	retval = set_orography(RES_ID, ORO_ID, z_surface);
     printf("finished.\n");
@@ -143,641 +142,68 @@ int main(int argc, char *argv[])
     free(x_unity);
     free(y_unity);
     free(z_unity);
-    edge_rel_to_face_0 = 0;
-    edge_rel_to_face_1 = 0;
-    face_index_0 = 0;
-    face_index_1 = 0;
-    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_PER_LAYER; ++i)
-    {
-        if (i >= NUMBER_OF_DUAL_VECTORS_H)
-            latitude_vector_dual[i] = latitude_scalar_dual[i - NUMBER_OF_DUAL_VECTORS_H];
-        else
-        {
-            if (i < NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))
-            {
-                edge_index = i/(POINTS_PER_EDGE + 1);
-                on_edge_index = i - edge_index*(POINTS_PER_EDGE + 1);
-                first_face_found = 0;
-                for (int j = 0; j < NUMBER_OF_BASIC_TRIANGLES; ++j)
-                {
-                    if (face_edges[j][0] == edge_index || face_edges[j][1] == edge_index || face_edges[j][2] == edge_index)
-                    {
-                        if (first_face_found == 0)
-                        {
-                            face_index_0 = j;
-                            first_face_found = 1;
-                        }
-                        else
-                            face_index_1 = j;
-                    }
-                }
-                if (face_edges[face_index_0][0] == edge_index)
-                    edge_rel_to_face_0 = 0;
-                if (face_edges[face_index_0][1] == edge_index)
-                    edge_rel_to_face_0 = 1;
-                if (face_edges[face_index_0][2] == edge_index)
-                    edge_rel_to_face_0 = 2;
-                if (face_edges[face_index_1][0] == edge_index)
-                    edge_rel_to_face_1 = 0;
-                if (face_edges[face_index_1][1] == edge_index)
-                    edge_rel_to_face_1 = 1;
-                if (face_edges[face_index_1][2] == edge_index)
-                    edge_rel_to_face_1 = 2;
-                if (edge_rel_to_face_0 == 0)
-                {
-                    if (face_edges_reverse[face_index_0][edge_rel_to_face_0] == 0)
-                        triangle_on_face_index = 2*on_edge_index;
-                    else
-                        triangle_on_face_index = 2*POINTS_PER_EDGE - 2*on_edge_index;
-                }
-                if (edge_rel_to_face_0 == 1)
-                {
-                    if (face_edges_reverse[face_index_0][edge_rel_to_face_0] == 0)
-                        triangle_on_face_index = -1 + (on_edge_index + 1)*(2*POINTS_PER_EDGE - on_edge_index + 1);
-                    else
-                        triangle_on_face_index = TRIANGLES_PER_FACE - on_edge_index*on_edge_index - 1;
-                }
-                if (edge_rel_to_face_0 == 2)
-                {
-                    if (face_edges_reverse[face_index_0][edge_rel_to_face_0] == 0)
-                        triangle_on_face_index = TRIANGLES_PER_FACE - 1 - on_edge_index*(on_edge_index + 2);
-                    else
-                        triangle_on_face_index = on_edge_index*(2*POINTS_PER_EDGE + 2 - on_edge_index);
-                }
-                to_index_dual[i] = face_index_0*TRIANGLES_PER_FACE + triangle_on_face_index;
-                if (edge_rel_to_face_1 == 0)
-                {
-                    if (face_edges_reverse[face_index_1][edge_rel_to_face_1] == 0)
-                        triangle_on_face_index = 2*on_edge_index;
-                    else
-                        triangle_on_face_index = 2*POINTS_PER_EDGE - 2*on_edge_index;
-                }
-                if (edge_rel_to_face_1 == 1)
-                {
-                    if (face_edges_reverse[face_index_1][edge_rel_to_face_1] == 0)
-                        triangle_on_face_index = -1 + (on_edge_index + 1)*(2*POINTS_PER_EDGE - on_edge_index + 1);
-                    else
-                        triangle_on_face_index = TRIANGLES_PER_FACE - on_edge_index*on_edge_index - 1;
-                }
-                if (edge_rel_to_face_1 == 2)
-                {
-                    if (face_edges_reverse[face_index_1][edge_rel_to_face_1] == 0)
-                        triangle_on_face_index = TRIANGLES_PER_FACE - 1 - on_edge_index*(on_edge_index + 2);
-                    else
-                        triangle_on_face_index = on_edge_index*(2*POINTS_PER_EDGE + 2 - on_edge_index);
-                }
-                from_index_dual[i] = face_index_1*TRIANGLES_PER_FACE + triangle_on_face_index;
-            }
-            else
-            {
-                face_index = (i - NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
-                on_face_index = i - (NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
-                triangle_on_face_index = on_face_index/3;
-                small_triangle_edge_index = on_face_index - 3*triangle_on_face_index;
-                retval = find_coords_from_triangle_on_face_index(triangle_on_face_index, RES_ID, &coord_0, &coord_1, &coord_0_points_amount);
-                if (small_triangle_edge_index == 0)
-                {
-                    from_index_dual[i] = face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + coord_1;
-                    to_index_dual[i] = from_index_dual[i] + 1;
-                }
-                if (small_triangle_edge_index == 1)
-                {
-                    from_index_dual[i] = face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + 1 + coord_1;
-                    to_index_dual[i] = from_index_dual[i] + 1;
-                }
-                if (small_triangle_edge_index == 2)
-                {
-                    from_index_dual[i] = face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + 1 + coord_1;
-                    to_index_dual[i] = from_index_dual[i] + 2*coord_0_points_amount;
-                }
-            }
-            latitude_vector_dual[i] = latitude_vector[i];
-            retval = find_min_dist_rel_on_line(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], latitude_vector_dual[i], longitude_vector[i], &rel_on_line_dual[i]);
-            if (fabs(rel_on_line_dual[i] - 0.5) > 0.14)
-                printf("Bisection warning.\n");
-            direction_dual[i] = find_geodetic_direction(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], rel_on_line_dual[i]);
-        }
-    }
-    printf("finished.\n");
+    retval = set_from_to_index_dual(from_index_dual, to_index_dual, face_edges, face_edges_reverse);
+	retval = set_dual_vector_h_doubles(latitude_vector_dual, latitude_scalar_dual, latitude_vector, direction_dual, longitude_vector, to_index_dual, from_index_dual, longitude_scalar_dual, rel_on_line_dual);
     retval = set_f_vec(latitude_vector, direction_dual, latitude_vector_dual, f_vec);
+    printf("finished.\n");
 	retval = calc_adjacent_vector_indices_h(from_index, to_index, adjacent_signs_h, adjacent_vector_indices_h);
-    for (int i = 0; i < NUMBER_OF_DUAL_SCALARS_H; ++i)
-    {
-    	counter = 0;
-    	for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_H; ++j)
-    	{
-    		if (from_index_dual[j] == i || to_index_dual[j] == i)
-    		{
-                if (from_index_dual[j] == to_index_dual[j])
-				{
-                    printf("It is from_index_dual == to_index_dual at some point.\n");
-					exit(1);
-				}
-                adjacent_vector_indices_dual_h[3*i + counter] = j;
-                counter++;
-            }
-    	}
-    	if (counter != 3)
-    	{
-    		printf("Error in adjacent_vector_indices_dual_h creation.\n");
-    		exit(1);
-    	}
-    }
-    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_V; ++i)
-    {
-        counter = 0;
-        for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_H; ++j)
-        {
-            if (from_index_dual[j] == i || to_index_dual[j] == i)
-            {
-                vorticity_indices_pre[3*i + counter] = j;
-                sign = 1;
-                if (from_index_dual[j] == i)
-                {
-                    find_angle_change(direction_dual[j], direction[j], &direction_change);
-                    if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
-                        sign = -1;
-                    adjacent_scalar_indices_dual_h[3*i + counter] = to_index_dual[j];
-                }
-                if (to_index_dual[j] == i)
-                {
-                    find_angle_change(direction_dual[j], direction[j], &direction_change);
-                    if (rad2deg(direction_change) > ORTH_CRITERION_DEG)
-                        sign = -1;
-                    adjacent_scalar_indices_dual_h[3*i + counter] = from_index_dual[j];
-                }
-                vorticity_signs_pre[3*i + counter] = sign;
-                ++counter;
-            }
-        }
-        if (counter != 3)
-		{
-            printf("Trouble detected, place 0.\n");
-			exit(1);
-		}
-    }
-    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
-    {
-        find_angle_change(direction[i], direction_dual[i], &direction_change);
-        if (fabs(rad2deg(direction_change)) < ORTH_CRITERION_DEG || fabs(rad2deg(direction_change)) > 90 + (90 - ORTH_CRITERION_DEG))
-		{
-            printf("Grid non-orthogonal.\n");
-			exit(1);
-		}
-    }
+	retval = calc_adjacent_vector_indices_dual_h(adjacent_vector_indices_dual_h, from_index_dual, to_index_dual);
+	retval = calc_vorticity_indices_pre_and_adjacent_scalar_indices_dual_h(from_index_dual, to_index_dual, direction, direction_dual, vorticity_indices_pre, ORTH_CRITERION_DEG, vorticity_signs_pre, adjacent_scalar_indices_dual_h);
+	check_for_orthogonality(direction, direction_dual, ORTH_CRITERION_DEG);
 	calc_cell_face_unity(pent_hex_face_unity_sphere, latitude_scalar_dual, longitude_scalar_dual, adjacent_vector_indices_h, vorticity_indices_pre);
 	// building the vertical grid
    	double z_oro_off = TOA*(NUMBER_OF_ORO_LAYERS + 0.0)/NUMBER_OF_LAYERS;
 	double z_vertical_vector_pre[NUMBER_OF_LAYERS + 1];
 	retval = determine_z_scalar(z_scalar, z_vertical_vector_pre, z_surface, z_oro_off, TOA);
-    for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
-    {
-        layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
-        h_index = i - layer_index*NUMBER_OF_VECTORS_PER_LAYER;
-        if (h_index >= NUMBER_OF_VECTORS_V)
-        {
-            gravity[i] = 0;
-            z_vector[i] = 0.5*(z_scalar[layer_index*NUMBER_OF_SCALARS_H + to_index[h_index - NUMBER_OF_VECTORS_V]] + z_scalar[layer_index*NUMBER_OF_SCALARS_H + from_index[h_index - NUMBER_OF_VECTORS_V]]);
-            if (z_vector[i] <= 0)
-			{
-                printf("z_vector contains a non-positive value at a horizontal grid point.\n");
-				exit(1);
-			}
-            normal_distance[i] = calculate_distance_h(latitude_scalar[from_index[h_index - NUMBER_OF_VECTORS_V]], longitude_scalar[from_index[h_index - NUMBER_OF_VECTORS_V]], latitude_scalar[to_index[h_index - NUMBER_OF_VECTORS_V]], longitude_scalar[to_index[h_index - NUMBER_OF_VECTORS_V]], RADIUS + z_vector[i]);
-        }
-        else
-        {
-            upper_index = h_index + (layer_index - 1)*NUMBER_OF_SCALARS_H;
-            lower_index = h_index + layer_index*NUMBER_OF_SCALARS_H;
-            if (layer_index == 0)
-			{
-                normal_distance[i] = TOA - z_scalar[lower_index];
-            	z_vector[i] = TOA;
-			}
-            else if (layer_index == NUMBER_OF_LAYERS)
-			{
-                normal_distance[i] = z_scalar[upper_index] - z_surface[h_index];
-				z_vector[i] = z_surface[h_index];
-			}
-            else
-			{
-                normal_distance[i] = z_scalar[upper_index] - z_scalar[lower_index];
-				z_vector[i] = z_scalar[lower_index] + 0.5*normal_distance[i];
-			}
-            if (z_vector[i] < z_surface[h_index])
-			{
-                printf("z_vector lays below surface.\n");
-				exit(1);
-			}
-            area[i] = pent_hex_face_unity_sphere[h_index]*pow(RADIUS + z_vector[i], 2);
-            gravity[i] = -GRAVITY_MEAN_SFC_ABS*pow(RADIUS, 2)/pow(RADIUS + z_vector[i], 2);
-        }
-    }
-    for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
-    {
-        if (normal_distance[i] <= 0)
-		{
-            printf("normal_distance contains a non-positive value.\n");
-			exit(1);
-		}
-    }
-	double check_sum;
-	for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
-	{
-		check_sum = 0;
-		for (int j = 0; j < NUMBER_OF_LEVELS; ++j)
-		{
-			check_sum += normal_distance[i + j*NUMBER_OF_VECTORS_PER_LAYER];
-		}
-		if (fabs(check_sum/(TOA - z_surface[i]) - 1) > 1e-15)
-		{
-			printf("Problem 0 with vertical grid structure.\n");
-			exit(1);
-		}
-	}
+	retval = set_z_vector_and_normal_distance(z_vector, z_surface, z_scalar, normal_distance, latitude_scalar, longitude_scalar, from_index, to_index, TOA);
+	printf("Mapping horizontal areas from unit sphere to model levels ... ");
+	retval = map_area_to_sphere(area, z_vector, pent_hex_face_unity_sphere);
+    printf("finished.\n");
+    printf("Setting gravity ... ");
+    retval = set_gravity(gravity, z_vector, GRAVITY_MEAN_SFC_ABS);
+    printf("finished.\n");
     free(pent_hex_face_unity_sphere);
+    printf("Setting volume ... ");
 	set_volume(volume, z_scalar_dual, z_vector, area, from_index, to_index, TOA, z_surface, vorticity_indices_pre);
-    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; ++i)
-    {
-        layer_index = i/NUMBER_OF_DUAL_VECTORS_PER_LAYER;
-        h_index = i - layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER;
-        if (h_index >= NUMBER_OF_DUAL_VECTORS_H)
-        {
-            upper_index = h_index - NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_DUAL_SCALARS_H;
-            lower_index = h_index - NUMBER_OF_DUAL_VECTORS_H + (layer_index + 1)*NUMBER_OF_DUAL_SCALARS_H;
-            normal_distance_dual[i] = z_scalar_dual[upper_index] - z_scalar_dual[lower_index];
-			z_vector_dual[i] = z_scalar_dual[lower_index] + 0.5*normal_distance_dual[i];
-            area_dual_pre[i] = pow(RADIUS + z_vector_dual[i], 2)*triangle_face_unit_sphere[h_index - NUMBER_OF_DUAL_VECTORS_H];
-        }
-        else
-        {
-			if (layer_index == 0)
-				z_vector_dual[i] = TOA;
-			else if (layer_index == NUMBER_OF_LAYERS)
-				z_vector_dual[i] = 0.5*(z_surface[from_index[h_index]] + z_surface[to_index[h_index]]);
-			else
-				z_vector_dual[i] = 0.5*(z_vector[NUMBER_OF_VECTORS_V + h_index + (layer_index - 1)*NUMBER_OF_VECTORS_PER_LAYER] + z_vector[NUMBER_OF_VECTORS_V + h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER]);
-            if (layer_index == 0)
-                radius_1 = RADIUS + z_vector_dual[i];
-            else
-                radius_1 = RADIUS + z_vector[NUMBER_OF_VECTORS_V + h_index + (layer_index - 1)*NUMBER_OF_VECTORS_PER_LAYER];
-            if (layer_index == NUMBER_OF_LAYERS)
-                radius_0 = RADIUS + z_vector_dual[i];
-            else
-                radius_0 = RADIUS + z_vector[NUMBER_OF_VECTORS_V + h_index + layer_index*NUMBER_OF_VECTORS_PER_LAYER];
-            primal_vector_index = (NUMBER_OF_LAYERS - 1)*NUMBER_OF_VECTORS_PER_LAYER + NUMBER_OF_VECTORS_V + h_index;
-            base_distance = normal_distance[primal_vector_index]/(RADIUS + z_vector[primal_vector_index])*radius_0;
-            area_dual_pre[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
-            normal_distance_dual[i] = calculate_distance_h(latitude_scalar_dual[from_index_dual[h_index]], longitude_scalar_dual[from_index_dual[h_index]], latitude_scalar_dual[to_index_dual[h_index]], longitude_scalar_dual[to_index_dual[h_index]], RADIUS + z_vector_dual[i]);
-        }
-    }
-    free(triangle_face_unit_sphere);
-    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS; ++i)
-    {
-        if (area_dual_pre[i] <= 0)
-		{
-            printf("area_dual_pre contains a non-positive value.\n");
-			exit(1);
-		}
-        if (normal_distance_dual[i] <= 0)
-		{
-            printf("normal_distance_dual contains a non-positive value.\n");
-			exit(1);
-		}
-    }
-	int index_vector_for_dual_scalar_z[3];
-	for (int i = 0; i < NUMBER_OF_DUAL_SCALARS_H; ++i)
-	{
-		check_sum = 0;
-		for (int j = 0; j < NUMBER_OF_LAYERS; ++j)
-		{
-			check_sum += normal_distance_dual[i + NUMBER_OF_DUAL_VECTORS_H + j*NUMBER_OF_DUAL_VECTORS_PER_LAYER];
-		}
-		retval = find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, i, index_vector_for_dual_scalar_z);
-		if (fabs(check_sum/(TOA - 1.0/3*(z_surface[index_vector_for_dual_scalar_z[0]] + z_surface[index_vector_for_dual_scalar_z[1]] + z_surface[index_vector_for_dual_scalar_z[2]])) - 1) > 1e-15)
-		{
-			printf("Problem 1 with vertical grid structure.\n");
-			exit(1);
-		}
-	}
+    printf("finished.\n");
+	printf("Determining vector z coordinates of the dual grid and distances of the dual grid ... ");
+	retval = calc_z_vector_dual_and_normal_distance_dual(z_vector_dual, normal_distance_dual, z_scalar_dual, TOA, z_surface, from_index, to_index, z_vector, from_index_dual, to_index_dual, latitude_scalar_dual, longitude_scalar_dual, vorticity_indices_pre);
+    printf("finished.\n");
+    printf("Calculating dual areas, pre version ... ");
+	retval = calc_area_dual_pre(area_dual_pre, z_vector_dual, normal_distance, z_vector, triangle_face_unit_sphere);
+    printf("finished.\n");
+    printf("Calculating vetical faces, pre version ... ");
 	retval = calculate_vertical_faces(area, z_vector_dual, normal_distance_dual);
-	int number_of_edges;
-    double x_value, y_value, z_value, normal_vector_global[3], local_basis_vector[3], local_x, local_y, local_z, tilting_angle, delta_x, delta_z, abs_value;
-    for (int i = 0; i < NUMBER_OF_ORO_LAYERS + 1; ++i)
-    {
-    	for (int j = 0; j < NUMBER_OF_VECTORS_V; ++j)
-    	{
-    		if (j < NUMBER_OF_PENTAGONS)
-    		{
-    			number_of_edges = 5;
-			}
-    		else
-    		{
-    			number_of_edges = 6;
-			}
-			normal_vector_global[0] = 0;
-			normal_vector_global[1] = 0;
-			normal_vector_global[2] = 0;
-    		for (int k = 0; k < number_of_edges; ++k)
-    		{
-    			layer_index = i + NUMBER_OF_LAYERS - NUMBER_OF_ORO_LAYERS;
-    			dual_vector_index = layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*j + k];
-    			delta_x = normal_distance_dual[dual_vector_index];
-    			delta_z = z_scalar_dual[layer_index*NUMBER_OF_DUAL_SCALARS_H + to_index_dual[adjacent_vector_indices_h[6*j + k]]] - z_scalar_dual[layer_index*NUMBER_OF_DUAL_SCALARS_H + from_index_dual[adjacent_vector_indices_h[6*j + k]]];
-    			tilting_angle = atan(delta_z/delta_x);
-    			local_x = -sin(tilting_angle)*cos(direction_dual[adjacent_vector_indices_h[6*j + k]]);
-    			local_y = -sin(tilting_angle)*sin(direction_dual[adjacent_vector_indices_h[6*j + k]]);
-    			local_z = cos(tilting_angle);	
-    			abs_value = sqrt(pow(local_x, 2) + pow(local_y, 2) + pow(local_z, 2));
-    			local_x = local_x/abs_value;
-    			local_y = local_y/abs_value;
-    			local_z = local_z/abs_value;
-    			calc_local_i(latitude_scalar[j], longitude_scalar[j], local_basis_vector);
-    			normal_vector_global[0] += local_x*local_basis_vector[0];
-    			normal_vector_global[1] += local_x*local_basis_vector[1];
-    			normal_vector_global[2] += local_x*local_basis_vector[2];
-    			calc_local_j(latitude_scalar[j], longitude_scalar[j], local_basis_vector);
-    			normal_vector_global[0] += local_y*local_basis_vector[0];
-    			normal_vector_global[1] += local_y*local_basis_vector[1];
-    			normal_vector_global[2] += local_y*local_basis_vector[2];
-    			calc_local_k(latitude_scalar[j], longitude_scalar[j], local_basis_vector);
-    			normal_vector_global[0] += local_z*local_basis_vector[0];
-    			normal_vector_global[1] += local_z*local_basis_vector[1];
-    			normal_vector_global[2] += local_z*local_basis_vector[2];
-    		}
-    		abs_value = sqrt(scalar_product_elementary(normal_vector_global, normal_vector_global));
-    		normal_vector_global[0] = normal_vector_global[0]/abs_value;
-    		normal_vector_global[1] = normal_vector_global[1]/abs_value;
-    		normal_vector_global[2] = normal_vector_global[2]/abs_value;
-    		calc_local_i(latitude_scalar[j], longitude_scalar[j], local_basis_vector);
-    		x_value = scalar_product_elementary(normal_vector_global, local_basis_vector);
-    		calc_local_j(latitude_scalar[j], longitude_scalar[j], local_basis_vector);
-    		y_value = scalar_product_elementary(normal_vector_global, local_basis_vector);
-    		calc_local_k(latitude_scalar[j], longitude_scalar[j], local_basis_vector);
-    		z_value = scalar_product_elementary(normal_vector_global, local_basis_vector);
-    		for (int k = 0; k < 3; ++k)
-    		{
-    			if (k == 0)
-    			{
-    				vertical_contravar_unit[i*3*NUMBER_OF_VECTORS_V + 3*j + k] = x_value;
-				}
-    			if (k == 1)
-    			{
-    				vertical_contravar_unit[i*3*NUMBER_OF_VECTORS_V + 3*j + k] = y_value;
-				}
-    			if (k == 2)
-    			{
-    				vertical_contravar_unit[i*3*NUMBER_OF_VECTORS_V + 3*j + k] = z_value;
-				}
-				if (fabs(vertical_contravar_unit[i*3*NUMBER_OF_VECTORS_V + 3*j + k]) > 1.000001)
-				{
-				    printf("fabs(vertical_contravar_unit) > 1 at some point.\n");
-					exit(1);
-				}
-			}
-    	}
-    }
-    double area_rescale_factor, dz, dh;
-	double area_rescale_factor_warning_begin = 0.1;
-	int contravar_unit_vector_index;
-    for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
-    {
-    	layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
-    	h_index = i - layer_index*NUMBER_OF_VECTORS_PER_LAYER;
-    	if (h_index < NUMBER_OF_VECTORS_V && layer_index >= NUMBER_OF_LAYERS - NUMBER_OF_ORO_LAYERS)
-    	{
-    		contravar_unit_vector_index = h_index + (layer_index - (NUMBER_OF_LAYERS - NUMBER_OF_ORO_LAYERS))*NUMBER_OF_VECTORS_V;
-    		dz = vertical_contravar_unit[3*contravar_unit_vector_index + 2];
-    		if (dz <= 0)
-    			printf("Error in horizontal face orography rescale calculation, position 0.\n");
-    		dh = sqrt(pow(vertical_contravar_unit[3*contravar_unit_vector_index + 0], 2) + pow(vertical_contravar_unit[3*contravar_unit_vector_index + 1], 2));
-    		tilting_angle = atan(dh/dz);
-    		area_rescale_factor = sqrt(1 + pow(tan(tilting_angle), 2));
-    		area[i] = area_rescale_factor*area[i];
-    		if (fabs(area_rescale_factor - 1) > area_rescale_factor_warning_begin)
-    			printf("It is area_rescale_factor > area_rescale_factor_warning_begin at some point.\n");
-    		if (area[i] <= 0)
-    		{
-    			printf("It is area <= 0 at some point, position 1.\n");
-    			exit(1);
-    		}
-    	}
-    }
+    printf("finished.\n");
+    printf("Calculating vertical contravariant unit vectors, pre version ... ");
+	retval = calc_vertical_contravar_unit(latitude_scalar, longitude_scalar, adjacent_vector_indices_h, vertical_contravar_unit, direction_dual, normal_distance_dual, from_index_dual, to_index_dual, z_scalar_dual);
+    printf("finished.\n");
+    printf("Rescaling area for orography ... ");
+	retval = rescale_area(area, vertical_contravar_unit);
+    printf("finished.\n");
+    printf("Rescaling dual areas for orography ... ");
+	retval = rescale_area_dual(area_dual, z_vector, from_index_dual, to_index_dual, area_dual_pre, z_vector_dual);
+    printf("finished.\n");
     // more advanced stuff: tangential vector reconstruction and kinetic energy
+    printf("Calculating Coriolis indices and weights ... ");
 	retval = calc_coriolis_weights(recov_hor_ver_curl_index, from_index_dual, to_index_dual, recov_hor_ver_curl_weight, recov_hor_ver_pri_index, trsk_modified_curl_indices, normal_distance, normal_distance_dual, to_index, area, z_scalar, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, trsk_modified_weights,  trsk_modified_velocity_indices, from_index, adjacent_vector_indices_h, direction, recov_hor_par_curl_weight, direction_dual, rel_on_line_dual, recov_hor_par_curl_index, ORTH_CRITERION_DEG);
+    printf("finished.\n");
 	// alpha is the kinetic energy parameter from Gassmann (2012) - necessary for avoiding Hollingsworth instability
     double alpha_1 = 3.0/4;
+    printf("Calculating kinetic energy indices and weights ... ");
 	retval = calc_kinetic_energy(latitude_scalar, longitude_scalar, e_kin_indices, e_kin_weights, volume, adjacent_vector_indices_dual_h, alpha_1, to_index, from_index, area_dual_pre, area, z_scalar, z_vector, adjacent_vector_indices_h, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, to_index_dual, from_index_dual, z_vector_dual);
     retval = set_recov_ver(recov_ver_index, adjacent_vector_indices_h, recov_ver_0_pri_weight, direction, recov_ver_0_curl_weight, direction_dual, recov_ver_1_pri_weight, recov_ver_1_curl_weight);
-    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_H; ++i)
-    {
-        sign = 1;
-        find_angle_change(direction_dual[i], direction[i], &direction_change);
-        if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
-            sign = -1;
-        h_curl_indices[4*i + 0] = i + NUMBER_OF_VECTORS_PER_LAYER;
-        h_curl_signs[4*i + 0] = sign;
-        if (sign == 1)
-            h_curl_indices[4*i + 1] = to_index[i];
-        else
-            h_curl_indices[4*i + 1] = from_index[i];
-        h_curl_signs[4*i + 1] = 1;
-        h_curl_indices[4*i + 2] = i;
-        h_curl_signs[4*i + 2] = -sign;
-        if (sign == 1)
-            h_curl_indices[4*i + 3] = from_index[i];
-        else
-            h_curl_indices[4*i + 3] = to_index[i];
-        h_curl_signs[4*i + 3] = -1;
-    }
-    for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
-    {
-    	counter = 0;
-    	for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_H; ++j)
-    	{
-    		if (h_curl_indices[4*j + 1] == i || h_curl_indices[4*j + 3] == i)
-    			++counter;
-    	}
-    	if (i < NUMBER_OF_PENTAGONS && counter != 5)
-    	{
-    		printf("Error in h_curl_indices, position 0.\n");
-    		exit(1);
-		}
-    	if (i >= NUMBER_OF_PENTAGONS && counter != 6)
-    	{
-    		printf("Error in h_curl_indices, position 1.\n");
-    		exit(1);
-		}
-    }
-    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
-    {
-    	counter = 0;
-    	for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_H; ++j)
-    	{
-    		if (h_curl_indices[4*j + 0] == i + NUMBER_OF_VECTORS_PER_LAYER || h_curl_indices[4*j + 2] == i)
-    		{
-    			++counter;
-    			if (h_curl_indices[4*j + 0] == i + NUMBER_OF_VECTORS_PER_LAYER && h_curl_indices[4*j + 2] == i)
-    				++counter;
-			}
-    	}
-    	if (counter != 2)
-    	{
-    		printf("Error in h_curl_indices, position 2.\n");
-    		exit(1);
-		}
-    }
+    printf("finished.\n");
+    printf("Setting horizontal curl indices ... ");
+	retval = set_horizontal_curl_indices(direction_dual, direction, h_curl_indices, from_index, to_index, ORTH_CRITERION_DEG, h_curl_signs);
+    printf("finished.\n");
     free(direction_dual);
-    double area_0, area_1, area_ratio;
-    for (int i = 0; i < NUMBER_OF_DUAL_H_VECTORS + NUMBER_OF_H_VECTORS; ++i)
-    {
-    	layer_index = i/(NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H);
-    	h_index = i - layer_index*(NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H);
-    	if (h_index < NUMBER_OF_DUAL_VECTORS_H)
-    		area_dual[i] = area_dual_pre[layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + h_index];
-    	else
-    	{
-    		primal_vector_index = NUMBER_OF_VECTORS_V + h_index - NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_VECTORS_PER_LAYER;
-    		dual_vector_index = NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + to_index_dual[h_index - NUMBER_OF_DUAL_VECTORS_H];
-    		area_0 = area_dual_pre[dual_vector_index];
-    		area_rescale_factor = pow((RADIUS + z_vector[primal_vector_index])/(RADIUS + z_vector_dual[dual_vector_index]), 2);
-    		area_0 = area_rescale_factor*area_0;
-    		dual_vector_index = NUMBER_OF_DUAL_VECTORS_H + layer_index*NUMBER_OF_DUAL_VECTORS_PER_LAYER + from_index_dual[h_index - NUMBER_OF_DUAL_VECTORS_H];
-    		area_1 = area_dual_pre[dual_vector_index];
-    		area_rescale_factor = pow((RADIUS + z_vector[primal_vector_index])/(RADIUS + z_vector_dual[dual_vector_index]), 2);
-    		area_1 = area_rescale_factor*area_1;
-    		area_ratio = area_0/area_1;
-    		if (fabs(area_ratio - 1) > 0.3)
-    		{
-    			printf("Unrealistic area_ratio in rhombus area calculation, position 0.\n");
-    			exit(1);
-			}
-    		area_dual[i] = area_0 + area_1;
-    	}
-		if (area_dual[i] <= 0)
-		{
-			printf("It is area_dual <= 0 at some point.\n");
-			exit(1);
-		}
-    }
-    double check_area, area_sum, mean_z;
-    for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
-    {
-    	mean_z = 0;
-    	for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
-    		mean_z += z_vector[NUMBER_OF_VECTORS_V + i*NUMBER_OF_VECTORS_PER_LAYER + j];
-    	mean_z = mean_z/NUMBER_OF_VECTORS_H;
-    	area_sum = 0;
-    	for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
-    		area_sum += 1.0/3*area_dual[NUMBER_OF_DUAL_VECTORS_H + i*(NUMBER_OF_VECTORS_H + NUMBER_OF_DUAL_VECTORS_H) + j];
-    	check_area = 4*M_PI*pow(RADIUS + mean_z, 2);
-    	area_ratio = check_area/area_sum;
-    	if (fabs(area_ratio - 1) > 0.00001)
-    	{
-    		printf("Unrealistic area_ratio in rhombus area calculation, position 1.\n");
-    		exit(1);
-    	}
-    }
-    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_H; ++i)
-    {
-    	area_ratio = area_dual[i]/area_dual[i + NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H];
-    	if (fabs(area_ratio - 0.5) > 0.0001)
-    	{
-    		printf("Unrealistic value in area_ratio of area_dual, position 0.\n");
-    		exit(1);
-    	}
-    }
-    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_H; ++i)
-    {
-    	area_ratio = area_dual[i + (NUMBER_OF_LAYERS - 1)*(NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H)]/area_dual[i + (NUMBER_OF_LAYERS - 1)*(NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H) + NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H];
-    	if (fabs(area_ratio - 2) > 0.001)
-    	{
-    		printf("Unrealistic value in area_ratio of area_dual, position 1.\n");
-    		exit(1);
-    	}
-    }
-    int indices_list_pre[6];
-    int signs_list_pre[6];
-    int indices_list[4];
-    int signs_list[4];
-    int double_indices[2];
-    double_indices[0] = -1;
-    double_indices[1] = -1;
-    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
-    {
-    	for (int j = 0; j < 3; ++j)
-    	{
-			indices_list_pre[j] = vorticity_indices_pre[3*to_index_dual[i] + j];
-			signs_list_pre[j] = vorticity_signs_pre[3*to_index_dual[i] + j];
-    	}
-    	for (int j = 0; j < 3; ++j)
-    	{
-			indices_list_pre[3 + j] = vorticity_indices_pre[3*from_index_dual[i] + j];
-			signs_list_pre[3 + j] = vorticity_signs_pre[3*from_index_dual[i] + j];
-    	}
-		for (int j = 0; j < 6; ++j)
-		{
-			for (int k = j + 1; k < 6; ++k)
-			{
-				if (indices_list_pre[j] == indices_list_pre[k])
-				{
-					double_indices[0] = j;
-					double_indices[1] = k;
-				}
-			}
-		}
-		counter = 0;
-    	for (int j = 0; j < 6; ++j)
-    	{
-    		if (j != double_indices[0] && j != double_indices[1])
-    		{
-				indices_list[counter] = indices_list_pre[j];
-				signs_list[counter] = signs_list_pre[j];
-				counter++;
-			}
-		}
-		if (counter != 4)
-		{
-			printf("Error in vorticity_indices and vortictiy_signs creation from vorticity_indices_pre and vortictiy_signs_pre, position 1.\n");
-			exit(1);
-		}
-    	for (int j = 0; j < 4; ++j)
-    	{
-			vorticity_indices[4*i + j] = indices_list[j];
-			vorticity_signs[4*i + j] = signs_list[j];
-			if (vorticity_signs[4*i + j] != 1 && vorticity_signs[4*i + j] != -1)
-			{
-				printf("Error in vorticity_indices and vortictiy_signs creation from vorticity_indices_pre and vortictiy_signs_pre, position 2.");
-				exit(1);
-			}
-			if (vorticity_indices[4*i + j] >= NUMBER_OF_VECTORS_H || vorticity_indices[4*i + j] < 0)
-			{
-				printf("Error in vorticity_indices and vortictiy_signs creation from vorticity_indices_pre and vortictiy_signs_pre, position 3.");
-				exit(1);
-			}
-		}
-    }
-    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
-    {
-    	counter = 0;
-    	for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
-    	{
-    		for (int k = 0; k < 4; ++k)
-    		{
-    			if (vorticity_indices[4*j + k] == i)
-    				++counter;
-    		}
-    	}
-    	if (counter != 4)
-    	{
-    		printf("Error in vorticity_indices, position 0.\n");
-    		exit(1);
-    	}
-    }
-    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
-    {
-    	gravity_potential[i] = -GRAVITY_MEAN_SFC_ABS*(RADIUS*RADIUS/(RADIUS + z_scalar[i]) - RADIUS);
-    }
+    printf("Setting vorticity indices ... ");
+	retval = set_vorticity_indices(vorticity_indices_pre, vorticity_signs_pre, from_index_dual, to_index_dual, vorticity_indices, vorticity_signs);
+    printf("finished.\n");
+    printf("Setting gravity potential ... ");
+	retval = set_gravity_potential(z_scalar, gravity_potential, GRAVITY_MEAN_SFC_ABS);
+    printf("finished.\n");
     int ncid_g_prop;
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);

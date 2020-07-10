@@ -227,7 +227,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
        	grid -> gravity_potential[i] = gravity_potential[i];
        	if (grid -> gravity_potential[i] <= 0)
         {
-        	printf("here\n");
             grid_check_failed();   
       	}
         if (grid -> z_scalar[i] <= 0)
@@ -250,7 +249,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
 			grid_check_failed();
    	   	}
     }
-    printf("here\n");
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         grid -> normal_distance[i] = normal_distance[i];

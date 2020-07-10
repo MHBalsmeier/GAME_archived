@@ -189,7 +189,6 @@ int calc_kinetic_energy(double latitude_scalar[], double longitude_scalar[], int
 		partial_volume = find_volume(cell_base_area, RADIUS + z_vector[e_kin_indices[14*i + 13]], RADIUS + z_scalar[i]);
 		e_kin_weights[14*i + 13] = 0.5*partial_volume/volume[i];
 	}
-	printf("Checking kinetic energy weights sum ... ");
 	double e_kin_weights_sum;
 	for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
 	{
@@ -210,12 +209,10 @@ int calc_kinetic_energy(double latitude_scalar[], double longitude_scalar[], int
 		}    	
 		if (fabs(e_kin_weights_sum - 1.5) > 0.01)
 		{
-			printf("%lf\n", e_kin_weights_sum);
 			printf("Error in e_kin_weights, position 1.\n");
 			exit(1);
 		}
 	}
-    printf("passed.\n");
 	return 0;
 }
 
