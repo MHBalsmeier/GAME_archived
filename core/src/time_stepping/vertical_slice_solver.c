@@ -205,11 +205,13 @@ int three_band_solver_ver_sound_waves(State *state_0, State *state_p1, State *st
 			d_vector[2*j + 1] = state_p1 -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + delta_t*(-gradient_geopotential_energy[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + pressure_gradient_acc_1[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]);
 			if (j == 0)
 				d_vector[2*j] -= delta_t*(-split_method_weight*0.25*vertical_velocity[j + 1]*temperature_density[i + (j + 1)*NO_OF_SCALARS_H]*grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + j*NO_OF_SCALARS_H]);
+			else if (j == NO_OF_LAYERS - 2)
+				d_vector[2*j] -= delta_t*(split_method_weight*0.25*(vertical_velocity[j - 1]*temperature_density[i + (j - 1)*NO_OF_SCALARS_H]*grid -> area[i + j*NO_OF_VECTORS_PER_LAYER])/grid -> volume[i + j*NO_OF_SCALARS_H]);
 			else
 				d_vector[2*j] -= delta_t*(split_method_weight*0.25*(vertical_velocity[j - 1]*temperature_density[i + (j - 1)*NO_OF_SCALARS_H]*grid -> area[i + j*NO_OF_VECTORS_PER_LAYER] - vertical_velocity[j + 1]*temperature_density[i + (j + 1)*NO_OF_SCALARS_H]*grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER])/grid -> volume[i + j*NO_OF_SCALARS_H]);
 		}
 		b_vector[2*NO_OF_LAYERS - 2] =  1 + delta_t*(R_D/C_D_V*wind_field_divv[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H] + (0.5*R_D/C_D_V + 0.25*split_method_weight)*vertical_velocity_divergence[NO_OF_LAYERS - 1]);
-		d_vector[2*NO_OF_LAYERS - 2] = temperature_density[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + delta_t*(-temperature_flux_density_divv[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] - 0.25*split_method_weight*vertical_velocity[NO_OF_LAYERS - 1]*temperature_density[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]*grid -> area[i + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]);
+		d_vector[2*NO_OF_LAYERS - 2] = temperature_density[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + delta_t*(-temperature_flux_density_divv[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] - 0.25*split_method_weight*vertical_velocity[NO_OF_LAYERS - 2]*temperature_density[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]*grid -> area[i + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]);
 		// calling the algorithm to solve the system of linear equations
 		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, 2*NO_OF_LAYERS - 1);
 		// writing the result into the new state

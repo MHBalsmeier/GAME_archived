@@ -491,13 +491,18 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 
 int set_recov_ver(int recov_ver_index[], int adjacent_vector_indices_h[], double recov_ver_0_pri_weight[], double direction[], double recov_ver_0_curl_weight[], double direction_dual[], double recov_ver_1_pri_weight[], double recov_ver_1_curl_weight[])
 {
+	int number_of_edges;
 	double weight_prefactor;
 	for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
 	{
+		number_of_edges = 6;
 		weight_prefactor = 2.0/6.0;
 		if (i < NUMBER_OF_PENTAGONS)
+		{
+			number_of_edges = 5;
 		    weight_prefactor = 2.0/5.0;
-		for (int j = 0; j < 6; ++j)
+	    }
+		for (int j = 0; j < number_of_edges; ++j)
 		{
 		    recov_ver_index[6*i + j] = adjacent_vector_indices_h[6*i + j];
 		    recov_ver_0_pri_weight[6*i + j] = weight_prefactor*cos(direction[recov_ver_index[6*i + j]]);
@@ -505,7 +510,7 @@ int set_recov_ver(int recov_ver_index[], int adjacent_vector_indices_h[], double
 		    recov_ver_1_pri_weight[6*i + j] = weight_prefactor*sin(direction[recov_ver_index[6*i + j]]);
 		    recov_ver_1_curl_weight[6*i + j] = weight_prefactor*sin(direction_dual[recov_ver_index[6*i + j]]);
 		}
-		if (i < NUMBER_OF_PENTAGONS)
+		if (number_of_edges == 5)
 		{
 		    recov_ver_index[6*i + 5] = 0;
 		    recov_ver_0_pri_weight[6*i + 5] = 0;

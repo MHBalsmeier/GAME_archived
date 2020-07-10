@@ -418,7 +418,6 @@ int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid)
     {
     	*delta_t = (1 - cfl_margin)*delta_t_candidate;
 	}
-	*delta_t = 0.2*(1 - cfl_margin)*delta_t_candidate;
     return 1;
 }
 
