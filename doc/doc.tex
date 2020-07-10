@@ -20,7 +20,7 @@
 \newcommand{\epsilonbi}{\text{{\osgbi ϵ}}}
 \newcommand{\etabi}{\text{{\osgbi η}}}
 \newcommand{\zetabi}{\text{{\osgbi ζ}}}
-\addbibresource{/home/max/my_texts/references.bib}
+\addbibresource{references.bib}
 \DeclareFieldFormat[article]{title}{{#1}}
 
 \begin{document}
@@ -43,6 +43,11 @@ In NWP mode, one wants to be able to integrate one day within 8.5 minutes, which
 \begin{eqnarray}
 s \geq 509.
 \end{eqnarray}
+
+\subsection{Grid optimization}
+\label{sec:grid_optimization}
+
+Hexagonal spherical grids need to be optimized for numerical modeling. Therefore, the Lloyd algorithm is used, which yields a \textit{spherical centroidal Voronoi tesselation (SCVT)} after convergence \cite{Du2003}. \cite{PEIXOTO201361} gives an overview of optimization alternatives and it seems to be that the SCVT is the most suitable for modeling. The procedure employed for executing the Lloyd algorithm is the one described in \cite{10.1175/MWR2991.1}.
 
 \subsection{Parallelization}
 \label{sec:parallelization}

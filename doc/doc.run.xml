@@ -79,7 +79,7 @@
       <file>doc.bcf</file>
     </requires>
     <requires type="editable">
-      <file>/home/max/my_texts/references.bib</file>
+      <file>references.bib</file>
     </requires>
   </external>
 </requests>

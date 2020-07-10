@@ -79,7 +79,24 @@ A grid is determined by the following five properties:
 \item the number of layers following the orography, specified via the parameter \texttt{NUMBER\_OF\_ORO\_LAYERS}
 \end{itemize}
 %
-The grid generator needs to be recompiled for every specific resolution, top height, number of layers as well as number of orography following layers. Therefore change the respective constants in the file \texttt{grid\_generator.c} and execute the bash script \texttt{compile.sh}. Then run the grid generator using the bash script \texttt{run.sh} with the desired \texttt{oro\_id}.
+The grid generator needs to be recompiled for every specific resolution, top height, number of layers as well as number of orography following layers. Therefore change the respective constants in the file \texttt{grid\_generator.c} and execute the bash script \texttt{compile.sh}. Then run the grid generator using the bash script \texttt{run.sh} with the desired \texttt{oro\_id}. Table \ref{tab:grid_generator_run_file_explanation} explains all the parameters to be set in \texttt{run.sh}. Otimized grids have the postfix \texttt{\_SCVT}.
+
+\renewcommand{\arraystretch}{1.2}
+\begin{table}
+\centering
+\begin{tabular}{|>{\centering}p{5.0 cm}|>{\centering}p{3 cm}|>{\centering}p{7 cm}|}
+\hline \textbf{name} & \textbf{domain} & \textbf{meaning} \tabularnewline
+\hline\hline \texttt{oro\_id} & all value for which an orography is defined & orography ID \tabularnewline
+\hline\hline \texttt{optimize} & 0, 1 & optimization switch (fails if \texttt{oro\_id} is not 0) \tabularnewline
+\hline\hline \texttt{n\_iterations} & integer $\geq$ 1 & number of iterations (ignored if \texttt{optimize} = 0) \tabularnewline
+\hline\hline \texttt{use\_scalar\_h\_coords\_file} & 0, 1 & switch to determine wether horizontal coordinates of triangle vertices (generators of the grid) shall be used from another file (if = 1, grid optimizations options are irrelevant) \tabularnewline
+\hline\hline \texttt{scalar\_h\_coords\_file} & string & input file for dual triangle vertices (only relevant if \texttt{use\_scalar\_h\_coords\_file} = 1) \tabularnewline
+\hline
+\end{tabular}
+\caption{Grid generator run script explanation.}
+\label{tab:grid_generator_run_file_explanation}
+\end{table}
+\renewcommand{\arraystretch}{1}
 
 \subsection{Generating a new orography file}
 \label{sec:generating_a_new_orography_file}

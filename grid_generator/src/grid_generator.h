@@ -49,7 +49,8 @@ int set_gravity(double [], double [], double);
 int map_area_to_sphere(double [], double [], double []);
 int calc_z_vector_dual_and_normal_distance_dual(double [], double [], double [], double, double [], int [], int [], double [], int [], int [], double [], double [], int []);
 int calc_area_dual_pre(double [], double [], double [], double [], double []);
-
+int optimize_to_scvt(double [], double [], double [], double [], int, int [][3], int [][3], int [][3], int [][2], int [], int [], int []);
+int read_horizontal_generators(double [], double [], char []);
 
 
 

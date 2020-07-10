@@ -27,12 +27,21 @@ The grid generation procedure is manged from this file. Memory allocation and IO
 #define GRAVITY_MEAN_SFC_ABS 9.80616
 
 const double TOA = 30000.0;
-const double ORTH_CRITERION_DEG = 89.995;
+const double ORTH_CRITERION_DEG = 89.99;
 
 int main(int argc, char *argv[])
 {
     int ORO_ID;
    	ORO_ID = strtod(argv[1], NULL);
+    int OPTIMIZE_BOOL;
+   	OPTIMIZE_BOOL = strtod(argv[2], NULL);
+    int N_ITERATIONS;
+   	N_ITERATIONS = strtod(argv[3], NULL);
+    int USE_SCALAR_H_FILE;
+   	USE_SCALAR_H_FILE = strtod(argv[4], NULL);
+    int len = strlen(argv[5]);
+    char *SCALAR_H_FILE = malloc((len + 1)*sizeof(char));
+    strcpy(SCALAR_H_FILE, argv[5]);
 	if (NUMBER_OF_ORO_LAYERS >= NUMBER_OF_LAYERS)
 	{
 		printf("It is NUMBER_OF_ORO_LAYERS >= NUMBER_OF_LAYERS.\n");
@@ -40,11 +49,25 @@ int main(int argc, char *argv[])
 	}
     int OUTPUT_FILE_LENGTH = 100;
     char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(OUTPUT_FILE_PRE, "nc_files/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
+    if (OPTIMIZE_BOOL == 1)
+    {
+    	sprintf(OUTPUT_FILE_PRE, "nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
+	}
+	else
+	{
+    	sprintf(OUTPUT_FILE_PRE, "nc_files/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
+	}
     OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
     free(OUTPUT_FILE_PRE);
     char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(OUTPUT_FILE, "nc_files/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
+    if (OPTIMIZE_BOOL == 1)
+    {
+    	sprintf(OUTPUT_FILE, "nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
+	}
+	else
+	{
+    	sprintf(OUTPUT_FILE, "nc_files/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
+	}
     double *latitude_ico = malloc(12*sizeof(double));
     double *longitude_ico = malloc(12*sizeof(double));
     int edge_vertices[NUMBER_OF_EDGES][2];
@@ -123,10 +146,23 @@ int main(int argc, char *argv[])
     {
         printf("It is NUMBER_OF_VECTORS_H != NUMBER_OF_DUAL_VECTORS_H.\n");
     }
-    printf("Establishing horizontal grid structure ... ");
-    retval = generate_horizontal_generators(latitude_ico, longitude_ico, latitude_scalar, longitude_scalar, x_unity, y_unity, z_unity, face_edges_reverse, face_edges, face_vertices);
+    printf("Establishing horizontal grid structure ... \n");
     retval = set_from_to_index(from_index, to_index, face_edges, face_edges_reverse, face_vertices, edge_vertices);
-	retval = set_scalar_h_dual_coords(latitude_scalar_dual, longitude_scalar_dual, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
+    retval = set_from_to_index_dual(from_index_dual, to_index_dual, face_edges, face_edges_reverse);
+	retval = calc_adjacent_vector_indices_h(from_index, to_index, adjacent_signs_h, adjacent_vector_indices_h);
+    if (USE_SCALAR_H_FILE == 0)
+    {
+    	retval = generate_horizontal_generators(latitude_ico, longitude_ico, latitude_scalar, longitude_scalar, x_unity, y_unity, z_unity, face_edges_reverse, face_edges, face_vertices);
+    	if (OPTIMIZE_BOOL == 1)
+    	{
+    		retval = optimize_to_scvt(latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, N_ITERATIONS, face_edges, face_edges_reverse, face_vertices, edge_vertices, adjacent_vector_indices_h, from_index_dual, to_index_dual);
+    	}
+    }
+    if (USE_SCALAR_H_FILE == 1)
+    {
+    	retval = read_horizontal_generators(latitude_scalar, longitude_scalar, SCALAR_H_FILE);
+    }
+    	retval = set_scalar_h_dual_coords(latitude_scalar_dual, longitude_scalar_dual, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
 	retval = set_vector_h_doubles(from_index, to_index, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, direction);
     if (retval != 0)
     {
@@ -142,11 +178,9 @@ int main(int argc, char *argv[])
     free(x_unity);
     free(y_unity);
     free(z_unity);
-    retval = set_from_to_index_dual(from_index_dual, to_index_dual, face_edges, face_edges_reverse);
 	retval = set_dual_vector_h_doubles(latitude_vector_dual, latitude_scalar_dual, latitude_vector, direction_dual, longitude_vector, to_index_dual, from_index_dual, longitude_scalar_dual, rel_on_line_dual);
     retval = set_f_vec(latitude_vector, direction_dual, latitude_vector_dual, f_vec);
-    printf("finished.\n");
-	retval = calc_adjacent_vector_indices_h(from_index, to_index, adjacent_signs_h, adjacent_vector_indices_h);
+    printf("Horizontal grid structure determined.\n");
 	retval = calc_adjacent_vector_indices_dual_h(adjacent_vector_indices_dual_h, from_index_dual, to_index_dual);
 	retval = calc_vorticity_indices_pre_and_adjacent_scalar_indices_dual_h(from_index_dual, to_index_dual, direction, direction_dual, vorticity_indices_pre, ORTH_CRITERION_DEG, vorticity_signs_pre, adjacent_scalar_indices_dual_h);
 	check_for_orthogonality(direction, direction_dual, ORTH_CRITERION_DEG);
@@ -172,7 +206,7 @@ int main(int argc, char *argv[])
     printf("Calculating dual areas, pre version ... ");
 	retval = calc_area_dual_pre(area_dual_pre, z_vector_dual, normal_distance, z_vector, triangle_face_unit_sphere);
     printf("finished.\n");
-    printf("Calculating vetical faces, pre version ... ");
+    printf("Calculating vertical faces, pre version ... ");
 	retval = calculate_vertical_faces(area, z_vector_dual, normal_distance_dual);
     printf("finished.\n");
     printf("Calculating vertical contravariant unit vectors, pre version ... ");
@@ -194,6 +228,7 @@ int main(int argc, char *argv[])
 	retval = calc_kinetic_energy(latitude_scalar, longitude_scalar, e_kin_indices, e_kin_weights, volume, adjacent_vector_indices_dual_h, alpha_1, to_index, from_index, area_dual_pre, area, z_scalar, z_vector, adjacent_vector_indices_h, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, to_index_dual, from_index_dual, z_vector_dual);
     retval = set_recov_ver(recov_ver_index, adjacent_vector_indices_h, recov_ver_0_pri_weight, direction, recov_ver_0_curl_weight, direction_dual, recov_ver_1_pri_weight, recov_ver_1_curl_weight);
     printf("finished.\n");
+    // setting indices related to the curl of a vector field
     printf("Setting horizontal curl indices ... ");
 	retval = set_horizontal_curl_indices(direction_dual, direction, h_curl_indices, from_index, to_index, ORTH_CRITERION_DEG, h_curl_signs);
     printf("finished.\n");
@@ -459,6 +494,7 @@ int main(int argc, char *argv[])
     if ((retval = nc_close(ncid_g_prop)))
         ERR(retval);
     printf("finished.\n");
+    free(SCALAR_H_FILE);
     free(e_kin_weights);
     free(e_kin_indices);
     free(adjacent_vector_indices_dual_h);

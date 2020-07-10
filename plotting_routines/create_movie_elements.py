@@ -12,7 +12,7 @@ import matplotlib as mpl;
 import cartopy.crs as ccrs;
 from iris.coord_systems import GeogCS;
 import iris.plot as iplt;
-import matplotlib.tri as tri;
+from scipy.interpolate import griddata;
 
 max_interval = int(sys.argv[1]);
 time_step = int(sys.argv[2]);
@@ -120,35 +120,36 @@ if color_bar_range > 200:
 cmap = plt.get_cmap(colormap);
 norm = BoundaryNorm(bounds, ncolors = cmap.N, clip = True);
 
+points = np.zeros([len(values[:, i]), 2]);
 fig_size = 10;
 for i in range(int(max_interval/time_step) + 1):
-    time_after_init = i*time_step;
-    print("plotting movie element for t - t_init = " + str(time_after_init) + " s ...");
-    fig = plt.figure(figsize = (fig_size, fig_size));
-    ax = plt.axes(projection=ccrs.Orthographic(central_latitude = 0, central_longitude = 0));
-    ax.coastlines(resolution = "10m", linewidth = 2);
-    lat_plot_deg = np.linspace(-90, 90, 1000);
-    lon_plot_deg = np.linspace(-180, 180, 1000);
-    triang = tri.Triangulation(np.rad2deg(lon), np.rad2deg(lat));
-    interpolator = tri.LinearTriInterpolator(triang, values[:, i]);
-    Xi, Yi = np.meshgrid(lon_plot_deg, lat_plot_deg);
-    values_interpolated = interpolator(Xi, Yi);
-    cs = GeogCS(6371229);
-    lat_coord = iris.coords.DimCoord(lat_plot_deg, standard_name = "latitude", units = "degrees", coord_system = cs);
-    lon_coord = iris.coords.DimCoord(lon_plot_deg, standard_name = "longitude", units = "degrees", coord_system = cs);
-    lat_coord.guess_bounds();
-    lon_coord.guess_bounds();
-    new_cube = iris.cube.Cube(values_interpolated, units = unit_string, dim_coords_and_dims = [(lat_coord, 0), (lon_coord, 1)]);
-    mesh = iplt.pcolormesh(new_cube, cmap = cmap, norm = norm);
-    cbar = plt.colorbar(mesh, fraction = 0.02, pad = 0.04, aspect = 40, orientation = "horizontal", ticks = np.arange(color_bar_min, color_bar_max + color_bar_dist, color_bar_dist));
-    cbar.ax.tick_params(labelsize = 16)
-    cbar.set_label(unit_string, fontsize = 16);
-    if disp_time_in_hr == 1:
-        time_after_init = int(time_after_init/3600);
-    plt.title(variable_name + "; " + str(time_after_init) + " " + time_unit_string + " after init", fontsize = 20);
-    fig.savefig(save_folder + "/" + savename + "-" + str(i) + ".png", dpi = 500);
-    plt.close();
-    print("done");
+	time_after_init = i*time_step;
+	print("plotting movie element for t - t_init = " + str(time_after_init) + " s ...");
+	fig = plt.figure(figsize = (fig_size, fig_size));
+	ax = plt.axes(projection=ccrs.Orthographic(central_latitude = 0, central_longitude = 0));
+	ax.coastlines(resolution = "10m", linewidth = 2);
+	lat_plot_deg = np.linspace(-90, 90, 1000);
+	lon_plot_deg = np.linspace(-180, 180, 1000);
+	Xi, Yi = np.meshgrid(lon_plot_deg, lat_plot_deg);
+	points[:, 0] = np.rad2deg(lat);
+	points[:, 1] = np.rad2deg(lon);
+	values_interpolated = griddata(points, values[:, i], (Yi, Xi), method = "linear");
+	cs = GeogCS(6371229);
+	lat_coord = iris.coords.DimCoord(lat_plot_deg, standard_name = "latitude", units = "degrees", coord_system = cs);
+	lon_coord = iris.coords.DimCoord(lon_plot_deg, standard_name = "longitude", units = "degrees", coord_system = cs);
+	lat_coord.guess_bounds();
+	lon_coord.guess_bounds();
+	new_cube = iris.cube.Cube(values_interpolated, units = unit_string, dim_coords_and_dims = [(lat_coord, 0), (lon_coord, 1)]);
+	mesh = iplt.pcolormesh(new_cube, cmap = cmap, norm = norm);
+	cbar = plt.colorbar(mesh, fraction = 0.02, pad = 0.04, aspect = 40, orientation = "horizontal", ticks = np.arange(color_bar_min, color_bar_max + color_bar_dist, color_bar_dist));
+	cbar.ax.tick_params(labelsize = 16)
+	cbar.set_label(unit_string, fontsize = 16);
+	if disp_time_in_hr == 1:
+		time_after_init = int(time_after_init/3600);
+	plt.title(variable_name + "; " + str(time_after_init) + " " + time_unit_string + " after init", fontsize = 20);
+	fig.savefig(save_folder + "/" + savename + "-" + str(i) + ".png", dpi = 500);
+	plt.close();
+	print("done");
 
 
 

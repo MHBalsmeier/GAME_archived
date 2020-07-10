@@ -1,8 +1,16 @@
+/*
+This source file is part of the Global Atmospheric Modeling Framework (GAME), which is released under the MIT license.
+Github repository: https://github.com/MHBalsmeier/game
+*/
+
 #include "enum.h"
 #include "grid_generator.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "geos95.h"
+#include <netcdf.h>
+#define ERRCODE 2
+#define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 
 int generate_horizontal_generators(double latitude_ico[], double longitude_ico[], double latitude_scalar[], double longitude_scalar[], double x_unity[], double y_unity[], double z_unity[], int face_edges_reverse[][3], int face_edges[][3], int face_vertices[][3])
 {
@@ -457,9 +465,23 @@ int set_from_to_index_dual(int from_index_dual[], int to_index_dual[], int face_
     return retval;
 }
 
-
-
-
+int read_horizontal_generators(double latitude_scalar[], double longitude_scalar[], char filename[])
+{
+	int retval, ncid, latitude_scalar_id, longitude_scalar_id;
+    if ((retval = nc_open(filename, NC_NOWRITE, &ncid)))
+        ERR(retval);
+    if ((retval = nc_inq_varid(ncid, "latitude_scalar", &latitude_scalar_id)))
+        ERR(retval);
+    if ((retval = nc_inq_varid(ncid, "longitude_scalar", &longitude_scalar_id)))
+        ERR(retval);
+    if ((retval = nc_get_var_double(ncid, latitude_scalar_id, &latitude_scalar[0])))
+        ERR(retval);
+    if ((retval = nc_get_var_double(ncid, longitude_scalar_id, &longitude_scalar[0])))
+        ERR(retval);
+    if ((retval = nc_close(ncid)))
+        ERR(retval);
+	return 0;
+}
 
 
 

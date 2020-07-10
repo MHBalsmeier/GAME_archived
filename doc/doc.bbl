@@ -19,6 +19,132 @@
 
 \refsection{0}
   \datalist[entry]{nty/global//global/global}
+    \entry{Du2003}{article}{}
+      \name{author}{3}{}{%
+        {{hash=3f79fb13c57a91bb57a69f1cd97b6cc8}{%
+           family={Du},
+           familyi={D\bibinitperiod},
+           given={Qiang},
+           giveni={Q\bibinitperiod}}}%
+        {{hash=4c7bbbe94084f3a0091c7e50da78e7e2}{%
+           family={Gunzburger},
+           familyi={G\bibinitperiod},
+           given={Max\bibnamedelima D.},
+           giveni={M\bibinitperiod\bibinitdelim D\bibinitperiod}}}%
+        {{hash=a776a9f370ec1ffdad1c9800b5b506bc}{%
+           family={Ju},
+           familyi={J\bibinitperiod},
+           given={Lili},
+           giveni={L\bibinitperiod}}}%
+      }
+      \strng{namehash}{173cea0b2471104e15a6e118864cf7bf}
+      \strng{fullhash}{173cea0b2471104e15a6e118864cf7bf}
+      \strng{bibnamehash}{173cea0b2471104e15a6e118864cf7bf}
+      \strng{authorbibnamehash}{173cea0b2471104e15a6e118864cf7bf}
+      \strng{authornamehash}{173cea0b2471104e15a6e118864cf7bf}
+      \strng{authorfullhash}{173cea0b2471104e15a6e118864cf7bf}
+      \field{sortinit}{D}
+      \field{sortinithash}{c438b3d5d027251ba63f5ed538d98af5}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{{Centroidal Voronoi tessellations are useful for subdividing a region in Euclidean space into Voronoi regions whose generators are also the centers of mass, with respect to a prescribed density function, of the regions. Their extensions to general spaces and sets are also available; for example, tessellations of surfaces in a Euclidean space may be considered. In this paper, a precise definition of such constrained centroidal Voronoi tessellations (CCVTs) is given and a number of their properties are derived, including their characterization as minimizers of an “energy.” Deterministic and probabilistic algorithms for the construction of CCVTs are presented and some analytical results for one of the algorithms are given. Computational examples are provided which serve to illustrate the high quality of CCVT point sets. Finally}}
+      \field{journaltitle}{SIAM J. Sci. Comput.}
+      \field{month}{4}
+      \field{number}{5}
+      \field{title}{{Constrained Centroidal Voronoi Tesselations for Surfaces}}
+      \field{volume}{24}
+      \field{year}{2003}
+      \field{pages}{1488\bibrangedash 1506}
+      \range{pages}{19}
+    \endentry
+    \entry{10.1175/MWR2991.1}{article}{}
+      \name{author}{2}{}{%
+        {{hash=b07617acdb88738b31e4c41a4a1e52d5}{%
+           family={Miura},
+           familyi={M\bibinitperiod},
+           given={Hiroaki},
+           giveni={H\bibinitperiod}}}%
+        {{hash=01bb0a703ca0211bf38e2e7d3d102049}{%
+           family={Kimoto},
+           familyi={K\bibinitperiod},
+           given={Masahide},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{5c7cf7423f5a656b9a049711f665fc9c}
+      \strng{fullhash}{5c7cf7423f5a656b9a049711f665fc9c}
+      \strng{bibnamehash}{5c7cf7423f5a656b9a049711f665fc9c}
+      \strng{authorbibnamehash}{5c7cf7423f5a656b9a049711f665fc9c}
+      \strng{authornamehash}{5c7cf7423f5a656b9a049711f665fc9c}
+      \strng{authorfullhash}{5c7cf7423f5a656b9a049711f665fc9c}
+      \field{sortinit}{M}
+      \field{sortinithash}{2e5c2f51f7fa2d957f3206819bf86dc3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{{Construction and optimization methods of spherical hexagonal–pentagonal geodesic grids are investigated. The objective is to compare grid structures on common ground.The distinction between two types of hexagonal–pentagonal grids is made. Three conventional grid optimization methods are summarized. In addition, three new optimization methods are proposed. Six desirable conditions for an ideal grid are described, and the grid optimization methods are organized in view of such conditions.Interval uniformity, area uniformity, isotropy, and bisection of cell faces are systematically investigated for optimized grids. There are compensations of preferable grid features in each optimization method, and an optimal method cannot be decided based only on the research of grid features. It is suggested that grid optimization methods should be selected based on research of numerical schemes.}}
+      \field{issn}{0027-0644}
+      \field{journaltitle}{Monthly Weather Review}
+      \field{month}{10}
+      \field{number}{10}
+      \field{title}{{A Comparison of Grid Quality of Optimized Spherical Hexagonal–Pentagonal Geodesic Grids}}
+      \field{volume}{133}
+      \field{year}{2005}
+      \field{pages}{2817\bibrangedash 2833}
+      \range{pages}{17}
+      \verb{doi}
+      \verb 10.1175/MWR2991.1
+      \endverb
+      \verb{eprint}
+      \verb https://journals.ametsoc.org/mwr/article-pdf/133/10/2817/4213997/mwr2991\_1.pdf
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1175/MWR2991.1
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1175/MWR2991.1
+      \endverb
+    \endentry
+    \entry{PEIXOTO201361}{article}{}
+      \name{author}{2}{}{%
+        {{hash=74ef4e6eb2897d41edbcfcb346749c0c}{%
+           family={Peixoto},
+           familyi={P\bibinitperiod},
+           given={Pedro\bibnamedelima S.},
+           giveni={P\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+        {{hash=c0bda8eb699c33c42f6528a39f40aa4b}{%
+           family={Barros},
+           familyi={B\bibinitperiod},
+           given={Saulo\bibnamedelima R.M.},
+           giveni={S\bibinitperiod\bibinitdelim R\bibinitperiod}}}%
+      }
+      \strng{namehash}{8fb13de301f69786885dcf27d40e0883}
+      \strng{fullhash}{8fb13de301f69786885dcf27d40e0883}
+      \strng{bibnamehash}{8fb13de301f69786885dcf27d40e0883}
+      \strng{authorbibnamehash}{8fb13de301f69786885dcf27d40e0883}
+      \strng{authornamehash}{8fb13de301f69786885dcf27d40e0883}
+      \strng{authorfullhash}{8fb13de301f69786885dcf27d40e0883}
+      \field{sortinit}{P}
+      \field{sortinithash}{bb5b15f2db90f7aef79bb9e83defefcb}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Numerical grid imprinting errors have often been observed in global atmospheric models on icosahedral grids. In this paper we analyse the sources of grid imprinting error related to the usual finite volume discretization of the divergence operator. We introduce the concept of alignment of computational cells, and establish that convergence of second order is attained on aligned cells. Moreover, we present strong evidence that grid imprinting errors are caused by the slow convergence on badly aligned cells. The analysis presented is not restricted to icosahedral grids, being valid for any geodesic spherical grid.}
+      \field{issn}{0021-9991}
+      \field{journaltitle}{Journal of Computational Physics}
+      \field{title}{Analysis of grid imprinting on geodesic spherical icosahedral grids}
+      \field{volume}{237}
+      \field{year}{2013}
+      \field{pages}{61\bibrangedash 78}
+      \range{pages}{18}
+      \verb{doi}
+      \verb https://doi.org/10.1016/j.jcp.2012.11.041
+      \endverb
+      \verb{urlraw}
+      \verb http://www.sciencedirect.com/science/article/pii/S0021999112007218
+      \endverb
+      \verb{url}
+      \verb http://www.sciencedirect.com/science/article/pii/S0021999112007218
+      \endverb
+      \keyw{Icosahedral grid,Geodesic grid,Grid imprinting,Grid alignment,Alignment index,Divergence discretization,Discretization error}
+    \endentry
     \entry{doi:10.1029/2019MS001621}{article}{}
       \name{author}{3}{}{%
         {{hash=a41c4b00f179546302c87c54e4a54a1e}{%

@@ -6,7 +6,8 @@
 # 1:	standard atmosphere with Gaussian mountain
 # 2:	JW test, dry, balanced
 # 3:	JW test, dry, perturbed
-# 4:	JW test, moist, perturbed
+# 4:	JW test, moist, balanced
+# 5:	JW test, moist, perturbed
 
 test_id=4
 echo "Starting the test state generation ..."
