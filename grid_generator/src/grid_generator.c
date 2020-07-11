@@ -25,6 +25,23 @@ The grid generation procedure is manged from this file. Memory allocation and IO
 #define C_P 1005.0
 #define P_0 100000.0
 #define GRAVITY_MEAN_SFC_ABS 9.80616
+#define RESET "\033[0m"
+#define BLACK "\033[30m"
+#define RED "\033[31m"
+#define GREEN "\033[32m"
+#define YELLOW "\033[33m"
+#define BLUE "\033[34m"
+#define MAGENTA "\033[35m"
+#define CYAN "\033[36m"
+#define WHITE "\033[37m"
+#define BOLDBLACK "\033[1m\033[30m"
+#define BOLDRED "\033[1m\033[31m"
+#define BOLDGREEN "\033[1m\033[32m"
+#define BOLDYELLOW "\033[1m\033[33m"
+#define BOLDBLUE "\033[1m\033[34m"
+#define BOLDMAGENTA "\033[1m\033[35m"
+#define BOLDCYAN "\033[1m\033[36m"
+#define BOLDWHITE "\033[1m\033[37m"
 
 const double TOA = 30000.0;
 const double ORTH_CRITERION_DEG = 89.99;
@@ -68,6 +85,7 @@ int main(int argc, char *argv[])
 	{
     	sprintf(OUTPUT_FILE, "nc_files/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
 	}
+	printf("Output will be written to file %s.\n", OUTPUT_FILE);
     double *latitude_ico = malloc(12*sizeof(double));
     double *longitude_ico = malloc(12*sizeof(double));
     int edge_vertices[NUMBER_OF_EDGES][2];
@@ -76,7 +94,7 @@ int main(int argc, char *argv[])
     int face_edges_reverse[20][3];
     printf("Building icosahedron ... ");
 	build_icosahedron(latitude_ico, longitude_ico, edge_vertices, face_vertices, face_edges, face_edges_reverse);
-    printf("finished.\n");
+    printf(GREEN "finished.\n" RESET);
     printf("Allocating memory ... ");
     double *x_unity = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double *y_unity = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
@@ -137,19 +155,23 @@ int main(int argc, char *argv[])
     int *vorticity_signs_pre = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(int));
     int *vorticity_signs = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
     int *h_curl_signs = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
-    printf("finished.\n");
+    printf(GREEN "finished.\n" RESET);
     int retval, z_surface_id;
     printf("Reading orography data ... ");
 	retval = set_orography(RES_ID, ORO_ID, z_surface);
-    printf("finished.\n");
+    printf(GREEN "finished.\n" RESET);
     if (NUMBER_OF_VECTORS_H != NUMBER_OF_DUAL_VECTORS_H)
     {
         printf("It is NUMBER_OF_VECTORS_H != NUMBER_OF_DUAL_VECTORS_H.\n");
     }
     printf("Establishing horizontal grid structure ... \n");
+    printf("Connecting vector points to scalar points ... ");
     retval = set_from_to_index(from_index, to_index, face_edges, face_edges_reverse, face_vertices, edge_vertices);
-    retval = set_from_to_index_dual(from_index_dual, to_index_dual, face_edges, face_edges_reverse);
 	retval = calc_adjacent_vector_indices_h(from_index, to_index, adjacent_signs_h, adjacent_vector_indices_h);
+    printf(GREEN "finished.\n" RESET);
+    printf("Connecting dual vector points to dual scalar points ... ");
+    retval = set_from_to_index_dual(from_index_dual, to_index_dual, face_edges, face_edges_reverse);
+    printf(GREEN "finished.\n" RESET);
     if (USE_SCALAR_H_FILE == 0)
     {
     	retval = generate_horizontal_generators(latitude_ico, longitude_ico, latitude_scalar, longitude_scalar, x_unity, y_unity, z_unity, face_edges_reverse, face_edges, face_vertices);
@@ -180,7 +202,7 @@ int main(int argc, char *argv[])
     free(z_unity);
 	retval = set_dual_vector_h_doubles(latitude_vector_dual, latitude_scalar_dual, latitude_vector, direction_dual, longitude_vector, to_index_dual, from_index_dual, longitude_scalar_dual, rel_on_line_dual);
     retval = set_f_vec(latitude_vector, direction_dual, latitude_vector_dual, f_vec);
-    printf("Horizontal grid structure determined.\n");
+    printf(GREEN "Horizontal grid structure determined.\n" RESET);
 	retval = calc_adjacent_vector_indices_dual_h(adjacent_vector_indices_dual_h, from_index_dual, to_index_dual);
 	retval = calc_vorticity_indices_pre_and_adjacent_scalar_indices_dual_h(from_index_dual, to_index_dual, direction, direction_dual, vorticity_indices_pre, ORTH_CRITERION_DEG, vorticity_signs_pre, adjacent_scalar_indices_dual_h);
 	check_for_orthogonality(direction, direction_dual, ORTH_CRITERION_DEG);
@@ -192,53 +214,53 @@ int main(int argc, char *argv[])
 	retval = set_z_vector_and_normal_distance(z_vector, z_surface, z_scalar, normal_distance, latitude_scalar, longitude_scalar, from_index, to_index, TOA);
 	printf("Mapping horizontal areas from unit sphere to model levels ... ");
 	retval = map_area_to_sphere(area, z_vector, pent_hex_face_unity_sphere);
-    printf("finished.\n");
+    printf(GREEN "finished.\n" RESET);
     printf("Setting gravity ... ");
     retval = set_gravity(gravity, z_vector, GRAVITY_MEAN_SFC_ABS);
-    printf("finished.\n");
+    printf(GREEN "finished.\n" RESET);
     free(pent_hex_face_unity_sphere);
-    printf("Setting volume ... ");
+    printf("Calculating grid box volumes ... ");
 	set_volume(volume, z_scalar_dual, z_vector, area, from_index, to_index, TOA, z_surface, vorticity_indices_pre);
-    printf("finished.\n");
+    printf(GREEN "finished.\n" RESET);
 	printf("Determining vector z coordinates of the dual grid and distances of the dual grid ... ");
 	retval = calc_z_vector_dual_and_normal_distance_dual(z_vector_dual, normal_distance_dual, z_scalar_dual, TOA, z_surface, from_index, to_index, z_vector, from_index_dual, to_index_dual, latitude_scalar_dual, longitude_scalar_dual, vorticity_indices_pre);
-    printf("finished.\n");
+    printf(GREEN "finished.\n" RESET);
     printf("Calculating dual areas, pre version ... ");
 	retval = calc_area_dual_pre(area_dual_pre, z_vector_dual, normal_distance, z_vector, triangle_face_unit_sphere);
-    printf("finished.\n");
+    printf(GREEN "finished.\n" RESET);
     printf("Calculating vertical faces, pre version ... ");
 	retval = calculate_vertical_faces(area, z_vector_dual, normal_distance_dual);
-    printf("finished.\n");
+    printf(GREEN "finished.\n" RESET);
     printf("Calculating vertical contravariant unit vectors, pre version ... ");
 	retval = calc_vertical_contravar_unit(latitude_scalar, longitude_scalar, adjacent_vector_indices_h, vertical_contravar_unit, direction_dual, normal_distance_dual, from_index_dual, to_index_dual, z_scalar_dual);
-    printf("finished.\n");
-    printf("Rescaling area for orography ... ");
+    printf(GREEN "finished.\n" RESET);
+    printf("Modifying areas for orography ... ");
 	retval = rescale_area(area, vertical_contravar_unit);
-    printf("finished.\n");
-    printf("Rescaling dual areas for orography ... ");
+    printf(GREEN "finished.\n" RESET);
+    printf("Modifying dual areas for orography ... ");
 	retval = rescale_area_dual(area_dual, z_vector, from_index_dual, to_index_dual, area_dual_pre, z_vector_dual);
-    printf("finished.\n");
+    printf(GREEN "finished.\n" RESET);
     // more advanced stuff: tangential vector reconstruction and kinetic energy
     printf("Calculating Coriolis indices and weights ... ");
 	retval = calc_coriolis_weights(recov_hor_ver_curl_index, from_index_dual, to_index_dual, recov_hor_ver_curl_weight, recov_hor_ver_pri_index, trsk_modified_curl_indices, normal_distance, normal_distance_dual, to_index, area, z_scalar, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, trsk_modified_weights,  trsk_modified_velocity_indices, from_index, adjacent_vector_indices_h, direction, recov_hor_par_curl_weight, direction_dual, rel_on_line_dual, recov_hor_par_curl_index, ORTH_CRITERION_DEG);
-    printf("finished.\n");
+    printf(GREEN "finished.\n" RESET);
 	// alpha is the kinetic energy parameter from Gassmann (2012) - necessary for avoiding Hollingsworth instability
     double alpha_1 = 3.0/4;
     printf("Calculating kinetic energy indices and weights ... ");
 	retval = calc_kinetic_energy(latitude_scalar, longitude_scalar, e_kin_indices, e_kin_weights, volume, adjacent_vector_indices_dual_h, alpha_1, to_index, from_index, area_dual_pre, area, z_scalar, z_vector, adjacent_vector_indices_h, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, to_index_dual, from_index_dual, z_vector_dual);
     retval = set_recov_ver(recov_ver_index, adjacent_vector_indices_h, recov_ver_0_pri_weight, direction, recov_ver_0_curl_weight, direction_dual, recov_ver_1_pri_weight, recov_ver_1_curl_weight);
-    printf("finished.\n");
+    printf(GREEN "finished.\n" RESET);
     // setting indices related to the curl of a vector field
     printf("Setting horizontal curl indices ... ");
 	retval = set_horizontal_curl_indices(direction_dual, direction, h_curl_indices, from_index, to_index, ORTH_CRITERION_DEG, h_curl_signs);
-    printf("finished.\n");
+    printf(GREEN "finished.\n" RESET);
     free(direction_dual);
     printf("Setting vorticity indices ... ");
 	retval = set_vorticity_indices(vorticity_indices_pre, vorticity_signs_pre, from_index_dual, to_index_dual, vorticity_indices, vorticity_signs);
-    printf("finished.\n");
+    printf(GREEN "finished.\n" RESET);
     printf("Setting gravity potential ... ");
 	retval = set_gravity_potential(z_scalar, gravity_potential, GRAVITY_MEAN_SFC_ABS);
-    printf("finished.\n");
+    printf(GREEN "finished.\n" RESET);
     int ncid_g_prop;
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
@@ -493,7 +515,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_close(ncid_g_prop)))
         ERR(retval);
-    printf("finished.\n");
+    printf(GREEN "finished.\n" RESET);
     free(SCALAR_H_FILE);
     free(e_kin_weights);
     free(e_kin_indices);

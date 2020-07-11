@@ -2,7 +2,7 @@
 operator=MHB
 overwrite_run_id=1
 run_id=jw_perturbed_moist
-run_span=7200
+run_span=21600
 write_out_interval=900
 grid_props_file=grids/B5L26T30000_O2_OL17_SCVT.nc
 init_state_filename=test_4_B5L26T30000_O2_OL17_SCVT.grb2
