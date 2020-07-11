@@ -159,8 +159,6 @@ int three_band_solver_ver_sound_waves(State *state_0, State *state_p1, State *st
 	/*
 	Implicit vertical advection of vertical momentum (Euler).
 	Procedure derived in Kompendium.
-	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
-	Can be considered a preconditioner for the vertical sound wave solver.
 	*/
 	scalar_times_scalar(state_0 -> density_dry, temperature, temperature_density);
 	scalar_times_vector(temperature_density, state_p1 -> velocity_gas, temperature_flux_density, grid);
@@ -250,7 +248,6 @@ int three_band_solver_ver_den_dry(State *state_0, State *state_p1, State *state_
 	/*
 	Implicit vertical advection of dry mass (Euler).
 	Procedure derived in Kompendium.
-	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
 	*/
 	double *a_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
 	double *b_vector = malloc(NO_OF_LAYERS*sizeof(double));
@@ -318,7 +315,6 @@ int three_band_solver_ver_entropy_gas(State *state_0, State *state_p1, State *st
 	/*
 	Implicit vertical advection of the entropy of the gas phase (Euler).
 	Procedure derived in Kompendium.
-	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
 	*/
 	double *a_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
 	double *b_vector = malloc(NO_OF_LAYERS*sizeof(double));
@@ -386,7 +382,6 @@ int three_band_solver_ver_tracers(State *state_0, State *state_p1, State *state_
 	/*
 	Implicit vertical advection of tracers (Euler).
 	Procedure derived in Kompendium.
-	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
 	*/
 	double *a_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
 	double *b_vector = malloc(NO_OF_LAYERS*sizeof(double));
