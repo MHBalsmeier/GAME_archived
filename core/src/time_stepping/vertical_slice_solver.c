@@ -13,6 +13,7 @@ The vertical advection of horizontal momentum is organized here.
 #include "atmostracers.h"
 
 int thomas_algorithm(double [], double [], double [], double [], double [], double [], double [], int);
+int sign(double);
 
 int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency, double delta_t, Grid *grid)
 {
@@ -174,6 +175,8 @@ int three_band_solver_ver_sound_waves(State *state_0, State *state_p1, State *st
 	double *solution_vector = malloc((2*NO_OF_LAYERS - 1)*sizeof(double));
 	double *vertical_velocity = malloc((NO_OF_LAYERS - 1)*sizeof(double));
 	double *vertical_velocity_divergence = malloc(NO_OF_LAYERS*sizeof(double));
+	double *temp_density_interface_values = malloc((NO_OF_LAYERS - 1)*sizeof(double));
+	double *second_derivative_vector = malloc(NO_OF_LAYERS*sizeof(double));
 	double delta_z;
 	int i;
 	for (i = 0; i < NO_OF_VECTORS_V; ++i)
@@ -182,28 +185,40 @@ int three_band_solver_ver_sound_waves(State *state_0, State *state_p1, State *st
 		{
 			vertical_velocity[j] = state_p1 -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
 		}
+		for (int j = 1; j < NO_OF_LAYERS - 1; ++j)
+		{
+			second_derivative_vector[j] = temperature_density[i + (j - 1)*NO_OF_SCALARS_H] - 2*temperature_density[i + j*NO_OF_SCALARS_H] + temperature_density[i + (j + 1)*NO_OF_SCALARS_H];
+		}
+		second_derivative_vector[0] = second_derivative_vector[1];
+		second_derivative_vector[NO_OF_LAYERS - 1] = second_derivative_vector[NO_OF_LAYERS - 2];
+		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+		{
+			temp_density_interface_values[j] = 0.5*(temperature_density[i + j*NO_OF_SCALARS_H] + temperature_density[i + (j + 1)*NO_OF_SCALARS_H]);
+			// fourth order flux for stability
+			temp_density_interface_values[j] += -1.0/12*(second_derivative_vector[j] + second_derivative_vector[j + 1]) - sign(state_0 -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER])*1.0/12*(second_derivative_vector[j + 1] - second_derivative_vector[j]);
+		}
 		divv_v_columns(vertical_velocity, vertical_velocity_divergence, i, grid);
 		// filling up the original vectors
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
 			delta_z = grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i];
 			a_vector[2*j] = delta_t*(C_D_P/delta_z*1/state_0 -> density_dry[i + j*NO_OF_SCALARS_H]);
-			a_vector[2*j + 1] = delta_t*(0.5*R_D/C_D_V*temperature_density[i + (j + 1)*NO_OF_SCALARS_H] + 0.5*(temperature_density[i + j*NO_OF_SCALARS_H] + temperature_density[i + (j + 1)*NO_OF_SCALARS_H])*grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]);
+			a_vector[2*j + 1] = delta_t*(R_D/C_D_V*temperature_density[i + (j + 1)*NO_OF_SCALARS_H] + temp_density_interface_values[j])*grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H];
 		}
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
-			c_vector[2*j] = -delta_t*(0.5*R_D/C_D_V*temperature_density[i + j*NO_OF_SCALARS_H] + 0.5*(temperature_density[i + j*NO_OF_SCALARS_H] + temperature_density[i + (j + 1)*NO_OF_SCALARS_H])*grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + j*NO_OF_SCALARS_H]);
+			c_vector[2*j] = -delta_t*(R_D/C_D_V*temperature_density[i + j*NO_OF_SCALARS_H] + temp_density_interface_values[j])*grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + j*NO_OF_SCALARS_H];
 			delta_z = grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i];
-			c_vector[2*j + 1] = delta_t*(-C_D_P/delta_z*1/state_0 -> density_dry[i + (j + 1)*NO_OF_SCALARS_H]);
+			c_vector[2*j + 1] = -delta_t*C_D_P/delta_z*1/state_0 -> density_dry[i + (j + 1)*NO_OF_SCALARS_H];
 		}
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
-			b_vector[2*j] = 1 + delta_t*(R_D/C_D_V*wind_field_divv[i + j*NO_OF_SCALARS_H] + 0.5*R_D/C_D_V*vertical_velocity_divergence[j]);
+			b_vector[2*j] = 1 + delta_t*R_D/C_D_V*wind_field_divv[i + j*NO_OF_SCALARS_H];
 			b_vector[2*j + 1] = 1;
-			d_vector[2*j] = temperature_density[j*NO_OF_SCALARS_H + i] + delta_t*(-temperature_flux_density_divv[j*NO_OF_SCALARS_H + i]);
+			d_vector[2*j] = temperature_density[j*NO_OF_SCALARS_H + i] - delta_t*temperature_flux_density_divv[j*NO_OF_SCALARS_H + i];
 			d_vector[2*j + 1] = state_p1 -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + delta_t*(-gradient_geopotential_energy[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + pressure_gradient_acc_1[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]);
 		}
-		b_vector[2*NO_OF_LAYERS - 2] =  1 + delta_t*(R_D/C_D_V*wind_field_divv[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H] + 0.5*R_D/C_D_V*vertical_velocity_divergence[NO_OF_LAYERS - 1]);
+		b_vector[2*NO_OF_LAYERS - 2] =  1 + delta_t*R_D/C_D_V*wind_field_divv[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
 		d_vector[2*NO_OF_LAYERS - 2] = temperature_density[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + delta_t*(-temperature_flux_density_divv[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]);
 		// calling the algorithm to solve the system of linear equations
 		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, 2*NO_OF_LAYERS - 1);
@@ -216,6 +231,8 @@ int three_band_solver_ver_sound_waves(State *state_0, State *state_p1, State *st
 		}
 		temperature_density[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H] = solution_vector[2*(NO_OF_LAYERS - 1)];
 	}
+	free(second_derivative_vector);
+	free(temp_density_interface_values);
 	free(vertical_velocity);
 	free(vertical_velocity_divergence);
 	free(solution_vector);
@@ -538,6 +555,15 @@ int thomas_algorithm(double a_vector[], double b_vector[], double c_vector[], do
 	{
 		solution_vector[j] = d_prime_vector[j] - c_prime_vector[j]*solution_vector[j + 1];
 	}
+	return 0;
+}
+
+int sign(double x)
+{
+	if (x > 0)
+		return 1;
+	if (x < 0)
+		return -1;
 	return 0;
 }
 
