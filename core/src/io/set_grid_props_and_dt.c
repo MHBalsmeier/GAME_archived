@@ -244,7 +244,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
            if (grid -> e_kin_indices[12*i + j] < 0 || grid -> e_kin_indices[12*i + j] >= NO_OF_VECTORS)
            	   grid_check_failed();
        	}
-       	if (fabs(e_kin_weight_sum - 1.0) > 0.01)
+       	if (fabs(e_kin_weight_sum - 1.0) > 0.015)
        	{
 			grid_check_failed();
    	   	}

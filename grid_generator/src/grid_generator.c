@@ -241,14 +241,15 @@ int main(int argc, char *argv[])
 	retval = rescale_area_dual(area_dual, z_vector, from_index_dual, to_index_dual, area_dual_pre, z_vector_dual);
     printf(GREEN "finished.\n" RESET);
     // more advanced stuff: tangential vector reconstruction and kinetic energy
-    printf("Calculating Coriolis indices and weights ... ");
-	retval = calc_coriolis_weights(recov_hor_ver_curl_index, from_index_dual, to_index_dual, recov_hor_ver_curl_weight, recov_hor_ver_pri_index, trsk_modified_curl_indices, normal_distance, normal_distance_dual, to_index, area, z_scalar, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, trsk_modified_weights,  trsk_modified_velocity_indices, from_index, adjacent_vector_indices_h, direction, recov_hor_par_curl_weight, direction_dual, rel_on_line_dual, recov_hor_par_curl_index, ORTH_CRITERION_DEG);
-    printf(GREEN "finished.\n" RESET);
 	// alpha is the kinetic energy parameter from Gassmann (2012) - necessary for avoiding Hollingsworth instability
     double alpha_1 = 3.0/4;
     printf("Calculating kinetic energy indices and weights ... ");
 	retval = calc_kinetic_energy(latitude_scalar, longitude_scalar, e_kin_indices, e_kin_weights, volume, adjacent_vector_indices_dual_h, alpha_1, to_index, from_index, area_dual_pre, area, z_scalar, z_vector, adjacent_vector_indices_h, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, to_index_dual, from_index_dual, z_vector_dual);
     retval = set_recov_ver(recov_ver_index, adjacent_vector_indices_h, recov_ver_0_pri_weight, direction, recov_ver_0_curl_weight, direction_dual, recov_ver_1_pri_weight, recov_ver_1_curl_weight);
+    printf(GREEN "finished.\n" RESET);
+    // modified TRSK
+    printf("Calculating Coriolis indices and weights ... ");
+	retval = calc_coriolis_weights(recov_hor_ver_curl_index, from_index_dual, to_index_dual, recov_hor_ver_curl_weight, recov_hor_ver_pri_index, trsk_modified_curl_indices, normal_distance, normal_distance_dual, to_index, area, z_scalar, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, trsk_modified_weights,  trsk_modified_velocity_indices, from_index, adjacent_vector_indices_h, direction, recov_hor_par_curl_weight, direction_dual, rel_on_line_dual, recov_hor_par_curl_index, ORTH_CRITERION_DEG);
     printf(GREEN "finished.\n" RESET);
     // setting indices related to the curl of a vector field
     printf("Setting horizontal curl indices ... ");
