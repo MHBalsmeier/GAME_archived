@@ -2,7 +2,7 @@ The Global Atmospheric Modeling Framework (GAME) is a global non-hydrostatic hex
 
 ## Overview
 
-(Advise: This section, as well as the whole model itself, reflects my personal views on how numerical weather prediction and climate modelling should be done. It is not meant to insult anyone or degrade anyone's work.)
+(Advise: This section, as well as the whole model itself reflects my personal views on how numerical weather prediction and climate modeling should be done. It is not meant to insult anyone or degrade anyone's work.)
 
 The aim is to develop a next generation global atmospheric model with the following properties:
 
@@ -24,14 +24,14 @@ According to my understanding, an hexagonal C grid model is the only model where
 
 What GAME does what other models do not do and why:
 
-* It uses the entropy as a prognostic variable. Usually, models use the potential temperature as a prognostic variable and modellers then call it the entropy, which is wrong. The potential temperature is still a conserved quantity and therefore the only forcings are the diabatic forcings rendering it a suitable variable for modelling. However, the same is true for the real entropy (connected to the density times the logarithm of the potential temperature), and this last quantitiy is the much more fundamental physical property. This requires reformulation of the pressure gradient term. It is not expected that modellers will start reformulating their equations.
+* It uses the entropy as a prognostic variable. Usually, models use the potential temperature as a prognostic variable and modelers then call it the entropy, which is wrong. The potential temperature is a conserved quantity and therefore the only forcings are the diabatic forcings rendering it a suitable variable for modeling. However, the same is true for the real entropy (connected to the density times the logarithm of the potential temperature), and this last quantitiy is the much more fundamental physical property. It is not expected that modelers will start reformulating their equations.
 * It assigns individual densities (instead of mixing ratios) to tracers as well as individual densities and sink velocities. This will be necessary for all models to do earlier or later.
 
 What GAME does not do and why:
 
 * GAME does not sacrifice physical accuracy and mimetic properties for a bit of speed up and tuning possibilities, like ICON-DWD does.
 * GAME does not contain an option for calculations in 2D, on the plane, in vertical columns or any other purely academic features. If schemes need to be tested individually, it can be done in an individual Python code.
-* GAME does not contain a nesting option. There are basically two ways this could be done: 1.) The MPAS way, where smooth transitions between coarser and finer mesh regions are possible, minimizing numerical noise. However, the global time step is bound by the smalles grid distance, which is unefficicent in coarser mesh regions. 2.) The ICON-DWD way, where a two-step nesting option exists and a smaller time step can be used only in the finer domain. This, however, leads to numerical noise. In my view, one should use a global model with a uniform resolution and then simply regional models in specific areas based on rectangular C grids like COSMO, also with uniform resolutions.
+* GAME does not contain a nesting option. There are basically two ways this could be done: 1.) The MPAS way, where smooth transitions between coarser and finer mesh regions are possible, minimizing numerical noise. However, the global time step is bound by the smallest grid distance, which is unefficicent in coarser mesh regions. 2.) The ICON-DWD way, where a two-step nesting option exists and a smaller time step can be used only in the finer domain. This, however, leads to numerical noise. In my view one should use a global model with a uniform resolution and then simply regional models in specific areas based on rectangular C grids like COSMO, also with uniform resolutions.
 
 Things to be done:
 
@@ -62,14 +62,29 @@ The handbook of the model can be found in the subdirectory handbook. It contains
 * CMake
 * atmostracers (https://github.com/MHBalsmeier/atmostracers)
 * rte-rrtmgp-c (https://github.com/MHBalsmeier/rte-rrtmgp-c)
+* Python (only for the plotting routines, which are of course not part of the actual model)
 
 ## Installing the model
 
+It will only run on Linux.
+
 ### Download
 
-
+Download the desired branch to a directory of your choice (better not the Downloads directory) and unzip.
 
 ### Build and install
+
+In the shell scripts controlling the build process (residing in the directory build\_scripts) change the variable aim\_dir to a place of your choice, then run the scripts. The files with the suffix \_dev are meant to install to a location where new versions can be tested. You also need to install the run configs in order to have the run scripts of the model where they belong. Install the plotting routines if you want to make use of them.
+
+
+
+
+
+
+
+
+
+
 
 
 
