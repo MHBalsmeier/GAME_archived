@@ -27,6 +27,33 @@
 
 \maketitle
 
+\section{Overview of schemes}
+\label{sec:overview_of_schemes}
+
+\begin{itemize}
+\item Time stepping: Runge-Kutta third order scheme (RK3). In the vertical, at every substep, implicit methods are used.
+\item Corolis: \cite{thuburn_f_discrete_plane} modified by \cite{doi:10.1002/qj.3294}
+\item kinetic energy: \cite{doi:10.1002/qj.1960}
+\end{itemize}
+
+\section{Code structure}
+\label{sec:code_structure}
+
+The code of the model resides in the directory \texttt{core/src}. It contains:
+%
+\begin{itemize}
+\item The file \texttt{coordinator.c}. This is the file containing the main method. It allocates and deallocates memory and manages the calls to the time stepping scheme as well as the output function.
+\item The file \texttt{coordinator.h} contains the include statements of the file \texttt{coordinator.c}.
+\item The file \texttt{enum\_and\_typedefs.h} contains physical constants as well as typedefs.
+\item The directory \texttt{time\_stepping} contains an implementation of the RK3 scheme as well as vertical column solvers.
+\item The directory \texttt{spatial\_operators} contains the implementations of the spatial operators needed for the prognostic equations.
+\item The directory \texttt{diagnostics} contains functions computing diagnostic quantities needed for determining the values of the spatial operators.
+\item The directory \texttt{io} contains anything related to input and output.
+\end{itemize}
+
+\section{Performance}
+\label{sec:performance}
+
 The \textit{speed} $s$ of a model is defined by
 %
 \begin{eqnarray}

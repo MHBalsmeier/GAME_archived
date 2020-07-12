@@ -2182,12 +2182,15 @@
     <bcf:datasource type="file" datatype="bibtex">references.bib</bcf:datasource>
   </bcf:bibdata>
   <bcf:section number="0">
-    <bcf:citekey order="1">Du2003</bcf:citekey>
-    <bcf:citekey order="2">PEIXOTO201361</bcf:citekey>
-    <bcf:citekey order="3">10.1175/MWR2991.1</bcf:citekey>
-    <bcf:citekey order="4">doi:10.1029/2019MS001621</bcf:citekey>
-    <bcf:citekey order="5">rte-rrtmgp-github</bcf:citekey>
-    <bcf:citekey order="6">rte-rrtmgp-c-github</bcf:citekey>
+    <bcf:citekey order="1">thuburn_f_discrete_plane</bcf:citekey>
+    <bcf:citekey order="2">doi:10.1002/qj.3294</bcf:citekey>
+    <bcf:citekey order="3">doi:10.1002/qj.1960</bcf:citekey>
+    <bcf:citekey order="4">Du2003</bcf:citekey>
+    <bcf:citekey order="5">PEIXOTO201361</bcf:citekey>
+    <bcf:citekey order="6">10.1175/MWR2991.1</bcf:citekey>
+    <bcf:citekey order="7">doi:10.1029/2019MS001621</bcf:citekey>
+    <bcf:citekey order="8">rte-rrtmgp-github</bcf:citekey>
+    <bcf:citekey order="9">rte-rrtmgp-c-github</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nty">

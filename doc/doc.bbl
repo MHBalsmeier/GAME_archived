@@ -19,6 +19,35 @@
 
 \refsection{0}
   \datalist[entry]{nty/global//global/global}
+    \entry{thuburn_f_discrete_plane}{article}{}
+      \name{author}{1}{}{%
+        {{hash=96e82474ce5d6130941dacba60f92bfa}{%
+           family={al.},
+           familyi={a\bibinitperiod},
+           given={J.\bibnamedelimi Thuburn},
+           giveni={J\bibinitperiod\bibinitdelim T\bibinitperiod},
+           prefix={et},
+           prefixi={e\bibinitperiod}}}%
+      }
+      \strng{namehash}{96e82474ce5d6130941dacba60f92bfa}
+      \strng{fullhash}{96e82474ce5d6130941dacba60f92bfa}
+      \strng{bibnamehash}{96e82474ce5d6130941dacba60f92bfa}
+      \strng{authorbibnamehash}{96e82474ce5d6130941dacba60f92bfa}
+      \strng{authornamehash}{96e82474ce5d6130941dacba60f92bfa}
+      \strng{authorfullhash}{96e82474ce5d6130941dacba60f92bfa}
+      \field{sortinit}{a}
+      \field{sortinithash}{a3dcedd53b04d1adfd5ac303ecd5e6fa}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{issue}{22}
+      \field{journaltitle}{Journal of Computational Physics}
+      \field{title}{Numerical representation of geostrophic modes on arbitrarily structured C-grids}
+      \field{volume}{228}
+      \field{year}{2009}
+      \field{dateera}{ce}
+      \field{pages}{8321\bibrangedash 8335}
+      \range{pages}{15}
+    \endentry
     \entry{Du2003}{article}{}
       \name{author}{3}{}{%
         {{hash=3f79fb13c57a91bb57a69f1cd97b6cc8}{%
@@ -56,6 +85,88 @@
       \field{year}{2003}
       \field{pages}{1488\bibrangedash 1506}
       \range{pages}{19}
+    \endentry
+    \entry{doi:10.1002/qj.1960}{article}{}
+      \name{author}{1}{}{%
+        {{hash=47e86804a39af5692446ea877f120940}{%
+           family={Gassmann},
+           familyi={G\bibinitperiod},
+           given={Almut},
+           giveni={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{47e86804a39af5692446ea877f120940}
+      \strng{fullhash}{47e86804a39af5692446ea877f120940}
+      \strng{bibnamehash}{47e86804a39af5692446ea877f120940}
+      \strng{authorbibnamehash}{47e86804a39af5692446ea877f120940}
+      \strng{authornamehash}{47e86804a39af5692446ea877f120940}
+      \strng{authorfullhash}{47e86804a39af5692446ea877f120940}
+      \field{extraname}{1}
+      \field{sortinit}{G}
+      \field{sortinithash}{62eb2aa29549e4fdbd3cb154ec5711cb}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Abstract This study describes a new global non-hydrostatic dynamical core (ICON-IAP: Icosahedral Nonhydrostatic model at the Institute for Atmospheric Physics) on a hexagonal C-grid which is designed to conserve mass and energy. Energy conservation is achieved by discretizing the antisymmetric Poisson bracket which mimics correct energy conversions between the different kinds of energy (kinetic, potential, internal). Because of the bracket structure this is even possible in a complicated numerical environment with (i) the occurrence of terrain-following coordinates with all the metric terms in it, (ii) the horizontal C-grid staggering on the Voronoi mesh and the complications induced by the need for an acceptable stationary geostrophic mode, and (iii) the necessity for avoiding Hollingsworth instability. The model is equipped with a Smagorinsky-type nonlinear horizontal diffusion. The associated dissipative heating is accounted for by the application of the discrete product rule for derivatives. The time integration scheme is explicit in the horizontal and implicit in the vertical. In order to ensure energy conservation, the Exner pressure has to be off-centred in the vertical velocity equation and extrapolated in the horizontal velocity equation. Test simulations are performed for small-scale and global-scale flows. A test simulation of linear non-hydrostatic flow over a rough mountain range shows the theoretically expected gravity wave propagation. The baroclinic wave test is extended to 40 days in order to check the Lorenz energy cycle. The model exhibits excellent energy conservation properties even in this strongly nonlinear and dissipative case. The Held–Suarez test confirms the reliability of the model over even longer time-scales. Copyright © 2012 Royal Meteorological Society}
+      \field{journaltitle}{Quarterly Journal of the Royal Meteorological Society}
+      \field{number}{670}
+      \field{title}{A global hexagonal C-grid non-hydrostatic dynamical core (ICON-IAP) designed for energetic consistency}
+      \field{volume}{139}
+      \field{year}{2013}
+      \field{pages}{152\bibrangedash 175}
+      \range{pages}{24}
+      \verb{doi}
+      \verb 10.1002/qj.1960
+      \endverb
+      \verb{eprint}
+      \verb https://rmets.onlinelibrary.wiley.com/doi/pdf/10.1002/qj.1960
+      \endverb
+      \verb{urlraw}
+      \verb https://rmets.onlinelibrary.wiley.com/doi/abs/10.1002/qj.1960
+      \endverb
+      \verb{url}
+      \verb https://rmets.onlinelibrary.wiley.com/doi/abs/10.1002/qj.1960
+      \endverb
+      \keyw{global atmospheric modelling,Lorenz energy cycle,hexagonal C-grid}
+    \endentry
+    \entry{doi:10.1002/qj.3294}{article}{}
+      \name{author}{1}{}{%
+        {{hash=47e86804a39af5692446ea877f120940}{%
+           family={Gassmann},
+           familyi={G\bibinitperiod},
+           given={Almut},
+           giveni={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{47e86804a39af5692446ea877f120940}
+      \strng{fullhash}{47e86804a39af5692446ea877f120940}
+      \strng{bibnamehash}{47e86804a39af5692446ea877f120940}
+      \strng{authorbibnamehash}{47e86804a39af5692446ea877f120940}
+      \strng{authornamehash}{47e86804a39af5692446ea877f120940}
+      \strng{authorfullhash}{47e86804a39af5692446ea877f120940}
+      \field{extraname}{2}
+      \field{sortinit}{G}
+      \field{sortinithash}{62eb2aa29549e4fdbd3cb154ec5711cb}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{This article discusses the generalized Coriolis and friction terms on the hexagonal C-grid from two perspectives: (a) within the linearized discretized momentum equations on an equilateral grid, and (b) as nonlinear terms on a distorted mesh. The discrete linearized momentum equations are formulated using a trivariate coordinate system. The tendencies of the different forcing terms for each wind component must be linearly dependent. This constraint determines unique discretizations for each term. The linearized vorticity flux term around a zonal mean current requires only the four rhombus potential vorticities (PVs) next to an edge. The vector Laplacian must be formulated with the vorticity on vertices defined as the average of three rhombus vorticities. A modified generalized Coriolis term is defined on the deformed mesh. The baroclinic wave test on the sphere does not reveal any sign of nonlinear Hollingsworth instability, even though it is demonstrated that the vector-invariant form and the advective form of momentum advection are not equivalent. Physical constraints determine the shape of the stress tensor. These are invariance to the addition of solid-body rotation and a resulting positive-definite dissipation rate. An appropriate stress-tensor formulation does not deliver Laplacian momentum diffusion in the linear case. On the deformed mesh, parts of this stress tensor are obtained by a least-squares reconstruction of wind gradients. This approach avoids spurious deformations diagnosed for constant flow in the vicinity of pentagon cells.}
+      \field{journaltitle}{Quarterly Journal of the Royal Meteorological Society}
+      \field{number}{716}
+      \field{title}{Discretization of generalized Coriolis and friction terms on the deformed hexagonal C-grid}
+      \field{volume}{144}
+      \field{year}{2018}
+      \field{pages}{2038\bibrangedash 2053}
+      \range{pages}{16}
+      \verb{doi}
+      \verb 10.1002/qj.3294
+      \endverb
+      \verb{eprint}
+      \verb https://rmets.onlinelibrary.wiley.com/doi/pdf/10.1002/qj.3294
+      \endverb
+      \verb{urlraw}
+      \verb https://rmets.onlinelibrary.wiley.com/doi/abs/10.1002/qj.3294
+      \endverb
+      \verb{url}
+      \verb https://rmets.onlinelibrary.wiley.com/doi/abs/10.1002/qj.3294
+      \endverb
+      \keyw{general circulation model experiments,global scale,numerical methods and NWP}
     \endentry
     \entry{10.1175/MWR2991.1}{article}{}
       \name{author}{2}{}{%
