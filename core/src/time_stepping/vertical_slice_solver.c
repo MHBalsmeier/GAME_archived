@@ -201,11 +201,13 @@ int three_band_solver_ver_sound_waves(State *state_0, State *state_p1, State *st
 		{
 			delta_z = grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i];
 			a_vector[2*j] = delta_t*(C_D_P/delta_z*1/state_0 -> density_dry[i + j*NO_OF_SCALARS_H]);
-			a_vector[2*j + 1] = delta_t*(R_D/C_D_V*temperature_density[i + (j + 1)*NO_OF_SCALARS_H] + temp_density_interface_values[j])*grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H];
+			delta_z = grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 2)*NO_OF_VECTORS_PER_LAYER + i];
+			a_vector[2*j + 1] = delta_t*(R_D/C_D_V*temperature_density[i + (j + 1)*NO_OF_SCALARS_H] + temp_density_interface_values[j])/delta_z;
 		}
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
-			c_vector[2*j] = -delta_t*(R_D/C_D_V*temperature_density[i + j*NO_OF_SCALARS_H] + temp_density_interface_values[j])*grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + j*NO_OF_SCALARS_H];
+			delta_z = grid -> z_vector[j*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
+			c_vector[2*j] = -delta_t*(R_D/C_D_V*temperature_density[i + j*NO_OF_SCALARS_H] + temp_density_interface_values[j])/delta_z;
 			delta_z = grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i];
 			c_vector[2*j + 1] = -delta_t*C_D_P/delta_z*1/state_0 -> density_dry[i + (j + 1)*NO_OF_SCALARS_H];
 		}
