@@ -37,7 +37,7 @@ int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency
 		// diagnozing the vertical velocity
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
 		{
-			recov_hor_ver_pri(state_p1 -> velocity_gas, j, i, &vertical_velocity[j], grid);
+			recov_hor_ver_pri(state_0 -> velocity_gas, j, i, &vertical_velocity[j], grid);
 		}
 		// filling up the original vectors
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
@@ -114,7 +114,7 @@ int three_band_solver_ver_vel_adv(State *state_0, State *state_p1, State *state_
 			vertical_velocity[j] = state_0 -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
 			vertical_velocity[j] = 0;
 		}
-		vertical_velocity[NO_OF_LAYERS - 1] = state_p1 -> velocity_gas[i + NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER];
+		vertical_velocity[NO_OF_LAYERS - 1] = state_0 -> velocity_gas[i + NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER];
 		vertical_velocity[NO_OF_LAYERS - 1] = 0;
 		// filling up the original vectors
 		for (int j = 0; j < NO_OF_LAYERS - 2; ++j)
