@@ -197,7 +197,9 @@ int calc_partially_implicit_divvs(State *next_state, State *state_tendency, Grid
     if (diffusion_on == 1)
     {
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
+		{
 		    state_tendency -> density_dry[i] = -mass_dry_flux_density_divv[i] + mass_dry_diffusion_source_rate[i];
+	    }
     }
     else
     {

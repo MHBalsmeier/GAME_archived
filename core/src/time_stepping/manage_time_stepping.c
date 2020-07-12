@@ -14,7 +14,6 @@ int manage_time_stepping(State *state_0, State *state_p1, State *state_p2, State
 {
 	/*
 	Here, the predictor-corrector is implemented (it is currently rather an RK2 scheme).
-	Diffusion and dissipation are only updated at the predictor step.
 	If radiation is updated, it is done at the predictor step.
 	*/
 	// predictor step
@@ -42,6 +41,7 @@ int manage_time_stepping(State *state_0, State *state_p1, State *state_p2, State
 	// corrector step
 	// calculatung explicit horizontal momentum tendencies and vertical advective momentum tendencies
 	explicit_momentum_tendencies(state_p1, state_tendency, grid, dualgrid, dissipation_on, tracers_on, temperature, temp_diffusion_heating, temp_gradient, friction_acc, heating_diss, specific_entropy, rel_curl, abs_curl, gradient_geopotential_energy, pressure_gradient_acc, abs_curl_tend, specific_entropy_gradient, c_h_p_field, macroscopic_energy, pressure_gradient_decel_factor, pressure_gradient_acc_1, 0, temp_gradient_times_c_h_p, pressure_gradient_acc_old, 1, first_step_bool, e_kin_h_grad);
+    *state_p2 = *state_p1;
 	// calculating the new values of the horizontal momentum, vertical horizontal advection handled implcitly
 	three_band_solver_hor(state_p1, state_p2, state_tendency, delta_t, grid);
 	// now that the new values of the horizontal velocity values are knoown, the lower boundary condition can be solved
@@ -49,7 +49,7 @@ int manage_time_stepping(State *state_0, State *state_p1, State *state_p2, State
 	// the advective part of the vertical velocity equation is solved here, the vertical advection is calculated implicitly
 	three_band_solver_ver_vel_adv(state_p1, state_p2, state_tendency, delta_t, grid);
 	// here, the horizontal divergences are calculated with the new values of the horizontal velocity
-	calc_partially_implicit_divvs(state_p2, state_tendency, grid, dualgrid, dissipation_on, 0, tracers_on, delta_t, diffusion_on, radiation_tendency, 0, tracer_mass_source_rates, tracer_heat_source_rates, mass_dry_flux_density, mass_dry_flux_density_divv, temperature, entropy_gas_flux_density, entropy_gas_flux_density_divv, temp_diffusion_heating, temp_gradient, heating_diss, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, mass_dry_diffusion_flux_density, mass_dry_diffusion_source_rate, temperature_flux_density, tracer_density, tracer_velocity, tracer_flux_density, tracer_flux_density_divv, tracer_density_temperature, tracer_temperature_flux_density, tracer_temperature_flux_density_divv, 0);
+	calc_partially_implicit_divvs(state_p2, state_tendency, grid, dualgrid, dissipation_on, dissipation_on, tracers_on, delta_t, diffusion_on, radiation_tendency, tracers_on, tracer_mass_source_rates, tracer_heat_source_rates, mass_dry_flux_density, mass_dry_flux_density_divv, temperature, entropy_gas_flux_density, entropy_gas_flux_density_divv, temp_diffusion_heating, temp_gradient, heating_diss, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, mass_dry_diffusion_flux_density, mass_dry_diffusion_source_rate, temperature_flux_density, tracer_density, tracer_velocity, tracer_flux_density, tracer_flux_density_divv, tracer_density_temperature, tracer_temperature_flux_density, tracer_temperature_flux_density_divv, diffusion_on);
 	// here, the non-advective part of the vertical velocity equation is solved implicitly (sound wave solver)
 	three_band_solver_ver_sound_waves(state_p1, state_p2, state_tendency, pressure_gradient_acc_1, gradient_geopotential_energy, temperature, temperature_density, temperature_flux_density, temperature_flux_density_divv, wind_field_divv, delta_t, grid);
 	// now that the new vertical velocity is known, the new dry density can be calculated via implicit vertical advection
