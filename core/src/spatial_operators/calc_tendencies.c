@@ -17,15 +17,10 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
 	double new_hor_grad_weight = C_D_V/C_D_P + 0.5;
 	old_hor_grad_weight = 0;
 	new_hor_grad_weight = 1;
-	int retval = temperature_diagnostics(current_state -> entropy_gas, current_state -> density_dry, current_state -> tracer_densities, temperature);
+	temperature_diagnostics(current_state -> entropy_gas, current_state -> density_dry, current_state -> tracer_densities, temperature);
     if (diss_update == 1)
     {
-		retval = dissipation(current_state -> velocity_gas, current_state -> density_dry, friction_acc, heating_diss, grid);
-		if (retval != 0)
-		{
-			printf("Error in dissipation called from tendency, position 0, exit code was %d.", retval);
-			exit(1);
-		}
+		dissipation(current_state -> velocity_gas, current_state -> density_dry, friction_acc, heating_diss, grid);
     }
     curl(current_state -> velocity_gas, rel_curl, grid, dualgrid);
     int layer_index, h_index;
@@ -46,18 +41,8 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
     	else
     		specific_entropy[i] = current_state -> entropy_gas[i]/current_state -> density_dry[i];
 	}
-    retval = grad(specific_entropy, specific_entropy_gradient, grid);
-    if (retval != 0)
-    {
-    	printf("grad called at position 0 from tendency errored out, exit code %d.\n", retval);
-    	exit(1);
-	}
-	retval = scalar_times_vector(temperature, specific_entropy_gradient, pressure_gradient_acc_1, grid);
-	if (retval != 0)
-	{
-		printf("scalar_times_vector called at position 0 from tendency errored out, exit code %d.\n", retval);
-		exit(1);
-	}
+    grad(specific_entropy, specific_entropy_gradient, grid);
+	scalar_times_vector(temperature, specific_entropy_gradient, pressure_gradient_acc_1, grid);
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	if (tracers_on == 1)
@@ -65,18 +50,8 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
     	else
     		c_h_p_field[i] = C_D_P;
 	}
-    retval = grad(temperature, temp_gradient, grid);
-    if (retval != 0)
-    {
-    	printf("grad called at position 2 from tendency errored out, exit code %d.\n", retval);
-    	exit(1);
-	}
-	retval = scalar_times_vector(c_h_p_field, temp_gradient, temp_gradient_times_c_h_p, grid);
-	if (retval != 0)
-	{
-		printf("scalar_times_vector called at position 2 from tendency errored out, exit code %d.\n", retval);
-		exit(1);
-	}
+    grad(temperature, temp_gradient, grid);
+	scalar_times_vector(c_h_p_field, temp_gradient, temp_gradient_times_c_h_p, grid);
 	if (no_step == 0)
 	{
 		*pressure_gradient_acc_old = *pressure_gradient_acc;
@@ -108,27 +83,12 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
 	        }
 			pressure_gradient_decel_factor[i] = rho_h/total_density;
 		}
-		retval = scalar_times_vector(pressure_gradient_decel_factor, pressure_gradient_acc, pressure_gradient_acc, grid);
-		if (retval != 0)
-		{
-			printf("scalar_times_vector called at position 1 from tendency errored out, exit code %d.\n", retval);
-			exit(1);
-		}
+		scalar_times_vector(pressure_gradient_decel_factor, pressure_gradient_acc, pressure_gradient_acc, grid);
 	}
-    retval = coriolis_gen(current_state -> velocity_gas, abs_curl, abs_curl_tend, grid);
-    if (retval != 0)
-    {
-    	printf("Error in coriolis_gen, exit code is %d.\n", retval);
-    	exit(1);
-    }
+    coriolis_gen(current_state -> velocity_gas, abs_curl, abs_curl_tend, grid);
     kinetic_energy(current_state -> velocity_gas, e_kin_h, grid);
     grad(e_kin_h, e_kin_h_grad, grid);
     grad(grid -> gravity_potential, gradient_geopotential_energy, grid);
-    if (retval != 0)
-    {
-    	printf("grad called at position 4 from tendency errored out, exit code %d.\n", retval);
-    	exit(1);
-	}
     int hor_non_trad_cori_sign;
     double metric_term, vertical_velocity, hor_non_trad_cori_term;
     for (int i = 0; i < NO_OF_VECTORS; ++i)
@@ -171,25 +131,19 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
         	}
         }
     }
-    return retval;
+    return 0;
 }
 
 int calc_partially_implicit_divvs(State *next_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int dissipation_on, int rad_update, int tracers_on, double delta_t, int diffusion_on, Scalar_field radiation_tendency, int phase_transitions_on, double tracer_mass_source_rates[], double tracer_heat_source_rates[], Vector_field mass_dry_flux_density, Scalar_field mass_dry_flux_density_divv, Scalar_field temperature, Vector_field entropy_gas_flux_density, Scalar_field entropy_gas_flux_density_divv, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Scalar_field heating_diss, Scalar_field diffusion_coeff_numerical_h, Scalar_field diffusion_coeff_numerical_v, Vector_field mass_dry_diffusion_flux_density, Scalar_field mass_dry_diffusion_source_rate, Vector_field temperature_flux_density, Scalar_field tracer_density, Vector_field tracer_velocity, Vector_field tracer_flux_density, Scalar_field tracer_flux_density_divv, Scalar_field tracer_density_temperature, Vector_field tracer_temperature_flux_density, Scalar_field tracer_temperature_flux_density_divv, int diff_update)
 {
     scalar_times_vector(next_state -> density_dry, next_state -> velocity_gas, mass_dry_flux_density, grid);
     divv_h(mass_dry_flux_density, mass_dry_flux_density_divv, grid);
-    int retval;
     if (diff_update == 1)
     {
-        retval = grad(next_state -> density_dry, mass_dry_diffusion_flux_density, grid);
-		if (retval != 0)
-		{
-			printf("grad called at position 3 from tendency errored out, exit code %d.\n", retval);
-			exit(1);
-		}
-        retval = calc_mass_diffusion_coeffs(temperature, next_state -> density_dry, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v);
+        grad(next_state -> density_dry, mass_dry_diffusion_flux_density, grid);
+        calc_mass_diffusion_coeffs(temperature, next_state -> density_dry, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v);
         scalar_times_vector_scalar_h_v(diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, mass_dry_diffusion_flux_density, mass_dry_diffusion_flux_density, grid);
-        retval = divv(mass_dry_diffusion_flux_density, mass_dry_diffusion_source_rate, grid, 0);
+        divv(mass_dry_diffusion_flux_density, mass_dry_diffusion_source_rate, grid, 0);
     }
     if (diffusion_on == 1)
     {
@@ -207,19 +161,14 @@ int calc_partially_implicit_divvs(State *next_state, State *state_tendency, Grid
     divv_h(entropy_gas_flux_density, entropy_gas_flux_density_divv, grid);
     if (rad_update == 1)
     {
-        retval = calc_rad_heating(radiation_tendency, NO_OF_SCALARS);
-		if (retval != 0)
-		{
-			printf("Error in calc_rad_heating called from tendency, position 0.\n");
-			exit(1);
-		}
+        calc_rad_heating(radiation_tendency, NO_OF_SCALARS);
     }
     double rho_h, c_h_v;
     if (diff_update == 1)
     {
-        retval = calc_temp_diffusion_coeffs(temperature, next_state -> density_dry, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v);
+        calc_temp_diffusion_coeffs(temperature, next_state -> density_dry, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v);
         scalar_times_vector_scalar_h_v(diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, temp_gradient, temperature_flux_density, grid);
-        retval = divv(temperature_flux_density, temp_diffusion_heating, grid, 0);
+        divv(temperature_flux_density, temp_diffusion_heating, grid, 0);
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
 			if (tracers_on == 1)
@@ -243,12 +192,7 @@ int calc_partially_implicit_divvs(State *next_state, State *state_tendency, Grid
     	*/
     	if (phase_transitions_on == 1)
     	{
-		    retval = calc_h2otracers_source_rates(tracer_mass_source_rates, tracer_heat_source_rates, next_state -> tracer_densities, next_state -> tracer_density_temperatures, temperature, NO_OF_TRACERS, NO_OF_SCALARS, delta_t);
-			if (retval != 0)
-			{
-				printf("Error in calc_h2otracers_source_rates called from tendency, position 0, exit code was %d.", retval);
-				exit(1);
-			}
+		    calc_h2otracers_source_rates(tracer_mass_source_rates, tracer_heat_source_rates, next_state -> tracer_densities, next_state -> tracer_density_temperatures, temperature, NO_OF_TRACERS, NO_OF_SCALARS, delta_t);
 		}
 		for (int i = 0; i < NO_OF_TRACERS; ++i)
 		{
@@ -265,12 +209,12 @@ int calc_partially_implicit_divvs(State *next_state, State *state_tendency, Grid
 		            else
 		            	tracer_velocity[j] = next_state -> velocity_gas[j];
 		        }
-		        retval = scalar_times_vector(tracer_density, tracer_velocity, tracer_flux_density, grid);
-		        retval = divv_h(tracer_flux_density, tracer_flux_density_divv, grid);
+		        scalar_times_vector(tracer_density, tracer_velocity, tracer_flux_density, grid);
+		        divv_h(tracer_flux_density, tracer_flux_density_divv, grid);
 				for (int j = 0; j < NO_OF_SCALARS; ++j)
 					tracer_density_temperature[j] = next_state -> tracer_density_temperatures[i*NO_OF_SCALARS + j];
-		        retval = scalar_times_vector(tracer_density_temperature, tracer_velocity, tracer_temperature_flux_density, grid);
-		        retval = divv_h(tracer_temperature_flux_density, tracer_temperature_flux_density_divv, grid);
+		        scalar_times_vector(tracer_density_temperature, tracer_velocity, tracer_temperature_flux_density, grid);
+		        divv_h(tracer_temperature_flux_density, tracer_temperature_flux_density_divv, grid);
 				for (int j = 0; j < NO_OF_SCALARS; ++j)
 				{
 				    c_v_cond = ret_c_v_cond(i, 0, next_state -> tracer_density_temperatures[i*NO_OF_SCALARS + j]/next_state -> tracer_densities[i*NO_OF_SCALARS + j]);
@@ -282,8 +226,8 @@ int calc_partially_implicit_divvs(State *next_state, State *state_tendency, Grid
 		    }
 		    else
 		    {
-		        retval = scalar_times_vector_vector_h_v(tracer_density, next_state -> velocity_gas, next_state -> velocity_gas, tracer_flux_density, grid);
-		        retval = divv_h(tracer_flux_density, tracer_flux_density_divv, grid);
+		        scalar_times_vector_vector_h_v(tracer_density, next_state -> velocity_gas, next_state -> velocity_gas, tracer_flux_density, grid);
+		        divv_h(tracer_flux_density, tracer_flux_density_divv, grid);
 				for (int j = 0; j < NO_OF_SCALARS; ++j)
 				{
 				    state_tendency -> tracer_densities[i*NO_OF_SCALARS + j] = -tracer_flux_density_divv[j] + phase_transitions_on*tracer_mass_source_rates[i*NO_OF_SCALARS + j];

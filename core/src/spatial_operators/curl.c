@@ -9,13 +9,14 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int curl(Vector_field in_field, Curl_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
-    int layer_index, h_index, index, sign, retval, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area;
+    int layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area;
     double rhombus_circ, dist_0, dist_1, dist_2, dist_3, dist_0_pre, dist_2_pre, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient;
     int index_0, index_1, index_2, index_3, sign_0, sign_1, sign_2, sign_3;
     for (int i = 0; i < NO_OF_LAYERS*(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H) + NO_OF_DUAL_VECTORS_H; ++i)
     {
         layer_index = i/(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H);
         h_index = i - layer_index*(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H);
+        // Rhombus vorticities
         if (h_index >= NO_OF_DUAL_VECTORS_H)
         {
 			edge_vector_index_h = h_index - NO_OF_DUAL_VECTORS_H;
@@ -26,8 +27,6 @@ int curl(Vector_field in_field, Curl_field out_field, Grid *grid, Dualgrid *dual
         	{
 				index = NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> vorticity_indices[4*edge_vector_index_h + k];
 			    sign = dualgrid -> vorticity_signs[4*edge_vector_index_h + k];
-			    if (sign != -1 && sign != 1)
-			    	printf("Error in curl, position 0.\n");
 		    	velocity_value = in_field[index];
 		    	length_rescale_factor = 1;
 		        if (layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
@@ -50,6 +49,7 @@ int curl(Vector_field in_field, Curl_field out_field, Grid *grid, Dualgrid *dual
         	}
         	out_field[i] = rhombus_circ/dualgrid -> area[edge_vector_index_dual_area];
         }
+        // tangential vorticities
         else
         {
             if (layer_index == 0 || layer_index == NO_OF_LAYERS)
@@ -82,12 +82,8 @@ int curl(Vector_field in_field, Curl_field out_field, Grid *grid, Dualgrid *dual
                 covar_2 = in_field[index_2];
                 if (layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
                 {
-                    retval = horizontal_covariant_normalized(in_field, layer_index, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_0);
-                    if (retval != 0)
-                        printf("Error in horizontal_covariant_normalized called at position 0 from curl.\n");
-                    retval = horizontal_covariant_normalized(in_field, layer_index - 1, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_2);
-                    if (retval != 0)
-                        printf("Error in horizontal_covariant_normalized called at position 1 from curl.\n");
+                    horizontal_covariant_normalized(in_field, layer_index, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_0);
+                    horizontal_covariant_normalized(in_field, layer_index - 1, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_2);
                 }
                 out_field[i] = 1/dualgrid -> area[layer_index*(NO_OF_VECTORS_H + NO_OF_DUAL_VECTORS_H) + h_index]*(dist_0*sign_0*covar_0 + dist_1*sign_1*in_field[index_1] + dist_2*sign_2*covar_2 + dist_3*sign_3*in_field[index_3]);
             }
