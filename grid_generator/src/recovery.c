@@ -73,11 +73,6 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 				}
 				else
 				{
-					if (trsk_modified_velocity_indices[10*i + k] < 0 || trsk_modified_velocity_indices[10*i + k] >= NUMBER_OF_VECTORS_H)
-					{
-						printf("Problem 11 in TRSK implementation detected.\n");
-						exit(1);
-					}
 					sign_1 = -1;
 					if (from_index[trsk_modified_velocity_indices[10*i + k]] == from_index[i])
 						sign_1 = 1;
@@ -127,34 +122,7 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 						printf("Problem 13 in TRSK implementation detected.\n");
 						exit(1);
 					}
-					for (int l = 0; l < number_of_edges; ++l)
-					{
-						if (vertex_indices[l] < 0 || vertex_indices[l] >= NUMBER_OF_DUAL_SCALARS_H)
-						{
-							printf("Problem 3 in TRSK implementation detected.\n");
-							exit(1);
-						}
-						for (int m = l + 1; m < number_of_edges; ++m)
-						{
-							if (vertex_indices[l] == vertex_indices[m])
-							{
-								printf("Problem 17 in TRSK implementation detected.\n");
-								exit(1);
-							}
-						}
-					}
 					retval = sort_edge_indices(latitude_vertices, longitude_vertices, number_of_edges, indices_resorted);
-					for (int l = 0; l < number_of_edges; ++l)
-					{
-						for (int m = l + 1; m < number_of_edges; ++m)
-						{
-							if (indices_resorted[l] == indices_resorted[m] || indices_resorted[l] < 0 || indices_resorted[l] > number_of_edges - 1)
-							{
-								printf("Problem 25 in TRSK implementation detected.\n");
-								exit(1);
-							}
-						}
-					}
 					for (int l = 0; l < number_of_edges; ++l)
 						vertex_indices_resorted[l] = vertex_indices[indices_resorted[l]];
 					for (int l = 0; l < number_of_edges; ++l)
@@ -163,22 +131,6 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 						{
 							if ((from_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[l] && to_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[(l + 1)%number_of_edges]) || (to_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[l] && from_index_dual[adjacent_vector_indices_h[6*from_index[i] + m]] == vertex_indices_resorted[(l + 1)%number_of_edges]))
 								edge_indices[l] = adjacent_vector_indices_h[6*from_index[i] + m];
-						}
-					}
-					for (int l = 0; l < number_of_edges; ++l)
-					{
-						if (edge_indices[l] < 0 || edge_indices[l] >= NUMBER_OF_VECTORS_H)
-						{
-							printf("Problem 7 in TRSK implementation detected.\n");
-							exit(1);
-						}
-						for (int m = l + 1; m < number_of_edges; ++m)
-						{
-							if (edge_indices[l] == edge_indices[m])
-							{
-								printf("Problem 18 in TRSK implementation detected.\n");
-								exit(1);
-							}
 						}
 					}
 					for (int l = 0; l < number_of_edges; ++l)
@@ -296,34 +248,7 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 						printf("Problem 15 in TRSK implementation detected.\n");
 						exit(1);
 					}
-					for (int l = 0; l < number_of_edges; ++l)
-					{
-						if (vertex_indices[l] < 0 || vertex_indices[l] >= NUMBER_OF_DUAL_SCALARS_H)
-						{
-							printf("Problem 5 in TRSK implementation detected.\n");
-							exit(1);
-						}
-						for (int m = l + 1; m < number_of_edges; ++m)
-						{
-							if (vertex_indices[l] == vertex_indices[m])
-							{
-								printf("Problem 23 in TRSK implementation detected.\n");
-								exit(1);
-							}
-						}
-					}
 					retval = sort_edge_indices(latitude_vertices, longitude_vertices, number_of_edges, indices_resorted);
-					for (int l = 0; l < number_of_edges; ++l)
-					{
-						for (int m = l + 1; m < number_of_edges; ++m)
-						{
-							if (indices_resorted[l] == indices_resorted[m] || indices_resorted[l] < 0 || indices_resorted[l] > number_of_edges - 1)
-							{
-								printf("Problem 27 in TRSK implementation detected.\n");
-								exit(1);
-							}
-						}
-					}
 					for (int l = 0; l < number_of_edges; ++l)
 						vertex_indices_resorted[l] = vertex_indices[indices_resorted[l]];
 					for (int l = 0; l < number_of_edges; ++l)
@@ -332,22 +257,6 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 						{
 							if ((from_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[l] && to_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[(l + 1)%number_of_edges]) || (to_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[l] && from_index_dual[adjacent_vector_indices_h[6*to_index[i] + m]] == vertex_indices_resorted[(l + 1)%number_of_edges]))
 								edge_indices[l] = adjacent_vector_indices_h[6*to_index[i] + m];
-						}
-					}
-					for (int l = 0; l < number_of_edges; ++l)
-					{
-						if (edge_indices[l] < 0 || edge_indices[l] >= NUMBER_OF_VECTORS_H)
-						{
-							printf("Problem 9 in TRSK implementation detected.\n");
-							exit(1);
-						}
-						for (int m = l + 1; m < number_of_edges; ++m)
-						{
-							if (edge_indices[l] == edge_indices[m])
-							{
-								printf("Problem 20 in TRSK implementation detected.\n");
-								exit(1);
-							}
 						}
 					}
 					for (int l = 0; l < number_of_edges; ++l)
@@ -438,14 +347,6 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 					printf("Problem 29 in TRSK implementation detected.\n");
 					exit(1);
 				}
-			}
-		}
-		for (int j = 0; j < 10; ++j)
-		{
-			if (trsk_modified_curl_indices[10*i + j] < 0 || trsk_modified_curl_indices[10*i + j] >= NUMBER_OF_VECTORS_H)
-			{
-				printf("Problem 30 in TRSK implementation detected.\n");
-				exit(1);
 			}
 		}
         recov_hor_ver_pri_index[4*i + 0] = to_index[i];
