@@ -306,6 +306,50 @@
       \endverb
       \keyw{radiation,atmospheric model,parameterization}
     \endentry
+    \entry{ringler_trsk}{article}{}
+      \name{author}{4}{}{%
+        {{hash=01bf91bcf88e98433e17a6a543fe8958}{%
+           family={Ringler},
+           familyi={R\bibinitperiod},
+           given={Todd},
+           giveni={T\bibinitperiod}}}%
+        {{hash=4ce2f99b1cd72688882ffdca224375aa}{%
+           family={Thuburn},
+           familyi={T\bibinitperiod},
+           given={John},
+           giveni={J\bibinitperiod}}}%
+        {{hash=231cc015438e75ccd71f63c40565aa3c}{%
+           family={Klemp},
+           familyi={K\bibinitperiod},
+           given={J.},
+           giveni={J\bibinitperiod}}}%
+        {{hash=d7dbf9015f1b7f38f3f9c1588e3fa5a1}{%
+           family={Skamarock},
+           familyi={S\bibinitperiod},
+           given={W.C.},
+           giveni={W\bibinitperiod}}}%
+      }
+      \strng{namehash}{34c63b4877d3794cdd468dc41dabac04}
+      \strng{fullhash}{2693148d962864ef65e821c3a96cabc7}
+      \strng{bibnamehash}{34c63b4877d3794cdd468dc41dabac04}
+      \strng{authorbibnamehash}{34c63b4877d3794cdd468dc41dabac04}
+      \strng{authornamehash}{34c63b4877d3794cdd468dc41dabac04}
+      \strng{authorfullhash}{2693148d962864ef65e821c3a96cabc7}
+      \field{sortinit}{R}
+      \field{sortinithash}{b9c68a358aea118dfa887b6e902414a7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{J. Comput. Physics}
+      \field{month}{05}
+      \field{title}{A unified approach to energy conservation and potential vorticity dynamics on arbitrarily structured C-grids}
+      \field{volume}{229}
+      \field{year}{2010}
+      \field{pages}{3065\bibrangedash 3090}
+      \range{pages}{26}
+      \verb{doi}
+      \verb 10.1016/j.jcp.2009.12.007
+      \endverb
+    \endentry
     \entry{rte-rrtmgp-github}{online}{}
       \field{sortinit}{R}
       \field{sortinithash}{b9c68a358aea118dfa887b6e902414a7}

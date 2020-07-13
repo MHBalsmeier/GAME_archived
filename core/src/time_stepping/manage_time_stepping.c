@@ -16,7 +16,7 @@ int manage_time_stepping(State *state_0, State *state_p1, State *state_interpola
 	Here, the RK3 scheme is implemented.
 	If radiation is updated, it is done at the first step.
 	*/
-	*state_interpolate = *state_0;
+    linear_combine_two_states(state_0, state_0, state_interpolate, 1, 0);
 	int phase_transitions_on = 0;
 	double delta_t_rk;
 	for (int i = 0; i < 3; ++i)
