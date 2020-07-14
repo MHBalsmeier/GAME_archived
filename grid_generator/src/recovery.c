@@ -184,7 +184,7 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 					double_sum_gen(vector_of_areas, number_of_edges, first_index, last_index, &sum_of_weights);
 				if (sum_of_weights < 0 || sum_of_weights/area[from_or_to_index[i]] > 1)
 				{
-					printf("Problem 34 in TRSK implementation detected\n");
+					printf("Problem 34 in TRSK implementation detected.\n");
 					exit(1);
 				}
 				sum_of_weights = sum_of_weights/area[from_or_to_index[i]];
@@ -203,6 +203,11 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 			trsk_modified_curl_indices[10*i + 2] = trsk_modified_velocity_indices[10*i + 3];
 			trsk_modified_curl_indices[10*i + 3] = trsk_modified_velocity_indices[10*i + 5];
 			trsk_modified_curl_indices[10*i + 4] = 0;
+			if (trsk_modified_weights[10*i + 4] != 0)
+			{
+				printf("Problem 40 in TRSK implementation detected.\n");
+				exit(1);
+			}
 		}
 		else
 		{
@@ -220,6 +225,11 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 			trsk_modified_curl_indices[10*i + 7] = trsk_modified_velocity_indices[10*i + 8];
 			trsk_modified_curl_indices[10*i + 8] = trsk_modified_velocity_indices[10*i + 0];
 			trsk_modified_curl_indices[10*i + 9] = 0;
+			if (trsk_modified_weights[10*i + 9] != 0)
+			{
+				printf("Problem 41 in TRSK implementation detected.\n");
+				exit(1);
+			}
 		}
 		else
 		{
