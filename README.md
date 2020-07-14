@@ -25,7 +25,7 @@ According to my understanding, an hexagonal C grid model is the only model where
 What GAME does what other models do not do and why:
 
 * It uses the entropy as a prognostic variable. Usually, models use the potential temperature as a prognostic variable and modelers then call it the entropy, which is wrong. The potential temperature is a conserved quantity and therefore the only forcings are the diabatic forcings rendering it a suitable variable for modeling. However, the same is true for the real entropy (connected to the density times the logarithm of the potential temperature), and this last quantitiy is the much more fundamental physical property. It is not expected that modelers will start reformulating their equations.
-* It employs the modified TRSK scheme proposed by Gassmann (2018).
+* It employs the modified TRSK scheme as well as the physically conistent dissipation proposed by Gassmann (2018).
 * It assigns individual densities (instead of mixing ratios) to tracers as well as individual densities and sink velocities. This will be necessary for all models to do earlier or later.
 
 What GAME does not do and why:
