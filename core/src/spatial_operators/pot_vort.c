@@ -23,6 +23,7 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
 	        edge_vector_index = NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + edge_vector_index_h;
 	        edge_vector_index_dual_area = NO_OF_DUAL_VECTORS_H + layer_index*(NO_OF_VECTORS_H + NO_OF_DUAL_VECTORS_H) + edge_vector_index_h;
         	rhombus_circ = 0;
+        	// The rhombus has four edges.
         	for (int k = 0; k < 4; ++k)
         	{
 				index = NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> vorticity_indices[4*edge_vector_index_h + k];
@@ -48,8 +49,10 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
     			rhombus_circ += length_rescale_factor*grid -> normal_distance[index]*sign*velocity_value;
         	}
         	out_field[i] = rhombus_circ/dualgrid -> area[edge_vector_index_dual_area];
+        	// We add the result of the curl component of the wind field with the component of the Coriolis vector.
        		out_field[i] += dualgrid -> f_vec[h_index];
-			density_value = 0.5*(density_field[layer_index*NO_OF_SCALARS_H + from_index[edge_vector_index_h]] + density_field[layer_index*NO_OF_SCALARS_H + to_index[edge_vector_index_h]]);
+       		// The whole stuff must be divided through the density to obtain something similar to a potential vorticity.
+			density_value = 0.5*(density_field[layer_index*NO_OF_SCALARS_H + grid -> from_index[edge_vector_index_h]] + density_field[layer_index*NO_OF_SCALARS_H + grid -> to_index[edge_vector_index_h]]);
 			out_field[i] = out_field[i]/density_value;
         }
         // tangential vorticities
@@ -64,6 +67,14 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
                 out_field[i] = 1/dualgrid -> area[layer_index*(NO_OF_VECTORS_H + NO_OF_DUAL_VECTORS_H) + h_index]*(grid -> normal_distance[index_1]*sign_1*velocity_field[index_1] + grid -> normal_distance[index_3]*sign_3*velocity_field[index_3]);
        			out_field[i] += dualgrid -> f_vec[h_index];
 				density_value = density_field[layer_index*NO_OF_SCALARS_H + h_index];
+				if (layer_index == 0)
+				{
+					density_value = 0.5*(density_field[grid -> from_index[h_index]] + density_field[grid -> to_index[h_index]]);
+				}
+				else if (layer_index == NO_OF_LAYERS)
+				{
+					density_value = 0.5*(density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]] + density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]);
+				}
 				out_field[i] = out_field[i]/density_value;
             }
             else
@@ -93,18 +104,7 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
                 }
                 out_field[i] = 1/dualgrid -> area[layer_index*(NO_OF_VECTORS_H + NO_OF_DUAL_VECTORS_H) + h_index]*(dist_0*sign_0*covar_0 + dist_1*sign_1*velocity_field[index_1] + dist_2*sign_2*covar_2 + dist_3*sign_3*velocity_field[index_3]);
        			out_field[i] += dualgrid -> f_vec[h_index];
-				if (layer_index == 0)
-				{
-					density_value = 0.5*(density_field[from_index[h_index]] + density_field[to_index[h_index]]);
-				}
-				else if (layer_index == NO_OF_LAYERS)
-				{
-					density_value = 0.5*(density_field[(layer_index - 1)*NO_OF_SCALARS_H + from_index[h_index]] + density_field[(layer_index - 1)*NO_OF_SCALARS_H + to_index[h_index]]);
-				}
-				else
-				{	
-					density_value = 0.25*(density_field[(layer_index - 1)*NO_OF_SCALARS_H + from_index[h_index]] + density_field[(layer_index - 1)*NO_OF_SCALARS_H + to_index[h_index]] + density_field[layer_index*NO_OF_SCALARS_H + from_index[h_index]] + density_field[layer_index*NO_OF_SCALARS_H + to_index[h_index]]);
-				}				
+				density_value = 0.25*(density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]] + density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]] + density_field[layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]] + density_field[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]]);
 				out_field[i] = out_field[i]/density_value;
             }
         }

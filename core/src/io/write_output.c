@@ -2,6 +2,9 @@
 This source file is part of the Global Atmospheric Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/MHBalsmeier/game
 */
+/*
+Here, the output is written to grib files and integrals are written to text files if configured that way.
+*/
 
 #include "../../../core/src/enum_and_typedefs.h"
 #include <stdio.h>
@@ -50,8 +53,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     find_hour_from_time_coord(t_init, &init_year, &init_month, &init_day, &init_hour, &init_minute, &init_second, &init_microsecond);
     long data_date = 10000*init_year + 100*init_month + init_day;
     long data_time = init_hour;
-    double *pot_temperature_h = malloc(NO_OF_SCALARS_H*sizeof(double));
-    double *rho_h = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *temperature = malloc(NO_OF_SCALARS*sizeof(double));
+    // Grib requires everything to be on horizontal levels.
+    double *temperature_h = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *pressure_h = malloc(NO_OF_SCALARS_H*sizeof(double));
     double *wind_u_h = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *wind_v_h = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *wind_w_h = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -65,8 +70,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     double standard_vert_lapse_rate = 0.0065;
     double pot_temp, condensates_density_sum, density_d_micro_value, density_v_micro_value;
     long unsigned length = 4;
-    codes_handle *handle_pot_temperature_h = NULL;
-    codes_handle *handle_density_h = NULL;
+    codes_handle *handle_temperature_h = NULL;
+    codes_handle *handle_pressure_h = NULL;
     codes_handle *handle_wind_u_h = NULL;
     codes_handle *handle_wind_v_h = NULL;
     codes_handle *handle_wind_w_h = NULL;
@@ -79,18 +84,20 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     codes_handle *handle_rprate = NULL;
     codes_handle *handle_sprate = NULL;
     codes_handle *handle_wind_10m_gusts = NULL;
+	temperature_diagnostics(state_write_out -> entropy_gas, state_write_out -> density_dry, state_write_out -> tracer_densities, temperature);
     for (int i = 0; i < NO_OF_LAYERS; ++i)
     {
         for (int j = 0; j < NO_OF_SCALARS_H; ++j)
         {
-        	rho_h[j] = state_write_out -> density_dry[j + i*NO_OF_SCALARS_H];
         	condensates_density_sum = calc_condensates_density_sum(i, j, state_write_out -> tracer_densities);
-			pot_temperature_h[j] = pot_temp_diagnostics_single_value(state_write_out -> entropy_gas[j + i*NO_OF_SCALARS_H], rho_h[j], state_write_out -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j + i*NO_OF_SCALARS_H], condensates_density_sum);
+        	temperature_h[j] = temperature[i*NO_OF_SCALARS_H + j];
+        	pressure_h[j] = state_write_out -> density_dry[j + i*NO_OF_SCALARS_H]*R_D*temperature_h[j];
         }
         if (i == NO_OF_LAYERS - 1)
         {
             for (int j = 0; j < NO_OF_SCALARS_H; ++j)
             {
+            	// Now the aim is to determine the value of the MSLP.
             	condensates_density_sum = calc_condensates_density_sum(i, j, state_write_out -> tracer_densities);
             	pot_temp = pot_temp_diagnostics_single_value(state_write_out -> entropy_gas[j + i*NO_OF_SCALARS_H], state_write_out -> density_dry[j + i*NO_OF_SCALARS_H], state_write_out -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j + i*NO_OF_SCALARS_H], condensates_density_sum);
             	density_d_micro_value = calc_micro_density(state_write_out -> density_dry[j + i*NO_OF_SCALARS_H], condensates_density_sum);
@@ -101,9 +108,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
                 temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[j + i*NO_OF_SCALARS_H];
                 mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, -grid -> gravity[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
                 mslp[j] = pressure_value/mslp_factor;
+				// Now the aim is to determine the value of the surface pressure.
 				temp_surface = temp_lowest_layer + standard_vert_lapse_rate*(grid -> z_scalar[j + i*NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_V + j]);
                 surface_p_factor = pow(1 - (temp_surface - temp_lowest_layer)/temp_surface, -grid -> gravity[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
 				surface_p[j] = pressure_value/surface_p_factor;
+				// Now the aim is to calculate the 2 m temperature.
                 delta_z_temp = 2 - grid -> z_scalar[j + i*NO_OF_SCALARS_H];
             	condensates_density_sum = calc_condensates_density_sum(i - 1, j, state_write_out -> tracer_densities);
                 pot_temp = pot_temp_diagnostics_single_value(state_write_out -> entropy_gas[j + (i - 1)*NO_OF_SCALARS_H], state_write_out -> density_dry[j + (i - 1)*NO_OF_SCALARS_H], state_write_out -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j + (i - 1)*NO_OF_SCALARS_H], condensates_density_sum);
@@ -118,7 +127,9 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
                 exner_pressure = exner_pressure_diagnostics_single_value(density_d_micro_value, density_v_micro_value, pot_temp);
                 temp_lower = temperature_diagnostics_single_value(exner_pressure, pot_temp);
                 temp_gradient = (temp_upper - temp_lower)/(grid -> z_scalar[j + (i - 1)*NO_OF_SCALARS_H] - grid -> z_scalar[j + i*NO_OF_SCALARS_H]);
+                // Finally the temperature in 2 m height AGL can bo obtained via linear extrapolation.
                 t2[j] = temp_lowest_layer + delta_z_temp*temp_gradient;
+                // Now come the hydrometeors.
                 sprate[j] = 0;
                 rprate[j] = 0;
                 tcdc[j] = 0;
@@ -214,7 +225,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
                 ECCERR(retval);
             if ((retval = codes_set_long(handle_surface_p, "parameterNumber", 0)))
                 ECCERR(retval);
-            if ((retval = codes_set_long(handle_surface_p, "typeOfFirstFixedSurface", 103)))
+            if ((retval = codes_set_long(handle_surface_p, "typeOfFirstFixedSurface", 1)))
                 ECCERR(retval);
             if ((retval = codes_set_long(handle_surface_p, "scaledValueOfFirstFixedSurface", 0)))
                 ECCERR(retval);
@@ -415,105 +426,105 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			codes_handle_delete(handle_tcdc);
         }
     	SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
-		handle_pot_temperature_h = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
+		handle_temperature_h = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 		if (err != 0)
 		    ECCERR(err);
 		fclose(SAMPLE_FILE);
-        if ((retval = codes_set_long(handle_pot_temperature_h, "discipline", 0)))
+        if ((retval = codes_set_long(handle_temperature_h, "discipline", 0)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature_h, "centre", 255)))
+        if ((retval = codes_set_long(handle_temperature_h, "centre", 255)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature_h, "significanceOfReferenceTime", 1)))
+        if ((retval = codes_set_long(handle_temperature_h, "significanceOfReferenceTime", 1)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature_h, "productionStatusOfProcessedData", 1)))
+        if ((retval = codes_set_long(handle_temperature_h, "productionStatusOfProcessedData", 1)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature_h, "typeOfProcessedData", 1)))
+        if ((retval = codes_set_long(handle_temperature_h, "typeOfProcessedData", 1)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature_h, "indicatorOfUnitOfTimeRange", 13)))
+        if ((retval = codes_set_long(handle_temperature_h, "indicatorOfUnitOfTimeRange", 13)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature_h, "stepUnits", 13)))
+        if ((retval = codes_set_long(handle_temperature_h, "stepUnits", 13)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature_h, "dataDate", data_date)))
+        if ((retval = codes_set_long(handle_temperature_h, "dataDate", data_date)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature_h, "dataTime", data_time)))
+        if ((retval = codes_set_long(handle_temperature_h, "dataTime", data_time)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature_h, "forecastTime", t_write - t_init)))
+        if ((retval = codes_set_long(handle_temperature_h, "forecastTime", t_write - t_init)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature_h, "stepRange", t_write - t_init)))
+        if ((retval = codes_set_long(handle_temperature_h, "stepRange", t_write - t_init)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature_h, "typeOfGeneratingProcess", 1)))
+        if ((retval = codes_set_long(handle_temperature_h, "typeOfGeneratingProcess", 1)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature_h, "parameterCategory", 0)))
+        if ((retval = codes_set_long(handle_temperature_h, "parameterCategory", 0)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature_h, "parameterNumber", 2)))
+        if ((retval = codes_set_long(handle_temperature_h, "parameterNumber", 0)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature_h, "typeOfFirstFixedSurface", 26)))
+        if ((retval = codes_set_long(handle_temperature_h, "typeOfFirstFixedSurface", 26)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature_h, "scaledValueOfFirstFixedSurface", i)))
+        if ((retval = codes_set_long(handle_temperature_h, "scaledValueOfFirstFixedSurface", i)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature_h, "scaleFactorOfFirstFixedSurface", 1)))
+        if ((retval = codes_set_long(handle_temperature_h, "scaleFactorOfFirstFixedSurface", 1)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature_h, "level", i)))
+        if ((retval = codes_set_long(handle_temperature_h, "level", i)))
             ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_pot_temperature_h, "values", pot_temperature_h, NO_OF_SCALARS_H)))
+        if ((retval = codes_set_double_array(handle_temperature_h, "values", temperature_h, NO_OF_SCALARS_H)))
             ECCERR(retval);
         if (i == 0)
         {
-            if ((retval = codes_write_message(handle_pot_temperature_h, OUTPUT_FILE, "w")))
+            if ((retval = codes_write_message(handle_temperature_h, OUTPUT_FILE, "w")))
                 ECCERR(retval);
         }
         else
         {
-            if ((retval = codes_write_message(handle_pot_temperature_h, OUTPUT_FILE, "a")))
+            if ((retval = codes_write_message(handle_temperature_h, OUTPUT_FILE, "a")))
                 ECCERR(retval);
         }
-		codes_handle_delete(handle_pot_temperature_h);
+		codes_handle_delete(handle_temperature_h);
 		SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
-		handle_density_h = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
+		handle_pressure_h = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 		if (err != 0)
 		    ECCERR(err);
 		fclose(SAMPLE_FILE);
-        if ((retval = codes_set_long(handle_density_h, "discipline", 0)))
+        if ((retval = codes_set_long(handle_pressure_h, "discipline", 0)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_density_h, "centre", 255)))
+        if ((retval = codes_set_long(handle_pressure_h, "centre", 255)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_density_h, "significanceOfReferenceTime", 1)))
+        if ((retval = codes_set_long(handle_pressure_h, "significanceOfReferenceTime", 1)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_density_h, "productionStatusOfProcessedData", 1)))
+        if ((retval = codes_set_long(handle_pressure_h, "productionStatusOfProcessedData", 1)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_density_h, "typeOfProcessedData", 1)))
+        if ((retval = codes_set_long(handle_pressure_h, "typeOfProcessedData", 1)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_density_h, "indicatorOfUnitOfTimeRange", 13)))
+        if ((retval = codes_set_long(handle_pressure_h, "indicatorOfUnitOfTimeRange", 13)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_density_h, "stepUnits", 13)))
+        if ((retval = codes_set_long(handle_pressure_h, "stepUnits", 13)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_density_h, "dataDate", data_date)))
+        if ((retval = codes_set_long(handle_pressure_h, "dataDate", data_date)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_density_h, "dataTime", data_time)))
+        if ((retval = codes_set_long(handle_pressure_h, "dataTime", data_time)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_density_h, "forecastTime", t_write - t_init)))
+        if ((retval = codes_set_long(handle_pressure_h, "forecastTime", t_write - t_init)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_density_h, "stepRange", t_write - t_init)))
+        if ((retval = codes_set_long(handle_pressure_h, "stepRange", t_write - t_init)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_density_h, "typeOfGeneratingProcess", 1)))
+        if ((retval = codes_set_long(handle_pressure_h, "typeOfGeneratingProcess", 1)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_density_h, "parameterCategory", 3)))
+        if ((retval = codes_set_long(handle_pressure_h, "parameterCategory", 3)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_density_h, "parameterNumber", 10)))
+        if ((retval = codes_set_long(handle_pressure_h, "parameterNumber", 0)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_density_h, "typeOfFirstFixedSurface", 26)))
+        if ((retval = codes_set_long(handle_pressure_h, "typeOfFirstFixedSurface", 26)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_density_h, "scaledValueOfFirstFixedSurface", i)))
+        if ((retval = codes_set_long(handle_pressure_h, "scaledValueOfFirstFixedSurface", i)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_density_h, "scaleFactorOfFirstFixedSurface", 1)))
+        if ((retval = codes_set_long(handle_pressure_h, "scaleFactorOfFirstFixedSurface", 1)))
             ECCERR(retval);
-        if ((retval = codes_set_long(handle_density_h, "level", i)))
+        if ((retval = codes_set_long(handle_pressure_h, "level", i)))
             ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_density_h, "values", rho_h, NO_OF_SCALARS_H)))
+        if ((retval = codes_set_double_array(handle_pressure_h, "values", pressure_h, NO_OF_SCALARS_H)))
             ECCERR(retval);
-        if ((retval = codes_write_message(handle_density_h, OUTPUT_FILE, "a")))
+        if ((retval = codes_write_message(handle_pressure_h, OUTPUT_FILE, "a")))
             ECCERR(retval);
-		codes_handle_delete(handle_density_h);
+		codes_handle_delete(handle_pressure_h);
         for (int j = 0; j < NO_OF_VECTORS_H; ++j)
         {
             wind_0 = state_write_out -> velocity_gas[j + i*NO_OF_VECTORS_H + (i + 1)*NO_OF_VECTORS_V];
@@ -823,8 +834,9 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     free(rprate);
     free(sprate);
     free(tcdc);
-    free(pot_temperature_h);
-    free(rho_h);
+    free(temperature);
+    free(temperature_h);
+    free(pressure_h);
     free(wind_u_h);
     free(wind_v_h);
 	SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");

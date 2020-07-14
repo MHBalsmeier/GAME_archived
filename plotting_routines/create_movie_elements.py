@@ -33,7 +33,7 @@ if short_name == "prmsl":
     rescale = 0.01;
     shift = -1000;
     unit_string = "hPa";
-if short_name == "pres":
+if short_name == "sp":
     variable_name = "Surface pressure - 1000 hPa";
     rescale = 0.01;
     shift = -1000;

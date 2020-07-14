@@ -32,8 +32,6 @@ int grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
         {
         	dzdx = (grid -> z_scalar[grid -> to_index[h_index - NO_OF_VECTORS_V] + layer_index*NO_OF_SCALARS_H] - grid -> z_scalar[grid -> from_index[h_index - NO_OF_VECTORS_V] + layer_index*NO_OF_SCALARS_H])/grid -> normal_distance[i];
         	retval = recov_hor_ver_pri(out_field, layer_index, h_index - NO_OF_VECTORS_V, &vertical_gradient, grid);
-        	if (retval != 0)
-        		printf("Error in recov_hor_ver_pri called from grad.\n");
             out_field[i] = out_field[i] - dzdx*vertical_gradient;
         }
     }

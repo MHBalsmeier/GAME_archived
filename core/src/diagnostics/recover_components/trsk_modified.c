@@ -10,7 +10,7 @@ This is a recovery function at horizontal vector points. If layer_index >= NO_OF
 int trsk_modified(Vector_field in_field_0, Curl_field in_field_1, int layer_index, int h_index, double *component, Grid *grid)
 {
     *component = 0;
-	if (grid -> from_index[h_index] < NUMBER_OF_PENTAGONS)	
+	if (grid -> from_index[h_index] < NO_OF_PENTAGONS)	
 	{
 	    *component += 
 		grid -> trsk_modified_weights[10*h_index + 0]*in_field_0[NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + 0]]*in_field_1[NO_OF_DUAL_VECTORS_H + layer_index*(NO_OF_VECTORS_H + NO_OF_DUAL_VECTORS_H) + grid -> trsk_modified_curl_indices[10*h_index + 0]]
@@ -27,7 +27,7 @@ int trsk_modified(Vector_field in_field_0, Curl_field in_field_1, int layer_inde
 		+ grid -> trsk_modified_weights[10*h_index + 3]*in_field_0[NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + 3]]*in_field_1[NO_OF_DUAL_VECTORS_H + layer_index*(NO_OF_VECTORS_H + NO_OF_DUAL_VECTORS_H) + grid -> trsk_modified_curl_indices[10*h_index + 3]]
 		+ grid -> trsk_modified_weights[10*h_index + 4]*in_field_0[NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + 4]]*in_field_1[NO_OF_DUAL_VECTORS_H + layer_index*(NO_OF_VECTORS_H + NO_OF_DUAL_VECTORS_H) + grid -> trsk_modified_curl_indices[10*h_index + 4]];
 	}
-	if (grid -> to_index[h_index] < NUMBER_OF_PENTAGONS)	
+	if (grid -> to_index[h_index] < NO_OF_PENTAGONS)	
 	{
 	    *component += 
 		grid -> trsk_modified_weights[10*h_index + 5]*in_field_0[NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + 5]]*in_field_1[NO_OF_DUAL_VECTORS_H + layer_index*(NO_OF_VECTORS_H + NO_OF_DUAL_VECTORS_H) + grid -> trsk_modified_curl_indices[10*h_index + 5]]

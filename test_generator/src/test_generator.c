@@ -32,7 +32,7 @@ For more specific details see handbook.
 #define R_D (R/M_D)
 #define P_0 100000
 #define OMEGA (7.292115e-5)
-#define C_P 1005.0
+#define C_D_P 1005.0
 
 // constants specifying the grid
 const double TOA = 30000;
@@ -71,6 +71,7 @@ int main(int argc, char *argv[])
     double *longitude_vector = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
     double *z_scalar = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *z_vector = malloc(NUMBER_OF_VECTORS*sizeof(double));
+    double *gravity_potential = malloc(NUMBER_OF_VECTORS*sizeof(double));
     int ncid, retval;
     short GEO_PROP_FILE_LENGTH = 100;
     char *GEO_PROP_FILE_PRE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
@@ -82,7 +83,7 @@ int main(int argc, char *argv[])
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         NCERR(retval);
     free(GEO_PROP_FILE);
-    int direction_id, latitude_scalar_id, longitude_scalar_id, latitude_vector_id, longitude_vector_id, z_scalar_id, z_vector_id;
+    int direction_id, latitude_scalar_id, longitude_scalar_id, latitude_vector_id, longitude_vector_id, z_scalar_id, z_vector_id, gravity_potential_id;
     if ((retval = nc_inq_varid(ncid, "direction", &direction_id)))
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "latitude_scalar", &latitude_scalar_id)))
@@ -97,6 +98,8 @@ int main(int argc, char *argv[])
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "z_vector", &z_vector_id)))
         NCERR(retval);
+    if ((retval = nc_inq_varid(ncid, "gravity_potential", &gravity_potential_id)))
+        NCERR(retval);
     if ((retval = nc_get_var_double(ncid, direction_id, &direction[0])))
         NCERR(retval);
     if ((retval = nc_get_var_double(ncid, latitude_scalar_id, &latitude_scalar[0])))
@@ -110,6 +113,8 @@ int main(int argc, char *argv[])
     if ((retval = nc_get_var_double(ncid, z_scalar_id, &z_scalar[0])))
         NCERR(retval);
     if ((retval = nc_get_var_double(ncid, z_vector_id, &z_vector[0])))
+        NCERR(retval);
+    if ((retval = nc_get_var_double(ncid, gravity_potential_id, &gravity_potential[0])))
         NCERR(retval);
     if ((retval = nc_close(ncid)))
         NCERR(retval);
@@ -132,16 +137,27 @@ int main(int argc, char *argv[])
     codes_handle *handle_solid_water_density = NULL;
     codes_handle *handle_liquid_water_temp = NULL;
     codes_handle *handle_solid_water_temp = NULL;
-    double *pressure = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *pot_temperature = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *temperature = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *rho = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *rel_humidity = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *water_vapour_density = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *liquid_water_density = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *solid_water_density = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *liquid_water_temp = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *solid_water_temp = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    // 3D arrays
+    double *pressure = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    double *pot_temperature = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    double *temperature = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    double *rho = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    double *rel_humidity = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    double *water_vapour_density = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    double *liquid_water_density = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    double *solid_water_density = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    double *liquid_water_temp = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    double *solid_water_temp = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    // grib requires everything on horizontal levels
+    double *pressure_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *pot_temperature_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *temperature_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *rho_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *water_vapour_density_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *liquid_water_density_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *solid_water_density_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *liquid_water_temp_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *solid_water_temp_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
     double *wind_h = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
     double *wind_v = malloc(NUMBER_OF_VECTORS_V*sizeof(double));
     const double TROPO_TEMP = T_SFC + TROPO_HEIGHT*TEMP_GRADIENT;
@@ -192,56 +208,94 @@ int main(int argc, char *argv[])
     double distance_scale = RADIUS/10;
     double lat_perturb = 2*M_PI/9;
     double lon_perturb = M_PI/9;
+    int layer_index, h_index;
+    // 3D scalar fields determined here, apart from density
+    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+    {
+    	layer_index = i/NUMBER_OF_SCALARS_H;
+    	h_index = i - layer_index*NUMBER_OF_SCALARS_H;
+        lat = latitude_scalar[h_index];
+        lon = longitude_scalar[h_index];
+        z_height = z_scalar[i];
+        rel_humidity[i] = 0;
+        // standard atmosphere
+        if (TEST_ID == 0 || TEST_ID == 1)
+        {
+            if (z_height < TROPO_HEIGHT)
+            {
+                temperature[i] = T_SFC + z_height*TEMP_GRADIENT;
+                pressure[i] = 101325*pow(1 + TEMP_GRADIENT*z_height/T_SFC, -G/(R_D*TEMP_GRADIENT));
+            }
+            else
+            {
+                temperature[i] = TROPO_TEMP;
+                pressure[i] = 101325*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT/T_SFC, -G/(R_D*TEMP_GRADIENT))*exp(-G*(z_height - TROPO_HEIGHT)/(R_D*TROPO_TEMP));
+            }
+        }
+        // JW atmosphere
+        if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
+        {
+            find_pressure_value(lat, z_height, &pressure_value);
+            pressure[i] = pressure_value;
+            eta = pressure[i]/P_0;
+            eta_v = (eta - ETA_0)*M_PI/2;
+            T_perturb = 3.0/4.0*eta*M_PI*U_0/R_D*sin(eta_v)*pow(cos(eta_v), 0.5)*((-2*pow(sin(lat), 6)*(pow(cos(lat), 2) + 1.0/3.0) + 10.0/63.0)*2*U_0*pow(cos(eta_v), 1.5) + RADIUS*OMEGA*(8.0/5.0*pow(cos(lat), 3)*(pow(sin(lat), 2) + 2.0/3.0) - M_PI/4.0));
+            if (eta >= ETA_T)
+            {
+                temperature[i] = T_0*pow(eta, R_D*GAMMA/G) + T_perturb;
+                if (TEST_ID == 4 || TEST_ID == 5)
+                    rel_humidity[i] = 0.7;
+                else
+                    rel_humidity[i] = 0;
+            }
+            else
+                temperature[i] = T_0*pow(eta, R_D*GAMMA/G) + DELTA_T*pow(ETA_T - eta, 5) + T_perturb;
+        }
+        liquid_water_density[i] = 0;
+        solid_water_density[i] = 0;
+        liquid_water_temp[i] = temperature[i];
+        solid_water_temp[i] = temperature[i];
+    }
+    // density is determined out of the hydrostatic equation
+    double entropy_value, temperature_mean, delta_temperature, delta_gravity_potential, pot_temp_value, lower_entropy_value;
+    for (int i = NUMBER_OF_SCALARS - 1; i >= 0; --i)
+    {
+    	layer_index = i/NUMBER_OF_SCALARS_H;
+    	// at the lowest the density is set using the equation of state, can be considered a boundary condition
+    	if (layer_index == NUMBER_OF_LAYERS - 1)
+    	{
+        	pot_temperature[i] = temperature[i]*pow(P_0/pressure[i], R_D/C_D_P);
+        	rho[i] = pressure[i]/(R_D*temperature[i]);
+        }
+        else
+        {
+        	lower_entropy_value = C_D_P*log(temperature[i + NUMBER_OF_SCALARS_H]*pow(P_0/(rho[i + NUMBER_OF_SCALARS_H]*R_D*temperature[i + NUMBER_OF_SCALARS_H]), R_D/C_D_P));
+        	temperature_mean = 0.5*(temperature[i] + temperature[i + NUMBER_OF_SCALARS_H]);
+        	delta_temperature = temperature[i] - temperature[i + NUMBER_OF_SCALARS_H];
+        	delta_gravity_potential = gravity_potential[i] - gravity_potential[i + NUMBER_OF_SCALARS_H];
+        	entropy_value = lower_entropy_value + (delta_gravity_potential + C_D_P*delta_temperature)/temperature_mean;
+        	pot_temp_value = exp(entropy_value/C_D_P);
+        	pot_temperature[i] = pot_temp_value;
+        	pressure_value = P_0*pow(temperature[i]/pot_temp_value, C_D_P/R_D);
+        	rho[i] = pressure_value/(R_D*temperature[i]);
+        }
+        water_vapour_density[i] = water_vapour_density_from_rel_humidity(rel_humidity[i], temperature[i], rho[i]);
+        if (water_vapour_density[i] < 0)
+        	printf("water_vapour_density negative.\n.");
+    }
+    free(gravity_potential);
     for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
     {
+    	// Grib wants everything as 2D levels. These arrays are constructed here out of the 3D arrays.
         for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
         {
-            lat = latitude_scalar[j];
-            lon = longitude_scalar[j];
-            z_height = z_scalar[i*NUMBER_OF_SCALARS_H + j];
-            rel_humidity[j] = 0;
-            // standard atmosphere
-            if (TEST_ID == 0 || TEST_ID == 1)
-            {
-                if (z_height < TROPO_HEIGHT)
-                {
-                    temperature[j] = T_SFC + z_height*TEMP_GRADIENT;
-                    pressure[j] = 101325*pow(1 + TEMP_GRADIENT*z_height/T_SFC, -G/(R_D*TEMP_GRADIENT));
-                }
-                else
-                {
-                    temperature[j] = TROPO_TEMP;
-                    pressure[j] = 101325*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT/T_SFC, -G/(R_D*TEMP_GRADIENT))*exp(-G*(z_height - TROPO_HEIGHT)/(R_D*TROPO_TEMP));
-                }
-            }
-            // JW atmosphere
-            if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
-            {
-                find_pressure_value(lat, z_height, &pressure_value);
-                pressure[j] = pressure_value;
-                eta = pressure[j]/P_0;
-                eta_v = (eta - ETA_0)*M_PI/2;
-                T_perturb = 3.0/4.0*eta*M_PI*U_0/R_D*sin(eta_v)*pow(cos(eta_v), 0.5)*((-2*pow(sin(lat), 6)*(pow(cos(lat), 2) + 1.0/3.0) + 10.0/63.0)*2*U_0*pow(cos(eta_v), 1.5) + RADIUS*OMEGA*(8.0/5.0*pow(cos(lat), 3)*(pow(sin(lat), 2) + 2.0/3.0) - M_PI/4.0));
-                if (eta >= ETA_T)
-                {
-                    temperature[j] = T_0*pow(eta, R_D*GAMMA/G) + T_perturb;
-                    if (TEST_ID == 4 || TEST_ID == 5)
-	                    rel_humidity[j] = 0.7;
-	                else
-	                    rel_humidity[j] = 0;
-                }
-                else
-                    temperature[j] = T_0*pow(eta, R_D*GAMMA/G) + DELTA_T*pow(ETA_T - eta, 5) + T_perturb;
-            }
-            rho[j] = pressure[j]/(R_D*temperature[j]);
-            pot_temperature[j] = temperature[j]*pow(P_0/pressure[j], R_D/C_P);
-            water_vapour_density[j] = water_vapour_density_from_rel_humidity(rel_humidity[j], temperature[j], rho[j]);
-            if (water_vapour_density[j] < 0)
-            	printf("water_vapour_density negative.\n.");
-            liquid_water_density[j] = 0;
-            solid_water_density[j] = 0;
-            liquid_water_temp[j] = temperature[j];
-            solid_water_temp[j] = temperature[j];
+            rho_h[j] = rho[i*NUMBER_OF_SCALARS_H + j];
+            pot_temperature_h[j] = pot_temperature[i*NUMBER_OF_SCALARS_H + j];
+            water_vapour_density_h[j] = water_vapour_density[i*NUMBER_OF_SCALARS_H + j];
+            liquid_water_density_h[j] = liquid_water_density[i*NUMBER_OF_SCALARS_H + j];
+            solid_water_density_h[j] = solid_water_density[i*NUMBER_OF_SCALARS_H + j];
+            liquid_water_temp_h[j] = liquid_water_temp[i*NUMBER_OF_SCALARS_H + j];
+            solid_water_temp_h[j] = solid_water_temp[i*NUMBER_OF_SCALARS_H + j];
         }
         if ((retval = codes_set_long(handle_pot_temperature, "discipline", 0)))
             ECCERR(retval);
@@ -273,7 +327,7 @@ int main(int argc, char *argv[])
             ECCERR(retval);
         if ((retval = codes_set_long(handle_pot_temperature, "level", round(z_height))))
             ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_pot_temperature, "values", pot_temperature, NUMBER_OF_SCALARS_H)))
+        if ((retval = codes_set_double_array(handle_pot_temperature, "values", pot_temperature_h, NUMBER_OF_SCALARS_H)))
             ECCERR(retval);
         if (i == 0)
             codes_write_message(handle_pot_temperature, OUTPUT_FILE, "w");
@@ -309,7 +363,7 @@ int main(int argc, char *argv[])
             ECCERR(retval);
         if ((retval = codes_set_long(handle_density, "level", round(z_height))))
             ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_density, "values", rho, NUMBER_OF_SCALARS_H)))
+        if ((retval = codes_set_double_array(handle_density, "values", rho_h, NUMBER_OF_SCALARS_H)))
             ECCERR(retval);
         codes_write_message(handle_density, OUTPUT_FILE, "a");
         if ((retval = codes_set_long(handle_water_vapour_density, "discipline", 0)))
@@ -342,7 +396,7 @@ int main(int argc, char *argv[])
             ECCERR(retval);
         if ((retval = codes_set_long(handle_water_vapour_density, "level", round(z_height))))
             ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_water_vapour_density, "values", water_vapour_density, NUMBER_OF_SCALARS_H)))
+        if ((retval = codes_set_double_array(handle_water_vapour_density, "values", water_vapour_density_h, NUMBER_OF_SCALARS_H)))
             ECCERR(retval);
         codes_write_message(handle_water_vapour_density, OUTPUT_FILE, "a");
         if ((retval = codes_set_long(handle_liquid_water_density, "discipline", 0)))
@@ -375,7 +429,7 @@ int main(int argc, char *argv[])
             ECCERR(retval);
         if ((retval = codes_set_long(handle_liquid_water_density, "level", round(z_height))))
             ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_liquid_water_density, "values", liquid_water_density, NUMBER_OF_SCALARS_H)))
+        if ((retval = codes_set_double_array(handle_liquid_water_density, "values", liquid_water_density_h, NUMBER_OF_SCALARS_H)))
             ECCERR(retval);
         codes_write_message(handle_liquid_water_density, OUTPUT_FILE, "a");
         if ((retval = codes_set_long(handle_solid_water_density, "discipline", 0)))
@@ -408,7 +462,7 @@ int main(int argc, char *argv[])
             ECCERR(retval);
         if ((retval = codes_set_long(handle_solid_water_density, "level", round(z_height))))
             ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_solid_water_density, "values", solid_water_density, NUMBER_OF_SCALARS_H)))
+        if ((retval = codes_set_double_array(handle_solid_water_density, "values", solid_water_density_h, NUMBER_OF_SCALARS_H)))
             ECCERR(retval);
         codes_write_message(handle_solid_water_density, OUTPUT_FILE, "a");
         if ((retval = codes_set_long(handle_liquid_water_temp, "discipline", 0)))
@@ -441,7 +495,7 @@ int main(int argc, char *argv[])
             ECCERR(retval);
         if ((retval = codes_set_long(handle_liquid_water_temp, "level", round(z_height))))
             ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_liquid_water_temp, "values", liquid_water_temp, NUMBER_OF_SCALARS_H)))
+        if ((retval = codes_set_double_array(handle_liquid_water_temp, "values", liquid_water_temp_h, NUMBER_OF_SCALARS_H)))
             ECCERR(retval);
         codes_write_message(handle_liquid_water_temp, OUTPUT_FILE, "a");
         if ((retval = codes_set_long(handle_solid_water_temp, "discipline", 0)))
@@ -474,14 +528,15 @@ int main(int argc, char *argv[])
             ECCERR(retval);
         if ((retval = codes_set_long(handle_solid_water_temp, "level", round(z_height))))
             ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_solid_water_temp, "values", solid_water_temp, NUMBER_OF_SCALARS_H)))
+        if ((retval = codes_set_double_array(handle_solid_water_temp, "values", solid_water_temp_h, NUMBER_OF_SCALARS_H)))
             ECCERR(retval);
         codes_write_message(handle_solid_water_temp, OUTPUT_FILE, "a");
+        // wind fields are determind here
         for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
         {
-            lat = latitude_vector[j];
-            lon = longitude_vector[j];
-            z_height = z_vector[NUMBER_OF_VECTORS_V + j + i*NUMBER_OF_VECTORS_PER_LAYER];
+            //lat = latitude_vector[j];
+            //lon = longitude_vector[j];
+            // z_height = z_vector[NUMBER_OF_VECTORS_V + j + i*NUMBER_OF_VECTORS_PER_LAYER];
             // standard atmosphere: no wind
             if (TEST_ID == 0 || TEST_ID == 1)
                 wind_h[j] = 0;
@@ -534,8 +589,30 @@ int main(int argc, char *argv[])
             ECCERR(retval);
         codes_write_message(handle_wind_h, OUTPUT_FILE, "a");
     }
+    free(direction);
+    free(latitude_vector);
+    free(longitude_vector);
+    free(pressure);
+    free(pot_temperature);
+    free(temperature);
+    free(rho);
+    free(water_vapour_density);
+    free(liquid_water_density);
+    free(solid_water_density);
+    free(liquid_water_temp);
+    free(solid_water_temp);
     free(z_scalar);
     free(rel_humidity);
+    free(pressure_h);
+    free(pot_temperature_h);
+    free(temperature_h);
+    free(rho_h);
+    free(water_vapour_density_h);
+    free(liquid_water_density_h);
+    free(solid_water_density_h);
+    free(liquid_water_temp_h);
+    free(solid_water_temp_h);
+    free(wind_h);
     codes_handle_delete(handle_pot_temperature);
     codes_handle_delete(handle_density);
     codes_handle_delete(handle_wind_h);
@@ -594,22 +671,10 @@ int main(int argc, char *argv[])
         codes_write_message(handle_wind_v, OUTPUT_FILE, "a");
     }
     free(z_vector);
-    free(latitude_vector);
-    free(longitude_vector);
     free(latitude_scalar);
     free(longitude_scalar);
-    free(direction);
+    codes_handle_delete(handle_wind_v);
     free(OUTPUT_FILE);
-    free(pressure);
-    free(pot_temperature);
-    free(temperature);
-    free(rho);
-    free(water_vapour_density);
-    free(liquid_water_density);
-    free(solid_water_density);
-    free(liquid_water_temp);
-    free(solid_water_temp);
-    free(wind_h);
     free(wind_v);
     return 0;
 }

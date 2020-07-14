@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
     printf("Starting to write to output file ... ");
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NUMBER_OF_SCALARS, &scalar_dimid)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "scalar_6_index", 8*NUMBER_OF_SCALARS, &scalar_6_dimid)))
+    if ((retval = nc_def_dim(ncid_g_prop, "scalar_6_index", 6*NUMBER_OF_SCALARS, &scalar_6_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_h_index", NUMBER_OF_SCALARS_H, &scalar_h_dimid)))
         ERR(retval);

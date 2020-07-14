@@ -9,9 +9,11 @@
 # 4:	JW test, moist, balanced
 # 5:	JW test, moist, perturbed
 
-test_id=4
+
+test_id=0
 echo "Starting the test state generation ..."
 mpirun -np 1 ./test_generator $test_id
+# valgrind ./test_generator $test_id
 if [ $? -ne 0 ]
 then
 echo -e ${RED}Test state file creation failed.$NC
