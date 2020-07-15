@@ -10,8 +10,8 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int coriolis_gen(Vector_field a_field, Curl_field b_field, Vector_field out_field, Grid *grid)
 {
-    double component_0, component_1, component_2, component_3, term_0, term_1;
     int layer_index, h_index, retval;
+    double component_0, component_1, component_2, component_3, term_0, term_1;
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
@@ -19,7 +19,7 @@ int coriolis_gen(Vector_field a_field, Curl_field b_field, Vector_field out_fiel
         if (h_index >= NO_OF_VECTORS_V)
         {
         	/*
-        	Only one term is needed here, do not doubt. See Lamb transformation in spherical coordinates (the horizontal velocity is used in the cross product).
+        	Only one term is needed here, do not doubt. See Lamb transformation in spherical coordinates (only the horizontal velocity is used in the cross product).
             */
             retval = trsk_modified(a_field, b_field, layer_index, h_index - NO_OF_VECTORS_V, &term_0, grid);
 		    out_field[i] = term_0;

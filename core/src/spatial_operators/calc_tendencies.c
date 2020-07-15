@@ -48,7 +48,10 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
 	scalar_times_vector(c_h_p_field, temp_gradient, temp_gradient_times_c_h_p, grid);
 	if (no_step == 0)
 	{
-		*pressure_gradient_acc_old = *pressure_gradient_acc;
+		for (int i = 0; i < NO_OF_VECTORS; ++i)
+		{
+			pressure_gradient_acc_old[i] = pressure_gradient_acc[i];
+		}
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
 		{
 			pressure_gradient_acc[i] = -temp_gradient_times_c_h_p[i] + pressure_gradient_acc_1[i];

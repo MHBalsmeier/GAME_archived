@@ -9,7 +9,7 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
 {
-    int layer_index, h_index, lower_index, upper_index, retval;
+    int layer_index, h_index, lower_index, upper_index;
     double vertical_gradient, dzdx;
     for (int i = NO_OF_VECTORS_V; i < NO_OF_VECTORS - NO_OF_VECTORS_V; ++i)
     {
@@ -31,7 +31,7 @@ int grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
         if (h_index >= NO_OF_VECTORS_V && layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
         {
         	dzdx = (grid -> z_scalar[grid -> to_index[h_index - NO_OF_VECTORS_V] + layer_index*NO_OF_SCALARS_H] - grid -> z_scalar[grid -> from_index[h_index - NO_OF_VECTORS_V] + layer_index*NO_OF_SCALARS_H])/grid -> normal_distance[i];
-        	retval = recov_hor_ver_pri(out_field, layer_index, h_index - NO_OF_VECTORS_V, &vertical_gradient, grid);
+        	recov_hor_ver_pri(out_field, layer_index, h_index - NO_OF_VECTORS_V, &vertical_gradient, grid);
             out_field[i] = out_field[i] - dzdx*vertical_gradient;
         }
     }

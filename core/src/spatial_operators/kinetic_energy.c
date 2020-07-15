@@ -8,7 +8,7 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int kinetic_energy(Vector_field in_field, Scalar_field out_field, Grid *grid)
 {
-	// It computes the horizontal kinetic energy.
+	// It computes only the horizontal kinetic energy. Only this part is neeed for the 3D Lamb transformation.
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         out_field[i] = 0;

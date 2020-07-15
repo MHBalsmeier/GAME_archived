@@ -534,9 +534,9 @@ int main(int argc, char *argv[])
         // wind fields are determind here
         for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
         {
-            //lat = latitude_vector[j];
-            //lon = longitude_vector[j];
-            // z_height = z_vector[NUMBER_OF_VECTORS_V + j + i*NUMBER_OF_VECTORS_PER_LAYER];
+            lat = latitude_vector[j];
+            lon = longitude_vector[j];
+            z_height = z_vector[NUMBER_OF_VECTORS_V + j + i*NUMBER_OF_VECTORS_PER_LAYER];
             // standard atmosphere: no wind
             if (TEST_ID == 0 || TEST_ID == 1)
                 wind_h[j] = 0;

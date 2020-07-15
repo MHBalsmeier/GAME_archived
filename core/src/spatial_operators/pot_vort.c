@@ -9,14 +9,13 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
-    int layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area;
+    int layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area, index_0, index_1, index_2, index_3, sign_0, sign_1, sign_2, sign_3;
     double rhombus_circ, dist_0, dist_1, dist_2, dist_3, dist_0_pre, dist_2_pre, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient, density_value;
-    int index_0, index_1, index_2, index_3, sign_0, sign_1, sign_2, sign_3;
     for (int i = 0; i < NO_OF_LAYERS*(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H) + NO_OF_DUAL_VECTORS_H; ++i)
     {
         layer_index = i/(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H);
         h_index = i - layer_index*(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H);
-        // Rhombus vorticities
+        // Rhombus vorticities (stand vertically)
         if (h_index >= NO_OF_DUAL_VECTORS_H)
         {
 			edge_vector_index_h = h_index - NO_OF_DUAL_VECTORS_H;
@@ -26,13 +25,18 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
         	// The rhombus has four edges.
         	for (int k = 0; k < 4; ++k)
         	{
+        		// This is the index of one of the rhombus edges.
 				index = NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> vorticity_indices[4*edge_vector_index_h + k];
+			    // This sign is positive for a positive sence of rotation.
 			    sign = dualgrid -> vorticity_signs[4*edge_vector_index_h + k];
+		    	// This is the value of the velocity at the rhombus edge.
 		    	velocity_value = velocity_field[index];
+		    	// length_rescale_factor corrects for terrain following coordinates
 		    	length_rescale_factor = 1;
 		        if (layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
 		        {
             		length_rescale_factor = (RADIUS + grid -> z_vector[edge_vector_index])/(RADIUS + grid -> z_vector[index]);
+            		// In terrain following coordinates, a vertical interpolation onto the reference z coordinate must be made. Therefore, delta_z and vertical_gradient must be determined.
 		        	delta_z = grid -> z_vector[edge_vector_index] - grid -> z_vector[index];
 		        	if (delta_z > 0)
 		        		index_for_vertical_gradient = index - NO_OF_VECTORS_PER_LAYER;
@@ -44,6 +48,7 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
 		        			index_for_vertical_gradient = index + NO_OF_VECTORS_PER_LAYER;
 		        	}
 		        	vertical_gradient = (velocity_field[index] - velocity_field[index_for_vertical_gradient])/(grid -> z_vector[index] - grid -> z_vector[index_for_vertical_gradient]);
+		        	// Here, the vertical interpolation is made.
 		        	velocity_value += delta_z*vertical_gradient;
     			}
     			rhombus_circ += length_rescale_factor*grid -> normal_distance[index]*sign*velocity_value;
