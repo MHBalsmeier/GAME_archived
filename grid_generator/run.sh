@@ -2,7 +2,7 @@
 # Github repository: https://github.com/MHBalsmeier/game
 
 oro_id=2
-optimize=1
+optimize=0
 n_iterations=2000
 use_scalar_h_coords_file=1
 scalar_h_coords_file="nc_files/B5L26T30000_O0_OL17_SCVT.nc"
@@ -22,7 +22,7 @@ echo "Optimization is switched off."
 fi
 if [ $use_scalar_h_coords_file -eq 1 ]
 then
-echo "Horizontal coordinates of the generating points (the scalar points in terms of the model) will be read from file $scalar_h_coords_file. This overwrites optimization options."
+echo "Horizontal coordinates of the generating points (the scalar points in terms of the model) will be read from file $scalar_h_coords_file."
 fi
 echo ""
 echo "********** Calling the GAME grid generator **********"

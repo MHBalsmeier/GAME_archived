@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
     for (int i = NUMBER_OF_SCALARS - 1; i >= 0; --i)
     {
     	layer_index = i/NUMBER_OF_SCALARS_H;
-    	// at the lowest the density is set using the equation of state, can be considered a boundary condition
+    	// at the lowest layer the density is set using the equation of state, can be considered a boundary condition
     	if (layer_index == NUMBER_OF_LAYERS - 1)
     	{
         	pot_temperature[i] = temperature[i]*pow(P_0/pressure[i], R_D/C_D_P);

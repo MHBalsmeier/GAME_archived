@@ -9,17 +9,6 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdio.h>
 #include "geos95.h"
 
-int find_angle_change(double angle_0, double angle_1, double *result)
-{
-    double result_pre = angle_1 - angle_0;
-    if (result_pre > M_PI)
-        result_pre = result_pre - 2*M_PI;
-    if (result_pre < -M_PI)
-        result_pre = result_pre + 2*M_PI;
-    *result = result_pre;
-    return 0;
-}
-
 int find_coords_from_triangle_on_face_index(int triangle_on_face_index, int res_id, int *coord_0, int *coord_1, int *coord_0_points_amount)
 {
     int check = 1;
@@ -264,18 +253,6 @@ int find_triangle_edge_points_from_dual_scalar_on_face_index(int dual_scalar_on_
     return retval;
 }
 
-int find_points_per_edge(int res_id, int *points_per_edge)
-{
-    *points_per_edge = (int) (pow(2, res_id) - 1);
-    return 0;
-}
-
-int find_scalar_points_per_inner_face(int res_id, int *scalar_points_per_inner_face)
-{
-    *scalar_points_per_inner_face = (int) (0.5*(pow(2, res_id) - 2)*(pow(2, res_id) - 1));
-    return 0;
-}
-
 int upscale_scalar_point(int res_id, int old_index, int *new_index)
 {
     int edge_index, face_index;
@@ -306,6 +283,7 @@ int upscale_scalar_point(int res_id, int old_index, int *new_index)
 int write_scalar_coordinates(int edgepoint_0, int edgepoint_1, int edgepoint_2, int point_0, int point_1, int point_2, int points_upwards, double x_unity[], double y_unity[], double z_unity[], double latitude_scalar[], double longitude_scalar[])
 {
     double x_res, y_res, z_res, lat_res, lon_res;
+    // first point
     int retval = find_between_point(x_unity[edgepoint_0], y_unity[edgepoint_0], z_unity[edgepoint_0], x_unity[edgepoint_1], y_unity[edgepoint_1], z_unity[edgepoint_1], 0.5, &x_res, &y_res, &z_res);
     retval += normalize_cartesian(x_res, y_res, z_res, &x_res, &y_res, &z_res);
     if (points_upwards == 1)
@@ -331,6 +309,7 @@ int write_scalar_coordinates(int edgepoint_0, int edgepoint_1, int edgepoint_2, 
         latitude_scalar[point_1] = lat_res;
         longitude_scalar[point_1] = lon_res;
     }
+    // second point
     retval += find_between_point(x_unity[edgepoint_1], y_unity[edgepoint_1], z_unity[edgepoint_1], x_unity[edgepoint_2], y_unity[edgepoint_2], z_unity[edgepoint_2], 0.5, &x_res, &y_res, &z_res);
     retval += normalize_cartesian(x_res, y_res, z_res, &x_res, &y_res, &z_res);
     if (points_upwards == 1)
@@ -356,6 +335,7 @@ int write_scalar_coordinates(int edgepoint_0, int edgepoint_1, int edgepoint_2, 
         latitude_scalar[point_2] = lat_res;
         longitude_scalar[point_2] = lon_res;
     }
+    // third point
     retval += find_between_point(x_unity[edgepoint_2], y_unity[edgepoint_2], z_unity[edgepoint_2], x_unity[edgepoint_0], y_unity[edgepoint_0], z_unity[edgepoint_0], 0.5, &x_res, &y_res, &z_res);
     retval += normalize_cartesian(x_res, y_res, z_res, &x_res, &y_res, &z_res);
     if (points_upwards == 1)
@@ -382,12 +362,6 @@ int write_scalar_coordinates(int edgepoint_0, int edgepoint_1, int edgepoint_2, 
         longitude_scalar[point_0] = lon_res;
     }
     return retval;
-}
-
-int find_triangles_per_face(int res_id, int *number_of_triangles_per_face)
-{
-    *number_of_triangles_per_face = (int) (pow(4, res_id));
-    return 0;
 }
 
 int find_v_vector_indices_for_dual_scalar_z(int from_index[], int to_index[], int vorticity_indices_pre[], int dual_scalar_h_index, int index_vector_for_dual_scalar_z[])
@@ -421,6 +395,24 @@ int find_v_vector_indices_for_dual_scalar_z(int from_index[], int to_index[], in
 		return 1;
 	else
 		return 0;
+}
+
+int find_points_per_edge(int res_id, int *points_per_edge)
+{
+    *points_per_edge = (int) (pow(2, res_id) - 1);
+    return 0;
+}
+
+int find_scalar_points_per_inner_face(int res_id, int *scalar_points_per_inner_face)
+{
+    *scalar_points_per_inner_face = (int) (0.5*(pow(2, res_id) - 2)*(pow(2, res_id) - 1));
+    return 0;
+}
+
+int find_triangles_per_face(int res_id, int *number_of_triangles_per_face)
+{
+    *number_of_triangles_per_face = (int) (pow(4, res_id));
+    return 0;
 }
 
 int build_icosahedron(double latitude_ico[], double longitude_ico[], int edge_vertices[][2], int face_vertices[][3], int face_edges[][3], int face_edges_reverse[][3])

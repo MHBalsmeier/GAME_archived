@@ -23,14 +23,13 @@ int optimize_to_scvt(double latitude_scalar[], double longitude_scalar[], double
     	retval = find_cell_cgs(latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, adjacent_vector_indices_h, from_index_dual, to_index_dual);
     	printf("Optimizing grid - iteration %d completed.\n", i + 1);
 	}
-	retval = set_scalar_h_dual_coords(latitude_scalar_dual, longitude_scalar_dual, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
 	return retval;
 }
 
 int find_cell_cgs(double latitude_scalar[], double longitude_scalar[], double latitude_scalar_dual[], double longitude_scalar_dual[], int adjacent_vector_indices_h[], int from_index_dual[], int to_index_dual[])
 {
 	int number_of_edges, counter, vertex_index_candidate_0, vertex_index_candidate_1, retval, check_result;
-	double lat_res, lon_res, x_res_normalized, y_res_normalized, z_res_normalized, x_res, y_res, z_res, triangle_unity_face, x_0, y_0, z_0, x_1, y_1, z_1, x_2, y_2, z_2, lat_0, lon_0, lat_1, lon_1, lat_2, lon_2;
+	double lat_res, lon_res, x_res, y_res, z_res, triangle_unity_face, x_0, y_0, z_0, x_1, y_1, z_1, x_2, y_2, z_2, lat_0, lon_0, lat_1, lon_1, lat_2, lon_2;
 	for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
 	{
 		number_of_edges = 6;
@@ -65,6 +64,8 @@ int find_cell_cgs(double latitude_scalar[], double longitude_scalar[], double la
 				++counter;
 			}
 		}
+		if (counter != number_of_edges)
+			printf("Trouble in find_cell_cgs detected.\n");
 		sort_edge_indices(latitude_vertices, longitude_vertices, number_of_edges, indices_resorted);
 		for (int j = 0; j < number_of_edges; ++j)
 			vertex_indices_resorted[j] = vertex_indices[indices_resorted[j]];
@@ -87,8 +88,7 @@ int find_cell_cgs(double latitude_scalar[], double longitude_scalar[], double la
 			y_res += triangle_unity_face*(y_0 + y_1 + y_2);
 			z_res += triangle_unity_face*(z_0 + z_1 + z_2);
 		}
-		normalize_cartesian(x_res, y_res, z_res, &x_res_normalized, &y_res_normalized, &z_res_normalized);
-		find_geos(x_res_normalized, y_res_normalized, z_res_normalized, &lat_res, &lon_res);
+		find_geos(x_res, y_res, z_res, &lat_res, &lon_res);
 		latitude_scalar[i] = lat_res;
 		longitude_scalar[i] = lon_res;
 	}
