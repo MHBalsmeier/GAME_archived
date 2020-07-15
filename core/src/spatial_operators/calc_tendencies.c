@@ -11,14 +11,24 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdlib.h>
 #include <stdio.h>
 
-int explicit_momentum_tendencies(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int dissipation_on, int tracers_on, Scalar_field temperature, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Vector_field friction_acc, Scalar_field heating_diss, Scalar_field specific_entropy, Curl_field pot_vort, Vector_field gradient_geopotential_energy, Vector_field pressure_gradient_acc, Vector_field pot_vort_tend, Vector_field specific_entropy_gradient, Scalar_field c_h_p_field, Scalar_field e_kin_h, Scalar_field pressure_gradient_decel_factor, Vector_field pressure_gradient_acc_1, int diss_update, Vector_field temp_gradient_times_c_h_p, Vector_field pressure_gradient_acc_old, int no_step, Vector_field e_kin_h_grad, Vector_field mass_dry_flux_density)
+int explicit_momentum_tendencies(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int momentum_diffusion_on, int tracers_on, Scalar_field temperature, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Vector_field friction_acc, Scalar_field heating_diss, Scalar_field specific_entropy, Curl_field pot_vort, Vector_field gradient_geopotential_energy, Vector_field pressure_gradient_acc, Vector_field pot_vort_tend, Vector_field specific_entropy_gradient, Scalar_field c_h_p_field, Scalar_field e_kin_h, Scalar_field pressure_gradient_decel_factor, Vector_field pressure_gradient_acc_1, int momentum_diff_update, Vector_field temp_gradient_times_c_h_p, Vector_field pressure_gradient_acc_old, int no_step_rk, Vector_field e_kin_h_grad, Vector_field mass_dry_flux_density, int totally_first_step_bool)
 {	
+	// Here, weights of the horizontal pressure gradient can be chosen as usual.
+	// This is in potential temperature formulation.
 	double old_hor_grad_weight = R_D/C_D_P - 0.5;
-	double new_hor_grad_weight = C_D_V/C_D_P + 0.5;
-	old_hor_grad_weight = 0;
-	new_hor_grad_weight = 1;
+	// -2.0/3: 12 hrs to crash
+	// -1.0/3: 
+	old_hor_grad_weight = -2.0/3;
+	double new_hor_grad_weight = 1 - old_hor_grad_weight;
+	if (totally_first_step_bool == 1)
+	{
+		old_hor_grad_weight = 0;
+		new_hor_grad_weight = 1;
+	}
+	// old_hor_grad_weight = 0;
+	// new_hor_grad_weight = 1;
 	temperature_diagnostics(current_state -> entropy_gas, current_state -> density_dry, current_state -> tracer_densities, temperature);
-    if (diss_update == 1)
+    if (momentum_diff_update == 1)
     {
 		dissipation(current_state -> velocity_gas, current_state -> density_dry, friction_acc, heating_diss, grid);
     }
@@ -46,11 +56,22 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
 	}
     grad(temperature, temp_gradient, grid);
 	scalar_times_vector(c_h_p_field, temp_gradient, temp_gradient_times_c_h_p, grid);
-	if (no_step == 0)
+	// Here, the update of the pressure gradient is managed.
+	if (no_step_rk == 0)
 	{
-		for (int i = 0; i < NO_OF_VECTORS; ++i)
+		if (totally_first_step_bool == 0)
 		{
-			pressure_gradient_acc_old[i] = pressure_gradient_acc[i];
+			for (int i = 0; i < NO_OF_VECTORS; ++i)
+			{
+				pressure_gradient_acc_old[i] = pressure_gradient_acc[i];
+			}
+		}
+		else
+		{
+			for (int i = 0; i < NO_OF_VECTORS; ++i)
+			{
+				pressure_gradient_acc_old[i] = 0;
+			}
 		}
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
 		{
@@ -67,6 +88,7 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
 				pressure_gradient_acc[i] = -temp_gradient_times_c_h_p[i] + pressure_gradient_acc_1[i];
 		}	
 	}
+	// The pressure gradient has to get a deceleration factor in presence of condensates.
 	double total_density;
 	if (tracers_on == 1)
 	{
@@ -82,11 +104,15 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
 		}
 		scalar_times_vector(pressure_gradient_decel_factor, pressure_gradient_acc, pressure_gradient_acc, grid);
 	}
+	// Here, the gaseous flux density is prepared fore the generalized Coriolis term.
     scalar_times_vector(current_state -> density_dry, current_state -> velocity_gas, mass_dry_flux_density, grid);
+    // Noew, the generalized Coriolis term is evaluated.
     coriolis_gen(mass_dry_flux_density, pot_vort, pot_vort_tend, grid);
+    // Horizontal kinetic energy is prepared for the gradient term of the Lamb transformation.
     kinetic_energy(current_state -> velocity_gas, e_kin_h, grid);
     grad(e_kin_h, e_kin_h_grad, grid);
     grad(grid -> gravity_potential, gradient_geopotential_energy, grid);
+    // Now the explicit forces are added up.
     int hor_non_trad_cori_sign;
     double metric_term, vertical_velocity, hor_non_trad_cori_term;
     for (int i = 0; i < NO_OF_VECTORS; ++i)
@@ -97,7 +123,7 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
             state_tendency -> velocity_gas[i] = 0;
         else
         {
-        	if (dissipation_on == 1)
+        	if (momentum_diffusion_on == 1)
         	{
         		if (h_index >= NO_OF_VECTORS_V)
         		{
@@ -132,7 +158,7 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
     return 0;
 }
 
-int calc_partially_implicit_divvs(State *next_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int dissipation_on, int rad_update, int tracers_on, double delta_t, int diffusion_on, Scalar_field radiation_tendency, int phase_transitions_on, double tracer_mass_source_rates[], double tracer_heat_source_rates[], Vector_field mass_dry_flux_density, Scalar_field mass_dry_flux_density_divv, Scalar_field temperature, Vector_field entropy_gas_flux_density, Scalar_field entropy_gas_flux_density_divv, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Scalar_field heating_diss, Scalar_field diffusion_coeff_numerical_h, Scalar_field diffusion_coeff_numerical_v, Vector_field mass_dry_diffusion_flux_density, Scalar_field mass_dry_diffusion_source_rate, Vector_field temperature_flux_density, Scalar_field tracer_density, Vector_field tracer_velocity, Vector_field tracer_flux_density, Scalar_field tracer_flux_density_divv, Scalar_field tracer_density_temperature, Vector_field tracer_temperature_flux_density, Scalar_field tracer_temperature_flux_density_divv, int diff_update)
+int calc_partially_implicit_divvs(State *next_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int momentum_diffusion_on, int rad_update, int tracers_on, double delta_t, int diffusion_on, Scalar_field radiation_tendency, int phase_transitions_on, double tracer_mass_source_rates[], double tracer_heat_source_rates[], Vector_field mass_dry_flux_density, Scalar_field mass_dry_flux_density_divv, Scalar_field temperature, Vector_field entropy_gas_flux_density, Scalar_field entropy_gas_flux_density_divv, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Scalar_field heating_diss, Scalar_field diffusion_coeff_numerical_h, Scalar_field diffusion_coeff_numerical_v, Vector_field mass_dry_diffusion_flux_density, Scalar_field mass_dry_diffusion_source_rate, Vector_field temperature_flux_density, Scalar_field tracer_density, Vector_field tracer_velocity, Vector_field tracer_flux_density, Scalar_field tracer_flux_density_divv, Scalar_field tracer_density_temperature, Vector_field tracer_temperature_flux_density, Scalar_field tracer_temperature_flux_density_divv, int diff_update)
 {
     scalar_times_vector(next_state -> density_dry, next_state -> velocity_gas, mass_dry_flux_density, grid);
     divv_h(mass_dry_flux_density, mass_dry_flux_density_divv, grid);
@@ -242,7 +268,7 @@ int calc_partially_implicit_divvs(State *next_state, State *state_tendency, Grid
                 total_density += next_state -> tracer_densities[k*NO_OF_SCALARS + i];
             c_h_v = spec_heat_cap_diagnostics_v(next_state -> density_dry[i], next_state -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i]);
             rho_h = next_state -> density_dry[i] + next_state -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];
-            state_tendency -> entropy_gas[i] = -entropy_gas_flux_density_divv[i] + 1/temperature[i]*(rho_h/total_density*(temp_diffusion_heating[i] + dissipation_on*heating_diss[i] + radiation_tendency[i]) + tracers_on*phase_transitions_on*tracer_heat_source_rates[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i]);
+            state_tendency -> entropy_gas[i] = -entropy_gas_flux_density_divv[i] + 1/temperature[i]*(rho_h/total_density*(temp_diffusion_heating[i] + momentum_diffusion_on*heating_diss[i] + radiation_tendency[i]) + tracers_on*phase_transitions_on*tracer_heat_source_rates[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i]);
         }
         else
         {
