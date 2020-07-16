@@ -19,4 +19,8 @@ write_out_entropy_gas_integral=1
 write_out_energy_integral=1
 export OMP_NUM_THREADS=4
 number_of_cpus=1
+year=2000
+month=1
+day=1
+hour=0
 source core/run.sh

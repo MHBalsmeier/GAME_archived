@@ -19,26 +19,23 @@ For more specific details see handbook.
 #include <string.h>
 #include <math.h>
 #include <netcdf.h>
-#include "eccodes.h"
 #include "geos95.h"
 #include "atmostracers.h"
-#define ERRCODE 3
-#define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 #define N_A (6.0221409e23)
 #define K_B (1.380649e-23)
 #define M_D 0.028964420
 #define R (N_A*K_B)
 #define R_D (R/M_D)
-#define P_0 100000
+#define P_0 100000.0
 #define OMEGA (7.292115e-5)
 #define C_D_P 1005.0
 
 // constants specifying the grid
 const double TOA = 30000;
-const double G = 9.80616;
 
 // constants needed for the JW test state
+const double G = 9.80616;
 const double TROPO_HEIGHT = 12e3;
 const double T_SFC = 273.15 + 15;
 double T_0 = 288;
@@ -72,7 +69,7 @@ int main(int argc, char *argv[])
     double *z_scalar = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *z_vector = malloc(NUMBER_OF_VECTORS*sizeof(double));
     double *gravity_potential = malloc(NUMBER_OF_VECTORS*sizeof(double));
-    int ncid, retval;
+    int ncid_grid, retval;
     short GEO_PROP_FILE_LENGTH = 100;
     char *GEO_PROP_FILE_PRE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
     sprintf(GEO_PROP_FILE_PRE, "../grid_generator/nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
@@ -80,128 +77,64 @@ int main(int argc, char *argv[])
     free(GEO_PROP_FILE_PRE);
     char *GEO_PROP_FILE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
     sprintf(GEO_PROP_FILE, "../grid_generator/nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
-    if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
+    if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid_grid)))
         NCERR(retval);
     free(GEO_PROP_FILE);
     int direction_id, latitude_scalar_id, longitude_scalar_id, latitude_vector_id, longitude_vector_id, z_scalar_id, z_vector_id, gravity_potential_id;
-    if ((retval = nc_inq_varid(ncid, "direction", &direction_id)))
+    if ((retval = nc_inq_varid(ncid_grid, "direction", &direction_id)))
         NCERR(retval);
-    if ((retval = nc_inq_varid(ncid, "latitude_scalar", &latitude_scalar_id)))
+    if ((retval = nc_inq_varid(ncid_grid, "latitude_scalar", &latitude_scalar_id)))
         NCERR(retval);
-    if ((retval = nc_inq_varid(ncid, "longitude_scalar", &longitude_scalar_id)))
+    if ((retval = nc_inq_varid(ncid_grid, "longitude_scalar", &longitude_scalar_id)))
         NCERR(retval);
-    if ((retval = nc_inq_varid(ncid, "latitude_vector", &latitude_vector_id)))
+    if ((retval = nc_inq_varid(ncid_grid, "latitude_vector", &latitude_vector_id)))
         NCERR(retval);
-    if ((retval = nc_inq_varid(ncid, "longitude_vector", &longitude_vector_id)))
+    if ((retval = nc_inq_varid(ncid_grid, "longitude_vector", &longitude_vector_id)))
         NCERR(retval);
-    if ((retval = nc_inq_varid(ncid, "z_scalar", &z_scalar_id)))
+    if ((retval = nc_inq_varid(ncid_grid, "z_scalar", &z_scalar_id)))
         NCERR(retval);
-    if ((retval = nc_inq_varid(ncid, "z_vector", &z_vector_id)))
+    if ((retval = nc_inq_varid(ncid_grid, "z_vector", &z_vector_id)))
         NCERR(retval);
-    if ((retval = nc_inq_varid(ncid, "gravity_potential", &gravity_potential_id)))
+    if ((retval = nc_inq_varid(ncid_grid, "gravity_potential", &gravity_potential_id)))
         NCERR(retval);
-    if ((retval = nc_get_var_double(ncid, direction_id, &direction[0])))
+    if ((retval = nc_get_var_double(ncid_grid, direction_id, &direction[0])))
         NCERR(retval);
-    if ((retval = nc_get_var_double(ncid, latitude_scalar_id, &latitude_scalar[0])))
+    if ((retval = nc_get_var_double(ncid_grid, latitude_scalar_id, &latitude_scalar[0])))
         NCERR(retval);
-    if ((retval = nc_get_var_double(ncid, longitude_scalar_id, &longitude_scalar[0])))
+    if ((retval = nc_get_var_double(ncid_grid, longitude_scalar_id, &longitude_scalar[0])))
         NCERR(retval);
-    if ((retval = nc_get_var_double(ncid, latitude_vector_id, &latitude_vector[0])))
+    if ((retval = nc_get_var_double(ncid_grid, latitude_vector_id, &latitude_vector[0])))
         NCERR(retval);
-    if ((retval = nc_get_var_double(ncid, longitude_vector_id, &longitude_vector[0])))
+    if ((retval = nc_get_var_double(ncid_grid, longitude_vector_id, &longitude_vector[0])))
         NCERR(retval);
-    if ((retval = nc_get_var_double(ncid, z_scalar_id, &z_scalar[0])))
+    if ((retval = nc_get_var_double(ncid_grid, z_scalar_id, &z_scalar[0])))
         NCERR(retval);
-    if ((retval = nc_get_var_double(ncid, z_vector_id, &z_vector[0])))
+    if ((retval = nc_get_var_double(ncid_grid, z_vector_id, &z_vector[0])))
         NCERR(retval);
-    if ((retval = nc_get_var_double(ncid, gravity_potential_id, &gravity_potential[0])))
+    if ((retval = nc_get_var_double(ncid_grid, gravity_potential_id, &gravity_potential[0])))
         NCERR(retval);
-    if ((retval = nc_close(ncid)))
+    if ((retval = nc_close(ncid_grid)))
         NCERR(retval);
-    char *SAMPLE_FILE = "grib_files/grib_template.grb2";
-    FILE *SAMPLE;
-    int err = 0;
     short OUTPUT_FILE_LENGTH = 100;
     char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(OUTPUT_FILE_PRE, "grib_files/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.grb2", TEST_ID, RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
+    sprintf(OUTPUT_FILE_PRE, "nc_files/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", TEST_ID, RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
     OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
     free(OUTPUT_FILE_PRE);
     char *OUTPUT_FILE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(OUTPUT_FILE, "grib_files/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.grb2", TEST_ID, RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
-    codes_handle *handle_pot_temperature = NULL;
-    codes_handle *handle_density = NULL;
-    codes_handle *handle_wind_h = NULL;
-    codes_handle *handle_wind_v = NULL;
-    codes_handle *handle_water_vapour_density = NULL;
-    codes_handle *handle_liquid_water_density = NULL;
-    codes_handle *handle_solid_water_density = NULL;
-    codes_handle *handle_liquid_water_temp = NULL;
-    codes_handle *handle_solid_water_temp = NULL;
-    // 3D arrays
+    sprintf(OUTPUT_FILE, "nc_files/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", TEST_ID, RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
     double *pressure = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *pot_temperature = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *temperature = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *rho = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *rel_humidity = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    double *wind = malloc(NUMBER_OF_VECTORS*sizeof(double));
     double *water_vapour_density = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *liquid_water_density = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *solid_water_density = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *liquid_water_temp = malloc(NUMBER_OF_SCALARS*sizeof(double));
     double *solid_water_temp = malloc(NUMBER_OF_SCALARS*sizeof(double));
-    // grib requires everything on horizontal levels
-    double *pressure_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *pot_temperature_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *temperature_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *rho_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *water_vapour_density_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *liquid_water_density_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *solid_water_density_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *liquid_water_temp_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *solid_water_temp_h = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *wind_h = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
-    double *wind_v = malloc(NUMBER_OF_VECTORS_V*sizeof(double));
     const double TROPO_TEMP = T_SFC + TROPO_HEIGHT*TEMP_GRADIENT;
     double z_height;
-    SAMPLE = fopen(SAMPLE_FILE, "r");
-    handle_pot_temperature = codes_handle_new_from_file(NULL, SAMPLE, PRODUCT_GRIB, &err);
-    if (err != 0)
-        ECCERR(err);
-    fclose(SAMPLE);
-    SAMPLE = fopen(SAMPLE_FILE, "r");
-    handle_density = codes_handle_new_from_file(NULL, SAMPLE, PRODUCT_GRIB, &err);
-    if (err != 0)
-        ECCERR(err);
-    fclose(SAMPLE);
-    SAMPLE = fopen(SAMPLE_FILE, "r");
-    handle_water_vapour_density = codes_handle_new_from_file(NULL, SAMPLE, PRODUCT_GRIB, &err);
-    if (err != 0)
-        ECCERR(err);
-    fclose(SAMPLE);
-    SAMPLE = fopen(SAMPLE_FILE, "r");
-    handle_liquid_water_density = codes_handle_new_from_file(NULL, SAMPLE, PRODUCT_GRIB, &err);
-    if (err != 0)
-        ECCERR(err);
-    fclose(SAMPLE);
-    SAMPLE = fopen(SAMPLE_FILE, "r");
-    handle_solid_water_density = codes_handle_new_from_file(NULL, SAMPLE, PRODUCT_GRIB, &err);
-    if (err != 0)
-        ECCERR(err);
-    fclose(SAMPLE);
-    SAMPLE = fopen(SAMPLE_FILE, "r");
-    handle_liquid_water_temp = codes_handle_new_from_file(NULL, SAMPLE, PRODUCT_GRIB, &err);
-    if (err != 0)
-        ECCERR(err);
-    fclose(SAMPLE);
-    SAMPLE = fopen(SAMPLE_FILE, "r");
-    handle_solid_water_temp = codes_handle_new_from_file(NULL, SAMPLE, PRODUCT_GRIB, &err);
-    if (err != 0)
-        ECCERR(err);
-    fclose(SAMPLE);
-    SAMPLE = fopen(SAMPLE_FILE, "r");
-    handle_wind_h = codes_handle_new_from_file(NULL, SAMPLE, PRODUCT_GRIB, &err);
-    if (err != 0)
-        ECCERR(err);
-    fclose(SAMPLE);
     double lat, lon;
     double u, eta, eta_v, T_perturb, distance, pressure_value;
     double u_p = 1.0;
@@ -286,252 +219,7 @@ int main(int argc, char *argv[])
     free(gravity_potential);
     for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
     {
-    	// Grib wants everything as 2D levels. These arrays are constructed here out of the 3D arrays.
-        for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
-        {
-            rho_h[j] = rho[i*NUMBER_OF_SCALARS_H + j];
-            pot_temperature_h[j] = pot_temperature[i*NUMBER_OF_SCALARS_H + j];
-            water_vapour_density_h[j] = water_vapour_density[i*NUMBER_OF_SCALARS_H + j];
-            liquid_water_density_h[j] = liquid_water_density[i*NUMBER_OF_SCALARS_H + j];
-            solid_water_density_h[j] = solid_water_density[i*NUMBER_OF_SCALARS_H + j];
-            liquid_water_temp_h[j] = liquid_water_temp[i*NUMBER_OF_SCALARS_H + j];
-            solid_water_temp_h[j] = solid_water_temp[i*NUMBER_OF_SCALARS_H + j];
-        }
-        if ((retval = codes_set_long(handle_pot_temperature, "discipline", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature, "centre", 255)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature, "significanceOfReferenceTime", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature, "productionStatusOfProcessedData", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature, "typeOfProcessedData", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature, "indicatorOfUnitOfTimeRange", 13)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature, "dataDate", 20000101)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature, "dataTime", 0000)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature, "typeOfGeneratingProcess", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature, "parameterCategory", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature, "parameterNumber", 2)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature, "typeOfFirstFixedSurface", 102)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature, "scaledValueOfFirstFixedSurface", round(z_height))))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature, "scaleFactorOfFirstFixedSurface", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_pot_temperature, "level", round(z_height))))
-            ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_pot_temperature, "values", pot_temperature_h, NUMBER_OF_SCALARS_H)))
-            ECCERR(retval);
-        if (i == 0)
-            codes_write_message(handle_pot_temperature, OUTPUT_FILE, "w");
-        else
-            codes_write_message(handle_pot_temperature, OUTPUT_FILE, "a");
-        if ((retval = codes_set_long(handle_density, "discipline", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_density, "centre", 255)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_density, "significanceOfReferenceTime", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_density, "productionStatusOfProcessedData", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_density, "typeOfProcessedData", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_density, "indicatorOfUnitOfTimeRange", 13)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_density, "dataDate", 20000101)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_density, "dataTime", 0000)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_density, "typeOfGeneratingProcess", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_density, "parameterCategory", 3)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_density, "parameterNumber", 10)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_density, "typeOfFirstFixedSurface", 102)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_density, "scaledValueOfFirstFixedSurface", round(z_height))))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_density, "scaleFactorOfFirstFixedSurface", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_density, "level", round(z_height))))
-            ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_density, "values", rho_h, NUMBER_OF_SCALARS_H)))
-            ECCERR(retval);
-        codes_write_message(handle_density, OUTPUT_FILE, "a");
-        if ((retval = codes_set_long(handle_water_vapour_density, "discipline", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_water_vapour_density, "centre", 255)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_water_vapour_density, "significanceOfReferenceTime", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_water_vapour_density, "productionStatusOfProcessedData", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_water_vapour_density, "typeOfProcessedData", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_water_vapour_density, "indicatorOfUnitOfTimeRange", 13)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_water_vapour_density, "dataDate", 20000101)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_water_vapour_density, "dataTime", 0000)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_water_vapour_density, "typeOfGeneratingProcess", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_water_vapour_density, "parameterCategory", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_water_vapour_density, "parameterNumber", 18)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_water_vapour_density, "typeOfFirstFixedSurface", 102)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_water_vapour_density, "scaledValueOfFirstFixedSurface", round(z_height))))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_water_vapour_density, "scaleFactorOfFirstFixedSurface", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_water_vapour_density, "level", round(z_height))))
-            ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_water_vapour_density, "values", water_vapour_density_h, NUMBER_OF_SCALARS_H)))
-            ECCERR(retval);
-        codes_write_message(handle_water_vapour_density, OUTPUT_FILE, "a");
-        if ((retval = codes_set_long(handle_liquid_water_density, "discipline", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_density, "centre", 255)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_density, "significanceOfReferenceTime", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_density, "productionStatusOfProcessedData", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_density, "typeOfProcessedData", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_density, "indicatorOfUnitOfTimeRange", 13)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_density, "dataDate", 20000101)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_density, "dataTime", 0000)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_density, "typeOfGeneratingProcess", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_density, "parameterCategory", 6)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_density, "parameterNumber", 38)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_density, "typeOfFirstFixedSurface", 102)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_density, "scaledValueOfFirstFixedSurface", round(z_height))))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_density, "scaleFactorOfFirstFixedSurface", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_density, "level", round(z_height))))
-            ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_liquid_water_density, "values", liquid_water_density_h, NUMBER_OF_SCALARS_H)))
-            ECCERR(retval);
-        codes_write_message(handle_liquid_water_density, OUTPUT_FILE, "a");
-        if ((retval = codes_set_long(handle_solid_water_density, "discipline", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_density, "centre", 255)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_density, "significanceOfReferenceTime", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_density, "productionStatusOfProcessedData", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_density, "typeOfProcessedData", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_density, "indicatorOfUnitOfTimeRange", 13)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_density, "dataDate", 20000101)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_density, "dataTime", 0000)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_density, "typeOfGeneratingProcess", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_density, "parameterCategory", 6)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_density, "parameterNumber", 39)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_density, "typeOfFirstFixedSurface", 102)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_density, "scaledValueOfFirstFixedSurface", round(z_height))))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_density, "scaleFactorOfFirstFixedSurface", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_density, "level", round(z_height))))
-            ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_solid_water_density, "values", solid_water_density_h, NUMBER_OF_SCALARS_H)))
-            ECCERR(retval);
-        codes_write_message(handle_solid_water_density, OUTPUT_FILE, "a");
-        if ((retval = codes_set_long(handle_liquid_water_temp, "discipline", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_temp, "centre", 255)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_temp, "significanceOfReferenceTime", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_temp, "productionStatusOfProcessedData", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_temp, "typeOfProcessedData", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_temp, "indicatorOfUnitOfTimeRange", 13)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_temp, "dataDate", 20000101)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_temp, "dataTime", 0000)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_temp, "typeOfGeneratingProcess", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_temp, "parameterCategory", 6)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_temp, "parameterNumber", 192)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_temp, "typeOfFirstFixedSurface", 102)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_temp, "scaledValueOfFirstFixedSurface", round(z_height))))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_temp, "scaleFactorOfFirstFixedSurface", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_liquid_water_temp, "level", round(z_height))))
-            ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_liquid_water_temp, "values", liquid_water_temp_h, NUMBER_OF_SCALARS_H)))
-            ECCERR(retval);
-        codes_write_message(handle_liquid_water_temp, OUTPUT_FILE, "a");
-        if ((retval = codes_set_long(handle_solid_water_temp, "discipline", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_temp, "centre", 255)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_temp, "significanceOfReferenceTime", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_temp, "productionStatusOfProcessedData", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_temp, "typeOfProcessedData", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_temp, "indicatorOfUnitOfTimeRange", 13)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_temp, "dataDate", 20000101)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_temp, "dataTime", 0000)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_temp, "typeOfGeneratingProcess", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_temp, "parameterCategory", 6)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_temp, "parameterNumber", 193)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_temp, "typeOfFirstFixedSurface", 102)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_temp, "scaledValueOfFirstFixedSurface", round(z_height))))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_temp, "scaleFactorOfFirstFixedSurface", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_solid_water_temp, "level", round(z_height))))
-            ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_solid_water_temp, "values", solid_water_temp_h, NUMBER_OF_SCALARS_H)))
-            ECCERR(retval);
-        codes_write_message(handle_solid_water_temp, OUTPUT_FILE, "a");
-        // wind fields are determind here
+        // horizontal wind fields are determind here
         for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
         {
             lat = latitude_vector[j];
@@ -539,7 +227,7 @@ int main(int argc, char *argv[])
             z_height = z_vector[NUMBER_OF_VECTORS_V + j + i*NUMBER_OF_VECTORS_PER_LAYER];
             // standard atmosphere: no wind
             if (TEST_ID == 0 || TEST_ID == 1)
-                wind_h[j] = 0;
+                wind[NUMBER_OF_VECTORS_V + i*NUMBER_OF_VECTORS_PER_LAYER + j] = 0;
             // JW test: specific wind field
             if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
             {
@@ -552,46 +240,87 @@ int main(int argc, char *argv[])
                     distance = calculate_distance_h(lat, lon, lat_perturb, lon_perturb, RADIUS);
                     u += u_p*exp(-pow(distance/distance_scale, 2));
                 }
-                wind_h[j] = u*cos(direction[j]);
+                wind[NUMBER_OF_VECTORS_V + i*NUMBER_OF_VECTORS_PER_LAYER + j] = u*cos(direction[j]);
             }
         }
-        if ((retval = codes_set_long(handle_wind_h, "discipline", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_h, "centre", 255)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_h, "significanceOfReferenceTime", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_h, "productionStatusOfProcessedData", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_h, "typeOfProcessedData", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_h, "indicatorOfUnitOfTimeRange", 13)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_h, "dataDate", 20000101)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_h, "dataTime", 0000)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_h, "typeOfGeneratingProcess", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_h, "parameterCategory", 2)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_h, "parameterNumber", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_h, "typeOfFirstFixedSurface", 102)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_h, "scaledValueOfFirstFixedSurface", round(z_height))))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_h, "scaleFactorOfFirstFixedSurface", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_h, "level", round(z_height))))
-            ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_wind_h, "values", wind_h, NUMBER_OF_VECTORS_H)))
-            ECCERR(retval);
-        codes_write_message(handle_wind_h, OUTPUT_FILE, "a");
     }
+    for (int i = 0; i < NUMBER_OF_LEVELS; ++i)
+    {
+        for (int j = 0; j < NUMBER_OF_VECTORS_V; ++j)
+        {
+            lat = latitude_scalar[j];
+            lon = longitude_scalar[j];
+            z_height = z_vector[j + i*NUMBER_OF_VECTORS_PER_LAYER];
+            if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
+                wind[i*NUMBER_OF_VECTORS_PER_LAYER + j] = 0;
+        }
+    }
+    free(z_vector);
+    free(latitude_scalar);
+    free(longitude_scalar);
     free(direction);
     free(latitude_vector);
     free(longitude_vector);
+    int scalar_dimid, vector_dimid, pot_temp_id, density_dry_id, wind_id, density_vapour_id, density_liquid_id, density_solid_id, temperature_liquid_id, temperature_solid_id, ncid;
+    if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
+        NCERR(retval);
+    if ((retval = nc_def_dim(ncid, "scalar_index", NUMBER_OF_SCALARS, &scalar_dimid)))
+        NCERR(retval);
+    if ((retval = nc_def_dim(ncid, "vector_index", NUMBER_OF_VECTORS, &vector_dimid)))
+        NCERR(retval);
+    if ((retval = nc_def_var(ncid, "potential_temperature", NC_DOUBLE, 1, &scalar_dimid, &pot_temp_id)))
+        NCERR(retval);
+    if ((retval = nc_put_att_text(ncid, pot_temp_id, "units", strlen("T"), "T")))
+        NCERR(retval);
+    if ((retval = nc_def_var(ncid, "density_dry", NC_DOUBLE, 1, &scalar_dimid, &density_dry_id)))
+        NCERR(retval);
+    if ((retval = nc_put_att_text(ncid, density_dry_id, "units", strlen("kg/m^3"), "kg/m^3")))
+        NCERR(retval);
+    if ((retval = nc_def_var(ncid, "wind", NC_DOUBLE, 1, &vector_dimid, &wind_id)))
+        NCERR(retval);
+    if ((retval = nc_put_att_text(ncid, wind_id, "units", strlen("m/s"), "m/s")))
+        NCERR(retval);
+    if ((retval = nc_def_var(ncid, "density_vapour", NC_DOUBLE, 1, &scalar_dimid, &density_vapour_id)))
+        NCERR(retval);
+    if ((retval = nc_put_att_text(ncid, density_vapour_id, "units", strlen("kg/m^3"), "kg/m^3")))
+        NCERR(retval);
+    if ((retval = nc_def_var(ncid, "density_liquid", NC_DOUBLE, 1, &scalar_dimid, &density_liquid_id)))
+        NCERR(retval);
+    if ((retval = nc_put_att_text(ncid, density_liquid_id, "units", strlen("kg/m^3"), "kg/m^3")))
+        NCERR(retval);
+    if ((retval = nc_def_var(ncid, "density_solid", NC_DOUBLE, 1, &scalar_dimid, &density_solid_id)))
+        NCERR(retval);
+    if ((retval = nc_put_att_text(ncid, density_solid_id, "units", strlen("kg/m^3"), "kg/m^3")))
+        NCERR(retval);
+    if ((retval = nc_def_var(ncid, "temperature_liquid", NC_DOUBLE, 1, &scalar_dimid, &temperature_liquid_id)))
+        NCERR(retval);
+    if ((retval = nc_put_att_text(ncid, temperature_liquid_id, "units", strlen("T"), "T")))
+        NCERR(retval);
+    if ((retval = nc_def_var(ncid, "temperature_solid", NC_DOUBLE, 1, &scalar_dimid, &temperature_solid_id)))
+        NCERR(retval);
+    if ((retval = nc_put_att_text(ncid, temperature_solid_id, "units", strlen("T"), "T")))
+        NCERR(retval);
+    if ((retval = nc_enddef(ncid)))
+        NCERR(retval);
+    if ((retval = nc_put_var_double(ncid, pot_temp_id, &pot_temperature[0])))
+        NCERR(retval);
+    if ((retval = nc_put_var_double(ncid, density_dry_id, &rho[0])))
+        NCERR(retval);
+    if ((retval = nc_put_var_double(ncid, wind_id, &wind[0])))
+        NCERR(retval);    
+    if ((retval = nc_put_var_double(ncid, density_vapour_id, &water_vapour_density[0])))
+        NCERR(retval);    
+    if ((retval = nc_put_var_double(ncid, density_liquid_id, &liquid_water_density[0])))
+        NCERR(retval);
+    if ((retval = nc_put_var_double(ncid, density_solid_id, &solid_water_density[0])))
+        NCERR(retval);
+    if ((retval = nc_put_var_double(ncid, temperature_liquid_id, &liquid_water_temp[0])))
+        NCERR(retval);    
+    if ((retval = nc_put_var_double(ncid, temperature_solid_id, &solid_water_temp[0])))
+        NCERR(retval);
+    if ((retval = nc_close(ncid)))
+    	NCERR(retval);
+    free(wind);
     free(pressure);
     free(pot_temperature);
     free(temperature);
@@ -603,79 +332,7 @@ int main(int argc, char *argv[])
     free(solid_water_temp);
     free(z_scalar);
     free(rel_humidity);
-    free(pressure_h);
-    free(pot_temperature_h);
-    free(temperature_h);
-    free(rho_h);
-    free(water_vapour_density_h);
-    free(liquid_water_density_h);
-    free(solid_water_density_h);
-    free(liquid_water_temp_h);
-    free(solid_water_temp_h);
-    free(wind_h);
-    codes_handle_delete(handle_pot_temperature);
-    codes_handle_delete(handle_density);
-    codes_handle_delete(handle_wind_h);
-    codes_handle_delete(handle_water_vapour_density);
-    codes_handle_delete(handle_liquid_water_density);
-    codes_handle_delete(handle_solid_water_density);
-    codes_handle_delete(handle_liquid_water_temp);
-    codes_handle_delete(handle_solid_water_temp);
-    SAMPLE = fopen(SAMPLE_FILE, "r");
-    handle_wind_v = codes_handle_new_from_file(NULL, SAMPLE, PRODUCT_GRIB, &err);
-    if (err != 0)
-        ECCERR(err);
-    fclose(SAMPLE);
-    for (int i = 0; i < NUMBER_OF_LEVELS; ++i)
-    {
-        for (int j = 0; j < NUMBER_OF_VECTORS_V; ++j)
-        {
-            lat = latitude_scalar[j];
-            lon = longitude_scalar[j];
-            z_height = z_vector[j + i*NUMBER_OF_VECTORS_PER_LAYER];
-            if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
-                wind_v[j] = 0;
-        }
-        if ((retval = codes_set_long(handle_wind_v, "discipline", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_v, "centre", 255)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_v, "significanceOfReferenceTime", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_v, "productionStatusOfProcessedData", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_v, "typeOfProcessedData", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_v, "indicatorOfUnitOfTimeRange", 13)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_v, "dataDate", 20000101)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_v, "dataTime", 0000)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_v, "typeOfGeneratingProcess", 1)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_v, "parameterCategory", 2)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_v, "parameterNumber", 9)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_v, "typeOfFirstFixedSurface", 102)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_v, "scaledValueOfFirstFixedSurface", z_height)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_v, "scaleFactorOfFirstFixedSurface", 0)))
-            ECCERR(retval);
-        if ((retval = codes_set_long(handle_wind_v, "level", i)))
-            ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_wind_v, "values", wind_v, NUMBER_OF_SCALARS_H)))
-            ECCERR(retval);
-        codes_write_message(handle_wind_v, OUTPUT_FILE, "a");
-    }
-    free(z_vector);
-    free(latitude_scalar);
-    free(longitude_scalar);
-    codes_handle_delete(handle_wind_v);
     free(OUTPUT_FILE);
-    free(wind_v);
     return 0;
 }
 

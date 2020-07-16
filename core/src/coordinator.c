@@ -7,7 +7,19 @@ Github repository: https://github.com/MHBalsmeier/game
 The main organizes the model, manages the time stepping, calls model output, collects the lowest model layer wind for 10 m wind mean and so on. All the memory needed for integration is allocated and freed here for efficiency (I wonder if this is really relevant).
 */
 
-#include "coordinator.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include "enum_and_typedefs.h"
+#include "io/io.h"
+#include "spatial_operators/spatial_operators.h"
+#include "diagnostics/diagnostics.h"
+#include "time_stepping/time_stepping.h"
+#include "rte-rrtmgp-c.h"
+#include "geos95.h"
+#include <mpi.h>
+#include <omp.h>
 
 int main(int argc, char *argv[])
 {
@@ -59,6 +71,16 @@ int main(int argc, char *argv[])
     diffusion_on = strtod(argv[14], NULL);
     double radiation_delta_t;
     radiation_delta_t = strtof(argv[15], NULL);
+    int year;
+    year = strtod(argv[16], NULL);
+    int month;
+    month = strtod(argv[17], NULL);
+    int day;
+    day = strtod(argv[18], NULL);
+    int hour;
+    hour = strtod(argv[19], NULL);
+    double t_init;
+    find_time_coord(year, month, day, hour, 0, 0, 0, &t_init);
     char *stars  = malloc(83*sizeof(char));
     for (int i = 0; i < 81; ++i)
         stars[i] = '*';
@@ -107,8 +129,7 @@ int main(int argc, char *argv[])
     printf("It begins.\n");
     printf("%s", stars);
     State *state_init = calloc(1, sizeof(State));
-    double t_init;
-    set_init_data(INIT_STATE_FILE, state_init, &t_init);
+    set_init_data(INIT_STATE_FILE, state_init);
     free(INIT_STATE_FILE);
     int min_no_of_output_steps = 600/delta_t;
     double *wind_h_lowest_layer_array = calloc(1, min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));

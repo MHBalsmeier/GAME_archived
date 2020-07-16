@@ -4,143 +4,89 @@ Github repository: https://github.com/MHBalsmeier/game
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "../enum_and_typedefs.h"
 #include "io.h"
 #include "../diagnostics/diagnostics.h"
-#include "eccodes.h"
-#include "geos95.h"
-#define ERRCODE 3
-#define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
+#include <netcdf.h>
+#define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 
-int set_init_data(char FILE_NAME[], State *init_state, double *t_init)
+int set_init_data(char FILE_NAME[], State *init_state)
 {
-    long unsigned int no_scalars_h = NO_OF_SCALARS_H;
-    long unsigned int no_vectors_h = NO_OF_VECTORS_H;
-    FILE *IN_FILE;
-    int err = 0;
-    *t_init = 0;
-    codes_handle *handle_pot_temperature = NULL;
-    codes_handle *handle_density = NULL;
-    codes_handle *handle_wind_h = NULL;
-    codes_handle *handle_wind_v = NULL;
-    codes_handle *handle_water_vapour_density = NULL;
-    codes_handle *handle_liquid_water_density = NULL;
-    codes_handle *handle_solid_water_density = NULL;
-    codes_handle *handle_liquid_water_temperature = NULL;
-    codes_handle *handle_solid_water_temperature = NULL;
-    double *pot_temp = malloc(NO_OF_SCALARS_H*sizeof(double));
-    double *rho = malloc(NO_OF_SCALARS_H*sizeof(double));
-    double *water_vapour_density = malloc(NO_OF_SCALARS_H*sizeof(double));
-    double *liquid_water_density = malloc(NO_OF_SCALARS_H*sizeof(double));
-    double *solid_water_density = malloc(NO_OF_SCALARS_H*sizeof(double));
-    double *liquid_water_temperature = malloc(NO_OF_SCALARS_H*sizeof(double));
-    double *solid_water_temperature = malloc(NO_OF_SCALARS_H*sizeof(double));
-    double *wind_h = malloc(NO_OF_VECTORS_H*sizeof(double));
-    double *wind_v = malloc(NO_OF_SCALARS_H*sizeof(double));
-    int retval;
-    long data_date, data_time;
+    double *pot_temp = malloc(NO_OF_SCALARS*sizeof(double));
+    double *rho = malloc(NO_OF_SCALARS*sizeof(double));
+    double *wind = malloc(NO_OF_VECTORS*sizeof(double));
+    double *water_vapour_density = malloc(NO_OF_SCALARS*sizeof(double));
+    double *liquid_water_density = malloc(NO_OF_SCALARS*sizeof(double));
+    double *solid_water_density = malloc(NO_OF_SCALARS*sizeof(double));
+    double *liquid_water_temperature = malloc(NO_OF_SCALARS*sizeof(double));
+    double *solid_water_temperature = malloc(NO_OF_SCALARS*sizeof(double));
+    int retval, ncid;
     double R_h, c_h_v, density_h_micro;
-    IN_FILE = fopen(FILE_NAME, "r");
-    for (int i = 0; i < NO_OF_LAYERS; ++i)
+    if ((retval = nc_open(FILE_NAME, NC_NOWRITE, &ncid)))
+        NCERR(retval);
+    int pot_temp_id, density_dry_id, wind_id, density_vapour_id, density_liquid_id, density_solid_id, temperature_liquid_id, temperature_solid_id;
+    if ((retval = nc_inq_varid(ncid, "potential_temperature",&pot_temp_id)))
+        NCERR(retval);
+    if ((retval = nc_inq_varid(ncid, "density_dry", &density_dry_id)))
+        NCERR(retval);
+    if ((retval = nc_inq_varid(ncid, "wind", &wind_id)))
+        NCERR(retval);
+    if ((retval = nc_inq_varid(ncid, "density_vapour", &density_vapour_id)))
+        NCERR(retval);
+    if ((retval = nc_inq_varid(ncid, "density_liquid", &density_liquid_id)))
+        NCERR(retval);
+    if ((retval = nc_inq_varid(ncid, "density_solid", &density_solid_id)))
+        NCERR(retval);
+    if ((retval = nc_inq_varid(ncid, "temperature_liquid", &temperature_liquid_id)))
+        NCERR(retval);
+    if ((retval = nc_inq_varid(ncid, "temperature_solid", &temperature_solid_id)))
+        NCERR(retval);
+    if ((retval = nc_get_var_double(ncid, pot_temp_id, &pot_temp[0])))
+        NCERR(retval);    
+    if ((retval = nc_get_var_double(ncid, density_dry_id, &rho[0])))
+        NCERR(retval);
+    if ((retval = nc_get_var_double(ncid, wind_id, &wind[0])))
+        NCERR(retval);    
+    if ((retval = nc_get_var_double(ncid, density_vapour_id, &water_vapour_density[0])))
+        NCERR(retval);    
+    if ((retval = nc_get_var_double(ncid, density_liquid_id, &liquid_water_density [0])))
+        NCERR(retval);    
+    if ((retval = nc_get_var_double(ncid, density_solid_id, &solid_water_density[0])))
+        NCERR(retval);
+    if ((retval = nc_get_var_double(ncid, temperature_liquid_id, &liquid_water_temperature[0])))
+        NCERR(retval);    
+    if ((retval = nc_get_var_double(ncid, temperature_solid_id, &solid_water_temperature[0])))
+        NCERR(retval);
+    if ((retval = nc_close(ncid)))
+        NCERR(retval);
+    for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-        handle_pot_temperature = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
-        if (err != 0)
-            ECCERR(err);
-        if ((retval = codes_get_double_array(handle_pot_temperature, "values", pot_temp, &no_scalars_h)))
-            ECCERR(retval);
-        codes_handle_delete(handle_pot_temperature);
-        handle_density = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
-        if (err != 0)
-            ECCERR(err);
-        if ((retval = codes_get_double_array(handle_density, "values", rho, &no_scalars_h)))
-            ECCERR(retval);
-        codes_handle_delete(handle_density);
-        handle_water_vapour_density = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
-        if (err != 0)
-            ECCERR(err);
-        if ((retval = codes_get_double_array(handle_water_vapour_density, "values", water_vapour_density, &no_scalars_h)))
-            ECCERR(retval);
-        codes_handle_delete(handle_water_vapour_density);
-        handle_liquid_water_density = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
-        if (err != 0)
-            ECCERR(err);
-        if ((retval = codes_get_double_array(handle_liquid_water_density, "values", liquid_water_density, &no_scalars_h)))
-            ECCERR(retval);
-        codes_handle_delete(handle_liquid_water_density);
-        handle_solid_water_density = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
-        if (err != 0)
-            ECCERR(err);
-        if ((retval = codes_get_double_array(handle_solid_water_density, "values", solid_water_density, &no_scalars_h)))
-            ECCERR(retval);
-        codes_handle_delete(handle_solid_water_density);
-        handle_liquid_water_temperature = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
-        if (err != 0)
-            ECCERR(err);
-        if ((retval = codes_get_double_array(handle_liquid_water_temperature, "values", liquid_water_temperature, &no_scalars_h)))
-            ECCERR(retval);
-        codes_handle_delete(handle_liquid_water_temperature);
-        handle_solid_water_temperature = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
-        if (err != 0)
-            ECCERR(err);
-        if ((retval = codes_get_double_array(handle_solid_water_temperature, "values", solid_water_temperature, &no_scalars_h)))
-            ECCERR(retval);
-        codes_handle_delete(handle_solid_water_temperature);
-        for (int j = 0; j < NO_OF_SCALARS_H; ++j)
+        init_state -> density_dry[i] = rho[i];
+        R_h = gas_constant_diagnostics(rho[i], water_vapour_density[i]);
+        c_h_v = spec_heat_cap_diagnostics_p(rho[i], water_vapour_density[i]);
+        density_h_micro = calc_micro_density(rho[i] + water_vapour_density[i], solid_water_density[i] + liquid_water_density[i]);
+        init_state -> entropy_gas[i] = rho[i]*(C_D_P*log(pot_temp[i]) + entropy_constant_d) + water_vapour_density[i]*(C_V_P*log(pot_temp[i]) + M_D/M_V*DELTA_C_V_P*R_h/c_h_v*log(R_h*pot_temp[i]*density_h_micro/P_0) + entropy_constant_d);
+        if (NO_OF_TRACERS > 0)
         {
-            init_state -> density_dry[j + i*NO_OF_SCALARS_H] = rho[j];
-            R_h = gas_constant_diagnostics(rho[j], water_vapour_density[j]);
-            c_h_v = spec_heat_cap_diagnostics_p(rho[j], water_vapour_density[j]);
-            density_h_micro = calc_micro_density(rho[j] + water_vapour_density[j], solid_water_density[j] + liquid_water_density[j]);
-            init_state -> entropy_gas[j + i*NO_OF_SCALARS_H] = rho[j]*(C_D_P*log(pot_temp[j]) + entropy_constant_d) + water_vapour_density[j]*(C_V_P*log(pot_temp[j]) + M_D/M_V*DELTA_C_V_P*R_h/c_h_v*log(R_h*pot_temp[j]*density_h_micro/P_0) + entropy_constant_d);
-            if (NO_OF_TRACERS > 0)
-            {
-                init_state -> tracer_densities[j + i*NO_OF_SCALARS_H] = solid_water_density[j];
-                init_state -> tracer_densities[NO_OF_SCALARS + j + i*NO_OF_SCALARS_H] = liquid_water_density[j];
-                init_state -> tracer_densities[2*NO_OF_SCALARS + j + i*NO_OF_SCALARS_H] = water_vapour_density[j];
-                init_state -> tracer_density_temperatures[j + i*NO_OF_SCALARS_H] = solid_water_density[j]*solid_water_temperature[j];
-                init_state -> tracer_density_temperatures[NO_OF_SCALARS + j + i*NO_OF_SCALARS_H] = liquid_water_density[j]*liquid_water_temperature[j];
-            }
+            init_state -> tracer_densities[i] = solid_water_density[i];
+            init_state -> tracer_densities[NO_OF_SCALARS + i] = liquid_water_density[i];
+            init_state -> tracer_densities[2*NO_OF_SCALARS + i] = water_vapour_density[i];
+            init_state -> tracer_density_temperatures[i] = solid_water_density[i]*solid_water_temperature[i];
+            init_state -> tracer_density_temperatures[NO_OF_SCALARS + i] = liquid_water_density[i]*liquid_water_temperature[i];
         }
-        handle_wind_h = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
-        if (err != 0)
-            ECCERR(err);
-        if ((retval = codes_get_double_array(handle_wind_h, "values", wind_h, &no_vectors_h)))
-            ECCERR(retval);
-        for (int j = 0; j < NO_OF_VECTORS_H; ++j)
-            init_state -> velocity_gas[j + i*NO_OF_VECTORS_H + (i + 1)*NO_OF_VECTORS_V] = wind_h[j];
-        codes_get_long(handle_wind_h, "dataDate", &data_date);
-        codes_get_long(handle_wind_h, "dataTime", &data_time);
-        codes_handle_delete(handle_wind_h);
     }
-    int year = data_date/10000;
-    int rest = data_date - 10000*year;
-    int month = rest/100;
-    rest -= 100*month;
-    int day = rest;
-    int hour = data_time;
-    find_time_coord(year, month, day, hour, 0, 0, 0, t_init);
-    if (err != 0)
-        ECCERR(err);
-    for (int i = 0; i < NO_OF_LEVELS; ++i)
+    for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
-        handle_wind_v = codes_handle_new_from_file(NULL, IN_FILE, PRODUCT_GRIB, &err);
-        if (err != 0)
-            ECCERR(err);
-        if ((retval = codes_get_double_array(handle_wind_v, "values", wind_v, &no_scalars_h)))
-            ECCERR(retval);
-        codes_handle_delete(handle_wind_v);
-        for (int j = 0; j < NO_OF_VECTORS_V; ++j)
-            init_state -> velocity_gas[j + i*NO_OF_VECTORS_PER_LAYER] = wind_v[j];
+        init_state -> velocity_gas[i] = wind[i];
     }
-    fclose(IN_FILE);
+    free(pot_temp);
+    free(rho);
+    free(wind);
     free(water_vapour_density);
     free(liquid_water_density);
     free(solid_water_density);
     free(liquid_water_temperature);
     free(solid_water_temperature);
-    free(pot_temp);
-    free(rho);
-    free(wind_h);
-    free(wind_v);
     return 0;
 }

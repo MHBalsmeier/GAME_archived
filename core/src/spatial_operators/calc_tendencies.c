@@ -16,9 +16,14 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
 	// Here, weights of the horizontal pressure gradient can be chosen as usual.
 	// This is in potential temperature formulation.
 	double old_hor_grad_weight = R_D/C_D_P - 0.5;
-	// -2.0/3: 12 hrs to crash
-	// -1.0/3: 
-	old_hor_grad_weight = -2.0/3;
+	// RES_ID = 5
+	// R_D/C_D_P - 0.5:  hrs to crash
+	// -2.0/3: 12.09 hrs to crash
+	// -0.7:	12.35 hrs to crash
+	// -0.8:	13.09 hrs to crash
+	// -0.9:	13.09 hrs to crash
+	// -1.0:	13.09 hrs to crash
+	old_hor_grad_weight = -0.8;
 	double new_hor_grad_weight = 1 - old_hor_grad_weight;
 	if (totally_first_step_bool == 1)
 	{
