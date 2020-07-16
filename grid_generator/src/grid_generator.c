@@ -165,13 +165,6 @@ int main(int argc, char *argv[])
         printf("It is NUMBER_OF_VECTORS_H != NUMBER_OF_DUAL_VECTORS_H.\n");
     }
     printf("Establishing horizontal grid structure ... \n");
-    printf("Connecting vector points to scalar points ... ");
-    retval = set_from_to_index(from_index, to_index, face_edges, face_edges_reverse, face_vertices, edge_vertices);
-	retval = calc_adjacent_vector_indices_h(from_index, to_index, adjacent_signs_h, adjacent_vector_indices_h);
-    printf(GREEN "finished.\n" RESET);
-    printf("Connecting dual vector points to dual scalar points ... ");
-    retval = set_from_to_index_dual(from_index_dual, to_index_dual, face_edges, face_edges_reverse);
-    printf(GREEN "finished.\n" RESET);
     if (USE_SCALAR_H_FILE == 0)
     {
     	retval = generate_horizontal_generators(latitude_ico, longitude_ico, latitude_scalar, longitude_scalar, x_unity, y_unity, z_unity, face_edges_reverse, face_edges, face_vertices);
@@ -180,6 +173,13 @@ int main(int argc, char *argv[])
     {
     	retval = read_horizontal_generators(latitude_scalar, longitude_scalar, SCALAR_H_FILE);
     }
+    printf("Connecting vector points to scalar points ... ");
+    retval = set_from_to_index(from_index, to_index, face_edges, face_edges_reverse, face_vertices, edge_vertices);
+	retval = calc_adjacent_vector_indices_h(from_index, to_index, adjacent_signs_h, adjacent_vector_indices_h);
+    printf(GREEN "finished.\n" RESET);
+    printf("Connecting dual vector points to dual scalar points ... ");
+    retval = set_from_to_index_dual(from_index_dual, to_index_dual, face_edges, face_edges_reverse);
+    printf(GREEN "finished.\n" RESET);
 	if (OPTIMIZE_BOOL == 1)
 	{
 		retval = optimize_to_scvt(latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, N_ITERATIONS, face_edges, face_edges_reverse, face_vertices, edge_vertices, adjacent_vector_indices_h, from_index_dual, to_index_dual);

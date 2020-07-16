@@ -94,7 +94,6 @@ int three_band_solver_ver_vel_adv(State *state_0, State *state_p1, State *state_
 	Implicit vertical advection of vertical momentum (Euler).
 	Procedure derived in Kompendium.
 	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
-	Can be considered a preconditioner for the vertical sound wave solver.
 	*/
 	double *a_vector = malloc((NO_OF_LAYERS - 2)*sizeof(double));
 	double *b_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
