@@ -10,7 +10,7 @@
 # 5:	JW test, moist, perturbed
 
 
-test_id=0
+test_id=2
 echo "Starting the test state generation ..."
 mpirun -np 1 ./test_generator $test_id
 # valgrind ./test_generator $test_id

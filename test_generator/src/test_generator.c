@@ -315,7 +315,7 @@ int main(int argc, char *argv[])
     if ((retval = nc_put_var_double(ncid, density_solid_id, &solid_water_density[0])))
         NCERR(retval);
     if ((retval = nc_put_var_double(ncid, temperature_liquid_id, &liquid_water_temp[0])))
-        NCERR(retval);    
+        NCERR(retval);
     if ((retval = nc_put_var_double(ncid, temperature_solid_id, &solid_water_temp[0])))
         NCERR(retval);
     if ((retval = nc_close(ncid)))
