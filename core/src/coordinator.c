@@ -59,10 +59,6 @@ int main(int argc, char *argv[])
     diffusion_on = strtod(argv[14], NULL);
     double radiation_delta_t;
     radiation_delta_t = strtof(argv[15], NULL);
-    int column_mode;
-   	column_mode = strtod(argv[16], NULL);
-    int column_index;
-   	column_index = strtod(argv[17], NULL);
     char *stars  = malloc(83*sizeof(char));
     for (int i = 0; i < 81; ++i)
         stars[i] = '*';
@@ -75,44 +71,28 @@ int main(int argc, char *argv[])
     printf("*\t\t\t\t\t\t\t\t\t\t*\n");
     printf("%s", stars);
     printf("Released under the MIT license, visit https://github.com/MHBalsmeier/game for more information.\n");
-   	if (column_mode == 1 && (column_index < 0 || column_index >= NO_OF_SCALARS_H))
-   	{
-   		printf("Error: column mode is on but column index is out of scope.");
-   		exit(1);
-   	}
-   	else if (column_mode == 1)
-   	{
-   		printf("Single column simulation.\n");
-		printf("number of layers: %d\n", NO_OF_LAYERS);
-		printf("number of layers following orography: %d\n", NO_OF_ORO_LAYERS);
-		printf("column index:%d\n", column_index);
-   		return 0;
-   	}
-   	else
-   	{
-		printf("What you want to do:\n");
-		printf("operator:\t\t\t%s\n", OPERATOR);
-		free(OPERATOR);
-		printf("run time span:\t\t\t%d s\n", TOTAL_RUN_SPAN);
-		printf("output written in intervals of\t%d s\n", WRITE_OUT_INTERVAL);
-		printf("geo properties file:\t\t%s\n", GEO_PROP_FILE);
-		printf("initialization state file:\t%s\n", INIT_STATE_FILE);
-		printf("output directory:\t\t%s\n", OUTPUT_FOLDER);
-		printf("%s", stars);
-		printf("configuration information:\n");
-		printf("number of layers: %d\n", NO_OF_LAYERS);
-		printf("number of layers following orography: %d\n", NO_OF_ORO_LAYERS);
-		printf("number of scalar data points per layer: %d\n", NO_OF_SCALARS_H);
-		double surface = 4*M_PI*pow(RADIUS, 2);
-		double points_per_axis = pow(NO_OF_SCALARS_H, 0.5);
-		int eff_hor_res_km = 1e-3*pow(surface, 0.5)/points_per_axis;
-		printf("effective horizontal resolution: %d km\n", eff_hor_res_km);
-		printf("number of horizontal vectors per layer: %d\n", NO_OF_VECTORS_H);
-		printf("number of scalar data points: %d\n", NO_OF_SCALARS);
-		printf("number of vectors: %d\n", NO_OF_VECTORS);
-		printf("number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
-		printf("reading grid data and checking ... ");
-    }
+	printf("What you want to do:\n");
+	printf("operator:\t\t\t%s\n", OPERATOR);
+	free(OPERATOR);
+	printf("run time span:\t\t\t%d s\n", TOTAL_RUN_SPAN);
+	printf("output written in intervals of\t%d s\n", WRITE_OUT_INTERVAL);
+	printf("geo properties file:\t\t%s\n", GEO_PROP_FILE);
+	printf("initialization state file:\t%s\n", INIT_STATE_FILE);
+	printf("output directory:\t\t%s\n", OUTPUT_FOLDER);
+	printf("%s", stars);
+	printf("configuration information:\n");
+	printf("number of layers: %d\n", NO_OF_LAYERS);
+	printf("number of layers following orography: %d\n", NO_OF_ORO_LAYERS);
+	printf("number of scalar data points per layer: %d\n", NO_OF_SCALARS_H);
+	double surface = 4*M_PI*pow(RADIUS, 2);
+	double points_per_axis = pow(NO_OF_SCALARS_H, 0.5);
+	int eff_hor_res_km = 1e-3*pow(surface, 0.5)/points_per_axis;
+	printf("effective horizontal resolution: %d km\n", eff_hor_res_km);
+	printf("number of horizontal vectors per layer: %d\n", NO_OF_VECTORS_H);
+	printf("number of scalar data points: %d\n", NO_OF_SCALARS);
+	printf("number of vectors: %d\n", NO_OF_VECTORS);
+	printf("number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
+	printf("reading grid data and checking ... ");
     set_grid_properties(grid, dualgrid, GEO_PROP_FILE);
     free(GEO_PROP_FILE);
     double delta_t;

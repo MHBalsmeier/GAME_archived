@@ -17,8 +17,6 @@ radiation_delta_t=3600
 write_out_mass_dry_integral=1
 write_out_entropy_gas_integral=1
 write_out_energy_integral=1
-column_mode=0
-column_index=10
 export OMP_NUM_THREADS=4
 number_of_cpus=1
 source core/run.sh
