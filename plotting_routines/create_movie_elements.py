@@ -38,6 +38,9 @@ if short_name == "sp":
     rescale = 0.01;
     shift = -1000;
     unit_string = "hPa";
+if short_name == "cape":
+    variable_name = "CAPE";
+    unit_string = "J / kg";
 if short_name == "pres":
     variable_name = "Pressure";
     unit_string = "Pa";
