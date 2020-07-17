@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		printf("Momentum diffusion turned on.\n");
+		printf("Momentum diffusion is turned on.\n");
 	}
 	printf("reading grid data and checking ... ");
     set_grid_properties(grid, dualgrid, GEO_PROP_FILE);

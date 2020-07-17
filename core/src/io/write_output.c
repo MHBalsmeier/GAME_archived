@@ -20,29 +20,15 @@ Here, the output is written to grib files and integrals are written to text file
 
 double calc_std_dev(double [], int);
 
-int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, char output_foldername[], Grid *grid)
+int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, char output_directory[], Grid *grid)
 {
-    int str_len;
-    find_string_length_from_int((int) t_write - t_init, &str_len);
-    char add_time_str[str_len];
-    char pre_string[] = "init+";
-    char append_string[] = "s.grb2";
-    sprintf(add_time_str, "%lf", t_write);
-    int out_file_length = strlen(output_foldername) + 1 + strlen(pre_string) + str_len + strlen(append_string);
-    char OUTPUT_FILE[out_file_length];
-    for (int i = 0; i < out_file_length + 1; i++)
-    {
-        if (i < strlen(output_foldername))
-            OUTPUT_FILE[i] = output_foldername[i];
-        if (i == strlen(output_foldername))
-            OUTPUT_FILE[i] = '/';
-        if (i >= strlen(output_foldername) + 1 && i < strlen(output_foldername) + 1 + strlen(pre_string))
-            OUTPUT_FILE[i] = pre_string[i - (strlen(output_foldername) + 1)];
-        if (i >= strlen(output_foldername) + 1 + strlen(pre_string) && i < out_file_length - strlen(append_string))
-            OUTPUT_FILE[i] = add_time_str[i - (strlen(output_foldername) + 1 + strlen(pre_string))];
-        if (i >= out_file_length - strlen(append_string))
-            OUTPUT_FILE[i] = append_string[i - (out_file_length - strlen(append_string))];
-    }
+    int OUTPUT_FILE_LENGTH = 300;
+    char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
+    sprintf(OUTPUT_FILE_PRE, "%s/init+%ds.grb2", output_directory, (int) (t_write - t_init));
+    OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
+    free(OUTPUT_FILE_PRE);
+    char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
+    sprintf(OUTPUT_FILE, "%s/init+%ds.grb2", output_directory, (int) (t_write - t_init));
     char *SAMPLE_FILENAME = "./input/grib_template.grb2";
     FILE *SAMPLE_FILE;
     int err = 0;
@@ -895,7 +881,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     return 0;
 }
 
-int write_out_integral(State *state_write_out, double t_write, char output_foldername[], Grid *grid, Dualgrid *dualgrid, int integral_id)
+int write_out_integral(State *state_write_out, double t_write, char output_directory[], Grid *grid, Dualgrid *dualgrid, int integral_id)
 {
 	/*
 	integral_id:
@@ -908,11 +894,11 @@ int write_out_integral(State *state_write_out, double t_write, char output_folde
     int INTEGRAL_FILE_LENGTH = 200;
     char *INTEGRAL_FILE_PRE = malloc((INTEGRAL_FILE_LENGTH + 1)*sizeof(char));
     if (integral_id == 0)
-   		sprintf(INTEGRAL_FILE_PRE, "%s/%s", output_foldername, "dry_mass");
+   		sprintf(INTEGRAL_FILE_PRE, "%s/%s", output_directory, "dry_mass");
     if (integral_id == 1)
-   		sprintf(INTEGRAL_FILE_PRE, "%s/%s", output_foldername, "entropy");
+   		sprintf(INTEGRAL_FILE_PRE, "%s/%s", output_directory, "entropy");
     if (integral_id == 2)
-   		sprintf(INTEGRAL_FILE_PRE, "%s/%s", output_foldername, "energy");
+   		sprintf(INTEGRAL_FILE_PRE, "%s/%s", output_directory, "energy");
     INTEGRAL_FILE_LENGTH = strlen(INTEGRAL_FILE_PRE);
     char *INTEGRAL_FILE = malloc((INTEGRAL_FILE_LENGTH + 1)*sizeof(char));
     sprintf(INTEGRAL_FILE, "%s", INTEGRAL_FILE_PRE);
@@ -972,16 +958,5 @@ double calc_std_dev(double vector_for_std_deviation[], int no_of_values)
 		result += pow(vector_for_std_deviation[i] - mean, 2);
 	result = 1/sqrt(no_of_values)*sqrt(result);
 	return result;
-}
-
-int find_string_length_from_int(int input, int *answer)
-{
-    *answer = 1;
-    for (int i = 1; i < 10; ++i)
-    {
-        if (input >= pow(10, i))
-            ++*answer;
-    }
-    return 0;
 }
 

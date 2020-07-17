@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     double *z_vector = malloc(NUMBER_OF_VECTORS*sizeof(double));
     double *gravity_potential = malloc(NUMBER_OF_VECTORS*sizeof(double));
     int ncid_grid, retval;
-    short GEO_PROP_FILE_LENGTH = 100;
+    int GEO_PROP_FILE_LENGTH = 100;
     char *GEO_PROP_FILE_PRE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
     sprintf(GEO_PROP_FILE_PRE, "../grid_generator/nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
     GEO_PROP_FILE_LENGTH = strlen(GEO_PROP_FILE_PRE);
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
         NCERR(retval);
     if ((retval = nc_close(ncid_grid)))
         NCERR(retval);
-    short OUTPUT_FILE_LENGTH = 100;
+    int OUTPUT_FILE_LENGTH = 100;
     char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
     sprintf(OUTPUT_FILE_PRE, "nc_files/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", TEST_ID, RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
     OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
