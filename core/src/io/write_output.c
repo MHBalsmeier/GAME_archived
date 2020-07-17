@@ -40,6 +40,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     long data_date = 10000*init_year + 100*init_month + init_day;
     long data_time = init_hour;
     double *temperature = malloc(NO_OF_SCALARS*sizeof(double));
+    double *pot_temperature = malloc(NO_OF_SCALARS*sizeof(double));
     // Grib requires everything to be on horizontal levels.
     double *temperature_h = malloc(NO_OF_SCALARS_H*sizeof(double));
     double *pressure_h = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -56,9 +57,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     double *sprate = malloc(NO_OF_SCALARS_H*sizeof(double));
     double *cape = malloc(NO_OF_SCALARS_H*sizeof(double));
     Curl_field *rel_vort = calloc(1, sizeof(Curl_field));
-    double pressure_value, mslp_factor, surface_p_factor, temp_lowest_layer, temp_mslp, temp_surface, exner_pressure, wind_0, wind_1, wind_u, wind_v, delta_z_temp, temp_gradient, temp_upper, temp_lower;
+    double pressure_value, mslp_factor, surface_p_factor, temp_lowest_layer, temp_mslp, temp_surface, wind_0, wind_1, wind_u, wind_v, delta_z_temp, temp_gradient, temp_upper, temp_lower;
     double standard_vert_lapse_rate = 0.0065;
-    double pot_temp, condensates_density_sum, density_d_micro_value, density_v_micro_value;
     long unsigned length = 4;
     codes_handle *handle_temperature_h = NULL;
     codes_handle *handle_pressure_h = NULL;
@@ -78,6 +78,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     codes_handle *handle_rh = NULL;
     codes_handle *handle_cape = NULL;
 	temperature_diagnostics(state_write_out -> entropy_gas, state_write_out -> density_dry, state_write_out -> tracer_densities, temperature);
+	pot_temp_diagnostics(temperature, state_write_out -> density_dry, state_write_out -> tracer_densities, pot_temperature);
 	calc_rel_vort(state_write_out -> velocity_gas, *rel_vort, grid, dualgrid);
 	int layer_index;
 	double z_height, delta_z, gravity, cape_integrand, theta_prime, theta;
@@ -86,7 +87,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     {
         for (int j = 0; j < NO_OF_SCALARS_H; ++j)
         {
-        	condensates_density_sum = calc_condensates_density_sum(i, j, state_write_out -> tracer_densities);
         	temperature_h[j] = temperature[i*NO_OF_SCALARS_H + j];
         	pressure_h[j] = state_write_out -> density_dry[j + i*NO_OF_SCALARS_H]*R_D*temperature_h[j];
         	rh_h[j] = 100*rel_humidity(temperature_h[j], state_write_out -> tracer_densities[2*NO_OF_SCALARS + i*NO_OF_SCALARS_H + j]);
@@ -96,12 +96,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
             for (int j = 0; j < NO_OF_SCALARS_H; ++j)
             {
             	// Now the aim is to determine the value of the MSLP.
-            	condensates_density_sum = calc_condensates_density_sum(i, j, state_write_out -> tracer_densities);
-            	pot_temp = pot_temp_diagnostics_single_value(state_write_out -> entropy_gas[j + i*NO_OF_SCALARS_H], state_write_out -> density_dry[j + i*NO_OF_SCALARS_H], state_write_out -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j + i*NO_OF_SCALARS_H], condensates_density_sum);
-            	density_d_micro_value = calc_micro_density(state_write_out -> density_dry[j + i*NO_OF_SCALARS_H], condensates_density_sum);
-            	density_v_micro_value = calc_micro_density(state_write_out -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j + i*NO_OF_SCALARS_H], condensates_density_sum);
-                exner_pressure = exner_pressure_diagnostics_single_value(density_d_micro_value, density_v_micro_value, pot_temp);
-                temp_lowest_layer = temperature_diagnostics_single_value(exner_pressure, pot_temp);
+                temp_lowest_layer = temperature[i*NO_OF_SCALARS_H + j];
                 pressure_value = state_write_out -> density_dry[j + i*NO_OF_SCALARS_H]*R_D*temp_lowest_layer;
                 temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[j + i*NO_OF_SCALARS_H];
                 mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, -grid -> gravity[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
@@ -112,18 +107,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				surface_p[j] = pressure_value/surface_p_factor;
 				// Now the aim is to calculate the 2 m temperature.
                 delta_z_temp = 2 - grid -> z_scalar[j + i*NO_OF_SCALARS_H];
-            	condensates_density_sum = calc_condensates_density_sum(i - 1, j, state_write_out -> tracer_densities);
-                pot_temp = pot_temp_diagnostics_single_value(state_write_out -> entropy_gas[j + (i - 1)*NO_OF_SCALARS_H], state_write_out -> density_dry[j + (i - 1)*NO_OF_SCALARS_H], state_write_out -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j + (i - 1)*NO_OF_SCALARS_H], condensates_density_sum);
-            	density_d_micro_value = calc_micro_density(state_write_out -> density_dry[j + (i - 1)*NO_OF_SCALARS_H], condensates_density_sum);
-            	density_v_micro_value = calc_micro_density(state_write_out -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j + (i - 1)*NO_OF_SCALARS_H], condensates_density_sum);
-                exner_pressure = exner_pressure_diagnostics_single_value(density_d_micro_value, density_v_micro_value, pot_temp);
-                temp_upper = temperature_diagnostics_single_value(exner_pressure, pot_temp);
-            	condensates_density_sum = calc_condensates_density_sum(i, j, state_write_out -> tracer_densities);
-                pot_temp = pot_temp_diagnostics_single_value(state_write_out -> entropy_gas[j + i*NO_OF_SCALARS_H], state_write_out -> density_dry[j + i*NO_OF_SCALARS_H], state_write_out -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i*NO_OF_SCALARS_H + j], condensates_density_sum);
-            	density_d_micro_value = calc_micro_density(state_write_out -> density_dry[j + i*NO_OF_SCALARS_H], condensates_density_sum);
-            	density_v_micro_value = calc_micro_density(state_write_out -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j + i*NO_OF_SCALARS_H], condensates_density_sum);
-                exner_pressure = exner_pressure_diagnostics_single_value(density_d_micro_value, density_v_micro_value, pot_temp);
-                temp_lower = temperature_diagnostics_single_value(exner_pressure, pot_temp);
+                temp_upper = temperature[(i - 1)*NO_OF_SCALARS_H + j];
+                temp_lower = temp_lowest_layer;
                 temp_gradient = (temp_upper - temp_lower)/(grid -> z_scalar[j + (i - 1)*NO_OF_SCALARS_H] - grid -> z_scalar[j + i*NO_OF_SCALARS_H]);
                 // Finally the temperature in 2 m height AGL can bo obtained via linear extrapolation.
                 t2[j] = temp_lowest_layer + delta_z_temp*temp_gradient;
@@ -145,11 +130,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
                     rprate[j] += fmax(ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + i*NO_OF_SCALARS_H + j], 0);
                 z_height = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j];
                 cape[j] = 0;
-                theta_prime = pot_temp_diagnostics_single_value(state_write_out -> entropy_gas[j + i*NO_OF_SCALARS_H], state_write_out -> density_dry[j + i*NO_OF_SCALARS_H], 0, 0);
+                theta_prime = pot_temperature[i*NO_OF_SCALARS_H + j];
                 layer_index = i;
                 while (z_height < z_tropopause)
                 {
-	                theta = pot_temp_diagnostics_single_value(state_write_out -> entropy_gas[j + layer_index*NO_OF_SCALARS_H], state_write_out -> density_dry[j + layer_index*NO_OF_SCALARS_H], 0, 0);
+	                theta = pot_temperature[layer_index*NO_OF_SCALARS_H + j];
                 	delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + j] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + j];
                 	z_height += delta_z;
                 	gravity = (grid -> gravity_potential[(layer_index - 1)*NO_OF_SCALARS_H + j] - grid -> gravity_potential[layer_index*NO_OF_SCALARS_H + j])/delta_z;
@@ -986,6 +971,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     free(rprate);
     free(sprate);
     free(tcdc);
+    free(pot_temperature);
     free(temperature);
     free(rel_vort_h);
     free(rel_vort);

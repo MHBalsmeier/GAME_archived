@@ -8,14 +8,20 @@ Github repository: https://github.com/MHBalsmeier/game
 #define K_B (1.380649e-23)
 #define M_D 0.028964420
 #define M_V 0.0180152
-#define R (N_A*K_B)
-#define R_D (R/M_D)
-#define R_V (R/M_V)
+// #define R (N_A*K_B)
+#define R 8.314463
+// #define R_D (R/M_D)
+#define R_D 287.057811
+// #define R_V (R/M_V)
+#define R_V 461.524879
 #define C_D_P 1005.0
-#define C_D_V (C_D_P - R_D)
+// #define C_D_V (C_D_P - R_D)
+#define C_D_V 717.942189
 #define C_V_P 1858.0
-#define C_V_V (C_V_P - R_V)
-#define DELTA_C_V_P (C_V_P - C_D_P)
+// #define C_V_V (C_V_P - R_V)
+#define C_V_V 1396.475121
+// #define DELTA_C_V_P (C_V_P - C_D_P)
+#define DELTA_C_V_P 853.000000
 #define P_0 100000.0
 #define RHO_WATER 1024.0
 #define SECONDS_PER_MIN 60.0
@@ -25,10 +31,13 @@ Github repository: https://github.com/MHBalsmeier/game
 #define OMEGA (7.292115e-5)
 #define SEMIMAJOR 6378137.0
 #define SEMIMINOR 6356752.314
-#define RADIUS pow(SEMIMAJOR*SEMIMAJOR*SEMIMINOR, 1.0/3.0)
+// #define RADIUS pow(SEMIMAJOR*SEMIMAJOR*SEMIMINOR, 1.0/3.0)
+#define RADIUS 6371000.789927
 #define H_BAR (1.054571817e-34)
-#define entropy_constant_d (0.4*C_D_P*log(K_B/P_0*pow(M_D/N_A*K_B*exp(5.0/3)/(2*M_PI*H_BAR*H_BAR), 1.5)))
-#define entropy_constant_v (0.4*C_V_P*log(K_B/P_0*pow(M_V/N_A*K_B*exp(5.0/3)/(2*M_PI*H_BAR*H_BAR), 1.5)))
+// #define entropy_constant_d (0.4*C_D_P*log(K_B/P_0*pow(M_D/N_A*K_B*exp(5.0/3)/(2*M_PI*H_BAR*H_BAR), 1.5)))
+#define entropy_constant_d 1566.752670
+// #define entropy_constant_v (0.4*C_V_P*log(K_B/P_0*pow(M_V/N_A*K_B*exp(5.0/3)/(2*M_PI*H_BAR*H_BAR), 1.5)))
+#define entropy_constant_v 2367.178359
 #define EPSILON_TRACERS 0.00001
 
 enum grid_integers {
@@ -119,3 +128,16 @@ Vector_field velocity_gas;
 Tracer_densities tracer_densities;
 Tracer_density_temperatures tracer_density_temperatures;
 } State;
+
+
+
+
+
+
+
+
+
+
+
+
+
