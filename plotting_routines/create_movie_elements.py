@@ -38,6 +38,12 @@ if short_name == "sp":
     rescale = 0.01;
     shift = -1000;
     unit_string = "hPa";
+if short_name == "pres":
+    variable_name = "Pressure";
+    unit_string = "Pa";
+if short_name == "rh":
+    variable_name = "Relative humidity";
+    unit_string = "%";
 if short_name == "u":
     variable_name = "Zonal wind";
     unit_string = "m/s";
@@ -48,6 +54,10 @@ if short_name == "2t":
     variable_name = "2 m temperature";
     unit_string = "°C";
     shift = -conv.c2k(0);
+if short_name == "vo":
+    variable_name = "Relative vorticity";
+    unit_string = "10^-5/s";
+    rescale = 1e5;
 if short_name == "10u":
     variable_name = "10 m zonal wind";
     unit_string = "m/s";

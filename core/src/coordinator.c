@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 		h_index = i - time_step_10_m_wind*NO_OF_VECTORS_H;
     	wind_h_lowest_layer_array[time_step_10_m_wind*NO_OF_VECTORS_H + h_index] = state_init -> velocity_gas[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + h_index];
     }
-    write_out(state_init, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, OUTPUT_FOLDER, grid);
+    write_out(state_init, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, OUTPUT_FOLDER, grid, dualgrid);
     t_write += WRITE_OUT_INTERVAL;
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     double t_0;
@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
         }
         if(t_0 + delta_t >= t_write + 300 && t_0 <= t_write + 300)
         {
-            write_out(state_write, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, OUTPUT_FOLDER, grid);
+            write_out(state_write, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, OUTPUT_FOLDER, grid, dualgrid);
             t_write += WRITE_OUT_INTERVAL;
             second_time = clock();
             if (second_write_out_bool == 1)
