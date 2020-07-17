@@ -88,7 +88,7 @@ The grid generator needs to be recompiled for every specific resolution, top hei
 \hline \textbf{name} & \textbf{domain} & \textbf{meaning} \tabularnewline
 \hline\hline \texttt{oro\_id} & all value for which an orography is defined & orography ID \tabularnewline
 \hline\hline \texttt{optimize} & 0, 1 & optimization switch (fails if \texttt{oro\_id} is not 0) \tabularnewline
-\hline\hline \texttt{n\_iterations} & integer $\geq$ 1 & number of iterations (ignored if \texttt{optimize} = 0) \tabularnewline
+\hline\hline \texttt{n\_iterations} & integer $\geq$ 1 & number of iterations (ignored if \texttt{optimize} = 0), 8000 seems to be a safe value \tabularnewline
 \hline\hline \texttt{use\_scalar\_h\_coords\_file} & 0, 1 & switch to determine wether horizontal coordinates of triangle vertices (generators of the grid) shall be used from another file \tabularnewline
 \hline\hline \texttt{scalar\_h\_coords\_file} & string & input file for dual triangle vertices (only relevant if \texttt{use\_scalar\_h\_coords\_file} = 1) \tabularnewline
 \hline

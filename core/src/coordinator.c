@@ -52,8 +52,8 @@ int main(int argc, char *argv[])
     char *OUTPUT_FOLDER = malloc((len + 1)*sizeof(char));
     strcpy(OUTPUT_FOLDER, argv[5]);
     double cfl_margin = strtof(argv[6], NULL);
-    int dissipation_on;
-    dissipation_on = strtod(argv[7], NULL);
+    int momentum_diffusion_on;
+    momentum_diffusion_on = strtod(argv[7], NULL);
     int rad_on;
     rad_on = strtod(argv[8], NULL);
     int tracers_on;
@@ -67,8 +67,8 @@ int main(int argc, char *argv[])
     write_out_entropy_integral = strtod(argv[12], NULL);
     int write_out_energy_integral;
     write_out_energy_integral = strtod(argv[13], NULL);
-    int diffusion_on;
-    diffusion_on = strtod(argv[14], NULL);
+    int scalar_diffusion_on;
+    scalar_diffusion_on = strtod(argv[14], NULL);
     double radiation_delta_t;
     radiation_delta_t = strtof(argv[15], NULL);
     int year;
@@ -100,6 +100,10 @@ int main(int argc, char *argv[])
 	printf("output written in intervals of\t%d s\n", WRITE_OUT_INTERVAL);
 	printf("geo properties file:\t\t%s\n", GEO_PROP_FILE);
 	printf("initialization state file:\t%s\n", INIT_STATE_FILE);
+	printf("Start year: %d\n", year);
+	printf("Start month: %d\n", month);
+	printf("Start day: %d\n", day);
+	printf("Start hour: %d\n", hour);
 	printf("output directory:\t\t%s\n", OUTPUT_FOLDER);
 	printf("%s", stars);
 	printf("configuration information:\n");
@@ -114,6 +118,38 @@ int main(int argc, char *argv[])
 	printf("number of scalar data points: %d\n", NO_OF_SCALARS);
 	printf("number of vectors: %d\n", NO_OF_VECTORS);
 	printf("number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
+	if (rad_on == 0)
+	{
+		printf("Radiation is turned off.\n");
+	}
+	else
+	{
+		printf("Radiation is turned on.\n");
+	}
+	if (tracers_on == 0)
+	{
+		printf("Moisture is turned off.\n");
+	}
+	else
+	{
+		printf("Moisture is turned on.\n");
+	}
+	if (scalar_diffusion_on == 0)
+	{
+		printf("Scalar diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Scalar diffusion is turned on.\n");
+	}
+	if (momentum_diffusion_on == 0)
+	{
+		printf("Momentum diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Momentum diffusion turned on.\n");
+	}
 	printf("reading grid data and checking ... ");
     set_grid_properties(grid, dualgrid, GEO_PROP_FILE);
     free(GEO_PROP_FILE);
@@ -224,7 +260,7 @@ int main(int argc, char *argv[])
     Scalar_field *wind_field_divv = calloc(1, sizeof(Scalar_field));
     int rad_update = 1;
     linear_combine_two_states(state_0, state_0, state_p1, 1, 0);
-    manage_time_stepping(state_0, state_p1, state_interpolate, delta_t, grid, dualgrid, dissipation_on, rad_update*rad_on, tracers_on, diffusion_on, *radiation_tendency, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divv, *temperature, *entropy_gas_flux_density, *entropy_gas_flux_density_divv, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *pot_vort, *gradient_geopotential_energy, *pressure_gradient_acc, *pot_vort_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divv, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divv, *temp_gradient_times_c_h_p, *pressure_gradient_acc_old, 1, *e_kin_h_grad, *temperature_density, *temperature_flux_density_divv, *wind_field_divv, 1);
+    manage_time_stepping(state_0, state_p1, state_interpolate, delta_t, grid, dualgrid, momentum_diffusion_on, rad_update*rad_on, tracers_on, scalar_diffusion_on, *radiation_tendency, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divv, *temperature, *entropy_gas_flux_density, *entropy_gas_flux_density_divv, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *pot_vort, *gradient_geopotential_energy, *pressure_gradient_acc, *pot_vort_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divv, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divv, *temp_gradient_times_c_h_p, *pressure_gradient_acc_old, 1, *e_kin_h_grad, *temperature_density, *temperature_flux_density_divv, *wind_field_divv, 1);
     counter += 1;
     if (write_out_dry_mass_integral == 1)
 		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
@@ -252,7 +288,7 @@ int main(int argc, char *argv[])
         }
         else
         	rad_update = 0;
-        manage_time_stepping(state_0, state_p1, state_interpolate, delta_t, grid, dualgrid, dissipation_on, rad_update*rad_on, tracers_on, diffusion_on, *radiation_tendency, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divv, *temperature, *entropy_gas_flux_density, *entropy_gas_flux_density_divv, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *pot_vort, *gradient_geopotential_energy, *pressure_gradient_acc, *pot_vort_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divv, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divv, *temp_gradient_times_c_h_p, *pressure_gradient_acc_old, 0, *e_kin_h_grad, *temperature_density, *temperature_flux_density_divv, *wind_field_divv, 0);
+        manage_time_stepping(state_0, state_p1, state_interpolate, delta_t, grid, dualgrid, momentum_diffusion_on, rad_update*rad_on, tracers_on, scalar_diffusion_on, *radiation_tendency, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divv, *temperature, *entropy_gas_flux_density, *entropy_gas_flux_density_divv, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *pot_vort, *gradient_geopotential_energy, *pressure_gradient_acc, *pot_vort_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divv, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divv, *temp_gradient_times_c_h_p, *pressure_gradient_acc_old, 0, *e_kin_h_grad, *temperature_density, *temperature_flux_density_divv, *wind_field_divv, 0);
 		if (write_out_dry_mass_integral == 1)
 			write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
 		if (write_out_entropy_integral == 1)

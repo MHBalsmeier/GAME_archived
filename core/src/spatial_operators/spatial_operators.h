@@ -10,7 +10,7 @@ int kinetic_energy(Vector_field, Scalar_field, Grid *);
 int divv(Vector_field, Scalar_field, Grid *, int);
 int divv_h(Vector_field, Scalar_field, Grid *);
 int explicit_momentum_tendencies(State *, State *, Grid *, Dualgrid *, int, int, Scalar_field, Scalar_field, Vector_field, Vector_field, Scalar_field, Scalar_field, Curl_field, Vector_field, Vector_field, Vector_field, Vector_field, Scalar_field, Scalar_field, Scalar_field, Vector_field, int, Vector_field, Vector_field, int,Vector_field, Vector_field, int);
-int calc_partially_implicit_divvs(State *, State *, Grid *, Dualgrid *, int, int, int, double, int, Scalar_field, int, double [], double [], Vector_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, Vector_field, Scalar_field, Vector_field, Vector_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, int);
+int calc_partially_implicit_divvs(State *, State *, State *, Grid *, Dualgrid *, int, int, int, double, int, Scalar_field, int, double [], double [], Vector_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, Vector_field, Scalar_field, Vector_field, Vector_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, int);
 int scalar_times_scalar(Scalar_field, Scalar_field, Scalar_field);
 int scalar_times_vector(Scalar_field, Vector_field, Vector_field, Grid *);
 int scalar_times_vector_scalar_h_v(Scalar_field, Scalar_field, Vector_field, Vector_field, Grid *);

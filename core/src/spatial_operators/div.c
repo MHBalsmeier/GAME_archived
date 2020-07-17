@@ -9,7 +9,7 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int divv(Vector_field in_field, Scalar_field out_field, Grid *grid, int allow_surface_flux)
 {
-    int number_of_edges, layer_index, h_index, retval;
+    int number_of_edges, layer_index, h_index;
     double contra_upper, contra_lower, comp_h, comp_v;
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
@@ -18,9 +18,13 @@ int divv(Vector_field in_field, Scalar_field out_field, Grid *grid, int allow_su
         h_index = i - layer_index*NO_OF_SCALARS_H;
         number_of_edges = 6;
         if (h_index < NO_OF_PENTAGONS)
+        {
             number_of_edges = 5;
+        }
         for (int j = 0; j < number_of_edges; ++j)
+        {
             comp_h += in_field[NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]*grid -> adjacent_signs_h[6*h_index + j]*grid -> area[NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]];
+        }
         if (layer_index == 0)
         {
             contra_lower = in_field[NO_OF_VECTORS_PER_LAYER + h_index];
@@ -28,14 +32,8 @@ int divv(Vector_field in_field, Scalar_field out_field, Grid *grid, int allow_su
         }
         else if (layer_index == NO_OF_LAYERS - 1)
         {
-        	retval = vertical_contravariant_normalized(in_field, layer_index, h_index, grid, &contra_upper);
-            if (retval != 0)
-            {
-            	printf("Error in vertical_contravariant_normalized called at position 1 from divv.\n");
-        	}
-        	retval = vertical_contravariant_normalized(in_field, layer_index + 1, h_index, grid, &contra_lower);
-            if (retval != 0)
-            	printf("Error in vertical_contravariant_normalized called at position 2 from divv.\n");
+        	vertical_contravariant_normalized(in_field, layer_index, h_index, grid, &contra_upper);
+        	vertical_contravariant_normalized(in_field, layer_index + 1, h_index, grid, &contra_lower);
             comp_v = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - allow_surface_flux*contra_lower*grid -> area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
         }
         else
@@ -43,16 +41,12 @@ int divv(Vector_field in_field, Scalar_field out_field, Grid *grid, int allow_su
             contra_upper = in_field[layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
             if (layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
             {
-                retval = vertical_contravariant_normalized(in_field, layer_index, h_index, grid, &contra_upper);
-                if (retval != 0)
-                    printf("Error in vertical_contravariant_normalized called at position 3 from divv.\n");
+                vertical_contravariant_normalized(in_field, layer_index, h_index, grid, &contra_upper);
             }
             contra_lower = in_field[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + h_index];
             if (layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS - 1)
             {
-                retval = vertical_contravariant_normalized(in_field, layer_index + 1, h_index, grid, &contra_lower);
-                if (retval != 0)
-                    printf("Error in vertical_contravariant_normalized called at position 4 from divv.\n");
+                vertical_contravariant_normalized(in_field, layer_index + 1, h_index, grid, &contra_lower);
             }
             comp_v = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - contra_lower*grid -> area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
         }
@@ -72,9 +66,13 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
         h_index = i - layer_index*NO_OF_SCALARS_H;
         number_of_edges = 6;
         if (h_index < NO_OF_PENTAGONS)
+        {
             number_of_edges = 5;
+        }
         for (int j = 0; j < number_of_edges; ++j)
+        {
             comp_h += in_field[NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]*grid -> adjacent_signs_h[6*h_index + j]*grid -> area[NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]];
+        }
         out_field[i] = 1/grid -> volume[i]*comp_h;
     }
     return 0;
@@ -82,7 +80,7 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
 
 int divv_v_columns(double in_vector[], double out_vector[], int h_index, Grid *grid)
 {
-	// it neglects orography. baaad!
+	// It neglects orography. Baaad!
     double contra_upper, contra_lower, comp_v;
     for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
     {

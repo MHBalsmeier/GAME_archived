@@ -35,7 +35,7 @@ int manage_time_stepping(State *state_0, State *state_p1, State *state_interpola
 		three_band_solver_ver_vel_adv(state_interpolate, state_p1, state_tendency, delta_t, grid);
 		// vertical velocities can be updated from now on
 		// here, the horizontal divergences are calculated with the new values of the horizontal velocity
-		calc_partially_implicit_divvs(state_p1, state_tendency, grid, dualgrid, momentum_diffusion_on, momentum_diffusion_on, tracers_on, delta_t, diffusion_on, radiation_tendency, phase_transitions_on, tracer_mass_source_rates, tracer_heat_source_rates, mass_dry_flux_density, mass_dry_flux_density_divv, temperature, entropy_gas_flux_density, entropy_gas_flux_density_divv, temp_diffusion_heating, temp_gradient, heating_diss, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, mass_dry_diffusion_flux_density, mass_dry_diffusion_source_rate, temperature_flux_density, tracer_density, tracer_velocity, tracer_flux_density, tracer_flux_density_divv, tracer_density_temperature, tracer_temperature_flux_density, tracer_temperature_flux_density_divv, diffusion_on);
+		calc_partially_implicit_divvs(state_interpolate, state_p1, state_tendency, grid, dualgrid, momentum_diffusion_on, momentum_diffusion_on, tracers_on, delta_t, diffusion_on, radiation_tendency, phase_transitions_on, tracer_mass_source_rates, tracer_heat_source_rates, mass_dry_flux_density, mass_dry_flux_density_divv, temperature, entropy_gas_flux_density, entropy_gas_flux_density_divv, temp_diffusion_heating, temp_gradient, heating_diss, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, mass_dry_diffusion_flux_density, mass_dry_diffusion_source_rate, temperature_flux_density, tracer_density, tracer_velocity, tracer_flux_density, tracer_flux_density_divv, tracer_density_temperature, tracer_temperature_flux_density, tracer_temperature_flux_density_divv, diffusion_on);
 		// here, the non-advective part of the vertical velocity equation is solved implicitly (sound wave solver)
 		three_band_solver_ver_sound_waves(state_interpolate, state_p1, state_tendency, pressure_gradient_acc_1, gradient_geopotential_energy, temperature, temperature_density, temperature_flux_density, temperature_flux_density_divv, wind_field_divv, delta_t, grid);
 		// now that the new vertical velocity is known, the new dry density can be calculated via implicit vertical advection
@@ -50,10 +50,9 @@ int manage_time_stepping(State *state_0, State *state_p1, State *state_interpola
 		// determining the new interpolated state
 		if (i < 2)
 			linear_combine_two_states(state_0, state_tendency, state_interpolate, 1, delta_t_rk);
-		// the final step
-		if (i == 2)
-			linear_combine_two_states(state_0, state_tendency, state_p1, 1, delta_t);
     }
+	// the final step
+    linear_combine_two_states(state_0, state_tendency, state_p1, 1, delta_t);
     return 0;
 }
 
