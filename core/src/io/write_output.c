@@ -54,6 +54,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     double *tcdc = malloc(NO_OF_SCALARS_H*sizeof(double));
     double *rprate = malloc(NO_OF_SCALARS_H*sizeof(double));
     double *sprate = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *cape = malloc(NO_OF_SCALARS_H*sizeof(double));
     Curl_field *rel_vort = calloc(1, sizeof(Curl_field));
     double pressure_value, mslp_factor, surface_p_factor, temp_lowest_layer, temp_mslp, temp_surface, exner_pressure, wind_0, wind_1, wind_u, wind_v, delta_z_temp, temp_gradient, temp_upper, temp_lower;
     double standard_vert_lapse_rate = 0.0065;
@@ -75,8 +76,12 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     codes_handle *handle_wind_10m_gusts = NULL;
     codes_handle *handle_rel_vort = NULL;
     codes_handle *handle_rh = NULL;
+    codes_handle *handle_cape = NULL;
 	temperature_diagnostics(state_write_out -> entropy_gas, state_write_out -> density_dry, state_write_out -> tracer_densities, temperature);
 	calc_rel_vort(state_write_out -> velocity_gas, *rel_vort, grid, dualgrid);
+	int layer_index;
+	double z_height, delta_z, gravity, cape_integrand, theta_prime, theta;
+	double z_tropopause = 15e3;
     for (int i = 0; i < NO_OF_LAYERS; ++i)
     {
         for (int j = 0; j < NO_OF_SCALARS_H; ++j)
@@ -138,6 +143,21 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
                     sprate[j] += fmax(ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + i*NO_OF_SCALARS_H + j], 0);
                 for (int k = NO_OF_SOLID_TRACERS; k < NO_OF_CONDENSATED_TRACERS; ++k)
                     rprate[j] += fmax(ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + i*NO_OF_SCALARS_H + j], 0);
+                z_height = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j];
+                cape[j] = 0;
+                theta_prime = pot_temp_diagnostics_single_value(state_write_out -> entropy_gas[j + i*NO_OF_SCALARS_H], state_write_out -> density_dry[j + i*NO_OF_SCALARS_H], 0, 0);
+                layer_index = i;
+                while (z_height < z_tropopause)
+                {
+	                theta = pot_temp_diagnostics_single_value(state_write_out -> entropy_gas[j + layer_index*NO_OF_SCALARS_H], state_write_out -> density_dry[j + layer_index*NO_OF_SCALARS_H], 0, 0);
+                	delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + j] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + j];
+                	z_height += delta_z;
+                	gravity = (grid -> gravity_potential[(layer_index - 1)*NO_OF_SCALARS_H + j] - grid -> gravity_potential[layer_index*NO_OF_SCALARS_H + j])/delta_z;
+                	cape_integrand += gravity*(theta_prime - theta)/theta;
+                	if (cape_integrand > 0)
+                		cape[j] += cape_integrand*delta_z;
+                	--layer_index;
+                }
             }
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_mslp = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
@@ -323,6 +343,52 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
             if ((retval = codes_write_message(handle_rprate, OUTPUT_FILE, "a")))
                 ECCERR(retval);
 			codes_handle_delete(handle_rprate);
+			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
+			handle_cape = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
+			if (err != 0)
+				ECCERR(err);
+			fclose(SAMPLE_FILE);
+            if ((retval = codes_set_long(handle_cape, "discipline", 0)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_cape, "centre", 255)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_cape, "significanceOfReferenceTime", 1)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_cape, "productionStatusOfProcessedData", 1)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_cape, "typeOfProcessedData", 1)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_cape, "indicatorOfUnitOfTimeRange", 13)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_cape, "stepUnits", 13)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_cape, "dataDate", data_date)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_cape, "dataTime", data_time)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_cape, "forecastTime", t_write - t_init)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_cape, "stepRange", t_write - t_init)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_cape, "typeOfGeneratingProcess", 1)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_cape, "parameterCategory", 7)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_cape, "parameterNumber", 6)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_cape, "typeOfFirstFixedSurface", 103)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_cape, "scaledValueOfFirstFixedSurface", 0)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_cape, "scaleFactorOfFirstFixedSurface", 1)))
+                ECCERR(retval);
+            if ((retval = codes_set_long(handle_cape, "level", 0)))
+                ECCERR(retval);
+            if ((retval = codes_set_double_array(handle_cape, "values", cape, NO_OF_SCALARS_H)))
+                ECCERR(retval);
+            if ((retval = codes_write_message(handle_cape, OUTPUT_FILE, "a")))
+                ECCERR(retval);
+			codes_handle_delete(handle_cape);
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_sprate = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 			if (err != 0)
@@ -928,6 +994,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     free(wind_u_h);
     free(wind_v_h);
     free(rh_h);
+    free(cape);
 	SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 	handle_wind_w_h = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 	if (err != 0)
