@@ -18,7 +18,7 @@ int sign(double);
 int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency, double delta_t, Grid *grid)
 {
 	/*
-	Implicit vertical advection of vertical momentum.
+	Semi-implicit vertical advection of vertical momentum (Crank-Nicolson).
 	Procedure derived in Kompendium.
 	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
 	*/
@@ -91,7 +91,7 @@ int three_band_solver_hor(State *state_0, State *state_p1, State *state_tendency
 int three_band_solver_ver_vel_adv(State *state_0, State *state_p1, State *state_tendency, double delta_t, Grid *grid)
 {
 	/*
-	Implicit vertical advection of vertical momentum (Euler).
+	Semi-implicit vertical advection of vertical momentum (Crank-Nicolson).
 	Procedure derived in Kompendium.
 	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
 	*/
@@ -119,22 +119,32 @@ int three_band_solver_ver_vel_adv(State *state_0, State *state_p1, State *state_
 		for (int j = 0; j < NO_OF_LAYERS - 2; ++j)
 		{
 			delta_z = grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 3)*NO_OF_VECTORS_PER_LAYER + i];
-			a_vector[j] = vertical_velocity[j + 1]*delta_t/delta_z;
+			a_vector[j] = 0.5*vertical_velocity[j + 1]*delta_t/delta_z;
 		}
 		delta_z = grid -> z_vector[i] - grid -> z_vector[2*NO_OF_VECTORS_PER_LAYER + i];
-		c_vector[0] = -vertical_velocity[0]*delta_t/delta_z;
+		c_vector[0] = -0.5*vertical_velocity[0]*delta_t/delta_z;
 		for (int j = 1; j < NO_OF_LAYERS - 2; ++j)
 		{
 			delta_z = grid -> z_vector[j*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 2)*NO_OF_VECTORS_PER_LAYER + i];
-			c_vector[j] = -vertical_velocity[j]*delta_t/delta_z;
+			c_vector[j] = -0.5*vertical_velocity[j]*delta_t/delta_z;
 		}
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
 			b_vector[j] = 1;
-			d_vector[j] = state_0 -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + delta_t*state_tendency -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
+			delta_z = grid -> z_vector[j*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 2)*NO_OF_VECTORS_PER_LAYER + i];
+			if (j == 0)
+			{
+				d_vector[j] = state_0 -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + delta_t*state_tendency -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - 0.5*delta_t*vertical_velocity[j]*(-vertical_velocity[j + 1])/delta_z;
+			}
+			else if (j == NO_OF_LAYERS - 2)
+			{
+				d_vector[j] = state_0 -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + delta_t*state_tendency -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - 0.5*delta_t*vertical_velocity[j]*(vertical_velocity[j - 1] - 2*vertical_velocity[j + 1])/delta_z;
+			}
+			else
+			{
+				d_vector[j] = state_0 -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + delta_t*state_tendency -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - 0.5*delta_t*vertical_velocity[j]*(vertical_velocity[j - 1] - vertical_velocity[j + 1])/delta_z;
+			}
 		}
-		delta_z = grid -> z_vector[(NO_OF_LAYERS - 2)*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i];
-		d_vector[NO_OF_LAYERS - 2] += delta_t*vertical_velocity[NO_OF_LAYERS - 2]*vertical_velocity[NO_OF_LAYERS - 1]/delta_z;
 		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, NO_OF_LAYERS - 1);
 		state_p1 -> velocity_gas[i] = 0;
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
@@ -155,10 +165,6 @@ int three_band_solver_ver_vel_adv(State *state_0, State *state_p1, State *state_
 
 int three_band_solver_ver_sound_waves(State *state_0, State *state_p1, State *state_tendency, Vector_field pressure_gradient_acc_1, Vector_field gradient_geopotential_energy, Scalar_field temperature, Scalar_field temperature_density, Vector_field temperature_flux_density, Scalar_field temperature_flux_density_divv, Scalar_field wind_field_divv, double delta_t, Grid *grid)
 {
-	/*
-	Implicit vertical advection of vertical momentum (Euler).
-	Procedure derived in Kompendium.
-	*/
 	scalar_times_scalar(state_0 -> density_dry, temperature, temperature_density);
 	scalar_times_vector(temperature_density, state_p1 -> velocity_gas, temperature_flux_density, grid);
 	divv_h(temperature_flux_density, temperature_flux_density_divv, grid);
@@ -258,8 +264,8 @@ int three_band_solver_ver_den_dry(State *state_0, State *state_p1, State *state_
 	double *d_prime_vector = malloc(NO_OF_LAYERS*sizeof(double));
 	double *vertical_flux_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
 	double *solution_vector = malloc(NO_OF_LAYERS*sizeof(double));
-	double area;
 	int i;
+	double area;
 	for (i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// diagnozing the vertical flux

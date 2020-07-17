@@ -80,7 +80,7 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
 
 int divv_v_columns(double in_vector[], double out_vector[], int h_index, Grid *grid)
 {
-	// It neglects orography. Baaad!
+	// In_vector must be contravariant already.
     double contra_upper, contra_lower, comp_v;
     for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
     {

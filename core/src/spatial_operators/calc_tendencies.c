@@ -23,7 +23,7 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
 	// -0.8:	13.09 hrs to crash
 	// -0.9:	13.09 hrs to crash
 	// -1.0:	13.09 hrs to crash
-	old_hor_grad_weight = -0.8;
+	old_hor_grad_weight = -0.5;
 	double new_hor_grad_weight = 1 - old_hor_grad_weight;
 	if (totally_first_step_bool == 1)
 	{
