@@ -163,7 +163,7 @@ int three_band_solver_ver_vel_adv(State *state_0, State *state_p1, State *state_
 	return 0;
 }
 
-int three_band_solver_ver_sound_waves(State *state_0, State *state_p1, State *state_tendency, Vector_field pressure_gradient_acc_1, Vector_field gradient_geopotential_energy, Scalar_field temperature, Scalar_field temperature_density, Vector_field temperature_flux_density, Scalar_field temperature_flux_density_divv, Scalar_field wind_field_divv, double delta_t, Grid *grid)
+int three_band_solver_ver_sound_waves(State *state_0, State *state_p1, State *state_tendency, Vector_field pressure_gradient_acc_1, Scalar_field temperature, Scalar_field temperature_density, Vector_field temperature_flux_density, Scalar_field temperature_flux_density_divv, Scalar_field wind_field_divv, double delta_t, Grid *grid)
 {
 	scalar_times_scalar(state_0 -> density_dry, temperature, temperature_density);
 	scalar_times_vector(temperature_density, state_p1 -> velocity_gas, temperature_flux_density, grid);
@@ -221,7 +221,7 @@ int three_band_solver_ver_sound_waves(State *state_0, State *state_p1, State *st
 			b_vector[2*j] = 1 + delta_t*R_D/C_D_V*wind_field_divv[i + j*NO_OF_SCALARS_H];
 			b_vector[2*j + 1] = 1;
 			d_vector[2*j] = temperature_density[j*NO_OF_SCALARS_H + i] - delta_t*temperature_flux_density_divv[j*NO_OF_SCALARS_H + i];
-			d_vector[2*j + 1] = state_p1 -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + delta_t*(-gradient_geopotential_energy[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + pressure_gradient_acc_1[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]);
+			d_vector[2*j + 1] = state_p1 -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + delta_t*(-grid -> gravity_m[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + pressure_gradient_acc_1[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]);
 		}
 		b_vector[2*NO_OF_LAYERS - 2] =  1 + delta_t*R_D/C_D_V*wind_field_divv[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
 		d_vector[2*NO_OF_LAYERS - 2] = temperature_density[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + delta_t*(-temperature_flux_density_divv[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]);

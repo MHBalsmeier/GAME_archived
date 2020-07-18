@@ -215,9 +215,6 @@ int main(int argc, char *argv[])
 	printf("Mapping horizontal areas from unit sphere to model levels ... ");
 	retval = map_area_to_sphere(area, z_vector, pent_hex_face_unity_sphere);
     printf(GREEN "finished.\n" RESET);
-    printf("Setting gravity ... ");
-    retval = set_gravity(gravity, z_vector, GRAVITY_MEAN_SFC_ABS);
-    printf(GREEN "finished.\n" RESET);
     printf("Calculating grid box volumes ... ");
 	set_volume(volume, z_scalar_dual, z_vector, area, from_index, to_index, TOA, z_surface, vorticity_indices_pre);
     printf(GREEN "finished.\n" RESET);

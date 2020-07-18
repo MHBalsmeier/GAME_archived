@@ -22,6 +22,10 @@ double calc_std_dev(double [], int);
 
 int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, char output_directory[], Grid *grid, Dualgrid *dualgrid)
 {
+    int init_year, init_month, init_day, init_hour, init_minute, init_second, init_microsecond;
+    find_hour_from_time_coord(t_init, &init_year, &init_month, &init_day, &init_hour, &init_minute, &init_second, &init_microsecond);
+    long data_date = 10000*init_year + 100*init_month + init_day;
+    long data_time = init_hour;
     int OUTPUT_FILE_LENGTH = 300;
     char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
     sprintf(OUTPUT_FILE_PRE, "%s/init+%ds.grb2", output_directory, (int) (t_write - t_init));
@@ -33,12 +37,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     FILE *SAMPLE_FILE;
     int err = 0;
     int retval;
+    if (t_init < 0)
+    	exit(1);
     FILE *OUT_GRIB;
     OUT_GRIB = fopen(OUTPUT_FILE, "w+");
-    int init_year, init_month, init_day, init_hour, init_minute, init_second, init_microsecond;
-    find_hour_from_time_coord(t_init, &init_year, &init_month, &init_day, &init_hour, &init_minute, &init_second, &init_microsecond);
-    long data_date = 10000*init_year + 100*init_month + init_day;
-    long data_time = init_hour;
     double *temperature = malloc(NO_OF_SCALARS*sizeof(double));
     double *pot_temperature = malloc(NO_OF_SCALARS*sizeof(double));
     // Grib requires everything to be on horizontal levels.
@@ -81,7 +83,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	pot_temp_diagnostics(temperature, state_write_out -> density_dry, state_write_out -> tracer_densities, pot_temperature);
 	calc_rel_vort(state_write_out -> velocity_gas, *rel_vort, grid, dualgrid);
 	int layer_index;
-	double z_height, delta_z, gravity, cape_integrand, theta_prime, theta;
+	double z_height, delta_z, cape_integrand, theta_prime, theta;
 	double z_tropopause = 15e3;
     for (int i = 0; i < NO_OF_LAYERS; ++i)
     {
@@ -99,11 +101,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
                 temp_lowest_layer = temperature[i*NO_OF_SCALARS_H + j];
                 pressure_value = state_write_out -> density_dry[j + i*NO_OF_SCALARS_H]*R_D*temp_lowest_layer;
                 temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[j + i*NO_OF_SCALARS_H];
-                mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, -grid -> gravity[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
+                mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
                 mslp[j] = pressure_value/mslp_factor;
 				// Now the aim is to determine the value of the surface pressure.
 				temp_surface = temp_lowest_layer + standard_vert_lapse_rate*(grid -> z_scalar[j + i*NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_V + j]);
-                surface_p_factor = pow(1 - (temp_surface - temp_lowest_layer)/temp_surface, -grid -> gravity[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
+                surface_p_factor = pow(1 - (temp_surface - temp_lowest_layer)/temp_surface, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
 				surface_p[j] = pressure_value/surface_p_factor;
 				// Now the aim is to calculate the 2 m temperature.
                 delta_z_temp = 2 - grid -> z_scalar[j + i*NO_OF_SCALARS_H];
@@ -112,6 +114,21 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
                 temp_gradient = (temp_upper - temp_lower)/(grid -> z_scalar[j + (i - 1)*NO_OF_SCALARS_H] - grid -> z_scalar[j + i*NO_OF_SCALARS_H]);
                 // Finally the temperature in 2 m height AGL can bo obtained via linear extrapolation.
                 t2[j] = temp_lowest_layer + delta_z_temp*temp_gradient;
+                z_height = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j];
+                cape[j] = 0;
+                theta_prime = pot_temperature[i*NO_OF_SCALARS_H + j];
+                layer_index = i;
+                cape[j] = 0;
+                while (z_height < z_tropopause)
+                {
+	                theta = pot_temperature[layer_index*NO_OF_SCALARS_H + j];
+                	delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + j] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + j];
+                	z_height += delta_z;
+                	cape_integrand = grid -> gravity_m[i*NO_OF_VECTORS_PER_LAYER + j]*(theta_prime - theta)/theta;
+                	if (cape_integrand > 0)
+                		cape[j] += cape_integrand*delta_z;
+                	--layer_index;
+                }
                 // Now come the hydrometeors.
                 sprate[j] = 0;
                 rprate[j] = 0;
@@ -128,21 +145,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
                     sprate[j] += fmax(ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + i*NO_OF_SCALARS_H + j], 0);
                 for (int k = NO_OF_SOLID_TRACERS; k < NO_OF_CONDENSATED_TRACERS; ++k)
                     rprate[j] += fmax(ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + i*NO_OF_SCALARS_H + j], 0);
-                z_height = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j];
-                cape[j] = 0;
-                theta_prime = pot_temperature[i*NO_OF_SCALARS_H + j];
-                layer_index = i;
-                while (z_height < z_tropopause)
-                {
-	                theta = pot_temperature[layer_index*NO_OF_SCALARS_H + j];
-                	delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + j] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + j];
-                	z_height += delta_z;
-                	gravity = (grid -> gravity_potential[(layer_index - 1)*NO_OF_SCALARS_H + j] - grid -> gravity_potential[layer_index*NO_OF_SCALARS_H + j])/delta_z;
-                	cape_integrand += gravity*(theta_prime - theta)/theta;
-                	if (cape_integrand > 0)
-                		cape[j] += cape_integrand*delta_z;
-                	--layer_index;
-                }
             }
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_mslp = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);

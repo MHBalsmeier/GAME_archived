@@ -423,25 +423,6 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_surface[], doub
     return 0;
 }
 
-int set_gravity(double gravity[], double z_vector[], double GRAVITY_MEAN_SFC_ABS)
-{
-	int layer_index, h_index;	
-    for (int i = 0; i < NUMBER_OF_VECTORS; ++i)
-    {
-		layer_index = i/NUMBER_OF_VECTORS_PER_LAYER;
-		h_index = i - layer_index*NUMBER_OF_VECTORS_PER_LAYER;
-        if (h_index >= NUMBER_OF_VECTORS_V)
-        {
-            gravity[i] = 0;
-        }
-        else
-        {
-            gravity[i] = -GRAVITY_MEAN_SFC_ABS*pow(RADIUS, 2)/pow(RADIUS + z_vector[i], 2);
-        }
-    }
-    return 0;
-}
-
 int map_area_to_sphere(double area[], double z_vector[], double pent_hex_face_unity_sphere[])
 {
 	int layer_index, h_index;

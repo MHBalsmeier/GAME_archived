@@ -45,7 +45,6 @@ int check_for_orthogonality(double [], double [], double);
 int calc_adjacent_vector_indices_dual_h(int [], int [], int []);
 int calc_vorticity_indices_pre_and_adjacent_scalar_indices_dual_h(int [], int [], double [], double [], int [], double, int [], int []);
 int set_z_vector_and_normal_distance(double [], double [], double [], double [], double [], double [], int [], int [], double);
-int set_gravity(double [], double [], double);
 int map_area_to_sphere(double [], double [], double []);
 int calc_z_vector_dual_and_normal_distance_dual(double [], double [], double [], double, double [], int [], int [], double [], int [], int [], double [], double [], int []);
 int calc_area_dual_pre(double [], double [], double [], double [], double []);
