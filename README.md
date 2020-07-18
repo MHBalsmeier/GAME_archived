@@ -73,7 +73,7 @@ It will only run on Linux.
 ### Download
 
 	git clone https://github.com/MHBalsmeier/game.git
-	./setup\_build\_directories.sh
+	./setup_build_directories.sh
 
 ### Build and install
 
