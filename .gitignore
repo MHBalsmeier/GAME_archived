@@ -2,7 +2,6 @@
 build
 *.pyc
 *.nc
-*.grb2
 grid_generator/grid_generator
 test_generator/test_generator
 orography_generator/orography_generator

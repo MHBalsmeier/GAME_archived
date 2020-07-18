@@ -29,7 +29,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     free(OUTPUT_FILE_PRE);
     char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
     sprintf(OUTPUT_FILE, "%s/init+%ds.grb2", output_directory, (int) (t_write - t_init));
-    char *SAMPLE_FILENAME = "./input/grib_template.grb2";
+    char *SAMPLE_FILENAME = "./grids/grib_template.grb2";
     FILE *SAMPLE_FILE;
     int err = 0;
     int retval;
@@ -618,8 +618,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
         for (int j = 0; j < NO_OF_VECTORS_H; ++j)
         {
             wind_0 = state_write_out -> velocity_gas[j + i*NO_OF_VECTORS_H + (i + 1)*NO_OF_VECTORS_V];
-            retval = recov_hor_par_pri(state_write_out -> velocity_gas, i, j, &wind_1, grid);
-            retval = passive_turn(wind_0, wind_1, -grid -> direction[j], &wind_u, &wind_v);
+            recov_hor_par_pri(state_write_out -> velocity_gas, i, j, &wind_1, grid);
+            passive_turn(wind_0, wind_1, -grid -> direction[j], &wind_u, &wind_v);
             wind_u_h[j] = wind_u;
             wind_v_h[j] = wind_v;
             rel_vort_h[j] = (*rel_vort)[NO_OF_DUAL_VECTORS_H + i*(NO_OF_VECTORS_H + NO_OF_DUAL_VECTORS_H) + j];
@@ -793,12 +793,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	}
 	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 	{
-        retval = passive_turn(wind_10_m_mean_u[i], wind_10_m_mean_v[i], -grid -> direction[i], &wind_u, &wind_v);
-        if (retval != 0)
-        {
-        	printf("Error in passive_turn called at position 0 from write_out.\n");
-        	exit(1);
-        }
+        passive_turn(wind_10_m_mean_u[i], wind_10_m_mean_v[i], -grid -> direction[i], &wind_u, &wind_v);
         wind_10_m_mean_u[i] = wind_u;
         wind_10_m_mean_v[i] = wind_v;
 	}
@@ -1059,7 +1054,6 @@ int write_out_integral(State *state_write_out, double t_write, char output_direc
     char *INTEGRAL_FILE = malloc((INTEGRAL_FILE_LENGTH + 1)*sizeof(char));
     sprintf(INTEGRAL_FILE, "%s", INTEGRAL_FILE_PRE);
     free(INTEGRAL_FILE_PRE);
-    int retval;
     if (integral_id == 0)
     {
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
@@ -1079,22 +1073,17 @@ int write_out_integral(State *state_write_out, double t_write, char output_direc
     	double kinetic_integral, potential_integral, internal_integral;
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
     	Scalar_field *e_kin_density = malloc(sizeof(Scalar_field));
-    	retval = kinetic_energy(state_write_out -> velocity_gas, *e_kin_density, grid);
-    	if (retval != 0)
-    	{
-    		printf("Error in kinetic_energy called from write_output, position 0. Answer is %d.\n", retval);
-    		exit(1);
-    	}
-    	retval = scalar_times_scalar(state_write_out -> density_dry, *e_kin_density, *e_kin_density);
+    	kinetic_energy(state_write_out -> velocity_gas, *e_kin_density, grid);
+    	scalar_times_scalar(state_write_out -> density_dry, *e_kin_density, *e_kin_density);
     	global_scalar_integrator(*e_kin_density, grid, &kinetic_integral);
     	free(e_kin_density);
     	Scalar_field *pot_energy_density = malloc(sizeof(Scalar_field));
-    	retval = scalar_times_scalar(state_write_out -> density_dry, grid -> gravity_potential, *pot_energy_density);
+    	scalar_times_scalar(state_write_out -> density_dry, grid -> gravity_potential, *pot_energy_density);
     	global_scalar_integrator(*pot_energy_density, grid, &potential_integral);
     	free(pot_energy_density);
     	Scalar_field *int_energy_density = malloc(sizeof(Scalar_field));
-    	retval = temperature_diagnostics(state_write_out -> entropy_gas, state_write_out -> density_dry, state_write_out -> tracer_densities, *int_energy_density);
-    	retval = scalar_times_scalar(state_write_out -> density_dry, *int_energy_density, *int_energy_density);
+    	temperature_diagnostics(state_write_out -> entropy_gas, state_write_out -> density_dry, state_write_out -> tracer_densities, *int_energy_density);
+    	scalar_times_scalar(state_write_out -> density_dry, *int_energy_density, *int_energy_density);
     	global_scalar_integrator(*int_energy_density, grid, &internal_integral);
     	fprintf(global_integral_file, "%lf\t%lf\t%lf\t%lf\n", t_write, kinetic_integral, potential_integral, C_D_V*internal_integral);
     	free(int_energy_density);

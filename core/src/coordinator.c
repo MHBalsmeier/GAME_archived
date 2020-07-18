@@ -197,16 +197,10 @@ int main(int argc, char *argv[])
 		write_out_integral(state_0, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 1);
     if (write_out_energy_integral == 1)
 		write_out_integral(state_0, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
-	int retval;
 	Scalar_field *radiation_tendency = calloc(1, sizeof(Scalar_field));
     if (rad_on == 1)
     {
-		retval = calc_rad_heating(*radiation_tendency, NO_OF_SCALARS);
-		if (retval != 0)
-		{
-			printf("Error in calc_rad_heating called from main, position 0.\n");
-			exit(1);
-		}
+		calc_rad_heating(*radiation_tendency, NO_OF_SCALARS);
     }
     else
     {

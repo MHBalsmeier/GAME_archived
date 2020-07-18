@@ -113,9 +113,9 @@ int calc_cell_face_unity(double pent_hex_face_unity_sphere[], double latitude_sc
         counter = 0;
         for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_V; ++j)
         {
-            in_bool_calculator(cell_vector_indices, number_of_edges, vorticity_indices_pre[3*j + 0], &check_0);
-            in_bool_calculator(cell_vector_indices, number_of_edges, vorticity_indices_pre[3*j + 1], &check_1);
-            in_bool_calculator(cell_vector_indices, number_of_edges, vorticity_indices_pre[3*j + 2], &check_2);
+            check_0 = in_bool_calculator(vorticity_indices_pre[3*j + 0], cell_vector_indices, number_of_edges);
+            check_1 = in_bool_calculator(vorticity_indices_pre[3*j + 1], cell_vector_indices, number_of_edges);
+            check_2 = in_bool_calculator(vorticity_indices_pre[3*j + 2], cell_vector_indices, number_of_edges);
             if (check_0 == 1 || check_1 == 1 || check_2 == 1)
             {
                 lat_points[counter] = latitude_scalar_dual[j];

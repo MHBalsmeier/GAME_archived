@@ -117,7 +117,7 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 				{
 					vertex_index_candidate_0 = from_index_dual[adjacent_vector_indices_h[6*from_or_to_index[i] + l]];
 					vertex_index_candidate_1 = to_index_dual[adjacent_vector_indices_h[6*from_or_to_index[i] + l]];
-					in_bool_calculator(vertex_indices, number_of_edges, vertex_index_candidate_0, &check_result);						
+					check_result = in_bool_calculator(vertex_index_candidate_0, vertex_indices, number_of_edges);						
 					if (check_result == 0)
 					{
 						vertex_indices[counter] = vertex_index_candidate_0;
@@ -125,7 +125,7 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 						longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
 						++counter;
 					}
-					in_bool_calculator(vertex_indices, number_of_edges, vertex_index_candidate_1, &check_result);						
+					check_result = in_bool_calculator(vertex_index_candidate_1, vertex_indices, number_of_edges);						
 					if (check_result == 0)
 					{
 						vertex_indices[counter] = vertex_index_candidate_1;

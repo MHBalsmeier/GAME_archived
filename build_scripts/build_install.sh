@@ -1,7 +1,16 @@
 aim_dir=~/compiled/game
+if [ -d $aim_dir/core ]
+then
 rm -r $aim_dir/core
+fi
+if [ -d $aim_dir/input ]
+then
 rm -r $aim_dir/input
+fi
+if [ -d $aim_dir/grids ]
+then
 rm -r $aim_dir/grids
+fi
 if [ -d build ]
 then
 rm -r build

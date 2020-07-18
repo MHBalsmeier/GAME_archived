@@ -11,6 +11,6 @@ int interpolation_t(State *state_0, State *state_p1, State *state_write, double 
     double weight_0, weight_p1;
     weight_p1 = (t_write - t_0)/(t_p1 - t_0);
     weight_0 = 1 - weight_p1;
-    int retval = linear_combine_two_states(state_0, state_p1, state_write, weight_0, weight_p1);
-    return retval;
+    linear_combine_two_states(state_0, state_p1, state_write, weight_0, weight_p1);
+    return 0;
 }

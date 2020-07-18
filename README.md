@@ -72,7 +72,8 @@ It will only run on Linux.
 
 ### Download
 
-Download the desired branch to a directory of your choice (better not the Downloads directory) and unzip.
+	git clone https://github.com/MHBalsmeier/game.git
+	./setup\_build\_directories.sh
 
 ### Build and install
 

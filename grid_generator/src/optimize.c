@@ -16,19 +16,18 @@ int find_cell_cgs(double [], double [], double [], double [], int [], int [], in
 
 int optimize_to_scvt(double latitude_scalar[], double longitude_scalar[], double latitude_scalar_dual[], double longitude_scalar_dual[], int n_iterations, int face_edges[][3], int face_edges_reverse[][3], int face_vertices[][3], int edge_vertices[][2], int adjacent_vector_indices_h[], int from_index_dual[], int to_index_dual[])
 {
-	int retval = 0;
 	for (int i = 0; i < n_iterations; ++i)
 	{
-    	retval = set_scalar_h_dual_coords(latitude_scalar_dual, longitude_scalar_dual, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
-    	retval = find_cell_cgs(latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, adjacent_vector_indices_h, from_index_dual, to_index_dual);
+    	set_scalar_h_dual_coords(latitude_scalar_dual, longitude_scalar_dual, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
+    	find_cell_cgs(latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, adjacent_vector_indices_h, from_index_dual, to_index_dual);
     	printf("Optimizing grid - iteration %d completed.\n", i + 1);
 	}
-	return retval;
+	return 0;
 }
 
 int find_cell_cgs(double latitude_scalar[], double longitude_scalar[], double latitude_scalar_dual[], double longitude_scalar_dual[], int adjacent_vector_indices_h[], int from_index_dual[], int to_index_dual[])
 {
-	int number_of_edges, counter, vertex_index_candidate_0, vertex_index_candidate_1, retval, check_result;
+	int number_of_edges, counter, vertex_index_candidate_0, vertex_index_candidate_1, check_result;
 	double lat_res, lon_res, x_res, y_res, z_res, triangle_unity_face, x_0, y_0, z_0, x_1, y_1, z_1, x_2, y_2, z_2, lat_0, lon_0, lat_1, lon_1, lat_2, lon_2;
 	for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
 	{
@@ -47,7 +46,7 @@ int find_cell_cgs(double latitude_scalar[], double longitude_scalar[], double la
 		{
 			vertex_index_candidate_0 = from_index_dual[adjacent_vector_indices_h[6*i + j]];
 			vertex_index_candidate_1 = to_index_dual[adjacent_vector_indices_h[6*i + j]];
-			retval = in_bool_calculator(vertex_indices, number_of_edges, vertex_index_candidate_0, &check_result);						
+			check_result = in_bool_calculator(vertex_index_candidate_0, vertex_indices, number_of_edges);						
 			if (check_result == 0)
 			{
 				vertex_indices[counter] = vertex_index_candidate_0;
@@ -55,7 +54,7 @@ int find_cell_cgs(double latitude_scalar[], double longitude_scalar[], double la
 				longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
 				++counter;
 			}
-			retval = in_bool_calculator(vertex_indices, number_of_edges, vertex_index_candidate_1, &check_result);						
+			check_result = in_bool_calculator(vertex_index_candidate_1, vertex_indices, number_of_edges);						
 			if (check_result == 0)
 			{
 				vertex_indices[counter] = vertex_index_candidate_1;
@@ -92,7 +91,7 @@ int find_cell_cgs(double latitude_scalar[], double longitude_scalar[], double la
 		latitude_scalar[i] = lat_res;
 		longitude_scalar[i] = lon_res;
 	}
-	return retval;
+	return 0;
 }
 
 

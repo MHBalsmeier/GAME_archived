@@ -1,0 +1,2 @@
+mkdir orography_generator/nc_files
+mkdir test_generator/nc_files
