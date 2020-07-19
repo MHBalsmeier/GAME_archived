@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
 	t_write_integral += delta_t;
     int counter = 0;
     State *state_tendency = calloc(1, sizeof(State));
-    State *state_interpolate = calloc(1, sizeof(State));
+    State_interpolate *state_interpolate = calloc(1, sizeof(State_interpolate));
     Diffusion_info *diffusion = calloc(1, sizeof(Diffusion_info));
     Vector_field *mass_dry_flux_density = calloc(1, sizeof(Vector_field));
     Scalar_field *mass_dry_flux_density_divv = calloc(1, sizeof(Scalar_field));

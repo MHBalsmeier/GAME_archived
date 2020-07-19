@@ -127,6 +127,12 @@ Tracer_densities tracer_densities;
 Tracer_density_temperatures tracer_density_temperatures;
 } State;
 
+
+// This is necessary for ensuring cancellation of energetically important terms, see Gassmann and Herzog.
+typedef struct state_interpolate {
+Scalar_field t_tilde;
+} State_interpolate;
+
 typedef struct diffusion_info {
 Scalar_field temp_diffusion_heating;
 Vector_field friction_acc;
