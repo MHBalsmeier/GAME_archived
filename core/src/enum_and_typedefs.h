@@ -127,19 +127,24 @@ Tracer_densities tracer_densities;
 Tracer_density_temperatures tracer_density_temperatures;
 } State;
 
-typedef struct tendency_state {
-Scalar_field density_dry;
-Scalar_field t_tilde;
-Vector_field velocity_gas;
-// density order: solid, liquid, vapour
-Tracer_densities tracer_densities;
-Tracer_density_temperatures tracer_density_temperatures;
-} Tendency_state;
-
-
-
-
-
+typedef struct diffusion_info {
+Scalar_field temp_diffusion_heating;
+Vector_field friction_acc;
+Scalar_field heating_diss;
+Scalar_field diffusion_coeff_numerical_h;
+Scalar_field diffusion_coeff_numerical_v;
+Vector_field mass_dry_diffusion_flux_density;
+Scalar_field mass_dry_diffusion_source_rate;
+Scalar_field tracer_density;
+Vector_field tracer_velocity;
+Vector_field tracer_flux_density;
+Scalar_field tracer_flux_density_divv;
+Scalar_field tracer_density_temperature;
+Vector_field tracer_temperature_flux_density;
+Scalar_field tracer_temperature_flux_density_divv;
+double tracer_mass_source_rates[NO_OF_TRACERS*NO_OF_SCALARS];
+double tracer_heat_source_rates[NO_OF_TRACERS*NO_OF_SCALARS];
+} Diffusion_info;
 
 
 
