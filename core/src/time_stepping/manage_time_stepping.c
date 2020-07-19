@@ -25,34 +25,34 @@ int manage_time_stepping(State *state_0, State *state_p1, State *state_interpola
 			phase_transitions_on = 1;
 		delta_t_rk = delta_t/(3 - i);
 		// calculatung explicit horizontal momentum tendencies and vertical advective momentum tendencies
-		explicit_momentum_tendencies(state_interpolate, state_tendency, grid, dualgrid, momentum_diffusion_on, tracers_on, temperature, temp_diffusion_heating, temp_gradient, friction_acc, heating_diss, specific_entropy, pot_vort, pressure_gradient_acc, pot_vort_tend, specific_entropy_gradient, c_h_p_field, macroscopic_energy, pressure_gradient_decel_factor, pressure_gradient_acc_1, momentum_diffusion_on, temp_gradient_times_c_h_p, pressure_gradient_acc_old, i, e_kin_h_grad, mass_dry_flux_density, totally_first_step_bool);
+		if (i == 0)
+		{
+			explicit_momentum_tendencies(state_0, state_tendency, grid, dualgrid, momentum_diffusion_on, tracers_on, temperature, temp_diffusion_heating, temp_gradient, friction_acc, heating_diss, specific_entropy, pot_vort, pressure_gradient_acc, pot_vort_tend, specific_entropy_gradient, c_h_p_field, macroscopic_energy, pressure_gradient_decel_factor, pressure_gradient_acc_1, momentum_diffusion_on, temp_gradient_times_c_h_p, pressure_gradient_acc_old, i, e_kin_h_grad, mass_dry_flux_density, totally_first_step_bool);
+		}
+		else
+		{
+			explicit_momentum_tendencies(state_p1, state_tendency, grid, dualgrid, momentum_diffusion_on, tracers_on, temperature, temp_diffusion_heating, temp_gradient, friction_acc, heating_diss, specific_entropy, pot_vort, pressure_gradient_acc, pot_vort_tend, specific_entropy_gradient, c_h_p_field, macroscopic_energy, pressure_gradient_decel_factor, pressure_gradient_acc_1, momentum_diffusion_on, temp_gradient_times_c_h_p, pressure_gradient_acc_old, i, e_kin_h_grad, mass_dry_flux_density, totally_first_step_bool);
+		}
 		// calculating the new values of the horizontal momentum, vertical horizontal advection handled implcitly
-		three_band_solver_hor(state_interpolate, state_p1, state_tendency, delta_t, grid);
+		three_band_solver_hor(state_0, state_p1, state_tendency, delta_t_rk, grid);
 		// horizontal velocities can be considered updated from now on
 		// now that the new values of the horizontal velocity values are knoown, the lower boundary condition can be solved
 		solve_lower_boundary(state_p1, grid);
 		// the advective part of the vertical velocity equation is solved here, the vertical advection is calculated implicitly
-		three_band_solver_ver_vel_adv(state_interpolate, state_p1, state_tendency, delta_t, grid);
+		three_band_solver_ver_vel_adv(state_0, state_p1, state_tendency, delta_t_rk, grid);
 		// vertical velocities can be updated from now on
 		// here, the horizontal divergences are calculated with the new values of the horizontal velocity
-		calc_partially_implicit_divvs(state_interpolate, state_p1, state_tendency, grid, dualgrid, momentum_diffusion_on, momentum_diffusion_on, tracers_on, delta_t, diffusion_on, radiation_tendency, phase_transitions_on, tracer_mass_source_rates, tracer_heat_source_rates, mass_dry_flux_density, mass_dry_flux_density_divv, temperature, entropy_gas_flux_density, entropy_gas_flux_density_divv, temp_diffusion_heating, temp_gradient, heating_diss, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, mass_dry_diffusion_flux_density, mass_dry_diffusion_source_rate, temperature_flux_density, tracer_density, tracer_velocity, tracer_flux_density, tracer_flux_density_divv, tracer_density_temperature, tracer_temperature_flux_density, tracer_temperature_flux_density_divv, diffusion_on);
+		calc_partially_implicit_divvs(state_0, state_p1, state_tendency, grid, dualgrid, momentum_diffusion_on, momentum_diffusion_on, tracers_on, delta_t, diffusion_on, radiation_tendency, phase_transitions_on, tracer_mass_source_rates, tracer_heat_source_rates, mass_dry_flux_density, mass_dry_flux_density_divv, temperature, entropy_gas_flux_density, entropy_gas_flux_density_divv, temp_diffusion_heating, temp_gradient, heating_diss, diffusion_coeff_numerical_h, diffusion_coeff_numerical_v, mass_dry_diffusion_flux_density, mass_dry_diffusion_source_rate, temperature_flux_density, tracer_density, tracer_velocity, tracer_flux_density, tracer_flux_density_divv, tracer_density_temperature, tracer_temperature_flux_density, tracer_temperature_flux_density_divv, diffusion_on);
 		// here, the non-advective part of the vertical velocity equation is solved implicitly (sound wave solver)
-		three_band_solver_ver_sound_waves(state_interpolate, state_p1, state_tendency, pressure_gradient_acc_1, temperature, temperature_density, temperature_flux_density, temperature_flux_density_divv, wind_field_divv, delta_t, grid);
+		three_band_solver_ver_sound_waves(state_0, state_p1, state_tendency, pressure_gradient_acc_1, temperature, temperature_density, temperature_flux_density, temperature_flux_density_divv, wind_field_divv, delta_t_rk, grid);
 		// now that the new vertical velocity is known, the new dry density can be calculated via implicit vertical advection
-		three_band_solver_ver_den_dry(state_interpolate, state_p1, state_tendency, delta_t, grid);
+		three_band_solver_ver_den_dry(state_0, state_p1, state_tendency, delta_t_rk, grid);
 		// Here, the global entropy density is calculated via its generalized equation of state.
-		three_band_solver_ver_entropy_gas(state_interpolate, state_p1, state_tendency, delta_t, grid);
+		three_band_solver_ver_entropy_gas(state_0, state_p1, state_tendency, delta_t_rk, grid);
 		// vertical tracer advection with 3-band matrices
 		if (tracers_on == 1)
-			three_band_solver_ver_tracers(state_interpolate, state_p1, state_tendency, delta_t, grid);
-		// diagnozing the tendency
-		linear_combine_two_states(state_interpolate, state_p1, state_tendency, -1/delta_t, 1/delta_t);
-		// determining the new interpolated state
-		if (i < 2)
-			linear_combine_two_states(state_0, state_tendency, state_interpolate, 1, delta_t_rk);
+			three_band_solver_ver_tracers(state_0, state_p1, state_tendency, delta_t_rk, grid);
     }
-	// the final step
-    linear_combine_two_states(state_0, state_tendency, state_p1, 1, delta_t);
     return 0;
 }
 
