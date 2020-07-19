@@ -8,34 +8,8 @@ This is a recovery function at horizontal vector points. If layer_index >= NO_OF
 
 int recov_hor_par_pri(Vector_field in_field, int layer_index, int h_index, double *component, Grid *grid)
 {
-	double unmodified_value, delta_z, dinputdz, delta_z_for_gradient, d_input;
     *component = 0;
-    if (layer_index < NO_OF_LAYERS - NO_OF_ORO_LAYERS)
-    {
-		for (int i = 0; i < 10; ++i)
-		    *component += grid -> trsk_modified_weights[10*h_index + i]*in_field[NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]];
-    }
-    else
-    {
-		for (int i = 0; i < 10; ++i)
-		{
-			// vertical interpolation necessary
-		    unmodified_value = grid -> trsk_modified_weights[10*h_index + i]*in_field[NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]];
-			if (layer_index == NO_OF_LAYERS - 1)
-			{
-				d_input = in_field[NO_OF_VECTORS_V + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]] - in_field[NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]];
-				delta_z_for_gradient = grid -> z_vector[NO_OF_VECTORS_V + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]] - grid -> z_vector[NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]];
-			}
-			else
-			{
-				d_input = in_field[NO_OF_VECTORS_V + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]] - in_field[NO_OF_VECTORS_V + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]];
-				delta_z_for_gradient = grid -> z_vector[NO_OF_VECTORS_V + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]] - grid -> z_vector[NO_OF_VECTORS_V + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]];
-			}
-			dinputdz = d_input/delta_z_for_gradient;
-			delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + NO_OF_VECTORS_V + h_index] - grid -> z_vector[NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]];
-			// result
-		    *component += unmodified_value + delta_z*dinputdz;
-	    }
-    }
+	for (int i = 0; i < 10; ++i)
+		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field[NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]];
     return 0;
 }

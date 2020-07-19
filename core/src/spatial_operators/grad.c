@@ -24,6 +24,10 @@ int grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
             out_field[i] = (in_field[upper_index] - in_field[lower_index])/grid -> normal_distance[i];
         }
     }
+    for (int i = 0; i < NO_OF_VECTORS_V; ++i)
+        out_field[i] = out_field[i + NO_OF_VECTORS_PER_LAYER];
+    for (int i = NO_OF_VECTORS - NO_OF_VECTORS_V; i < NO_OF_VECTORS; ++i)
+        out_field[i] = out_field[i - NO_OF_VECTORS_PER_LAYER];
     for (int i = NO_OF_VECTORS_V; i < NO_OF_VECTORS - NO_OF_VECTORS_V; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
@@ -35,10 +39,6 @@ int grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
             out_field[i] = out_field[i] - dzdx*vertical_gradient;
         }
     }
-    for (int i = 0; i < NO_OF_VECTORS_V; ++i)
-        out_field[i] = out_field[i + NO_OF_VECTORS_PER_LAYER];
-    for (int i = NO_OF_VECTORS - NO_OF_VECTORS_V; i < NO_OF_VECTORS; ++i)
-        out_field[i] = out_field[i - NO_OF_VECTORS_PER_LAYER];
     return 0;
 }
 

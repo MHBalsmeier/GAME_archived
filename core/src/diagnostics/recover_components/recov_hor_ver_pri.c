@@ -15,19 +15,19 @@ int recov_hor_ver_pri(Vector_field in_field, int layer_index, int h_index, doubl
     // This is the index of the edge we aim at.
     int aim_vector_index = layer_index*NO_OF_VECTORS_PER_LAYER + NO_OF_VECTORS_V + h_index;
     // Now comes the first neighbouring cell.
-    large_delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> recov_hor_ver_pri_index[4*h_index + 0]] - grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> recov_hor_ver_pri_index[4*h_index + 2]];
-    small_delta_z = grid -> z_vector[aim_vector_index] - grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> recov_hor_ver_pri_index[4*h_index + 2]];
+    large_delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]];
+    small_delta_z = grid -> z_vector[aim_vector_index] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]];
 	vertical_factor = small_delta_z/large_delta_z;
 	// The resulting component is a sum of four constituents.
-    *component = 0.5*vertical_factor*in_field[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> recov_hor_ver_pri_index[4*h_index + 0]];
+    *component = 0.5*vertical_factor*in_field[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]];
 	vertical_factor = 1 - vertical_factor;
-    *component += 0.5*vertical_factor*in_field[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> recov_hor_ver_pri_index[4*h_index + 2]];
+    *component += 0.5*vertical_factor*in_field[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]];
     // Now comes the other neighbouring cell.
-    large_delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> recov_hor_ver_pri_index[4*h_index + 1]] - grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> recov_hor_ver_pri_index[4*h_index + 3]];
-	small_delta_z = grid -> z_vector[aim_vector_index] - grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> recov_hor_ver_pri_index[4*h_index + 3]];
+    large_delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index]] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index]];
+	small_delta_z = grid -> z_vector[aim_vector_index] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index]];
 	vertical_factor = small_delta_z/large_delta_z;
-    *component += 0.5*vertical_factor*in_field[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> recov_hor_ver_pri_index[4*h_index + 1]];
+    *component += 0.5*vertical_factor*in_field[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index]];
 	vertical_factor = 1 - vertical_factor;
-    *component += 0.5*vertical_factor*in_field[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> recov_hor_ver_pri_index[4*h_index + 3]];
+    *component += 0.5*vertical_factor*in_field[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index]];
     return 0;
 }

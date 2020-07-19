@@ -12,7 +12,7 @@ In this file, vector reconstruction indices and weights are computed.
 #include <stdio.h>
 #include "geos95.h"
 
-int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[], int to_index_dual[], double recov_hor_ver_curl_weight[], int recov_hor_ver_pri_index[], int trsk_modified_curl_indices[], double normal_distance[], double normal_distance_dual[], int to_index[], double area[], double z_scalar[], double latitude_scalar[], double longitude_scalar[], double latitude_vector[], double longitude_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], double trsk_modified_weights[], int trsk_modified_velocity_indices[], int from_index[], int adjacent_vector_indices_h[], double direction[], double recov_hor_par_curl_weight[], double direction_dual[], double rel_on_line_dual[], int recov_hor_par_curl_index[], double ORTH_CRITERION_DEG)
+int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[], int to_index_dual[], double recov_hor_ver_curl_weight[], int trsk_modified_curl_indices[], double normal_distance[], double normal_distance_dual[], int to_index[], double area[], double z_scalar[], double latitude_scalar[], double longitude_scalar[], double latitude_vector[], double longitude_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], double trsk_modified_weights[], int trsk_modified_velocity_indices[], int from_index[], int adjacent_vector_indices_h[], double direction[], double recov_hor_par_curl_weight[], double direction_dual[], double rel_on_line_dual[], int recov_hor_par_curl_index[], double ORTH_CRITERION_DEG)
 {
 	/*
 	This function implements the modified TRSK scheme proposed by Gassmann (2018).
@@ -248,10 +248,6 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 				}
 			}
 		}
-        recov_hor_ver_pri_index[4*i + 0] = to_index[i];
-        recov_hor_ver_pri_index[4*i + 1] = from_index[i];
-        recov_hor_ver_pri_index[4*i + 2] = to_index[i] + NUMBER_OF_VECTORS_PER_LAYER;
-        recov_hor_ver_pri_index[4*i + 3] = from_index[i] + NUMBER_OF_VECTORS_PER_LAYER;
     }
     int second_index;
     // doing some more checks

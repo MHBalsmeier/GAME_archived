@@ -20,7 +20,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     double *area = malloc(NO_OF_VECTORS*sizeof(double));
     double *z_scalar = malloc(NO_OF_SCALARS*sizeof(double));
     double *z_vector = malloc(NO_OF_VECTORS*sizeof(double));
-    double *recov_hor_par_curl_weight = malloc(2*NO_OF_VECTORS_H*sizeof(double));
     double *trsk_modified_weights = malloc(10*NO_OF_VECTORS_H*sizeof(double));
     double *recov_ver_0_pri_weight = malloc(6*NO_OF_VECTORS_V*sizeof(double));
     double *recov_ver_1_pri_weight = malloc(6*NO_OF_VECTORS_V*sizeof(double));
@@ -36,18 +35,16 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     int *to_index = malloc(NO_OF_VECTORS_H*sizeof(int));
     int *from_index = malloc(NO_OF_VECTORS_H*sizeof(int));
     int *recov_ver_index = malloc(6*NO_OF_VECTORS_V*sizeof(int));
-    int *recov_hor_ver_pri_index = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int *trsk_modified_velocity_indices = malloc(10*NO_OF_VECTORS_H*sizeof(int));
     int *trsk_modified_curl_indices = malloc(10*NO_OF_VECTORS_H*sizeof(int));
     int *adjacent_vector_indices_h = malloc(6*NO_OF_SCALARS_H*sizeof(int));
     int *vorticity_indices = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int *h_curl_indices = malloc(4*NO_OF_DUAL_VECTORS_H*sizeof(int));
-    int *recov_hor_par_curl_index = malloc(2*NO_OF_VECTORS_H*sizeof(int));
     int *adjacent_signs_h = malloc(6*NO_OF_SCALARS_H*sizeof(int));
     int *vorticity_signs = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int *h_curl_signs = malloc(4*NO_OF_DUAL_VECTORS_H*sizeof(int));
     int ncid, retval;
-    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, recov_hor_par_curl_weight_id, trsk_modified_weights_id, recov_ver_0_pri_weight_id, recov_ver_0_curl_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_curl_weight_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_curl_index_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, recov_hor_ver_pri_index_id, recov_ver_index_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, direction_id, gravity_potential_id, vertical_contravar_unit_id, e_kin_weights_id, e_kin_indices_id;
+    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_modified_weights_id, recov_ver_0_pri_weight_id, recov_ver_0_curl_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_curl_weight_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, recov_ver_index_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, direction_id, gravity_potential_id, vertical_contravar_unit_id, e_kin_weights_id, e_kin_indices_id;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "normal_distance", &normal_distance_id)))
@@ -63,8 +60,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     if ((retval = nc_inq_varid(ncid, "vertical_contravar_unit", &vertical_contravar_unit_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "z_vector", &z_vector_id)))
-        ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "recov_hor_par_curl_weight", &recov_hor_par_curl_weight_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "trsk_modified_weights", &trsk_modified_weights_id)))
         ERR(retval);
@@ -92,13 +87,9 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "h_curl_indices", &h_curl_indices_id)))
         ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "recov_hor_par_curl_index", &recov_hor_par_curl_index_id)))
-        ERR(retval);
     if ((retval = nc_inq_varid(ncid, "trsk_modified_velocity_indices", &trsk_modified_velocity_indices_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "trsk_modified_curl_indices", &trsk_modified_curl_indices_id)))
-        ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "recov_hor_ver_pri_index", &recov_hor_ver_pri_index_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "recov_ver_index", &recov_ver_index_id)))
         ERR(retval);
@@ -128,8 +119,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, z_vector_id, &z_vector[0])))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, recov_hor_par_curl_weight_id, &recov_hor_par_curl_weight[0])))
-        ERR(retval);
     if ((retval = nc_get_var_double(ncid, trsk_modified_weights_id, &trsk_modified_weights[0])))
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, recov_ver_0_pri_weight_id, &recov_ver_0_pri_weight[0])))
@@ -158,13 +147,9 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, h_curl_indices_id, &h_curl_indices[0])))
         ERR(retval);
-    if ((retval = nc_get_var_int(ncid, recov_hor_par_curl_index_id, &recov_hor_par_curl_index[0])))
-        ERR(retval);
     if ((retval = nc_get_var_int(ncid, trsk_modified_velocity_indices_id, &trsk_modified_velocity_indices[0])))
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, trsk_modified_curl_indices_id, &trsk_modified_curl_indices[0])))
-        ERR(retval);
-    if ((retval = nc_get_var_int(ncid, recov_hor_ver_pri_index_id, &recov_hor_ver_pri_index[0])))
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, recov_ver_index_id, &recov_ver_index[0])))
         ERR(retval);
@@ -269,15 +254,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         grid -> direction[i] = direction[i];
         if (fabs(grid -> direction[i]) >= 1.0001*M_PI)
             grid_check_failed();
-        for (int j = 0; j < 2; ++j)
-        {
-            grid -> recov_hor_par_curl_index[2*i + j] = recov_hor_par_curl_index[2*i + j];
-            if (grid -> recov_hor_par_curl_index[2*i + j] >= 2*NO_OF_VECTORS_H + NO_OF_DUAL_VECTORS_H || grid -> recov_hor_par_curl_index[2*i + j] < 0)
-                grid_check_failed();
-            grid -> recov_hor_par_curl_weight[2*i + j] = recov_hor_par_curl_weight[2*i + j];
-            if (fabs(grid -> recov_hor_par_curl_weight[2*i + j]) >= 1.0001)
-                grid_check_failed();
-        }
         for (int j = 0; j < 10; ++j)
         {
             grid -> trsk_modified_velocity_indices[10*i + j] = trsk_modified_velocity_indices[10*i + j];
@@ -290,12 +266,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
             if (fabs(grid -> trsk_modified_weights[10*i + j]) >= 0.30)
                 grid_check_failed();
 		}
-        for (int j = 0; j < 4; ++j)
-        {
-            grid -> recov_hor_ver_pri_index[4*i + j] = recov_hor_ver_pri_index[4*i + j];
-            if (grid -> recov_hor_ver_pri_index[4*i + j] >= 2*NO_OF_VECTORS_V + NO_OF_VECTORS_H || grid -> recov_hor_ver_pri_index[4*i + j] < 0)
-                grid_check_failed();
-        }
     }
     for (int i = 0; i < NO_OF_VECTORS_V; ++i)
     {
@@ -366,7 +336,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     free(area);
     free(z_scalar);
     free(z_vector);
-    free(recov_hor_par_curl_weight);
     free(trsk_modified_weights);
     free(recov_ver_0_pri_weight);
     free(recov_ver_0_curl_weight);
@@ -379,10 +348,8 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     free(adjacent_vector_indices_h);
     free(vorticity_indices);
     free(h_curl_indices);
-    free(recov_hor_par_curl_index);
     free(trsk_modified_velocity_indices);
     free(trsk_modified_curl_indices);
-    free(recov_hor_ver_pri_index);
     free(recov_ver_index);
     free(adjacent_signs_h);
     free(vorticity_signs);
