@@ -79,7 +79,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     codes_handle *handle_rel_vort = NULL;
     codes_handle *handle_rh = NULL;
     codes_handle *handle_cape = NULL;
-	temperature_diagnostics(state_write_out -> entropy_gas, state_write_out -> density_dry, state_write_out -> tracer_densities, temperature);
+	temperature_diagnostics(state_write_out, temperature);
 	pot_temp_diagnostics(temperature, state_write_out -> density_dry, state_write_out -> tracer_densities, pot_temperature);
 	calc_rel_vort(state_write_out -> velocity_gas, *rel_vort, grid, dualgrid);
 	int layer_index;
@@ -1084,7 +1084,7 @@ int write_out_integral(State *state_write_out, double t_write, char output_direc
     	global_scalar_integrator(*pot_energy_density, grid, &potential_integral);
     	free(pot_energy_density);
     	Scalar_field *int_energy_density = malloc(sizeof(Scalar_field));
-    	temperature_diagnostics(state_write_out -> entropy_gas, state_write_out -> density_dry, state_write_out -> tracer_densities, *int_energy_density);
+    	temperature_diagnostics(state_write_out, *int_energy_density);
     	scalar_times_scalar(state_write_out -> density_dry, *int_energy_density, *int_energy_density);
     	global_scalar_integrator(*int_energy_density, grid, &internal_integral);
     	fprintf(global_integral_file, "%lf\t%lf\t%lf\t%lf\n", t_write, kinetic_integral, potential_integral, C_D_V*internal_integral);

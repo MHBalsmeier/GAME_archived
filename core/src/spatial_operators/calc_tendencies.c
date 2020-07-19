@@ -11,7 +11,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdlib.h>
 #include <stdio.h>
 
-int explicit_momentum_tendencies(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int momentum_diffusion_on, int tracers_on, Scalar_field temperature, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Vector_field friction_acc, Scalar_field heating_diss, Scalar_field specific_entropy, Curl_field pot_vort, Vector_field pressure_gradient_acc, Vector_field pot_vort_tend, Vector_field specific_entropy_gradient, Scalar_field c_h_p_field, Scalar_field e_kin_h, Scalar_field pressure_gradient_decel_factor, Vector_field pressure_gradient_acc_1, int momentum_diff_update, Vector_field temp_gradient_times_c_h_p, Vector_field pressure_gradient_acc_old, int no_step_rk, Vector_field e_kin_h_grad, Vector_field mass_dry_flux_density, int totally_first_step_bool)
+int explicit_momentum_tendencies(State *current_state, Tendency_state *state_tendency, Grid *grid, Dualgrid *dualgrid, int momentum_diffusion_on, int tracers_on, Scalar_field temperature, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Vector_field friction_acc, Scalar_field heating_diss, Scalar_field specific_entropy, Curl_field pot_vort, Vector_field pressure_gradient_acc, Vector_field pot_vort_tend, Vector_field specific_entropy_gradient, Scalar_field c_h_p_field, Scalar_field e_kin_h, Scalar_field pressure_gradient_decel_factor, Vector_field pressure_gradient_acc_1, int momentum_diff_update, Vector_field temp_gradient_times_c_h_p, Vector_field pressure_gradient_acc_old, int no_step_rk, Vector_field e_kin_h_grad, Vector_field mass_dry_flux_density, int totally_first_step_bool)
 {	
 	// Here, weights of the horizontal pressure gradient can be chosen as usual.
 	// This is in potential temperature formulation.
@@ -31,7 +31,7 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
 	}
 	// old_hor_grad_weight = 0;
 	// new_hor_grad_weight = 1;
-	temperature_diagnostics(current_state -> entropy_gas, current_state -> density_dry, current_state -> tracer_densities, temperature);
+	temperature_diagnostics(current_state, temperature);
     if (momentum_diff_update == 1)
     {
 		dissipation(current_state -> velocity_gas, current_state -> density_dry, friction_acc, heating_diss, grid);
@@ -161,7 +161,7 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
     return 0;
 }
 
-int calc_partially_implicit_divvs(State *state_old, State *state_new, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int momentum_diffusion_on, int rad_update, int tracers_on, double delta_t, int diffusion_on, Scalar_field radiation_tendency, int phase_transitions_on, double tracer_mass_source_rates[], double tracer_heat_source_rates[], Vector_field mass_dry_flux_density, Scalar_field mass_dry_flux_density_divv, Scalar_field temperature, Vector_field entropy_gas_flux_density, Scalar_field entropy_gas_flux_density_divv, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Scalar_field heating_diss, Scalar_field diffusion_coeff_numerical_h, Scalar_field diffusion_coeff_numerical_v, Vector_field mass_dry_diffusion_flux_density, Scalar_field mass_dry_diffusion_source_rate, Vector_field temperature_flux_density, Scalar_field tracer_density, Vector_field tracer_velocity, Vector_field tracer_flux_density, Scalar_field tracer_flux_density_divv, Scalar_field tracer_density_temperature, Vector_field tracer_temperature_flux_density, Scalar_field tracer_temperature_flux_density_divv, int diff_update)
+int calc_partially_implicit_divvs(State *state_old, State *state_new, Tendency_state *state_tendency, Grid *grid, Dualgrid *dualgrid, int momentum_diffusion_on, int rad_update, int tracers_on, double delta_t, int diffusion_on, Scalar_field radiation_tendency, int phase_transitions_on, double tracer_mass_source_rates[], double tracer_heat_source_rates[], Vector_field mass_dry_flux_density, Scalar_field mass_dry_flux_density_divv, Scalar_field temperature, Vector_field t_tilde_flux_density, Scalar_field t_tilde_flux_div, Scalar_field temp_diffusion_heating, Vector_field temp_gradient, Scalar_field heating_diss, Scalar_field diffusion_coeff_numerical_h, Scalar_field diffusion_coeff_numerical_v, Vector_field mass_dry_diffusion_flux_density, Scalar_field mass_dry_diffusion_source_rate, Vector_field temperature_flux_density, Scalar_field tracer_density, Vector_field tracer_velocity, Vector_field tracer_flux_density, Scalar_field tracer_flux_density_divv, Scalar_field tracer_density_temperature, Vector_field tracer_temperature_flux_density, Scalar_field tracer_temperature_flux_density_divv, int diff_update, Scalar_field wind_field_divv_h)
 {
     scalar_times_vector(state_old -> density_dry, state_new -> velocity_gas, mass_dry_flux_density, grid);
     divv_h(mass_dry_flux_density, mass_dry_flux_density_divv, grid);
@@ -184,8 +184,9 @@ int calc_partially_implicit_divvs(State *state_old, State *state_new, State *sta
     	for (int i = 0; i < NO_OF_SCALARS; ++i)
         	state_tendency -> density_dry[i] = -mass_dry_flux_density_divv[i];
     }
-    scalar_times_vector(state_old -> entropy_gas, state_new -> velocity_gas, entropy_gas_flux_density, grid);
-    divv_h(entropy_gas_flux_density, entropy_gas_flux_density_divv, grid);
+    scalar_times_vector(state_old -> t_tilde, state_new -> velocity_gas, t_tilde_flux_density, grid);
+    divv_h(t_tilde_flux_density, t_tilde_flux_div, grid);
+	divv_h(state_new -> velocity_gas, wind_field_divv_h, grid);
     if (rad_update == 1)
     {
         calc_rad_heating(radiation_tendency, NO_OF_SCALARS);
@@ -262,6 +263,7 @@ int calc_partially_implicit_divvs(State *state_old, State *state_new, State *sta
 		    }
 		}
     }
+    double R_h, density_d_micro_value, density_v_micro_value, condensates_density_sum;
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         if (diffusion_on == 1)
@@ -269,13 +271,17 @@ int calc_partially_implicit_divvs(State *state_old, State *state_new, State *sta
             total_density = state_old -> density_dry[i];
             for (int k = 0; k < NO_OF_TRACERS; ++k)
                 total_density += state_old -> tracer_densities[k*NO_OF_SCALARS + i];
-            c_h_v = spec_heat_cap_diagnostics_v(state_old -> density_dry[i], state_old -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i]);
-            rho_h = state_old -> density_dry[i] + state_old -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];
-            state_tendency -> entropy_gas[i] = -entropy_gas_flux_density_divv[i] + 1/temperature[i]*(rho_h/total_density*(temp_diffusion_heating[i] + momentum_diffusion_on*heating_diss[i] + radiation_tendency[i]) + tracers_on*phase_transitions_on*tracer_heat_source_rates[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i]);
+            rho_h = state_old -> density_dry[i] + state_old -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];		        
+			condensates_density_sum = calc_condensates_density_sum(i, state_old -> tracer_densities);
+			density_d_micro_value = calc_micro_density(state_old -> density_dry[i], condensates_density_sum);
+			density_v_micro_value = calc_micro_density(state_old -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i], condensates_density_sum);
+		    c_h_v = spec_heat_cap_diagnostics_v(density_d_micro_value, density_v_micro_value);
+		    R_h = gas_constant_diagnostics(density_d_micro_value, density_v_micro_value);
+            state_tendency -> t_tilde[i] = -t_tilde_flux_div[i] - R_h/c_h_v*state_old -> t_tilde[i]*wind_field_divv_h[i] + 1/c_h_v*rho_h/total_density*(temp_diffusion_heating[i] + momentum_diffusion_on*heating_diss[i] + radiation_tendency[i]) + tracers_on*phase_transitions_on*tracer_heat_source_rates[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];
         }
         else
         {
-            state_tendency -> entropy_gas[i] = -entropy_gas_flux_density_divv[i] + 1/temperature[i]*radiation_tendency[i];
+            state_tendency -> t_tilde[i] = -t_tilde_flux_div[i] - R_D/C_D_V*state_old -> t_tilde[i]*wind_field_divv_h[i] + radiation_tendency[i]/C_D_V;
         }
     }
     return 0;

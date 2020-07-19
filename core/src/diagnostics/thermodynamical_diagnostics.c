@@ -34,24 +34,33 @@ int pot_temp_diagnostics(Scalar_field temperature, Scalar_field density, Tracer_
     return 0;
 }
 
-int temperature_diagnostics(Scalar_field density_entropy, Scalar_field density, Tracer_densities tracer_densities, Scalar_field temperature)
+int temperature_diagnostics(State *state, Scalar_field temperature)
 {
 	/*
 	This is actually the equation of state of the gas phase in a moist atmosphere.
 	*/
-    double condensates_density_sum, density_d_micro_value, density_v_micro_value, density_h_micro_value, R_h, c_h_v, entropy_constant_h;
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-    	condensates_density_sum = calc_condensates_density_sum(i, tracer_densities);
-    	density_d_micro_value = calc_micro_density(density[i], condensates_density_sum);
-    	density_v_micro_value = calc_micro_density(tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i], condensates_density_sum);
-		R_h = gas_constant_diagnostics(density_d_micro_value, density_v_micro_value);
-    	density_h_micro_value = density_d_micro_value + density_v_micro_value;
-    	c_h_v = spec_heat_cap_diagnostics_v(density_d_micro_value, density_v_micro_value);
-    	entropy_constant_h = entropy_constant_diagnostics(density_d_micro_value, density_v_micro_value);
-    	temperature[i] = pow(R_h/P_0, R_h/c_h_v)*exp(-entropy_constant_h/c_h_v)*pow(density_h_micro_value, R_h/c_h_v)*exp(density_entropy[i]/(density_h_micro_value*c_h_v));
+    	temperature[i] = state -> t_tilde[i]/(state -> density_dry[i] + state -> tracer_densities[2*NO_OF_SCALARS + i]);
     }
     return 0;
+}
+
+int diagnoze_global_entropy(State *state)
+{
+	double density_h_micro_value, pot_temp, c_h_v, density_d_micro_value, density_v_micro_value, condensates_density_sum, R_h;
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		condensates_density_sum = calc_condensates_density_sum(i, state -> tracer_densities);
+        pot_temp = state -> t_tilde[i]/state -> density_dry[i]*pow(P_0/(R_D*state -> t_tilde[i]), R_D/C_D_P);
+    	density_d_micro_value = calc_micro_density(state -> density_dry[i], condensates_density_sum);
+    	density_v_micro_value = calc_micro_density(state -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i], condensates_density_sum);
+    	density_h_micro_value = density_d_micro_value + density_v_micro_value;
+        c_h_v = spec_heat_cap_diagnostics_v(density_d_micro_value, density_v_micro_value);
+        R_h = gas_constant_diagnostics(density_d_micro_value, density_v_micro_value);
+        state -> entropy_gas[i] = state -> density_dry[i]*(C_D_P*log(pot_temp) + entropy_constant_d) + state -> tracer_densities[2*NO_OF_SCALARS + i]*(C_V_P*log(pot_temp) + M_D/M_V*DELTA_C_V_P*R_h/c_h_v*log(R_h*pot_temp*density_h_micro_value/P_0) + entropy_constant_d);
+	}
+	return 0;
 }
 
 double spec_heat_cap_diagnostics_p(double density_d_micro_value, double density_v_micro_value)

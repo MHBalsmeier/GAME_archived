@@ -14,6 +14,7 @@ int linear_combine_two_states(State *state_0, State *state_1, State *state_out, 
     {
         state_out -> density_dry[i] = coeff_0*state_0 -> density_dry[i] + coeff_1*state_1 -> density_dry[i];
         state_out -> entropy_gas[i] = coeff_0*state_0 -> entropy_gas[i] + coeff_1*state_1 -> entropy_gas[i];
+        state_out -> t_tilde[i] = coeff_0*state_0 -> t_tilde[i] + coeff_1*state_1 -> t_tilde[i];
         for (int j = 0; j < NO_OF_TRACERS; ++j)
             state_out -> tracer_densities[j*NO_OF_SCALARS + i] = coeff_0*state_0 -> tracer_densities[j*NO_OF_SCALARS + i] + coeff_1*state_1 -> tracer_densities[j*NO_OF_SCALARS + i];
         for (int j = 0; j < NO_OF_CONDENSATED_TRACERS; ++j)
@@ -23,24 +24,6 @@ int linear_combine_two_states(State *state_0, State *state_1, State *state_out, 
         state_out -> velocity_gas[i] = coeff_0*state_0 -> velocity_gas[i] + coeff_1*state_1 -> velocity_gas[i];
     return 0;
 }
-
-int set_state_to_zero(State *state)
-{
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
-    {
-        state -> density_dry[i] = 0;
-        state -> entropy_gas[i] = 0;
-        for (int j = 0; j < NO_OF_TRACERS; ++j)
-            state -> tracer_densities[j*NO_OF_SCALARS + i] = 0;
-        for (int j = 0; j < NO_OF_CONDENSATED_TRACERS; ++j)
-            state -> tracer_density_temperatures[j*NO_OF_SCALARS + i] = 0;
-    }
-	for (int i = 0; i < NO_OF_VECTORS; ++i)
-	    state -> velocity_gas[i] = 0;
-    return 0;
-}
-
-
 
 
 

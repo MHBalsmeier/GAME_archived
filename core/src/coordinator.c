@@ -184,13 +184,11 @@ int main(int argc, char *argv[])
     t_0 = t_init;
     double t_write_integral = t_init;
     State *state_0 = calloc(1, sizeof(State));
-    set_state_to_zero(state_0);
     linear_combine_two_states(state_init, state_init, state_0, 1, 0);
     free(state_init);
     clock_t first_time, second_time;
     first_time = clock();
     State *state_p1 = calloc(1, sizeof(State));
-    set_state_to_zero(state_p1);
     if (write_out_dry_mass_integral == 1)
 		write_out_integral(state_0, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
     if (write_out_entropy_integral == 1)
@@ -211,15 +209,13 @@ int main(int argc, char *argv[])
     int counter = 0;
     double *tracer_mass_source_rates = calloc(NO_OF_TRACERS*NO_OF_SCALARS, sizeof(double));
     double *tracer_heat_source_rates = calloc(NO_OF_TRACERS*NO_OF_SCALARS, sizeof(double));
-    State *state_tendency = calloc(1, sizeof(State));
-    set_state_to_zero(state_tendency);
+    Tendency_state *state_tendency = calloc(1, sizeof(Tendency_state));
     State *state_interpolate = calloc(1, sizeof(State));
-    set_state_to_zero(state_interpolate);
     Vector_field *mass_dry_flux_density = calloc(1, sizeof(Vector_field));
     Scalar_field *mass_dry_flux_density_divv = calloc(1, sizeof(Scalar_field));
     Scalar_field *temperature = calloc(1, sizeof(Scalar_field));
-    Vector_field *entropy_gas_flux_density = calloc(1, sizeof(Vector_field));
-    Scalar_field *entropy_gas_flux_density_divv = calloc(1, sizeof(Scalar_field));
+    Vector_field *t_tilde_flux_density = calloc(1, sizeof(Vector_field));
+    Scalar_field *t_tilde_flux_density_divv = calloc(1, sizeof(Scalar_field));
     Scalar_field *temp_diffusion_heating = calloc(1, sizeof(Scalar_field));
     Vector_field *temp_gradient = calloc(1, sizeof(Vector_field));
     Vector_field *friction_acc = calloc(1, sizeof(Vector_field));
@@ -248,12 +244,10 @@ int main(int argc, char *argv[])
     Vector_field *temp_gradient_times_c_h_p = calloc(1, sizeof(Vector_field));
     Vector_field *pressure_gradient_acc_old = calloc(1, sizeof(Vector_field));
     Vector_field *e_kin_h_grad = calloc(1, sizeof(Vector_field));
-    Scalar_field *temperature_density = calloc(1, sizeof(Scalar_field));
-    Scalar_field *temperature_flux_density_divv = calloc(1, sizeof(Scalar_field));
     Scalar_field *wind_field_divv = calloc(1, sizeof(Scalar_field));
     int rad_update = 1;
     linear_combine_two_states(state_0, state_0, state_p1, 1, 0);
-    manage_time_stepping(state_0, state_p1, state_interpolate, delta_t, grid, dualgrid, momentum_diffusion_on, rad_update*rad_on, tracers_on, scalar_diffusion_on, *radiation_tendency, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divv, *temperature, *entropy_gas_flux_density, *entropy_gas_flux_density_divv, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *pot_vort, *pressure_gradient_acc, *pot_vort_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divv, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divv, *temp_gradient_times_c_h_p, *pressure_gradient_acc_old, 1, *e_kin_h_grad, *temperature_density, *temperature_flux_density_divv, *wind_field_divv, 1);
+    manage_time_stepping(state_0, state_p1, state_interpolate, delta_t, grid, dualgrid, momentum_diffusion_on, rad_update*rad_on, tracers_on, scalar_diffusion_on, *radiation_tendency, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divv, *temperature, *t_tilde_flux_density, *t_tilde_flux_density_divv, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *pot_vort, *pressure_gradient_acc, *pot_vort_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divv, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divv, *temp_gradient_times_c_h_p, *pressure_gradient_acc_old, *e_kin_h_grad, *wind_field_divv, 1);
     counter += 1;
     if (write_out_dry_mass_integral == 1)
 		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
@@ -263,7 +257,6 @@ int main(int argc, char *argv[])
 		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
 	t_write_integral += delta_t;
     State *state_write = calloc(1, sizeof(State));
-    set_state_to_zero(state_write);
     double speed;
     rad_update = 0;
     double t_rad_update = t_0 + radiation_delta_t;
@@ -281,7 +274,7 @@ int main(int argc, char *argv[])
         }
         else
         	rad_update = 0;
-        manage_time_stepping(state_0, state_p1, state_interpolate, delta_t, grid, dualgrid, momentum_diffusion_on, rad_update*rad_on, tracers_on, scalar_diffusion_on, *radiation_tendency, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divv, *temperature, *entropy_gas_flux_density, *entropy_gas_flux_density_divv, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *pot_vort, *pressure_gradient_acc, *pot_vort_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divv, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divv, *temp_gradient_times_c_h_p, *pressure_gradient_acc_old, 0, *e_kin_h_grad, *temperature_density, *temperature_flux_density_divv, *wind_field_divv, 0);
+        manage_time_stepping(state_0, state_p1, state_interpolate, delta_t, grid, dualgrid, momentum_diffusion_on, rad_update*rad_on, tracers_on, scalar_diffusion_on, *radiation_tendency, tracer_mass_source_rates, tracer_heat_source_rates, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divv, *temperature, *t_tilde_flux_density, *t_tilde_flux_density_divv, *temp_diffusion_heating, *temp_gradient, *friction_acc, *heating_diss, *specific_entropy, *pot_vort, *pressure_gradient_acc, *pot_vort_tend, *specific_entropy_gradient, *c_h_p_field, *macroscopic_energy, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *diffusion_coeff_numerical_h, *diffusion_coeff_numerical_v, *mass_dry_diffusion_flux_density, *mass_dry_diffusion_source_rate, *temperature_flux_density, *tracer_density, *tracer_velocity, *tracer_flux_density, *tracer_flux_density_divv, *tracer_density_temperature, *tracer_temperature_flux_density, *tracer_temperature_flux_density_divv, *temp_gradient_times_c_h_p, *pressure_gradient_acc_old, *e_kin_h_grad, *wind_field_divv, 0);
 		if (write_out_dry_mass_integral == 1)
 			write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
 		if (write_out_entropy_integral == 1)
@@ -324,9 +317,7 @@ int main(int argc, char *argv[])
     MPI_Finalize();
     free(state_interpolate);
     free(wind_field_divv);
-    free(temperature_flux_density_divv);
     free(e_kin_h_grad);
-    free(temperature_density);
     free(pressure_gradient_acc_old);
     free(temp_gradient_times_c_h_p);
     free(wind_h_lowest_layer_array);
@@ -355,11 +346,11 @@ int main(int argc, char *argv[])
     free(friction_acc);
     free(temp_gradient);
     free(temp_diffusion_heating);
-    free(entropy_gas_flux_density);
+    free(t_tilde_flux_density);
     free(temperature);
     free(mass_dry_flux_density_divv);
     free(mass_dry_flux_density);
-    free(entropy_gas_flux_density_divv);
+    free(t_tilde_flux_density_divv);
     free(state_tendency);
     free(tracer_mass_source_rates);
     free(tracer_heat_source_rates);

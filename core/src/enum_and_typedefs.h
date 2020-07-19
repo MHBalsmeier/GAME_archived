@@ -118,15 +118,23 @@ int h_curl_signs[4*NO_OF_DUAL_VECTORS_H];
 } Dualgrid;
 
 typedef struct state {
-Scalar_field entropy_gas;
 Scalar_field density_dry;
+Scalar_field t_tilde;
 Vector_field velocity_gas;
+Scalar_field entropy_gas;
 // density order: solid, liquid, vapour
 Tracer_densities tracer_densities;
 Tracer_density_temperatures tracer_density_temperatures;
 } State;
 
-
+typedef struct tendency_state {
+Scalar_field density_dry;
+Scalar_field t_tilde;
+Vector_field velocity_gas;
+// density order: solid, liquid, vapour
+Tracer_densities tracer_densities;
+Tracer_density_temperatures tracer_density_temperatures;
+} Tendency_state;
 
 
 

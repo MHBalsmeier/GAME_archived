@@ -10,8 +10,8 @@ int coriolis_gen(Vector_field, Dual_vector_field, Vector_field, Grid *);
 int kinetic_energy(Vector_field, Scalar_field, Grid *);
 int divv(Vector_field, Scalar_field, Grid *, int);
 int divv_h(Vector_field, Scalar_field, Grid *);
-int explicit_momentum_tendencies(State *, State *, Grid *, Dualgrid *, int, int, Scalar_field, Scalar_field, Vector_field, Vector_field, Scalar_field, Scalar_field, Curl_field, Vector_field, Vector_field, Vector_field, Scalar_field, Scalar_field, Scalar_field, Vector_field, int, Vector_field, Vector_field, int,Vector_field, Vector_field, int);
-int calc_partially_implicit_divvs(State *, State *, State *, Grid *, Dualgrid *, int, int, int, double, int, Scalar_field, int, double [], double [], Vector_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, Vector_field, Scalar_field, Vector_field, Vector_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, int);
+int explicit_momentum_tendencies(State *, Tendency_state *, Grid *, Dualgrid *, int, int, Scalar_field, Scalar_field, Vector_field, Vector_field, Scalar_field, Scalar_field, Curl_field, Vector_field, Vector_field, Vector_field, Scalar_field, Scalar_field, Scalar_field, Vector_field, int, Vector_field, Vector_field, int,Vector_field, Vector_field, int);
+int calc_partially_implicit_divvs(State *, State *, Tendency_state *, Grid *, Dualgrid *, int, int, int, double, int, Scalar_field, int, double [], double [], Vector_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, Vector_field, Scalar_field, Vector_field, Vector_field, Scalar_field, Scalar_field, Vector_field, Scalar_field, int, Scalar_field);
 int scalar_times_scalar(Scalar_field, Scalar_field, Scalar_field);
 int scalar_times_vector(Scalar_field, Vector_field, Vector_field, Grid *);
 int scalar_times_vector_scalar_h_v(Scalar_field, Scalar_field, Vector_field, Vector_field, Grid *);
@@ -19,7 +19,6 @@ int scalar_times_vector_vector_h_v(Scalar_field, Vector_field, Vector_field, Vec
 int scalar_times_vector_v_column(double [], double [], double []);
 int linear_combine_two_states(State *, State *, State *, double, double);
 int dissipation(Vector_field, Scalar_field, Vector_field, Scalar_field, Grid *);
-int set_state_to_zero(State *);
 int divv_v_columns(double [], double [], int, Grid *);
 int grad_v_vector_column_to_vector_points(double [], double [], int, Grid *);
 int grad_v_scalar_column(double [], double [], int, Grid *);

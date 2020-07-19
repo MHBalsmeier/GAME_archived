@@ -66,6 +66,7 @@ int set_init_data(char FILE_NAME[], State *init_state)
         R_h = gas_constant_diagnostics(rho[i], water_vapour_density[i]);
         c_h_v = spec_heat_cap_diagnostics_p(rho[i], water_vapour_density[i]);
         density_h_micro = calc_micro_density(rho[i] + water_vapour_density[i], solid_water_density[i] + liquid_water_density[i]);
+        init_state -> t_tilde[i] = init_state -> density_dry[i]*pow(pot_temp[i], C_D_P/C_D_V)*pow(R_D*init_state -> density_dry[i]/P_0, R_D/C_D_V);
         init_state -> entropy_gas[i] = rho[i]*(C_D_P*log(pot_temp[i]) + entropy_constant_d) + water_vapour_density[i]*(C_V_P*log(pot_temp[i]) + M_D/M_V*DELTA_C_V_P*R_h/c_h_v*log(R_h*pot_temp[i]*density_h_micro/P_0) + entropy_constant_d);
         if (NO_OF_TRACERS > 0)
         {
