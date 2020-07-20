@@ -10,7 +10,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdlib.h>
 #include <stdio.h>
 
-int manage_time_stepping(State *state_0, State *state_p1, Interpolate_info *interpolation, double delta_t, Grid *grid, Dualgrid *dualgrid, int momentum_diffusion_on, int rad_update, int tracers_on, int diffusion_on, Scalar_field radiation_tendency, State *state_tendency, Vector_field mass_dry_flux_density, Scalar_field mass_dry_flux_density_divv, Scalar_field temperature, Vector_field t_tilde_flux_density, Scalar_field t_tilde_flux_density_divv, Vector_field temp_gradient, Scalar_field specific_entropy, Curl_field pot_vort, Vector_field pressure_gradient_acc, Vector_field pot_vort_tend, Vector_field specific_entropy_gradient, Scalar_field c_h_p_field, Scalar_field e_kin_h, Scalar_field pressure_gradient_decel_factor, Vector_field pressure_gradient_acc_1, Vector_field temperature_flux_density, Vector_field temp_gradient_times_c_h_p, Vector_field pressure_gradient_acc_old, Vector_field e_kin_h_grad, Scalar_field wind_field_divv_h, int totally_first_step_bool, Scalar_field entropy_gas_flux_density_divv, Vector_field entropy_gas_flux_density, Diffusion_info *diffusion_info)
+int manage_time_stepping(State *state_0, State *state_p1, Interpolate_info *interpolation, double delta_t, Grid *grid, Dualgrid *dualgrid, int momentum_diffusion_on, int rad_update, int tracers_on, int diffusion_on, Scalar_field radiation_tendency, State *state_tendency, Vector_field mass_dry_flux_density, Scalar_field mass_dry_flux_density_divv, Scalar_field temperature, Vector_field t_tilde_flux_density, Scalar_field t_tilde_flux_density_divv, Vector_field temp_gradient, Scalar_field specific_entropy, Curl_field pot_vort, Vector_field pressure_gradient_acc, Vector_field pot_vort_tend, Vector_field specific_entropy_gradient, Scalar_field c_h_p_field, Scalar_field e_kin_h, Vector_field pressure_gradient_acc_1, Vector_field temperature_flux_density, Vector_field temp_gradient_times_c_h_p, Vector_field pressure_gradient_acc_old, Vector_field e_kin_h_grad, Scalar_field wind_field_divv_h, int totally_first_step_bool, Scalar_field entropy_gas_flux_density_divv, Vector_field entropy_gas_flux_density, Diffusion_info *diffusion_info)
 {
 	/*
 	Here, the RK3 scheme is implemented.
@@ -28,11 +28,11 @@ int manage_time_stepping(State *state_0, State *state_p1, Interpolate_info *inte
 		// calculatung explicit horizontal momentum tendencies and vertical advective momentum tendencies
 		if (i == 0)
 		{
-			explicit_momentum_tendencies(state_0, state_tendency, grid, dualgrid, momentum_diffusion_on, tracers_on, temperature, temp_gradient, specific_entropy, pot_vort, pressure_gradient_acc, pot_vort_tend, specific_entropy_gradient, c_h_p_field, e_kin_h, pressure_gradient_decel_factor, pressure_gradient_acc_1, momentum_diffusion_on, temp_gradient_times_c_h_p, pressure_gradient_acc_old, i, e_kin_h_grad, mass_dry_flux_density, totally_first_step_bool, diffusion_info);
+			explicit_momentum_tendencies(state_0, state_tendency, grid, dualgrid, momentum_diffusion_on, tracers_on, temperature, temp_gradient, specific_entropy, pot_vort, pressure_gradient_acc, pot_vort_tend, specific_entropy_gradient, c_h_p_field, e_kin_h, pressure_gradient_acc_1, momentum_diffusion_on, temp_gradient_times_c_h_p, pressure_gradient_acc_old, i, e_kin_h_grad, mass_dry_flux_density, totally_first_step_bool, diffusion_info);
 		}
 		else
 		{
-			explicit_momentum_tendencies(state_p1, state_tendency, grid, dualgrid, momentum_diffusion_on, tracers_on, temperature, temp_gradient, specific_entropy, pot_vort, pressure_gradient_acc, pot_vort_tend, specific_entropy_gradient, c_h_p_field, e_kin_h, pressure_gradient_decel_factor, pressure_gradient_acc_1, momentum_diffusion_on, temp_gradient_times_c_h_p, pressure_gradient_acc_old, i, e_kin_h_grad, mass_dry_flux_density, totally_first_step_bool, diffusion_info);
+			explicit_momentum_tendencies(state_p1, state_tendency, grid, dualgrid, momentum_diffusion_on, tracers_on, temperature, temp_gradient, specific_entropy, pot_vort, pressure_gradient_acc, pot_vort_tend, specific_entropy_gradient, c_h_p_field, e_kin_h, pressure_gradient_acc_1, momentum_diffusion_on, temp_gradient_times_c_h_p, pressure_gradient_acc_old, i, e_kin_h_grad, mass_dry_flux_density, totally_first_step_bool, diffusion_info);
 		}
 		// calculating the new values of the horizontal momentum, vertical horizontal advection handled implcitly
 		three_band_solver_hor(state_0, state_p1, state_tendency, delta_t_rk, grid);

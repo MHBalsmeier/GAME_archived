@@ -150,6 +150,7 @@ Vector_field tracer_temperature_flux_density;
 Scalar_field tracer_temperature_flux_density_divv;
 double tracer_mass_source_rates[NO_OF_TRACERS*NO_OF_SCALARS];
 double tracer_heat_source_rates[NO_OF_TRACERS*NO_OF_SCALARS];
+Scalar_field pressure_gradient_decel_factor;
 } Diffusion_info;
 
 

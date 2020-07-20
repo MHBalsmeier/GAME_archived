@@ -24,4 +24,3 @@ double calc_micro_density(double, double);
 double calc_condensates_density_sum(int, Tracer_densities);
 int vertical_contravariant_normalized(Vector_field, int, int, Grid *, double *);
 int horizontal_covariant_normalized(Vector_field, int, int, Grid *, double *);
-int diagnoze_global_entropy(State *);

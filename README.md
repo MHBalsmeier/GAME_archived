@@ -1,10 +1,8 @@
-The Global Atmospheric Modeling Framework (GAME) is a global non-hydrostatic hexagonal C grid dynamical core with the possibility to advect a variable number of tracers. For the source terms, it makes use of the atmostracers library. For radiation, it is coupled to RTE+RRTMGP via the C binding rte-rrtmgp-c (to be done).
+The Global Atmospheric Modeling Framework (GAME) is a global non-hydrostatic hexagonal C grid dynamical core with the possibility to advect a variable number of tracers. For radiation, it is coupled to RTE+RRTMGP via the C binding rte-rrtmgp-c (to be done).
 
 ## Overview
 
-(Advise: This section, as well as the whole model itself reflects my personal views on how numerical weather prediction and climate modeling should be done. It is not meant to insult anyone or degrade anyone's work.)
-
-The aim is to develop a next generation global atmospheric model with the following properties:
+It is known that the forecast skill of a NWP model depends much more on physics and data assimilation than on the dynamical core. With MPAS and FV3 for the global scale and WRF-ARW for the regional scale, efficient and capable dynamical cores exist. However, all global dynamical cores I know of have inconsistencies even in the most fundamental dynamical quantities (mass, energy forms and entropy). That is why the aim of this project is to develop a next generation global dynamical core with the following properties:
 
 * Stability.
 * At least second order accuracy -> this requires all individual schemes to be of at least second accuracy.
@@ -17,16 +15,18 @@ The aim is to develop a next generation global atmospheric model with the follow
 * No problems with terrain following coordinates. For example: A resting atmosphere around steep orography shall remain at rest.
 * Absence of unphysical numerical stabilizers like divergence damping, fixers, filters and so on.
 * Ellipsoidal grid geometry.
+* A capable and flexible framework for coupling to physics and to other components of an Earth system model.
+* Consistecy also in the presence of tracers and radiation.
 
-According to my understanding, an hexagonal C grid model is the only model where all this can be achieved (no, FV3 cannot do this either).
+According to my understanding, a hexagonal C grid is the only discretization where all this can be achieved.
 
 ### GAME's principles a.k.a. why a new global model is necessary
 
 What GAME does what other models do not do and why:
 
-* It uses the entropy as a prognostic variable. Usually, models use the potential temperature as a prognostic variable and modelers then call it the entropy, which is wrong. The potential temperature is a conserved quantity and therefore the only forcings are the diabatic forcings rendering it a suitable variable for modeling. However, the same is true for the real entropy (connected to the density times the logarithm of the potential temperature), and this last quantitiy is the much more fundamental physical property. It is not expected that modelers will start reformulating their equations.
+* It uses the entropy as a prognostic variable. Usually, models use the potential temperature as a prognostic variable and modelers then call it the entropy, which is wrong. The potential temperature is a conserved quantity and therefore the only forcings are the diabatic forcings rendering it a suitable variable for modeling. However, the same is true for the real entropy (connected to the density times the logarithm of the potential temperature), and this last quantitiy is the much more fundamental physical property.
 * It employs the modified TRSK scheme as well as the physically conistent dissipation proposed by Gassmann (2018).
-* It assigns individual densities (instead of mixing ratios) to tracers as well as individual densities and sink velocities. This will be necessary for all models to do earlier or later.
+* It assigns individual densities (instead of mixing ratios) to tracers as well as individual temperatures and sink velocities.
 
 What GAME does not do and why:
 
@@ -36,7 +36,7 @@ What GAME does not do and why:
 
 Things to be done:
 
-* An implicit solver for efficiency and better energy conservation properties.
+* A 3D implicit solver for efficiency and better energy conservation properties.
 * A way to construct Voronoi meshes on an ellipsoid.
 * (How) can EPV be conserved?
 

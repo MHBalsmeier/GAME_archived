@@ -11,7 +11,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdlib.h>
 #include <stdio.h>
 
-int explicit_momentum_tendencies(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int momentum_diffusion_on, int tracers_on, Scalar_field temperature, Vector_field temp_gradient, Scalar_field specific_entropy, Curl_field pot_vort, Vector_field pressure_gradient_acc, Vector_field pot_vort_tend, Vector_field specific_entropy_gradient, Scalar_field c_h_p_field, Scalar_field e_kin_h, Scalar_field pressure_gradient_decel_factor, Vector_field pressure_gradient_acc_1, int momentum_diff_update, Vector_field temp_gradient_times_c_h_p, Vector_field pressure_gradient_acc_old, int no_step_rk, Vector_field e_kin_h_grad, Vector_field mass_dry_flux_density, int totally_first_step_bool, Diffusion_info *diffusion_info)
+int explicit_momentum_tendencies(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, int momentum_diffusion_on, int tracers_on, Scalar_field temperature, Vector_field temp_gradient, Scalar_field specific_entropy, Curl_field pot_vort, Vector_field pressure_gradient_acc, Vector_field pot_vort_tend, Vector_field specific_entropy_gradient, Scalar_field c_h_p_field, Scalar_field e_kin_h, Vector_field pressure_gradient_acc_1, int momentum_diff_update, Vector_field temp_gradient_times_c_h_p, Vector_field pressure_gradient_acc_old, int no_step_rk, Vector_field e_kin_h_grad, Vector_field mass_dry_flux_density, int totally_first_step_bool, Diffusion_info *diffusion_info)
 {
 	// Here, weights of the horizontal pressure gradient can be chosen as usual.
 	// This is in potential temperature formulation.
@@ -104,9 +104,9 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
 		    {
 		        total_density += current_state -> tracer_densities[k*NO_OF_SCALARS + i];
 	        }
-			pressure_gradient_decel_factor[i] = rho_h/total_density;
+			diffusion_info -> pressure_gradient_decel_factor[i] = rho_h/total_density;
 		}
-		scalar_times_vector(pressure_gradient_decel_factor, pressure_gradient_acc, pressure_gradient_acc, grid);
+		scalar_times_vector(diffusion_info -> pressure_gradient_decel_factor, pressure_gradient_acc, pressure_gradient_acc, grid);
 	}
 	// Here, the gaseous flux density is prepared fore the generalized Coriolis term.
     scalar_times_vector(current_state -> density_dry, current_state -> velocity_gas, mass_dry_flux_density, grid);
