@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
 	t_write_integral += delta_t;
     int counter = 0;
     State *state_tendency = calloc(1, sizeof(State));
-    State_interpolate *state_interpolate = calloc(1, sizeof(State_interpolate));
+    Interpolate_info *interpolation = calloc(1, sizeof(Interpolate_info));
     Diffusion_info *diffusion = calloc(1, sizeof(Diffusion_info));
     Vector_field *mass_dry_flux_density = calloc(1, sizeof(Vector_field));
     Scalar_field *mass_dry_flux_density_divv = calloc(1, sizeof(Scalar_field));
@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
     Vector_field *entropy_gas_flux_density = calloc(1, sizeof(Vector_field));
     int rad_update = 1;
     linear_combine_two_states(state_0, state_0, state_p1, 1, 0);
-    manage_time_stepping(state_0, state_p1, state_interpolate, delta_t, grid, dualgrid, momentum_diffusion_on, rad_update*rad_on, tracers_on, scalar_diffusion_on, *radiation_tendency, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divv, *temperature, *t_tilde_flux_density, *t_tilde_flux_density_divv, *temp_gradient, *specific_entropy, *pot_vort, *pressure_gradient_acc, *pot_vort_tend, *specific_entropy_gradient, *c_h_p_field, *e_kin_h, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *temperature_flux_density, *temp_gradient_times_c_h_p, *pressure_gradient_acc_old, *e_kin_h_grad, *wind_field_divv, 1, *entropy_gas_flux_density_divv, *entropy_gas_flux_density, diffusion);
+    manage_time_stepping(state_0, state_p1, interpolation, delta_t, grid, dualgrid, momentum_diffusion_on, rad_update*rad_on, tracers_on, scalar_diffusion_on, *radiation_tendency, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divv, *temperature, *t_tilde_flux_density, *t_tilde_flux_density_divv, *temp_gradient, *specific_entropy, *pot_vort, *pressure_gradient_acc, *pot_vort_tend, *specific_entropy_gradient, *c_h_p_field, *e_kin_h, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *temperature_flux_density, *temp_gradient_times_c_h_p, *pressure_gradient_acc_old, *e_kin_h_grad, *wind_field_divv, 1, *entropy_gas_flux_density_divv, *entropy_gas_flux_density, diffusion);
     counter += 1;
     if (write_out_dry_mass_integral == 1)
 		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
         }
         else
         	rad_update = 0;
-            manage_time_stepping(state_0, state_p1, state_interpolate, delta_t, grid, dualgrid, momentum_diffusion_on, rad_update*rad_on, tracers_on, scalar_diffusion_on, *radiation_tendency, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divv, *temperature, *t_tilde_flux_density, *t_tilde_flux_density_divv, *temp_gradient, *specific_entropy, *pot_vort, *pressure_gradient_acc, *pot_vort_tend, *specific_entropy_gradient, *c_h_p_field, *e_kin_h, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *temperature_flux_density, *temp_gradient_times_c_h_p, *pressure_gradient_acc_old, *e_kin_h_grad, *wind_field_divv, 0, *entropy_gas_flux_density_divv, *entropy_gas_flux_density, diffusion);
+            manage_time_stepping(state_0, state_p1, interpolation, delta_t, grid, dualgrid, momentum_diffusion_on, rad_update*rad_on, tracers_on, scalar_diffusion_on, *radiation_tendency, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divv, *temperature, *t_tilde_flux_density, *t_tilde_flux_density_divv, *temp_gradient, *specific_entropy, *pot_vort, *pressure_gradient_acc, *pot_vort_tend, *specific_entropy_gradient, *c_h_p_field, *e_kin_h, *pressure_gradient_decel_factor, *pressure_gradient_acc_1, *temperature_flux_density, *temp_gradient_times_c_h_p, *pressure_gradient_acc_old, *e_kin_h_grad, *wind_field_divv, 0, *entropy_gas_flux_density_divv, *entropy_gas_flux_density, diffusion);
 		if (write_out_dry_mass_integral == 1)
 			write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
 		if (write_out_entropy_integral == 1)
@@ -305,7 +305,7 @@ int main(int argc, char *argv[])
     free(diffusion);
     free(entropy_gas_flux_density_divv);
     free(entropy_gas_flux_density);
-    free(state_interpolate);
+    free(interpolation);
     free(wind_field_divv);
     free(e_kin_h_grad);
     free(pressure_gradient_acc_old);

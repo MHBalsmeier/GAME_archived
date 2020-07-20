@@ -129,9 +129,9 @@ Tracer_density_temperatures tracer_density_temperatures;
 
 
 // This is necessary for ensuring cancellation of energetically important terms, see Gassmann and Herzog.
-typedef struct state_interpolate {
+typedef struct interpolate_info {
 Scalar_field t_tilde;
-} State_interpolate;
+} Interpolate_info;
 
 typedef struct diffusion_info {
 Scalar_field temp_diffusion_heating;
