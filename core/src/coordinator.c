@@ -52,12 +52,10 @@ int main(int argc, char *argv[])
     char *OUTPUT_FOLDER = malloc((len + 1)*sizeof(char));
     strcpy(OUTPUT_FOLDER, argv[5]);
     double cfl_margin = strtof(argv[6], NULL);
-    int momentum_diffusion_on;
-    momentum_diffusion_on = strtod(argv[7], NULL);
-    int rad_on;
-    rad_on = strtod(argv[8], NULL);
-    int tracers_on;
-    tracers_on = strtod(argv[9], NULL);
+    Config_info *config_info = calloc(1, sizeof(Config_info));
+    config_info -> momentum_diffusion_on = strtod(argv[7], NULL);
+    config_info -> rad_on = strtod(argv[8], NULL);
+    config_info -> tracers_on = strtod(argv[9], NULL);
     len = strlen(argv[10]);
     char *OPERATOR = malloc((len + 1)*sizeof(char));
     strcpy(OPERATOR, argv[10]);
@@ -67,8 +65,7 @@ int main(int argc, char *argv[])
     write_out_entropy_integral = strtod(argv[12], NULL);
     int write_out_energy_integral;
     write_out_energy_integral = strtod(argv[13], NULL);
-    int scalar_diffusion_on;
-    scalar_diffusion_on = strtod(argv[14], NULL);
+    config_info -> scalar_diffusion_on = strtod(argv[14], NULL);
     double radiation_delta_t;
     radiation_delta_t = strtof(argv[15], NULL);
     int year;
@@ -118,7 +115,7 @@ int main(int argc, char *argv[])
 	printf("number of scalar data points: %d\n", NO_OF_SCALARS);
 	printf("number of vectors: %d\n", NO_OF_VECTORS);
 	printf("number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
-	if (rad_on == 0)
+	if (config_info -> rad_on == 0)
 	{
 		printf("Radiation is turned off.\n");
 	}
@@ -126,7 +123,7 @@ int main(int argc, char *argv[])
 	{
 		printf("Radiation is turned on.\n");
 	}
-	if (tracers_on == 0)
+	if (config_info -> tracers_on == 0)
 	{
 		printf("Moisture is turned off.\n");
 	}
@@ -134,7 +131,7 @@ int main(int argc, char *argv[])
 	{
 		printf("Moisture is turned on.\n");
 	}
-	if (scalar_diffusion_on == 0)
+	if (config_info -> scalar_diffusion_on == 0)
 	{
 		printf("Scalar diffusion is turned off.\n");
 	}
@@ -142,7 +139,7 @@ int main(int argc, char *argv[])
 	{
 		printf("Scalar diffusion is turned on.\n");
 	}
-	if (momentum_diffusion_on == 0)
+	if (config_info -> momentum_diffusion_on == 0)
 	{
 		printf("Momentum diffusion is turned off.\n");
 	}
@@ -196,7 +193,7 @@ int main(int argc, char *argv[])
     if (write_out_energy_integral == 1)
 		write_out_integral(state_0, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
 	Scalar_field *radiation_tendency = calloc(1, sizeof(Scalar_field));
-    if (rad_on == 1)
+    if (config_info -> rad_on == 1)
     {
 		calc_rad_heating(*radiation_tendency, NO_OF_SCALARS);
     }
@@ -210,30 +207,12 @@ int main(int argc, char *argv[])
     State *state_tendency = calloc(1, sizeof(State));
     Interpolate_info *interpolation = calloc(1, sizeof(Interpolate_info));
     Diffusion_info *diffusion = calloc(1, sizeof(Diffusion_info));
-    Vector_field *mass_dry_flux_density = calloc(1, sizeof(Vector_field));
-    Scalar_field *mass_dry_flux_density_divv = calloc(1, sizeof(Scalar_field));
-    Scalar_field *temperature = calloc(1, sizeof(Scalar_field));
-    Vector_field *t_tilde_flux_density = calloc(1, sizeof(Vector_field));
-    Scalar_field *t_tilde_flux_density_divv = calloc(1, sizeof(Scalar_field));
-    Vector_field *temp_gradient = calloc(1, sizeof(Vector_field));
-    Scalar_field *specific_entropy = calloc(1, sizeof(Scalar_field));
-    Vector_field *pot_vort_tend = calloc(1, sizeof(Vector_field));
-    Curl_field *pot_vort = calloc(1, sizeof(Curl_field));
-    Vector_field *pressure_gradient_acc = calloc(1, sizeof(Vector_field));
-    Vector_field *specific_entropy_gradient = calloc(1, sizeof(Vector_field));
-    Scalar_field *c_h_p_field = calloc(1, sizeof(Scalar_field));
-    Scalar_field *e_kin_h = calloc(1, sizeof(Scalar_field));
-    Vector_field *pressure_gradient_acc_1 = calloc(1, sizeof(Vector_field));
-    Vector_field *temperature_flux_density = calloc(1, sizeof(Vector_field));
-    Vector_field *temp_gradient_times_c_h_p = calloc(1, sizeof(Vector_field));
-    Vector_field *pressure_gradient_acc_old = calloc(1, sizeof(Vector_field));
-    Vector_field *e_kin_h_grad = calloc(1, sizeof(Vector_field));
-    Scalar_field *wind_field_divv = calloc(1, sizeof(Scalar_field));
-    Scalar_field *entropy_gas_flux_density_divv = calloc(1, sizeof(Scalar_field));
-    Vector_field *entropy_gas_flux_density = calloc(1, sizeof(Vector_field));
-    int rad_update = 1;
+    Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
+    Forcings *forcings = calloc(1, sizeof(Forcings));
+    config_info -> rad_update = 1;
     linear_combine_two_states(state_0, state_0, state_p1, 1, 0);
-    manage_time_stepping(state_0, state_p1, interpolation, delta_t, grid, dualgrid, momentum_diffusion_on, rad_update*rad_on, tracers_on, scalar_diffusion_on, *radiation_tendency, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divv, *temperature, *t_tilde_flux_density, *t_tilde_flux_density_divv, *temp_gradient, *specific_entropy, *pot_vort, *pressure_gradient_acc, *pot_vort_tend, *specific_entropy_gradient, *c_h_p_field, *e_kin_h, *pressure_gradient_acc_1, *temperature_flux_density, *temp_gradient_times_c_h_p, *pressure_gradient_acc_old, *e_kin_h_grad, *wind_field_divv, 1, *entropy_gas_flux_density_divv, *entropy_gas_flux_density, diffusion);
+    config_info -> totally_first_step_bool = 1;
+    manage_time_stepping(state_0, state_p1, interpolation, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
     counter += 1;
     if (write_out_dry_mass_integral == 1)
 		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
@@ -244,23 +223,24 @@ int main(int argc, char *argv[])
 	t_write_integral += delta_t;
     State *state_write = calloc(1, sizeof(State));
     double speed;
-    rad_update = 0;
+    config_info -> rad_update = 0;
     double t_rad_update = t_0 + radiation_delta_t;
     int wind_10_m_step_counter = 0;
     int second_write_out_bool = 1;
     MPI_Init(&argc, &argv);
+    config_info -> totally_first_step_bool = 0;
     while (t_0 + delta_t < t_init + TOTAL_RUN_SPAN + 300)
     {
         t_0 += delta_t;
     	linear_combine_two_states(state_p1, state_p1, state_0, 1, 0);
         if (t_0 <= t_rad_update && t_0 + delta_t >= t_rad_update)
         {
-        	rad_update = 1;
+        	config_info -> rad_update = 1;
         	t_rad_update += radiation_delta_t;
         }
         else
-        	rad_update = 0;
-            manage_time_stepping(state_0, state_p1, interpolation, delta_t, grid, dualgrid, momentum_diffusion_on, rad_update*rad_on, tracers_on, scalar_diffusion_on, *radiation_tendency, state_tendency, *mass_dry_flux_density, *mass_dry_flux_density_divv, *temperature, *t_tilde_flux_density, *t_tilde_flux_density_divv, *temp_gradient, *specific_entropy, *pot_vort, *pressure_gradient_acc, *pot_vort_tend, *specific_entropy_gradient, *c_h_p_field, *e_kin_h, *pressure_gradient_acc_1, *temperature_flux_density, *temp_gradient_times_c_h_p, *pressure_gradient_acc_old, *e_kin_h_grad, *wind_field_divv, 0, *entropy_gas_flux_density_divv, *entropy_gas_flux_density, diffusion);
+        	config_info -> rad_update = 0;
+            manage_time_stepping(state_0, state_p1, interpolation, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
 		if (write_out_dry_mass_integral == 1)
 			write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
 		if (write_out_entropy_integral == 1)
@@ -302,28 +282,10 @@ int main(int argc, char *argv[])
     }
     MPI_Finalize();
     free(diffusion);
-    free(entropy_gas_flux_density_divv);
-    free(entropy_gas_flux_density);
+    free(config_info);
+    free(diagnostics);
     free(interpolation);
-    free(wind_field_divv);
-    free(e_kin_h_grad);
-    free(pressure_gradient_acc_old);
-    free(temp_gradient_times_c_h_p);
-    free(wind_h_lowest_layer_array);
-    free(temperature_flux_density);
-    free(e_kin_h);
-    free(c_h_p_field);
-    free(specific_entropy_gradient);
-    free(pot_vort_tend);
-    free(pressure_gradient_acc);
-    free(pot_vort);
-	free(specific_entropy);
-    free(temp_gradient);
-    free(t_tilde_flux_density);
-    free(temperature);
-    free(mass_dry_flux_density_divv);
-    free(mass_dry_flux_density);
-    free(t_tilde_flux_density_divv);
+    free(forcings);
     free(state_tendency);
     free(radiation_tendency);
     free(grid);

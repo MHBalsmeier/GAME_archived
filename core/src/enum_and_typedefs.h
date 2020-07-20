@@ -82,6 +82,7 @@ typedef double Curl_field_one_layer[NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H];
 typedef double Tracer_densities[NO_OF_TRACERS*NO_OF_SCALARS];
 typedef double Tracer_density_temperatures[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS];
 
+// Contains properties of the primal grid.
 typedef struct grid {
 Vector_field normal_distance;
 Scalar_field volume;
@@ -108,6 +109,7 @@ double recov_ver_1_pri_weight[6*NO_OF_VECTORS_V];
 double recov_ver_1_curl_weight[6*NO_OF_VECTORS_V];
 } Grid;
 
+// Contains properties of the dual grid.
 typedef struct dualgrid {
 Curl_field_one_layer f_vec;
 Curl_field area;
@@ -127,10 +129,49 @@ Tracer_densities tracer_densities;
 Tracer_density_temperatures tracer_density_temperatures;
 } State;
 
+// Collects diagnostic quantities. Note: in fact, forcings are also diagnostic quiantities.
+typedef struct diagnostics {
+Vector_field mass_dry_flux_density;
+Scalar_field temperature;
+Vector_field t_tilde_flux_density;
+Vector_field temp_gradient;
+Scalar_field specific_entropy;
+Curl_field pot_vort;
+Vector_field specific_entropy_gradient;
+Scalar_field c_h_p_field;
+Scalar_field e_kin_h;
+Vector_field pressure_gradient_acc_1;
+Vector_field temperature_flux_density;
+Scalar_field wind_field_divv_h;
+Vector_field entropy_gas_flux_density;
+} Diagnostics;
+
+// Collects forcings.
+typedef struct forcings {
+Scalar_field mass_dry_flux_density_divv;
+Scalar_field entropy_gas_flux_density_divv;
+Scalar_field t_tilde_flux_density_divv;
+Vector_field temp_gradient_times_c_h_p;
+Vector_field pressure_gradient_acc;
+Vector_field e_kin_h_grad;
+Vector_field pot_vort_tend;
+} Forcings;
+
+// Info on the run configuration is collected here.
+typedef struct config_info {
+int totally_first_step_bool;
+int scalar_diffusion_on;
+int momentum_diffusion_on;
+int tracers_on;
+int phase_transitions_on;
+int rad_on;
+int rad_update;
+} Config_info;
 
 // This is necessary for ensuring cancellation of energetically important terms, see Gassmann and Herzog.
 typedef struct interpolate_info {
 Scalar_field t_tilde;
+Vector_field pressure_gradient_acc_old;
 } Interpolate_info;
 
 typedef struct diffusion_info {
@@ -148,9 +189,9 @@ Scalar_field tracer_flux_density_divv;
 Scalar_field tracer_density_temperature;
 Vector_field tracer_temperature_flux_density;
 Scalar_field tracer_temperature_flux_density_divv;
+Scalar_field pressure_gradient_decel_factor;
 double tracer_mass_source_rates[NO_OF_TRACERS*NO_OF_SCALARS];
 double tracer_heat_source_rates[NO_OF_TRACERS*NO_OF_SCALARS];
-Scalar_field pressure_gradient_decel_factor;
 } Diffusion_info;
 
 

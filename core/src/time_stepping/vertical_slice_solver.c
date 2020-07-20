@@ -163,7 +163,7 @@ int three_band_solver_ver_vel_adv(State *state_0, State *state_p1, State *state_
 	return 0;
 }
 
-int three_band_solver_ver_sound_waves(State *state_0, State *state_p1, State *state_tendency, Vector_field pressure_gradient_acc_1, Scalar_field temperature_flux_density_divv, Scalar_field wind_field_divv, double delta_t, Grid *grid)
+int three_band_solver_ver_sound_waves(State *state_0, State *state_p1, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, double delta_t, Grid *grid)
 {
 	double *a_vector = malloc((2*NO_OF_LAYERS - 2)*sizeof(double));
 	double *b_vector = malloc((2*NO_OF_LAYERS - 1)*sizeof(double));
@@ -214,13 +214,13 @@ int three_band_solver_ver_sound_waves(State *state_0, State *state_p1, State *st
 		}
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
-			b_vector[2*j] = 1 + delta_t*R_D/C_D_V*wind_field_divv[i + j*NO_OF_SCALARS_H];
+			b_vector[2*j] = 1 + delta_t*R_D/C_D_V*diagnostics -> wind_field_divv_h[i + j*NO_OF_SCALARS_H];
 			b_vector[2*j + 1] = 1;
-			d_vector[2*j] = state_0 -> t_tilde[j*NO_OF_SCALARS_H + i] - delta_t*temperature_flux_density_divv[j*NO_OF_SCALARS_H + i];
-			d_vector[2*j + 1] = state_p1 -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + delta_t*(-grid -> gravity_m[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + pressure_gradient_acc_1[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]);
+			d_vector[2*j] = state_0 -> t_tilde[j*NO_OF_SCALARS_H + i] - delta_t*forcings -> t_tilde_flux_density_divv[j*NO_OF_SCALARS_H + i];
+			d_vector[2*j + 1] = state_p1 -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + delta_t*(-grid -> gravity_m[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + diagnostics -> pressure_gradient_acc_1[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]);
 		}
-		b_vector[2*NO_OF_LAYERS - 2] =  1 + delta_t*R_D/C_D_V*wind_field_divv[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
-		d_vector[2*NO_OF_LAYERS - 2] = state_0 -> t_tilde[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + delta_t*(-temperature_flux_density_divv[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]);
+		b_vector[2*NO_OF_LAYERS - 2] =  1 + delta_t*R_D/C_D_V*diagnostics -> wind_field_divv_h[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
+		d_vector[2*NO_OF_LAYERS - 2] = state_0 -> t_tilde[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + delta_t*(-forcings -> t_tilde_flux_density_divv[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]);
 		// calling the algorithm to solve the system of linear equations
 		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, 2*NO_OF_LAYERS - 1);
 		// writing the result into the new state
