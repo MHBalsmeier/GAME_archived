@@ -178,6 +178,7 @@ int three_band_solver_ver_sound_waves(State *state_0, State *state_p1, State *st
 	double *second_derivative_vector = malloc(NO_OF_LAYERS*sizeof(double));
 	double delta_z;
 	int i;
+	divv_h(state_p1 -> velocity_gas, diagnostics -> wind_field_divv_h, grid);
 	for (i = 0; i < NO_OF_VECTORS_V; ++i)
 	{
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
