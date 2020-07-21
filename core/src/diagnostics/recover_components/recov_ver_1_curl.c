@@ -13,22 +13,22 @@ int recov_ver_1_curl(Curl_field in_field, int layer_index, int h_index, double *
     if (layer_index < NO_OF_LAYERS - NO_OF_ORO_LAYERS)
     {
 		for (int i = 0; i < 6; ++i)
-		    *component += grid -> recov_ver_1_curl_weight[6*h_index + i]*in_field[layer_index*(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H) + grid -> recov_ver_index[6*h_index + i]];
+		    *component += grid -> recov_ver_1_curl_weight[6*h_index + i]*in_field[layer_index*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + grid -> recov_ver_index[6*h_index + i]];
 	}
 	else
 	{
 		for (int i = 0; i < 6; ++i)
 		{
 			// vertical interpolation necessary
-			unmodified_value = grid -> recov_ver_1_curl_weight[6*h_index + i]*in_field[layer_index*(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H) + grid -> recov_ver_index[6*h_index + i]];
+			unmodified_value = grid -> recov_ver_1_curl_weight[6*h_index + i]*in_field[layer_index*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + grid -> recov_ver_index[6*h_index + i]];
 			if (layer_index == NO_OF_LAYERS)
 			{
-				d_input = in_field[(layer_index - 1)*(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H) + grid -> recov_ver_index[6*h_index + i]] - in_field[layer_index*(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H) + grid -> recov_ver_index[6*h_index + i]];
+				d_input = in_field[(layer_index - 1)*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + grid -> recov_ver_index[6*h_index + i]] - in_field[layer_index*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + grid -> recov_ver_index[6*h_index + i]];
 				delta_z_for_gradient = grid -> z_vector[(layer_index - 1)*NO_OF_VECTORS_PER_LAYER + grid -> recov_ver_index[6*h_index + i]] - grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> recov_ver_index[6*h_index + i]];
 			}
 			else
 			{
-				d_input = in_field[(layer_index - 1)*(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H) + grid -> recov_ver_index[6*h_index + i]] - in_field[(layer_index + 1)*(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H) + grid -> recov_ver_index[6*h_index + i]];
+				d_input = in_field[(layer_index - 1)*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + grid -> recov_ver_index[6*h_index + i]] - in_field[(layer_index + 1)*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + grid -> recov_ver_index[6*h_index + i]];
 				delta_z_for_gradient = grid -> z_vector[(layer_index - 1)*NO_OF_VECTORS_PER_LAYER + grid -> recov_ver_index[6*h_index + i]] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> recov_ver_index[6*h_index + i]];
 			}
 			dinputdz = d_input/delta_z_for_gradient;

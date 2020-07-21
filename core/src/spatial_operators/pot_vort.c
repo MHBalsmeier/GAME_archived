@@ -11,22 +11,22 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
 {
     int layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area, index_0, index_1, index_2, index_3, sign_0, sign_1, sign_2, sign_3;
     double rhombus_circ, dist_0, dist_1, dist_2, dist_3, dist_0_pre, dist_2_pre, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient, density_value;
-    for (int i = 0; i < NO_OF_LAYERS*(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H) + NO_OF_DUAL_VECTORS_H; ++i)
+    for (int i = 0; i < NO_OF_LAYERS*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + NO_OF_VECTORS_H; ++i)
     {
-        layer_index = i/(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H);
-        h_index = i - layer_index*(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H);
+        layer_index = i/(NO_OF_VECTORS_H + NO_OF_VECTORS_H);
+        h_index = i - layer_index*(NO_OF_VECTORS_H + NO_OF_VECTORS_H);
         // Rhombus vorticities (stand vertically)
-        if (h_index >= NO_OF_DUAL_VECTORS_H)
+        if (h_index >= NO_OF_VECTORS_H)
         {
-			edge_vector_index_h = h_index - NO_OF_DUAL_VECTORS_H;
-	        edge_vector_index = NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + edge_vector_index_h;
-	        edge_vector_index_dual_area = NO_OF_DUAL_VECTORS_H + layer_index*(NO_OF_VECTORS_H + NO_OF_DUAL_VECTORS_H) + edge_vector_index_h;
+			edge_vector_index_h = h_index - NO_OF_VECTORS_H;
+	        edge_vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + edge_vector_index_h;
+	        edge_vector_index_dual_area = NO_OF_VECTORS_H + layer_index*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + edge_vector_index_h;
         	rhombus_circ = 0;
         	// The rhombus has four edges.
         	for (int k = 0; k < 4; ++k)
         	{
         		// This is the index of one of the rhombus edges.
-				index = NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> vorticity_indices[4*edge_vector_index_h + k];
+				index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> vorticity_indices[4*edge_vector_index_h + k];
 			    // This sign is positive for a positive sence of rotation.
 			    sign = dualgrid -> vorticity_signs[4*edge_vector_index_h + k];
 		    	// This is the value of the velocity at the rhombus edge.
@@ -69,7 +69,7 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
                 index_3 = layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> h_curl_indices[4*h_index + 3];
                 sign_1 = dualgrid -> h_curl_signs[4*h_index + 1];
                 sign_3 = dualgrid -> h_curl_signs[4*h_index + 3];
-                out_field[i] = 1/dualgrid -> area[layer_index*(NO_OF_VECTORS_H + NO_OF_DUAL_VECTORS_H) + h_index]*(grid -> normal_distance[index_1]*sign_1*velocity_field[index_1] + grid -> normal_distance[index_3]*sign_3*velocity_field[index_3]);
+                out_field[i] = 1/dualgrid -> area[layer_index*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + h_index]*(grid -> normal_distance[index_1]*sign_1*velocity_field[index_1] + grid -> normal_distance[index_3]*sign_3*velocity_field[index_3]);
        			out_field[i] += dualgrid -> f_vec[h_index];
 				density_value = density_field[layer_index*NO_OF_SCALARS_H + h_index];
 				if (layer_index == 0)
@@ -107,7 +107,7 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
                     horizontal_covariant_normalized(velocity_field, layer_index, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_0);
                     horizontal_covariant_normalized(velocity_field, layer_index - 1, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_2);
                 }
-                out_field[i] = 1/dualgrid -> area[layer_index*(NO_OF_VECTORS_H + NO_OF_DUAL_VECTORS_H) + h_index]*(dist_0*sign_0*covar_0 + dist_1*sign_1*velocity_field[index_1] + dist_2*sign_2*covar_2 + dist_3*sign_3*velocity_field[index_3]);
+                out_field[i] = 1/dualgrid -> area[layer_index*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + h_index]*(dist_0*sign_0*covar_0 + dist_1*sign_1*velocity_field[index_1] + dist_2*sign_2*covar_2 + dist_3*sign_3*velocity_field[index_3]);
        			out_field[i] += dualgrid -> f_vec[h_index];
 				density_value = 0.25*(density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]] + density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]] + density_field[layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]] + density_field[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]]);
 				out_field[i] = out_field[i]/density_value;
@@ -121,22 +121,22 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
 {
     int layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area, index_0, index_1, index_2, index_3, sign_0, sign_1, sign_2, sign_3;
     double rhombus_circ, dist_0, dist_1, dist_2, dist_3, dist_0_pre, dist_2_pre, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient;
-    for (int i = 0; i < NO_OF_LAYERS*(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H) + NO_OF_DUAL_VECTORS_H; ++i)
+    for (int i = 0; i < NO_OF_LAYERS*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + NO_OF_VECTORS_H; ++i)
     {
-        layer_index = i/(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H);
-        h_index = i - layer_index*(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H);
+        layer_index = i/(NO_OF_VECTORS_H + NO_OF_VECTORS_H);
+        h_index = i - layer_index*(NO_OF_VECTORS_H + NO_OF_VECTORS_H);
         // Rhombus vorticities (stand vertically)
-        if (h_index >= NO_OF_DUAL_VECTORS_H)
+        if (h_index >= NO_OF_VECTORS_H)
         {
-			edge_vector_index_h = h_index - NO_OF_DUAL_VECTORS_H;
-	        edge_vector_index = NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + edge_vector_index_h;
-	        edge_vector_index_dual_area = NO_OF_DUAL_VECTORS_H + layer_index*(NO_OF_VECTORS_H + NO_OF_DUAL_VECTORS_H) + edge_vector_index_h;
+			edge_vector_index_h = h_index - NO_OF_VECTORS_H;
+	        edge_vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + edge_vector_index_h;
+	        edge_vector_index_dual_area = NO_OF_VECTORS_H + layer_index*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + edge_vector_index_h;
         	rhombus_circ = 0;
         	// The rhombus has four edges.
         	for (int k = 0; k < 4; ++k)
         	{
         		// This is the index of one of the rhombus edges.
-				index = NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> vorticity_indices[4*edge_vector_index_h + k];
+				index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> vorticity_indices[4*edge_vector_index_h + k];
 			    // This sign is positive for a positive sence of rotation.
 			    sign = dualgrid -> vorticity_signs[4*edge_vector_index_h + k];
 		    	// This is the value of the velocity at the rhombus edge.
@@ -174,7 +174,7 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
                 index_3 = layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> h_curl_indices[4*h_index + 3];
                 sign_1 = dualgrid -> h_curl_signs[4*h_index + 1];
                 sign_3 = dualgrid -> h_curl_signs[4*h_index + 3];
-                out_field[i] = 1/dualgrid -> area[layer_index*(NO_OF_VECTORS_H + NO_OF_DUAL_VECTORS_H) + h_index]*(grid -> normal_distance[index_1]*sign_1*velocity_field[index_1] + grid -> normal_distance[index_3]*sign_3*velocity_field[index_3]);
+                out_field[i] = 1/dualgrid -> area[layer_index*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + h_index]*(grid -> normal_distance[index_1]*sign_1*velocity_field[index_1] + grid -> normal_distance[index_3]*sign_3*velocity_field[index_3]);
             }
             else
             {
@@ -201,7 +201,7 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
                     horizontal_covariant_normalized(velocity_field, layer_index, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_0);
                     horizontal_covariant_normalized(velocity_field, layer_index - 1, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_2);
                 }
-                out_field[i] = 1/dualgrid -> area[layer_index*(NO_OF_VECTORS_H + NO_OF_DUAL_VECTORS_H) + h_index]*(dist_0*sign_0*covar_0 + dist_1*sign_1*velocity_field[index_1] + dist_2*sign_2*covar_2 + dist_3*sign_3*velocity_field[index_3]);
+                out_field[i] = 1/dualgrid -> area[layer_index*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + h_index]*(dist_0*sign_0*covar_0 + dist_1*sign_1*velocity_field[index_1] + dist_2*sign_2*covar_2 + dist_3*sign_3*velocity_field[index_3]);
             }
         }
     }

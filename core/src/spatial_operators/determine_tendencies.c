@@ -84,7 +84,7 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
 		{
 			layer_index = i/NO_OF_VECTORS_PER_LAYER;
 			h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-			if (h_index < NO_OF_VECTORS_V)
+			if (h_index < NO_OF_SCALARS_H)
 				forcings -> pressure_gradient_acc[i] = -forcings -> temp_gradient_times_c_h_p[i] + diagnostics -> pressure_gradient_acc_1[i];
 		}	
 	}
@@ -118,36 +118,36 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
     {
     	layer_index = i/NO_OF_VECTORS_PER_LAYER;
     	h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-        if (i < NO_OF_VECTORS_V || i >= NO_OF_VECTORS - NO_OF_VECTORS_V)
+        if (i < NO_OF_SCALARS_H || i >= NO_OF_VECTORS - NO_OF_SCALARS_H)
             state_tendency -> velocity_gas[i] = 0;
         else
         {
         	if (config_info -> momentum_diffusion_on == 1)
         	{
-        		if (h_index >= NO_OF_VECTORS_V)
+        		if (h_index >= NO_OF_SCALARS_H)
         		{
-        			recov_hor_ver_pri(current_state -> velocity_gas, layer_index, h_index - NO_OF_VECTORS_V, &vertical_velocity, grid);
+        			recov_hor_ver_pri(current_state -> velocity_gas, layer_index, h_index - NO_OF_SCALARS_H, &vertical_velocity, grid);
         			metric_term = -vertical_velocity*current_state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
-        			hor_non_trad_cori_sign = -dualgrid -> h_curl_signs[4*(h_index - NO_OF_VECTORS_V) + 0];
-        			hor_non_trad_cori_term = hor_non_trad_cori_sign*vertical_velocity*dualgrid -> f_vec[h_index - NO_OF_VECTORS_V];
+        			hor_non_trad_cori_sign = -dualgrid -> h_curl_signs[4*(h_index - NO_OF_SCALARS_H) + 0];
+        			hor_non_trad_cori_term = hor_non_trad_cori_sign*vertical_velocity*dualgrid -> f_vec[h_index - NO_OF_SCALARS_H];
             		state_tendency -> velocity_gas[i] = old_hor_grad_weight*interpolation -> pressure_gradient_acc_old[i] + new_hor_grad_weight*forcings -> pressure_gradient_acc[i] + forcings -> pot_vort_tend[i] - grid -> gravity_m[i] - forcings -> e_kin_h_grad[i] + hor_non_trad_cori_term + metric_term + diffusion_info -> friction_acc[i];
         		}
-            	if (h_index < NO_OF_VECTORS_V)
+            	if (h_index < NO_OF_SCALARS_H)
             	{
             		state_tendency -> velocity_gas[i] = forcings -> pot_vort_tend[i] - forcings -> e_kin_h_grad[i] + diffusion_info -> friction_acc[i];
         		}
         	}
             else
             {
-        		if (h_index >= NO_OF_VECTORS_V)
+        		if (h_index >= NO_OF_SCALARS_H)
         		{
-        			recov_hor_ver_pri(current_state -> velocity_gas, layer_index, h_index - NO_OF_VECTORS_V, &vertical_velocity, grid);
+        			recov_hor_ver_pri(current_state -> velocity_gas, layer_index, h_index - NO_OF_SCALARS_H, &vertical_velocity, grid);
         			metric_term = -vertical_velocity*current_state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
-        			hor_non_trad_cori_sign = -dualgrid -> h_curl_signs[4*(h_index - NO_OF_VECTORS_V) + 0];
-        			hor_non_trad_cori_term = hor_non_trad_cori_sign*vertical_velocity*dualgrid -> f_vec[h_index - NO_OF_VECTORS_V];
+        			hor_non_trad_cori_sign = -dualgrid -> h_curl_signs[4*(h_index - NO_OF_SCALARS_H) + 0];
+        			hor_non_trad_cori_term = hor_non_trad_cori_sign*vertical_velocity*dualgrid -> f_vec[h_index - NO_OF_SCALARS_H];
             		state_tendency -> velocity_gas[i] = old_hor_grad_weight*interpolation -> pressure_gradient_acc_old[i] + new_hor_grad_weight*forcings -> pressure_gradient_acc[i] + forcings -> pot_vort_tend[i] - grid -> gravity_m[i] - forcings -> e_kin_h_grad[i] + hor_non_trad_cori_term + metric_term;
         		}
-        		if (h_index < NO_OF_VECTORS_V)
+        		if (h_index < NO_OF_SCALARS_H)
         		{
             		state_tendency -> velocity_gas[i] = forcings -> pot_vort_tend[i] - forcings -> e_kin_h_grad[i];
         		}
@@ -238,7 +238,7 @@ int integrate_tracers(State *state_old, State *state_new, Interpolate_info *inte
 		        {
 		            layer_index = j/NO_OF_VECTORS_PER_LAYER;
 		            h_index = j - layer_index*NO_OF_VECTORS_PER_LAYER;
-		            if (h_index < NO_OF_VECTORS_V)
+		            if (h_index < NO_OF_SCALARS_H)
 		                diffusion_info -> tracer_velocity[j] = state_new -> velocity_gas[j] - ret_sink_velocity(i, 0, 0.001);
 		            else
 		            	diffusion_info -> tracer_velocity[j] = state_new -> velocity_gas[j];

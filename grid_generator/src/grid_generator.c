@@ -59,36 +59,36 @@ int main(int argc, char *argv[])
     int len = strlen(argv[5]);
     char *SCALAR_H_FILE = malloc((len + 1)*sizeof(char));
     strcpy(SCALAR_H_FILE, argv[5]);
-	if (NUMBER_OF_ORO_LAYERS >= NUMBER_OF_LAYERS)
+	if (NO_OF_ORO_LAYERS >= NO_OF_LAYERS)
 	{
-		printf("It is NUMBER_OF_ORO_LAYERS >= NUMBER_OF_LAYERS.\n");
+		printf("It is NO_OF_ORO_LAYERS >= NO_OF_LAYERS.\n");
 		exit(1);
 	}
     int OUTPUT_FILE_LENGTH = 100;
     char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
     if (OPTIMIZE_BOOL == 1)
     {
-    	sprintf(OUTPUT_FILE_PRE, "nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
+    	sprintf(OUTPUT_FILE_PRE, "nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
 	}
 	else
 	{
-    	sprintf(OUTPUT_FILE_PRE, "nc_files/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
+    	sprintf(OUTPUT_FILE_PRE, "nc_files/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
 	}
     OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
     free(OUTPUT_FILE_PRE);
     char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
     if (OPTIMIZE_BOOL == 1)
     {
-    	sprintf(OUTPUT_FILE, "nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
+    	sprintf(OUTPUT_FILE, "nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
 	}
 	else
 	{
-    	sprintf(OUTPUT_FILE, "nc_files/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
+    	sprintf(OUTPUT_FILE, "nc_files/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
 	}
 	printf("Output will be written to file %s.\n", OUTPUT_FILE);
     double *latitude_ico = malloc(12*sizeof(double));
     double *longitude_ico = malloc(12*sizeof(double));
-    int edge_vertices[NUMBER_OF_EDGES][2];
+    int edge_vertices[NO_OF_EDGES][2];
     int face_vertices[20][3];
     int face_edges[20][3];
     int face_edges_reverse[20][3];
@@ -96,72 +96,72 @@ int main(int argc, char *argv[])
 	build_icosahedron(latitude_ico, longitude_ico, edge_vertices, face_vertices, face_edges, face_edges_reverse);
     printf(GREEN "finished.\n" RESET);
     printf("Allocating memory ... ");
-    double *x_unity = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *y_unity = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *z_unity = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *latitude_scalar = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *longitude_scalar = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *z_scalar = malloc(NUMBER_OF_SCALARS*sizeof(double));
-    double *gravity_potential = malloc(NUMBER_OF_SCALARS*sizeof(double));
-    double *z_vector = malloc(NUMBER_OF_VECTORS*sizeof(double));
-    double *normal_distance = malloc(NUMBER_OF_VECTORS*sizeof(double));
-    double *latitude_vector = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
-    double *longitude_vector = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
-    double *direction = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
-    double *gravity = malloc(NUMBER_OF_VECTORS*sizeof(double));
-    double *volume = malloc(NUMBER_OF_SCALARS*sizeof(double));
-    double *area = malloc(NUMBER_OF_VECTORS*sizeof(double));
-    double *trsk_modified_weights = calloc(10*NUMBER_OF_VECTORS_H, sizeof(double));
-    double *recov_hor_par_curl_weight = malloc(2*NUMBER_OF_VECTORS_H*sizeof(double));
-    double *recov_hor_ver_curl_weight = malloc(2*NUMBER_OF_VECTORS_H*sizeof(double));
-    double *recov_ver_0_pri_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
-    double *recov_ver_1_pri_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
-    double *recov_ver_0_curl_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
-    double *recov_ver_1_curl_weight = malloc(6*NUMBER_OF_VECTORS_V*sizeof(double));
-    double *latitude_scalar_dual = malloc(NUMBER_OF_DUAL_SCALARS_H*sizeof(double));
-    double *longitude_scalar_dual = malloc(NUMBER_OF_DUAL_SCALARS_H*sizeof(double));
-    double *z_scalar_dual = malloc(NUMBER_OF_DUAL_SCALARS*sizeof(double));
-    double *latitude_vector_dual = malloc(NUMBER_OF_DUAL_VECTORS_PER_LAYER*sizeof(double));
-    double *z_vector_dual = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(double));
-    double *normal_distance_dual = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(double));
-    double *direction_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(double));
-    double *area_dual_pre = malloc(NUMBER_OF_DUAL_VECTORS*sizeof(double));
-    double *area_dual = malloc((NUMBER_OF_DUAL_H_VECTORS + NUMBER_OF_H_VECTORS)*sizeof(double));
-    double *f_vec = malloc((NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H)*sizeof(double));
-    double *triangle_face_unit_sphere = malloc(NUMBER_OF_DUAL_VECTORS_V*sizeof(double));
-    double *pent_hex_face_unity_sphere = malloc(NUMBER_OF_VECTORS_V*sizeof(double));
-    double *rel_on_line_dual = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
-	double *z_surface = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-	double *vertical_contravar_unit = malloc(3*NUMBER_OF_VECTORS_V*(NUMBER_OF_ORO_LAYERS + 1)*sizeof(double));
-	double *e_kin_weights = malloc(6*NUMBER_OF_SCALARS*sizeof(double));
-	int *e_kin_indices = malloc(6*NUMBER_OF_SCALARS*sizeof(int));
-    int *to_index = malloc(NUMBER_OF_VECTORS_H*sizeof(int));
-    int *from_index = malloc(NUMBER_OF_VECTORS_H*sizeof(int));
-    int *trsk_modified_velocity_indices = calloc(10*NUMBER_OF_VECTORS_H, sizeof(int));
-    int *trsk_modified_curl_indices = calloc(10*NUMBER_OF_VECTORS_H, sizeof(int));
-    int *recov_hor_par_curl_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(int));
-    int *recov_hor_ver_curl_index = malloc(2*NUMBER_OF_VECTORS_H*sizeof(int));
-    int *recov_ver_index = malloc(6*NUMBER_OF_VECTORS_V*sizeof(int));
-    int *adjacent_vector_indices_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(int));
-    int *adjacent_vector_indices_dual_h = malloc(3*NUMBER_OF_DUAL_SCALARS_H*sizeof(int));
-    int *vorticity_indices_pre = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(int));
-    int *vorticity_indices = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
-    int *h_curl_indices = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
-    int *to_index_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
-    int *from_index_dual = malloc(NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
-    int *adjacent_scalar_indices_dual_h = malloc(3*NUMBER_OF_DUAL_SCALARS_H*sizeof(int));
-    int *adjacent_signs_h = malloc(6*NUMBER_OF_SCALARS_H*sizeof(int));
-    int *vorticity_signs_pre = malloc(3*NUMBER_OF_DUAL_VECTORS_V*sizeof(int));
-    int *vorticity_signs = malloc(4*NUMBER_OF_VECTORS_H*sizeof(int));
-    int *h_curl_signs = malloc(4*NUMBER_OF_DUAL_VECTORS_H*sizeof(int));
+    double *x_unity = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *y_unity = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *z_unity = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *latitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *longitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *z_scalar = malloc(NO_OF_SCALARS*sizeof(double));
+    double *gravity_potential = malloc(NO_OF_SCALARS*sizeof(double));
+    double *z_vector = malloc(NO_OF_VECTORS*sizeof(double));
+    double *normal_distance = malloc(NO_OF_VECTORS*sizeof(double));
+    double *latitude_vector = malloc(NO_OF_VECTORS_H*sizeof(double));
+    double *longitude_vector = malloc(NO_OF_VECTORS_H*sizeof(double));
+    double *direction = malloc(NO_OF_VECTORS_H*sizeof(double));
+    double *gravity = malloc(NO_OF_VECTORS*sizeof(double));
+    double *volume = malloc(NO_OF_SCALARS*sizeof(double));
+    double *area = malloc(NO_OF_VECTORS*sizeof(double));
+    double *trsk_modified_weights = calloc(10*NO_OF_VECTORS_H, sizeof(double));
+    double *recov_hor_par_curl_weight = malloc(2*NO_OF_VECTORS_H*sizeof(double));
+    double *recov_hor_ver_curl_weight = malloc(2*NO_OF_VECTORS_H*sizeof(double));
+    double *recov_ver_0_pri_weight = malloc(6*NO_OF_VECTORS_V*sizeof(double));
+    double *recov_ver_1_pri_weight = malloc(6*NO_OF_VECTORS_V*sizeof(double));
+    double *recov_ver_0_curl_weight = malloc(6*NO_OF_VECTORS_V*sizeof(double));
+    double *recov_ver_1_curl_weight = malloc(6*NO_OF_VECTORS_V*sizeof(double));
+    double *latitude_scalar_dual = malloc(NO_OF_DUAL_SCALARS_H*sizeof(double));
+    double *longitude_scalar_dual = malloc(NO_OF_DUAL_SCALARS_H*sizeof(double));
+    double *z_scalar_dual = malloc(NO_OF_DUAL_SCALARS*sizeof(double));
+    double *latitude_vector_dual = malloc(NO_OF_DUAL_VECTORS_PER_LAYER*sizeof(double));
+    double *z_vector_dual = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
+    double *normal_distance_dual = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
+    double *direction_dual = malloc(NO_OF_VECTORS_H*sizeof(double));
+    double *area_dual_pre = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
+    double *area_dual = malloc((NO_OF_DUAL_H_VECTORS + NO_OF_H_VECTORS)*sizeof(double));
+    double *f_vec = malloc(2*NO_OF_VECTORS_H*sizeof(double));
+    double *triangle_face_unit_sphere = malloc(NO_OF_DUAL_SCALARS_H*sizeof(double));
+    double *pent_hex_face_unity_sphere = malloc(NO_OF_VECTORS_V*sizeof(double));
+    double *rel_on_line_dual = malloc(NO_OF_VECTORS_H*sizeof(double));
+	double *z_surface = malloc(NO_OF_SCALARS_H*sizeof(double));
+	double *vertical_contravar_unit = malloc(3*NO_OF_VECTORS_V*(NO_OF_ORO_LAYERS + 1)*sizeof(double));
+	double *e_kin_weights = malloc(6*NO_OF_SCALARS*sizeof(double));
+	int *e_kin_indices = malloc(6*NO_OF_SCALARS*sizeof(int));
+    int *to_index = malloc(NO_OF_VECTORS_H*sizeof(int));
+    int *from_index = malloc(NO_OF_VECTORS_H*sizeof(int));
+    int *trsk_modified_velocity_indices = calloc(10*NO_OF_VECTORS_H, sizeof(int));
+    int *trsk_modified_curl_indices = calloc(10*NO_OF_VECTORS_H, sizeof(int));
+    int *recov_hor_par_curl_index = malloc(2*NO_OF_VECTORS_H*sizeof(int));
+    int *recov_hor_ver_curl_index = malloc(2*NO_OF_VECTORS_H*sizeof(int));
+    int *recov_ver_index = malloc(6*NO_OF_VECTORS_V*sizeof(int));
+    int *adjacent_vector_indices_h = malloc(6*NO_OF_SCALARS_H*sizeof(int));
+    int *adjacent_vector_indices_dual_h = malloc(3*NO_OF_DUAL_SCALARS_H*sizeof(int));
+    int *vorticity_indices_pre = malloc(3*NO_OF_DUAL_SCALARS_H*sizeof(int));
+    int *vorticity_indices = malloc(4*NO_OF_VECTORS_H*sizeof(int));
+    int *h_curl_indices = malloc(4*NO_OF_VECTORS_H*sizeof(int));
+    int *to_index_dual = malloc(NO_OF_VECTORS_H*sizeof(int));
+    int *from_index_dual = malloc(NO_OF_VECTORS_H*sizeof(int));
+    int *adjacent_scalar_indices_dual_h = malloc(3*NO_OF_DUAL_SCALARS_H*sizeof(int));
+    int *adjacent_signs_h = malloc(6*NO_OF_SCALARS_H*sizeof(int));
+    int *vorticity_signs_pre = malloc(3*NO_OF_DUAL_SCALARS_H*sizeof(int));
+    int *vorticity_signs = malloc(4*NO_OF_VECTORS_H*sizeof(int));
+    int *h_curl_signs = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     printf(GREEN "finished.\n" RESET);
     int retval, z_surface_id;
     printf("Reading orography data ... ");
 	retval = set_orography(RES_ID, ORO_ID, z_surface);
     printf(GREEN "finished.\n" RESET);
-    if (NUMBER_OF_VECTORS_H != NUMBER_OF_DUAL_VECTORS_H)
+    if (NO_OF_VECTORS_H != NO_OF_VECTORS_H)
     {
-        printf("It is NUMBER_OF_VECTORS_H != NUMBER_OF_DUAL_VECTORS_H.\n");
+        printf("It is NO_OF_VECTORS_H != NO_OF_VECTORS_H.\n");
     }
     printf("Establishing horizontal grid structure ... \n");
     if (USE_SCALAR_H_FILE == 0)
@@ -207,8 +207,8 @@ int main(int argc, char *argv[])
 	check_for_orthogonality(direction, direction_dual, ORTH_CRITERION_DEG);
 	calc_cell_face_unity(pent_hex_face_unity_sphere, latitude_scalar_dual, longitude_scalar_dual, adjacent_vector_indices_h, vorticity_indices_pre);
 	// building the vertical grid
-   	double z_oro_off = TOA*(NUMBER_OF_ORO_LAYERS + 0.0)/NUMBER_OF_LAYERS;
-	double z_vertical_vector_pre[NUMBER_OF_LAYERS + 1];
+   	double z_oro_off = TOA*(NO_OF_ORO_LAYERS + 0.0)/NO_OF_LAYERS;
+	double z_vertical_vector_pre[NO_OF_LAYERS + 1];
 	retval = determine_z_scalar(z_scalar, z_vertical_vector_pre, z_surface, z_oro_off, TOA);
 	retval = set_z_vector_and_normal_distance(z_vector, z_surface, z_scalar, normal_distance, latitude_scalar, longitude_scalar, from_index, to_index, TOA);
 	printf("Mapping horizontal areas from unit sphere to model levels ... ");
@@ -260,51 +260,51 @@ int main(int argc, char *argv[])
         ERR(retval);
     free(OUTPUT_FILE);
     double area_max, area_min;
-    area_max = pent_hex_face_unity_sphere[find_max_index(pent_hex_face_unity_sphere, NUMBER_OF_VECTORS_V)];
-    area_min = pent_hex_face_unity_sphere[find_min_index(pent_hex_face_unity_sphere, NUMBER_OF_VECTORS_V)];
+    area_max = pent_hex_face_unity_sphere[find_max_index(pent_hex_face_unity_sphere, NO_OF_VECTORS_V)];
+    area_min = pent_hex_face_unity_sphere[find_min_index(pent_hex_face_unity_sphere, NO_OF_VECTORS_V)];
     free(pent_hex_face_unity_sphere);
     printf("Ratio of minimum to maximum area: %lf\n", area_min/area_max);
     int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_curl_weight_id, recov_hor_ver_curl_weight_id, trsk_modified_weights_id, recov_ver_0_pri_weight_id, recov_ver_0_curl_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_curl_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_curl_index_id, recov_hor_ver_curl_index_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, recov_ver_index_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vector_curl_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, gravity_potential_id, vertical_contravar_unit_id, vertical_contravar_unit_dimid, adjacent_vector_indices_dual_h_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_6_dimid, e_kin_indices_id;
     printf("Starting to write to output file ... ");
-    if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NUMBER_OF_SCALARS, &scalar_dimid)))
+    if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NO_OF_SCALARS, &scalar_dimid)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "scalar_6_index", 6*NUMBER_OF_SCALARS, &scalar_6_dimid)))
+    if ((retval = nc_def_dim(ncid_g_prop, "scalar_6_index", 6*NO_OF_SCALARS, &scalar_6_dimid)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "scalar_h_index", NUMBER_OF_SCALARS_H, &scalar_h_dimid)))
+    if ((retval = nc_def_dim(ncid_g_prop, "scalar_h_index", NO_OF_SCALARS_H, &scalar_h_dimid)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "scalar_dual_h_index", NUMBER_OF_DUAL_SCALARS_H, &scalar_dual_h_dimid)))
+    if ((retval = nc_def_dim(ncid_g_prop, "scalar_dual_h_index", NO_OF_DUAL_SCALARS_H, &scalar_dual_h_dimid)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "scalar_dual_h_3_index", 3*NUMBER_OF_DUAL_SCALARS_H, &scalar_dual_h_dimid_3)))
+    if ((retval = nc_def_dim(ncid_g_prop, "scalar_dual_h_3_index", 3*NO_OF_DUAL_SCALARS_H, &scalar_dual_h_dimid_3)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_index", NUMBER_OF_VECTORS, &vector_dimid)))
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_index", NO_OF_VECTORS, &vector_dimid)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_h_index", NUMBER_OF_VECTORS_H, &vector_h_dimid)))
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_h_index", NO_OF_VECTORS_H, &vector_h_dimid)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "scalar_h_6_index", 6*NUMBER_OF_SCALARS_H, &scalar_h_dimid_6)))
+    if ((retval = nc_def_dim(ncid_g_prop, "scalar_h_6_index", 6*NO_OF_SCALARS_H, &scalar_h_dimid_6)))
         ERR(retval);
-	if ((retval = nc_def_dim(ncid_g_prop, "vector_h_10_index", 10*NUMBER_OF_VECTORS_H, &vector_h_dimid_10)))
+	if ((retval = nc_def_dim(ncid_g_prop, "vector_h_10_index", 10*NO_OF_VECTORS_H, &vector_h_dimid_10)))
 	    ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_h_11_index", 11*NUMBER_OF_VECTORS_H, &vector_h_dimid_11)))
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_h_11_index", 11*NO_OF_VECTORS_H, &vector_h_dimid_11)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_h_2_index", 2*NUMBER_OF_VECTORS_H, &vector_h_dimid_2)))
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_h_2_index", 2*NO_OF_VECTORS_H, &vector_h_dimid_2)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_h_4_index", 4*NUMBER_OF_VECTORS_H, &vector_h_dimid_4)))
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_h_4_index", 4*NO_OF_VECTORS_H, &vector_h_dimid_4)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_v_6_index", 6*NUMBER_OF_VECTORS_V, &vector_v_dimid_6)))
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_v_6_index", 6*NO_OF_VECTORS_V, &vector_v_dimid_6)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_contravar_unit_index", 3*NUMBER_OF_VECTORS_V*(NUMBER_OF_ORO_LAYERS + 1), &vertical_contravar_unit_dimid)))
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_contravar_unit_index", 3*NO_OF_VECTORS_V*(NO_OF_ORO_LAYERS + 1), &vertical_contravar_unit_dimid)))
         ERR(retval);        
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_index_h_dual", NUMBER_OF_DUAL_VECTORS_H, &vector_dual_h_dimid)))
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_index_h_dual", NO_OF_VECTORS_H, &vector_dual_h_dimid)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_curl_one_layer_dimid", NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H, &vector_curl_one_layer_dimid)))
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_curl_one_layer_dimid", 2*NO_OF_VECTORS_H, &vector_curl_one_layer_dimid)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_index_dual", NUMBER_OF_DUAL_VECTORS, &vector_dual_dimid)))
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_index_dual", NO_OF_DUAL_VECTORS, &vector_dual_dimid)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_index_dual_area", NUMBER_OF_DUAL_H_VECTORS + NUMBER_OF_H_VECTORS, &vector_dual_area_dimid)))
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_index_dual_area", NO_OF_DUAL_H_VECTORS + NO_OF_H_VECTORS, &vector_dual_area_dimid)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_dual_v_3_index", 3*NUMBER_OF_DUAL_VECTORS_V, &vector_dual_v_dimid_3)))
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_dual_v_3_index", 3*NO_OF_DUAL_SCALARS_H, &vector_dual_v_dimid_3)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_dual_h_4_index", 4*NUMBER_OF_DUAL_VECTORS_H, &vector_dual_h_dimid_4)))
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_dual_h_4_index", 4*NO_OF_VECTORS_H, &vector_dual_h_dimid_4)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "latitude_scalar", NC_DOUBLE, 1, &scalar_h_dimid, &latitude_scalar_id)))
         ERR(retval);

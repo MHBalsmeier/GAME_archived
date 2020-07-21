@@ -16,12 +16,12 @@ int coriolis_gen(Vector_field a_field, Curl_field b_field, Vector_field out_fiel
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-        if (h_index >= NO_OF_VECTORS_V)
+        if (h_index >= NO_OF_SCALARS_H)
         {
         	/*
         	Only one term is needed here, do not doubt. See Lamb transformation in spherical coordinates (only the horizontal velocity is used in the cross product).
             */
-            trsk_modified(a_field, b_field, layer_index, h_index - NO_OF_VECTORS_V, &term_0, grid);
+            trsk_modified(a_field, b_field, layer_index, h_index - NO_OF_SCALARS_H, &term_0, grid);
 		    out_field[i] = term_0;
         }
         else

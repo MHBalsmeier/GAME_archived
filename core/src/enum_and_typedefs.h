@@ -55,19 +55,17 @@ NO_OF_ORO_LAYERS = 17,
 NO_OF_LEVELS = NO_OF_LAYERS + 1,
 NO_OF_SCALARS_H = NO_OF_PENTAGONS + NO_OF_HEXAGONS,
 NO_OF_VECTORS_H = (5*NO_OF_PENTAGONS/2 + 6/2*NO_OF_HEXAGONS),
-NO_OF_VECTORS_V = NO_OF_SCALARS_H,
 NO_OF_H_VECTORS = NO_OF_LAYERS*NO_OF_VECTORS_H,
-NO_OF_V_VECTORS = NO_OF_LEVELS*NO_OF_VECTORS_V,
-NO_OF_VECTORS_PER_LAYER = NO_OF_VECTORS_H + NO_OF_VECTORS_V,
+NO_OF_V_VECTORS = NO_OF_LEVELS*NO_OF_SCALARS_H,
+NO_OF_VECTORS_PER_LAYER = NO_OF_VECTORS_H + NO_OF_SCALARS_H,
 NO_OF_TRIANGLES = (int) (NO_OF_BASIC_TRIANGLES*(pow(4, RES_ID))),
 NO_OF_SCALARS = NO_OF_SCALARS_H*NO_OF_LAYERS,
 NO_OF_VECTORS = NO_OF_H_VECTORS + NO_OF_V_VECTORS,
 NO_OF_DUAL_SCALARS_H = NO_OF_TRIANGLES,
-NO_OF_DUAL_VECTORS_H = 3*NO_OF_TRIANGLES/2,
 NO_OF_DUAL_VECTORS_V = NO_OF_DUAL_SCALARS_H,
-NO_OF_DUAL_H_VECTORS = NO_OF_LEVELS*NO_OF_DUAL_VECTORS_H,
+NO_OF_DUAL_H_VECTORS = NO_OF_LEVELS*NO_OF_VECTORS_H,
 NO_OF_DUAL_V_VECTORS = NO_OF_LAYERS*NO_OF_DUAL_VECTORS_V,
-NO_OF_DUAL_VECTORS_PER_LAYER = NO_OF_DUAL_VECTORS_H + NO_OF_DUAL_VECTORS_V,
+NO_OF_DUAL_VECTORS_PER_LAYER = NO_OF_VECTORS_H + NO_OF_DUAL_VECTORS_V,
 NO_OF_DUAL_SCALARS = NO_OF_LEVELS*NO_OF_DUAL_SCALARS_H,
 NO_OF_DUAL_VECTORS = NO_OF_DUAL_H_VECTORS + NO_OF_DUAL_V_VECTORS,
 TRIANGLES_PER_FACE = NO_OF_TRIANGLES/NO_OF_BASIC_TRIANGLES,
@@ -78,8 +76,8 @@ VECTOR_POINTS_PER_INNER_FACE = (int) (1.5*(pow(2, RES_ID) - 1)*pow(2, RES_ID))};
 typedef double Scalar_field[NO_OF_SCALARS];
 typedef double Vector_field[NO_OF_VECTORS];
 typedef double Dual_vector_field[NO_OF_DUAL_VECTORS];
-typedef double Curl_field[NO_OF_LAYERS*(NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H) + NO_OF_DUAL_VECTORS_H];
-typedef double Curl_field_one_layer[NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H];
+typedef double Curl_field[NO_OF_LAYERS*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + NO_OF_VECTORS_H];
+typedef double Curl_field_one_layer[NO_OF_VECTORS_H + NO_OF_VECTORS_H];
 typedef double Tracer_densities[NO_OF_TRACERS*NO_OF_SCALARS];
 typedef double Tracer_density_temperatures[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS];
 
@@ -94,7 +92,7 @@ Scalar_field gravity_potential;
 Vector_field gravity_m;
 int e_kin_indices[6*NO_OF_SCALARS];
 double e_kin_weights[6*NO_OF_SCALARS];
-double vertical_contravar_unit[3*NO_OF_VECTORS_V*(NO_OF_ORO_LAYERS + 1)];
+double vertical_contravar_unit[3*NO_OF_SCALARS_H*(NO_OF_ORO_LAYERS + 1)];
 int from_index[NO_OF_VECTORS_H];
 int to_index[NO_OF_VECTORS_H];
 double direction[NO_OF_VECTORS_H];
@@ -103,11 +101,11 @@ int adjacent_signs_h[6*NO_OF_SCALARS_H];
 int trsk_modified_velocity_indices[10*NO_OF_VECTORS_H];
 int trsk_modified_curl_indices[10*NO_OF_VECTORS_H];
 double trsk_modified_weights[10*NO_OF_VECTORS_H];
-int recov_ver_index[6*NO_OF_VECTORS_V];
-double recov_ver_0_pri_weight[6*NO_OF_VECTORS_V];
-double recov_ver_0_curl_weight[6*NO_OF_VECTORS_V];
-double recov_ver_1_pri_weight[6*NO_OF_VECTORS_V];
-double recov_ver_1_curl_weight[6*NO_OF_VECTORS_V];
+int recov_ver_index[6*NO_OF_SCALARS_H];
+double recov_ver_0_pri_weight[6*NO_OF_SCALARS_H];
+double recov_ver_0_curl_weight[6*NO_OF_SCALARS_H];
+double recov_ver_1_pri_weight[6*NO_OF_SCALARS_H];
+double recov_ver_1_curl_weight[6*NO_OF_SCALARS_H];
 } Grid;
 
 // Contains properties of the dual grid.
@@ -116,8 +114,8 @@ Curl_field_one_layer f_vec;
 Curl_field area;
 int vorticity_indices[4*NO_OF_VECTORS_H];
 int vorticity_signs[4*NO_OF_VECTORS_H];
-int h_curl_indices[4*NO_OF_DUAL_VECTORS_H];
-int h_curl_signs[4*NO_OF_DUAL_VECTORS_H];
+int h_curl_indices[4*NO_OF_VECTORS_H];
+int h_curl_signs[4*NO_OF_VECTORS_H];
 } Dualgrid;
 
 typedef struct state {

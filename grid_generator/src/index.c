@@ -18,10 +18,10 @@ int calc_adjacent_vector_indices_h(int from_index[], int to_index[], int adjacen
 {
     int trouble_detected = 0;
     int counter;
-    for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
+    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
         counter = 0;
-        for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
+        for (int j = 0; j < NO_OF_VECTORS_H; ++j)
         {
             if (from_index[j] == i || to_index[j] == i)
             {
@@ -41,7 +41,7 @@ int calc_adjacent_vector_indices_h(int from_index[], int to_index[], int adjacen
         if (counter != 6)
         {
             trouble_detected = 1;
-            if (counter == 5 && i < NUMBER_OF_PENTAGONS)
+            if (counter == 5 && i < NO_OF_PENTAGONS)
                 trouble_detected = 0;
         }
         if (trouble_detected == 1)
@@ -49,24 +49,24 @@ int calc_adjacent_vector_indices_h(int from_index[], int to_index[], int adjacen
             printf("Trouble detected, place 1.\n");
 			exit(1);
 		}
-        if (i < NUMBER_OF_PENTAGONS)
+        if (i < NO_OF_PENTAGONS)
         {
             adjacent_vector_indices_h[6*i + 5] = -1;
             adjacent_signs_h[6*i + 5] = 0;
         }
     }
-    int number_of_edges, double_check, sign_sum_check;
-    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+    int NO_OF_edges, double_check, sign_sum_check;
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         counter = 0;
         sign_sum_check = 0;
-        for (int j = 0; j < NUMBER_OF_SCALARS_H; ++j)
+        for (int j = 0; j < NO_OF_SCALARS_H; ++j)
         {
-            number_of_edges = 6;
-            if (j < NUMBER_OF_PENTAGONS)
-                number_of_edges = 5;
+            NO_OF_edges = 6;
+            if (j < NO_OF_PENTAGONS)
+                NO_OF_edges = 5;
             double_check = 0;
-            for (int k = 0; k < number_of_edges; ++k)
+            for (int k = 0; k < NO_OF_edges; ++k)
             {
                 if (adjacent_vector_indices_h[6*j + k] == i)
                 {
@@ -93,13 +93,13 @@ int set_horizontal_curl_indices(double direction_dual[], double direction[], int
 {
 	int sign, counter;
 	double direction_change;
-    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_H; ++i)
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         sign = 1;
         find_angle_change(direction_dual[i], direction[i], &direction_change);
         if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
             sign = -1;
-        h_curl_indices[4*i + 0] = i + NUMBER_OF_VECTORS_PER_LAYER;
+        h_curl_indices[4*i + 0] = i + NO_OF_VECTORS_PER_LAYER;
         h_curl_signs[4*i + 0] = sign;
         if (sign == 1)
             h_curl_indices[4*i + 1] = to_index[i];
@@ -114,34 +114,34 @@ int set_horizontal_curl_indices(double direction_dual[], double direction[], int
             h_curl_indices[4*i + 3] = to_index[i];
         h_curl_signs[4*i + 3] = -1;
     }
-    for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
+    for (int i = 0; i < NO_OF_VECTORS_V; ++i)
     {
     	counter = 0;
-    	for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_H; ++j)
+    	for (int j = 0; j < NO_OF_VECTORS_H; ++j)
     	{
     		if (h_curl_indices[4*j + 1] == i || h_curl_indices[4*j + 3] == i)
     			++counter;
     	}
-    	if (i < NUMBER_OF_PENTAGONS && counter != 5)
+    	if (i < NO_OF_PENTAGONS && counter != 5)
     	{
     		printf("Error in h_curl_indices, position 0.\n");
     		exit(1);
 		}
-    	if (i >= NUMBER_OF_PENTAGONS && counter != 6)
+    	if (i >= NO_OF_PENTAGONS && counter != 6)
     	{
     		printf("Error in h_curl_indices, position 1.\n");
     		exit(1);
 		}
     }
-    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
     	counter = 0;
-    	for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_H; ++j)
+    	for (int j = 0; j < NO_OF_VECTORS_H; ++j)
     	{
-    		if (h_curl_indices[4*j + 0] == i + NUMBER_OF_VECTORS_PER_LAYER || h_curl_indices[4*j + 2] == i)
+    		if (h_curl_indices[4*j + 0] == i + NO_OF_VECTORS_PER_LAYER || h_curl_indices[4*j + 2] == i)
     		{
     			++counter;
-    			if (h_curl_indices[4*j + 0] == i + NUMBER_OF_VECTORS_PER_LAYER && h_curl_indices[4*j + 2] == i)
+    			if (h_curl_indices[4*j + 0] == i + NO_OF_VECTORS_PER_LAYER && h_curl_indices[4*j + 2] == i)
     				++counter;
 			}
     	}
@@ -164,7 +164,7 @@ int set_vorticity_indices(int vorticity_indices_pre[], int vorticity_signs_pre[]
     int double_indices[2];
     double_indices[0] = -1;
     double_indices[1] = -1;
-    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
     	for (int j = 0; j < 3; ++j)
     	{
@@ -211,17 +211,17 @@ int set_vorticity_indices(int vorticity_indices_pre[], int vorticity_signs_pre[]
 				printf("Error in vorticity_indices and vortictiy_signs creation from vorticity_indices_pre and vortictiy_signs_pre, position 2.");
 				exit(1);
 			}
-			if (vorticity_indices[4*i + j] >= NUMBER_OF_VECTORS_H || vorticity_indices[4*i + j] < 0)
+			if (vorticity_indices[4*i + j] >= NO_OF_VECTORS_H || vorticity_indices[4*i + j] < 0)
 			{
 				printf("Error in vorticity_indices and vortictiy_signs creation from vorticity_indices_pre and vortictiy_signs_pre, position 3.");
 				exit(1);
 			}
 		}
     }
-    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
     	counter = 0;
-    	for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
+    	for (int j = 0; j < NO_OF_VECTORS_H; ++j)
     	{
     		for (int k = 0; k < 4; ++k)
     		{

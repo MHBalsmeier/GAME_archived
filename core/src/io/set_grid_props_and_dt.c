@@ -21,28 +21,28 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     double *z_scalar = malloc(NO_OF_SCALARS*sizeof(double));
     double *z_vector = malloc(NO_OF_VECTORS*sizeof(double));
     double *trsk_modified_weights = malloc(10*NO_OF_VECTORS_H*sizeof(double));
-    double *recov_ver_0_pri_weight = malloc(6*NO_OF_VECTORS_V*sizeof(double));
-    double *recov_ver_1_pri_weight = malloc(6*NO_OF_VECTORS_V*sizeof(double));
-    double *recov_ver_0_curl_weight = malloc(6*NO_OF_VECTORS_V*sizeof(double));
-    double *recov_ver_1_curl_weight = malloc(6*NO_OF_VECTORS_V*sizeof(double));
+    double *recov_ver_0_pri_weight = malloc(6*NO_OF_SCALARS_H*sizeof(double));
+    double *recov_ver_1_pri_weight = malloc(6*NO_OF_SCALARS_H*sizeof(double));
+    double *recov_ver_0_curl_weight = malloc(6*NO_OF_SCALARS_H*sizeof(double));
+    double *recov_ver_1_curl_weight = malloc(6*NO_OF_SCALARS_H*sizeof(double));
     double *area_dual = malloc((NO_OF_DUAL_H_VECTORS + NO_OF_H_VECTORS)*sizeof(double));
-    double *f_vec = malloc((NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H)*sizeof(double));
+    double *f_vec = malloc((NO_OF_VECTORS_H + NO_OF_VECTORS_H)*sizeof(double));
     double *direction = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *gravity_potential = malloc(NO_OF_SCALARS*sizeof(double));
-    double *vertical_contravar_unit = malloc(3*NO_OF_VECTORS_V*(NO_OF_ORO_LAYERS + 1)*sizeof(double));
+    double *vertical_contravar_unit = malloc(3*NO_OF_SCALARS_H*(NO_OF_ORO_LAYERS + 1)*sizeof(double));
     double *e_kin_weights = malloc(6*NO_OF_SCALARS*sizeof(double));
     int *e_kin_indices = malloc(6*NO_OF_SCALARS*sizeof(int));
     int *to_index = malloc(NO_OF_VECTORS_H*sizeof(int));
     int *from_index = malloc(NO_OF_VECTORS_H*sizeof(int));
-    int *recov_ver_index = malloc(6*NO_OF_VECTORS_V*sizeof(int));
+    int *recov_ver_index = malloc(6*NO_OF_SCALARS_H*sizeof(int));
     int *trsk_modified_velocity_indices = malloc(10*NO_OF_VECTORS_H*sizeof(int));
     int *trsk_modified_curl_indices = malloc(10*NO_OF_VECTORS_H*sizeof(int));
     int *adjacent_vector_indices_h = malloc(6*NO_OF_SCALARS_H*sizeof(int));
     int *vorticity_indices = malloc(4*NO_OF_VECTORS_H*sizeof(int));
-    int *h_curl_indices = malloc(4*NO_OF_DUAL_VECTORS_H*sizeof(int));
+    int *h_curl_indices = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int *adjacent_signs_h = malloc(6*NO_OF_SCALARS_H*sizeof(int));
     int *vorticity_signs = malloc(4*NO_OF_VECTORS_H*sizeof(int));
-    int *h_curl_signs = malloc(4*NO_OF_DUAL_VECTORS_H*sizeof(int));
+    int *h_curl_signs = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int ncid, retval;
     int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_modified_weights_id, recov_ver_0_pri_weight_id, recov_ver_0_curl_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_curl_weight_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, recov_ver_index_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, direction_id, gravity_potential_id, vertical_contravar_unit_id, e_kin_weights_id, e_kin_indices_id;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
@@ -267,12 +267,12 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
                 grid_check_failed();
 		}
     }
-    for (int i = 0; i < NO_OF_VECTORS_V; ++i)
+    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
         for (int j = 0; j < 6; ++j)
         {
             grid -> recov_ver_index[6*i + j] = recov_ver_index[6*i + j];
-            if (grid -> recov_ver_index[6*i + j] >= 2*NO_OF_VECTORS_H + NO_OF_VECTORS_V || grid -> recov_ver_index[6*i + j] < 0)
+            if (grid -> recov_ver_index[6*i + j] >= 2*NO_OF_VECTORS_H + NO_OF_SCALARS_H || grid -> recov_ver_index[6*i + j] < 0)
                 grid_check_failed();
             grid -> recov_ver_0_pri_weight[6*i + j] = recov_ver_0_pri_weight[6*i + j];
             if (fabs(grid -> recov_ver_0_pri_weight[6*i + j]) >= 1.0001)
@@ -288,7 +288,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
                 grid_check_failed();
         }
     }
-    for (int i = 0; i < NO_OF_DUAL_VECTORS_H + NO_OF_VECTORS_H; ++i)
+    for (int i = 0; i < NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {
         dualgrid -> f_vec[i] = f_vec[i];
         if (fabs(dualgrid -> f_vec[i]) > 2*OMEGA)
@@ -300,12 +300,12 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         if (dualgrid -> area[i] <= 0)
             grid_check_failed();
     }
-    for (int i = 0; i < NO_OF_DUAL_VECTORS_H; ++i)
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         for (int j = 0; j < 4; ++j)
         {
             dualgrid -> h_curl_indices[4*i + j] = h_curl_indices[4*i + j];
-            if (dualgrid -> h_curl_indices[4*i + j] >= 2*NO_OF_VECTORS_H + NO_OF_VECTORS_V || dualgrid -> h_curl_indices[4*i + j] < 0)
+            if (dualgrid -> h_curl_indices[4*i + j] >= 2*NO_OF_VECTORS_H + NO_OF_SCALARS_H || dualgrid -> h_curl_indices[4*i + j] < 0)
                 grid_check_failed();
             dualgrid -> h_curl_signs[4*i + j] = h_curl_signs[4*i + j];
             if (dualgrid -> h_curl_signs[4*i + j] != -1 && dualgrid -> h_curl_signs[4*i + j] != 1)
@@ -314,12 +314,12 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     }
     for (int i = 0; i < NO_OF_ORO_LAYERS + 1; ++i)
     {
-    	for (int j = 0; j < NO_OF_VECTORS_V; ++j)
+    	for (int j = 0; j < NO_OF_SCALARS_H; ++j)
     	{
     		for (int k = 0; k < 3; ++k)
     		{
-				grid -> vertical_contravar_unit[i*3*NO_OF_VECTORS_V + 3*j + k] = vertical_contravar_unit[i*3*NO_OF_VECTORS_V + 3*j + k];
-				if (fabs(grid -> vertical_contravar_unit[i*3*NO_OF_VECTORS_V + 3*j + k]) > 1.000001)
+				grid -> vertical_contravar_unit[i*3*NO_OF_SCALARS_H + 3*j + k] = vertical_contravar_unit[i*3*NO_OF_SCALARS_H + 3*j + k];
+				if (fabs(grid -> vertical_contravar_unit[i*3*NO_OF_SCALARS_H + 3*j + k]) > 1.000001)
 					grid_check_failed();
 			}
     	}
@@ -368,8 +368,8 @@ int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid)
     {
         for (int j = 0; j < NO_OF_VECTORS_H; ++j)
         {
-            if (grid -> normal_distance[NO_OF_VECTORS_V + i*NO_OF_VECTORS_PER_LAYER + j] < min_dist_horizontal)
-                min_dist_horizontal = grid -> normal_distance[NO_OF_VECTORS_V + i*NO_OF_VECTORS_PER_LAYER + j];
+            if (grid -> normal_distance[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] < min_dist_horizontal)
+                min_dist_horizontal = grid -> normal_distance[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j];
         }
     }
     delta_t_candidate = (1 - cfl_margin)*min_dist_horizontal/max_speed;

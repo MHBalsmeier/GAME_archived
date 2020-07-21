@@ -18,11 +18,11 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 	This function implements the modified TRSK scheme proposed by Gassmann (2018).
 	*/
 	int *face_of_cell_indices = malloc(2*sizeof(int));
-	int *from_or_to_index = malloc(NUMBER_OF_VECTORS_H*sizeof(int));
-	int offset, sign_0, sign_1, sign, number_of_edges, index_offset;
+	int *from_or_to_index = malloc(NO_OF_VECTORS_H*sizeof(int));
+	int offset, sign_0, sign_1, sign, NO_OF_edges, index_offset;
 	double check_sum, direction_change;
 	double sum_of_weights = 0;
-    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         for (int j = 0; j < 2; ++j)
         {
@@ -37,7 +37,7 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
                 recov_hor_ver_curl_weight[2*i + j] = 1 - recov_hor_ver_curl_weight[2*i + 0];
             }
             sign = 1;
-            recov_hor_par_curl_index[2*i + j] = i + j*NUMBER_OF_DUAL_VECTORS_PER_LAYER;
+            recov_hor_par_curl_index[2*i + j] = i + j*NO_OF_DUAL_VECTORS_PER_LAYER;
             find_angle_change(direction[i], direction_dual[i], &direction_change);
             if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
                 sign = -1;
@@ -61,7 +61,7 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 			{
 				index_offset = 0;
 				sign_0 = -1;
-				for (int l = 0; l < NUMBER_OF_VECTORS_H; ++l)
+				for (int l = 0; l < NO_OF_VECTORS_H; ++l)
 				{
 					from_or_to_index[l] = from_index[l];
 				}
@@ -70,7 +70,7 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 			{
 				index_offset = 5;
 				sign_0 = 1;
-				for (int l = 0; l < NUMBER_OF_VECTORS_H; ++l)
+				for (int l = 0; l < NO_OF_VECTORS_H; ++l)
 				{
 					from_or_to_index[l] = to_index[l];
 				}
@@ -93,31 +93,31 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 				sign_1 = -1;
 				if (from_index[trsk_modified_velocity_indices[10*i + k]] == from_or_to_index[i])
 					sign_1 = 1;
-				if (from_or_to_index[i] < NUMBER_OF_PENTAGONS)
+				if (from_or_to_index[i] < NO_OF_PENTAGONS)
 				{
-					number_of_edges = 5;
+					NO_OF_edges = 5;
 				}
 				else
 				{
-					number_of_edges = 6;
+					NO_OF_edges = 6;
 				}
-				int vertex_indices[number_of_edges];
-				int edge_indices[number_of_edges];
-				int indices_resorted[number_of_edges];
-				int vertex_indices_resorted[number_of_edges];
-				double latitude_vertices[number_of_edges];
-				double longitude_vertices[number_of_edges];
-				double latitude_edges[number_of_edges];
-				double longitude_edges[number_of_edges];
-				double vector_of_areas[number_of_edges];
-				for (int l = 0; l < number_of_edges; ++l)
+				int vertex_indices[NO_OF_edges];
+				int edge_indices[NO_OF_edges];
+				int indices_resorted[NO_OF_edges];
+				int vertex_indices_resorted[NO_OF_edges];
+				double latitude_vertices[NO_OF_edges];
+				double longitude_vertices[NO_OF_edges];
+				double latitude_edges[NO_OF_edges];
+				double longitude_edges[NO_OF_edges];
+				double vector_of_areas[NO_OF_edges];
+				for (int l = 0; l < NO_OF_edges; ++l)
 					vertex_indices[l] = -1;
 				counter = 0;
-				for (int l = 0; l < number_of_edges; ++l)
+				for (int l = 0; l < NO_OF_edges; ++l)
 				{
 					vertex_index_candidate_0 = from_index_dual[adjacent_vector_indices_h[6*from_or_to_index[i] + l]];
 					vertex_index_candidate_1 = to_index_dual[adjacent_vector_indices_h[6*from_or_to_index[i] + l]];
-					check_result = in_bool_calculator(vertex_index_candidate_0, vertex_indices, number_of_edges);						
+					check_result = in_bool_calculator(vertex_index_candidate_0, vertex_indices, NO_OF_edges);						
 					if (check_result == 0)
 					{
 						vertex_indices[counter] = vertex_index_candidate_0;
@@ -125,7 +125,7 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 						longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
 						++counter;
 					}
-					check_result = in_bool_calculator(vertex_index_candidate_1, vertex_indices, number_of_edges);						
+					check_result = in_bool_calculator(vertex_index_candidate_1, vertex_indices, NO_OF_edges);						
 					if (check_result == 0)
 					{
 						vertex_indices[counter] = vertex_index_candidate_1;
@@ -134,32 +134,32 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 						++counter;
 					}
 				}
-				if (counter != number_of_edges)
+				if (counter != NO_OF_edges)
 				{
 					printf("Problem 13 in TRSK implementation detected.\n");
 					exit(1);
 				}
-				sort_edge_indices(latitude_vertices, longitude_vertices, number_of_edges, indices_resorted);
-				for (int l = 0; l < number_of_edges; ++l)
+				sort_edge_indices(latitude_vertices, longitude_vertices, NO_OF_edges, indices_resorted);
+				for (int l = 0; l < NO_OF_edges; ++l)
 					vertex_indices_resorted[l] = vertex_indices[indices_resorted[l]];
-				for (int l = 0; l < number_of_edges; ++l)
+				for (int l = 0; l < NO_OF_edges; ++l)
 				{
-					for (int m = 0; m < number_of_edges; ++m)
+					for (int m = 0; m < NO_OF_edges; ++m)
 					{
-						if ((from_index_dual[adjacent_vector_indices_h[6*from_or_to_index[i] + m]] == vertex_indices_resorted[l] && to_index_dual[adjacent_vector_indices_h[6*from_or_to_index[i] + m]] == vertex_indices_resorted[(l + 1)%number_of_edges]) || (to_index_dual[adjacent_vector_indices_h[6*from_or_to_index[i] + m]] == vertex_indices_resorted[l] && from_index_dual[adjacent_vector_indices_h[6*from_or_to_index[i] + m]] == vertex_indices_resorted[(l + 1)%number_of_edges]))
+						if ((from_index_dual[adjacent_vector_indices_h[6*from_or_to_index[i] + m]] == vertex_indices_resorted[l] && to_index_dual[adjacent_vector_indices_h[6*from_or_to_index[i] + m]] == vertex_indices_resorted[(l + 1)%NO_OF_edges]) || (to_index_dual[adjacent_vector_indices_h[6*from_or_to_index[i] + m]] == vertex_indices_resorted[l] && from_index_dual[adjacent_vector_indices_h[6*from_or_to_index[i] + m]] == vertex_indices_resorted[(l + 1)%NO_OF_edges]))
 							edge_indices[l] = adjacent_vector_indices_h[6*from_or_to_index[i] + m];
 					}
 				}
-				for (int l = 0; l < number_of_edges; ++l)
+				for (int l = 0; l < NO_OF_edges; ++l)
 				{
 					latitude_edges[l] = latitude_vector[edge_indices[l]];
 					longitude_edges[l] = longitude_vector[edge_indices[l]];
 				}
 				check_sum = 0;
-				for (int l = 0; l < number_of_edges; ++l)	
+				for (int l = 0; l < NO_OF_edges; ++l)	
 				{
 					if (l == 0)
-						calc_triangle_face(latitude_scalar[from_or_to_index[i]], longitude_scalar[from_or_to_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[number_of_edges - 1], longitude_edges[number_of_edges - 1], &triangle_0);
+						calc_triangle_face(latitude_scalar[from_or_to_index[i]], longitude_scalar[from_or_to_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[NO_OF_edges - 1], longitude_edges[NO_OF_edges - 1], &triangle_0);
 					else
 						calc_triangle_face(latitude_scalar[from_or_to_index[i]], longitude_scalar[from_or_to_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[l - 1], longitude_edges[l - 1], &triangle_0);
 					calc_triangle_face(latitude_scalar[from_or_to_index[i]], longitude_scalar[from_or_to_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[l], longitude_edges[l], &triangle_1);
@@ -171,17 +171,17 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 					printf("Problem 30 in TRSK implementation detected.\n");
 					exit(1);
 				}
-				for (int l = 0; l < number_of_edges; ++l)
+				for (int l = 0; l < NO_OF_edges; ++l)
 				{
 					if (edge_indices[l] == i)
 						last_index = l;
 					if (edge_indices[l] == trsk_modified_velocity_indices[10*i + k])
-						first_index = (l + 1)%number_of_edges;
+						first_index = (l + 1)%NO_OF_edges;
 				}
-				if (k == index_offset + number_of_edges - 1)
+				if (k == index_offset + NO_OF_edges - 1)
 					sum_of_weights = 0;
 				else
-					double_sum_gen(vector_of_areas, number_of_edges, first_index, last_index, &sum_of_weights);
+					double_sum_gen(vector_of_areas, NO_OF_edges, first_index, last_index, &sum_of_weights);
 				if (sum_of_weights < 0 || sum_of_weights/area[from_or_to_index[i]] > 1)
 				{
 					printf("Problem 34 in TRSK implementation detected.\n");
@@ -190,15 +190,15 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 				sum_of_weights = sum_of_weights/area[from_or_to_index[i]];
 				trsk_modified_weights[10*i + k] = sign_0*(sum_of_weights - 0.5)*sign_1;
 			}
-			trsk_modified_weights[10*i + k] = -normal_distance_dual[trsk_modified_velocity_indices[10*i + k]]/normal_distance[NUMBER_OF_VECTORS_V + i]*trsk_modified_weights[10*i + k];
+			trsk_modified_weights[10*i + k] = -normal_distance_dual[trsk_modified_velocity_indices[10*i + k]]/normal_distance[NO_OF_VECTORS_V + i]*trsk_modified_weights[10*i + k];
 		}
 		// modification following Gassmann (2018)
-		if (to_index[i] < NUMBER_OF_PENTAGONS)
+		if (to_index[i] < NO_OF_PENTAGONS)
 			trsk_modified_curl_indices[10*i + 0] = trsk_modified_velocity_indices[10*i + 8];
 		else
 			trsk_modified_curl_indices[10*i + 0] = trsk_modified_velocity_indices[10*i + 9];
 		trsk_modified_curl_indices[10*i + 1] = trsk_modified_velocity_indices[10*i + 0];
-		if (from_index[i] < NUMBER_OF_PENTAGONS)
+		if (from_index[i] < NO_OF_PENTAGONS)
 		{
 			trsk_modified_curl_indices[10*i + 2] = trsk_modified_velocity_indices[10*i + 3];
 			trsk_modified_curl_indices[10*i + 3] = trsk_modified_velocity_indices[10*i + 5];
@@ -215,12 +215,12 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 			trsk_modified_curl_indices[10*i + 3] = trsk_modified_velocity_indices[10*i + 4];
 			trsk_modified_curl_indices[10*i + 4] = trsk_modified_velocity_indices[10*i + 5];
 		}
-		if (from_index[i] < NUMBER_OF_PENTAGONS)
+		if (from_index[i] < NO_OF_PENTAGONS)
 			trsk_modified_curl_indices[10*i + 5] = trsk_modified_velocity_indices[10*i + 3];
 		else
 			trsk_modified_curl_indices[10*i + 5] = trsk_modified_velocity_indices[10*i + 4];
 		trsk_modified_curl_indices[10*i + 6] = trsk_modified_velocity_indices[10*i + 5];
-		if (to_index[i] < NUMBER_OF_PENTAGONS)
+		if (to_index[i] < NO_OF_PENTAGONS)
 		{
 			trsk_modified_curl_indices[10*i + 7] = trsk_modified_velocity_indices[10*i + 8];
 			trsk_modified_curl_indices[10*i + 8] = trsk_modified_velocity_indices[10*i + 0];
@@ -252,11 +252,11 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
     int second_index;
     // doing some more checks
 	double value_0, value_1;
-	for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 	{
 		for (int j = 0; j < 10; ++j)
 		{
-			value_0 = normal_distance[NUMBER_OF_VECTORS_V + i]/normal_distance_dual[trsk_modified_velocity_indices[10*i + j]]*trsk_modified_weights[10*i + j];
+			value_0 = normal_distance[NO_OF_VECTORS_V + i]/normal_distance_dual[trsk_modified_velocity_indices[10*i + j]]*trsk_modified_weights[10*i + j];
 			if (trsk_modified_velocity_indices[10*i + j] != 0 || (trsk_modified_velocity_indices[10*i + j] == 0 && trsk_modified_weights[10*i + j] != 0))
 			{
 				second_index = -1;			
@@ -270,7 +270,7 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 					printf("Problem 38 in TRSK implementation detected.\n");
 					exit(1);
 				}
-				value_1 = normal_distance[NUMBER_OF_VECTORS_V + trsk_modified_velocity_indices[10*i + j]]/normal_distance_dual[i]*trsk_modified_weights[10*trsk_modified_velocity_indices[10*i + j] + second_index];
+				value_1 = normal_distance[NO_OF_VECTORS_V + trsk_modified_velocity_indices[10*i + j]]/normal_distance_dual[i]*trsk_modified_weights[10*trsk_modified_velocity_indices[10*i + j] + second_index];
 				check_sum = value_0 + value_1;
 				if (fabs(check_sum) > 0.001)
 				{
@@ -288,18 +288,18 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 
 int set_recov_ver(int recov_ver_index[], int adjacent_vector_indices_h[], double recov_ver_0_pri_weight[], double direction[], double recov_ver_0_curl_weight[], double direction_dual[], double recov_ver_1_pri_weight[], double recov_ver_1_curl_weight[])
 {
-	int number_of_edges;
+	int NO_OF_edges;
 	double weight_prefactor;
-	for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
+	for (int i = 0; i < NO_OF_VECTORS_V; ++i)
 	{
-		number_of_edges = 6;
+		NO_OF_edges = 6;
 		weight_prefactor = 2.0/6.0;
-		if (i < NUMBER_OF_PENTAGONS)
+		if (i < NO_OF_PENTAGONS)
 		{
-			number_of_edges = 5;
+			NO_OF_edges = 5;
 		    weight_prefactor = 2.0/5.0;
 	    }
-		for (int j = 0; j < number_of_edges; ++j)
+		for (int j = 0; j < NO_OF_edges; ++j)
 		{
 		    recov_ver_index[6*i + j] = adjacent_vector_indices_h[6*i + j];
 		    recov_ver_0_pri_weight[6*i + j] = weight_prefactor*cos(direction[recov_ver_index[6*i + j]]);
@@ -307,7 +307,7 @@ int set_recov_ver(int recov_ver_index[], int adjacent_vector_indices_h[], double
 		    recov_ver_1_pri_weight[6*i + j] = weight_prefactor*sin(direction[recov_ver_index[6*i + j]]);
 		    recov_ver_1_curl_weight[6*i + j] = weight_prefactor*sin(direction_dual[recov_ver_index[6*i + j]]);
 		}
-		if (number_of_edges == 5)
+		if (NO_OF_edges == 5)
 		{
 		    recov_ver_index[6*i + 5] = 0;
 		    recov_ver_0_pri_weight[6*i + 5] = 0;

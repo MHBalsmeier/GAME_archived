@@ -10,12 +10,12 @@ int scalar_times_vector(Scalar_field in_field_0, Vector_field in_field_1, Vector
 {
     int layer_index, h_index, lower_index, upper_index;
     double scalar_value;
-    for (int i = NO_OF_VECTORS_V; i < NO_OF_VECTORS - NO_OF_VECTORS_V; ++i)
+    for (int i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-        if (h_index >= NO_OF_VECTORS_V)
-            scalar_value = 0.5*(in_field_0[grid -> to_index[h_index - NO_OF_VECTORS_V] + layer_index*NO_OF_SCALARS_H] + in_field_0[grid -> from_index[h_index - NO_OF_VECTORS_V] + layer_index*NO_OF_SCALARS_H]);
+        if (h_index >= NO_OF_SCALARS_H)
+            scalar_value = 0.5*(in_field_0[grid -> to_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H] + in_field_0[grid -> from_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H]);
         else
         {
             lower_index = h_index + layer_index*NO_OF_SCALARS_H;
@@ -24,12 +24,12 @@ int scalar_times_vector(Scalar_field in_field_0, Vector_field in_field_1, Vector
         }
         out_field[i] = scalar_value*in_field_1[i];
     }
-    for (int i = 0; i < NO_OF_VECTORS_V; ++i)
+    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
         scalar_value = in_field_0[i];
         out_field[i] = scalar_value*in_field_1[i];
     }
-    for (int i = NO_OF_VECTORS - NO_OF_VECTORS_V; i < NO_OF_VECTORS; ++i)
+    for (int i = NO_OF_VECTORS - NO_OF_SCALARS_H; i < NO_OF_VECTORS; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
@@ -44,12 +44,12 @@ int scalar_times_vector_scalar_h_v(Scalar_field in_field_h, Scalar_field in_fiel
 {
     int layer_index, h_index, lower_index, upper_index;
     double scalar_value;
-    for (int i = NO_OF_VECTORS_V; i < NO_OF_VECTORS - NO_OF_VECTORS_V; ++i)
+    for (int i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-        if (h_index >= NO_OF_VECTORS_V)
-            scalar_value = 0.5*(in_field_h[grid -> to_index[h_index - NO_OF_VECTORS_V] + layer_index*NO_OF_SCALARS_H] + in_field_h[grid -> from_index[h_index - NO_OF_VECTORS_V] + layer_index*NO_OF_SCALARS_H]);
+        if (h_index >= NO_OF_SCALARS_H)
+            scalar_value = 0.5*(in_field_h[grid -> to_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H] + in_field_h[grid -> from_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H]);
         else
         {
             lower_index = h_index + layer_index*NO_OF_SCALARS_H;
@@ -58,12 +58,12 @@ int scalar_times_vector_scalar_h_v(Scalar_field in_field_h, Scalar_field in_fiel
         }
         out_field[i] = scalar_value*in_field_1[i];
     }
-    for (int i = 0; i < NO_OF_VECTORS_V; ++i)
+    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
         scalar_value = in_field_v[i];
         out_field[i] = scalar_value*in_field_1[i];
     }
-    for (int i = NO_OF_VECTORS - NO_OF_VECTORS_V; i < NO_OF_VECTORS; ++i)
+    for (int i = NO_OF_VECTORS - NO_OF_SCALARS_H; i < NO_OF_VECTORS; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
@@ -79,12 +79,12 @@ int scalar_times_vector_vector_h_v(Scalar_field in_field_0, Vector_field in_fiel
 	// in_field_1 is horizontal vector field, in_field_2 is vertical vector_field
     int layer_index, h_index, lower_index, upper_index;
     double scalar_value;
-    for (int i = NO_OF_VECTORS_V; i < NO_OF_VECTORS - NO_OF_VECTORS_V; ++i)
+    for (int i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-        if (h_index >= NO_OF_VECTORS_V)
-            scalar_value = 0.5*(in_field_0[grid -> to_index[h_index - NO_OF_VECTORS_V] + layer_index*NO_OF_SCALARS_H] + in_field_0[grid -> from_index[h_index - NO_OF_VECTORS_V] + layer_index*NO_OF_SCALARS_H]);
+        if (h_index >= NO_OF_SCALARS_H)
+            scalar_value = 0.5*(in_field_0[grid -> to_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H] + in_field_0[grid -> from_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H]);
         else
         {
             lower_index = h_index + layer_index*NO_OF_SCALARS_H;
@@ -93,12 +93,12 @@ int scalar_times_vector_vector_h_v(Scalar_field in_field_0, Vector_field in_fiel
         }
         out_field[i] = scalar_value*in_field_2[i];
     }
-    for (int i = 0; i < NO_OF_VECTORS_V; ++i)
+    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
         scalar_value = in_field_0[i];
         out_field[i] = scalar_value*in_field_2[i];
     }
-    for (int i = NO_OF_VECTORS - NO_OF_VECTORS_V; i < NO_OF_VECTORS; ++i)
+    for (int i = NO_OF_VECTORS - NO_OF_SCALARS_H; i < NO_OF_VECTORS; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;

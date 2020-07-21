@@ -51,8 +51,8 @@ int find_triangle_on_face_index_from_coords(int coord_0, int coord_1, int res_id
 
 int find_triangle_indices_from_h_vector_index(int res_id, int i, int *point_0, int *point_1, int *point_2, int *point_3, int *point_4, int *point_5, int *dual_scalar_on_face_index, int *small_triangle_edge_index, int face_edges[][3], int face_vertices[][3], int edge_vertices [][2], int face_edges_reverse[][3])
 {
-    int face_index = (i - NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
-    int on_face_index = i - (NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
+    int face_index = (i - NO_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
+    int on_face_index = i - (NO_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
     int triangle_on_face_index = on_face_index/3;
     *small_triangle_edge_index = on_face_index - 3*triangle_on_face_index;
    	find_triangle_edge_points(triangle_on_face_index, face_index, res_id, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, face_vertices, face_edges, face_edges_reverse);
@@ -70,30 +70,30 @@ int find_triangle_edge_points(int triangle_on_face_index, int face_index, int re
     if (coord_1 == 0)
     {
         if (face_edges_reverse[face_index][0] == 0)
-            *point_0 = NUMBER_OF_PENTAGONS + face_edges[face_index][0]*points_per_edge + coord_0;
+            *point_0 = NO_OF_PENTAGONS + face_edges[face_index][0]*points_per_edge + coord_0;
         else
-            *point_0 = NUMBER_OF_PENTAGONS + (face_edges[face_index][0] + 1)*points_per_edge - 1 - coord_0;
+            *point_0 = NO_OF_PENTAGONS + (face_edges[face_index][0] + 1)*points_per_edge - 1 - coord_0;
     }
     else
-        *point_0 = NUMBER_OF_PENTAGONS + points_per_edge*NUMBER_OF_EDGES + face_index*scalar_points_per_inner_face + triangle_on_face_index - points_per_edge;
+        *point_0 = NO_OF_PENTAGONS + points_per_edge*NO_OF_EDGES + face_index*scalar_points_per_inner_face + triangle_on_face_index - points_per_edge;
     if (coord_0 == points_per_edge - 1 - coord_1)
     {
         if (face_edges_reverse[face_index][1] == 0)
-            *point_1 = NUMBER_OF_PENTAGONS + face_edges[face_index][1]*points_per_edge + coord_1;
+            *point_1 = NO_OF_PENTAGONS + face_edges[face_index][1]*points_per_edge + coord_1;
         else
-            *point_1 = NUMBER_OF_PENTAGONS + (face_edges[face_index][1] + 1)*points_per_edge - 1 - coord_1;
+            *point_1 = NO_OF_PENTAGONS + (face_edges[face_index][1] + 1)*points_per_edge - 1 - coord_1;
     }
     else
-        *point_1 = NUMBER_OF_PENTAGONS + points_per_edge*NUMBER_OF_EDGES + face_index*scalar_points_per_inner_face + triangle_on_face_index - coord_1;
+        *point_1 = NO_OF_PENTAGONS + points_per_edge*NO_OF_EDGES + face_index*scalar_points_per_inner_face + triangle_on_face_index - coord_1;
     if (coord_0 == 0)
     {
         if (face_edges_reverse[face_index][2] == 0)
-            *point_2 = NUMBER_OF_PENTAGONS + (face_edges[face_index][2] + 1)*points_per_edge - 1 - coord_1;
+            *point_2 = NO_OF_PENTAGONS + (face_edges[face_index][2] + 1)*points_per_edge - 1 - coord_1;
         else
-            *point_2 = NUMBER_OF_PENTAGONS + face_edges[face_index][2]*points_per_edge + coord_1;
+            *point_2 = NO_OF_PENTAGONS + face_edges[face_index][2]*points_per_edge + coord_1;
     }
     else
-        *point_2 = NUMBER_OF_PENTAGONS + points_per_edge*NUMBER_OF_EDGES + face_index*scalar_points_per_inner_face + triangle_on_face_index - 1 - coord_1;
+        *point_2 = NO_OF_PENTAGONS + points_per_edge*NO_OF_EDGES + face_index*scalar_points_per_inner_face + triangle_on_face_index - 1 - coord_1;
     if (coord_1 == 0)
     {
         if (coord_0 == 0)
@@ -258,23 +258,23 @@ int upscale_scalar_point(int res_id, int old_index, int *new_index)
     int points_per_edge, on_edge_index, scalar_points_per_inner_face, on_face_index, coord_0, coord_1, coord_0_points_amount;
     find_points_per_edge(res_id, &points_per_edge);
     find_scalar_points_per_inner_face(res_id, &scalar_points_per_inner_face);
-    if (old_index < NUMBER_OF_PENTAGONS)
+    if (old_index < NO_OF_PENTAGONS)
         *new_index = old_index;
-    else if (old_index < NUMBER_OF_PENTAGONS + NUMBER_OF_EDGES*points_per_edge)
+    else if (old_index < NO_OF_PENTAGONS + NO_OF_EDGES*points_per_edge)
     {
-        edge_index = (old_index - NUMBER_OF_PENTAGONS)/points_per_edge;
-        on_edge_index = old_index - (NUMBER_OF_PENTAGONS + edge_index*points_per_edge);
-        *new_index = NUMBER_OF_PENTAGONS + edge_index*POINTS_PER_EDGE + pow(2, RES_ID - res_id)*(on_edge_index + 1) - 1;
+        edge_index = (old_index - NO_OF_PENTAGONS)/points_per_edge;
+        on_edge_index = old_index - (NO_OF_PENTAGONS + edge_index*points_per_edge);
+        *new_index = NO_OF_PENTAGONS + edge_index*POINTS_PER_EDGE + pow(2, RES_ID - res_id)*(on_edge_index + 1) - 1;
     }
     else
     {
-        face_index = (old_index - (NUMBER_OF_PENTAGONS + NUMBER_OF_EDGES*points_per_edge))/scalar_points_per_inner_face;
-        on_face_index = old_index - (NUMBER_OF_PENTAGONS + NUMBER_OF_EDGES*points_per_edge + face_index*scalar_points_per_inner_face);
+        face_index = (old_index - (NO_OF_PENTAGONS + NO_OF_EDGES*points_per_edge))/scalar_points_per_inner_face;
+        on_face_index = old_index - (NO_OF_PENTAGONS + NO_OF_EDGES*points_per_edge + face_index*scalar_points_per_inner_face);
         find_coords_from_triangle_on_face_index(on_face_index + points_per_edge, res_id, &coord_0, &coord_1, &coord_0_points_amount);
         coord_0 = (coord_0 + 1)*pow(2, RES_ID - res_id) - 1;
         coord_1 = coord_1*pow(2, RES_ID - res_id);
        	find_triangle_on_face_index_from_coords(coord_0, coord_1, RES_ID, &on_face_index);
-        *new_index = NUMBER_OF_PENTAGONS + NUMBER_OF_EDGES*POINTS_PER_EDGE + face_index*SCALAR_POINTS_PER_INNER_FACE + on_face_index - POINTS_PER_EDGE;
+        *new_index = NO_OF_PENTAGONS + NO_OF_EDGES*POINTS_PER_EDGE + face_index*SCALAR_POINTS_PER_INNER_FACE + on_face_index - POINTS_PER_EDGE;
     }
     return 0;
 }
@@ -405,9 +405,9 @@ int find_scalar_points_per_inner_face(int res_id, int *scalar_points_per_inner_f
     return 0;
 }
 
-int find_triangles_per_face(int res_id, int *number_of_triangles_per_face)
+int find_triangles_per_face(int res_id, int *NO_OF_triangles_per_face)
 {
-    *number_of_triangles_per_face = (int) (pow(4, res_id));
+    *NO_OF_triangles_per_face = (int) (pow(4, res_id));
     return 0;
 }
 

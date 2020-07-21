@@ -13,7 +13,7 @@ int recov_hor_ver_pri(Vector_field in_field, int layer_index, int h_index, doubl
 {
     double vertical_factor, large_delta_z, small_delta_z;
     // This is the index of the edge we aim at.
-    int aim_vector_index = layer_index*NO_OF_VECTORS_PER_LAYER + NO_OF_VECTORS_V + h_index;
+    int aim_vector_index = layer_index*NO_OF_VECTORS_PER_LAYER + NO_OF_SCALARS_H + h_index;
     // Now comes the first neighbouring cell.
     large_delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]];
     small_delta_z = grid -> z_vector[aim_vector_index] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]];

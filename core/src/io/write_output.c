@@ -102,7 +102,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
                 mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
                 mslp[j] = pressure_value/mslp_factor;
 				// Now the aim is to determine the value of the surface pressure.
-				temp_surface = temp_lowest_layer + standard_vert_lapse_rate*(grid -> z_scalar[j + i*NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_V + j]);
+				temp_surface = temp_lowest_layer + standard_vert_lapse_rate*(grid -> z_scalar[j + i*NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + j]);
                 surface_p_factor = pow(1 - (temp_surface - temp_lowest_layer)/temp_surface, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
 				surface_p[j] = pressure_value/surface_p_factor;
 				// Now the aim is to calculate the 2 m temperature.
@@ -617,12 +617,12 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		codes_handle_delete(handle_rh);
         for (int j = 0; j < NO_OF_VECTORS_H; ++j)
         {
-            wind_0 = state_write_out -> velocity_gas[j + i*NO_OF_VECTORS_H + (i + 1)*NO_OF_VECTORS_V];
+            wind_0 = state_write_out -> velocity_gas[j + i*NO_OF_VECTORS_H + (i + 1)*NO_OF_SCALARS_H];
             recov_hor_par_pri(state_write_out -> velocity_gas, i, j, &wind_1, grid);
             passive_turn(wind_0, wind_1, -grid -> direction[j], &wind_u, &wind_v);
             wind_u_h[j] = wind_u;
             wind_v_h[j] = wind_v;
-            rel_vort_h[j] = (*rel_vort)[NO_OF_DUAL_VECTORS_H + i*(NO_OF_VECTORS_H + NO_OF_DUAL_VECTORS_H) + j];
+            rel_vort_h[j] = (*rel_vort)[NO_OF_VECTORS_H + i*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + j];
         }
 		SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 		handle_wind_u_h = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
@@ -982,7 +982,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	fclose(SAMPLE_FILE);
     for (int i = 0; i < NO_OF_LEVELS; ++i)
     {
-        for (int j = 0; j < NO_OF_VECTORS_V; j++)
+        for (int j = 0; j < NO_OF_SCALARS_H; j++)
             wind_w_h[j] = state_write_out -> velocity_gas[j + i*NO_OF_VECTORS_PER_LAYER];
         if ((retval = codes_set_long(handle_wind_w_h, "discipline", 0)))
             ECCERR(retval);
@@ -1020,7 +1020,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
             ECCERR(retval);
         if ((retval = codes_set_long(handle_wind_w_h, "level", i)))
             ECCERR(retval);
-        if ((retval = codes_set_double_array(handle_wind_w_h, "values", wind_w_h, NO_OF_VECTORS_V)))
+        if ((retval = codes_set_double_array(handle_wind_w_h, "values", wind_w_h, NO_OF_SCALARS_H)))
             ECCERR(retval);
         if ((retval = codes_write_message(handle_wind_w_h, OUTPUT_FILE, "a")))
             ECCERR(retval);

@@ -61,22 +61,22 @@ int main(int argc, char *argv[])
 		ORO_ID = 1;
 	if (TEST_ID > 1)
 		ORO_ID = 2;
-    double *direction = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
-    double *latitude_scalar = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *longitude_scalar = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *latitude_vector = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
-    double *longitude_vector = malloc(NUMBER_OF_VECTORS_H*sizeof(double));
-    double *z_scalar = malloc(NUMBER_OF_SCALARS*sizeof(double));
-    double *z_vector = malloc(NUMBER_OF_VECTORS*sizeof(double));
-    double *gravity_potential = malloc(NUMBER_OF_VECTORS*sizeof(double));
+    double *direction = malloc(NO_OF_VECTORS_H*sizeof(double));
+    double *latitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *longitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *latitude_vector = malloc(NO_OF_VECTORS_H*sizeof(double));
+    double *longitude_vector = malloc(NO_OF_VECTORS_H*sizeof(double));
+    double *z_scalar = malloc(NO_OF_SCALARS*sizeof(double));
+    double *z_vector = malloc(NO_OF_VECTORS*sizeof(double));
+    double *gravity_potential = malloc(NO_OF_VECTORS*sizeof(double));
     int ncid_grid, retval;
     int GEO_PROP_FILE_LENGTH = 100;
     char *GEO_PROP_FILE_PRE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(GEO_PROP_FILE_PRE, "../grid_generator/nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
+    sprintf(GEO_PROP_FILE_PRE, "../grid_generator/nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
     GEO_PROP_FILE_LENGTH = strlen(GEO_PROP_FILE_PRE);
     free(GEO_PROP_FILE_PRE);
     char *GEO_PROP_FILE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(GEO_PROP_FILE, "../grid_generator/nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
+    sprintf(GEO_PROP_FILE, "../grid_generator/nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid_grid)))
         NCERR(retval);
     free(GEO_PROP_FILE);
@@ -117,22 +117,22 @@ int main(int argc, char *argv[])
         NCERR(retval);
     int OUTPUT_FILE_LENGTH = 100;
     char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(OUTPUT_FILE_PRE, "nc_files/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", TEST_ID, RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
+    sprintf(OUTPUT_FILE_PRE, "nc_files/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", TEST_ID, RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
     OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
     free(OUTPUT_FILE_PRE);
     char *OUTPUT_FILE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(OUTPUT_FILE, "nc_files/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", TEST_ID, RES_ID, NUMBER_OF_LAYERS, (int) TOA, ORO_ID, NUMBER_OF_ORO_LAYERS);
-    double *pressure = malloc(NUMBER_OF_SCALARS*sizeof(double));
-    double *pot_temperature = malloc(NUMBER_OF_SCALARS*sizeof(double));
-    double *temperature = malloc(NUMBER_OF_SCALARS*sizeof(double));
-    double *rho = malloc(NUMBER_OF_SCALARS*sizeof(double));
-    double *rel_humidity = malloc(NUMBER_OF_SCALARS*sizeof(double));
-    double *wind = malloc(NUMBER_OF_VECTORS*sizeof(double));
-    double *water_vapour_density = malloc(NUMBER_OF_SCALARS*sizeof(double));
-    double *liquid_water_density = malloc(NUMBER_OF_SCALARS*sizeof(double));
-    double *solid_water_density = malloc(NUMBER_OF_SCALARS*sizeof(double));
-    double *liquid_water_temp = malloc(NUMBER_OF_SCALARS*sizeof(double));
-    double *solid_water_temp = malloc(NUMBER_OF_SCALARS*sizeof(double));
+    sprintf(OUTPUT_FILE, "nc_files/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", TEST_ID, RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
+    double *pressure = malloc(NO_OF_SCALARS*sizeof(double));
+    double *pot_temperature = malloc(NO_OF_SCALARS*sizeof(double));
+    double *temperature = malloc(NO_OF_SCALARS*sizeof(double));
+    double *rho = malloc(NO_OF_SCALARS*sizeof(double));
+    double *rel_humidity = malloc(NO_OF_SCALARS*sizeof(double));
+    double *wind = malloc(NO_OF_VECTORS*sizeof(double));
+    double *water_vapour_density = malloc(NO_OF_SCALARS*sizeof(double));
+    double *liquid_water_density = malloc(NO_OF_SCALARS*sizeof(double));
+    double *solid_water_density = malloc(NO_OF_SCALARS*sizeof(double));
+    double *liquid_water_temp = malloc(NO_OF_SCALARS*sizeof(double));
+    double *solid_water_temp = malloc(NO_OF_SCALARS*sizeof(double));
     const double TROPO_TEMP = T_SFC + TROPO_HEIGHT*TEMP_GRADIENT;
     double z_height;
     double lat, lon;
@@ -143,10 +143,10 @@ int main(int argc, char *argv[])
     double lon_perturb = M_PI/9;
     int layer_index, h_index;
     // 3D scalar fields determined here, apart from density
-    for (int i = 0; i < NUMBER_OF_SCALARS; ++i)
+    for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-    	layer_index = i/NUMBER_OF_SCALARS_H;
-    	h_index = i - layer_index*NUMBER_OF_SCALARS_H;
+    	layer_index = i/NO_OF_SCALARS_H;
+    	h_index = i - layer_index*NO_OF_SCALARS_H;
         lat = latitude_scalar[h_index];
         lon = longitude_scalar[h_index];
         z_height = z_scalar[i];
@@ -191,21 +191,21 @@ int main(int argc, char *argv[])
     }
     // density is determined out of the hydrostatic equation
     double entropy_value, temperature_mean, delta_temperature, delta_gravity_potential, pot_temp_value, lower_entropy_value;
-    for (int i = NUMBER_OF_SCALARS - 1; i >= 0; --i)
+    for (int i = NO_OF_SCALARS - 1; i >= 0; --i)
     {
-    	layer_index = i/NUMBER_OF_SCALARS_H;
+    	layer_index = i/NO_OF_SCALARS_H;
     	// at the lowest layer the density is set using the equation of state, can be considered a boundary condition
-    	if (layer_index == NUMBER_OF_LAYERS - 1)
+    	if (layer_index == NO_OF_LAYERS - 1)
     	{
         	pot_temperature[i] = temperature[i]*pow(P_0/pressure[i], R_D/C_D_P);
         	rho[i] = pressure[i]/(R_D*temperature[i]);
         }
         else
         {
-        	lower_entropy_value = C_D_P*log(temperature[i + NUMBER_OF_SCALARS_H]*pow(P_0/(rho[i + NUMBER_OF_SCALARS_H]*R_D*temperature[i + NUMBER_OF_SCALARS_H]), R_D/C_D_P));
-        	temperature_mean = 0.5*(temperature[i] + temperature[i + NUMBER_OF_SCALARS_H]);
-        	delta_temperature = temperature[i] - temperature[i + NUMBER_OF_SCALARS_H];
-        	delta_gravity_potential = gravity_potential[i] - gravity_potential[i + NUMBER_OF_SCALARS_H];
+        	lower_entropy_value = C_D_P*log(temperature[i + NO_OF_SCALARS_H]*pow(P_0/(rho[i + NO_OF_SCALARS_H]*R_D*temperature[i + NO_OF_SCALARS_H]), R_D/C_D_P));
+        	temperature_mean = 0.5*(temperature[i] + temperature[i + NO_OF_SCALARS_H]);
+        	delta_temperature = temperature[i] - temperature[i + NO_OF_SCALARS_H];
+        	delta_gravity_potential = gravity_potential[i] - gravity_potential[i + NO_OF_SCALARS_H];
         	entropy_value = lower_entropy_value + (delta_gravity_potential + C_D_P*delta_temperature)/temperature_mean;
         	pot_temp_value = exp(entropy_value/C_D_P);
         	pot_temperature[i] = pot_temp_value;
@@ -217,17 +217,17 @@ int main(int argc, char *argv[])
         	printf("water_vapour_density negative.\n.");
     }
     free(gravity_potential);
-    for (int i = 0; i < NUMBER_OF_LAYERS; ++i)
+    for (int i = 0; i < NO_OF_LAYERS; ++i)
     {
         // horizontal wind fields are determind here
-        for (int j = 0; j < NUMBER_OF_VECTORS_H; ++j)
+        for (int j = 0; j < NO_OF_VECTORS_H; ++j)
         {
             lat = latitude_vector[j];
             lon = longitude_vector[j];
-            z_height = z_vector[NUMBER_OF_VECTORS_V + j + i*NUMBER_OF_VECTORS_PER_LAYER];
+            z_height = z_vector[NO_OF_SCALARS_H + j + i*NO_OF_VECTORS_PER_LAYER];
             // standard atmosphere: no wind
             if (TEST_ID == 0 || TEST_ID == 1)
-                wind[NUMBER_OF_VECTORS_V + i*NUMBER_OF_VECTORS_PER_LAYER + j] = 0;
+                wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = 0;
             // JW test: specific wind field
             if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
             {
@@ -240,19 +240,19 @@ int main(int argc, char *argv[])
                     distance = calculate_distance_h(lat, lon, lat_perturb, lon_perturb, RADIUS);
                     u += u_p*exp(-pow(distance/distance_scale, 2));
                 }
-                wind[NUMBER_OF_VECTORS_V + i*NUMBER_OF_VECTORS_PER_LAYER + j] = u*cos(direction[j]);
+                wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(direction[j]);
             }
         }
     }
-    for (int i = 0; i < NUMBER_OF_LEVELS; ++i)
+    for (int i = 0; i < NO_OF_LEVELS; ++i)
     {
-        for (int j = 0; j < NUMBER_OF_VECTORS_V; ++j)
+        for (int j = 0; j < NO_OF_SCALARS_H; ++j)
         {
             lat = latitude_scalar[j];
             lon = longitude_scalar[j];
-            z_height = z_vector[j + i*NUMBER_OF_VECTORS_PER_LAYER];
+            z_height = z_vector[j + i*NO_OF_VECTORS_PER_LAYER];
             if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
-                wind[i*NUMBER_OF_VECTORS_PER_LAYER + j] = 0;
+                wind[i*NO_OF_VECTORS_PER_LAYER + j] = 0;
         }
     }
     free(z_vector);
@@ -264,9 +264,9 @@ int main(int argc, char *argv[])
     int scalar_dimid, vector_dimid, pot_temp_id, density_dry_id, wind_id, density_vapour_id, density_liquid_id, density_solid_id, temperature_liquid_id, temperature_solid_id, ncid;
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
         NCERR(retval);
-    if ((retval = nc_def_dim(ncid, "scalar_index", NUMBER_OF_SCALARS, &scalar_dimid)))
+    if ((retval = nc_def_dim(ncid, "scalar_index", NO_OF_SCALARS, &scalar_dimid)))
         NCERR(retval);
-    if ((retval = nc_def_dim(ncid, "vector_index", NUMBER_OF_VECTORS, &vector_dimid)))
+    if ((retval = nc_def_dim(ncid, "vector_index", NO_OF_VECTORS, &vector_dimid)))
         NCERR(retval);
     if ((retval = nc_def_var(ncid, "potential_temperature", NC_DOUBLE, 1, &scalar_dimid, &pot_temp_id)))
         NCERR(retval);

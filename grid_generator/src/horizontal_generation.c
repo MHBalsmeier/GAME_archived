@@ -14,15 +14,15 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int generate_horizontal_generators(double latitude_ico[], double longitude_ico[], double latitude_scalar[], double longitude_scalar[], double x_unity[], double y_unity[], double z_unity[], int face_edges_reverse[][3], int face_edges[][3], int face_vertices[][3])
 {
-	int base_index_down_triangles, base_index_old, test_index, last_triangle_bool, old_triangle_on_line_index, base_index_up_triangles, points_downwards, points_upwards, dump, points_per_edge, edgepoint_0, edgepoint_1, edgepoint_2, number_of_triangles_per_face, point_0, point_1, point_2, dual_scalar_on_face_index, coord_0, coord_1, triangle_on_face_index, coord_0_points_amount;
+	int base_index_down_triangles, base_index_old, test_index, last_triangle_bool, old_triangle_on_line_index, base_index_up_triangles, points_downwards, points_upwards, dump, points_per_edge, edgepoint_0, edgepoint_1, edgepoint_2, NO_OF_triangles_per_face, point_0, point_1, point_2, dual_scalar_on_face_index, coord_0, coord_1, triangle_on_face_index, coord_0_points_amount;
 	double x_res, y_res, z_res;
-	for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
+	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 	    upscale_scalar_point(RES_ID, i, &test_index);
 	    if (test_index != i)
 	        printf("problem with upscale_scalar_point detected\n");
 	}
-	for (int i = 0; i < NUMBER_OF_PENTAGONS; ++i)
+	for (int i = 0; i < NO_OF_PENTAGONS; ++i)
 	{
 	    latitude_scalar[i] = latitude_ico[i];
 	    longitude_scalar[i] = longitude_ico[i];
@@ -31,12 +31,12 @@ int generate_horizontal_generators(double latitude_ico[], double longitude_ico[]
 	    y_unity[i] = y_res;
 	    z_unity[i] = z_res;
 	}
-	for (int i = 0; i < NUMBER_OF_BASIC_TRIANGLES; ++i)
+	for (int i = 0; i < NO_OF_BASIC_TRIANGLES; ++i)
 	{
 	    for (int j = 0; j < RES_ID; ++j)
 	    {
-	        find_triangles_per_face(j, &number_of_triangles_per_face);
-	        for (int k = 0; k < number_of_triangles_per_face; ++k)
+	        find_triangles_per_face(j, &NO_OF_triangles_per_face);
+	        for (int k = 0; k < NO_OF_triangles_per_face; ++k)
 	        {
 	            if (j == 0)
 	            {
@@ -97,25 +97,25 @@ int generate_horizontal_generators(double latitude_ico[], double longitude_ico[]
 
 int calc_cell_face_unity(double pent_hex_face_unity_sphere[], double latitude_scalar_dual[], double longitude_scalar_dual[], int adjacent_vector_indices_h [], int vorticity_indices_pre [])
 {
-    int check_0, check_1, check_2, counter, number_of_edges;
-    for (int i = 0; i < NUMBER_OF_VECTORS_V; ++i)
+    int check_0, check_1, check_2, counter, NO_OF_edges;
+    for (int i = 0; i < NO_OF_VECTORS_V; ++i)
     {
-    	number_of_edges = 6;
-        if (i < NUMBER_OF_PENTAGONS)
+    	NO_OF_edges = 6;
+        if (i < NO_OF_PENTAGONS)
         {
-        	number_of_edges = 5;
+        	NO_OF_edges = 5;
         }
-        double *lat_points = malloc(number_of_edges*sizeof(double));
-        double *lon_points = malloc(number_of_edges*sizeof(double));
-        int *cell_vector_indices = malloc(number_of_edges*sizeof(int));
-        for (int j = 0; j < number_of_edges; ++j)
+        double *lat_points = malloc(NO_OF_edges*sizeof(double));
+        double *lon_points = malloc(NO_OF_edges*sizeof(double));
+        int *cell_vector_indices = malloc(NO_OF_edges*sizeof(int));
+        for (int j = 0; j < NO_OF_edges; ++j)
             cell_vector_indices[j] = adjacent_vector_indices_h[6*i + j];
         counter = 0;
-        for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_V; ++j)
+        for (int j = 0; j < NO_OF_DUAL_SCALARS_H; ++j)
         {
-            check_0 = in_bool_calculator(vorticity_indices_pre[3*j + 0], cell_vector_indices, number_of_edges);
-            check_1 = in_bool_calculator(vorticity_indices_pre[3*j + 1], cell_vector_indices, number_of_edges);
-            check_2 = in_bool_calculator(vorticity_indices_pre[3*j + 2], cell_vector_indices, number_of_edges);
+            check_0 = in_bool_calculator(vorticity_indices_pre[3*j + 0], cell_vector_indices, NO_OF_edges);
+            check_1 = in_bool_calculator(vorticity_indices_pre[3*j + 1], cell_vector_indices, NO_OF_edges);
+            check_2 = in_bool_calculator(vorticity_indices_pre[3*j + 2], cell_vector_indices, NO_OF_edges);
             if (check_0 == 1 || check_1 == 1 || check_2 == 1)
             {
                 lat_points[counter] = latitude_scalar_dual[j];
@@ -123,16 +123,16 @@ int calc_cell_face_unity(double pent_hex_face_unity_sphere[], double latitude_sc
                 counter++;
             }
         }
-        if (counter != number_of_edges)
+        if (counter != NO_OF_edges)
         	printf("Trouble in calc_cell_face_unity.\n");
-        calc_spherical_polygon_face(lat_points, lon_points, number_of_edges, &pent_hex_face_unity_sphere[i]);
+        calc_spherical_polygon_face(lat_points, lon_points, NO_OF_edges, &pent_hex_face_unity_sphere[i]);
         free(lat_points);
         free(lon_points);
         free(cell_vector_indices);
     }
     double pent_hex_sum_unity_sphere = 0;
-    double pent_hex_avg_unity_sphere_ideal = 4*M_PI/NUMBER_OF_SCALARS_H;
-    for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
+    double pent_hex_avg_unity_sphere_ideal = 4*M_PI/NO_OF_SCALARS_H;
+    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
         pent_hex_sum_unity_sphere += pent_hex_face_unity_sphere[i];
         if (pent_hex_face_unity_sphere[i] <= 0)
@@ -158,16 +158,16 @@ int calc_triangle_face_unity(double triangle_face_unit_sphere[], double latitude
 {
 	int dual_scalar_index, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, small_triangle_edge_index, coord_0_points_amount, coord_0, coord_1, face_index, on_face_index, triangle_on_face_index;
 	double triangle_face;
-    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
-        if (i >= NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))
+        if (i >= NO_OF_EDGES*(POINTS_PER_EDGE + 1))
         {
             find_triangle_indices_from_h_vector_index(RES_ID, i, &point_0, &point_1, &point_2, &point_3, &point_4, &point_5, &dual_scalar_on_face_index, &small_triangle_edge_index, face_edges, face_vertices, edge_vertices, face_edges_reverse);
-            face_index = (i - NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
-            on_face_index = i - (NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
+            face_index = (i - NO_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
+            on_face_index = i - (NO_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
             triangle_on_face_index = on_face_index/3;
             find_coords_from_triangle_on_face_index(triangle_on_face_index, RES_ID, &coord_0, &coord_1, &coord_0_points_amount);
-            dual_scalar_index = dual_scalar_on_face_index + face_index*NUMBER_OF_TRIANGLES/NUMBER_OF_BASIC_TRIANGLES;
+            dual_scalar_index = dual_scalar_on_face_index + face_index*NO_OF_TRIANGLES/NO_OF_BASIC_TRIANGLES;
             calc_triangle_face(latitude_scalar[point_0], longitude_scalar[point_0], latitude_scalar[point_1], longitude_scalar[point_1], latitude_scalar[point_2], longitude_scalar[point_2], &triangle_face);
             triangle_face_unit_sphere[dual_scalar_index] = triangle_face;
             calc_triangle_face(latitude_scalar[point_3], longitude_scalar[point_3], latitude_scalar[point_0], longitude_scalar[point_0], latitude_scalar[point_2], longitude_scalar[point_2], &triangle_face);
@@ -185,8 +185,8 @@ int calc_triangle_face_unity(double triangle_face_unit_sphere[], double latitude
         }
     }
     double triangle_sum_unit_sphere = 0;
-    double triangle_avg_unit_sphere_ideal = 4*M_PI/NUMBER_OF_TRIANGLES;
-    for (int i = 0; i < NUMBER_OF_DUAL_SCALARS_H; ++i)
+    double triangle_avg_unit_sphere_ideal = 4*M_PI/NO_OF_TRIANGLES;
+    for (int i = 0; i < NO_OF_DUAL_SCALARS_H; ++i)
     {
         triangle_sum_unit_sphere += triangle_face_unit_sphere[i];
         if (triangle_face_unit_sphere[i] <= 0)
@@ -212,7 +212,7 @@ int calc_triangle_face_unity(double triangle_face_unit_sphere[], double latitude
 int set_vector_h_doubles(int from_index[], int to_index[], double latitude_scalar[], double longitude_scalar[], double latitude_vector[], double longitude_vector[], double direction[])
 {
 	double x_point_0, y_point_0, z_point_0, x_point_1, y_point_1, z_point_1, x_res, y_res, z_res, lat_res, lon_res;
-    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         find_global_normal(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], &x_point_0, &y_point_0, &z_point_0);
         find_global_normal(latitude_scalar[to_index[i]], longitude_scalar[to_index[i]], &x_point_1, &y_point_1, &z_point_1);
@@ -228,26 +228,26 @@ int set_vector_h_doubles(int from_index[], int to_index[], double latitude_scala
 int set_from_to_index(int from_index[], int to_index[], int face_edges[][3], int face_edges_reverse[][3], int face_vertices[][3], int edge_vertices[][2])
 {
 	int edge_index, on_edge_index, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, small_triangle_edge_index;
-    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
-        if (i < NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))
+        if (i < NO_OF_EDGES*(POINTS_PER_EDGE + 1))
         {
             edge_index = i/(POINTS_PER_EDGE + 1);
             on_edge_index = i - edge_index*(POINTS_PER_EDGE + 1);
             if(on_edge_index == 0)
             {
                 from_index[i] = edge_vertices[edge_index][0];
-                to_index[i] = NUMBER_OF_PENTAGONS + edge_index*POINTS_PER_EDGE;
+                to_index[i] = NO_OF_PENTAGONS + edge_index*POINTS_PER_EDGE;
             }
             else if (on_edge_index == POINTS_PER_EDGE)
             {
-                from_index[i] = NUMBER_OF_PENTAGONS + (edge_index + 1)*POINTS_PER_EDGE - 1;
+                from_index[i] = NO_OF_PENTAGONS + (edge_index + 1)*POINTS_PER_EDGE - 1;
                 to_index[i] = edge_vertices[edge_index][1];
             }
             else
             {
-                from_index[i] = NUMBER_OF_PENTAGONS + edge_index*POINTS_PER_EDGE + on_edge_index - 1;
-                to_index[i] = NUMBER_OF_PENTAGONS + edge_index*POINTS_PER_EDGE + on_edge_index;
+                from_index[i] = NO_OF_PENTAGONS + edge_index*POINTS_PER_EDGE + on_edge_index - 1;
+                to_index[i] = NO_OF_PENTAGONS + edge_index*POINTS_PER_EDGE + on_edge_index;
             }
         }
         else
@@ -277,16 +277,16 @@ int set_scalar_h_dual_coords(double latitude_scalar_dual[], double longitude_sca
 {
 	double lat_res, lon_res;
 	int point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, small_triangle_edge_index, dual_scalar_index, coord_0, coord_1, coord_0_points_amount, face_index, on_face_index, triangle_on_face_index;
-    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
-        if (i >= NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))
+        if (i >= NO_OF_EDGES*(POINTS_PER_EDGE + 1))
         {
             find_triangle_indices_from_h_vector_index(RES_ID, i, &point_0, &point_1, &point_2, &point_3, &point_4, &point_5, &dual_scalar_on_face_index, &small_triangle_edge_index, face_edges, face_vertices, edge_vertices, face_edges_reverse);
-            face_index = (i - NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
-            on_face_index = i - (NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
+            face_index = (i - NO_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
+            on_face_index = i - (NO_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
             triangle_on_face_index = on_face_index/3;
             find_coords_from_triangle_on_face_index(triangle_on_face_index, RES_ID, &coord_0, &coord_1, &coord_0_points_amount);
-            dual_scalar_index = dual_scalar_on_face_index + face_index*NUMBER_OF_TRIANGLES/NUMBER_OF_BASIC_TRIANGLES;
+            dual_scalar_index = dual_scalar_on_face_index + face_index*NO_OF_TRIANGLES/NO_OF_BASIC_TRIANGLES;
             // We want to construct a Voronoi gird, that's why we choose this function for calculating the dual cell centers.
             find_voronoi_center_sphere(latitude_scalar[point_0], longitude_scalar[point_0], latitude_scalar[point_1], longitude_scalar[point_1], latitude_scalar[point_2], longitude_scalar[point_2], &lat_res, &lon_res);
             latitude_scalar_dual[dual_scalar_index] = lat_res;
@@ -313,10 +313,10 @@ int set_scalar_h_dual_coords(double latitude_scalar_dual[], double longitude_sca
 
 int set_dual_vector_h_doubles(double latitude_vector_dual[], double latitude_scalar_dual[], double latitude_vector[], double direction_dual[], double longitude_vector[], int to_index_dual[], int from_index_dual[], double longitude_scalar_dual[], double rel_on_line_dual[])
 {
-    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_PER_LAYER; ++i)
+    for (int i = 0; i < NO_OF_DUAL_VECTORS_PER_LAYER; ++i)
     {
-        if (i >= NUMBER_OF_DUAL_VECTORS_H)
-            latitude_vector_dual[i] = latitude_scalar_dual[i - NUMBER_OF_DUAL_VECTORS_H];
+        if (i >= NO_OF_VECTORS_H)
+            latitude_vector_dual[i] = latitude_scalar_dual[i - NO_OF_VECTORS_H];
         else
         {
             latitude_vector_dual[i] = latitude_vector[i];
@@ -336,16 +336,16 @@ int set_from_to_index_dual(int from_index_dual[], int to_index_dual[], int face_
     int edge_rel_to_face_1 = 0;
     int face_index_0 = 0;
     int face_index_1 = 0;
-    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_PER_LAYER; ++i)
+    for (int i = 0; i < NO_OF_DUAL_VECTORS_PER_LAYER; ++i)
     {
-        if (i < NUMBER_OF_DUAL_VECTORS_H)
+        if (i < NO_OF_VECTORS_H)
         {
-            if (i < NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))
+            if (i < NO_OF_EDGES*(POINTS_PER_EDGE + 1))
             {
                 edge_index = i/(POINTS_PER_EDGE + 1);
                 on_edge_index = i - edge_index*(POINTS_PER_EDGE + 1);
                 first_face_found = 0;
-                for (int j = 0; j < NUMBER_OF_BASIC_TRIANGLES; ++j)
+                for (int j = 0; j < NO_OF_BASIC_TRIANGLES; ++j)
                 {
                     if (face_edges[j][0] == edge_index || face_edges[j][1] == edge_index || face_edges[j][2] == edge_index)
                     {
@@ -417,8 +417,8 @@ int set_from_to_index_dual(int from_index_dual[], int to_index_dual[], int face_
             }
             else
             {
-                face_index = (i - NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
-                on_face_index = i - (NUMBER_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
+                face_index = (i - NO_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
+                on_face_index = i - (NO_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
                 triangle_on_face_index = on_face_index/3;
                 small_triangle_edge_index = on_face_index - 3*triangle_on_face_index;
                 find_coords_from_triangle_on_face_index(triangle_on_face_index, RES_ID, &coord_0, &coord_1, &coord_0_points_amount);

@@ -15,14 +15,14 @@ int recov_ver_0_pri(Vector_field in_field, int layer_index, int h_index, double 
 		if (layer_index == 0)
 		{
 		    for (int i = 0; i < 6; ++i)
-		        *component += grid -> recov_ver_0_pri_weight[6*h_index + i]*in_field[NO_OF_VECTORS_V + grid -> recov_ver_index[6*h_index + i]];
+		        *component += grid -> recov_ver_0_pri_weight[6*h_index + i]*in_field[NO_OF_SCALARS_H + grid -> recov_ver_index[6*h_index + i]];
 		}
 		else
 		{
 		    for (int i = 0; i < 6; ++i)
 		    {
-		        *component += 0.5*grid -> recov_ver_0_pri_weight[6*h_index + i]*in_field[(layer_index - 1)*NO_OF_VECTORS_PER_LAYER + NO_OF_VECTORS_V + grid -> recov_ver_index[6*h_index + i]];
-		        *component += 0.5*grid -> recov_ver_0_pri_weight[6*h_index + i]*in_field[layer_index*NO_OF_VECTORS_PER_LAYER + NO_OF_VECTORS_V + grid -> recov_ver_index[6*h_index + i]];
+		        *component += 0.5*grid -> recov_ver_0_pri_weight[6*h_index + i]*in_field[(layer_index - 1)*NO_OF_VECTORS_PER_LAYER + NO_OF_SCALARS_H + grid -> recov_ver_index[6*h_index + i]];
+		        *component += 0.5*grid -> recov_ver_0_pri_weight[6*h_index + i]*in_field[layer_index*NO_OF_VECTORS_PER_LAYER + NO_OF_SCALARS_H + grid -> recov_ver_index[6*h_index + i]];
 		    }
 		}
     }
@@ -32,11 +32,11 @@ int recov_ver_0_pri(Vector_field in_field, int layer_index, int h_index, double 
 		{
 		    for (int i = 0; i < 6; ++i)
 		    {
-		    	original_value = in_field[(layer_index - 1)*NO_OF_VECTORS_PER_LAYER + NO_OF_VECTORS_V + grid -> recov_ver_index[6*h_index + i]];
-		    	upper_value = in_field[(layer_index - 2)*NO_OF_VECTORS_PER_LAYER + NO_OF_VECTORS_V + grid -> recov_ver_index[6*h_index + i]];
-		    	delta_z_for_gradient = grid -> z_vector[(layer_index - 2)*NO_OF_VECTORS_PER_LAYER + NO_OF_VECTORS_V + grid -> recov_ver_index[6*h_index + i]] - grid -> z_vector[(layer_index - 1)*NO_OF_VECTORS_PER_LAYER + NO_OF_VECTORS_V + grid -> recov_ver_index[6*h_index + i]];
+		    	original_value = in_field[(layer_index - 1)*NO_OF_VECTORS_PER_LAYER + NO_OF_SCALARS_H + grid -> recov_ver_index[6*h_index + i]];
+		    	upper_value = in_field[(layer_index - 2)*NO_OF_VECTORS_PER_LAYER + NO_OF_SCALARS_H + grid -> recov_ver_index[6*h_index + i]];
+		    	delta_z_for_gradient = grid -> z_vector[(layer_index - 2)*NO_OF_VECTORS_PER_LAYER + NO_OF_SCALARS_H + grid -> recov_ver_index[6*h_index + i]] - grid -> z_vector[(layer_index - 1)*NO_OF_VECTORS_PER_LAYER + NO_OF_SCALARS_H + grid -> recov_ver_index[6*h_index + i]];
 		    	vertical_gradient = (upper_value - original_value)/delta_z_for_gradient;
-		    	delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + h_index] - grid -> z_vector[(layer_index - 1)*NO_OF_VECTORS_PER_LAYER + NO_OF_VECTORS_V + grid -> recov_ver_index[6*h_index + i]];
+		    	delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + h_index] - grid -> z_vector[(layer_index - 1)*NO_OF_VECTORS_PER_LAYER + NO_OF_SCALARS_H + grid -> recov_ver_index[6*h_index + i]];
 		    	modified_value = original_value + delta_z*vertical_gradient;
 		        *component += grid -> recov_ver_0_pri_weight[6*h_index + i]*modified_value;
 	        }
@@ -47,11 +47,11 @@ int recov_ver_0_pri(Vector_field in_field, int layer_index, int h_index, double 
 		    {
 				// vertical interpolation necessary
 				z_aim = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
-				z_upper = grid -> z_vector[(layer_index - 1)*NO_OF_VECTORS_PER_LAYER + NO_OF_VECTORS_V + grid -> recov_ver_index[6*h_index + i]];
-				z_lower = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + NO_OF_VECTORS_V + grid -> recov_ver_index[6*h_index + i]];
+				z_upper = grid -> z_vector[(layer_index - 1)*NO_OF_VECTORS_PER_LAYER + NO_OF_SCALARS_H + grid -> recov_ver_index[6*h_index + i]];
+				z_lower = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + NO_OF_SCALARS_H + grid -> recov_ver_index[6*h_index + i]];
 				z_upper_weight = (z_aim - z_lower)/(z_upper - z_lower);
-		        *component += z_upper_weight*grid -> recov_ver_0_pri_weight[6*h_index + i]*in_field[(layer_index - 1)*NO_OF_VECTORS_PER_LAYER + NO_OF_VECTORS_V + grid -> recov_ver_index[6*h_index + i]];
-		        *component += (1 - z_upper_weight)*grid -> recov_ver_0_pri_weight[6*h_index + i]*in_field[layer_index*NO_OF_VECTORS_PER_LAYER + NO_OF_VECTORS_V + grid -> recov_ver_index[6*h_index + i]];
+		        *component += z_upper_weight*grid -> recov_ver_0_pri_weight[6*h_index + i]*in_field[(layer_index - 1)*NO_OF_VECTORS_PER_LAYER + NO_OF_SCALARS_H + grid -> recov_ver_index[6*h_index + i]];
+		        *component += (1 - z_upper_weight)*grid -> recov_ver_0_pri_weight[6*h_index + i]*in_field[layer_index*NO_OF_VECTORS_PER_LAYER + NO_OF_SCALARS_H + grid -> recov_ver_index[6*h_index + i]];
 	        }
 		}
     }

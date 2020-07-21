@@ -16,10 +16,10 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int set_f_vec(double latitude_vector[], double direction_dual[], double latitude_vector_dual[], double f_vec[])
 {
-    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_H + NUMBER_OF_VECTORS_H; ++i)
+    for (int i = 0; i < 2*NO_OF_VECTORS_H; ++i)
     {
-        if (i >= NUMBER_OF_DUAL_VECTORS_H)
-        	f_vec[i] = 2*OMEGA*sin(latitude_vector[i - NUMBER_OF_DUAL_VECTORS_H]);
+        if (i >= NO_OF_VECTORS_H)
+        	f_vec[i] = 2*OMEGA*sin(latitude_vector[i - NO_OF_VECTORS_H]);
         else
         	f_vec[i] = 2*OMEGA*cos(latitude_vector_dual[i])*sin(direction_dual[i]);
     }
@@ -60,7 +60,7 @@ int set_orography(int RES_ID, int ORO_ID, double z_surface[])
     }
     else
     {
-    	for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
+    	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     	{
     		z_surface[i] = 0;
     	}
@@ -71,7 +71,7 @@ int set_orography(int RES_ID, int ORO_ID, double z_surface[])
 int check_for_orthogonality(double direction[], double direction_dual[], double ORTH_CRITERION_DEG)
 {
 	double direction_change;
-    for (int i = 0; i < NUMBER_OF_VECTORS_H; ++i)
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         find_angle_change(direction[i], direction_dual[i], &direction_change);
         if (fabs(rad2deg(direction_change)) < ORTH_CRITERION_DEG || fabs(rad2deg(direction_change)) > 90 + (90 - ORTH_CRITERION_DEG))
@@ -85,10 +85,10 @@ int check_for_orthogonality(double direction[], double direction_dual[], double 
 
 int calc_adjacent_vector_indices_dual_h(int adjacent_vector_indices_dual_h[], int from_index_dual[], int to_index_dual[])
 {
-    for (int i = 0; i < NUMBER_OF_DUAL_SCALARS_H; ++i)
+    for (int i = 0; i < NO_OF_DUAL_SCALARS_H; ++i)
     {
     	int counter = 0;
-    	for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_H; ++j)
+    	for (int j = 0; j < NO_OF_VECTORS_H; ++j)
     	{
     		if (from_index_dual[j] == i || to_index_dual[j] == i)
     		{
@@ -114,10 +114,10 @@ int calc_vorticity_indices_pre_and_adjacent_scalar_indices_dual_h(int from_index
 {
 	int counter, sign;
 	double direction_change;
-    for (int i = 0; i < NUMBER_OF_DUAL_VECTORS_V; ++i)
+    for (int i = 0; i < NO_OF_DUAL_SCALARS_H; ++i)
     {
         counter = 0;
-        for (int j = 0; j < NUMBER_OF_DUAL_VECTORS_H; ++j)
+        for (int j = 0; j < NO_OF_VECTORS_H; ++j)
         {
             if (from_index_dual[j] == i || to_index_dual[j] == i)
             {

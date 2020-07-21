@@ -10,6 +10,6 @@ int recov_hor_par_pri(Vector_field in_field, int layer_index, int h_index, doubl
 {
     *component = 0;
 	for (int i = 0; i < 10; ++i)
-		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field[NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]];
+		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]];
     return 0;
 }

@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 	sprintf(OUTPUT_FILE, "nc_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
 	int ncid, scalar_h_dimid, var_dimid, oro_id, latitude_scalar_id, longitude_scalar_id;
 	double *oro, latitude;
-	oro = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+	oro = malloc(NO_OF_SCALARS_H*sizeof(double));
     int GEO_PROP_FILE_LENGTH = 100;
     char *GEO_PROP_FILE_PRE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
     sprintf(GEO_PROP_FILE_PRE, "../grid_generator/nc_files/B%dL26T30000_O0_OL17_SCVT.nc", RES_ID);
@@ -60,8 +60,8 @@ int main(int argc, char *argv[])
     char *GEO_PROP_FILE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
     sprintf(GEO_PROP_FILE, "../grid_generator/nc_files/B%dL26T30000_O0_OL17_SCVT.nc", RES_ID);
 	int scalar_index, retval;
-    double *latitude_scalar = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
-    double *longitude_scalar = malloc(NUMBER_OF_SCALARS_H*sizeof(double));
+    double *latitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *longitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
     double distance;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
         ERR(retval);
 	if ((retval = nc_close(ncid)))
 	  ERR(retval);
-	for (int i = 0; i < NUMBER_OF_SCALARS_H; ++i)
+	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{	
 		if (ORO_ID == 0)
 			oro[i] = 0;
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 	if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
 	  ERR(retval);
 	free(OUTPUT_FILE);
-	if ((retval = nc_def_dim(ncid, "scalar_index", NUMBER_OF_SCALARS_H, &scalar_h_dimid)))
+	if ((retval = nc_def_dim(ncid, "scalar_index", NO_OF_SCALARS_H, &scalar_h_dimid)))
 	  ERR(retval);
 	if ((retval = nc_def_var(ncid, "z_surface", NC_DOUBLE, 1, &scalar_h_dimid, &oro_id)))
 	  ERR(retval);
