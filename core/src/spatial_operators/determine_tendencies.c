@@ -13,25 +13,13 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int explicit_momentum_tendencies(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Interpolate_info *interpolation, Diffusion_info *diffusion_info, Config_info *config_info, int no_step_rk)
 {
-	// Here, weights of the horizontal pressure gradient can be chosen as usual.
-	// This is in potential temperature formulation.
-	// RES_ID = 5
-	// R_D/C_D_P - 0.5:  hrs to crash
-	// -2.0/3: 12.09 hrs to crash
-	// -0.7:	12.35 hrs to crash
-	// -0.8:	13.09 hrs to crash
-	// -0.9:	13.09 hrs to crash
-	// -1.0:	13.09 hrs to crash
-	double old_hor_grad_weight = -0.5;
+	double old_hor_grad_weight = -C_D_V/C_D_P;
 	double new_hor_grad_weight = 1 - old_hor_grad_weight;
 	if (config_info -> totally_first_step_bool == 1)
 	{
 		old_hor_grad_weight = 0;
 		new_hor_grad_weight = 1;
 	}
-	// old_hor_grad_weight = 0;
-	// new_hor_grad_weight = 1;
-	temperature_diagnostics(current_state, diagnostics -> temperature);
     if (config_info -> momentum_diffusion_on == 1)
     {
 		dissipation(current_state -> velocity_gas, current_state -> density_dry, diffusion_info -> friction_acc, diffusion_info -> heating_diss, grid);
@@ -44,13 +32,13 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
     	if (config_info -> tracers_on == 1)
     	{
 			rho_h = current_state -> density_dry[i] + current_state -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];
-			diagnostics -> specific_entropy[i] = current_state -> entropy_gas[i]/rho_h;
+			diagnostics -> specific_entropy[i] = current_state -> entropy_density_gas[i]/rho_h;
     	}
     	else
-    		diagnostics -> specific_entropy[i] = current_state -> entropy_gas[i]/current_state -> density_dry[i];
+    		diagnostics -> specific_entropy[i] = current_state -> entropy_density_gas[i]/current_state -> density_dry[i];
 	}
     grad(diagnostics -> specific_entropy, diagnostics -> specific_entropy_gradient, grid);
-	scalar_times_vector(diagnostics -> temperature, diagnostics -> specific_entropy_gradient, diagnostics -> pressure_gradient_acc_1, grid);
+	scalar_times_vector(current_state -> temp_gas, diagnostics -> specific_entropy_gradient, diagnostics -> pressure_gradient_acc_1, grid);
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	if (config_info -> tracers_on == 1)
@@ -58,7 +46,7 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
     	else
     		diagnostics -> c_h_p_field[i] = C_D_P;
 	}
-    grad(diagnostics -> temperature, diagnostics -> temp_gradient, grid);
+    grad(current_state -> temp_gas, diagnostics -> temp_gradient, grid);
 	scalar_times_vector(diagnostics -> c_h_p_field, diagnostics -> temp_gradient, forcings -> temp_gradient_times_c_h_p, grid);
 	// Here, the update of the pressure gradient is managed.
 	if (no_step_rk == 0)
@@ -161,14 +149,14 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
     return 0;
 }
 
-int calc_partially_implicit_divvs(State *state_old, State *state_new, Interpolate_info *interpolation, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Diffusion_info *diffusion_info, Config_info *config_info, int no_rk_step)
+int semi_implicit_scalar_tendencies(State *state_old, State *state_new, Interpolate_info *interpolation, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Diffusion_info *diffusion_info, Config_info *config_info, int no_rk_step)
 {
     scalar_times_vector(state_old -> density_dry, state_new -> velocity_gas, diagnostics -> mass_dry_flux_density, grid);
     divv_h(diagnostics -> mass_dry_flux_density, forcings -> mass_dry_flux_density_divv, grid);
     if (config_info -> scalar_diffusion_on == 1)
     {
         grad(state_old -> density_dry, diffusion_info -> mass_dry_diffusion_flux_density, grid);
-        calc_mass_diffusion_coeffs(diagnostics -> temperature, state_old -> density_dry, diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v);
+        calc_mass_diffusion_coeffs(state_old -> temp_gas, state_old -> density_dry, diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v);
         scalar_times_vector_scalar_h_v(diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v, diffusion_info -> mass_dry_diffusion_flux_density, diffusion_info -> mass_dry_diffusion_flux_density, grid);
         divv(diffusion_info -> mass_dry_diffusion_flux_density, diffusion_info -> mass_dry_diffusion_source_rate, grid, 0);
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
@@ -181,8 +169,8 @@ int calc_partially_implicit_divvs(State *state_old, State *state_new, Interpolat
     	for (int i = 0; i < NO_OF_SCALARS; ++i)
         	state_tendency -> density_dry[i] = -forcings -> mass_dry_flux_density_divv[i];
     }
-    scalar_times_vector(state_old -> t_tilde, state_new -> velocity_gas, diagnostics -> t_tilde_flux_density, grid);
-    divv_h(diagnostics -> t_tilde_flux_density, forcings -> t_tilde_flux_density_divv, grid);
+    scalar_times_vector(state_old -> temp_gas, state_new -> velocity_gas, diagnostics -> temp_gas_flux, grid);
+    divv_h(diagnostics -> temp_gas_flux, forcings -> temp_gas_flux_divv_h, grid);
 	divv_h(state_new -> velocity_gas, diagnostics -> wind_field_divv_h, grid);
     if (config_info -> rad_update == 1)
     {
@@ -191,7 +179,7 @@ int calc_partially_implicit_divvs(State *state_old, State *state_new, Interpolat
     double rho_h, c_h_v;
     if (config_info -> scalar_diffusion_on == 1)
     {
-        calc_temp_diffusion_coeffs(diagnostics -> temperature, state_old -> density_dry, diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v);
+        calc_temp_diffusion_coeffs(state_old -> temp_gas, state_old -> density_dry, diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v);
         scalar_times_vector_scalar_h_v(diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v, diagnostics -> temp_gradient, diagnostics -> temperature_flux_density, grid);
         divv(diagnostics -> temperature_flux_density, diffusion_info -> temp_diffusion_heating, grid, 0);
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
@@ -218,7 +206,7 @@ int calc_partially_implicit_divvs(State *state_old, State *state_new, Interpolat
     	*/
     	if (config_info -> phase_transitions_on == 1)
     	{
-		    calc_h2otracers_source_rates(diffusion_info -> tracer_mass_source_rates, diffusion_info -> tracer_heat_source_rates, state_old-> tracer_densities, state_old -> tracer_density_temperatures, diagnostics -> temperature, NO_OF_TRACERS, NO_OF_SCALARS, delta_t);
+		    calc_h2otracers_source_rates(diffusion_info -> tracer_mass_source_rates, diffusion_info -> tracer_heat_source_rates, state_old-> tracer_densities, state_old -> tracer_density_temperatures, state_old -> temp_gas, NO_OF_TRACERS, NO_OF_SCALARS, delta_t);
 		}
 		for (int i = 0; i < NO_OF_TRACERS; ++i)
 		{
@@ -261,7 +249,7 @@ int calc_partially_implicit_divvs(State *state_old, State *state_new, Interpolat
 		    }
 		}
     }
-    double R_h, density_d_micro_value, density_v_micro_value, condensates_density_sum;
+    double density_d_micro_value, density_v_micro_value, condensates_density_sum;
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         if (config_info -> scalar_diffusion_on == 1)
@@ -274,15 +262,14 @@ int calc_partially_implicit_divvs(State *state_old, State *state_new, Interpolat
 			density_d_micro_value = calc_micro_density(state_old -> density_dry[i], condensates_density_sum);
 			density_v_micro_value = calc_micro_density(state_old -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i], condensates_density_sum);
 		    c_h_v = spec_heat_cap_diagnostics_v(density_d_micro_value, density_v_micro_value);
-		    R_h = gas_constant_diagnostics(density_d_micro_value, density_v_micro_value);
-            state_tendency -> t_tilde[i] = -forcings -> t_tilde_flux_density_divv[i] - R_h/c_h_v*interpolation -> t_tilde[i]*diagnostics -> wind_field_divv_h[i] + 1/c_h_v*rho_h/total_density*(diffusion_info -> temp_diffusion_heating[i] + config_info -> momentum_diffusion_on*diffusion_info -> heating_diss[i] + radiation_tendency[i]) + config_info -> tracers_on*config_info -> phase_transitions_on*diffusion_info -> tracer_heat_source_rates[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];
+            state_tendency -> temp_gas[i] = -forcings -> temp_gas_flux_divv_h[i] + rho_h/total_density*(diffusion_info -> temp_diffusion_heating[i] + config_info -> momentum_diffusion_on*diffusion_info -> heating_diss[i] + radiation_tendency[i]) + config_info -> tracers_on*config_info -> phase_transitions_on*diffusion_info -> tracer_heat_source_rates[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];
         }
         else
         {
-            state_tendency -> t_tilde[i] = -forcings -> t_tilde_flux_density_divv[i] - R_D/C_D_V*interpolation -> t_tilde[i]*diagnostics -> wind_field_divv_h[i] + radiation_tendency[i]/C_D_V;
+            state_tendency -> temp_gas[i] = -forcings -> temp_gas_flux_divv_h[i] + radiation_tendency[i];
         }
     }
-	scalar_times_vector(state_old -> entropy_gas, state_new -> velocity_gas, diagnostics -> entropy_gas_flux_density, grid);
+	scalar_times_vector(state_old -> entropy_density_gas, state_new -> velocity_gas, diagnostics -> entropy_gas_flux_density, grid);
 	divv_h(diagnostics -> entropy_gas_flux_density, forcings -> entropy_gas_flux_density_divv, grid);
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
@@ -293,11 +280,11 @@ int calc_partially_implicit_divvs(State *state_old, State *state_new, Interpolat
 	            total_density += state_old -> tracer_densities[k*NO_OF_SCALARS + i];
 	        c_h_v = spec_heat_cap_diagnostics_v(state_old -> density_dry[i], state_old -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i]);
 	        rho_h = state_old -> density_dry[i] + state_old -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];
-	        state_tendency -> entropy_gas[i] = -forcings -> entropy_gas_flux_density_divv[i] + 1/diagnostics -> temperature[i]*(rho_h/total_density*(diffusion_info -> temp_diffusion_heating[i] + config_info -> momentum_diffusion_on*diffusion_info -> heating_diss[i] + radiation_tendency[i]) + config_info -> tracers_on*config_info -> phase_transitions_on*diffusion_info -> tracer_heat_source_rates[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i]);
+	        state_tendency -> entropy_density_gas[i] = -forcings -> entropy_gas_flux_density_divv[i] + 1/state_old -> temp_gas[i]*(rho_h/total_density*(diffusion_info -> temp_diffusion_heating[i] + config_info -> momentum_diffusion_on*diffusion_info -> heating_diss[i] + radiation_tendency[i]) + config_info -> tracers_on*config_info -> phase_transitions_on*diffusion_info -> tracer_heat_source_rates[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i]);
 	    }
 	    else
 	    {
-	        state_tendency -> entropy_gas[i] = -forcings -> entropy_gas_flux_density_divv[i] + 1/diagnostics -> temperature[i]*radiation_tendency[i];
+	        state_tendency -> entropy_density_gas[i] = -forcings -> entropy_gas_flux_density_divv[i] + 1/state_old -> temp_gas[i]*radiation_tendency[i];
 	    }
 	}
     return 0;

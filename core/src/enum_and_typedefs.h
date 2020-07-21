@@ -4,6 +4,7 @@ Github repository: https://github.com/MHBalsmeier/game
 */
 
 #include <math.h>
+// some fundamental constants
 #define N_A (6.0221409e23)
 #define K_B (1.380649e-23)
 #define M_D 0.028964420
@@ -121,9 +122,9 @@ int h_curl_signs[4*NO_OF_DUAL_VECTORS_H];
 
 typedef struct state {
 Scalar_field density_dry;
-Scalar_field t_tilde;
+Scalar_field temp_gas;
+Scalar_field entropy_density_gas;
 Vector_field velocity_gas;
-Scalar_field entropy_gas;
 // density order: solid, liquid, vapour
 Tracer_densities tracer_densities;
 Tracer_density_temperatures tracer_density_temperatures;
@@ -132,8 +133,7 @@ Tracer_density_temperatures tracer_density_temperatures;
 // Collects diagnostic quantities. Note: in fact, forcings are also diagnostic quiantities.
 typedef struct diagnostics {
 Vector_field mass_dry_flux_density;
-Scalar_field temperature;
-Vector_field t_tilde_flux_density;
+Vector_field temp_gas_flux;
 Vector_field temp_gradient;
 Scalar_field specific_entropy;
 Curl_field pot_vort;
@@ -150,7 +150,7 @@ Vector_field entropy_gas_flux_density;
 typedef struct forcings {
 Scalar_field mass_dry_flux_density_divv;
 Scalar_field entropy_gas_flux_density_divv;
-Scalar_field t_tilde_flux_density_divv;
+Scalar_field temp_gas_flux_divv_h;
 Vector_field temp_gradient_times_c_h_p;
 Vector_field pressure_gradient_acc;
 Vector_field e_kin_h_grad;
@@ -170,10 +170,10 @@ int rad_update;
 
 // This is necessary for ensuring cancellation of energetically important terms, see Gassmann and Herzog.
 typedef struct interpolate_info {
-Scalar_field t_tilde;
 Vector_field pressure_gradient_acc_old;
 } Interpolate_info;
 
+// Contains everything on turbulence parametrizations as well as tracer-related quantities.
 typedef struct diffusion_info {
 Scalar_field temp_diffusion_heating;
 Vector_field friction_acc;

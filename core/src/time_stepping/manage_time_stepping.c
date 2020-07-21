@@ -19,8 +19,6 @@ int manage_time_stepping(State *state_0, State *state_p1, Interpolate_info *inte
 	double delta_t_rk;
 	for (int i = 0; i < 3; ++i)
 	{
-		if (config_info -> totally_first_step_bool == 1)
-			setup_interpolation(state_0, interpolation);
 		if (i == 2 && config_info -> tracers_on == 1)
 			config_info -> phase_transitions_on = 1;
 		delta_t_rk = delta_t/(3 - i);
@@ -38,19 +36,18 @@ int manage_time_stepping(State *state_0, State *state_p1, Interpolate_info *inte
 		three_band_solver_ver_vel_adv(state_0, state_p1, state_tendency, delta_t_rk, grid);
 		// Vertical velocities can be seen as updated from now on.
 		// here, the horizontal divergences are calculated with the new values of the horizontal velocity
-		calc_partially_implicit_divvs(state_0, state_p1, interpolation, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, diffusion_info, config_info, i);
+		semi_implicit_scalar_tendencies(state_0, state_p1, interpolation, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, diffusion_info, config_info, i);
 		// here, the non-advective part of the vertical velocity equation is solved implicitly (sound wave solver)
-		three_band_solver_ver_sound_waves(state_0, state_p1, state_tendency, diagnostics, forcings, delta_t_rk, grid);
+		three_band_solver_ver_sound_waves(state_0, state_p1, state_tendency, diagnostics, delta_t_rk, grid);
 		// now that the new vertical velocity is known, the new dry density can be calculated via implicit vertical advection
 		three_band_solver_ver_den_dry(state_0, state_p1, state_tendency, delta_t_rk, grid);
 		// Now the entropy density is at the new step is calculated using the advection equation in flux form.
-		three_band_solver_ver_entropy_gas(state_0, state_p1, state_tendency, delta_t_rk, grid);
+		three_band_solver_ver_entropy_density_gas(state_0, state_p1, state_tendency, delta_t_rk, grid);
 		// exit(1);
 		// Vertical tracer advection with 3-band matrices.
 		if (config_info -> tracers_on == 1)
 			three_band_solver_ver_tracers(state_0, state_p1, state_tendency, delta_t_rk, grid);
     }
-	update_interpolation(state_0, state_p1, interpolation);
     return 0;
 }
 

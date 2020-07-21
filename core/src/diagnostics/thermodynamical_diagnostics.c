@@ -34,18 +34,6 @@ int pot_temp_diagnostics(Scalar_field temperature, Scalar_field density, Tracer_
     return 0;
 }
 
-int temperature_diagnostics(State *state, Scalar_field temperature)
-{
-	/*
-	This is actually the equation of state of the gas phase in a moist atmosphere.
-	*/
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
-    {
-    	temperature[i] = state -> t_tilde[i]/(state -> density_dry[i] + state -> tracer_densities[2*NO_OF_SCALARS + i]);
-    }
-    return 0;
-}
-
 double spec_heat_cap_diagnostics_p(double density_d_micro_value, double density_v_micro_value)
 {
 	double result = (density_d_micro_value*C_D_P + density_v_micro_value*C_V_P)/(density_d_micro_value + density_v_micro_value);

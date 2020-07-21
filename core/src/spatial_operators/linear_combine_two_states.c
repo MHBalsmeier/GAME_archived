@@ -13,8 +13,8 @@ int linear_combine_two_states(State *state_0, State *state_1, State *state_out, 
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         state_out -> density_dry[i] = coeff_0*state_0 -> density_dry[i] + coeff_1*state_1 -> density_dry[i];
-        state_out -> entropy_gas[i] = coeff_0*state_0 -> entropy_gas[i] + coeff_1*state_1 -> entropy_gas[i];
-        state_out -> t_tilde[i] = coeff_0*state_0 -> t_tilde[i] + coeff_1*state_1 -> t_tilde[i];
+        state_out -> entropy_density_gas[i] = coeff_0*state_0 -> entropy_density_gas[i] + coeff_1*state_1 -> entropy_density_gas[i];
+        state_out -> temp_gas[i] = coeff_0*state_0 -> temp_gas[i] + coeff_1*state_1 -> temp_gas[i];
         for (int j = 0; j < NO_OF_TRACERS; ++j)
             state_out -> tracer_densities[j*NO_OF_SCALARS + i] = coeff_0*state_0 -> tracer_densities[j*NO_OF_SCALARS + i] + coeff_1*state_1 -> tracer_densities[j*NO_OF_SCALARS + i];
         for (int j = 0; j < NO_OF_CONDENSATED_TRACERS; ++j)

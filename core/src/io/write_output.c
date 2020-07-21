@@ -41,7 +41,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     	exit(1);
     FILE *OUT_GRIB;
     OUT_GRIB = fopen(OUTPUT_FILE, "w+");
-    double *temperature = malloc(NO_OF_SCALARS*sizeof(double));
     double *pot_temperature = malloc(NO_OF_SCALARS*sizeof(double));
     // Grib requires everything to be on horizontal levels.
     double *temperature_h = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -79,8 +78,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     codes_handle *handle_rel_vort = NULL;
     codes_handle *handle_rh = NULL;
     codes_handle *handle_cape = NULL;
-	temperature_diagnostics(state_write_out, temperature);
-	pot_temp_diagnostics(temperature, state_write_out -> density_dry, state_write_out -> tracer_densities, pot_temperature);
+	pot_temp_diagnostics(state_write_out -> temp_gas, state_write_out -> density_dry, state_write_out -> tracer_densities, pot_temperature);
 	calc_rel_vort(state_write_out -> velocity_gas, *rel_vort, grid, dualgrid);
 	int layer_index;
 	double z_height, delta_z, cape_integrand, theta_prime, theta;
@@ -89,7 +87,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     {
         for (int j = 0; j < NO_OF_SCALARS_H; ++j)
         {
-        	temperature_h[j] = temperature[i*NO_OF_SCALARS_H + j];
+        	temperature_h[j] = state_write_out -> temp_gas[i*NO_OF_SCALARS_H + j];
         	pressure_h[j] = state_write_out -> density_dry[j + i*NO_OF_SCALARS_H]*R_D*temperature_h[j];
         	rh_h[j] = 100*rel_humidity(temperature_h[j], state_write_out -> tracer_densities[2*NO_OF_SCALARS + i*NO_OF_SCALARS_H + j]);
         }
@@ -98,7 +96,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
             for (int j = 0; j < NO_OF_SCALARS_H; ++j)
             {
             	// Now the aim is to determine the value of the MSLP.
-                temp_lowest_layer = temperature[i*NO_OF_SCALARS_H + j];
+                temp_lowest_layer = state_write_out -> temp_gas[i*NO_OF_SCALARS_H + j];
                 pressure_value = state_write_out -> density_dry[j + i*NO_OF_SCALARS_H]*R_D*temp_lowest_layer;
                 temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[j + i*NO_OF_SCALARS_H];
                 mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
@@ -109,7 +107,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				surface_p[j] = pressure_value/surface_p_factor;
 				// Now the aim is to calculate the 2 m temperature.
                 delta_z_temp = 2 - grid -> z_scalar[j + i*NO_OF_SCALARS_H];
-                temp_upper = temperature[(i - 1)*NO_OF_SCALARS_H + j];
+                temp_upper = state_write_out -> temp_gas[(i - 1)*NO_OF_SCALARS_H + j];
                 temp_lower = temp_lowest_layer;
                 temp_gradient = (temp_upper - temp_lower)/(grid -> z_scalar[j + (i - 1)*NO_OF_SCALARS_H] - grid -> z_scalar[j + i*NO_OF_SCALARS_H]);
                 // Finally the temperature in 2 m height AGL can bo obtained via linear extrapolation.
@@ -969,7 +967,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     free(sprate);
     free(tcdc);
     free(pot_temperature);
-    free(temperature);
     free(rel_vort_h);
     free(rel_vort);
     free(temperature_h);
@@ -1066,7 +1063,7 @@ int write_out_integral(State *state_write_out, double t_write, char output_direc
     if (integral_id == 1)
     {
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
-    	global_scalar_integrator(state_write_out -> entropy_gas, grid, &global_integral);
+    	global_scalar_integrator(state_write_out -> entropy_density_gas, grid, &global_integral);
     	fprintf(global_integral_file, "%lf\t%lf\n", t_write, global_integral);
     	fclose(global_integral_file);
     }
@@ -1084,7 +1081,6 @@ int write_out_integral(State *state_write_out, double t_write, char output_direc
     	global_scalar_integrator(*pot_energy_density, grid, &potential_integral);
     	free(pot_energy_density);
     	Scalar_field *int_energy_density = malloc(sizeof(Scalar_field));
-    	temperature_diagnostics(state_write_out, *int_energy_density);
     	scalar_times_scalar(state_write_out -> density_dry, *int_energy_density, *int_energy_density);
     	global_scalar_integrator(*int_energy_density, grid, &internal_integral);
     	fprintf(global_integral_file, "%lf\t%lf\t%lf\t%lf\n", t_write, kinetic_integral, potential_integral, C_D_V*internal_integral);
