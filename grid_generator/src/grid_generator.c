@@ -221,10 +221,10 @@ int main(int argc, char *argv[])
 	retval = calc_z_vector_dual_and_normal_distance_dual(z_vector_dual, normal_distance_dual, z_scalar_dual, TOA, z_surface, from_index, to_index, z_vector, from_index_dual, to_index_dual, latitude_scalar_dual, longitude_scalar_dual, vorticity_indices_pre);
     printf(GREEN "finished.\n" RESET);
     printf("Calculating dual areas, pre version ... ");
-	retval = calc_area_dual_pre(area_dual_pre, z_vector_dual, normal_distance, z_vector, triangle_face_unit_sphere);
+	retval = calc_area_dual_pre(area_dual_pre, z_vector_dual, normal_distance, z_vector, from_index, to_index, z_surface, triangle_face_unit_sphere, TOA);
     printf(GREEN "finished.\n" RESET);
     printf("Calculating vertical faces, pre version ... ");
-	retval = calculate_vertical_faces(area, z_vector_dual, normal_distance_dual);
+	retval = calculate_vertical_faces(area, z_vector_dual, normal_distance_dual, TOA);
     printf(GREEN "finished.\n" RESET);
     printf("Calculating vertical contravariant unit vectors, pre version ... ");
 	retval = calc_vertical_contravar_unit(latitude_scalar, longitude_scalar, adjacent_vector_indices_h, vertical_contravar_unit, direction_dual, normal_distance_dual, from_index_dual, to_index_dual, z_scalar_dual);

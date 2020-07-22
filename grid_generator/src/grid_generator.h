@@ -24,7 +24,7 @@ int determine_z_scalar(double [], double [], double [], double, double);
 int set_f_vec(double [], double [], double [], double []);
 int set_orography(int, int, double []);
 int calc_cell_face_unity(double [], double [], double [], int [], int []);
-int calculate_vertical_faces(double [], double [], double []);
+int calculate_vertical_faces(double [], double [], double [], double);
 int set_recov_ver(int [], int [], double [], double [], double [], double [], double [], double []);
 int calc_triangle_face_unity(double [], double [], double [], int [][3], int [][3], int [][3], int [][2]);
 int set_vector_h_doubles(int [], int [], double [], double [], double [], double [], double []);
@@ -47,7 +47,7 @@ int calc_vorticity_indices_pre_and_adjacent_scalar_indices_dual_h(int [], int []
 int set_z_vector_and_normal_distance(double [], double [], double [], double [], double [], double [], int [], int [], double);
 int map_area_to_sphere(double [], double [], double []);
 int calc_z_vector_dual_and_normal_distance_dual(double [], double [], double [], double, double [], int [], int [], double [], int [], int [], double [], double [], int []);
-int calc_area_dual_pre(double [], double [], double [], double [], double []);
+int calc_area_dual_pre(double [], double [], double [], double [], int [], int [], double [], double [], double);
 int optimize_to_scvt(double [], double [], double [], double [], int, int [][3], int [][3], int [][3], int [][2], int [], int [], int []);
 int read_horizontal_generators(double [], double [], char []);
 
