@@ -46,7 +46,27 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
     		diagnostics -> specific_entropy[i] = current_state -> entropy_density_gas[i]/current_state -> density_dry[i];
 	}
     grad(diagnostics -> specific_entropy, diagnostics -> specific_entropy_gradient, grid);
-	scalar_times_vector(current_state -> temp_gas, diagnostics -> specific_entropy_gradient, diagnostics -> pressure_gradient_acc_1, grid);
+	// Here, the pressure gradient extrapolation is managed.
+	if (no_step_rk == 0)
+	{
+		if (config_info -> totally_first_step_bool == 0)
+		{
+			for (int i = 0; i < NO_OF_VECTORS; ++i)
+			{
+				interpolation -> pressure_gradient_0_old_m[i] = diagnostics -> pressure_gradient_0_m[i];
+			}
+		}
+		else
+		{
+			for (int i = 0; i < NO_OF_VECTORS; ++i)
+			{
+				interpolation -> pressure_gradient_0_old_m[i] = 0;
+			}
+		}
+	}
+	scalar_times_vector(interpolation -> temp_interpolate, diagnostics -> specific_entropy_gradient, interpolation -> pressure_gradient_1_interpolate, grid);
+	// This is necessary for the vertical momentum equation.
+	scalar_times_vector(current_state -> temp_gas, diagnostics -> specific_entropy_gradient, diagnostics -> pressure_gradient_1, grid);
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	if (config_info -> tracers_on == 1)
@@ -55,38 +75,13 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
     		diagnostics -> c_h_p_field[i] = C_D_P;
 	}
     grad(current_state -> temp_gas, diagnostics -> temp_gradient, grid);
-	scalar_times_vector(diagnostics -> c_h_p_field, diagnostics -> temp_gradient, forcings -> temp_gradient_times_c_h_p, grid);
-	// Here, the update of the pressure gradient is managed.
+	scalar_times_vector(diagnostics -> c_h_p_field, diagnostics -> temp_gradient, diagnostics -> pressure_gradient_0_m, grid);
 	if (no_step_rk == 0)
 	{
-		if (config_info -> totally_first_step_bool == 0)
-		{
-			for (int i = 0; i < NO_OF_VECTORS; ++i)
-			{
-				interpolation -> pressure_gradient_acc_old[i] = forcings -> pressure_gradient_acc[i];
-			}
-		}
-		else
-		{
-			for (int i = 0; i < NO_OF_VECTORS; ++i)
-			{
-				interpolation -> pressure_gradient_acc_old[i] = 0;
-			}
-		}
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
 		{
-			forcings -> pressure_gradient_acc[i] = -forcings -> temp_gradient_times_c_h_p[i] + diagnostics -> pressure_gradient_acc_1[i];
+			forcings -> pressure_gradient_acc[i] = old_hor_grad_weight*(-interpolation -> pressure_gradient_0_old_m[i]) + new_hor_grad_weight*(-diagnostics -> pressure_gradient_0_m[i]) + interpolation -> pressure_gradient_1_interpolate[i];
 		}
-	}
-	else
-	{
-		for (int i = 0; i < NO_OF_VECTORS; ++i)
-		{
-			layer_index = i/NO_OF_VECTORS_PER_LAYER;
-			h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-			if (h_index < NO_OF_SCALARS_H)
-				forcings -> pressure_gradient_acc[i] = -forcings -> temp_gradient_times_c_h_p[i] + diagnostics -> pressure_gradient_acc_1[i];
-		}	
 	}
 	// The pressure gradient has to get a deceleration factor in presence of condensates.
 	double total_density;
@@ -130,7 +125,7 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
         			metric_term = -vertical_velocity*current_state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
         			hor_non_trad_cori_sign = -dualgrid -> h_curl_signs[4*(h_index - NO_OF_SCALARS_H) + 0];
         			hor_non_trad_cori_term = hor_non_trad_cori_sign*vertical_velocity*dualgrid -> f_vec[h_index - NO_OF_SCALARS_H];
-            		state_tendency -> velocity_gas[i] = old_hor_grad_weight*interpolation -> pressure_gradient_acc_old[i] + new_hor_grad_weight*forcings -> pressure_gradient_acc[i] + forcings -> pot_vort_tend[i] - grid -> gravity_m[i] - forcings -> e_kin_h_grad[i] + hor_non_trad_cori_term + metric_term + diffusion_info -> friction_acc[i];
+            		state_tendency -> velocity_gas[i] = forcings -> pressure_gradient_acc[i] + forcings -> pot_vort_tend[i] - grid -> gravity_m[i] - forcings -> e_kin_h_grad[i] + hor_non_trad_cori_term + metric_term + diffusion_info -> friction_acc[i];
         		}
             	if (h_index < NO_OF_SCALARS_H)
             	{
@@ -145,7 +140,7 @@ int explicit_momentum_tendencies(State *current_state, State *state_tendency, Gr
         			metric_term = -vertical_velocity*current_state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
         			hor_non_trad_cori_sign = -dualgrid -> h_curl_signs[4*(h_index - NO_OF_SCALARS_H) + 0];
         			hor_non_trad_cori_term = hor_non_trad_cori_sign*vertical_velocity*dualgrid -> f_vec[h_index - NO_OF_SCALARS_H];
-            		state_tendency -> velocity_gas[i] = old_hor_grad_weight*interpolation -> pressure_gradient_acc_old[i] + new_hor_grad_weight*forcings -> pressure_gradient_acc[i] + forcings -> pot_vort_tend[i] - grid -> gravity_m[i] - forcings -> e_kin_h_grad[i] + hor_non_trad_cori_term + metric_term;
+            		state_tendency -> velocity_gas[i] = forcings -> pressure_gradient_acc[i] + forcings -> pot_vort_tend[i] - grid -> gravity_m[i] - forcings -> e_kin_h_grad[i] + hor_non_trad_cori_term + metric_term;
         		}
         		if (h_index < NO_OF_SCALARS_H)
         		{

@@ -137,7 +137,10 @@ Curl_field pot_vort;
 Vector_field specific_entropy_gradient;
 Scalar_field c_h_p_field;
 Scalar_field e_kin_h;
-Vector_field pressure_gradient_acc_1;
+// nabla h
+Vector_field pressure_gradient_0_m;
+// temp nabla s
+Vector_field pressure_gradient_1;
 Vector_field temperature_flux_density;
 Scalar_field wind_field_divv_h;
 Vector_field entropy_gas_flux_density;
@@ -148,7 +151,6 @@ typedef struct forcings {
 Scalar_field mass_dry_flux_density_divv;
 Scalar_field entropy_gas_flux_density_divv;
 Scalar_field temp_gas_flux_divv_h;
-Vector_field temp_gradient_times_c_h_p;
 Vector_field pressure_gradient_acc;
 Vector_field e_kin_h_grad;
 Vector_field pot_vort_tend;
@@ -167,7 +169,9 @@ int rad_update;
 
 // This is necessary for ensuring cancellation of energetically important terms, see Gassmann and Herzog.
 typedef struct interpolate_info {
-Vector_field pressure_gradient_acc_old;
+Vector_field pressure_gradient_0_old_m;
+Scalar_field temp_interpolate;
+Vector_field pressure_gradient_1_interpolate;
 } Interpolate_info;
 
 // Contains everything on turbulence parametrizations as well as tracer-related quantities.

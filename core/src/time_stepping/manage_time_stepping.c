@@ -17,6 +17,9 @@ int manage_time_stepping(State *state_0, State *state_p1, Interpolate_info *inte
 	If radiation is updated, it is done at the first step.
 	*/
 	double delta_t_rk;
+	// At the totally first step, now extrapolation in the temperature is possible.
+	if (config_info -> totally_first_step_bool == 1)
+		set_interpolated_temperature(state_0, state_p1, interpolation, 1);
 	for (int i = 0; i < 3; ++i)
 	{
 		if (i == 2 && config_info -> tracers_on == 1)
@@ -38,7 +41,7 @@ int manage_time_stepping(State *state_0, State *state_p1, Interpolate_info *inte
 		// here, the horizontal divergences are calculated with the new values of the horizontal velocity
 		semi_implicit_scalar_tendencies(state_0, state_p1, interpolation, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, diffusion_info, config_info, i);
 		// here, the non-advective part of the vertical velocity equation is solved implicitly (sound wave solver)
-		three_band_solver_ver_sound_waves(state_0, state_p1, state_tendency, diagnostics, delta_t_rk, grid);
+		three_band_solver_ver_sound_waves(state_0, state_p1, state_tendency, diagnostics, interpolation, delta_t_rk, grid);
 		// now that the new vertical velocity is known, the new dry density can be calculated via implicit vertical advection
 		three_band_solver_ver_den_dry(state_0, state_p1, state_tendency, delta_t_rk, grid);
 		// Now the entropy density is at the new step is calculated using the advection equation in flux form.
@@ -48,6 +51,7 @@ int manage_time_stepping(State *state_0, State *state_p1, Interpolate_info *inte
 		if (config_info -> tracers_on == 1)
 			three_band_solver_ver_tracers(state_0, state_p1, state_tendency, delta_t_rk, grid);
     }
+	set_interpolated_temperature(state_0, state_p1, interpolation, 0);
     return 0;
 }
 
