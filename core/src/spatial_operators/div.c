@@ -58,7 +58,7 @@ int divv(Vector_field in_field, Scalar_field out_field, Grid *grid, int allow_su
 int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
 {
     int number_of_edges, layer_index, h_index;
-    double comp_h;
+    double contra_upper, contra_lower, comp_h, comp_v;
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         comp_h = 0;
@@ -73,7 +73,32 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
         {
             comp_h += in_field[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]*grid -> adjacent_signs_h[6*h_index + j]*grid -> area[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]];
         }
-        out_field[i] = 1/grid -> volume[i]*comp_h;
+        if (layer_index == 0)
+        {
+            contra_lower = 0;
+            comp_v = -contra_lower*grid -> area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
+        }
+        else if (layer_index == NO_OF_LAYERS - 1)
+        {
+        	vertical_contravariant_normalized_h(in_field, layer_index, h_index, grid, &contra_upper);
+        	vertical_contravariant_normalized_h(in_field, layer_index + 1, h_index, grid, &contra_lower);
+            comp_v = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
+        }
+        else
+        {
+            contra_upper = 0;
+            if (layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
+            {
+                vertical_contravariant_normalized_h(in_field, layer_index, h_index, grid, &contra_upper);
+            }
+            contra_lower = 0;
+            if (layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS - 1)
+            {
+                vertical_contravariant_normalized_h(in_field, layer_index + 1, h_index, grid, &contra_lower);
+            }
+            comp_v = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - contra_lower*grid -> area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
+        }
+        out_field[i] = 1/grid -> volume[i]*(comp_h + comp_v);
     }
     return 0;
 }
