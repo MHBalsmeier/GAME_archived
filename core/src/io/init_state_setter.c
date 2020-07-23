@@ -13,9 +13,10 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int set_init_data(char FILE_NAME[], State *init_state)
 {
-    double *pot_temp = malloc(NO_OF_SCALARS*sizeof(double));
-    double *rho = malloc(NO_OF_SCALARS*sizeof(double));
+    double *density_dry = malloc(NO_OF_SCALARS*sizeof(double));
+    double *temperature_gas = malloc(NO_OF_SCALARS*sizeof(double));
     double *wind = malloc(NO_OF_VECTORS*sizeof(double));
+    double *pot_temperature = malloc(NO_OF_SCALARS*sizeof(double));
     double *water_vapour_density = malloc(NO_OF_SCALARS*sizeof(double));
     double *liquid_water_density = malloc(NO_OF_SCALARS*sizeof(double));
     double *solid_water_density = malloc(NO_OF_SCALARS*sizeof(double));
@@ -25,10 +26,10 @@ int set_init_data(char FILE_NAME[], State *init_state)
     double R_h, c_h_v, density_h_micro;
     if ((retval = nc_open(FILE_NAME, NC_NOWRITE, &ncid)))
         NCERR(retval);
-    int pot_temp_id, density_dry_id, wind_id, density_vapour_id, density_liquid_id, density_solid_id, temperature_liquid_id, temperature_solid_id;
-    if ((retval = nc_inq_varid(ncid, "potential_temperature",&pot_temp_id)))
-        NCERR(retval);
+    int temperature_gas_id, density_dry_id, wind_id, density_vapour_id, density_liquid_id, density_solid_id, temperature_liquid_id, temperature_solid_id;
     if ((retval = nc_inq_varid(ncid, "density_dry", &density_dry_id)))
+        NCERR(retval);
+    if ((retval = nc_inq_varid(ncid, "temperature_gas",&temperature_gas_id)))
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "wind", &wind_id)))
         NCERR(retval);
@@ -42,9 +43,9 @@ int set_init_data(char FILE_NAME[], State *init_state)
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "temperature_solid", &temperature_solid_id)))
         NCERR(retval);
-    if ((retval = nc_get_var_double(ncid, pot_temp_id, &pot_temp[0])))
+    if ((retval = nc_get_var_double(ncid, temperature_gas_id, &temperature_gas[0])))
         NCERR(retval);    
-    if ((retval = nc_get_var_double(ncid, density_dry_id, &rho[0])))
+    if ((retval = nc_get_var_double(ncid, density_dry_id, &density_dry[0])))
         NCERR(retval);
     if ((retval = nc_get_var_double(ncid, wind_id, &wind[0])))
         NCERR(retval);    
@@ -62,12 +63,8 @@ int set_init_data(char FILE_NAME[], State *init_state)
         NCERR(retval);
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-        init_state -> density_dry[i] = rho[i];
-        R_h = gas_constant_diagnostics(rho[i], water_vapour_density[i]);
-        c_h_v = spec_heat_cap_diagnostics_p(rho[i], water_vapour_density[i]);
-        density_h_micro = calc_micro_density(rho[i] + water_vapour_density[i], solid_water_density[i] + liquid_water_density[i]);
-        init_state -> temp_gas[i] = pow(pot_temp[i], C_D_P/C_D_V)*pow(R_D*init_state -> density_dry[i]/P_0, R_D/C_D_V);
-        init_state -> entropy_density_gas[i] = rho[i]*(C_D_P*log(pot_temp[i]) + entropy_constant_d) + water_vapour_density[i]*(C_V_P*log(pot_temp[i]) + M_D/M_V*DELTA_C_V_P*R_h/c_h_v*log(R_h*pot_temp[i]*density_h_micro/P_0) + entropy_constant_d);
+        init_state -> density_dry[i] = density_dry[i];
+        init_state -> temp_gas[i] = temperature_gas[i];
         if (NO_OF_TRACERS > 0)
         {
             init_state -> tracer_densities[i] = solid_water_density[i];
@@ -77,12 +74,20 @@ int set_init_data(char FILE_NAME[], State *init_state)
             init_state -> tracer_density_temperatures[NO_OF_SCALARS + i] = liquid_water_density[i]*liquid_water_temperature[i];
         }
     }
+	pot_temp_diagnostics(init_state, pot_temperature);
+    for (int i = 0; i < NO_OF_SCALARS; ++i)
+    {
+        R_h = gas_constant_diagnostics(density_dry[i], water_vapour_density[i]);
+        c_h_v = spec_heat_cap_diagnostics_p(density_dry[i], water_vapour_density[i]);
+        density_h_micro = calc_micro_density(density_dry[i] + water_vapour_density[i], solid_water_density[i] + liquid_water_density[i]);
+        init_state -> entropy_density_gas[i] = density_dry[i]*(C_D_P*log(pot_temperature[i]) + entropy_constant_d) + water_vapour_density[i]*(C_V_P*log(pot_temperature[i]) + M_D/M_V*DELTA_C_V_P*R_h/c_h_v*log(R_h*pot_temperature[i]*density_h_micro/P_0) + entropy_constant_d);
+    }
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         init_state -> velocity_gas[i] = wind[i];
     }
-    free(pot_temp);
-    free(rho);
+    free(pot_temperature);
+    free(density_dry);
     free(wind);
     free(water_vapour_density);
     free(liquid_water_density);

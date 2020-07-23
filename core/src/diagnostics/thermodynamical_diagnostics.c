@@ -16,7 +16,7 @@ h:	humid
 #include <stdio.h>
 #include <stdlib.h>
 
-int pot_temp_diagnostics(Scalar_field temperature, Scalar_field density, Tracer_densities tracer_densities, Scalar_field pot_temp)
+int pot_temp_diagnostics(State *state, Scalar_field pot_temp)
 {
 	/*
 	This is only needed for the output.
@@ -24,12 +24,12 @@ int pot_temp_diagnostics(Scalar_field temperature, Scalar_field density, Tracer_
 	double condensates_density_sum, density_d_micro_value, density_h_micro_value, density_v_micro_value, R_h;
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-    	condensates_density_sum = calc_condensates_density_sum(i, tracer_densities);
-    	density_d_micro_value = calc_micro_density(density[i], condensates_density_sum);
-    	density_v_micro_value = calc_micro_density(tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i], condensates_density_sum);
+    	condensates_density_sum = calc_condensates_density_sum(i, state -> tracer_densities);
+    	density_d_micro_value = calc_micro_density(state -> density_dry[i], condensates_density_sum);
+    	density_v_micro_value = calc_micro_density(state -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i], condensates_density_sum);
 		R_h = gas_constant_diagnostics(density_d_micro_value, density_v_micro_value);
     	density_h_micro_value = density_d_micro_value + density_v_micro_value;
-    	pot_temp[i] = temperature[i]*pow(P_0/(density_h_micro_value*R_h*temperature[i]), R_D/C_D_P);
+    	pot_temp[i] = state -> temp_gas[i]*pow(P_0/(density_h_micro_value*R_h*state -> temp_gas[i]), R_D/C_D_P);
 	}
     return 0;
 }

@@ -78,7 +78,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     codes_handle *handle_rel_vort = NULL;
     codes_handle *handle_rh = NULL;
     codes_handle *handle_cape = NULL;
-	pot_temp_diagnostics(state_write_out -> temp_gas, state_write_out -> density_dry, state_write_out -> tracer_densities, pot_temperature);
+	pot_temp_diagnostics(state_write_out, pot_temperature);
 	calc_rel_vort(state_write_out -> velocity_gas, *rel_vort, grid, dualgrid);
 	int layer_index;
 	double z_height, delta_z, cape_integrand, theta_prime, theta;

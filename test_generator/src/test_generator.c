@@ -123,7 +123,6 @@ int main(int argc, char *argv[])
     char *OUTPUT_FILE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
     sprintf(OUTPUT_FILE, "nc_files/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", TEST_ID, RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
     double *pressure = malloc(NO_OF_SCALARS*sizeof(double));
-    double *pot_temperature = malloc(NO_OF_SCALARS*sizeof(double));
     double *temperature = malloc(NO_OF_SCALARS*sizeof(double));
     double *rho = malloc(NO_OF_SCALARS*sizeof(double));
     double *rel_humidity = malloc(NO_OF_SCALARS*sizeof(double));
@@ -197,7 +196,6 @@ int main(int argc, char *argv[])
     	// at the lowest layer the density is set using the equation of state, can be considered a boundary condition
     	if (layer_index == NO_OF_LAYERS - 1)
     	{
-        	pot_temperature[i] = temperature[i]*pow(P_0/pressure[i], R_D/C_D_P);
         	rho[i] = pressure[i]/(R_D*temperature[i]);
         }
         else
@@ -208,7 +206,6 @@ int main(int argc, char *argv[])
         	delta_gravity_potential = gravity_potential[i] - gravity_potential[i + NO_OF_SCALARS_H];
         	entropy_value = lower_entropy_value + (delta_gravity_potential + C_D_P*delta_temperature)/temperature_mean;
         	pot_temp_value = exp(entropy_value/C_D_P);
-        	pot_temperature[i] = pot_temp_value;
         	pressure_value = P_0*pow(temperature[i]/pot_temp_value, C_D_P/R_D);
         	rho[i] = pressure_value/(R_D*temperature[i]);
         }
@@ -261,16 +258,16 @@ int main(int argc, char *argv[])
     free(direction);
     free(latitude_vector);
     free(longitude_vector);
-    int scalar_dimid, vector_dimid, pot_temp_id, density_dry_id, wind_id, density_vapour_id, density_liquid_id, density_solid_id, temperature_liquid_id, temperature_solid_id, ncid;
+    int scalar_dimid, vector_dimid, temp_id, density_dry_id, wind_id, density_vapour_id, density_liquid_id, density_solid_id, temperature_liquid_id, temperature_solid_id, ncid;
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
         NCERR(retval);
     if ((retval = nc_def_dim(ncid, "scalar_index", NO_OF_SCALARS, &scalar_dimid)))
         NCERR(retval);
     if ((retval = nc_def_dim(ncid, "vector_index", NO_OF_VECTORS, &vector_dimid)))
         NCERR(retval);
-    if ((retval = nc_def_var(ncid, "potential_temperature", NC_DOUBLE, 1, &scalar_dimid, &pot_temp_id)))
+    if ((retval = nc_def_var(ncid, "temperature_gas", NC_DOUBLE, 1, &scalar_dimid, &temp_id)))
         NCERR(retval);
-    if ((retval = nc_put_att_text(ncid, pot_temp_id, "units", strlen("T"), "T")))
+    if ((retval = nc_put_att_text(ncid, temp_id, "units", strlen("K"), "K")))
         NCERR(retval);
     if ((retval = nc_def_var(ncid, "density_dry", NC_DOUBLE, 1, &scalar_dimid, &density_dry_id)))
         NCERR(retval);
@@ -302,7 +299,7 @@ int main(int argc, char *argv[])
         NCERR(retval);
     if ((retval = nc_enddef(ncid)))
         NCERR(retval);
-    if ((retval = nc_put_var_double(ncid, pot_temp_id, &pot_temperature[0])))
+    if ((retval = nc_put_var_double(ncid, temp_id, &temperature[0])))
         NCERR(retval);
     if ((retval = nc_put_var_double(ncid, density_dry_id, &rho[0])))
         NCERR(retval);
@@ -322,7 +319,6 @@ int main(int argc, char *argv[])
     	NCERR(retval);
     free(wind);
     free(pressure);
-    free(pot_temperature);
     free(temperature);
     free(rho);
     free(water_vapour_density);

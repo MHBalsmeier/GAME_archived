@@ -17,7 +17,7 @@ int recov_ver_1_pri(Vector_field, int, int, double *, Grid *);
 double spec_heat_cap_diagnostics_p(double, double);
 double spec_heat_cap_diagnostics_v(double, double);
 double entropy_constant_diagnostics(double, double);
-int pot_temp_diagnostics(Scalar_field, Scalar_field, Tracer_densities, Scalar_field);
+int pot_temp_diagnostics(State *, Scalar_field);
 double gas_constant_diagnostics(double, double);
 double calc_micro_density(double, double);
 double calc_condensates_density_sum(int, Tracer_densities);
