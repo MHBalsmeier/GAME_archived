@@ -163,7 +163,7 @@ int three_band_solver_ver_vel_adv(State *state_0, State *state_p1, State *state_
 	return 0;
 }
 
-int three_band_solver_ver_sound_waves(State *state_0, State *state_p1, State *state_tendency, Diagnostics *diagnostics, Interpolate_info *interpolate, double delta_t, Grid *grid)
+int three_band_solver_ver_sound_waves(State *state_0, State *state_p1, State *state_tendency, Diagnostics *diagnostics, double delta_t, Grid *grid)
 {
 	double *a_vector = malloc((2*NO_OF_LAYERS - 2)*sizeof(double));
 	double *b_vector = malloc((2*NO_OF_LAYERS - 1)*sizeof(double));

@@ -21,7 +21,7 @@ int integrate_entropy_density_gas(State *, State *, Interpolate_info *, State *,
 
 int explicit_momentum_tendencies(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Interpolate_info *interpolation, Diffusion_info *diffusion_info, Config_info *config_info, int no_step_rk)
 {
-	double old_hor_grad_weight = -C_D_V/C_D_P;
+	double old_hor_grad_weight = R_D/C_D_P - 0.5;
 	double new_hor_grad_weight = 1 - old_hor_grad_weight;
 	if (config_info -> totally_first_step_bool == 1)
 	{

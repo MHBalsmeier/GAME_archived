@@ -13,7 +13,7 @@ The vertical advection of horizontal momentum is organized here.
 
 int set_interpolated_temperature(State *state_old, State *state_new, Interpolate_info *interpolate, int totally_first_bool)
 {
-	double old_weight = -C_D_V/C_D_P;
+	double old_weight = R_D/C_D_P - 0.5;
 	double new_weight = 1 - old_weight;
 	if (totally_first_bool == 1)
 	{
