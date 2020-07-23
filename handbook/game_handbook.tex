@@ -117,7 +117,13 @@ The grid generator needs to be recompiled for every specific resolution, top hei
 \end{table}
 \renewcommand{\arraystretch}{1}
 
-Orography files are generated with the code residing in the directory \texttt{orography\_generator/src}. Firstly, change the parameter \texttt{RES\_ID} in the file \texttt{orography\_generator.c} to the desired value and compile. Then source the bash scribt \texttt{run.sh} with the desired \texttt{oro\_id}. Tab. \ref{tab:oro_id_definition} shows the definition of the orography IDs.
+Orography files are generated with the code residing in the directory \texttt{orography\_generator/src}. Firstly, change the parameter \texttt{RES\_ID} in the file \texttt{orography\_generator.c} to the desired value and compile. Then source the bash scribt \texttt{run.sh} with the desired \texttt{oro\_id}. Tab. \ref{tab:oro_id_definition} shows the definition of the orography IDs. Real orography can be downloaded from
+%
+\begin{itemize}
+\item \texttt{https://psl.noaa.gov/cgi-bin/db\_search/DBSearch.pl?Dataset=NCEP+Reanalysis\\\&Variable=Geopotential+height\&group=0\&submit=Search}
+\end{itemize}
+%
+These files are stored in the directory \texttt{orography\_generator/real}. An information file explains them.
 
 \subsection{Generating a new test state file}
 \label{sec:generating_a_new_test_state_file}
