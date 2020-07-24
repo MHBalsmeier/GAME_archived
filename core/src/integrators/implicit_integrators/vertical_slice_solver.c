@@ -4,12 +4,12 @@ Github repository: https://github.com/MHBalsmeier/game
 The vertical advection of horizontal momentum is organized here.
 */
 
-#include "../enum_and_typedefs.h"
+#include "../../enum_and_typedefs.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "../diagnostics/diagnostics.h"
+#include "../../diagnostics/diagnostics.h"
 #include <omp.h>
-#include "../spatial_operators/spatial_operators.h"
+#include "../../spatial_operators/spatial_operators.h"
 #include "atmostracers.h"
 
 int thomas_algorithm(double [], double [], double [], double [], double [], double [], double [], int);

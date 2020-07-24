@@ -15,7 +15,7 @@ The main organizes the model, manages the time stepping, calls model output, col
 #include "io/io.h"
 #include "spatial_operators/spatial_operators.h"
 #include "diagnostics/diagnostics.h"
-#include "time_stepping/time_stepping.h"
+#include "manage_time_stepping/manage_time_stepping.h"
 #include "rte-rrtmgp-c.h"
 #include "geos95.h"
 #include <mpi.h>

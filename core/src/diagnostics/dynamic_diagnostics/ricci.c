@@ -3,9 +3,9 @@ This source file is part of the Global Atmospheric Modeling Framework (GAME), wh
 Github repository: https://github.com/MHBalsmeier/game
 */
 
-#include "../enum_and_typedefs.h"
+#include "../../enum_and_typedefs.h"
 #include <stdio.h>
-#include "diagnostics.h"
+#include "../diagnostics.h"
 
 double inner_elementary(double [], double []);
 

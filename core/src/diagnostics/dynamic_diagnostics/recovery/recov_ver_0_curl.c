@@ -4,7 +4,7 @@ Github repository: https://github.com/MHBalsmeier/game
 This is a recovery function at vertical vector points. The x component of a Curl_field is diagnozed here. If layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS, a vertical interpolation of the input field onto the desired z coordinate must be done.
 */
 
-#include "../../enum_and_typedefs.h"
+#include "../../../enum_and_typedefs.h"
 
 int recov_ver_0_curl(Curl_field in_field, int layer_index, int h_index, double *component, Grid *grid)
 {

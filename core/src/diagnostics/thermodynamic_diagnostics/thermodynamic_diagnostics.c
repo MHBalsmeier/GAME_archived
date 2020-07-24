@@ -10,9 +10,9 @@ v:	water vapour
 h:	humid
 */
 
-#include "../enum_and_typedefs.h"
-#include "../spatial_operators/spatial_operators.h"
-#include "diagnostics.h"
+#include "../../enum_and_typedefs.h"
+#include "../../spatial_operators/spatial_operators.h"
+#include "../diagnostics.h"
 #include <stdio.h>
 #include <stdlib.h>
 

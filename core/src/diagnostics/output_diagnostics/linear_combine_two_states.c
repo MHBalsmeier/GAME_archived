@@ -3,8 +3,8 @@ This source file is part of the Global Atmospheric Modeling Framework (GAME), wh
 Github repository: https://github.com/MHBalsmeier/game
 */
 
-#include "../enum_and_typedefs.h"
-#include "spatial_operators.h"
+#include "../../enum_and_typedefs.h"
+#include "../../spatial_operators/spatial_operators.h"
 #include <stdlib.h>
 #include <stdio.h>
 

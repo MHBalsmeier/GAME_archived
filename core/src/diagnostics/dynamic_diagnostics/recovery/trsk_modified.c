@@ -4,7 +4,7 @@ Github repository: https://github.com/MHBalsmeier/game
 This is a recovery function at horizontal vector points. If layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS, a vertical interpolation of the input field onto the desired z coordinate must be done (not yet implemented).
 */
 
-#include "../../enum_and_typedefs.h"
+#include "../../../enum_and_typedefs.h"
 #include <stdio.h>
 
 int trsk_modified(Vector_field in_field_0, Curl_field in_field_1, int layer_index, int h_index, double *component, Grid *grid)
