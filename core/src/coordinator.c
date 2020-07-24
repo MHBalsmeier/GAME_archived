@@ -97,10 +97,10 @@ int main(int argc, char *argv[])
 	printf("output written in intervals of\t%d s\n", WRITE_OUT_INTERVAL);
 	printf("geo properties file:\t\t%s\n", GEO_PROP_FILE);
 	printf("initialization state file:\t%s\n", INIT_STATE_FILE);
-	printf("Start year: %d\n", year);
-	printf("Start month: %d\n", month);
-	printf("Start day: %d\n", day);
-	printf("Start hour: %d\n", hour);
+	printf("Start year:\t\t\t%d\n", year);
+	printf("Start month:\t\t\t%d\n", month);
+	printf("Start day:\t\t\t%d\n", day);
+	printf("Start hour:\t\t\t%d\n", hour);
 	printf("output directory:\t\t%s\n", OUTPUT_FOLDER);
 	printf("%s", stars);
 	printf("configuration information:\n");

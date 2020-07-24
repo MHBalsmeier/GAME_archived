@@ -23,4 +23,7 @@ year=2000
 month=1
 day=1
 hour=0
+nwp_mode=0
+# necessary only for data assimilation
+ndvar_directory=/home/max/compiled/ndvar
 source core/run.sh

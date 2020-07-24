@@ -3,8 +3,7 @@ operator=MHB
 overwrite_run_id=1
 source run_configs/.sh/determine_latest_synop_time.sh
 run_id=$year$month$day$hour"_nwp"
-echo $run_id
-run_span=259200
+run_span=3600
 write_out_interval=3600
 grid_props_file=grids/B5L26T30000_O3_OL17_SCVT.nc
 init_state_filename=$year$month$day$hour"_nwp_B5L26T30000_O3_OL17_SCVT.nc"
@@ -21,4 +20,7 @@ write_out_entropy_gas_integral=0
 write_out_energy_integral=0
 export OMP_NUM_THREADS=4
 number_of_cpus=1
+nwp_mode=1
+# necessary only for data assimilation
+ndvar_directory=/home/max/compiled/ndvar
 source core/run.sh
