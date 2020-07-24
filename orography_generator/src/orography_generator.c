@@ -40,10 +40,10 @@ int find_z_from_p(double, double, double *);
 
 int main(int argc, char *argv[])
 {	
-	int ORO_ID;
-   	ORO_ID = strtod(argv[1], NULL);
 	int OUTPUT_FILE_LENGTH = 100;
 	char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
+	int ORO_ID;
+   	ORO_ID = strtod(argv[1], NULL);
 	sprintf(OUTPUT_FILE_PRE, "nc_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
 	OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
 	free(OUTPUT_FILE_PRE);
@@ -76,10 +76,55 @@ int main(int argc, char *argv[])
         ERR(retval);
 	if ((retval = nc_close(ncid)))
 	  ERR(retval);
+   	int lat_in_id, lon_in_id, z_in_id;
+   	int no_of_lat_points = 73;
+   	int no_of_lon_points = 144;
+    float *latitude_input = malloc(no_of_lat_points*sizeof(double));
+   	float *longitude_input = malloc(no_of_lon_points*sizeof(double));
+    float (*z_input)[no_of_lon_points] = malloc(sizeof(float[no_of_lat_points][no_of_lon_points]));
+	if (ORO_ID == 3)
+	{
+		int INPUT_FILE_LENGTH = 100;
+		char *INPUT_FILE_PRE = malloc((INPUT_FILE_LENGTH + 1)*sizeof(char));
+		sprintf(INPUT_FILE_PRE, "real/hgt.sfc.nc");
+		INPUT_FILE_LENGTH = strlen(INPUT_FILE_PRE);
+		free(INPUT_FILE_PRE);
+		char *INPUT_FILE = malloc((INPUT_FILE_LENGTH + 1)*sizeof(char));
+		sprintf(INPUT_FILE, "real/hgt.sfc.nc");
+		if ((retval = nc_open(INPUT_FILE, NC_NOWRITE, &ncid)))
+		    ERR(retval);
+		free(INPUT_FILE);
+		if ((retval = nc_inq_varid(ncid, "lat", &lat_in_id)))
+		    ERR(retval);
+		if ((retval = nc_inq_varid(ncid, "lon", &lon_in_id)))
+		    ERR(retval);
+		if ((retval = nc_inq_varid(ncid, "hgt", &z_in_id)))
+		    ERR(retval);
+		if ((retval = nc_get_var_float(ncid, lat_in_id, &latitude_input[0])))
+		    ERR(retval);
+		if ((retval = nc_get_var_float(ncid, lon_in_id, &longitude_input[0])))
+		    ERR(retval);
+		if ((retval = nc_get_var_float(ncid, z_in_id, &z_input[0][0])))
+		    ERR(retval);
+		if ((retval = nc_close(ncid)))
+		  ERR(retval);
+	}
+    double *z_in_vector = malloc(no_of_lat_points*no_of_lon_points*sizeof(double));
+    int lat_index, lon_index;
+    for (int i = 0; i < no_of_lat_points*no_of_lon_points; ++i)
+    {
+    	lat_index = i/no_of_lon_points;
+    	lon_index = i - lat_index*no_of_lon_points;
+    	z_in_vector[i] = z_input[lat_index][lon_index];
+    }
+    double *distance_vector = malloc(no_of_lat_points*no_of_lon_points*sizeof(double));
+    int min_index;
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-	{	
+	{
 		if (ORO_ID == 0)
+		{
 			oro[i] = 0;
+		}
 		if (ORO_ID == 1)
 		{
             distance = calculate_distance_h(latitude_scalar[i], longitude_scalar[i], 0, 0, RADIUS);
@@ -90,7 +135,26 @@ int main(int argc, char *argv[])
 			latitude = latitude_scalar[i];
 			find_z_from_p(latitude, P_0, &oro[i]);
 		}
+		if (ORO_ID == 3)
+		{
+			for (int j = 0; j < no_of_lat_points*no_of_lon_points; ++j)
+			{
+				lat_index = j/no_of_lon_points;
+				lon_index = j - lat_index*no_of_lon_points;
+				distance_vector[j] = calculate_distance_h(deg2rad(latitude_input[lat_index]), deg2rad(longitude_input[lon_index]), deg2rad(latitude_scalar[i]), deg2rad(longitude_scalar[i]), 1);
+				
+			}
+			min_index = find_min_index(distance_vector, no_of_lat_points*no_of_lon_points);
+			oro[i] = z_in_vector[min_index];
+			if (oro[i] < -600 || oro[i] > 5700)
+				printf("Warning: value out of usual range.\n");		
+		}
 	}
+	free(z_in_vector);
+	free(distance_vector);
+	free(z_input);
+	free(latitude_input);
+	free(longitude_input);
 	free(latitude_scalar);
 	free(longitude_scalar);
 	if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
