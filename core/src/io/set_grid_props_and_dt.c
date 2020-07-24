@@ -239,7 +239,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         if (grid -> area[i] <= 0)
             grid_check_failed();
         grid -> z_vector[i] = z_vector[i];
-        if (grid -> z_vector[i] < -400)
+        if (grid -> z_vector[i] < -600)
             grid_check_failed();
         grid -> gravity_m[i] = 0;
     }

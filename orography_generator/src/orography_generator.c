@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 			{
 				lat_index = j/no_of_lon_points;
 				lon_index = j - lat_index*no_of_lon_points;
-				distance_vector[j] = calculate_distance_h(deg2rad(latitude_input[lat_index]), deg2rad(longitude_input[lon_index]), deg2rad(latitude_scalar[i]), deg2rad(longitude_scalar[i]), 1);
+				distance_vector[j] = calculate_distance_h(deg2rad(latitude_input[lat_index]), deg2rad(longitude_input[lon_index]), latitude_scalar[i], longitude_scalar[i], 1);
 				
 			}
 			min_index = find_min_index(distance_vector, no_of_lat_points*no_of_lon_points);
