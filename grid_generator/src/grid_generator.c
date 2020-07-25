@@ -114,10 +114,7 @@ int main(int argc, char *argv[])
     double *trsk_modified_weights = calloc(10*NO_OF_VECTORS_H, sizeof(double));
     double *recov_hor_par_curl_weight = malloc(2*NO_OF_VECTORS_H*sizeof(double));
     double *recov_hor_ver_curl_weight = malloc(2*NO_OF_VECTORS_H*sizeof(double));
-    double *recov_ver_0_pri_weight = malloc(6*NO_OF_VECTORS_V*sizeof(double));
-    double *recov_ver_1_pri_weight = malloc(6*NO_OF_VECTORS_V*sizeof(double));
-    double *recov_ver_0_curl_weight = malloc(6*NO_OF_VECTORS_V*sizeof(double));
-    double *recov_ver_1_curl_weight = malloc(6*NO_OF_VECTORS_V*sizeof(double));
+    double *recov_ver_weight = malloc(6*NO_OF_VECTORS_V*sizeof(double));
     double *latitude_scalar_dual = malloc(NO_OF_DUAL_SCALARS_H*sizeof(double));
     double *longitude_scalar_dual = malloc(NO_OF_DUAL_SCALARS_H*sizeof(double));
     double *z_scalar_dual = malloc(NO_OF_DUAL_SCALARS*sizeof(double));
@@ -238,7 +235,7 @@ int main(int argc, char *argv[])
     // more advanced stuff: tangential vector reconstruction and kinetic energy
     printf("Calculating kinetic energy indices and weights ... ");
 	retval = calc_kinetic_energy(latitude_scalar, longitude_scalar, e_kin_indices, e_kin_weights, volume, adjacent_vector_indices_dual_h, to_index, from_index, area_dual_pre, area, z_scalar, z_vector, adjacent_vector_indices_h, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, to_index_dual, from_index_dual, z_vector_dual);
-    retval = set_recov_ver(recov_ver_index, adjacent_vector_indices_h, recov_ver_0_pri_weight, direction, recov_ver_0_curl_weight, direction_dual, recov_ver_1_pri_weight, recov_ver_1_curl_weight);
+    set_recov_ver(recov_ver_index, adjacent_vector_indices_h, direction, direction_dual, latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, from_index_dual, to_index_dual, pent_hex_face_unity_sphere, recov_ver_weight, ORTH_CRITERION_DEG);
     printf(GREEN "finished.\n" RESET);
     // modified TRSK
     printf("Calculating Coriolis indices and weights ... ");
@@ -264,7 +261,7 @@ int main(int argc, char *argv[])
     area_min = pent_hex_face_unity_sphere[find_min_index(pent_hex_face_unity_sphere, NO_OF_VECTORS_V)];
     free(pent_hex_face_unity_sphere);
     printf("Ratio of minimum to maximum area: %lf\n", area_min/area_max);
-    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_curl_weight_id, recov_hor_ver_curl_weight_id, trsk_modified_weights_id, recov_ver_0_pri_weight_id, recov_ver_0_curl_weight_id, recov_ver_1_pri_weight_id, recov_ver_1_curl_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_curl_index_id, recov_hor_ver_curl_index_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, recov_ver_index_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vector_curl_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, gravity_potential_id, vertical_contravar_unit_id, vertical_contravar_unit_dimid, adjacent_vector_indices_dual_h_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_6_dimid, e_kin_indices_id;
+    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_curl_weight_id, recov_hor_ver_curl_weight_id, trsk_modified_weights_id, recov_ver_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_curl_index_id, recov_hor_ver_curl_index_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, recov_ver_index_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vector_curl_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, gravity_potential_id, adjacent_vector_indices_dual_h_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_6_dimid, e_kin_indices_id;
     printf("Starting to write to output file ... ");
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NO_OF_SCALARS, &scalar_dimid)))
         ERR(retval);
@@ -292,8 +289,6 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_v_6_index", 6*NO_OF_VECTORS_V, &vector_v_dimid_6)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_contravar_unit_index", 3*NO_OF_VECTORS_V*(NO_OF_ORO_LAYERS + 1), &vertical_contravar_unit_dimid)))
-        ERR(retval);        
     if ((retval = nc_def_dim(ncid_g_prop, "vector_index_h_dual", NO_OF_VECTORS_H, &vector_dual_h_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_curl_one_layer_dimid", 2*NO_OF_VECTORS_H, &vector_curl_one_layer_dimid)))
@@ -321,8 +316,6 @@ int main(int argc, char *argv[])
     if ((retval = nc_def_var(ncid_g_prop, "gravity_potential", NC_DOUBLE, 1, &scalar_dimid, &gravity_potential_id)))
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, gravity_potential_id, "units", strlen("m^2/s^2"), "m^2/s^2")))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "vertical_contravar_unit", NC_DOUBLE, 1, &vertical_contravar_unit_dimid, &vertical_contravar_unit_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "z_surface", NC_DOUBLE, 1, &scalar_h_dimid, &z_surface_id)))
         ERR(retval);
@@ -354,13 +347,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "trsk_modified_weights", NC_DOUBLE, 1, &vector_h_dimid_10, &trsk_modified_weights_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_curl_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_0_curl_weight_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_0_pri_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_0_pri_weight_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_pri_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_1_pri_weight_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_1_curl_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_1_curl_weight_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "recov_ver_weight", NC_DOUBLE, 1, &vector_v_dimid_6, &recov_ver_weight_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "z_vector_dual", NC_DOUBLE, 1, &vector_dual_dimid, &z_vector_dual_id)))
         ERR(retval);
@@ -432,8 +419,6 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, gravity_potential_id, &gravity_potential[0])))
         ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, vertical_contravar_unit_id, &vertical_contravar_unit[0])))
-        ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, z_surface_id, &z_surface[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, z_vector_id, &z_vector[0])))
@@ -454,13 +439,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, trsk_modified_weights_id, &trsk_modified_weights[0])))
         ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, recov_ver_0_pri_weight_id, &recov_ver_0_pri_weight[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, recov_ver_0_curl_weight_id, &recov_ver_0_curl_weight[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, recov_ver_1_pri_weight_id, &recov_ver_1_pri_weight[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, recov_ver_1_curl_weight_id, &recov_ver_1_curl_weight[0])))
+    if ((retval = nc_put_var_double(ncid_g_prop, recov_ver_weight_id, &recov_ver_weight[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, z_vector_dual_id, &z_vector_dual[0])))
         ERR(retval);
@@ -515,7 +494,6 @@ int main(int argc, char *argv[])
     free(e_kin_weights);
     free(e_kin_indices);
     free(adjacent_vector_indices_dual_h);
-    free(vertical_contravar_unit);
     free(gravity_potential);
     free(adjacent_scalar_indices_dual_h);
     free(latitude_vector);
@@ -532,10 +510,7 @@ int main(int argc, char *argv[])
     free(recov_hor_par_curl_weight);
     free(recov_hor_ver_curl_weight);
     free(trsk_modified_weights);
-    free(recov_ver_0_pri_weight);
-    free(recov_ver_0_curl_weight);
-    free(recov_ver_1_pri_weight);
-    free(recov_ver_1_curl_weight);
+    free(recov_ver_weight);
     free(latitude_scalar_dual);
     free(longitude_scalar_dual);
     free(z_scalar_dual);

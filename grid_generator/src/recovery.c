@@ -190,7 +190,7 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 				sum_of_weights = sum_of_weights/area[from_or_to_index[i]];
 				trsk_modified_weights[10*i + k] = sign_0*(sum_of_weights - 0.5)*sign_1;
 			}
-			trsk_modified_weights[10*i + k] = -normal_distance_dual[trsk_modified_velocity_indices[10*i + k]]/normal_distance[NO_OF_VECTORS_V + i]*trsk_modified_weights[10*i + k];
+			trsk_modified_weights[10*i + k] = -normal_distance_dual[trsk_modified_velocity_indices[10*i + k]]/normal_distance[NO_OF_SCALARS_H + i]*trsk_modified_weights[10*i + k];
 		}
 		// modification following Gassmann (2018)
 		if (to_index[i] < NO_OF_PENTAGONS)
@@ -256,7 +256,7 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 	{
 		for (int j = 0; j < 10; ++j)
 		{
-			value_0 = normal_distance[NO_OF_VECTORS_V + i]/normal_distance_dual[trsk_modified_velocity_indices[10*i + j]]*trsk_modified_weights[10*i + j];
+			value_0 = normal_distance[NO_OF_SCALARS_H + i]/normal_distance_dual[trsk_modified_velocity_indices[10*i + j]]*trsk_modified_weights[10*i + j];
 			if (trsk_modified_velocity_indices[10*i + j] != 0 || (trsk_modified_velocity_indices[10*i + j] == 0 && trsk_modified_weights[10*i + j] != 0))
 			{
 				second_index = -1;			
@@ -270,7 +270,7 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 					printf("Problem 38 in TRSK implementation detected.\n");
 					exit(1);
 				}
-				value_1 = normal_distance[NO_OF_VECTORS_V + trsk_modified_velocity_indices[10*i + j]]/normal_distance_dual[i]*trsk_modified_weights[10*trsk_modified_velocity_indices[10*i + j] + second_index];
+				value_1 = normal_distance[NO_OF_SCALARS_H + trsk_modified_velocity_indices[10*i + j]]/normal_distance_dual[i]*trsk_modified_weights[10*trsk_modified_velocity_indices[10*i + j] + second_index];
 				check_sum = value_0 + value_1;
 				if (fabs(check_sum) > 0.001)
 				{
@@ -286,34 +286,38 @@ int calc_coriolis_weights(int recov_hor_ver_curl_index[], int from_index_dual[],
 	return 0;
 }
 
-int set_recov_ver(int recov_ver_index[], int adjacent_vector_indices_h[], double recov_ver_0_pri_weight[], double direction[], double recov_ver_0_curl_weight[], double direction_dual[], double recov_ver_1_pri_weight[], double recov_ver_1_curl_weight[])
+int set_recov_ver(int recov_ver_index[], int adjacent_vector_indices_h[], double direction[], double direction_dual[], double latitude_scalar[], double longitude_scalar[], double latitude_scalar_dual[], double longitude_scalar_dual[], int from_index_dual[], int to_index_dual[], double pent_hex_face_unity_sphere[], double recov_ver_weight[], double ORTH_CRITERION_DEG)
 {
-	int NO_OF_edges;
-	double weight_prefactor;
-	for (int i = 0; i < NO_OF_VECTORS_V; ++i)
+	int no_of_edges, sign;
+	double triangle_area, check_sum, direction_change;
+	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
-		NO_OF_edges = 6;
-		weight_prefactor = 2.0/6.0;
+		no_of_edges = 6;
 		if (i < NO_OF_PENTAGONS)
 		{
-			NO_OF_edges = 5;
-		    weight_prefactor = 2.0/5.0;
+			no_of_edges = 5;
 	    }
-		for (int j = 0; j < NO_OF_edges; ++j)
+	    check_sum = 0;
+		for (int j = 0; j < no_of_edges; ++j)
 		{
 		    recov_ver_index[6*i + j] = adjacent_vector_indices_h[6*i + j];
-		    recov_ver_0_pri_weight[6*i + j] = weight_prefactor*cos(direction[recov_ver_index[6*i + j]]);
-		    recov_ver_0_curl_weight[6*i + j] = weight_prefactor*cos(direction_dual[recov_ver_index[6*i + j]]);
-		    recov_ver_1_pri_weight[6*i + j] = weight_prefactor*sin(direction[recov_ver_index[6*i + j]]);
-		    recov_ver_1_curl_weight[6*i + j] = weight_prefactor*sin(direction_dual[recov_ver_index[6*i + j]]);
+			calc_triangle_face(latitude_scalar[i], longitude_scalar[i], latitude_scalar_dual[from_index_dual[recov_ver_index[6*i + j]]], longitude_scalar_dual[from_index_dual[recov_ver_index[6*i + j]]], latitude_scalar_dual[to_index_dual[recov_ver_index[6*i + j]]], longitude_scalar_dual[to_index_dual[recov_ver_index[6*i + j]]], &triangle_area);
+			sign = 1;
+            find_angle_change(direction[i], direction_dual[i], &direction_change);
+            if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
+                sign = -1;
+		    recov_ver_weight[6*i + j] = 2*sign*triangle_area/pent_hex_face_unity_sphere[i];
+		    check_sum += fabs(recov_ver_weight[6*i + j]);
 		}
-		if (NO_OF_edges == 5)
+		if (fabs(check_sum - 2) > 1e-10)
+		{
+			printf("Problem with recov_ver_weight.\n");
+			exit(1);
+		}
+		if (no_of_edges == 5)
 		{
 		    recov_ver_index[6*i + 5] = 0;
-		    recov_ver_0_pri_weight[6*i + 5] = 0;
-		    recov_ver_1_pri_weight[6*i + 5] = 0;
-		    recov_ver_0_curl_weight[6*i + 5] = 0;
-		    recov_ver_1_curl_weight[6*i + 5] = 0;
+		    recov_ver_weight[6*i + 5] = 0;
 		}
 	}
 	return 0;

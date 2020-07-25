@@ -25,7 +25,7 @@ int set_f_vec(double [], double [], double [], double []);
 int set_orography(int, int, double []);
 int calc_cell_face_unity(double [], double [], double [], int [], int []);
 int calculate_vertical_faces(double [], double [], double [], double);
-int set_recov_ver(int [], int [], double [], double [], double [], double [], double [], double []);
+int set_recov_ver(int [], int [], double [], double [], double [], double [], double [], double [], int [], int [], double [], double [], double);
 int calc_triangle_face_unity(double [], double [], double [], int [][3], int [][3], int [][3], int [][2]);
 int set_vector_h_doubles(int [], int [], double [], double [], double [], double [], double []);
 int set_from_to_index(int [], int [], int [][3], int [][3], int [][3], int [][2]);
