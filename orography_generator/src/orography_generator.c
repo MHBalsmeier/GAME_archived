@@ -118,7 +118,9 @@ int main(int argc, char *argv[])
     	z_in_vector[i] = z_input[lat_index][lon_index];
     }
     double *distance_vector = malloc(no_of_lat_points*no_of_lon_points*sizeof(double));
-    int min_index;
+    int min_indices_vector[4];
+    double weights_vector[4];
+    double weights_sum;
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		if (ORO_ID == 0)
@@ -144,8 +146,22 @@ int main(int argc, char *argv[])
 				distance_vector[j] = calculate_distance_h(deg2rad(latitude_input[lat_index]), deg2rad(longitude_input[lon_index]), latitude_scalar[i], longitude_scalar[i], 1);
 				
 			}
-			min_index = find_min_index(distance_vector, no_of_lat_points*no_of_lon_points);
-			oro[i] = z_in_vector[min_index];
+			for (int j = 0; j < 4; ++j)
+			{
+				min_indices_vector[j] = -1;
+			}
+			weights_sum = 0;
+			for (int j = 0; j < 4; ++j)
+			{
+				min_indices_vector[j] = find_min_index_exclude(distance_vector, no_of_lat_points*no_of_lon_points, min_indices_vector, 4);
+				weights_vector[j] = 1/(distance_vector[min_indices_vector[j]] + 0.01);
+				weights_sum += weights_vector[j];
+			}
+			oro[i] = 0;
+			for (int j = 0; j < 4; ++j)
+			{
+				oro[i] += z_in_vector[min_indices_vector[j]]*weights_vector[j]/weights_sum;
+			}
 			if (oro[i] < -600 || oro[i] > 5700)
 				printf("Warning: value out of usual range.\n");		
 		}

@@ -91,7 +91,6 @@ Scalar_field gravity_potential;
 Vector_field gravity_m;
 int e_kin_indices[6*NO_OF_SCALARS];
 double e_kin_weights[6*NO_OF_SCALARS];
-double vertical_contravar_unit[3*NO_OF_SCALARS_H*(NO_OF_ORO_LAYERS + 1)];
 int from_index[NO_OF_VECTORS_H];
 int to_index[NO_OF_VECTORS_H];
 double direction[NO_OF_VECTORS_H];
@@ -101,10 +100,7 @@ int trsk_modified_velocity_indices[10*NO_OF_VECTORS_H];
 int trsk_modified_curl_indices[10*NO_OF_VECTORS_H];
 double trsk_modified_weights[10*NO_OF_VECTORS_H];
 int recov_ver_index[6*NO_OF_SCALARS_H];
-double recov_ver_0_pri_weight[6*NO_OF_SCALARS_H];
-double recov_ver_0_curl_weight[6*NO_OF_SCALARS_H];
-double recov_ver_1_pri_weight[6*NO_OF_SCALARS_H];
-double recov_ver_1_curl_weight[6*NO_OF_SCALARS_H];
+double recov_ver_weight[6*NO_OF_SCALARS_H];
 } Grid;
 
 // Contains properties of the dual grid.
