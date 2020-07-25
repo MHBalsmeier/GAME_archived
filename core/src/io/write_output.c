@@ -105,7 +105,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				temp_surface = temp_lowest_layer + standard_vert_lapse_rate*(grid -> z_scalar[j + i*NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + j]);
                 surface_p_factor = pow(1 - (temp_surface - temp_lowest_layer)/temp_surface, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
 				surface_p[j] = pressure_value/surface_p_factor;
-				surface_p[j] = grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + j];
 				// Now the aim is to calculate the 2 m temperature.
                 delta_z_temp = 2 - grid -> z_scalar[j + i*NO_OF_SCALARS_H];
                 temp_upper = state_write_out -> temp_gas[(i - 1)*NO_OF_SCALARS_H + j];

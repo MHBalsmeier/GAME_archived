@@ -22,13 +22,10 @@ src/spatial_operators/gradient_operators.c
 src/spatial_operators/
 src/spatial_operators/kinetic_energy.c
 src/diagnostics/thermodynamic_diagnostics/thermodynamic_diagnostics.c
-src/diagnostics/dynamic_diagnostics/recovery/recov_hor_par_pri.c
-src/diagnostics/dynamic_diagnostics/recovery/recov_hor_ver_pri.c
-src/diagnostics/dynamic_diagnostics/recovery/recov_ver_0_curl.c
-src/diagnostics/dynamic_diagnostics/recovery/recov_ver_0_pri.c
-src/diagnostics/dynamic_diagnostics/recovery/recov_ver_1_curl.c
-src/diagnostics/dynamic_diagnostics/recovery/recov_ver_1_pri.c
+src/diagnostics/dynamic_diagnostics/recovery/vertical_coriolis_gen.c
 src/diagnostics/dynamic_diagnostics/recovery/trsk_modified.c
+src/diagnostics/dynamic_diagnostics/recovery/recov_hor_ver_pri.c
+src/diagnostics/dynamic_diagnostics/recovery/recov_hor_par_pri.c
 src/diagnostics/dynamic_diagnostics/ricci.c
 src/diagnostics/dynamic_diagnostics/lower_boundary_solver.c
 src/diagnostics/turbulence_diagnostics/diffusion_diagnostics.c

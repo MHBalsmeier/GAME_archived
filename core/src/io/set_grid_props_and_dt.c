@@ -252,7 +252,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         for (int j = 0; j < 6; ++j)
         {
             grid -> recov_ver_index[6*i + j] = recov_ver_index[6*i + j];
-            if (grid -> recov_ver_index[6*i + j] >= 2*NO_OF_VECTORS_H + NO_OF_SCALARS_H || grid -> recov_ver_index[6*i + j] < 0)
+            if (grid -> recov_ver_index[6*i + j] >= NO_OF_VECTORS_H || grid -> recov_ver_index[6*i + j] < 0)
                 grid_check_failed();
             grid -> recov_ver_weight[6*i + j] = recov_ver_weight[6*i + j];
             if (fabs(grid -> recov_ver_weight[6*i + j]) >= 1.0001)
