@@ -20,5 +20,5 @@ cmake -DCMAKE_INSTALL_PREFIX=$aim_dir ../core
 make
 ctest
 make install
-chmod +x $aim_dir/run.sh
+chmod +x $aim_dir/core/run.sh
 cd ..

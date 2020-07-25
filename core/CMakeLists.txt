@@ -3,7 +3,6 @@ project(core VERSION 0.0)
 set(CMAKE_C_COMPILER mpicc)
 add_executable(
 game src/coordinator.c
-src/manage_time_stepping/lower_boundary_solver.c
 src/manage_time_stepping/manage_time_stepping.c
 src/manage_time_stepping/manage_interpolation.c
 src/integrators/explicit_integrators/forward_tendencies.c
@@ -31,6 +30,7 @@ src/diagnostics/dynamic_diagnostics/recovery/recov_ver_1_curl.c
 src/diagnostics/dynamic_diagnostics/recovery/recov_ver_1_pri.c
 src/diagnostics/dynamic_diagnostics/recovery/trsk_modified.c
 src/diagnostics/dynamic_diagnostics/ricci.c
+src/diagnostics/dynamic_diagnostics/lower_boundary_solver.c
 src/diagnostics/turbulence_diagnostics/diffusion_diagnostics.c
 src/diagnostics/output_diagnostics/global_scalar_integral.c
 src/diagnostics/output_diagnostics/linear_combine_two_states.c

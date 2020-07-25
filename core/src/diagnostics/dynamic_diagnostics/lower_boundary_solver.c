@@ -3,8 +3,8 @@ This source file is part of the Global Atmospheric Modeling Framework (GAME), wh
 Github repository: https://github.com/MHBalsmeier/game
 */
 
-#include "../enum_and_typedefs.h"
-#include "../diagnostics/diagnostics.h"
+#include "../../enum_and_typedefs.h"
+#include "../diagnostics.h"
 #include <stdio.h>
 #include <stdlib.h>
 
