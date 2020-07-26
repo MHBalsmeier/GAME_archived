@@ -33,8 +33,6 @@ int set_scalar_h_dual_coords(double [], double [], double [], double [], int [][
 int set_z_scalar_dual(double [], double [], int [], int [], int [], double [], double);
 int set_volume(double [], double [], double [], double [], int [], int [], double, double [], int []);
 int calc_adjacent_vector_indices_h(int [], int [], int [], int []);
-int calc_vertical_contravar_unit(double [], double [], int [], double [], double [], double [], int [], int [], double []);
-int rescale_area(double [], double []);
 int rescale_area_dual(double [], double [], int [], int [], double [], double []);
 int set_horizontal_curl_indices(double [], double [], int [], int [], int [], double, int []);
 int set_vorticity_indices(int [], int [], int [], int [], int [], int []);
@@ -50,6 +48,7 @@ int calc_z_vector_dual_and_normal_distance_dual(double [], double [], double [],
 int calc_area_dual_pre(double [], double [], double [], double [], int [], int [], double [], double [], double);
 int optimize_to_scvt(double [], double [], double [], double [], int, int [][3], int [][3], int [][3], int [][2], int [], int [], int []);
 int read_horizontal_generators(double [], double [], char []);
+int calc_tangential_coordinate_slopes(double [], int [], int [], double [], double []);
 
 
 

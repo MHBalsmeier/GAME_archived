@@ -175,118 +175,6 @@ int set_volume(double volume[], double z_scalar_dual[], double z_vector[], doubl
 	return 0;
 }
 
-int calc_vertical_contravar_unit(double latitude_scalar[], double longitude_scalar[], int adjacent_vector_indices_h[], double vertical_contravar_unit[], double direction_dual[], double normal_distance_dual[], int from_index_dual[], int to_index_dual[], double z_scalar_dual[])
-{
-	int NO_OF_edges, layer_index, dual_vector_index;
-    double x_value, y_value, z_value, normal_vector_global[3], local_basis_vector[3], local_x, local_y, local_z, tilting_angle, delta_x, delta_z, abs_value;
-    for (int i = 0; i < NO_OF_ORO_LAYERS + 1; ++i)
-    {
-    	for (int j = 0; j < NO_OF_VECTORS_V; ++j)
-    	{
-    		if (j < NO_OF_PENTAGONS)
-    		{
-    			NO_OF_edges = 5;
-			}
-    		else
-    		{
-    			NO_OF_edges = 6;
-			}
-			normal_vector_global[0] = 0;
-			normal_vector_global[1] = 0;
-			normal_vector_global[2] = 0;
-    		for (int k = 0; k < NO_OF_edges; ++k)
-    		{
-    			layer_index = i + NO_OF_LAYERS - NO_OF_ORO_LAYERS;
-    			dual_vector_index = layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*j + k];
-    			delta_x = normal_distance_dual[dual_vector_index];
-    			delta_z = z_scalar_dual[layer_index*NO_OF_DUAL_SCALARS_H + to_index_dual[adjacent_vector_indices_h[6*j + k]]] - z_scalar_dual[layer_index*NO_OF_DUAL_SCALARS_H + from_index_dual[adjacent_vector_indices_h[6*j + k]]];
-    			tilting_angle = atan(delta_z/delta_x);
-    			local_x = -sin(tilting_angle)*cos(direction_dual[adjacent_vector_indices_h[6*j + k]]);
-    			local_y = -sin(tilting_angle)*sin(direction_dual[adjacent_vector_indices_h[6*j + k]]);
-    			local_z = cos(tilting_angle);	
-    			abs_value = sqrt(pow(local_x, 2) + pow(local_y, 2) + pow(local_z, 2));
-    			local_x = local_x/abs_value;
-    			local_y = local_y/abs_value;
-    			local_z = local_z/abs_value;
-    			calc_local_i(latitude_scalar[j], longitude_scalar[j], local_basis_vector);
-    			normal_vector_global[0] += local_x*local_basis_vector[0];
-    			normal_vector_global[1] += local_x*local_basis_vector[1];
-    			normal_vector_global[2] += local_x*local_basis_vector[2];
-    			calc_local_j(latitude_scalar[j], longitude_scalar[j], local_basis_vector);
-    			normal_vector_global[0] += local_y*local_basis_vector[0];
-    			normal_vector_global[1] += local_y*local_basis_vector[1];
-    			normal_vector_global[2] += local_y*local_basis_vector[2];
-    			calc_local_k(latitude_scalar[j], longitude_scalar[j], local_basis_vector);
-    			normal_vector_global[0] += local_z*local_basis_vector[0];
-    			normal_vector_global[1] += local_z*local_basis_vector[1];
-    			normal_vector_global[2] += local_z*local_basis_vector[2];
-    		}
-    		abs_value = sqrt(scalar_product_elementary(normal_vector_global, normal_vector_global));
-    		normal_vector_global[0] = normal_vector_global[0]/abs_value;
-    		normal_vector_global[1] = normal_vector_global[1]/abs_value;
-    		normal_vector_global[2] = normal_vector_global[2]/abs_value;
-    		calc_local_i(latitude_scalar[j], longitude_scalar[j], local_basis_vector);
-    		x_value = scalar_product_elementary(normal_vector_global, local_basis_vector);
-    		calc_local_j(latitude_scalar[j], longitude_scalar[j], local_basis_vector);
-    		y_value = scalar_product_elementary(normal_vector_global, local_basis_vector);
-    		calc_local_k(latitude_scalar[j], longitude_scalar[j], local_basis_vector);
-    		z_value = scalar_product_elementary(normal_vector_global, local_basis_vector);
-    		for (int k = 0; k < 3; ++k)
-    		{
-    			if (k == 0)
-    			{
-    				vertical_contravar_unit[i*3*NO_OF_VECTORS_V + 3*j + k] = x_value;
-				}
-    			if (k == 1)
-    			{
-    				vertical_contravar_unit[i*3*NO_OF_VECTORS_V + 3*j + k] = y_value;
-				}
-    			if (k == 2)
-    			{
-    				vertical_contravar_unit[i*3*NO_OF_VECTORS_V + 3*j + k] = z_value;
-				}
-				if (fabs(vertical_contravar_unit[i*3*NO_OF_VECTORS_V + 3*j + k]) > 1.000001)
-				{
-				    printf("fabs(vertical_contravar_unit) > 1 at some point.\n");
-					exit(1);
-				}
-			}
-    	}
-    }
-    return 0;
-}
-
-int rescale_area(double area[], double vertical_contravar_unit[])
-{
-    double area_rescale_factor, dz, dh, tilting_angle;
-	double area_rescale_factor_warning_begin = 0.1;
-	int contravar_unit_vector_index, layer_index, h_index;
-    for (int i = 0; i < NO_OF_VECTORS; ++i)
-    {
-    	layer_index = i/NO_OF_VECTORS_PER_LAYER;
-    	h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-    	if (h_index < NO_OF_VECTORS_V && layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
-    	{
-    		contravar_unit_vector_index = h_index + (layer_index - (NO_OF_LAYERS - NO_OF_ORO_LAYERS))*NO_OF_VECTORS_V;
-    		dz = vertical_contravar_unit[3*contravar_unit_vector_index + 2];
-    		if (dz <= 0)
-    			printf("Error in horizontal face orography rescale calculation, position 0.\n");
-    		dh = sqrt(pow(vertical_contravar_unit[3*contravar_unit_vector_index + 0], 2) + pow(vertical_contravar_unit[3*contravar_unit_vector_index + 1], 2));
-    		tilting_angle = atan(dh/dz);
-    		area_rescale_factor = sqrt(1 + pow(tan(tilting_angle), 2));
-    		area[i] = area_rescale_factor*area[i];
-    		if (fabs(area_rescale_factor - 1) > area_rescale_factor_warning_begin)
-    			printf("It is area_rescale_factor > area_rescale_factor_warning_begin at some point.\n");
-    		if (area[i] <= 0)
-    		{
-    			printf("It is area <= 0 at some point, position 1.\n");
-    			exit(1);
-    		}
-    	}
-    }
-	return 0;
-}
-
 int rescale_area_dual(double area_dual[], double z_vector[], int from_index_dual[], int to_index_dual[], double area_dual_pre[], double z_vector_dual[])
 {
 	int layer_index, h_index, primal_vector_index, dual_vector_index;
@@ -573,6 +461,43 @@ int calc_area_dual_pre(double area_dual_pre[], double z_vector_dual[], double no
     }
     return 0;
 }
+
+int calc_tangential_coordinate_slopes(double z_vector_dual[], int from_index_dual[], int to_index_dual[], double normal_distance_dual[], double tangential_coord_gradient[])
+{
+	int layer_index, h_index;
+	double delta_x_pre, delta_x_rescale_factor, delta_x, delta_z;
+	for (int i = 0; i < NO_OF_VECTORS; ++i)
+	{
+		layer_index = i/NO_OF_VECTORS_PER_LAYER;
+		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
+		if (h_index < NO_OF_SCALARS_H)
+		{
+			tangential_coord_gradient[i] = 0;
+		}
+		else
+		{
+			delta_x_pre = normal_distance_dual[(layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H];
+			delta_x_rescale_factor = (RADIUS + z_vector_dual[i])/(RADIUS + z_vector_dual[(layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H]);
+			delta_x = delta_x_rescale_factor*delta_x_pre;
+			delta_z = z_vector_dual[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + NO_OF_VECTORS_H + to_index_dual[h_index - NO_OF_SCALARS_H]] - z_vector_dual[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + NO_OF_VECTORS_H + from_index_dual[h_index - NO_OF_SCALARS_H]];
+			tangential_coord_gradient[i] = delta_z/delta_x;
+			if (fabs(tangential_coord_gradient[i]) > 1)
+			{
+				printf("Problem in calc_tangential_coordinate_slopes.\n");
+				exit(1);
+			}
+		}
+	}
+	return 0;
+}
+
+
+
+
+
+
+
+
 
 
 

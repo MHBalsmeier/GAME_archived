@@ -303,7 +303,7 @@ int set_recov_ver(int recov_ver_index[], int adjacent_vector_indices_h[], double
 		    recov_ver_index[6*i + j] = adjacent_vector_indices_h[6*i + j];
 			calc_triangle_face(latitude_scalar[i], longitude_scalar[i], latitude_scalar_dual[from_index_dual[recov_ver_index[6*i + j]]], longitude_scalar_dual[from_index_dual[recov_ver_index[6*i + j]]], latitude_scalar_dual[to_index_dual[recov_ver_index[6*i + j]]], longitude_scalar_dual[to_index_dual[recov_ver_index[6*i + j]]], &triangle_area);
 			sign = 1;
-            find_angle_change(direction[i], direction_dual[i], &direction_change);
+            find_angle_change(direction[recov_ver_index[6*i + j]], direction_dual[recov_ver_index[6*i + j]], &direction_change);
             if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
                 sign = -1;
 		    recov_ver_weight[6*i + j] = 2*sign*triangle_area/pent_hex_face_unity_sphere[i];

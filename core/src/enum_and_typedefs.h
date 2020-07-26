@@ -89,6 +89,7 @@ Scalar_field z_scalar;
 Vector_field z_vector;
 Scalar_field gravity_potential;
 Vector_field gravity_m;
+Vector_field tangential_coord_gradient;
 int e_kin_indices[6*NO_OF_SCALARS];
 double e_kin_weights[6*NO_OF_SCALARS];
 int from_index[NO_OF_VECTORS_H];

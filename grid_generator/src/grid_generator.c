@@ -129,8 +129,8 @@ int main(int argc, char *argv[])
     double *pent_hex_face_unity_sphere = malloc(NO_OF_VECTORS_V*sizeof(double));
     double *rel_on_line_dual = malloc(NO_OF_VECTORS_H*sizeof(double));
 	double *z_surface = malloc(NO_OF_SCALARS_H*sizeof(double));
-	double *vertical_contravar_unit = malloc(3*NO_OF_VECTORS_V*(NO_OF_ORO_LAYERS + 1)*sizeof(double));
 	double *e_kin_weights = malloc(6*NO_OF_SCALARS*sizeof(double));
+	double *tangential_coord_gradient = malloc(NO_OF_VECTORS*sizeof(double));
 	int *e_kin_indices = malloc(6*NO_OF_SCALARS*sizeof(int));
     int *to_index = malloc(NO_OF_VECTORS_H*sizeof(int));
     int *from_index = malloc(NO_OF_VECTORS_H*sizeof(int));
@@ -209,25 +209,22 @@ int main(int argc, char *argv[])
 	retval = determine_z_scalar(z_scalar, z_vertical_vector_pre, z_surface, z_oro_off, TOA);
 	retval = set_z_vector_and_normal_distance(z_vector, z_surface, z_scalar, normal_distance, latitude_scalar, longitude_scalar, from_index, to_index, TOA);
 	printf("Mapping horizontal areas from unit sphere to model levels ... ");
-	retval = map_area_to_sphere(area, z_vector, pent_hex_face_unity_sphere);
+	map_area_to_sphere(area, z_vector, pent_hex_face_unity_sphere);
     printf(GREEN "finished.\n" RESET);
     printf("Calculating grid box volumes ... ");
 	set_volume(volume, z_scalar_dual, z_vector, area, from_index, to_index, TOA, z_surface, vorticity_indices_pre);
     printf(GREEN "finished.\n" RESET);
 	printf("Determining vector z coordinates of the dual grid and distances of the dual grid ... ");
-	retval = calc_z_vector_dual_and_normal_distance_dual(z_vector_dual, normal_distance_dual, z_scalar_dual, TOA, z_surface, from_index, to_index, z_vector, from_index_dual, to_index_dual, latitude_scalar_dual, longitude_scalar_dual, vorticity_indices_pre);
+	calc_z_vector_dual_and_normal_distance_dual(z_vector_dual, normal_distance_dual, z_scalar_dual, TOA, z_surface, from_index, to_index, z_vector, from_index_dual, to_index_dual, latitude_scalar_dual, longitude_scalar_dual, vorticity_indices_pre);
+    printf(GREEN "finished.\n" RESET);
+    printf("Determining tangential coordinate slopes ...");
+    calc_tangential_coordinate_slopes(z_vector_dual, from_index_dual, to_index_dual, normal_distance_dual, tangential_coord_gradient);
     printf(GREEN "finished.\n" RESET);
     printf("Calculating dual areas, pre version ... ");
 	retval = calc_area_dual_pre(area_dual_pre, z_vector_dual, normal_distance, z_vector, from_index, to_index, z_surface, triangle_face_unit_sphere, TOA);
     printf(GREEN "finished.\n" RESET);
     printf("Calculating vertical faces, pre version ... ");
 	retval = calculate_vertical_faces(area, z_vector_dual, normal_distance_dual, TOA);
-    printf(GREEN "finished.\n" RESET);
-    printf("Calculating vertical contravariant unit vectors, pre version ... ");
-	retval = calc_vertical_contravar_unit(latitude_scalar, longitude_scalar, adjacent_vector_indices_h, vertical_contravar_unit, direction_dual, normal_distance_dual, from_index_dual, to_index_dual, z_scalar_dual);
-    printf(GREEN "finished.\n" RESET);
-    printf("Modifying areas for orography ... ");
-	retval = rescale_area(area, vertical_contravar_unit);
     printf(GREEN "finished.\n" RESET);
     printf("Modifying dual areas for orography ... ");
 	retval = rescale_area_dual(area_dual, z_vector, from_index_dual, to_index_dual, area_dual_pre, z_vector_dual);
@@ -261,7 +258,7 @@ int main(int argc, char *argv[])
     area_min = pent_hex_face_unity_sphere[find_min_index(pent_hex_face_unity_sphere, NO_OF_VECTORS_V)];
     free(pent_hex_face_unity_sphere);
     printf("Ratio of minimum to maximum area: %lf\n", area_min/area_max);
-    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_curl_weight_id, recov_hor_ver_curl_weight_id, trsk_modified_weights_id, recov_ver_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_curl_index_id, recov_hor_ver_curl_index_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, recov_ver_index_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vector_curl_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, gravity_potential_id, adjacent_vector_indices_dual_h_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_6_dimid, e_kin_indices_id;
+    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_curl_weight_id, recov_hor_ver_curl_weight_id, trsk_modified_weights_id, recov_ver_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_curl_index_id, recov_hor_ver_curl_index_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, recov_ver_index_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vector_curl_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, gravity_potential_id, adjacent_vector_indices_dual_h_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_6_dimid, e_kin_indices_id, tangential_coord_gradient_id;
     printf("Starting to write to output file ... ");
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NO_OF_SCALARS, &scalar_dimid)))
         ERR(retval);
@@ -322,6 +319,8 @@ int main(int argc, char *argv[])
     if ((retval = nc_put_att_text(ncid_g_prop, z_surface_id, "units", strlen("m"), "m")))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "z_vector", NC_DOUBLE, 1, &vector_dimid, &z_vector_id)))
+        ERR(retval);
+    if ((retval = nc_def_var(ncid_g_prop, "tangential_coord_gradient", NC_DOUBLE, 1, &vector_dimid, &tangential_coord_gradient_id)))
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, z_vector_id, "units", strlen("m"), "m")))
         ERR(retval);
@@ -455,6 +454,8 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, longitude_vector_id, &longitude_vector[0])))
         ERR(retval);
+    if ((retval = nc_put_var_double(ncid_g_prop, tangential_coord_gradient_id, &tangential_coord_gradient[0])))
+        ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, to_index_id, &to_index[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, from_index_id, &from_index[0])))
@@ -491,6 +492,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     printf(GREEN "finished.\n" RESET);
     free(SCALAR_H_FILE);
+    free(tangential_coord_gradient);
     free(e_kin_weights);
     free(e_kin_indices);
     free(adjacent_vector_indices_dual_h);
