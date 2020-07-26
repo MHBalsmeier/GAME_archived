@@ -622,7 +622,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
             passive_turn(wind_0, wind_1, -grid -> direction[j], &wind_u, &wind_v);
             wind_u_h[j] = wind_u;
             wind_v_h[j] = wind_v;
-            rel_vort_h[j] = (*rel_vort)[NO_OF_VECTORS_H + i*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + j];
+            rel_vort_h[j] = (*rel_vort)[NO_OF_VECTORS_H + i*2*NO_OF_VECTORS_H + j];
         }
 		SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 		handle_wind_u_h = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);

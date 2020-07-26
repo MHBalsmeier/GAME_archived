@@ -16,7 +16,7 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int set_f_vec(double latitude_vector[], double direction[], double direction_dual[], double f_vec[])
 {
-    for (int i = 0; i < 2*NO_OF_VECTORS_H; ++i)
+    for (int i = 0; i < 3*NO_OF_VECTORS_H; ++i)
     {
     	// horizontal component at dual vector points
         if (i < NO_OF_VECTORS_H)
