@@ -116,7 +116,7 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
 int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
     int layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area, index_0, index_1, index_2, index_3, sign_0, sign_1, sign_2, sign_3;
-    double rhombus_circ, dist_0, dist_1, dist_2, dist_3, dist_0_pre, dist_2_pre, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient;
+    double rhombus_circ, dist_0, dist_1, dist_2, dist_3, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient;
     for (int i = 0; i < NO_OF_LAYERS*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + NO_OF_VECTORS_H; ++i)
     {
         layer_index = i/(NO_OF_VECTORS_H + NO_OF_VECTORS_H);
@@ -182,14 +182,10 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
                 sign_1 = dualgrid -> h_curl_signs[4*h_index + 1];
                 sign_2 = dualgrid -> h_curl_signs[4*h_index + 2];
                 sign_3 = dualgrid -> h_curl_signs[4*h_index + 3];
-                dist_0_pre = grid -> normal_distance[index_0];
+                dist_0 = grid -> normal_distance[index_0];
                 dist_1 = grid -> normal_distance[index_1];
-                dist_2_pre = grid -> normal_distance[index_2];
+                dist_2 = grid -> normal_distance[index_2];
                 dist_3 = grid -> normal_distance[index_3];
-                delta_z = grid -> z_scalar[layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> h_curl_indices[4*h_index + 2]]] - grid -> z_scalar[layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> h_curl_indices[4*h_index + 2]]];
-                dist_0 = sqrt(pow(dist_0_pre, 2) + pow(delta_z, 2));
-                delta_z = grid -> z_scalar[(layer_index - 1)*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> h_curl_indices[4*h_index + 2]]] - grid -> z_scalar[(layer_index - 1)*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> h_curl_indices[4*h_index + 2]]];
-                dist_2 = sqrt(pow(dist_2_pre, 2) + pow(delta_z, 2));
                 covar_0 = velocity_field[index_0];
                 covar_2 = velocity_field[index_2];
                 if (layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)

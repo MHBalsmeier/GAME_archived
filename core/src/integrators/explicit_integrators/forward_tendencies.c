@@ -95,13 +95,12 @@ int forward_tendencies(State *current_state, State *state_tendency, Grid *grid, 
 	}
 	// Here, the gaseous flux density is prepared fore the generalized Coriolis term.
     scalar_times_vector(current_state -> density_dry, current_state -> velocity_gas, diagnostics -> mass_dry_flux_density, grid);
-    // Noew, the generalized Coriolis term is evaluated.
+    // Now, the generalized Coriolis term is evaluated.
     coriolis_gen(diagnostics -> mass_dry_flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid);
     // Horizontal kinetic energy is prepared for the gradient term of the Lamb transformation.
     kinetic_energy(current_state -> velocity_gas, diagnostics -> e_kin_h, grid);
     grad(diagnostics -> e_kin_h, forcings -> e_kin_h_grad, grid);
     // Now the explicit forces are added up.
-    int hor_non_trad_cori_sign;
     double metric_term, vertical_velocity, hor_non_trad_cori_term;
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
@@ -117,8 +116,7 @@ int forward_tendencies(State *current_state, State *state_tendency, Grid *grid, 
         		{
         			recov_hor_ver_pri(current_state -> velocity_gas, layer_index, h_index - NO_OF_SCALARS_H, &vertical_velocity, grid);
         			metric_term = -vertical_velocity*current_state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
-        			hor_non_trad_cori_sign = -dualgrid -> h_curl_signs[4*(h_index - NO_OF_SCALARS_H) + 0];
-        			hor_non_trad_cori_term = hor_non_trad_cori_sign*vertical_velocity*dualgrid -> f_vec[h_index - NO_OF_SCALARS_H];
+        			hor_non_trad_cori_term = -vertical_velocity*dualgrid -> f_vec[2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
             		state_tendency -> velocity_gas[i] = forcings -> pressure_gradient_acc[i] + forcings -> pot_vort_tend[i] - grid -> gravity_m[i] - forcings -> e_kin_h_grad[i] + hor_non_trad_cori_term + metric_term + diffusion_info -> friction_acc[i];
         		}
             	if (h_index < NO_OF_SCALARS_H)
@@ -132,8 +130,7 @@ int forward_tendencies(State *current_state, State *state_tendency, Grid *grid, 
         		{
         			recov_hor_ver_pri(current_state -> velocity_gas, layer_index, h_index - NO_OF_SCALARS_H, &vertical_velocity, grid);
         			metric_term = -vertical_velocity*current_state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
-        			hor_non_trad_cori_sign = -dualgrid -> h_curl_signs[4*(h_index - NO_OF_SCALARS_H) + 0];
-        			hor_non_trad_cori_term = hor_non_trad_cori_sign*vertical_velocity*dualgrid -> f_vec[h_index - NO_OF_SCALARS_H];
+        			hor_non_trad_cori_term = -vertical_velocity*dualgrid -> f_vec[2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
             		state_tendency -> velocity_gas[i] = forcings -> pressure_gradient_acc[i] + forcings -> pot_vort_tend[i] - grid -> gravity_m[i] - forcings -> e_kin_h_grad[i] + hor_non_trad_cori_term + metric_term;
         		}
         		if (h_index < NO_OF_SCALARS_H)

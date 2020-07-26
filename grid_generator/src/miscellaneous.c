@@ -14,14 +14,19 @@ Github repository: https://github.com/MHBalsmeier/game
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 
-int set_f_vec(double latitude_vector[], double direction_dual[], double latitude_vector_dual[], double f_vec[])
+int set_f_vec(double latitude_vector[], double direction[], double direction_dual[], double f_vec[])
 {
     for (int i = 0; i < 2*NO_OF_VECTORS_H; ++i)
     {
-        if (i >= NO_OF_VECTORS_H)
+    	// horizontal component at dual vector points
+        if (i < NO_OF_VECTORS_H)
+        	f_vec[i] = 2*OMEGA*cos(latitude_vector[i])*sin(direction_dual[i]);
+        // vertical component at primal vector points
+        else if (i < 2*NO_OF_VECTORS_H)
         	f_vec[i] = 2*OMEGA*sin(latitude_vector[i - NO_OF_VECTORS_H]);
+    	// hpreparation of horizontal non-traditional Coriolis term
         else
-        	f_vec[i] = 2*OMEGA*cos(latitude_vector_dual[i])*sin(direction_dual[i]);
+        	f_vec[i] = 2*OMEGA*cos(latitude_vector[i - 2*NO_OF_VECTORS_H])*cos(direction[i - 2*NO_OF_VECTORS_H]);
     }
  	return 0;   
 }

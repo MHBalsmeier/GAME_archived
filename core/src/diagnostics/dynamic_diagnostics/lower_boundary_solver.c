@@ -16,8 +16,8 @@ int solve_lower_boundary(State *state, Grid *grid)
 	{
 		vertical_contravariant_normalized_h(state -> velocity_gas, NO_OF_LAYERS, h_index, grid, &result_of_wind_h);
 		state -> velocity_gas[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + h_index] = -result_of_wind_h;
-		check_value = 0;
-		if (fabs(check_value) > 0.001)
+		vertical_contravariant_normalized(state -> velocity_gas, NO_OF_LAYERS, h_index, grid, &check_value);
+		if (fabs(check_value) > 1e-10)
 		{
 			printf("Error with lower boundary condition.\n");
 			exit(1);	

@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     double *direction_dual = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *area_dual_pre = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
     double *area_dual = malloc((NO_OF_DUAL_H_VECTORS + NO_OF_H_VECTORS)*sizeof(double));
-    double *f_vec = malloc(2*NO_OF_VECTORS_H*sizeof(double));
+    double *f_vec = malloc(3*NO_OF_VECTORS_H*sizeof(double));
     double *triangle_face_unit_sphere = malloc(NO_OF_DUAL_SCALARS_H*sizeof(double));
     double *pent_hex_face_unity_sphere = malloc(NO_OF_VECTORS_V*sizeof(double));
     double *rel_on_line_dual = malloc(NO_OF_VECTORS_H*sizeof(double));
@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
     free(y_unity);
     free(z_unity);
 	retval = set_dual_vector_h_doubles(latitude_vector_dual, latitude_scalar_dual, latitude_vector, direction_dual, longitude_vector, to_index_dual, from_index_dual, longitude_scalar_dual, rel_on_line_dual);
-    retval = set_f_vec(latitude_vector, direction_dual, latitude_vector_dual, f_vec);
+    retval = set_f_vec(latitude_vector, direction, direction_dual, f_vec);
     printf(GREEN "Horizontal grid structure determined.\n" RESET);
 	retval = calc_adjacent_vector_indices_dual_h(adjacent_vector_indices_dual_h, from_index_dual, to_index_dual);
 	retval = calc_vorticity_indices_pre_and_adjacent_scalar_indices_dual_h(from_index_dual, to_index_dual, direction, direction_dual, vorticity_indices_pre, ORTH_CRITERION_DEG, vorticity_signs_pre, adjacent_scalar_indices_dual_h);
@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
     area_min = pent_hex_face_unity_sphere[find_min_index(pent_hex_face_unity_sphere, NO_OF_VECTORS_V)];
     free(pent_hex_face_unity_sphere);
     printf("Ratio of minimum to maximum area: %lf\n", area_min/area_max);
-    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_curl_weight_id, recov_hor_ver_curl_weight_id, trsk_modified_weights_id, recov_ver_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_curl_index_id, recov_hor_ver_curl_index_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, recov_ver_index_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, vector_curl_one_layer_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, gravity_potential_id, adjacent_vector_indices_dual_h_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_6_dimid, e_kin_indices_id, tangential_coord_gradient_id;
+    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, recov_hor_par_curl_weight_id, recov_hor_ver_curl_weight_id, trsk_modified_weights_id, recov_ver_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, recov_hor_par_curl_index_id, recov_hor_ver_curl_index_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, recov_ver_index_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, gravity_potential_id, adjacent_vector_indices_dual_h_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_6_dimid, e_kin_indices_id, tangential_coord_gradient_id;
     printf("Starting to write to output file ... ");
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NO_OF_SCALARS, &scalar_dimid)))
         ERR(retval);
@@ -288,7 +288,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_index_h_dual", NO_OF_VECTORS_H, &vector_dual_h_dimid)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_curl_one_layer_dimid", 2*NO_OF_VECTORS_H, &vector_curl_one_layer_dimid)))
+    if ((retval = nc_def_dim(ncid_g_prop, "f_vec_index", 3*NO_OF_VECTORS_H, &f_vec_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_index_dual", NO_OF_DUAL_VECTORS, &vector_dual_dimid)))
         ERR(retval);
@@ -360,7 +360,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, area_dual_id, "units", strlen("m^2"), "m^2")))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "f_vec", NC_DOUBLE, 1, &vector_curl_one_layer_dimid, &f_vec_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "f_vec", NC_DOUBLE, 1, &f_vec_dimid, &f_vec_id)))
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, f_vec_id, "units", strlen("1/s"), "1/s")))
         ERR(retval);

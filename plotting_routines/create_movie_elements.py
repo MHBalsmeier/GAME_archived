@@ -136,11 +136,12 @@ if color_bar_range > 200:
     color_bar_dist = 30;
 if color_bar_range > 2000:
     color_bar_dist = 250;
+if color_bar_range > 4000:
+    color_bar_dist = 800;
 if color_bar_range > 6000:
-    color_bar_dist = 500;
+    color_bar_dist = 1000;
 cmap = plt.get_cmap(colormap);
 norm = BoundaryNorm(bounds, ncolors = cmap.N, clip = True);
-
 points = np.zeros([len(values[:, 0]), 2]);
 fig_size = 10;
 for i in range(int(max_interval/time_step) + 1):

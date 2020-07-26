@@ -23,7 +23,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     double *trsk_modified_weights = malloc(10*NO_OF_VECTORS_H*sizeof(double));
     double *recov_ver_weight = malloc(6*NO_OF_SCALARS_H*sizeof(double));
     double *area_dual = malloc((NO_OF_DUAL_H_VECTORS + NO_OF_H_VECTORS)*sizeof(double));
-    double *f_vec = malloc((NO_OF_VECTORS_H + NO_OF_VECTORS_H)*sizeof(double));
+    double *f_vec = malloc(3*NO_OF_VECTORS_H*sizeof(double));
     double *direction = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *gravity_potential = malloc(NO_OF_SCALARS*sizeof(double));
     double *e_kin_weights = malloc(6*NO_OF_SCALARS*sizeof(double));
@@ -266,7 +266,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
                 grid_check_failed();
         }
     }
-    for (int i = 0; i < NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
+    for (int i = 0; i < 3*NO_OF_VECTORS_H; ++i)
     {
         dualgrid -> f_vec[i] = f_vec[i];
         if (fabs(dualgrid -> f_vec[i]) > 2*OMEGA)

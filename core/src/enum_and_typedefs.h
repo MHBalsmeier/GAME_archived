@@ -76,7 +76,6 @@ typedef double Scalar_field[NO_OF_SCALARS];
 typedef double Vector_field[NO_OF_VECTORS];
 typedef double Dual_vector_field[NO_OF_DUAL_VECTORS];
 typedef double Curl_field[NO_OF_LAYERS*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + NO_OF_VECTORS_H];
-typedef double Curl_field_one_layer[NO_OF_VECTORS_H + NO_OF_VECTORS_H];
 typedef double Tracer_densities[NO_OF_TRACERS*NO_OF_SCALARS];
 typedef double Tracer_density_temperatures[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS];
 
@@ -106,8 +105,8 @@ double recov_ver_weight[6*NO_OF_SCALARS_H];
 
 // Contains properties of the dual grid.
 typedef struct dualgrid {
-Curl_field_one_layer f_vec;
 Curl_field area;
+double f_vec[3*NO_OF_VECTORS_H];
 int vorticity_indices[4*NO_OF_VECTORS_H];
 int vorticity_signs[4*NO_OF_VECTORS_H];
 int h_curl_indices[4*NO_OF_VECTORS_H];
