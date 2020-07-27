@@ -5,7 +5,6 @@ The Global Atmospheric Modeling Framework (GAME) is a global non-hydrostatic hex
 It is known that the forecast skill of a NWP model depends much more on physics and data assimilation than on the dynamical core. With MPAS and FV3 for the global scale and WRF-ARW for the regional scale, efficient and capable dynamical cores exist. However, all global dynamical cores I know of have inconsistencies even in the most fundamental dynamical quantities (mass, energy forms and entropy). That is why the aim of this project is to develop a next generation global dynamical core with the following properties:
 
 * Stability.
-* At least second order accuracy -> this requires all individual schemes to be of at least second accuracy.
 * The numerical dispersion relation shall contain no unphysical branches.
 * The numerical dispersion relation shall contain all relevant physical branches, including a geostrophic mode.
 * Strong scalability on massively parallel computer architectures.

@@ -111,10 +111,8 @@ int three_band_solver_ver_vel_adv(State *state_old, State *state_new, State *sta
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
 			vertical_velocity[j] = state_old -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
-			vertical_velocity[j] = 0;
 		}
 		vertical_velocity[NO_OF_LAYERS - 1] = state_old -> velocity_gas[i + NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER];
-		vertical_velocity[NO_OF_LAYERS - 1] = 0;
 		// filling up the original vectors
 		for (int j = 0; j < NO_OF_LAYERS - 2; ++j)
 		{

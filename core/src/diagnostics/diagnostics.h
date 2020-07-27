@@ -21,4 +21,3 @@ double calc_condensates_density_sum(int, Tracer_densities);
 int vertical_contravariant_normalized(Vector_field, int, int, Grid *, double *);
 int vertical_contravariant_normalized_h(Vector_field, int, int, Grid *, double *);
 int horizontal_covariant_normalized(Vector_field, int, int, Grid *, double *);
-int solve_lower_boundary(State *, Grid *);

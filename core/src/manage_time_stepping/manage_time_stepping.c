@@ -34,8 +34,6 @@ int manage_time_stepping(State *state_0, State *state_p1, Interpolate_info *inte
 		// calculating the new values of the horizontal momentum, vertical horizontal advection handled implcitly
 		three_band_solver_hor(state_0, state_p1, state_tendency, delta_t_rk, grid);
 		// Horizontal velocities can be considered as updated from now on.
-		// Now that the new values of the horizontal velocity values are known, the lower boundary condition can be solved.
-		solve_lower_boundary(state_p1, grid);
 		// The advective part of the vertical velocity equation is solved here, the vertical advection is calculated implicitly.
 		three_band_solver_ver_vel_adv(state_0, state_p1, state_tendency, delta_t_rk, grid);
 		// Vertical velocities can be seen as updated from now on.

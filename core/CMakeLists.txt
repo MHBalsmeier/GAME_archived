@@ -27,7 +27,6 @@ src/diagnostics/dynamic_diagnostics/recovery/trsk_modified.c
 src/diagnostics/dynamic_diagnostics/recovery/recov_hor_ver_pri.c
 src/diagnostics/dynamic_diagnostics/recovery/recov_hor_par_pri.c
 src/diagnostics/dynamic_diagnostics/ricci.c
-src/diagnostics/dynamic_diagnostics/lower_boundary_solver.c
 src/diagnostics/turbulence_diagnostics/diffusion_diagnostics.c
 src/diagnostics/output_diagnostics/global_scalar_integral.c
 src/diagnostics/output_diagnostics/linear_combine_two_states.c
