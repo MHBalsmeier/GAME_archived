@@ -98,7 +98,7 @@ int forward_tendencies(State *current_state, State *state_tendency, Grid *grid, 
     // Now, the generalized Coriolis term is evaluated.
     coriolis_gen(diagnostics -> mass_dry_flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid);
     // Horizontal kinetic energy is prepared for the gradient term of the Lamb transformation.
-    kinetic_energy(current_state -> velocity_gas, diagnostics -> e_kin_h, grid);
+    kinetic_energy(current_state -> velocity_gas, diagnostics -> e_kin_h, grid, 0);
     grad(diagnostics -> e_kin_h, forcings -> e_kin_h_grad, grid);
     // Now the explicit forces are added up.
     double metric_term, vertical_velocity, hor_non_trad_cori_term;

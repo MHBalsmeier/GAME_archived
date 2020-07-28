@@ -26,9 +26,9 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     double *f_vec = malloc(3*NO_OF_VECTORS_H*sizeof(double));
     double *direction = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *gravity_potential = malloc(NO_OF_SCALARS*sizeof(double));
-    double *e_kin_weights = malloc(6*NO_OF_SCALARS*sizeof(double));
+    double *e_kin_weights = malloc(8*NO_OF_SCALARS*sizeof(double));
     double *slope = malloc(NO_OF_VECTORS*sizeof(double));
-    int *e_kin_indices = malloc(6*NO_OF_SCALARS*sizeof(int));
+    int *e_kin_indices = malloc(8*NO_OF_SCALARS*sizeof(int));
     int *to_index = malloc(NO_OF_VECTORS_H*sizeof(int));
     int *from_index = malloc(NO_OF_VECTORS_H*sizeof(int));
     int *recov_ver_index = malloc(6*NO_OF_SCALARS_H*sizeof(int));
@@ -200,17 +200,17 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
             grid_check_failed();   
   		}
        	e_kin_weight_sum = 0;
-       	for (int j = 0; j < 6; ++j)
+       	for (int j = 0; j < 8; ++j)
 		{
-           grid -> e_kin_weights[6*i + j] = e_kin_weights[6*i + j];
-           if (grid -> e_kin_weights[6*i + j] > 0.3 || grid -> e_kin_weights[6*i + j] < 0)
+           grid -> e_kin_weights[8*i + j] = e_kin_weights[8*i + j];
+           if (grid -> e_kin_weights[8*i + j] > 0.3 || grid -> e_kin_weights[8*i + j] < 0)
            	   grid_check_failed();
-           e_kin_weight_sum += grid -> e_kin_weights[6*i + j];
-           grid -> e_kin_indices[6*i + j] = e_kin_indices[6*i + j];
-           if (grid -> e_kin_indices[6*i + j] < 0 || grid -> e_kin_indices[6*i + j] >= NO_OF_VECTORS)
+           e_kin_weight_sum += grid -> e_kin_weights[8*i + j];
+           grid -> e_kin_indices[8*i + j] = e_kin_indices[8*i + j];
+           if (grid -> e_kin_indices[8*i + j] < 0 || grid -> e_kin_indices[8*i + j] >= NO_OF_VECTORS)
            	   grid_check_failed();
        	}
-       	if (fabs(e_kin_weight_sum - 1.0) > 0.01)
+       	if (fabs(e_kin_weight_sum - 1.5) > 1e-10)
        	{
 			grid_check_failed();
    	   	}

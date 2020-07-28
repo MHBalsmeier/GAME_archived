@@ -1072,7 +1072,7 @@ int write_out_integral(State *state_write_out, double t_write, char output_direc
     	double kinetic_integral, potential_integral, internal_integral;
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
     	Scalar_field *e_kin_density = malloc(sizeof(Scalar_field));
-    	kinetic_energy(state_write_out -> velocity_gas, *e_kin_density, grid);
+    	kinetic_energy(state_write_out -> velocity_gas, *e_kin_density, grid, 1);
     	scalar_times_scalar(state_write_out -> density_dry, *e_kin_density, *e_kin_density);
     	global_scalar_integrator(*e_kin_density, grid, &kinetic_integral);
     	free(e_kin_density);

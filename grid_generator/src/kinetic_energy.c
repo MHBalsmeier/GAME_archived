@@ -15,7 +15,7 @@ In this file, the kinetic energy indices and weights are computed.
 int calc_kinetic_energy(double latitude_scalar[], double longitude_scalar[], int e_kin_indices[], double e_kin_weights[], double volume[], int adjacent_vector_indices_dual_h[], int to_index[], int from_index[], double area_dual_pre[], double area[], double z_scalar[], double z_vector[], int adjacent_vector_indices_h[], double latitude_vector[], double longitude_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], int to_index_dual[], int from_index_dual[], double z_vector_dual[])
 {
 	int layer_index, h_index;
-	double z_value_0, z_value_1, z_value_2, z_triangle_mean, triangle_face_0, triangle_face_1, delta_z, weights_sum, weights_rescale;
+	double z_value_0, z_value_1, z_value_2, z_triangle_mean, triangle_face_0, triangle_face_1, delta_z, weights_sum, weights_rescale, partial_volume;
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		layer_index = i/NO_OF_SCALARS_H;
@@ -25,7 +25,7 @@ int calc_kinetic_energy(double latitude_scalar[], double longitude_scalar[], int
 		{
 			if (j < 5 || h_index >= NO_OF_PENTAGONS)
 			{
-				e_kin_indices[6*i + j] = NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j];
+				e_kin_indices[8*i + j] = NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j];
 				calc_triangle_face(latitude_scalar[h_index], longitude_scalar[h_index], latitude_vector[adjacent_vector_indices_h[6*h_index + j]], longitude_vector[adjacent_vector_indices_h[6*h_index + j]], latitude_scalar_dual[from_index_dual[adjacent_vector_indices_h[6*h_index + j]]], longitude_scalar_dual[from_index_dual[adjacent_vector_indices_h[6*h_index + j]]], &triangle_face_0);
 				z_value_0 = z_scalar[i];
 				z_value_1 = z_vector[NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]];
@@ -39,46 +39,54 @@ int calc_kinetic_energy(double latitude_scalar[], double longitude_scalar[], int
 				z_triangle_mean = 1.0/3*(z_value_0 + z_value_1 + z_value_2);
 				triangle_face_1 = triangle_face_1*pow(RADIUS + z_triangle_mean, 2);
 				delta_z = z_vector_dual[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]] - z_vector_dual[(layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]];
-				e_kin_weights[6*i + j] = (triangle_face_0 + triangle_face_1)*delta_z;
-				e_kin_weights[6*i + j] = e_kin_weights[6*i + j]/volume[i];
-				weights_sum += e_kin_weights[6*i + j];
+				e_kin_weights[8*i + j] = (triangle_face_0 + triangle_face_1)*delta_z;
+				e_kin_weights[8*i + j] = e_kin_weights[8*i + j]/volume[i];
+				weights_sum += e_kin_weights[8*i + j];
 			}
 			else
 			{
-				e_kin_indices[6*i + j] = 0;
-				e_kin_weights[6*i + j] = 0;
+				e_kin_indices[8*i + j] = 0;
+				e_kin_weights[8*i + j] = 0;
 			}
 		}
 		weights_rescale = 1/weights_sum;
 		if (fabs(weights_rescale - 1) > 0.12)
 		{
-			printf("Error in e_kin_weights, position 0. Weights rescale is %lf.\n", weights_sum);
+			printf("Error in e_kin_weights, position 0. Weights rescale is %lf.\n", weights_rescale);
 			exit(1);
 		}
 		for (int j = 0; j < 6; ++j)
 		{
-			e_kin_weights[6*i + j] = weights_rescale*e_kin_weights[6*i + j];
+			e_kin_weights[8*i + j] = weights_rescale*e_kin_weights[8*i + j];
 		}
+		// lower w, only needed only for diagnostics
+		e_kin_indices[8*i + 6] = h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER;
+		partial_volume = find_volume(area[e_kin_indices[8*i + 6]], RADIUS + z_vector[e_kin_indices[8*i + 6]], RADIUS + z_scalar[i]);
+		e_kin_weights[8*i + 6] = 0.5*partial_volume/volume[i];
+		// upper w, only needed only for diagnostics
+		e_kin_indices[8*i + 7] = h_index + layer_index*NO_OF_VECTORS_PER_LAYER;
+		partial_volume = find_volume(area[e_kin_indices[8*i + 6]]*pow((RADIUS + z_scalar[i])/(RADIUS + z_vector[e_kin_indices[8*i + 6]]), 2), RADIUS + z_scalar[i], RADIUS + z_vector[e_kin_indices[8*i + 7]]);
+		e_kin_weights[8*i + 7] = 0.5*partial_volume/volume[i];
 	}
 	double e_kin_weights_check_sum;
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		e_kin_weights_check_sum = 0;
-		for (int j = 0; j < 6; ++j)
+		for (int j = 0; j < 8; ++j)
 		{
-			if (e_kin_indices[6*i + j] < 0 || e_kin_indices[6*i + j] >= NO_OF_VECTORS)
+			if (e_kin_indices[8*i + j] < 0 || e_kin_indices[8*i + j] >= NO_OF_VECTORS)
 			{
 				printf("Error in e_kin_indices, position 0.\n");
 				exit(1);
 			}
-			e_kin_weights_check_sum += e_kin_weights[6*i + j];
-			if (e_kin_weights[6*i + j] < 0)
+			e_kin_weights_check_sum += e_kin_weights[8*i + j];
+			if (e_kin_weights[8*i + j] < 0)
 			{
 				printf("Error in e_kin_weights, position 1.\n");
 				exit(1);
 			}
 		}    	
-		if (fabs(e_kin_weights_check_sum - 1.0) > 0.01)
+		if (fabs(e_kin_weights_check_sum - 1.5) > 1e-10)
 		{
 			printf("Error in e_kin_weights, position 1. Weights check sum is %lf.\n", e_kin_weights_check_sum);
 			exit(1);
