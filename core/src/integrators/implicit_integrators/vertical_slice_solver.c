@@ -15,7 +15,7 @@ The vertical advection of horizontal momentum is organized here.
 int thomas_algorithm(double [], double [], double [], double [], double [], double [], double [], int);
 int sign(double);
 
-int three_band_solver_hor(State *state_old, State *state_new, State *state_tendency, double delta_t, Grid *grid)
+int three_band_solver_hor_vel_adv(State *state_old, State *state_new, State *state_tendency, double delta_t, Grid *grid)
 {
 	/*
 	Semi-implicit vertical advection of vertical momentum (Crank-Nicolson).

@@ -14,7 +14,7 @@ int integrate_temp_gas(State *state_old, State *state_new, Interpolate_info *int
 	double total_density, rho_h;
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-        if (config_info -> scalar_diffusion_on == 1)
+        if (config_info -> scalar_diffusion_on == 1 && no_rk_step == 2)
         {
             total_density = state_old -> density_dry[i];
             for (int k = 0; k < NO_OF_TRACERS; ++k)

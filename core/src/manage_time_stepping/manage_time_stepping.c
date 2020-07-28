@@ -23,6 +23,7 @@ int manage_time_stepping(State *state_0, State *state_p1, Interpolate_info *inte
 		set_interpolated_temperature(state_0, state_p1, interpolation, 1);
 	for (int i = 0; i < 3; ++i)
 	{
+		// If tracers are on, phase transitions are only updated at the third step.
 		if (i == 2 && config_info -> tracers_on == 1)
 			config_info -> phase_transitions_on = 1;
 		delta_t_rk = delta_t/(3 - i);
@@ -32,7 +33,7 @@ int manage_time_stepping(State *state_0, State *state_p1, Interpolate_info *inte
 		else
 			forward_tendencies(state_p1, state_tendency, grid, dualgrid, diagnostics, forcings, interpolation, diffusion_info, config_info, i);
 		// calculating the new values of the horizontal momentum, vertical horizontal advection handled implcitly
-		three_band_solver_hor(state_0, state_p1, state_tendency, delta_t_rk, grid);
+		three_band_solver_hor_vel_adv(state_0, state_p1, state_tendency, delta_t_rk, grid);
 		// Horizontal velocities can be considered as updated from now on.
 		// The advective part of the vertical velocity equation is solved here, the vertical advection is calculated implicitly.
 		three_band_solver_ver_vel_adv(state_0, state_p1, state_tendency, delta_t_rk, grid);

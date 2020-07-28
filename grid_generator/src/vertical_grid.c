@@ -462,28 +462,26 @@ int calc_area_dual_pre(double area_dual_pre[], double z_vector_dual[], double no
     return 0;
 }
 
-int calc_tangential_coordinate_slopes(double z_vector_dual[], int from_index_dual[], int to_index_dual[], double normal_distance_dual[], double tangential_coord_gradient[])
+int calc_slopes(double z_scalar[], int from_index[], int to_index[], double normal_distance[], double slope[])
 {
 	int layer_index, h_index;
-	double delta_x_pre, delta_x_rescale_factor, delta_x, delta_z;
+	double delta_x, delta_z;
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
 		layer_index = i/NO_OF_VECTORS_PER_LAYER;
 		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
 		if (h_index < NO_OF_SCALARS_H)
 		{
-			tangential_coord_gradient[i] = 0;
+			slope[i] = 0;
 		}
 		else
 		{
-			delta_x_pre = normal_distance_dual[(layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H];
-			delta_x_rescale_factor = (RADIUS + z_vector_dual[i])/(RADIUS + z_vector_dual[(layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H]);
-			delta_x = delta_x_rescale_factor*delta_x_pre;
-			delta_z = z_vector_dual[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + NO_OF_VECTORS_H + to_index_dual[h_index - NO_OF_SCALARS_H]] - z_vector_dual[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + NO_OF_VECTORS_H + from_index_dual[h_index - NO_OF_SCALARS_H]];
-			tangential_coord_gradient[i] = delta_z/delta_x;
-			if (fabs(tangential_coord_gradient[i]) > 1)
+			delta_x = normal_distance[layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+			delta_z = z_scalar[layer_index*NO_OF_SCALARS_H + to_index[h_index - NO_OF_SCALARS_H]] - z_scalar[layer_index*NO_OF_SCALARS_H + from_index[h_index - NO_OF_SCALARS_H]];
+			slope[i] = delta_z/delta_x;
+			if (fabs(slope[i]) > 1)
 			{
-				printf("Problem in calc_tangential_coordinate_slopes.\n");
+				printf("Problem in calc_slopes.\n");
 				exit(1);
 			}
 		}

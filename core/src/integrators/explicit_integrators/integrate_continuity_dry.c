@@ -11,7 +11,7 @@ int integrate_continuity_dry(State *state_old, State *state_new, Interpolate_inf
 {
     scalar_times_vector(state_old -> density_dry, state_new -> velocity_gas, diagnostics -> mass_dry_flux_density, grid);
     divv_h(diagnostics -> mass_dry_flux_density, forcings -> mass_dry_flux_density_divv, grid);
-    if (config_info -> scalar_diffusion_on == 1)
+    if (config_info -> scalar_diffusion_on == 1 && no_rk_step == 2)
     {
         grad(state_old -> density_dry, diffusion_info -> mass_dry_diffusion_flux_density, grid);
         calc_mass_diffusion_coeffs(state_old -> temp_gas, state_old -> density_dry, diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v);

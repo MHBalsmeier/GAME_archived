@@ -48,7 +48,7 @@ int calc_z_vector_dual_and_normal_distance_dual(double [], double [], double [],
 int calc_area_dual_pre(double [], double [], double [], double [], int [], int [], double [], double [], double);
 int optimize_to_scvt(double [], double [], double [], double [], int, int [][3], int [][3], int [][3], int [][2], int [], int [], int []);
 int read_horizontal_generators(double [], double [], char []);
-int calc_tangential_coordinate_slopes(double [], int [], int [], double [], double []);
+int calc_slopes(double [], int [], int [], double [], double []);
 
 
 

@@ -13,7 +13,7 @@ int integrate_entropy_density_gas(State *state_old, State *state_new, Interpolat
 	double rho_h, total_density;
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-	    if (config_info -> scalar_diffusion_on == 1)
+	    if (config_info -> scalar_diffusion_on == 1 && no_rk_step == 2)
 	    {
 	        total_density = state_old -> density_dry[i];
 	        for (int k = 0; k < NO_OF_TRACERS; ++k)

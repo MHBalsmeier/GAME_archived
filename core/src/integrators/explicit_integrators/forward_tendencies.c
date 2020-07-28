@@ -22,7 +22,7 @@ int forward_tendencies(State *current_state, State *state_tendency, Grid *grid, 
 		old_hor_grad_weight = 0;
 		new_hor_grad_weight = 1;
 	}
-    if (config_info -> momentum_diffusion_on == 1)
+    if (config_info -> momentum_diffusion_on == 1 && no_step_rk == 2)
     {
 		dissipation(current_state -> velocity_gas, current_state -> density_dry, diffusion_info -> friction_acc, diffusion_info -> heating_diss, grid);
     }
@@ -110,7 +110,7 @@ int forward_tendencies(State *current_state, State *state_tendency, Grid *grid, 
             state_tendency -> velocity_gas[i] = 0;
         else
         {
-        	if (config_info -> momentum_diffusion_on == 1)
+        	if (config_info -> momentum_diffusion_on == 1 && no_step_rk == 2)
         	{
         		if (h_index >= NO_OF_SCALARS_H)
         		{
