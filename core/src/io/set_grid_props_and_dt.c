@@ -21,7 +21,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     double *z_scalar = malloc(NO_OF_SCALARS*sizeof(double));
     double *z_vector = malloc(NO_OF_VECTORS*sizeof(double));
     double *trsk_modified_weights = malloc(10*NO_OF_VECTORS_H*sizeof(double));
-    double *recov_ver_weight = malloc(6*NO_OF_SCALARS_H*sizeof(double));
+    double *recov_ver_weight = malloc(6*NO_OF_LEVELS*NO_OF_SCALARS_H*sizeof(double));
     double *area_dual = malloc((NO_OF_DUAL_H_VECTORS + NO_OF_H_VECTORS)*sizeof(double));
     double *f_vec = malloc(3*NO_OF_VECTORS_H*sizeof(double));
     double *direction = malloc(NO_OF_VECTORS_H*sizeof(double));
@@ -33,7 +33,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     int *e_kin_indices = malloc(8*NO_OF_SCALARS*sizeof(int));
     int *to_index = malloc(NO_OF_VECTORS_H*sizeof(int));
     int *from_index = malloc(NO_OF_VECTORS_H*sizeof(int));
-    int *recov_ver_index = malloc(6*NO_OF_SCALARS_H*sizeof(int));
+    int *recov_ver_index = malloc(6*NO_OF_LEVELS*NO_OF_SCALARS_H*sizeof(int));
     int *trsk_modified_velocity_indices = malloc(10*NO_OF_VECTORS_H*sizeof(int));
     int *trsk_modified_curl_indices = malloc(10*NO_OF_VECTORS_H*sizeof(int));
     int *adjacent_vector_indices_h = malloc(6*NO_OF_SCALARS_H*sizeof(int));
@@ -281,6 +281,12 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
             grid -> recov_ver_index[6*i + j] = recov_ver_index[6*i + j];
             if (grid -> recov_ver_index[6*i + j] >= NO_OF_VECTORS_H || grid -> recov_ver_index[6*i + j] < 0)
                 grid_check_failed();
+        }
+    }
+    for (int i = 0; i < NO_OF_LEVELS*NO_OF_SCALARS_H; ++i)
+    {
+        for (int j = 0; j < 6; ++j)
+        {
             grid -> recov_ver_weight[6*i + j] = recov_ver_weight[6*i + j];
             if (fabs(grid -> recov_ver_weight[6*i + j]) >= 1.0001)
                 grid_check_failed();

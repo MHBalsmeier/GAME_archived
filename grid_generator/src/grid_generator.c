@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
     double *trsk_modified_weights = calloc(10*NO_OF_VECTORS_H, sizeof(double));
     double *recov_hor_par_curl_weight = malloc(2*NO_OF_VECTORS_H*sizeof(double));
     double *recov_hor_ver_curl_weight = malloc(2*NO_OF_VECTORS_H*sizeof(double));
-    double *recov_ver_weight = malloc(6*NO_OF_VECTORS_V*sizeof(double));
+    double *recov_ver_weight = malloc(6*NO_OF_LEVELS*NO_OF_VECTORS_V*sizeof(double));
     double *latitude_scalar_dual = malloc(NO_OF_DUAL_SCALARS_H*sizeof(double));
     double *longitude_scalar_dual = malloc(NO_OF_DUAL_SCALARS_H*sizeof(double));
     double *z_scalar_dual = malloc(NO_OF_DUAL_SCALARS*sizeof(double));
@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
     // more advanced stuff: tangential vector reconstruction and kinetic energy
     printf("Calculating kinetic energy indices and weights and related things ... ");
 	retval = calc_kinetic_energy_and_related(latitude_scalar, longitude_scalar, e_kin_indices, e_kin_weights, volume, adjacent_vector_indices_dual_h, to_index, from_index, area_dual_pre, area, z_scalar, z_vector, adjacent_vector_indices_h, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, to_index_dual, from_index_dual, z_vector_dual, volume_ratios, recov_primal2dual_weights);
-    set_recov_ver(recov_ver_index, adjacent_vector_indices_h, direction, direction_dual, latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, from_index_dual, to_index_dual, pent_hex_face_unity_sphere, recov_ver_weight, ORTH_CRITERION_DEG);
+    set_recov_ver(recov_ver_index, adjacent_vector_indices_h, direction, direction_dual, latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, from_index_dual, to_index_dual, pent_hex_face_unity_sphere, recov_ver_weight, ORTH_CRITERION_DEG, normal_distance, z_vector, z_vector_dual, TOA);
     printf(GREEN "finished.\n" RESET);
     // modified TRSK
     printf("Calculating Coriolis indices and weights ... ");
@@ -288,7 +288,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_h_4_index", 4*NO_OF_VECTORS_H, &vector_h_dimid_4)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_v_6_index", 6*NO_OF_VECTORS_V, &vector_v_dimid_6)))
+    if ((retval = nc_def_dim(ncid_g_prop, "vector_v_6_index", 6*NO_OF_LEVELS*NO_OF_VECTORS_V, &vector_v_dimid_6)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_index_h_dual", NO_OF_VECTORS_H, &vector_dual_h_dimid)))
         ERR(retval);
