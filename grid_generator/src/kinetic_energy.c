@@ -12,7 +12,7 @@ In this file, the kinetic energy indices and weights are computed.
 #include <stdio.h>
 #include "geos95.h"
 
-int calc_kinetic_energy_and_volume_ratios(double latitude_scalar[], double longitude_scalar[], int e_kin_indices[], double e_kin_weights[], double volume[], int adjacent_vector_indices_dual_h[], int to_index[], int from_index[], double area_dual_pre[], double area[], double z_scalar[], double z_vector[], int adjacent_vector_indices_h[], double latitude_vector[], double longitude_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], int to_index_dual[], int from_index_dual[], double z_vector_dual[], double volume_ratios[])
+int calc_kinetic_energy_and_related(double latitude_scalar[], double longitude_scalar[], int e_kin_indices[], double e_kin_weights[], double volume[], int adjacent_vector_indices_dual_h[], int to_index[], int from_index[], double area_dual_pre[], double area[], double z_scalar[], double z_vector[], int adjacent_vector_indices_h[], double latitude_vector[], double longitude_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], int to_index_dual[], int from_index_dual[], double z_vector_dual[], double volume_ratios[], double recov_primal2dual_weights[])
 {
 	int layer_index, h_index;
 	double z_value_0, z_value_1, z_value_2, z_triangle_mean, triangle_face_0, triangle_face_1, delta_z, weights_sum, weights_rescale, partial_volume;
@@ -75,10 +75,10 @@ int calc_kinetic_energy_and_volume_ratios(double latitude_scalar[], double longi
 			exit(1);
 		}
 	}
-	double e_kin_weights_check_sum;
+	double check_sum;
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		e_kin_weights_check_sum = 0;
+		check_sum = 0;
 		for (int j = 0; j < 8; ++j)
 		{
 			if (e_kin_indices[8*i + j] < 0 || e_kin_indices[8*i + j] >= NO_OF_VECTORS)
@@ -86,21 +86,76 @@ int calc_kinetic_energy_and_volume_ratios(double latitude_scalar[], double longi
 				printf("Error in e_kin_indices, position 0.\n");
 				exit(1);
 			}
-			e_kin_weights_check_sum += e_kin_weights[8*i + j];
+			check_sum += e_kin_weights[8*i + j];
 			if (e_kin_weights[8*i + j] < 0)
 			{
 				printf("Error in e_kin_weights, position 1.\n");
 				exit(1);
 			}
 		}    	
-		if (fabs(e_kin_weights_check_sum - 1.5) > 1e-10)
+		if (fabs(check_sum - 1.5) > 1e-10)
 		{
-			printf("Error in e_kin_weights, position 1. Weights check sum is %lf.\n", e_kin_weights_check_sum);
+			printf("Error in e_kin_weights, position 1. Weights check sum is %lf.\n", check_sum);
 			exit(1);
+		}
+	}
+	int e_kin_h_index_0, e_kin_h_index_1;
+	double total_volume, upper_volume, lower_volume, upper_volume_0, lower_volume_0, upper_volume_1, lower_volume_1;
+	for (int i = 0; i < NO_OF_DUAL_H_VECTORS; ++i)
+	{
+		layer_index = i/NO_OF_VECTORS_H;
+		h_index = i - layer_index*NO_OF_VECTORS_H;
+		if (layer_index == 0 || layer_index == NO_OF_LAYERS)
+		{
+			recov_primal2dual_weights[2*i + 0] = 0;
+			recov_primal2dual_weights[2*i + 1] = 0;
+		}
+		else
+		{
+			upper_volume_0 = volume[(layer_index - 1)*NO_OF_SCALARS_H + from_index[h_index]];
+			upper_volume_1 = volume[(layer_index - 1)*NO_OF_SCALARS_H] + to_index[h_index];
+			lower_volume_0 = volume[layer_index*NO_OF_SCALARS_H + from_index[h_index]];
+			lower_volume_1 = volume[layer_index*NO_OF_SCALARS_H] + to_index[h_index];
+			e_kin_h_index_0 = -1;
+			e_kin_h_index_1 = -1;
+			for (int j = 0; j < 6; ++j)
+			{
+				if (e_kin_indices[8*((layer_index - 1)*NO_OF_SCALARS_H + from_index[h_index]) + j] == NO_OF_SCALARS_H + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER + h_index)
+					e_kin_h_index_0 = j;
+				if (e_kin_indices[8*((layer_index - 1)*NO_OF_SCALARS_H + to_index[h_index]) + j] == NO_OF_SCALARS_H + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER + h_index)
+					e_kin_h_index_1 = j;
+			}
+			if (e_kin_h_index_0 == -1 || e_kin_h_index_1 == -1)
+			{
+				printf("Index error in calculating recov_primal2dual.\n");
+				exit(1);
+			}
+			upper_volume_0 = e_kin_weights[8*((layer_index - 1)*NO_OF_SCALARS_H + from_index[h_index]) + e_kin_h_index_0]*upper_volume_0;
+			upper_volume_1 = e_kin_weights[8*((layer_index - 1)*NO_OF_SCALARS_H + to_index[h_index]) + e_kin_h_index_1]*upper_volume_1;
+			lower_volume_0 = e_kin_weights[8*(layer_index*NO_OF_SCALARS_H + from_index[h_index]) + e_kin_h_index_0]*lower_volume_0;
+			lower_volume_1 = e_kin_weights[8*(layer_index*NO_OF_SCALARS_H + to_index[h_index]) + e_kin_h_index_1]*lower_volume_1;
+			upper_volume = upper_volume_0 + upper_volume_1;
+			lower_volume = lower_volume_0 + lower_volume_1;
+			total_volume = upper_volume + lower_volume;
+			recov_primal2dual_weights[2*i + 0] = upper_volume/total_volume;
+			recov_primal2dual_weights[2*i + 1] = lower_volume/total_volume;
+			check_sum = recov_primal2dual_weights[2*i + 0] + recov_primal2dual_weights[2*i + 1];
+			if (fabs(check_sum - 1) > 1e-10)
+			{
+				printf("Error in calculating recov_primal2dual. Check sum is %lf, should be 1.\n", check_sum);
+				exit(1);
+			}
 		}
 	}
 	return 0;
 }
+
+
+
+
+
+
+
 
 
 

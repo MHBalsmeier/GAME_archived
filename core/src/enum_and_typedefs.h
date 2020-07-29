@@ -102,6 +102,7 @@ int trsk_modified_curl_indices[10*NO_OF_VECTORS_H];
 double trsk_modified_weights[10*NO_OF_VECTORS_H];
 int recov_ver_index[6*NO_OF_SCALARS_H];
 double recov_ver_weight[6*NO_OF_SCALARS_H];
+double recov_primal2dual_weights[2*NO_OF_DUAL_H_VECTORS];
 } Grid;
 
 // Contains properties of the dual grid.
