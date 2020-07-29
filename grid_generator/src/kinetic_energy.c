@@ -12,7 +12,7 @@ In this file, the kinetic energy indices and weights are computed.
 #include <stdio.h>
 #include "geos95.h"
 
-int calc_kinetic_energy(double latitude_scalar[], double longitude_scalar[], int e_kin_indices[], double e_kin_weights[], double volume[], int adjacent_vector_indices_dual_h[], int to_index[], int from_index[], double area_dual_pre[], double area[], double z_scalar[], double z_vector[], int adjacent_vector_indices_h[], double latitude_vector[], double longitude_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], int to_index_dual[], int from_index_dual[], double z_vector_dual[])
+int calc_kinetic_energy_and_volume_ratios(double latitude_scalar[], double longitude_scalar[], int e_kin_indices[], double e_kin_weights[], double volume[], int adjacent_vector_indices_dual_h[], int to_index[], int from_index[], double area_dual_pre[], double area[], double z_scalar[], double z_vector[], int adjacent_vector_indices_h[], double latitude_vector[], double longitude_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], int to_index_dual[], int from_index_dual[], double z_vector_dual[], double volume_ratios[])
 {
 	int layer_index, h_index;
 	double z_value_0, z_value_1, z_value_2, z_triangle_mean, triangle_face_0, triangle_face_1, delta_z, weights_sum, weights_rescale, partial_volume;
@@ -59,14 +59,21 @@ int calc_kinetic_energy(double latitude_scalar[], double longitude_scalar[], int
 		{
 			e_kin_weights[8*i + j] = weights_rescale*e_kin_weights[8*i + j];
 		}
-		// lower w, only needed only for diagnostics
-		e_kin_indices[8*i + 6] = h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER;
-		partial_volume = find_volume(area[e_kin_indices[8*i + 6]], RADIUS + z_vector[e_kin_indices[8*i + 6]], RADIUS + z_scalar[i]);
-		e_kin_weights[8*i + 6] = 0.5*partial_volume/volume[i];
 		// upper w, only needed only for diagnostics
-		e_kin_indices[8*i + 7] = h_index + layer_index*NO_OF_VECTORS_PER_LAYER;
-		partial_volume = find_volume(area[e_kin_indices[8*i + 6]]*pow((RADIUS + z_scalar[i])/(RADIUS + z_vector[e_kin_indices[8*i + 6]]), 2), RADIUS + z_scalar[i], RADIUS + z_vector[e_kin_indices[8*i + 7]]);
+		e_kin_indices[8*i + 6] = h_index + layer_index*NO_OF_VECTORS_PER_LAYER;
+		partial_volume = find_volume(area[e_kin_indices[8*i + 6]]*pow((RADIUS + z_scalar[i])/(RADIUS + z_vector[e_kin_indices[8*i + 6]]), 2), RADIUS + z_scalar[i], RADIUS + z_vector[e_kin_indices[8*i + 6]]);
+		e_kin_weights[8*i + 6] = 0.5*partial_volume/volume[i];
+		volume_ratios[2*i + 0] = partial_volume/volume[i];
+		// lower w, only needed only for diagnostics
+		e_kin_indices[8*i + 7] = h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER;
+		partial_volume = find_volume(area[e_kin_indices[8*i + 7]], RADIUS + z_vector[e_kin_indices[8*i + 7]], RADIUS + z_scalar[i]);
 		e_kin_weights[8*i + 7] = 0.5*partial_volume/volume[i];
+		volume_ratios[2*i + 1] = partial_volume/volume[i];
+		if (fabs(volume_ratios[2*i + 0] + volume_ratios[2*i + 1] - 1) > 1e-10)
+		{
+			printf("Problem with volume ratios, volume ratio sum is %lf.\n", volume_ratios[2*i + 0] + volume_ratios[2*i + 1]);
+			exit(1);
+		}
 	}
 	double e_kin_weights_check_sum;
 	for (int i = 0; i < NO_OF_SCALARS; ++i)

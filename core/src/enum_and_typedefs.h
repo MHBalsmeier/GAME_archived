@@ -89,6 +89,7 @@ Vector_field z_vector;
 Scalar_field gravity_potential;
 Vector_field gravity_m;
 Vector_field slope;
+double volume_ratios[2*NO_OF_SCALARS];
 int e_kin_indices[8*NO_OF_SCALARS];
 double e_kin_weights[8*NO_OF_SCALARS];
 int from_index[NO_OF_VECTORS_H];
