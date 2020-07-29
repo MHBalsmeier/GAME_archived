@@ -9,7 +9,7 @@ Github repository: https://github.com/MHBalsmeier/game
 int scalar_times_vector(Scalar_field in_field_0, Vector_field in_field_1, Vector_field out_field, Grid *grid)
 {
     int layer_index, h_index, lower_index, upper_index;
-    double scalar_value;
+    double scalar_value, total_volume, upper_volume, lower_volume, upper_weight, lower_weight;
     for (int i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
@@ -20,7 +20,12 @@ int scalar_times_vector(Scalar_field in_field_0, Vector_field in_field_1, Vector
         {
             lower_index = h_index + layer_index*NO_OF_SCALARS_H;
             upper_index = h_index + (layer_index - 1)*NO_OF_SCALARS_H;
-            scalar_value = 0.5*(in_field_0[upper_index] + in_field_0[lower_index]);
+            upper_volume = grid -> volume_ratios[2*upper_index + 1]*grid -> volume[upper_index];
+            lower_volume = grid -> volume_ratios[2*lower_index + 0]*grid -> volume[lower_index];
+            total_volume = upper_volume + lower_volume;
+            upper_weight = upper_volume/total_volume;
+            lower_weight = lower_volume/total_volume;
+            scalar_value = upper_weight*in_field_0[upper_index] + lower_weight*in_field_0[lower_index];
         }
         out_field[i] = scalar_value*in_field_1[i];
     }

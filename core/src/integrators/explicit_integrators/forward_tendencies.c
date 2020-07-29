@@ -8,6 +8,7 @@ In this source file, the calculation of the tendencies, i.e. the explicit part o
 
 #include "../../enum_and_typedefs.h"
 #include "../../spatial_operators/spatial_operators.h"
+#include "../../manage_time_stepping/manage_time_stepping.h"
 #include "atmostracers.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -15,92 +16,26 @@ In this source file, the calculation of the tendencies, i.e. the explicit part o
 
 int forward_tendencies(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Interpolate_info *interpolation, Diffusion_info *diffusion_info, Config_info *config_info, int no_step_rk)
 {
-	double old_hor_grad_weight = R_D/C_D_P - 0.5;
-	double new_hor_grad_weight = 1 - old_hor_grad_weight;
-	if (config_info -> totally_first_step_bool == 1)
-	{
-		old_hor_grad_weight = 0;
-		new_hor_grad_weight = 1;
-	}
     if (config_info -> momentum_diffusion_on == 1 && no_step_rk == 2)
     {
 		dissipation(current_state -> velocity_gas, current_state -> density_dry, diffusion_info -> friction_acc, diffusion_info -> heating_diss, grid);
     }
-    calc_pot_vort(current_state -> velocity_gas, current_state -> density_dry, diagnostics -> pot_vort, grid, dualgrid);
-    int layer_index, h_index;
-    double rho_h;
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
-    {
-    	if (config_info -> tracers_on == 1)
-    	{
-			rho_h = current_state -> density_dry[i] + current_state -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];
-			diagnostics -> specific_entropy[i] = current_state -> entropy_density_gas[i]/rho_h;
-    	}
-    	else
-    		diagnostics -> specific_entropy[i] = current_state -> entropy_density_gas[i]/current_state -> density_dry[i];
-	}
-    grad(diagnostics -> specific_entropy, diagnostics -> specific_entropy_gradient, grid);
-	// Here, the pressure gradient extrapolation is managed.
+	// The calculation of the pressure gradient has been split off. It is only done at the first RK step.
 	if (no_step_rk == 0)
 	{
-		if (config_info -> totally_first_step_bool == 0)
-		{
-			for (int i = 0; i < NO_OF_VECTORS; ++i)
-			{
-				interpolation -> pressure_gradient_0_old_m[i] = diagnostics -> pressure_gradient_0_m[i];
-			}
-		}
-		else
-		{
-			for (int i = 0; i < NO_OF_VECTORS; ++i)
-			{
-				interpolation -> pressure_gradient_0_old_m[i] = 0;
-			}
-		}
-	}
-	scalar_times_vector(interpolation -> temp_interpolate, diagnostics -> specific_entropy_gradient, interpolation -> pressure_gradient_1_interpolate, grid);
-	// This is necessary for the vertical momentum equation.
-	scalar_times_vector(current_state -> temp_gas, diagnostics -> specific_entropy_gradient, diagnostics -> pressure_gradient_1, grid);
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
-    {
-    	if (config_info -> tracers_on == 1)
-    		diagnostics -> c_h_p_field[i] = spec_heat_cap_diagnostics_p(current_state -> density_dry[i], current_state -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i]);
-    	else
-    		diagnostics -> c_h_p_field[i] = C_D_P;
-	}
-    grad(current_state -> temp_gas, diagnostics -> temp_gradient, grid);
-	scalar_times_vector(diagnostics -> c_h_p_field, diagnostics -> temp_gradient, diagnostics -> pressure_gradient_0_m, grid);
-	if (no_step_rk == 0)
-	{
-		for (int i = 0; i < NO_OF_VECTORS; ++i)
-		{
-			forcings -> pressure_gradient_acc[i] = old_hor_grad_weight*(-interpolation -> pressure_gradient_0_old_m[i]) + new_hor_grad_weight*(-diagnostics -> pressure_gradient_0_m[i]) + interpolation -> pressure_gradient_1_interpolate[i];
-		}
-	}
-	// The pressure gradient has to get a deceleration factor in presence of condensates.
-	double total_density;
-	if (config_info -> tracers_on == 1)
-	{
-		for (int i = 0; i < NO_OF_SCALARS; ++i)
-		{
-			rho_h = current_state -> density_dry[i] + current_state -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];
-		    total_density = current_state -> density_dry[i];
-		    for (int k = 0; k < NO_OF_TRACERS; ++k)
-		    {
-		        total_density += current_state -> tracer_densities[k*NO_OF_SCALARS + i];
-	        }
-			diffusion_info -> pressure_gradient_decel_factor[i] = rho_h/total_density;
-		}
-		scalar_times_vector(diffusion_info -> pressure_gradient_decel_factor, forcings -> pressure_gradient_acc, forcings -> pressure_gradient_acc, grid);
+		manage_pressure_gradient(current_state, grid, dualgrid, diagnostics, forcings, interpolation, diffusion_info, config_info, no_step_rk);
 	}
 	// Here, the gaseous flux density is prepared fore the generalized Coriolis term.
     scalar_times_vector(current_state -> density_dry, current_state -> velocity_gas, diagnostics -> mass_dry_flux_density, grid);
+    // Now, the potential vorticity is evaluated.
+    calc_pot_vort(current_state -> velocity_gas, current_state -> density_dry, diagnostics -> pot_vort, grid, dualgrid);
     // Now, the generalized Coriolis term is evaluated.
     coriolis_gen(diagnostics -> mass_dry_flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid);
     // Horizontal kinetic energy is prepared for the gradient term of the Lamb transformation.
     kinetic_energy(current_state -> velocity_gas, diagnostics -> e_kin_h, grid, 0);
     grad(diagnostics -> e_kin_h, forcings -> e_kin_h_grad, grid);
     // Now the explicit forces are added up.
+    int layer_index, h_index;
     double metric_term, vertical_velocity, hor_non_trad_cori_term;
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {

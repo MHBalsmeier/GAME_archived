@@ -175,10 +175,9 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 	double *vertical_entropy_vector = malloc(NO_OF_LAYERS*sizeof(double));
 	double *vertical_entropy_gradient = malloc((NO_OF_LAYERS - 1)*sizeof(double));
 	double *temp_interface_values = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *second_derivative_vector = malloc(NO_OF_LAYERS*sizeof(double));
-	double delta_z;
-	int i;
-	for (i = 0; i < NO_OF_SCALARS_H; ++i)
+	int upper_index, lower_index;
+	double delta_z, upper_weight, lower_weight, upper_volume, lower_volume, total_volume;
+	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
 		{
@@ -189,17 +188,16 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 		{
 			vertical_velocity[j] = state_new -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
 		}
-		for (int j = 1; j < NO_OF_LAYERS - 1; ++j)
-		{
-			second_derivative_vector[j] = state_old -> temp_gas[i + (j - 1)*NO_OF_SCALARS_H] - 2*state_old -> temp_gas[i + j*NO_OF_SCALARS_H] + state_old -> temp_gas[i + (j + 1)*NO_OF_SCALARS_H];
-		}
-		second_derivative_vector[0] = second_derivative_vector[1];
-		second_derivative_vector[NO_OF_LAYERS - 1] = second_derivative_vector[NO_OF_LAYERS - 2];
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
-			temp_interface_values[j] = 0.5*(state_old -> temp_gas[i + j*NO_OF_SCALARS_H] + state_old -> temp_gas[i + (j + 1)*NO_OF_SCALARS_H]);
-			// fourth order flux for stability
-			temp_interface_values[j] += -1.0/12*(second_derivative_vector[j] + second_derivative_vector[j + 1]) - sign(state_old -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER])*1.0/12*(second_derivative_vector[j + 1] - second_derivative_vector[j]);
+            lower_index = i + (j + 1)*NO_OF_SCALARS_H;
+            upper_index = i + j*NO_OF_SCALARS_H;
+            upper_volume = grid -> volume_ratios[2*upper_index + 1]*grid -> volume[upper_index];
+            lower_volume = grid -> volume_ratios[2*lower_index + 0]*grid -> volume[lower_index];
+            total_volume = upper_volume + lower_volume;
+            upper_weight = upper_volume/total_volume;
+            lower_weight = lower_volume/total_volume;
+			temp_interface_values[j] = upper_weight*state_old -> temp_gas[i + j*NO_OF_SCALARS_H] + lower_weight*state_old -> temp_gas[i + (j + 1)*NO_OF_SCALARS_H];
 		}
 		divv_v_columns(vertical_velocity, vertical_velocity_divergence, i, grid);
 		// filling up the original vectors
@@ -239,7 +237,6 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 	}
 	free(vertical_entropy_vector);
 	free(vertical_entropy_gradient);
-	free(second_derivative_vector);
 	free(temp_interface_values);
 	free(vertical_velocity);
 	free(vertical_velocity_divergence);

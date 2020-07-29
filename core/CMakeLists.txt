@@ -8,7 +8,6 @@ src/manage_time_stepping/manage_interpolation.c
 src/integrators/explicit_integrators/forward_tendencies.c
 src/integrators/explicit_integrators/backward_tendencies.c
 src/integrators/explicit_integrators/entropy_density_gas.c
-src/integrators/explicit_integrators/integrate
 src/integrators/explicit_integrators/integrate_continuity_dry.c
 src/integrators/explicit_integrators/integrate_temp_gas.c
 src/integrators/explicit_integrators/integrate_tracers.c
@@ -19,7 +18,6 @@ src/spatial_operators/scalar_times_scalar.c
 src/spatial_operators/divergence_operators.c
 src/spatial_operators/scalar_times_vector.c
 src/spatial_operators/gradient_operators.c
-src/spatial_operators/
 src/spatial_operators/kinetic_energy.c
 src/diagnostics/thermodynamic_diagnostics/thermodynamic_diagnostics.c
 src/diagnostics/dynamic_diagnostics/recovery/vertical_coriolis_gen.c

@@ -22,6 +22,7 @@ int backward_tendencies(State *state_old, State *state_new, Interpolate_info *in
     if (config_info -> scalar_diffusion_on == 1)
     {
         calc_temp_diffusion_coeffs(state_old -> temp_gas, state_old -> density_dry, diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v);
+		grad(state_old -> temp_gas, diagnostics -> temp_gradient, grid);
         scalar_times_vector_scalar_h_v(diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v, diagnostics -> temp_gradient, diagnostics -> temperature_flux_density, grid);
         divv(diagnostics -> temperature_flux_density, diffusion_info -> temp_diffusion_heating, grid, 0);
 		for (int i = 0; i < NO_OF_SCALARS; ++i)

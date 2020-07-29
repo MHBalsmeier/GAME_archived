@@ -131,7 +131,6 @@ Vector_field temp_gas_flux;
 Vector_field temp_gradient;
 Scalar_field specific_entropy;
 Curl_field pot_vort;
-Vector_field specific_entropy_gradient;
 Scalar_field c_h_p_field;
 Scalar_field e_kin_h;
 // nabla h
