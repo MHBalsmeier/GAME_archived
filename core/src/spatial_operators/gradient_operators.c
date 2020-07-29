@@ -26,9 +26,13 @@ int grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
         }
     }
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-        out_field[i] = out_field[i + NO_OF_VECTORS_PER_LAYER];
+    {
+        out_field[i] = out_field[i + NO_OF_VECTORS_PER_LAYER] + out_field[i + NO_OF_VECTORS_PER_LAYER] - out_field[i + 2*NO_OF_VECTORS_PER_LAYER];
+    }
     for (int i = NO_OF_VECTORS - NO_OF_SCALARS_H; i < NO_OF_VECTORS; ++i)
-        out_field[i] = out_field[i - NO_OF_VECTORS_PER_LAYER];
+    {
+        out_field[i] = out_field[i - NO_OF_VECTORS_PER_LAYER] + out_field[i - NO_OF_VECTORS_PER_LAYER] - out_field[i - 2*NO_OF_VECTORS_PER_LAYER];
+    }
     for (int i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
@@ -62,11 +66,11 @@ int scalar_times_grad(Scalar_field in_field_for_prefactor, Scalar_field in_field
     }
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
-        out_field[i] = out_field[i + NO_OF_VECTORS_PER_LAYER];
+        out_field[i] = out_field[i + NO_OF_VECTORS_PER_LAYER] + out_field[i + NO_OF_VECTORS_PER_LAYER] - out_field[i + 2*NO_OF_VECTORS_PER_LAYER];
     }
     for (int i = NO_OF_VECTORS - NO_OF_SCALARS_H; i < NO_OF_VECTORS; ++i)
     {
-        out_field[i] = out_field[i - NO_OF_VECTORS_PER_LAYER];
+        out_field[i] = out_field[i - NO_OF_VECTORS_PER_LAYER] + out_field[i - NO_OF_VECTORS_PER_LAYER] - out_field[i - 2*NO_OF_VECTORS_PER_LAYER];
     }
 	scalar_times_vector(in_field_for_prefactor, out_field, out_field, grid);
     for (int i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)

@@ -11,7 +11,7 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
 {
     int layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area, index_0, index_1, index_2, index_3, sign_0, sign_1, sign_2, sign_3;
     double rhombus_circ, dist_0, dist_1, dist_2, dist_3, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient, density_value;
-    for (int i = 0; i < NO_OF_LAYERS*(2*NO_OF_VECTORS_H) + NO_OF_VECTORS_H; ++i)
+    for (int i = NO_OF_VECTORS_H; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {
         layer_index = i/(2*NO_OF_VECTORS_H);
         h_index = i - layer_index*(2*NO_OF_VECTORS_H);
@@ -58,29 +58,20 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
        		out_field[i] += dualgrid -> f_vec[h_index];
        		// The whole stuff must be divided through the density to obtain something similar to a potential vorticity.
 			density_value = 0.5*(density_field[layer_index*NO_OF_SCALARS_H + grid -> from_index[edge_vector_index_h]] + density_field[layer_index*NO_OF_SCALARS_H + grid -> to_index[edge_vector_index_h]]);
-			out_field[i] = out_field[i]/density_value;
         }
         // tangential vorticities
         else
         {
-            if (layer_index == 0 || layer_index == NO_OF_LAYERS)
+        	// At the lower boundary, w vanishes. Furthermore, the covariant velocity at the surface is also zero.
+            if (layer_index == NO_OF_LAYERS)
             {
-                index_1 = layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> h_curl_indices[4*h_index + 1];
-                index_3 = layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> h_curl_indices[4*h_index + 3];
-                sign_1 = dualgrid -> h_curl_signs[4*h_index + 1];
-                sign_3 = dualgrid -> h_curl_signs[4*h_index + 3];
-                out_field[i] = 1/dualgrid -> area[layer_index*(2*NO_OF_VECTORS_H) + h_index]*(grid -> normal_distance[index_1]*sign_1*velocity_field[index_1] + grid -> normal_distance[index_3]*sign_3*velocity_field[index_3]);
+                index_2 = layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> h_curl_indices[4*h_index + 2] - NO_OF_VECTORS_H;
+                sign_2 = dualgrid -> h_curl_signs[4*h_index + 2];
+                dist_2 = grid -> normal_distance[index_2];
+                horizontal_covariant_normalized(velocity_field, layer_index - 1, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_2);
+                out_field[i] = 1/dualgrid -> area[layer_index*(2*NO_OF_VECTORS_H) + h_index]*dist_2*sign_2*covar_2;
        			out_field[i] += dualgrid -> f_vec[h_index];
-				density_value = density_field[layer_index*NO_OF_SCALARS_H + h_index];
-				if (layer_index == 0)
-				{
-					density_value = 0.5*(density_field[grid -> from_index[h_index]] + density_field[grid -> to_index[h_index]]);
-				}
-				else if (layer_index == NO_OF_LAYERS)
-				{
-					density_value = 0.5*(density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]] + density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]);
-				}
-				out_field[i] = out_field[i]/density_value;
+				density_value = 0.5*(density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]] + density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]);
             }
             else
             {
@@ -106,9 +97,14 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
                 out_field[i] = 1/dualgrid -> area[layer_index*(2*NO_OF_VECTORS_H) + h_index]*(dist_0*sign_0*covar_0 + dist_1*sign_1*velocity_field[index_1] + dist_2*sign_2*covar_2 + dist_3*sign_3*velocity_field[index_3]);
        			out_field[i] += dualgrid -> f_vec[h_index];
 				density_value = 0.25*(density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]] + density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]] + density_field[layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]] + density_field[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]]);
-				out_field[i] = out_field[i]/density_value;
             }
         }
+		out_field[i] = out_field[i]/density_value;
+    }
+    // At the upper boundary, the tangential vorticity is assumed to have no vertical shear.
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+    {
+    	out_field[i] = out_field[i + 2*NO_OF_VECTORS_H];
     }
     return 0;
 }

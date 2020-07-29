@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
     printf(GREEN "finished.\n" RESET);
     // setting indices related to the curl of a vector field
     printf("Setting horizontal curl indices ... ");
-	retval = set_horizontal_curl_indices(direction_dual, direction, h_curl_indices, from_index, to_index, ORTH_CRITERION_DEG, h_curl_signs);
+	set_horizontal_curl_indices(direction_dual, direction, h_curl_indices, from_index, to_index, ORTH_CRITERION_DEG, h_curl_signs);
     printf(GREEN "finished.\n" RESET);
     free(direction_dual);
     printf("Setting vorticity indices ... ");
