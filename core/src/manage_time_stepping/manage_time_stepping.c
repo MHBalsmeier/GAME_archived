@@ -43,6 +43,7 @@ int manage_time_stepping(State *state_0, State *state_p1, Interpolate_info *inte
 		three_band_solver_ver_den_dry(state_0, state_p1, state_tendency, delta_t_rk, grid);
 		// Now the entropy density is at the new step is calculated using the advection equation in flux form.
 		three_band_solver_ver_entropy_density_gas(state_0, state_p1, state_tendency, delta_t_rk, grid);
+		temperature_diagnostics(state_p1);
 		// exit(1);
 		// Vertical tracer advection with 3-band matrices.
 		if (config_info -> tracers_on == 1)
