@@ -6,5 +6,4 @@ Github repository: https://github.com/MHBalsmeier/game
 int manage_time_stepping(State *, State *, Interpolate_info *, Grid *, Dualgrid *, Scalar_field, State *, Diagnostics *, Forcings *, Diffusion_info *, Config_info *, double);
 int setup_interpolation(State *, Interpolate_info *);
 int update_interpolation(State *, State *, Interpolate_info *);
-int set_interpolated_temperature(State *, State *, Interpolate_info *, int);
 int manage_pressure_gradient(State *, Grid *, Dualgrid *, Diagnostics *, Forcings *, Interpolate_info *, Diffusion_info *, Config_info *, int);

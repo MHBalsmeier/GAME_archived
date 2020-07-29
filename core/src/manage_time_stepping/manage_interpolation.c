@@ -11,22 +11,6 @@ The vertical advection of horizontal momentum is organized here.
 #include <omp.h>
 #include "../spatial_operators/spatial_operators.h"
 
-int set_interpolated_temperature(State *state_old, State *state_new, Interpolate_info *interpolate, int totally_first_bool)
-{
-	double old_weight = R_D/C_D_P - 0.5;
-	double new_weight = 1 - old_weight;
-	if (totally_first_bool == 1)
-	{
-		old_weight = 1;
-		new_weight = 0;
-	}
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
-	{
-		interpolate -> temp_interpolate[i] = old_weight*state_old -> temp_gas[i] + new_weight*state_new -> temp_gas[i];
-	}
-	return 0;
-}
-
 int manage_pressure_gradient(State *current_state, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Interpolate_info *interpolation, Diffusion_info *diffusion_info, Config_info *config_info, int no_step_rk)
 {
 	double old_hor_grad_weight = R_D/C_D_P - 0.5;
@@ -53,6 +37,7 @@ int manage_pressure_gradient(State *current_state, Grid *grid, Dualgrid *dualgri
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
 		{
 			interpolation -> pressure_gradient_0_old_m[i] = diagnostics -> pressure_gradient_0_m[i];
+			interpolation -> pressure_gradient_1_old[i] = diagnostics -> pressure_gradient_1[i];
 		}
 	}
 	else
@@ -60,6 +45,7 @@ int manage_pressure_gradient(State *current_state, Grid *grid, Dualgrid *dualgri
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
 		{
 			interpolation -> pressure_gradient_0_old_m[i] = 0;
+			interpolation -> pressure_gradient_1_old[i] = 0;
 		}
 	}
 	// The new pressure gradient os only calculated at the first RK step.
@@ -71,12 +57,10 @@ int manage_pressure_gradient(State *current_state, Grid *grid, Dualgrid *dualgri
 			diagnostics -> c_h_p_field[i] = C_D_P;
 	}
 	scalar_times_grad(diagnostics -> c_h_p_field, current_state -> temp_gas, diagnostics -> pressure_gradient_0_m, grid);
-	scalar_times_grad(interpolation -> temp_interpolate, diagnostics -> specific_entropy, interpolation -> pressure_gradient_1_interpolate, grid);
-	// This is necessary for the vertical momentum equation.
 	scalar_times_grad(current_state -> temp_gas, diagnostics -> specific_entropy, diagnostics -> pressure_gradient_1, grid);
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
-		forcings -> pressure_gradient_acc[i] = old_hor_grad_weight*(-interpolation -> pressure_gradient_0_old_m[i]) + new_hor_grad_weight*(-diagnostics -> pressure_gradient_0_m[i]) + interpolation -> pressure_gradient_1_interpolate[i];
+		forcings -> pressure_gradient_acc[i] = old_hor_grad_weight*(-interpolation -> pressure_gradient_0_old_m[i] + interpolation -> pressure_gradient_1_old[i]) + new_hor_grad_weight*(-diagnostics -> pressure_gradient_0_m[i] + diagnostics -> pressure_gradient_1[i]);
 	}
 	// The pressure gradient has to get a deceleration factor in presence of condensates.
 	double total_density;

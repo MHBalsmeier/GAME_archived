@@ -166,8 +166,7 @@ int rad_update;
 // This is necessary for ensuring cancellation of energetically important terms, see Gassmann and Herzog.
 typedef struct interpolate_info {
 Vector_field pressure_gradient_0_old_m;
-Scalar_field temp_interpolate;
-Vector_field pressure_gradient_1_interpolate;
+Vector_field pressure_gradient_1_old;
 } Interpolate_info;
 
 // Contains everything on turbulence parametrizations as well as tracer-related quantities.

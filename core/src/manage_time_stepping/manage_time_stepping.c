@@ -18,9 +18,6 @@ int manage_time_stepping(State *state_0, State *state_p1, Interpolate_info *inte
 	If radiation is updated, it is done at the first step.
 	*/
 	double delta_t_rk;
-	// At the totally first step, now extrapolation in the temperature is possible.
-	if (config_info -> totally_first_step_bool == 1)
-		set_interpolated_temperature(state_0, state_p1, interpolation, 1);
 	for (int i = 0; i < 3; ++i)
 	{
 		// If tracers are on, phase transitions are only updated at the third step.
@@ -51,7 +48,6 @@ int manage_time_stepping(State *state_0, State *state_p1, Interpolate_info *inte
 		if (config_info -> tracers_on == 1)
 			three_band_solver_ver_tracers(state_0, state_p1, state_tendency, delta_t_rk, grid);
     }
-	set_interpolated_temperature(state_0, state_p1, interpolation, 0);
     return 0;
 }
 
