@@ -176,7 +176,10 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 	double *vertical_entropy_gradient = malloc((NO_OF_LAYERS - 1)*sizeof(double));
 	double *temp_interface_values = malloc((NO_OF_LAYERS - 1)*sizeof(double));
 	int upper_index, lower_index;
-	double delta_z, upper_weight, lower_weight, upper_volume, lower_volume, total_volume;
+	double delta_z, upper_weight, lower_weight, upper_volume, lower_volume, total_volume, damping_coeff, damping_coeff_max, damping_start_height, z_above_damping;
+	// This is for Klemp (2008).
+	damping_start_height = 0.75*grid -> z_vector[0];
+	damping_coeff_max = 0.2;
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
@@ -231,7 +234,13 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
 			state_new -> temp_gas[i + j*NO_OF_SCALARS_H] = solution_vector[2*j];
-			state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] = solution_vector[2*j + 1];
+			// Klemp (2008) upper boundary layer
+			z_above_damping = grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - damping_start_height;
+			if (z_above_damping < 0)
+				damping_coeff = 0;
+			else 
+				damping_coeff = damping_coeff_max*pow(sin(0.5*M_PI*z_above_damping/(grid -> z_vector[0] - damping_start_height)), 2);
+			state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] = solution_vector[2*j + 1]/(1 + delta_t*damping_coeff);
 		}
 		state_new -> temp_gas[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H] = solution_vector[2*(NO_OF_LAYERS - 1)];
 	}
