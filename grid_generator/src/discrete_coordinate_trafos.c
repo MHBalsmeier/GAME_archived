@@ -497,6 +497,27 @@ int build_icosahedron(double latitude_ico[], double longitude_ico[], int edge_ve
     edge_vertices[28][1] = 11;
     edge_vertices[29][0] = 10;
     edge_vertices[29][1] = 11;
+    int *vertices_check_counter = calloc(NO_OF_EDGES, sizeof(int));
+    for (int i = 0; i < NO_OF_PENTAGONS; ++i)
+    {
+    	for (int j = 0; j < NO_OF_EDGES; ++j)
+    	{
+    		for (int k = 0; k < 2; ++k)
+    		{
+    			if (edge_vertices[j][k] == i)
+    				vertices_check_counter[i] = vertices_check_counter[i] + 1;
+    		}
+    	}
+    }
+    for (int i = 0; i < NO_OF_PENTAGONS; ++i)
+    {
+    	if (vertices_check_counter[i] != 5)
+    	{
+    		printf("Error with vertices, position 0.\n");
+    		exit(1);
+    	}
+    	vertices_check_counter[i] = 0;
+    }
     face_vertices[0][0] = 0;
     face_vertices[0][1] = 1;
     face_vertices[0][2] = 2;
@@ -557,12 +578,33 @@ int build_icosahedron(double latitude_ico[], double longitude_ico[], int edge_ve
     face_vertices[19][0] = 11;
     face_vertices[19][1] = 10;
     face_vertices[19][2] = 9;
+    for (int i = 0; i < NO_OF_PENTAGONS; ++i)
+    {
+    	for (int j = 0; j < NO_OF_BASIC_TRIANGLES; ++j)
+    	{
+    		for (int k = 0; k < 3; ++k)
+    		{
+    			if (face_vertices[j][k] == i)
+    				vertices_check_counter[i] = vertices_check_counter[i] + 1;
+    		}
+    	}
+    }
+    for (int i = 0; i < NO_OF_PENTAGONS; ++i)
+    {
+    	if (vertices_check_counter[i] != 5)
+    	{
+    		printf("Error with vertices, position 1.\n");
+    		exit(1);
+    	}
+    }
+    free(vertices_check_counter);
     int edge_other_vertex_index, check_index;
-    for (int i = 0; i < 20; ++i)
+    int *edges_check_counter = calloc(NO_OF_EDGES, sizeof(int));
+    for (int i = 0; i < NO_OF_BASIC_TRIANGLES; ++i)
     {
         for (int j = 0; j < 3; ++j)
         {
-            for (int k = 0; k < 30; ++k)
+            for (int k = 0; k < NO_OF_EDGES; ++k)
             {
                 if (edge_vertices[k][0] == face_vertices[i][j] || edge_vertices[k][1] == face_vertices[i][j])
                 {
@@ -579,6 +621,7 @@ int build_icosahedron(double latitude_ico[], double longitude_ico[], int edge_ve
                     if (edge_vertices[k][edge_other_vertex_index] == face_vertices[i][check_index])
                     {
                         face_edges[i][j] = k;
+                        edges_check_counter[k] = edges_check_counter[k] + 1;
                         if (edge_other_vertex_index == 1)
                             face_edges_reverse[i][j] = 0;
                         if (edge_other_vertex_index == 0)
@@ -588,6 +631,15 @@ int build_icosahedron(double latitude_ico[], double longitude_ico[], int edge_ve
             }
         }
     }
+    for (int i = 0; i < NO_OF_EDGES; ++i)
+    {
+    	if (edges_check_counter[i] != 2)
+	    {
+	    	printf("Error with edges.\n");
+	    	exit(1);
+	    }
+    }
+    free(edges_check_counter);
     return 0;
 }
 

@@ -172,24 +172,24 @@ int main(int argc, char *argv[])
     	retval = read_horizontal_generators(latitude_scalar, longitude_scalar, SCALAR_H_FILE);
     }
     printf("Connecting vector points to scalar points ... ");
-    retval = set_from_to_index(from_index, to_index, face_edges, face_edges_reverse, face_vertices, edge_vertices);
-	retval = calc_adjacent_vector_indices_h(from_index, to_index, adjacent_signs_h, adjacent_vector_indices_h);
+    set_from_to_index(from_index, to_index, face_edges, face_edges_reverse, face_vertices, edge_vertices);
+	calc_adjacent_vector_indices_h(from_index, to_index, adjacent_signs_h, adjacent_vector_indices_h);
     printf(GREEN "finished.\n" RESET);
     printf("Connecting dual vector points to dual scalar points ... ");
     retval = set_from_to_index_dual(from_index_dual, to_index_dual, face_edges, face_edges_reverse);
     printf(GREEN "finished.\n" RESET);
 	if (OPTIMIZE_BOOL == 1)
 	{
-		retval = optimize_to_scvt(latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, N_ITERATIONS, face_edges, face_edges_reverse, face_vertices, edge_vertices, adjacent_vector_indices_h, from_index_dual, to_index_dual);
+		optimize_to_scvt(latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, N_ITERATIONS, face_edges, face_edges_reverse, face_vertices, edge_vertices, adjacent_vector_indices_h, from_index_dual, to_index_dual);
 	}
-	retval = set_scalar_h_dual_coords(latitude_scalar_dual, longitude_scalar_dual, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
-	retval = set_vector_h_doubles(from_index, to_index, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, direction);
+	set_scalar_h_dual_coords(latitude_scalar_dual, longitude_scalar_dual, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
+	set_vector_h_doubles(from_index, to_index, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, direction);
     if (retval != 0)
     {
     	printf("set_vector_h_doubles failed with exit code %d.\n", retval);
     	exit(1);
     }
-    retval = calc_triangle_face_unity(triangle_face_unit_sphere, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
+    calc_triangle_face_unity(triangle_face_unit_sphere, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
     if (retval != 0)
     {
     	printf("calc_triangle_face_unity failed with exit code %d.\n", retval);

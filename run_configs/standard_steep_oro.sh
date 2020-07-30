@@ -2,7 +2,7 @@
 operator=MHB
 overwrite_run_id=1
 run_id=standard_steep_oro
-run_span=21600
+run_span=43200
 write_out_interval=900
 grid_props_file=grids/B5L26T30000_O1_OL17_SCVT.nc
 init_state_filename=test_1_B5L26T30000_O1_OL17_SCVT.nc

@@ -55,18 +55,18 @@ int calc_adjacent_vector_indices_h(int from_index[], int to_index[], int adjacen
             adjacent_signs_h[6*i + 5] = 0;
         }
     }
-    int NO_OF_edges, double_check, sign_sum_check;
+    int no_of_edges, double_check, sign_sum_check;
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         counter = 0;
         sign_sum_check = 0;
         for (int j = 0; j < NO_OF_SCALARS_H; ++j)
         {
-            NO_OF_edges = 6;
+            no_of_edges = 6;
             if (j < NO_OF_PENTAGONS)
-                NO_OF_edges = 5;
+                no_of_edges = 5;
             double_check = 0;
-            for (int k = 0; k < NO_OF_edges; ++k)
+            for (int k = 0; k < no_of_edges; ++k)
             {
                 if (adjacent_vector_indices_h[6*j + k] == i)
                 {

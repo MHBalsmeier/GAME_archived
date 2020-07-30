@@ -2,7 +2,7 @@
 operator=MHB
 overwrite_run_id=1
 run_id=standard_0_oro
-run_span=86400
+run_span=43200
 write_out_interval=900
 grid_props_file=grids/B5L26T30000_O0_OL17_SCVT.nc
 init_state_filename=test_0_B5L26T30000_O0_OL17_SCVT.nc
