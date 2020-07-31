@@ -19,7 +19,7 @@ int backward_tendencies(State *state_old, State *state_new, Interpolate_info *in
     }
     double rho_h, c_h_v;
     // Diffusion gets updated here.
-    if (config_info -> scalar_diffusion_on == 1)
+    if (config_info -> scalar_diffusion_on == 1 && no_rk_step == 2)
     {
         calc_temp_diffusion_coeffs(state_old -> temp_gas, state_old -> density_dry, diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v);
 		grad(state_old -> temp_gas, diagnostics -> temp_gradient, grid);

@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
     printf("Calculating vertical faces, pre version ... ");
 	calculate_vertical_faces(area, z_vector_dual, normal_distance_dual, TOA);
     printf(GREEN "finished.\n" RESET);
-    printf("Modifying dual areas for orography ... ");
+    printf("Modifying dual areas for rhombus vorticity calculation ... ");
 	rescale_area_dual(area_dual, z_vector, from_index_dual, to_index_dual, area_dual_pre, z_vector_dual);
     printf(GREEN "finished.\n" RESET);
     // more advanced stuff: tangential vector reconstruction and kinetic energy

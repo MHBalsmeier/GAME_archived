@@ -14,7 +14,7 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
     for (int i = NO_OF_VECTORS_H; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {
         layer_index = i/(2*NO_OF_VECTORS_H);
-        h_index = i - layer_index*(2*NO_OF_VECTORS_H);
+        h_index = i - layer_index*2*NO_OF_VECTORS_H;
         // Rhombus vorticities (stand vertically)
         if (h_index >= NO_OF_VECTORS_H)
         {
