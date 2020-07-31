@@ -75,7 +75,7 @@ VECTOR_POINTS_PER_INNER_FACE = (int) (1.5*(pow(2, RES_ID) - 1)*pow(2, RES_ID))};
 typedef double Scalar_field[NO_OF_SCALARS];
 typedef double Vector_field[NO_OF_VECTORS];
 typedef double Dual_vector_field[NO_OF_DUAL_VECTORS];
-typedef double Curl_field[NO_OF_LAYERS*(NO_OF_VECTORS_H + NO_OF_VECTORS_H) + NO_OF_VECTORS_H];
+typedef double Curl_field[NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H];
 typedef double Tracer_densities[NO_OF_TRACERS*NO_OF_SCALARS];
 typedef double Tracer_density_temperatures[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS];
 
@@ -100,7 +100,6 @@ int adjacent_signs_h[6*NO_OF_SCALARS_H];
 int trsk_modified_velocity_indices[10*NO_OF_VECTORS_H];
 int trsk_modified_curl_indices[10*NO_OF_VECTORS_H];
 double trsk_modified_weights[10*NO_OF_VECTORS_H];
-int recov_ver_index[6*NO_OF_SCALARS_H];
 double recov_ver_weight[6*NO_OF_LEVELS*NO_OF_SCALARS_H];
 double recov_primal2dual_weights[2*NO_OF_DUAL_H_VECTORS];
 } Grid;

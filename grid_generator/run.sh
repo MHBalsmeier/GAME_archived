@@ -1,7 +1,7 @@
 # This source file is part of the Global Atmospheric Modeling Framework (GAME), which is released under the MIT license.
 # Github repository: https://github.com/MHBalsmeier/game
 
-oro_id=3
+oro_id=2
 optimize=1
 n_iterations=0
 use_scalar_h_coords_file=1

@@ -33,7 +33,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     int *e_kin_indices = malloc(8*NO_OF_SCALARS*sizeof(int));
     int *to_index = malloc(NO_OF_VECTORS_H*sizeof(int));
     int *from_index = malloc(NO_OF_VECTORS_H*sizeof(int));
-    int *recov_ver_index = malloc(6*NO_OF_LEVELS*NO_OF_SCALARS_H*sizeof(int));
     int *trsk_modified_velocity_indices = malloc(10*NO_OF_VECTORS_H*sizeof(int));
     int *trsk_modified_curl_indices = malloc(10*NO_OF_VECTORS_H*sizeof(int));
     int *adjacent_vector_indices_h = malloc(6*NO_OF_SCALARS_H*sizeof(int));
@@ -43,7 +42,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     int *vorticity_signs = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int *h_curl_signs = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int ncid, retval;
-    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_modified_weights_id, recov_ver_weight_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, recov_ver_index_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, direction_id, gravity_potential_id, e_kin_weights_id, e_kin_indices_id, slope_id, volume_ratios_id, recov_primal2dual_weights_id;
+    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_modified_weights_id, recov_ver_weight_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, direction_id, gravity_potential_id, e_kin_weights_id, e_kin_indices_id, slope_id, volume_ratios_id, recov_primal2dual_weights_id;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "normal_distance", &normal_distance_id)))
@@ -83,8 +82,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     if ((retval = nc_inq_varid(ncid, "trsk_modified_velocity_indices", &trsk_modified_velocity_indices_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "trsk_modified_curl_indices", &trsk_modified_curl_indices_id)))
-        ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "recov_ver_index", &recov_ver_index_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "adjacent_signs_h", &adjacent_signs_h_id)))
         ERR(retval);
@@ -146,8 +143,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, trsk_modified_curl_indices_id, &trsk_modified_curl_indices[0])))
         ERR(retval);
-    if ((retval = nc_get_var_int(ncid, recov_ver_index_id, &recov_ver_index[0])))
-        ERR(retval);
     if ((retval = nc_get_var_int(ncid, adjacent_signs_h_id, &adjacent_signs_h[0])))
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, vorticity_signs_id, &vorticity_signs[0])))
@@ -185,6 +180,39 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
             dualgrid -> vorticity_signs[4*i + j] = vorticity_signs[4*i + j];
             if (dualgrid -> vorticity_signs[4*i + j] != -1 && dualgrid -> vorticity_signs[4*i + j] != 1)
                 grid_check_failed();
+            dualgrid -> h_curl_indices[4*i + j] = h_curl_indices[4*i + j];
+            if (dualgrid -> h_curl_indices[4*i + j] >= 2*NO_OF_VECTORS_H + NO_OF_SCALARS_H || dualgrid -> h_curl_indices[4*i + j] < 0)
+                grid_check_failed();
+            dualgrid -> h_curl_signs[4*i + j] = h_curl_signs[4*i + j];
+            if (dualgrid -> h_curl_signs[4*i + j] != -1 && dualgrid -> h_curl_signs[4*i + j] != 1)
+                grid_check_failed();
+        }
+        grid -> to_index[i] = to_index[i];
+        if (grid -> to_index[i] >= NO_OF_SCALARS_H || grid -> to_index[i] < 0)
+            grid_check_failed();
+        grid -> from_index[i] = from_index[i];
+        if (grid -> from_index[i] >= NO_OF_SCALARS_H || grid -> from_index[i] < 0)
+            grid_check_failed();
+        grid -> direction[i] = direction[i];
+        if (fabs(grid -> direction[i]) >= 1.0001*M_PI)
+            grid_check_failed();
+        for (int j = 0; j < 10; ++j)
+        {
+            grid -> trsk_modified_velocity_indices[10*i + j] = trsk_modified_velocity_indices[10*i + j];
+            if (grid -> trsk_modified_velocity_indices[10*i + j] >= NO_OF_VECTORS_H || grid -> trsk_modified_velocity_indices[10*i + j] < 0)
+                grid_check_failed();
+            grid -> trsk_modified_curl_indices[10*i + j] = trsk_modified_curl_indices[10*i + j];
+            if (grid -> trsk_modified_curl_indices[10*i + j] >= NO_OF_VECTORS_H || grid -> trsk_modified_curl_indices[10*i + j] < 0)
+                grid_check_failed();
+            grid -> trsk_modified_weights[10*i + j] = trsk_modified_weights[10*i + j];
+            if (fabs(grid -> trsk_modified_weights[10*i + j]) >= 0.30)
+                grid_check_failed();
+		}
+        for (int j = 0; j < 3; ++j)
+        {
+		    dualgrid -> f_vec[3*i + j] = f_vec[3*i + j];
+		    if (fabs(dualgrid -> f_vec[3*i + j]) > 2*OMEGA)
+		        grid_check_failed();
         }
     }
     double check_sum = 0;
@@ -250,39 +278,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         if (fabs(grid -> slope[i]) > 1)
         	grid_check_failed();
     }
-    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-    {
-        grid -> to_index[i] = to_index[i];
-        if (grid -> to_index[i] >= NO_OF_SCALARS_H || grid -> to_index[i] < 0)
-            grid_check_failed();
-        grid -> from_index[i] = from_index[i];
-        if (grid -> from_index[i] >= NO_OF_SCALARS_H || grid -> from_index[i] < 0)
-            grid_check_failed();
-        grid -> direction[i] = direction[i];
-        if (fabs(grid -> direction[i]) >= 1.0001*M_PI)
-            grid_check_failed();
-        for (int j = 0; j < 10; ++j)
-        {
-            grid -> trsk_modified_velocity_indices[10*i + j] = trsk_modified_velocity_indices[10*i + j];
-            if (grid -> trsk_modified_velocity_indices[10*i + j] >= NO_OF_VECTORS_H || grid -> trsk_modified_velocity_indices[10*i + j] < 0)
-                grid_check_failed();
-            grid -> trsk_modified_curl_indices[10*i + j] = trsk_modified_curl_indices[10*i + j];
-            if (grid -> trsk_modified_curl_indices[10*i + j] >= NO_OF_VECTORS_H || grid -> trsk_modified_curl_indices[10*i + j] < 0)
-                grid_check_failed();
-            grid -> trsk_modified_weights[10*i + j] = trsk_modified_weights[10*i + j];
-            if (fabs(grid -> trsk_modified_weights[10*i + j]) >= 0.30)
-                grid_check_failed();
-		}
-    }
-    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-    {
-        for (int j = 0; j < 6; ++j)
-        {
-            grid -> recov_ver_index[6*i + j] = recov_ver_index[6*i + j];
-            if (grid -> recov_ver_index[6*i + j] >= NO_OF_VECTORS_H || grid -> recov_ver_index[6*i + j] < 0)
-                grid_check_failed();
-        }
-    }
     for (int i = 0; i < NO_OF_LEVELS*NO_OF_SCALARS_H; ++i)
     {
         for (int j = 0; j < 6; ++j)
@@ -292,29 +287,11 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
                 grid_check_failed();
         }
     }
-    for (int i = 0; i < 3*NO_OF_VECTORS_H; ++i)
-    {
-        dualgrid -> f_vec[i] = f_vec[i];
-        if (fabs(dualgrid -> f_vec[i]) > 2*OMEGA)
-            grid_check_failed();
-    }
     for (int i = 0; i < NO_OF_DUAL_H_VECTORS + NO_OF_H_VECTORS; ++i)
     {
         dualgrid -> area[i] = area_dual[i];
         if (dualgrid -> area[i] <= 0)
             grid_check_failed();
-    }
-    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-    {
-        for (int j = 0; j < 4; ++j)
-        {
-            dualgrid -> h_curl_indices[4*i + j] = h_curl_indices[4*i + j];
-            if (dualgrid -> h_curl_indices[4*i + j] >= 2*NO_OF_VECTORS_H + NO_OF_SCALARS_H || dualgrid -> h_curl_indices[4*i + j] < 0)
-                grid_check_failed();
-            dualgrid -> h_curl_signs[4*i + j] = h_curl_signs[4*i + j];
-            if (dualgrid -> h_curl_signs[4*i + j] != -1 && dualgrid -> h_curl_signs[4*i + j] != 1)
-                grid_check_failed();
-        }
     }
     for (int i = 0; i < NO_OF_DUAL_H_VECTORS; ++i)
     {
@@ -358,7 +335,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     free(h_curl_indices);
     free(trsk_modified_velocity_indices);
     free(trsk_modified_curl_indices);
-    free(recov_ver_index);
     free(adjacent_signs_h);
     free(vorticity_signs);
     free(h_curl_signs);

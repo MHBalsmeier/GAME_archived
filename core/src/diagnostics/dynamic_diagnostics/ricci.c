@@ -39,7 +39,7 @@ int vertical_contravariant_normalized_h(Vector_field in_field, int layer_index, 
     	{
 			for (int i = 0; i < no_of_edges; ++i)
 			{
-				vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> recov_ver_index[6*h_index + i];
+				vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + i];
 				*result += -0.5*fabs(grid -> recov_ver_weight[6*h_index + i])*grid -> slope[vector_index]*in_field[vector_index];
 			}
     	}
@@ -47,7 +47,7 @@ int vertical_contravariant_normalized_h(Vector_field in_field, int layer_index, 
     	{
 			for (int i = 0; i < no_of_edges; ++i)
 			{
-				vector_index = NO_OF_SCALARS_H + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER + grid -> recov_ver_index[6*h_index + i];
+				vector_index = NO_OF_SCALARS_H + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + i];
 				*result += -fabs(grid -> recov_ver_weight[6*h_index + i])*grid -> slope[vector_index]*in_field[vector_index];
 			}
     	}
@@ -55,12 +55,12 @@ int vertical_contravariant_normalized_h(Vector_field in_field, int layer_index, 
     	{
 			for (int i = 0; i < no_of_edges; ++i)
 			{
-				vector_index = NO_OF_SCALARS_H + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER + grid -> recov_ver_index[6*h_index + i];
+				vector_index = NO_OF_SCALARS_H + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + i];
 				*result += -0.5*fabs(grid -> recov_ver_weight[6*h_index + i])*grid -> slope[vector_index]*in_field[vector_index];
 			}
 			for (int i = 0; i < no_of_edges; ++i)
 			{
-				vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> recov_ver_index[6*h_index + i];
+				vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + i];
 				*result += -0.5*fabs(grid -> recov_ver_weight[6*h_index + i])*grid -> slope[vector_index]*in_field[vector_index];
 			}
     	}

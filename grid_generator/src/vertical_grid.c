@@ -41,9 +41,9 @@ int calculate_vertical_faces(double area[], double z_vector_dual[], double norma
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-        if (h_index >= NO_OF_VECTORS_V)
+        if (h_index >= NO_OF_SCALARS_H)
         {
-            dual_vector_index = (layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_VECTORS_V;
+            dual_vector_index = (layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H;
             radius_0 = RADIUS + z_vector_dual[dual_vector_index];
             radius_1 = RADIUS + z_vector_dual[dual_vector_index - NO_OF_DUAL_VECTORS_PER_LAYER];
             base_distance = normal_distance_dual[dual_vector_index];
@@ -65,7 +65,7 @@ int calculate_vertical_faces(double area[], double z_vector_dual[], double norma
     	check_area = 0;
     	for (int j = 0; j < NO_OF_LAYERS; ++j)
     	{
-    		check_area += area[NO_OF_VECTORS_V + i + j*NO_OF_VECTORS_PER_LAYER];
+    		check_area += area[NO_OF_SCALARS_H + i + j*NO_OF_VECTORS_PER_LAYER];
     	}
     	if(fabs(check_area/wished_result - 1) > 1e-10)
     	{
@@ -84,12 +84,12 @@ int set_z_scalar_dual(double z_scalar_dual[], double z_vector[], int from_index[
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-        if (h_index >= NO_OF_VECTORS_V)
+        if (h_index >= NO_OF_SCALARS_H)
         {
-            if (h_index - NO_OF_VECTORS_V >= NO_OF_EDGES*(POINTS_PER_EDGE + 1))
+            if (h_index - NO_OF_SCALARS_H >= NO_OF_EDGES*(POINTS_PER_EDGE + 1))
             {
-                face_index = (h_index - NO_OF_VECTORS_V - NO_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
-                on_face_index = h_index - NO_OF_VECTORS_V - (NO_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
+                face_index = (h_index - NO_OF_SCALARS_H - NO_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
+                on_face_index = h_index - NO_OF_SCALARS_H - (NO_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
                 triangle_on_face_index = on_face_index/3;
                 find_coords_from_triangle_on_face_index(triangle_on_face_index, RES_ID, &coord_0, &coord_1, &coord_0_points_amount);
 				dual_scalar_h_index = face_index*TRIANGLES_PER_FACE + 1 + 2*triangle_on_face_index + coord_1;
@@ -166,7 +166,7 @@ int set_volume(double volume[], double z_scalar_dual[], double z_vector[], doubl
     }
     volume_sum_ideal = 0;
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-    	volume_sum_ideal += find_volume(area[NO_OF_VECTORS - NO_OF_VECTORS_V + i], RADIUS + z_vector[NO_OF_VECTORS- NO_OF_VECTORS_V + i], RADIUS + TOA);
+    	volume_sum_ideal += find_volume(area[NO_OF_VECTORS - NO_OF_SCALARS_H + i], RADIUS + z_vector[NO_OF_VECTORS- NO_OF_SCALARS_H + i], RADIUS + TOA);
     if (fabs(volume_sum/volume_sum_ideal - 1) > 1e-12)
 	{
         printf("Sum of volumes of grid boxes does not match volume of entire atmosphere.\n");
@@ -187,7 +187,7 @@ int rescale_area_dual(double area_dual[], double z_vector[], int from_index_dual
     		area_dual[i] = area_dual_pre[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + h_index];
     	else
     	{
-    		primal_vector_index = NO_OF_VECTORS_V + h_index - NO_OF_VECTORS_H + layer_index*NO_OF_VECTORS_PER_LAYER;
+    		primal_vector_index = NO_OF_SCALARS_H + h_index - NO_OF_VECTORS_H + layer_index*NO_OF_VECTORS_PER_LAYER;
     		dual_vector_index = NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + to_index_dual[h_index - NO_OF_VECTORS_H];
     		area_0 = area_dual_pre[dual_vector_index];
     		area_rescale_factor = pow((RADIUS + z_vector[primal_vector_index])/(RADIUS + z_vector_dual[dual_vector_index]), 2);
@@ -233,7 +233,7 @@ int rescale_area_dual(double area_dual[], double z_vector[], int from_index_dual
     {
     	mean_z = 0;
     	for (int j = 0; j < NO_OF_VECTORS_H; ++j)
-    		mean_z += z_vector[NO_OF_VECTORS_V + i*NO_OF_VECTORS_PER_LAYER + j];
+    		mean_z += z_vector[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j];
     	mean_z = mean_z/NO_OF_VECTORS_H;
     	area_sum = 0;
     	for (int j = 0; j < NO_OF_VECTORS_H; ++j)
@@ -261,19 +261,26 @@ int set_gravity_potential(double z_scalar[], double gravity_potential[], double 
 int set_z_vector_and_normal_distance(double z_vector[], double z_surface[], double z_scalar[], double normal_distance[], double latitude_scalar[], double longitude_scalar[], int from_index[], int to_index[], double TOA)
 {
 	int layer_index, h_index, upper_index, lower_index;
+	double normal_distance_h_min,  normal_distance_h_max;
+ 	normal_distance_h_min = RADIUS;
+  	normal_distance_h_max = -1;
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-        if (h_index >= NO_OF_VECTORS_V)
+        if (h_index >= NO_OF_SCALARS_H)
         {
-            z_vector[i] = 0.5*(z_scalar[layer_index*NO_OF_SCALARS_H + to_index[h_index - NO_OF_VECTORS_V]] + z_scalar[layer_index*NO_OF_SCALARS_H + from_index[h_index - NO_OF_VECTORS_V]]);
+            z_vector[i] = 0.5*(z_scalar[layer_index*NO_OF_SCALARS_H + to_index[h_index - NO_OF_SCALARS_H]] + z_scalar[layer_index*NO_OF_SCALARS_H + from_index[h_index - NO_OF_SCALARS_H]]);
             if (z_vector[i] <= 0)
 			{
                 printf("z_vector contains a non-positive value at a horizontal grid point.\n");
 				exit(1);
 			}
-            normal_distance[i] = calculate_distance_h(latitude_scalar[from_index[h_index - NO_OF_VECTORS_V]], longitude_scalar[from_index[h_index - NO_OF_VECTORS_V]], latitude_scalar[to_index[h_index - NO_OF_VECTORS_V]], longitude_scalar[to_index[h_index - NO_OF_VECTORS_V]], RADIUS + z_vector[i]);
+            normal_distance[i] = calculate_distance_h(latitude_scalar[from_index[h_index - NO_OF_SCALARS_H]], longitude_scalar[from_index[h_index - NO_OF_SCALARS_H]], latitude_scalar[to_index[h_index - NO_OF_SCALARS_H]], longitude_scalar[to_index[h_index - NO_OF_SCALARS_H]], RADIUS + z_vector[i]);
+            if (normal_distance[i] > normal_distance_h_max)
+            	normal_distance_h_max = normal_distance[i];
+            if (normal_distance[i] < normal_distance_h_min)
+            	normal_distance_h_min = normal_distance[i];
         }
         else
         {
@@ -301,6 +308,8 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_surface[], doub
 			}
         }
     }
+    printf("\nShortest horizontal normal distance: %lf m.\n", normal_distance_h_min);
+    printf("Longest horizontal normal distance: %lf m.\n", normal_distance_h_max);
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         if (normal_distance[i] <= 0)
@@ -333,7 +342,7 @@ int map_area_to_sphere(double area[], double z_vector[], double pent_hex_face_un
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-        if (h_index < NO_OF_VECTORS_V)
+        if (h_index < NO_OF_SCALARS_H)
         {
             area[i] = pent_hex_face_unity_sphere[h_index]*pow(RADIUS + z_vector[i], 2);
         }
@@ -345,8 +354,8 @@ int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double n
 {
 	int layer_index, h_index, upper_index, lower_index;
 	double normal_distance_dual_h_min,  normal_distance_dual_h_max;
-	 normal_distance_dual_h_min = RADIUS;
-	  normal_distance_dual_h_max = -1;
+ 	normal_distance_dual_h_min = RADIUS;
+  	normal_distance_dual_h_max = -1;
     for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
     {
         layer_index = i/NO_OF_DUAL_VECTORS_PER_LAYER;
@@ -365,7 +374,7 @@ int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double n
 			else if (layer_index == NO_OF_LAYERS)
 				z_vector_dual[i] = 0.5*(z_surface[from_index[h_index]] + z_surface[to_index[h_index]]);
 			else
-				z_vector_dual[i] = 0.5*(z_vector[NO_OF_VECTORS_V + h_index + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER] + z_vector[NO_OF_VECTORS_V + h_index + layer_index*NO_OF_VECTORS_PER_LAYER]);
+				z_vector_dual[i] = 0.5*(z_vector[NO_OF_SCALARS_H + h_index + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER] + z_vector[NO_OF_SCALARS_H + h_index + layer_index*NO_OF_VECTORS_PER_LAYER]);
             normal_distance_dual[i] = calculate_distance_h(latitude_scalar_dual[from_index_dual[h_index]], longitude_scalar_dual[from_index_dual[h_index]], latitude_scalar_dual[to_index_dual[h_index]], longitude_scalar_dual[to_index_dual[h_index]], RADIUS + z_vector_dual[i]);
             if (normal_distance_dual[i] > normal_distance_dual_h_max)
             	normal_distance_dual_h_max = normal_distance_dual[i];
@@ -418,21 +427,21 @@ int calc_area_dual_pre(double area_dual_pre[], double z_vector_dual[], double no
         {
         	if (layer_index == 0)
         	{
-		        primal_vector_index = NO_OF_VECTORS_V + h_index;
+		        primal_vector_index = NO_OF_SCALARS_H + h_index;
 		        radius_0 = RADIUS + z_vector[primal_vector_index];
 		        radius_1 = RADIUS + TOA;
 		        base_distance = normal_distance[primal_vector_index];
         	}
         	else if (layer_index == NO_OF_LAYERS)
         	{
-		        primal_vector_index = NO_OF_VECTORS_V + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + h_index;
+		        primal_vector_index = NO_OF_SCALARS_H + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + h_index;
 		        radius_0 = RADIUS + 0.5*(z_surface[from_index[h_index]] + z_surface[to_index[h_index]]);
 		        radius_1 = RADIUS + z_vector[primal_vector_index];
 		        base_distance = normal_distance[primal_vector_index]*radius_0/radius_1;
         	}
         	else
         	{
-		        primal_vector_index = NO_OF_VECTORS_V + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
+		        primal_vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
 		        radius_0 = RADIUS + z_vector[primal_vector_index];
 		        radius_1 = RADIUS + z_vector[primal_vector_index - NO_OF_VECTORS_PER_LAYER];
 		        base_distance = normal_distance[primal_vector_index];
@@ -453,7 +462,7 @@ int calc_area_dual_pre(double area_dual_pre[], double z_vector_dual[], double no
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         radius_0 = RADIUS + 0.5*(z_surface[from_index[i]] + z_surface[to_index[i]]);
-        primal_vector_index = NO_OF_VECTORS_V + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i;
+        primal_vector_index = NO_OF_SCALARS_H + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i;
         radius_1 = RADIUS + z_vector[primal_vector_index];
         base_distance = normal_distance[primal_vector_index]*radius_0/radius_1;
     	wished_result = calculate_vertical_face(base_distance, radius_0, RADIUS + TOA);

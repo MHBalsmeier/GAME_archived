@@ -19,13 +19,13 @@ int find_triangle_edge_points(int, int, int, int *, int *, int *, int *, int *, 
 int build_icosahedron(double [], double [], int [][2], int [][3], int [][3], int [][3]);
 int generate_horizontal_generators(double [], double [], double [], double [], double [], double [], double [], int [][3], int [][3], int [][3]);
 int calc_kinetic_energy_and_related(double [], double [], int [], double [], double [], int [], int [], int [], double [], double [], double [], double [], int [], double [], double [], double [], double [], int [], int [], double [], double [], double []);
-int calc_coriolis_weights(int [], int [], int [], double [], int [], double [], double [], int [], double [], double [], double [], double [], double [], double [], double [], double [], double [], int [], int [], int [], double [], double [], double [], double [], int [], double);
+int calc_coriolis_weights(int [], int [], int [], double [], double [], int [], double [], double [], double [], double [], double [], double [], double [], double [], double [], int [], int [], int [], double [], double [], double);
 int determine_z_scalar(double [], double [], double [], double, double);
 int set_f_vec(double [], double [], double [], double []);
 int set_orography(int, int, double []);
 int calc_cell_face_unity(double [], double [], double [], int [], int []);
 int calculate_vertical_faces(double [], double [], double [], double);
-int set_recov_ver(int [], int [], double [], double [], double [], double [], double [], double [], int [], int [], double [], double [], double, double [], double [], double [], double);
+int set_recov_ver(int [], double [], double [], double [], double [], double [], double [], int [], int [], double [], double [], double, double [], double [], double [], double);
 int calc_triangle_face_unity(double [], double [], double [], int [][3], int [][3], int [][3], int [][2]);
 int set_vector_h_doubles(int [], int [], double [], double [], double [], double [], double []);
 int set_from_to_index(int [], int [], int [][3], int [][3], int [][3], int [][2]);

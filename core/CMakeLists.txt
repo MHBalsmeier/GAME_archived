@@ -6,6 +6,7 @@ game src/coordinator.c
 src/manage_time_stepping/manage_time_stepping.c
 src/manage_time_stepping/manage_interpolation.c
 src/integrators/explicit_integrators/forward_tendencies.c
+src/integrators/explicit_integrators/integrate_momentum.c
 src/integrators/explicit_integrators/backward_tendencies.c
 src/integrators/explicit_integrators/entropy_density_gas.c
 src/integrators/explicit_integrators/integrate_continuity_dry.c

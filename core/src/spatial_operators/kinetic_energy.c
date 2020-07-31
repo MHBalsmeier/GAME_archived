@@ -9,10 +9,12 @@ Github repository: https://github.com/MHBalsmeier/game
 int kinetic_energy(Vector_field in_field, Scalar_field out_field, Grid *grid, int diag_bool)
 {
 	// It computes only the horizontal kinetic energy. Only this part is neeed for the 3D Lamb transformation.
-	// For diag_bool == 3 it computes the 3D kinetic energy. This is only needed for diagnostics.
+	// For diag_bool == 1 it computes the 3D kinetic energy. This is only needed for diagnostics.
 	int max_index = 6;
 	if (diag_bool == 1)
-		max_index = 8;
+	{
+		max_index = 8;	
+	}
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         out_field[i] = 0;
