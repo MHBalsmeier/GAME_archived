@@ -30,7 +30,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     double *e_kin_weights = malloc(8*NO_OF_SCALARS*sizeof(double));
     double *slope = malloc(NO_OF_VECTORS*sizeof(double));
     double *recov_primal2dual_weights = malloc(2*NO_OF_DUAL_H_VECTORS*sizeof(double));
-    int *e_kin_indices = malloc(8*NO_OF_SCALARS*sizeof(int));
     int *to_index = malloc(NO_OF_VECTORS_H*sizeof(int));
     int *from_index = malloc(NO_OF_VECTORS_H*sizeof(int));
     int *trsk_modified_velocity_indices = malloc(10*NO_OF_VECTORS_H*sizeof(int));
@@ -42,7 +41,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     int *vorticity_signs = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int *h_curl_signs = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int ncid, retval;
-    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_modified_weights_id, recov_ver_weight_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, direction_id, gravity_potential_id, e_kin_weights_id, e_kin_indices_id, slope_id, volume_ratios_id, recov_primal2dual_weights_id;
+    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_modified_weights_id, recov_ver_weight_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, direction_id, gravity_potential_id, e_kin_weights_id, slope_id, volume_ratios_id, recov_primal2dual_weights_id;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "normal_distance", &normal_distance_id)))
@@ -91,8 +90,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "e_kin_weights", &e_kin_weights_id)))
         ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "e_kin_indices", &e_kin_indices_id)))
-        ERR(retval);
     if ((retval = nc_inq_varid(ncid, "slope", &slope_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "recov_primal2dual_weights", &recov_primal2dual_weights_id)))
@@ -130,8 +127,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     if ((retval = nc_get_var_int(ncid, to_index_id, &to_index[0])))
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, from_index_id, &from_index[0])))
-        ERR(retval);
-    if ((retval = nc_get_var_int(ncid, e_kin_indices_id, &e_kin_indices[0])))
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, adjacent_vector_indices_h_id, &adjacent_vector_indices_h[0])))
         ERR(retval);
@@ -244,9 +239,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
            if (grid -> e_kin_weights[8*i + j] > 0.3 || grid -> e_kin_weights[8*i + j] < 0)
            	   grid_check_failed();
            check_sum += grid -> e_kin_weights[8*i + j];
-           grid -> e_kin_indices[8*i + j] = e_kin_indices[8*i + j];
-           if (grid -> e_kin_indices[8*i + j] < 0 || grid -> e_kin_indices[8*i + j] >= NO_OF_VECTORS)
-           	   grid_check_failed();
        	}
        	if (fabs(check_sum - 1.5) > 1e-10)
        	{
@@ -316,7 +308,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     free(volume_ratios);
     free(slope);
     free(e_kin_weights);
-    free(e_kin_indices);
     free(gravity_potential);
     free(direction);
     free(normal_distance);

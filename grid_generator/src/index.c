@@ -114,7 +114,7 @@ int set_horizontal_curl_indices(double direction_dual[], double direction[], int
             h_curl_indices[4*i + 3] = to_index[i];
         h_curl_signs[4*i + 3] = -1;
     }
-    for (int i = 0; i < NO_OF_VECTORS_V; ++i)
+    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
     	counter = 0;
     	for (int j = 0; j < NO_OF_VECTORS_H; ++j)

@@ -98,7 +98,7 @@ int generate_horizontal_generators(double latitude_ico[], double longitude_ico[]
 int calc_cell_face_unity(double pent_hex_face_unity_sphere[], double latitude_scalar_dual[], double longitude_scalar_dual[], int adjacent_vector_indices_h [], int vorticity_indices_pre [])
 {
     int check_0, check_1, check_2, counter, NO_OF_edges;
-    for (int i = 0; i < NO_OF_VECTORS_V; ++i)
+    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
     	NO_OF_edges = 6;
         if (i < NO_OF_PENTAGONS)
