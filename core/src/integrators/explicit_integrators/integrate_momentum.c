@@ -3,7 +3,7 @@ This source file is part of the Global Atmospheric Modeling Framework (GAME), wh
 Github repository: https://github.com/MHBalsmeier/game
 */
 /*
-In this source file, the calculation of the horizontal momentum equation is managed.
+In this source file, the calculation of the explicit part of the momentum equation is managed.
 */
 
 #include "../../enum_and_typedefs.h"
