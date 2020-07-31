@@ -311,20 +311,14 @@ int set_scalar_h_dual_coords(double latitude_scalar_dual[], double longitude_sca
 	return 0;
 }
 
-int set_dual_vector_h_doubles(double latitude_vector_dual[], double latitude_scalar_dual[], double latitude_vector[], double direction_dual[], double longitude_vector[], int to_index_dual[], int from_index_dual[], double longitude_scalar_dual[], double rel_on_line_dual[])
+int set_dual_vector_h_doubles(double latitude_scalar_dual[], double latitude_vector[], double direction_dual[], double longitude_vector[], int to_index_dual[], int from_index_dual[], double longitude_scalar_dual[], double rel_on_line_dual[])
 {
-    for (int i = 0; i < NO_OF_DUAL_VECTORS_PER_LAYER; ++i)
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
-        if (i >= NO_OF_VECTORS_H)
-            latitude_vector_dual[i] = latitude_scalar_dual[i - NO_OF_VECTORS_H];
-        else
-        {
-            latitude_vector_dual[i] = latitude_vector[i];
-            find_min_dist_rel_on_line(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], latitude_vector_dual[i], longitude_vector[i], &rel_on_line_dual[i]);
-            if (fabs(rel_on_line_dual[i] - 0.5) > 0.14)
-                printf("Bisection warning.\n");
-            direction_dual[i] = find_geodetic_direction(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], rel_on_line_dual[i]);
-        }
+        find_min_dist_rel_on_line(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], latitude_vector[i], longitude_vector[i], &rel_on_line_dual[i]);
+        if (fabs(rel_on_line_dual[i] - 0.5) > 0.14)
+            printf("Bisection warning.\n");
+        direction_dual[i] = find_geodetic_direction(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], rel_on_line_dual[i]);
     }
     return 0;
 }

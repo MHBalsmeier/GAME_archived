@@ -88,34 +88,7 @@ int check_for_orthogonality(double direction[], double direction_dual[], double 
     return 0;
 }
 
-int calc_adjacent_vector_indices_dual_h(int adjacent_vector_indices_dual_h[], int from_index_dual[], int to_index_dual[])
-{
-    for (int i = 0; i < NO_OF_DUAL_SCALARS_H; ++i)
-    {
-    	int counter = 0;
-    	for (int j = 0; j < NO_OF_VECTORS_H; ++j)
-    	{
-    		if (from_index_dual[j] == i || to_index_dual[j] == i)
-    		{
-                if (from_index_dual[j] == to_index_dual[j])
-				{
-                    printf("It is from_index_dual == to_index_dual at some point.\n");
-					exit(1);
-				}
-                adjacent_vector_indices_dual_h[3*i + counter] = j;
-                counter++;
-            }
-    	}
-    	if (counter != 3)
-    	{
-    		printf("Error in adjacent_vector_indices_dual_h creation.\n");
-    		exit(1);
-    	}
-    }
-    return 0;
-}
-
-int calc_vorticity_indices_pre_and_adjacent_scalar_indices_dual_h(int from_index_dual[], int to_index_dual[], double direction[], double direction_dual[], int vorticity_indices_pre[], double ORTH_CRITERION_DEG, int vorticity_signs_pre[], int adjacent_scalar_indices_dual_h[])
+int calc_vorticity_indices_pre(int from_index_dual[], int to_index_dual[], double direction[], double direction_dual[], int vorticity_indices_pre[], double ORTH_CRITERION_DEG, int vorticity_signs_pre[])
 {
 	int counter, sign;
 	double direction_change;
@@ -133,14 +106,12 @@ int calc_vorticity_indices_pre_and_adjacent_scalar_indices_dual_h(int from_index
                     find_angle_change(direction_dual[j], direction[j], &direction_change);
                     if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
                         sign = -1;
-                    adjacent_scalar_indices_dual_h[3*i + counter] = to_index_dual[j];
                 }
                 if (to_index_dual[j] == i)
                 {
                     find_angle_change(direction_dual[j], direction[j], &direction_change);
                     if (rad2deg(direction_change) > ORTH_CRITERION_DEG)
                         sign = -1;
-                    adjacent_scalar_indices_dual_h[3*i + counter] = from_index_dual[j];
                 }
                 vorticity_signs_pre[3*i + counter] = sign;
                 ++counter;

@@ -12,7 +12,7 @@ In this file, the kinetic energy indices and weights are computed.
 #include <stdio.h>
 #include "geos95.h"
 
-int calc_kinetic_energy_and_related(double latitude_scalar[], double longitude_scalar[], double e_kin_weights[], double volume[], int adjacent_vector_indices_dual_h[], int to_index[], int from_index[], double area_dual_pre[], double area[], double z_scalar[], double z_vector[], int adjacent_vector_indices_h[], double latitude_vector[], double longitude_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], int to_index_dual[], int from_index_dual[], double z_vector_dual[], double volume_ratios[], double recov_primal2dual_weights[])
+int calc_kinetic_energy_and_related(double latitude_scalar[], double longitude_scalar[], double e_kin_weights[], double volume[], int to_index[], int from_index[], double area_dual_pre[], double area[], double z_scalar[], double z_vector[], int adjacent_vector_indices_h[], double latitude_vector[], double longitude_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], int to_index_dual[], int from_index_dual[], double z_vector_dual[], double volume_ratios[], double recov_primal2dual_weights[])
 {
 	int layer_index, h_index;
 	double z_value_0, z_value_1, z_value_2, z_triangle_mean, triangle_face_0, triangle_face_1, delta_z, weights_sum, weights_rescale, partial_volume;

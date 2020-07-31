@@ -108,7 +108,6 @@ int main(int argc, char *argv[])
     double *latitude_vector = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *longitude_vector = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *direction = malloc(NO_OF_VECTORS_H*sizeof(double));
-    double *gravity = malloc(NO_OF_VECTORS*sizeof(double));
     double *volume = malloc(NO_OF_SCALARS*sizeof(double));
     double *area = malloc(NO_OF_VECTORS*sizeof(double));
     double *trsk_modified_weights = calloc(10*NO_OF_VECTORS_H, sizeof(double));
@@ -116,7 +115,6 @@ int main(int argc, char *argv[])
     double *latitude_scalar_dual = malloc(NO_OF_DUAL_SCALARS_H*sizeof(double));
     double *longitude_scalar_dual = malloc(NO_OF_DUAL_SCALARS_H*sizeof(double));
     double *z_scalar_dual = malloc(NO_OF_DUAL_SCALARS*sizeof(double));
-    double *latitude_vector_dual = malloc(NO_OF_DUAL_VECTORS_PER_LAYER*sizeof(double));
     double *z_vector_dual = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
     double *normal_distance_dual = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
     double *direction_dual = malloc(NO_OF_VECTORS_H*sizeof(double));
@@ -136,13 +134,11 @@ int main(int argc, char *argv[])
     int *trsk_modified_velocity_indices = calloc(10*NO_OF_VECTORS_H, sizeof(int));
     int *trsk_modified_curl_indices = calloc(10*NO_OF_VECTORS_H, sizeof(int));
     int *adjacent_vector_indices_h = malloc(6*NO_OF_SCALARS_H*sizeof(int));
-    int *adjacent_vector_indices_dual_h = malloc(3*NO_OF_DUAL_SCALARS_H*sizeof(int));
     int *vorticity_indices_pre = malloc(3*NO_OF_DUAL_SCALARS_H*sizeof(int));
     int *vorticity_indices = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int *h_curl_indices = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int *to_index_dual = malloc(NO_OF_VECTORS_H*sizeof(int));
     int *from_index_dual = malloc(NO_OF_VECTORS_H*sizeof(int));
-    int *adjacent_scalar_indices_dual_h = malloc(3*NO_OF_DUAL_SCALARS_H*sizeof(int));
     int *adjacent_signs_h = malloc(6*NO_OF_SCALARS_H*sizeof(int));
     int *vorticity_signs_pre = malloc(3*NO_OF_DUAL_SCALARS_H*sizeof(int));
     int *vorticity_signs = malloc(4*NO_OF_VECTORS_H*sizeof(int));
@@ -192,11 +188,10 @@ int main(int argc, char *argv[])
     free(x_unity);
     free(y_unity);
     free(z_unity);
-	set_dual_vector_h_doubles(latitude_vector_dual, latitude_scalar_dual, latitude_vector, direction_dual, longitude_vector, to_index_dual, from_index_dual, longitude_scalar_dual, rel_on_line_dual);
+	set_dual_vector_h_doubles(latitude_scalar_dual, latitude_vector, direction_dual, longitude_vector, to_index_dual, from_index_dual, longitude_scalar_dual, rel_on_line_dual);
     set_f_vec(latitude_vector, direction, direction_dual, f_vec);
     printf(GREEN "Horizontal grid structure determined.\n" RESET);
-	calc_adjacent_vector_indices_dual_h(adjacent_vector_indices_dual_h, from_index_dual, to_index_dual);
-	calc_vorticity_indices_pre_and_adjacent_scalar_indices_dual_h(from_index_dual, to_index_dual, direction, direction_dual, vorticity_indices_pre, ORTH_CRITERION_DEG, vorticity_signs_pre, adjacent_scalar_indices_dual_h);
+	calc_vorticity_indices_pre(from_index_dual, to_index_dual, direction, direction_dual, vorticity_indices_pre, ORTH_CRITERION_DEG, vorticity_signs_pre);
 	check_for_orthogonality(direction, direction_dual, ORTH_CRITERION_DEG);
 	calc_cell_face_unity(pent_hex_face_unity_sphere, latitude_scalar_dual, longitude_scalar_dual, adjacent_vector_indices_h, vorticity_indices_pre);
 	// building the vertical grid
@@ -227,7 +222,7 @@ int main(int argc, char *argv[])
     printf(GREEN "finished.\n" RESET);
     // more advanced stuff: tangential vector reconstruction and kinetic energy
     printf("Calculating kinetic energy indices and weights and related things ... ");
-	calc_kinetic_energy_and_related(latitude_scalar, longitude_scalar, e_kin_weights, volume, adjacent_vector_indices_dual_h, to_index, from_index, area_dual_pre, area, z_scalar, z_vector, adjacent_vector_indices_h, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, to_index_dual, from_index_dual, z_vector_dual, volume_ratios, recov_primal2dual_weights);
+	calc_kinetic_energy_and_related(latitude_scalar, longitude_scalar, e_kin_weights, volume, to_index, from_index, area_dual_pre, area, z_scalar, z_vector, adjacent_vector_indices_h, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, to_index_dual, from_index_dual, z_vector_dual, volume_ratios, recov_primal2dual_weights);
     set_recov_ver(adjacent_vector_indices_h, direction, direction_dual, latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, from_index_dual, to_index_dual, pent_hex_face_unity_sphere, recov_ver_weight, ORTH_CRITERION_DEG, normal_distance, z_vector, z_vector_dual, TOA);
     printf(GREEN "finished.\n" RESET);
     // modified TRSK
@@ -254,7 +249,7 @@ int main(int argc, char *argv[])
     area_min = pent_hex_face_unity_sphere[find_min_index(pent_hex_face_unity_sphere, NO_OF_SCALARS_H)];
     free(pent_hex_face_unity_sphere);
     printf("Ratio of minimum to maximum area: %lf\n", area_min/area_max);
-    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, gravity_id, volume_id, area_id, trsk_modified_weights_id, recov_ver_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, adjacent_scalar_indices_dual_h_id, gravity_potential_id, adjacent_vector_indices_dual_h_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_8_dimid, slope_id, scalar_2_dimid, volume_ratios_id, recov_primal2dual_weights_id, vector_h_dual_dimid_2;
+    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_modified_weights_id, recov_ver_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, vector_dual_h_dimid_4, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_8_dimid, slope_id, scalar_2_dimid, volume_ratios_id, recov_primal2dual_weights_id, vector_h_dual_dimid_2;
     printf("Starting to write to output file ... ");
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NO_OF_SCALARS, &scalar_dimid)))
         ERR(retval);
@@ -328,10 +323,6 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, normal_distance_id, "units", strlen("m"), "m")))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "gravity", NC_DOUBLE, 1, &vector_dimid, &gravity_id)))
-        ERR(retval);
-    if ((retval = nc_put_att_text(ncid_g_prop, gravity_id, "units", strlen("m/s^2"), "m/s^2")))
-        ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "volume", NC_DOUBLE, 1, &scalar_dimid, &volume_id)))
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, volume_id, "units", strlen("m^3"), "m^3")))
@@ -378,8 +369,6 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "adjacent_vector_indices_h", NC_INT, 1, &scalar_h_dimid_6, &adjacent_vector_indices_h_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "adjacent_vector_indices_dual_h", NC_INT, 1, &scalar_dual_h_dimid_3, &adjacent_vector_indices_dual_h_id)))
-        ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "vorticity_indices", NC_INT, 1, &vector_h_dimid_4, &vorticity_indices_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "h_curl_indices", NC_INT, 1, &vector_dual_h_dimid_4, &h_curl_indices_id)))
@@ -387,8 +376,6 @@ int main(int argc, char *argv[])
     if ((retval = nc_def_var(ncid_g_prop, "trsk_modified_velocity_indices", NC_INT, 1, &vector_h_dimid_10, &trsk_modified_velocity_indices_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "trsk_modified_curl_indices", NC_INT, 1, &vector_h_dimid_10, &trsk_modified_curl_indices_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "adjacent_scalar_indices_dual_h", NC_INT, 1, &vector_dual_v_dimid_3, &adjacent_scalar_indices_dual_h_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "adjacent_signs_h", NC_INT, 1, &scalar_h_dimid_6, &adjacent_signs_h_id)))
         ERR(retval);
@@ -415,8 +402,6 @@ int main(int argc, char *argv[])
     if ((retval = nc_put_var_double(ncid_g_prop, z_vector_id, &z_vector[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, normal_distance_id, &normal_distance[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, gravity_id, &gravity[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, volume_id, &volume[0])))
         ERR(retval);
@@ -454,8 +439,6 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, adjacent_vector_indices_h_id, &adjacent_vector_indices_h[0])))
         ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, adjacent_vector_indices_dual_h_id, &adjacent_vector_indices_dual_h[0])))
-        ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, vorticity_indices_id, &vorticity_indices[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, h_curl_indices_id, &h_curl_indices[0])))
@@ -463,8 +446,6 @@ int main(int argc, char *argv[])
     if ((retval = nc_put_var_int(ncid_g_prop, trsk_modified_velocity_indices_id, &trsk_modified_velocity_indices[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, trsk_modified_curl_indices_id, &trsk_modified_curl_indices[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, adjacent_scalar_indices_dual_h_id, &adjacent_scalar_indices_dual_h[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, adjacent_signs_h_id, &adjacent_signs_h[0])))
         ERR(retval);
@@ -481,9 +462,7 @@ int main(int argc, char *argv[])
     free(rel_on_line_dual);
     free(volume_ratios);
     free(e_kin_weights);
-    free(adjacent_vector_indices_dual_h);
     free(gravity_potential);
-    free(adjacent_scalar_indices_dual_h);
     free(latitude_vector);
     free(longitude_vector);
     free(direction);
@@ -492,7 +471,6 @@ int main(int argc, char *argv[])
     free(z_scalar);
     free(z_vector);
     free(normal_distance);
-    free(gravity);
     free(volume);
     free(area);
     free(trsk_modified_weights);
@@ -500,7 +478,6 @@ int main(int argc, char *argv[])
     free(latitude_scalar_dual);
     free(longitude_scalar_dual);
     free(z_scalar_dual);
-    free(latitude_vector_dual);
     free(z_vector_dual);
     free(normal_distance_dual);
     free(f_vec);

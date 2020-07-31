@@ -20,7 +20,7 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
         {
 			edge_vector_index_h = h_index - NO_OF_VECTORS_H;
 	        edge_vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + edge_vector_index_h;
-	        edge_vector_index_dual_area = NO_OF_VECTORS_H + layer_index*(2*NO_OF_VECTORS_H) + edge_vector_index_h;
+	        edge_vector_index_dual_area = NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + edge_vector_index_h;
         	rhombus_circ = 0;
         	// The rhombus has four edges.
         	for (int k = 0; k < 4; ++k)
