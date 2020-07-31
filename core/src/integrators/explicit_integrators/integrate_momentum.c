@@ -16,7 +16,7 @@ In this source file, the calculation of the horizontal momentum equation is mana
 
 int integrate_momentum(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Diffusion_info *diffusion_info, Config_info *config_info, int no_step_rk)
 {
-	// Here, the gaseous flux density is prepared fore the generalized Coriolis term.
+	// Here, the gaseous flux density is prepared for the generalized Coriolis term.
     scalar_times_vector(current_state -> density_dry, current_state -> velocity_gas, diagnostics -> mass_dry_flux_density, grid);
     // Now, the potential vorticity is evaluated.
     calc_pot_vort(current_state -> velocity_gas, current_state -> density_dry, diagnostics -> pot_vort, grid, dualgrid);

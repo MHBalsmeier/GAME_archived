@@ -24,7 +24,7 @@ int set_f_vec(double latitude_vector[], double direction[], double direction_dua
         // vertical component at primal vector points
         else if (i < 2*NO_OF_VECTORS_H)
         	f_vec[i] = 2*OMEGA*sin(latitude_vector[i - NO_OF_VECTORS_H]);
-    	// hpreparation of horizontal non-traditional Coriolis term
+    	// preparation of horizontal non-traditional Coriolis term
         else
         	f_vec[i] = 2*OMEGA*cos(latitude_vector[i - 2*NO_OF_VECTORS_H])*cos(direction[i - 2*NO_OF_VECTORS_H]);
     }

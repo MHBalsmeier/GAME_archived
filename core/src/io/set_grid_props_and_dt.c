@@ -197,7 +197,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
             if (grid -> trsk_modified_velocity_indices[10*i + j] >= NO_OF_VECTORS_H || grid -> trsk_modified_velocity_indices[10*i + j] < 0)
                 grid_check_failed();
             grid -> trsk_modified_curl_indices[10*i + j] = trsk_modified_curl_indices[10*i + j];
-            if (grid -> trsk_modified_curl_indices[10*i + j] >= NO_OF_VECTORS_H || grid -> trsk_modified_curl_indices[10*i + j] < 0)
+            if (grid -> trsk_modified_curl_indices[10*i + j] >= NO_OF_VECTORS_H|| grid -> trsk_modified_curl_indices[10*i + j] < 0)
                 grid_check_failed();
             grid -> trsk_modified_weights[10*i + j] = trsk_modified_weights[10*i + j];
             if (fabs(grid -> trsk_modified_weights[10*i + j]) >= 0.30)
