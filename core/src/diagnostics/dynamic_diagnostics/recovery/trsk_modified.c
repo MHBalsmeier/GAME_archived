@@ -20,12 +20,17 @@ int trsk_modified(Vector_field in_field_0, Curl_field in_field_1, int layer_inde
 	}
 	else
 	{
-	    *component += 
-		grid -> trsk_modified_weights[10*h_index + 0]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + 0]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + 0]]
-		+ grid -> trsk_modified_weights[10*h_index + 1]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + 1]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + 1]]
-		+ grid -> trsk_modified_weights[10*h_index + 2]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + 2]]*0.5*(in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + 2]] + in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + h_index])
-		+ grid -> trsk_modified_weights[10*h_index + 3]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + 3]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + 3]]
-		+ grid -> trsk_modified_weights[10*h_index + 4]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + 4]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + 4]];
+		for (int i = 0; i < 5; ++i)
+		{
+			if (i == 2)
+			{
+	    		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*0.5*(in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + i]] + in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + h_index]);
+	    	}
+	    	else
+	    	{
+	    		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + i]];
+	    	}
+		}
 	}
 	if (grid -> to_index[h_index] < NO_OF_PENTAGONS)	
 	{
@@ -36,12 +41,17 @@ int trsk_modified(Vector_field in_field_0, Curl_field in_field_1, int layer_inde
 	}
 	else
 	{
-	    *component += 
-		grid -> trsk_modified_weights[10*h_index + 5]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + 5]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + 5]]
-		+ grid -> trsk_modified_weights[10*h_index + 6]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + 6]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + 6]]
-		+ grid -> trsk_modified_weights[10*h_index + 7]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + 7]]*0.5*(in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + 7]] + in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + h_index])
-		+ grid -> trsk_modified_weights[10*h_index + 8]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + 8]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + 8]]
-		+ grid -> trsk_modified_weights[10*h_index + 9]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + 9]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + 9]];
+		for (int i = 5; i < 10; ++i)
+		{
+			if (i == 7)
+			{
+	    		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*0.5*(in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + i]] + in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + h_index]);
+	    	}
+	    	else
+	    	{
+	    		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + i]];
+	    	}
+		}
 	}
     return 0;
 }

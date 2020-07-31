@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
     printf(GREEN "finished.\n" RESET);
     // modified TRSK
     printf("Calculating Coriolis indices and weights ... ");
-	calc_coriolis_weights(from_index_dual, to_index_dual, trsk_modified_curl_indices, normal_distance, normal_distance_dual, to_index, area, z_scalar, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, trsk_modified_weights,  trsk_modified_velocity_indices, from_index, adjacent_vector_indices_h, direction, direction_dual, ORTH_CRITERION_DEG);
+	calc_coriolis_weights(from_index_dual, to_index_dual, trsk_modified_curl_indices, normal_distance, normal_distance_dual, to_index, area, z_scalar, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, trsk_modified_weights,  trsk_modified_velocity_indices, from_index, adjacent_vector_indices_h, direction, direction_dual, ORTH_CRITERION_DEG, z_vector, z_vector_dual);
     printf(GREEN "finished.\n" RESET);
     // setting indices related to the curl of a vector field
     printf("Setting horizontal curl indices ... ");
