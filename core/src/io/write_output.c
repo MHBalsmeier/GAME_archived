@@ -20,8 +20,9 @@ Here, the output is written to grib files and integrals are written to text file
 
 double calc_std_dev(double [], int);
 
-int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, char output_directory[], Grid *grid, Dualgrid *dualgrid)
+int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, char output_directory[], Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid)
 {
+	// Diagnostics and forcings are primarily handed over for checks.
     int init_year, init_month, init_day, init_hour, init_minute, init_second, init_microsecond;
     find_hour_from_time_coord(t_init, &init_year, &init_month, &init_day, &init_hour, &init_minute, &init_second, &init_microsecond);
     long data_date = 10000*init_year + 100*init_month + init_day;

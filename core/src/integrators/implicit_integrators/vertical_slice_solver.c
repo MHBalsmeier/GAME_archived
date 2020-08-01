@@ -220,13 +220,13 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 		}
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
-			b_vector[2*j] = 1 + delta_t*(R_D/C_D_V - 1)*diagnostics -> wind_field_divv_h[i + j*NO_OF_SCALARS_H];
+			b_vector[2*j] = 1;
 			b_vector[2*j + 1] = 1;
-			d_vector[2*j] = state_old -> temp_gas[j*NO_OF_SCALARS_H + i] + delta_t*state_tendency -> temp_gas[j*NO_OF_SCALARS_H + i];
-			d_vector[2*j + 1] = state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + delta_t*(-grid -> gravity_m[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + R_D/C_D_P*diagnostics -> pressure_gradient_1[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - R_D/C_D_P*diagnostics -> pressure_gradient_0_m[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]);
+			d_vector[2*j] = diagnostics -> temp_gas_explicit[j*NO_OF_SCALARS_H + i];
+			d_vector[2*j + 1] = state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 		}
-		b_vector[2*NO_OF_LAYERS - 2] =  1 + delta_t*(R_D/C_D_V - 1)*diagnostics -> wind_field_divv_h[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
-		d_vector[2*NO_OF_LAYERS - 2] = state_old -> temp_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + delta_t*state_tendency -> temp_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		b_vector[2*NO_OF_LAYERS - 2] =  1;
+		d_vector[2*NO_OF_LAYERS - 2] = diagnostics -> temp_gas_explicit[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		// calling the algorithm to solve the system of linear equations
 		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, 2*NO_OF_LAYERS - 1);
 		// writing the result into the new state

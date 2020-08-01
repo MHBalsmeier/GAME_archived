@@ -47,7 +47,7 @@ int integrate_momentum(State *current_state, State *state_tendency, Grid *grid, 
         		}
             	if (h_index < NO_OF_SCALARS_H)
             	{
-            		state_tendency -> velocity_gas[i] = forcings -> pot_vort_tend[i] - forcings -> e_kin_h_grad[i] + diffusion_info -> friction_acc[i];
+            		state_tendency -> velocity_gas[i] = forcings -> pot_vort_tend[i] - forcings -> e_kin_h_grad[i] + diffusion_info -> friction_acc[i] - grid -> gravity_m[i] + R_D/C_D_P*forcings -> pressure_gradient_acc[i];
         		}
         	}
             else
@@ -61,7 +61,7 @@ int integrate_momentum(State *current_state, State *state_tendency, Grid *grid, 
         		}
         		if (h_index < NO_OF_SCALARS_H)
         		{
-            		state_tendency -> velocity_gas[i] = forcings -> pot_vort_tend[i] - forcings -> e_kin_h_grad[i];
+            		state_tendency -> velocity_gas[i] = forcings -> pot_vort_tend[i] - forcings -> e_kin_h_grad[i] - grid -> gravity_m[i] + R_D/C_D_P*forcings -> pressure_gradient_acc[i];
         		}
         	}
         }

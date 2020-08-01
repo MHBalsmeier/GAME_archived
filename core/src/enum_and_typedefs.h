@@ -129,6 +129,7 @@ Vector_field mass_dry_flux_density;
 Vector_field temp_gas_flux;
 Vector_field temp_gradient;
 Scalar_field specific_entropy;
+Scalar_field temp_gas_explicit;
 Curl_field pot_vort;
 Scalar_field c_h_p_field;
 Scalar_field e_kin_h;

@@ -174,7 +174,9 @@ int main(int argc, char *argv[])
 		h_index = i - time_step_10_m_wind*NO_OF_VECTORS_H;
     	wind_h_lowest_layer_array[time_step_10_m_wind*NO_OF_VECTORS_H + h_index] = state_init -> velocity_gas[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + h_index];
     }
-    write_out(state_init, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, OUTPUT_FOLDER, grid, dualgrid);
+    Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
+    Forcings *forcings = calloc(1, sizeof(Forcings));
+    write_out(state_init, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, OUTPUT_FOLDER, diagnostics, forcings, grid, dualgrid);
     t_write += WRITE_OUT_INTERVAL;
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     double t_0;
@@ -207,8 +209,6 @@ int main(int argc, char *argv[])
     State *state_tendency = calloc(1, sizeof(State));
     Interpolate_info *interpolation = calloc(1, sizeof(Interpolate_info));
     Diffusion_info *diffusion = calloc(1, sizeof(Diffusion_info));
-    Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
-    Forcings *forcings = calloc(1, sizeof(Forcings));
     config_info -> rad_update = 1;
     linear_combine_two_states(state_0, state_0, state_p1, 1, 0);
     config_info -> totally_first_step_bool = 1;
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
         }
         if(t_0 + delta_t >= t_write + 300 && t_0 <= t_write + 300)
         {
-            write_out(state_write, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, OUTPUT_FOLDER, grid, dualgrid);
+            write_out(state_write, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, OUTPUT_FOLDER, diagnostics, forcings, grid, dualgrid);
             t_write += WRITE_OUT_INTERVAL;
             second_time = clock();
             if (second_write_out_bool == 1)

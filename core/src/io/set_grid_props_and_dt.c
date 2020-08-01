@@ -151,11 +151,16 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         for (int j = 0; j < 6; ++j)
         {
             grid -> adjacent_vector_indices_h[6*i + j] = adjacent_vector_indices_h[6*i + j];
-            if (grid -> adjacent_vector_indices_h[6*i + j] >= NO_OF_VECTORS_H || grid -> adjacent_vector_indices_h[6*i + j] < -1)
+            if (grid -> adjacent_vector_indices_h[6*i + j] >= NO_OF_VECTORS_H || grid -> adjacent_vector_indices_h[6*i + j] < 0)
             {
-                grid_check_failed();
                 if (grid -> adjacent_vector_indices_h[6*i + j] == -1)
+                {
                 	grid -> adjacent_vector_indices_h[6*i + j] = 0;
+            	}
+            	else
+            	{
+                	grid_check_failed();
+            	}
             }
             grid -> adjacent_signs_h[6*i + j] = adjacent_signs_h[6*i + j];
             if (grid -> adjacent_signs_h[6*i + j] != -1 && grid -> adjacent_signs_h[6*i + j] != 1)

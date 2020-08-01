@@ -10,7 +10,6 @@ src/integrators/explicit_integrators/integrate_momentum.c
 src/integrators/explicit_integrators/backward_tendencies.c
 src/integrators/explicit_integrators/entropy_density_gas.c
 src/integrators/explicit_integrators/integrate_continuity_dry.c
-src/integrators/explicit_integrators/integrate_temp_gas.c
 src/integrators/explicit_integrators/integrate_tracers.c
 src/integrators/implicit_integrators/vertical_slice_solver.c
 src/spatial_operators/coriolis_gen.c src/spatial_operators/potential_vorticity.c

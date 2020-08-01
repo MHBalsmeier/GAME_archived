@@ -55,6 +55,27 @@ int temperature_diagnostics(State *state_old, State *state_new)
     return 0;
 }
 
+int temperature_diagnostics_explicit(State *state_old, State *state_tendency, Diagnostics *diagnostics, double delta_t)
+{
+    double nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_0, density_1, delta_density, delta_entropy_density, temperature_0, entropy_0, entropy_1;
+    for (int i = 0; i < NO_OF_SCALARS; ++i)
+    {
+    	entropy_density_gas_0 = state_old -> entropy_density_gas[i];
+    	entropy_density_gas_1 = state_old -> entropy_density_gas[i] + delta_t*state_tendency -> entropy_density_gas[i];
+    	delta_entropy_density = entropy_density_gas_1 - entropy_density_gas_0;
+    	density_0 = state_old -> density_dry[i];
+    	density_1 = state_old -> density_dry[i] + delta_t*state_tendency -> density_dry[i];
+    	delta_density = density_1 - density_0;
+    	temperature_0 = state_old -> temp_gas[i];
+    	entropy_0 = entropy_density_gas_0/density_0;
+    	entropy_1 = entropy_density_gas_1/density_1;
+    	nominator = C_D_V*density_0*temperature_0 + (R_D*temperature_0 - R_D/C_D_P*entropy_0*temperature_0)*delta_density + R_D/C_D_P*temperature_0*delta_entropy_density;
+    	denominator = C_D_V*density_0 + C_D_V/C_D_P*entropy_1*delta_density - C_D_V/C_D_P*delta_entropy_density;
+    	diagnostics -> temp_gas_explicit[i] = nominator/denominator;
+    }
+    return 0;
+}
+
 double spec_heat_cap_diagnostics_p(double density_d_micro_value, double density_v_micro_value)
 {
 	double result = (density_d_micro_value*C_D_P + density_v_micro_value*C_V_P)/(density_d_micro_value + density_v_micro_value);
