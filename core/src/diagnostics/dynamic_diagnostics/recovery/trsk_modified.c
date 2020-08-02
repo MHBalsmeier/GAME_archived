@@ -1,7 +1,7 @@
 /*
 This source file is part of the Global Atmospheric Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/MHBalsmeier/game
-This is a recovery function at horizontal vector points. If layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS, a vertical interpolation of the input field onto the desired z coordinate must be done (not yet implemented).
+This implements the modified TRSK scheme by Gassmann (2018).
 */
 
 #include "../../../enum_and_typedefs.h"
@@ -15,7 +15,7 @@ int trsk_modified(Vector_field in_field_0, Curl_field in_field_1, int layer_inde
 	{
 		for (int i = 0; i < 4; ++i)
 		{
-			*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + i]];
+			*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> trsk_modified_curl_indices[10*h_index + i]];
 		}
 	}
 	else
@@ -24,11 +24,11 @@ int trsk_modified(Vector_field in_field_0, Curl_field in_field_1, int layer_inde
 		{
 			if (i == 2)
 			{
-	    		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*0.5*(in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + i]] + in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + h_index]);
+	    		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*0.5*(in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> trsk_modified_curl_indices[10*h_index + i]] + in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + h_index]);
 	    	}
 	    	else
 	    	{
-	    		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + i]];
+	    		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> trsk_modified_curl_indices[10*h_index + i]];
 	    	}
 		}
 	}
@@ -45,11 +45,11 @@ int trsk_modified(Vector_field in_field_0, Curl_field in_field_1, int layer_inde
 		{
 			if (i == 7)
 			{
-	    		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*0.5*(in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + i]] + in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + h_index]);
+	    		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*0.5*(in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> trsk_modified_curl_indices[10*h_index + i]] + in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + h_index]);
 	    	}
 	    	else
 	    	{
-	    		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H  + grid -> trsk_modified_curl_indices[10*h_index + i]];
+	    		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> trsk_modified_curl_indices[10*h_index + i]];
 	    	}
 		}
 	}

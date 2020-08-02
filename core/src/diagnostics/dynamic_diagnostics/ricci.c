@@ -7,19 +7,6 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdio.h>
 #include "../diagnostics.h"
 
-int vertical_contravariant_normalized(Vector_field in_field, int layer_index, int h_index, Grid *grid, double *result)
-{
-	// Attention: contains a rescaling factor for the tilting of the horizontal surface.
-	if (h_index < 0 || h_index >= NO_OF_SCALARS_H)
-		return 1;
-	int vector_index = layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
-	*result = in_field[vector_index];
-	double horizontal_component;
-	vertical_contravariant_normalized_h(in_field, layer_index, h_index, grid, &horizontal_component);
-	*result += horizontal_component;
-	return 0;
-}
-
 int vertical_contravariant_normalized_h(Vector_field in_field, int layer_index, int h_index, Grid *grid, double *result)
 {
 	// Attention: contains a rescaling factor for the tilting of the horizontal surface.

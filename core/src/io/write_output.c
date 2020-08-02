@@ -792,11 +792,23 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	    	wind_10_m_mean_v[h_index] += 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 1];
 	    }
 	}
+	// This is useful for checking a forcing.
+	// double u_forcing, v_forcing;
 	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 	{
         passive_turn(wind_10_m_mean_u[i], wind_10_m_mean_v[i], -grid -> direction[i], &wind_u, &wind_v);
         wind_10_m_mean_u[i] = wind_u;
         wind_10_m_mean_v[i] = wind_v;
+        // This is useful for checking a forcing.
+        /*
+        u_forcing = forcings -> pot_vort_tend[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i];
+		v_forcing = 0;
+		for (int j = 0; j < 10; ++j)
+			v_forcing += grid -> trsk_modified_weights[10*i + j]*forcings -> pot_vort_tend[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*i + j]];
+        passive_turn(u_forcing, v_forcing, -grid -> direction[i], &wind_u, &wind_v);
+        wind_10_m_mean_u[i] = 10000*wind_u;
+        wind_10_m_mean_v[i] = 10000*wind_v;
+        */
 	}
 	double standard_deviation;
 	double gusts_parameter = 3;

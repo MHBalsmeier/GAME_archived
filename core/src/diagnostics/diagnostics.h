@@ -19,7 +19,6 @@ int pot_temp_diagnostics(State *, Scalar_field);
 double gas_constant_diagnostics(double, double);
 double calc_micro_density(double, double);
 double calc_condensates_density_sum(int, Tracer_densities);
-int vertical_contravariant_normalized(Vector_field, int, int, Grid *, double *);
 int vertical_contravariant_normalized_h(Vector_field, int, int, Grid *, double *);
 int horizontal_covariant_normalized(Vector_field, int, int, Grid *, double *);
 int temperature_diagnostics(State *, State *);
