@@ -96,6 +96,8 @@ int to_index[NO_OF_VECTORS_H];
 double direction[NO_OF_VECTORS_H];
 int adjacent_vector_indices_h[6*NO_OF_SCALARS_H];
 int adjacent_signs_h[6*NO_OF_SCALARS_H];
+int density_to_rhombus_indices[4*NO_OF_VECTORS_H];
+double density_to_rhombus_weights[4*NO_OF_VECTORS_H];
 int trsk_modified_velocity_indices[10*NO_OF_VECTORS_H];
 int trsk_modified_curl_indices[10*NO_OF_VECTORS_H];
 double trsk_modified_weights[10*NO_OF_VECTORS_H];

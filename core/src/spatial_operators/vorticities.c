@@ -13,8 +13,8 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
 {
 	// It is called "potential vorticity", but it is not Ertel's potential vorticity. It is the absolute vorticity divided by the density.
 	calc_abs_vort(velocity_field, out_field, grid, dualgrid);
-    int layer_index, h_index, edge_vector_index_h;
-    double density_value;
+    int layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index;
+    double density_value, from_volume, to_volume, upper_volume, lower_volume;
     for (int i = 0; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {
         layer_index = i/(2*NO_OF_VECTORS_H);
@@ -22,7 +22,11 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
         if (h_index >= NO_OF_VECTORS_H)
         {
 			edge_vector_index_h = h_index - NO_OF_VECTORS_H;
-			density_value = 0.5*(density_field[layer_index*NO_OF_SCALARS_H + grid -> from_index[edge_vector_index_h]] + density_field[layer_index*NO_OF_SCALARS_H + grid -> to_index[edge_vector_index_h]]);
+			density_value = 0;
+			for (int j = 0; j < 4; ++j)
+			{
+				density_value += grid -> density_to_rhombus_weights[4*edge_vector_index_h + j]*density_field[layer_index*NO_OF_SCALARS_H + grid -> density_to_rhombus_indices[4*edge_vector_index_h + j]];
+			}
         }
         else
         {
@@ -36,7 +40,18 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
             }
             else
             {
-				density_value = 0.25*(density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]] + density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]] + density_field[layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]] + density_field[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]]);
+            	upper_from_index = (layer_index - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index];
+            	upper_volume = grid -> volume_ratios[2*upper_from_index + 1]*grid -> volume[upper_from_index];
+            	lower_volume = grid -> volume_ratios[2*(upper_from_index + NO_OF_SCALARS_H) + 0]*grid -> volume[upper_from_index + NO_OF_SCALARS_H];
+            	from_volume = upper_volume + lower_volume;
+            	density_value = 0.5*upper_volume/from_volume*density_field[upper_from_index];
+            	density_value += 0.5*lower_volume/from_volume*density_field[upper_from_index + NO_OF_SCALARS_H];
+            	upper_to_index = (layer_index - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index];
+            	upper_volume = grid -> volume_ratios[2*upper_to_index + 1]*grid -> volume[upper_to_index];
+            	lower_volume = grid -> volume_ratios[2*(upper_to_index + NO_OF_SCALARS_H) + 0]*grid -> volume[upper_to_index + NO_OF_SCALARS_H];
+            	to_volume = upper_volume + lower_volume;
+            	density_value += 0.5*upper_volume/to_volume*density_field[upper_to_index];
+            	density_value += 0.5*lower_volume/to_volume*density_field[upper_to_index + NO_OF_SCALARS_H];
             }
         }
 		out_field[i] = out_field[i]/density_value;

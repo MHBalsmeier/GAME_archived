@@ -175,7 +175,7 @@ int set_volume(double volume[], double z_scalar_dual[], double z_vector[], doubl
 	return 0;
 }
 
-int rescale_area_dual(double area_dual[], double z_vector[], int from_index_dual[], int to_index_dual[], double area_dual_pre[], double z_vector_dual[])
+int modify_area_dual(double area_dual[], double z_vector[], int from_index_dual[], int to_index_dual[], double area_dual_pre[], double z_vector_dual[])
 {
 	int layer_index, h_index, primal_vector_index, dual_vector_index;
     double area_0, area_1, area_rescale_factor, area_ratio;
@@ -210,6 +210,18 @@ int rescale_area_dual(double area_dual[], double z_vector[], int from_index_dual
 			exit(1);
 		}
     }
+    double check_area, earth_surface;
+    check_area = 0;
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+    {
+    	check_area += area_dual[NO_OF_VECTORS_H + i];
+    }
+    earth_surface = 4*M_PI*pow(RADIUS + z_vector[NO_OF_SCALARS_H], 2);
+    if (fabs(check_area/earth_surface - 3) > 1e-10)
+    {
+    	printf("Problem with rhombus areas.\n");
+    	exit(1);
+    }
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
     	area_ratio = area_dual[i]/area_dual[i + 2*NO_OF_VECTORS_H];
@@ -228,7 +240,7 @@ int rescale_area_dual(double area_dual[], double z_vector[], int from_index_dual
     		exit(1);
     	}
     }
-    double check_area, area_sum, mean_z;
+    double area_sum, mean_z;
     for (int i = 0; i < NO_OF_LAYERS; ++i)
     {
     	mean_z = 0;
