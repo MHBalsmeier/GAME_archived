@@ -182,7 +182,7 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 	{
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
 		{
-			vertical_entropy_vector[j] = diagnostics -> specific_entropy[i + j*NO_OF_SCALARS_H];
+			vertical_entropy_vector[j] = diagnostics -> specific_entropy_dry[i + j*NO_OF_SCALARS_H];
 		}
 		grad_v_scalar_column(vertical_entropy_vector, vertical_entropy_gradient, i, grid);
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
@@ -223,7 +223,6 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 		// calling the algorithm to solve the system of linear equations
 		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, 2*NO_OF_LAYERS - 1);
 		// writing the result into the new state
-		state_new -> velocity_gas[i] = 0;
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
 			// Klemp (2008) upper boundary layer

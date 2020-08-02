@@ -96,7 +96,7 @@ double gas_constant_diagnostics(double density_d_micro_value, double density_v_m
 
 double entropy_constant_diagnostics(double density_d_micro_value, double density_v_micro_value)
 {
-	double result = (density_d_micro_value*entropy_constant_d + density_v_micro_value*entropy_constant_v)/(density_d_micro_value + density_v_micro_value);
+	double result = (density_d_micro_value*ENTROPY_CONSTANT_D + density_v_micro_value*ENTROPY_CONSTANT_V)/(density_d_micro_value + density_v_micro_value);
 	return result;
 }
 

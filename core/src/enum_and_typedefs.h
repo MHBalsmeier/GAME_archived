@@ -35,10 +35,10 @@ Github repository: https://github.com/MHBalsmeier/game
 // #define RADIUS pow(SEMIMAJOR*SEMIMAJOR*SEMIMINOR, 1.0/3.0)
 #define RADIUS 6371000.789927
 #define H_BAR (1.054571817e-34)
-// #define entropy_constant_d (0.4*C_D_P*log(K_B/P_0*pow(M_D/N_A*K_B*exp(5.0/3)/(2*M_PI*H_BAR*H_BAR), 1.5)))
-#define entropy_constant_d 1566.752670
-// #define entropy_constant_v (0.4*C_V_P*log(K_B/P_0*pow(M_V/N_A*K_B*exp(5.0/3)/(2*M_PI*H_BAR*H_BAR), 1.5)))
-#define entropy_constant_v 2367.178359
+// #define ENTROPY_CONSTANT_D (0.4*C_D_P*log(K_B/P_0*pow(M_D/N_A*K_B*exp(5.0/3)/(2*M_PI*H_BAR*H_BAR), 1.5)))
+#define ENTROPY_CONSTANT_D 1566.752670
+// #define ENTROPY_CONSTANT_V (0.4*C_V_P*log(K_B/P_0*pow(M_V/N_A*K_B*exp(5.0/3)/(2*M_PI*H_BAR*H_BAR), 1.5)))
+#define ENTROPY_CONSTANT_V 2367.178359
 #define EPSILON_TRACERS 0.00001
 
 enum grid_integers {
@@ -126,9 +126,11 @@ Tracer_density_temperatures tracer_density_temperatures;
 // Collects diagnostic quantities. Note: in fact, forcings are also diagnostic quiantities.
 typedef struct diagnostics {
 Vector_field mass_dry_flux_density;
-Vector_field temp_gas_flux;
 Vector_field temp_gradient;
-Scalar_field specific_entropy;
+Scalar_field specific_entropy_dry;
+Scalar_field specific_entropy_vapour;
+Scalar_field pressure_gradient_1_dry_prefactor;
+Scalar_field pressure_gradient_1_vapour_prefactor;
 Scalar_field temp_gas_explicit;
 Curl_field pot_vort;
 Scalar_field c_h_p_field;
@@ -136,7 +138,8 @@ Scalar_field e_kin_h;
 // nabla h
 Vector_field pressure_gradient_0_m;
 // temp nabla s
-Vector_field pressure_gradient_1;
+Vector_field pressure_gradient_1_dry;
+Vector_field pressure_gradient_1_vapour;
 Vector_field temperature_flux_density;
 Scalar_field wind_field_divv_h;
 Vector_field entropy_gas_flux_density;

@@ -23,7 +23,6 @@ int set_init_data(char FILE_NAME[], State *init_state)
     double *liquid_water_temperature = malloc(NO_OF_SCALARS*sizeof(double));
     double *solid_water_temperature = malloc(NO_OF_SCALARS*sizeof(double));
     int retval, ncid;
-    double R_h, c_h_v, density_h_micro;
     if ((retval = nc_open(FILE_NAME, NC_NOWRITE, &ncid)))
         NCERR(retval);
     int temperature_gas_id, density_dry_id, wind_id, density_vapour_id, density_liquid_id, density_solid_id, temperature_liquid_id, temperature_solid_id;
@@ -75,12 +74,14 @@ int set_init_data(char FILE_NAME[], State *init_state)
         }
     }
 	pot_temp_diagnostics(init_state, pot_temperature);
+	double pot_temperature_vapour, pressure_value, pressure_value_d, pressure_value_v;
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-        R_h = gas_constant_diagnostics(density_dry[i], water_vapour_density[i]);
-        c_h_v = spec_heat_cap_diagnostics_p(density_dry[i], water_vapour_density[i]);
-        density_h_micro = calc_micro_density(density_dry[i] + water_vapour_density[i], solid_water_density[i] + liquid_water_density[i]);
-        init_state -> entropy_density_gas[i] = density_dry[i]*(C_D_P*log(pot_temperature[i]) + entropy_constant_d) + water_vapour_density[i]*(C_V_P*log(pot_temperature[i]) + M_D/M_V*DELTA_C_V_P*R_h/c_h_v*log(R_h*pot_temperature[i]*density_h_micro/P_0) + entropy_constant_d);
+    	pressure_value_d = init_state -> density_dry[i]*R_D*init_state -> temp_gas[i];
+    	pressure_value_v = init_state -> tracer_densities[2*NO_OF_SCALARS + i]*R_V*init_state -> temp_gas[i];
+    	pressure_value = pressure_value_d + pressure_value_v; 
+        pot_temperature_vapour = temperature_gas[i]*pow(P_0/pressure_value, R_V/C_V_P);
+        init_state -> entropy_density_gas[i] = density_dry[i]*(C_D_P*log(pot_temperature[i]) + ENTROPY_CONSTANT_D) + water_vapour_density[i]*(C_V_P*log(pot_temperature_vapour) + ENTROPY_CONSTANT_V);
     }
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {

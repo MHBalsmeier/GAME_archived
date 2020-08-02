@@ -98,7 +98,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
             {
             	// Now the aim is to determine the value of the MSLP.
                 temp_lowest_layer = state_write_out -> temp_gas[i*NO_OF_SCALARS_H + j];
-                pressure_value = state_write_out -> density_dry[j + i*NO_OF_SCALARS_H]*R_D*temp_lowest_layer;
+                pressure_value = state_write_out -> density_dry[j + i*NO_OF_SCALARS_H]*R_D*temp_lowest_layer + state_write_out -> tracer_densities[2*NO_OF_SCALARS + i]*R_V*temp_lowest_layer;
                 temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[j + i*NO_OF_SCALARS_H];
                 mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
                 mslp[j] = pressure_value/mslp_factor;
