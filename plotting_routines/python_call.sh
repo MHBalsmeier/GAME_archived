@@ -1,5 +1,5 @@
-disp_shortname=sp
-disp_level=0
+disp_shortname=wz
+disp_level=25
 fig_save_path=~/figs/game_output/$run_id
 plot_integrals=1
 if [ -d $fig_save_path ]

@@ -994,7 +994,9 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     for (int i = 0; i < NO_OF_LEVELS; ++i)
     {
         for (int j = 0; j < NO_OF_SCALARS_H; j++)
+        {
             wind_w_h[j] = state_write_out -> velocity_gas[j + i*NO_OF_VECTORS_PER_LAYER];
+        }
         if ((retval = codes_set_long(handle_wind_w_h, "discipline", 0)))
             ECCERR(retval);
         if ((retval = codes_set_long(handle_wind_w_h, "centre", 255)))

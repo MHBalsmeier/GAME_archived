@@ -9,11 +9,11 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int vertical_coriolis_gen(Vector_field in_field_0, Curl_field in_field_1, int layer_index, int h_index, double *component, Grid *grid)
 {
-	*component = 0;
 	int number_of_edges = 6;
 	if (h_index < NO_OF_PENTAGONS)
 		number_of_edges = 5;
 	double vector_field_value;
+	*component = 0;
 	for (int i = 0; i < number_of_edges; ++i)
 	{
 		recov_primal2dual(in_field_0, layer_index, grid -> adjacent_vector_indices_h[6*h_index + i], &vector_field_value, grid);
