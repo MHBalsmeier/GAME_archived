@@ -53,36 +53,6 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
     return 0;
 }
 
-int divv_v_columns(double in_vector[], double out_vector[], int h_index, Grid *grid)
-{
-	// In_vector must be contravariant already.
-    double contra_upper, contra_lower, comp_v;
-    for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
-    {
-        if (layer_index == 0)
-        {
-            contra_lower = in_vector[0];
-            comp_v = -contra_lower*grid -> area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
-        }
-        else if (layer_index == NO_OF_LAYERS - 1)
-        {
-        	contra_upper = in_vector[layer_index - 1];
-            comp_v = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
-        }
-        else
-        {
-            contra_upper = in_vector[layer_index - 1];
-            contra_lower = in_vector[layer_index];
-            comp_v = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - contra_lower*grid -> area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
-        }
-        out_vector[layer_index] = 1/grid -> volume[h_index + layer_index*NO_OF_SCALARS_H]*comp_v;
-    }
-    return 0;
-}
-
-
-
-
 
 
 

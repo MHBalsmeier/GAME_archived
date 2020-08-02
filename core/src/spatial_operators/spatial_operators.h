@@ -17,8 +17,4 @@ int scalar_times_vector_scalar_h_v(Scalar_field, Scalar_field, Vector_field, Vec
 int scalar_times_vector_vector_h_v(Scalar_field, Vector_field, Vector_field, Vector_field, Grid *);
 int linear_combine_two_states(State *, State *, State *, double, double);
 int dissipation(Vector_field, Scalar_field, Vector_field, Scalar_field, Grid *);
-int divv_v_columns(double [], double [], int, Grid *);
-int grad_v_vector_column_to_vector_points(double [], double [], int, Grid *);
 int grad_v_scalar_column(double [], double [], int, Grid *);
-int grad_v_vector_column_to_scalar_points(double [], double [], int, Grid *);
-int grad_v_scalar_column_to_scalar_points(double [], double [], int, Grid *);

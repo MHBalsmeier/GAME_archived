@@ -1,7 +1,7 @@
 /*
 This source file is part of the Global Atmospheric Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/MHBalsmeier/game
-The vertical advection of horizontal momentum is organized here.
+The vertical advection is organized here.
 */
 
 #include "../../enum_and_typedefs.h"
@@ -170,8 +170,6 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 	double *c_prime_vector = malloc((2*NO_OF_LAYERS - 2)*sizeof(double));
 	double *d_prime_vector = malloc((2*NO_OF_LAYERS - 1)*sizeof(double));
 	double *solution_vector = malloc((2*NO_OF_LAYERS - 1)*sizeof(double));
-	double *vertical_velocity = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *vertical_velocity_divergence = malloc(NO_OF_LAYERS*sizeof(double));
 	double *vertical_entropy_vector = malloc(NO_OF_LAYERS*sizeof(double));
 	double *vertical_entropy_gradient = malloc((NO_OF_LAYERS - 1)*sizeof(double));
 	double *temp_interface_values = malloc((NO_OF_LAYERS - 1)*sizeof(double));
@@ -189,10 +187,6 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 		grad_v_scalar_column(vertical_entropy_vector, vertical_entropy_gradient, i, grid);
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
-			vertical_velocity[j] = state_new -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
-		}
-		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
-		{
             lower_index = i + (j + 1)*NO_OF_SCALARS_H;
             upper_index = i + j*NO_OF_SCALARS_H;
             upper_volume = grid -> volume_ratios[2*upper_index + 1]*grid -> volume[upper_index];
@@ -202,7 +196,6 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
             lower_weight = lower_volume/total_volume;
 			temp_interface_values[j] = upper_weight*state_old -> temp_gas[i + j*NO_OF_SCALARS_H] + lower_weight*state_old -> temp_gas[i + (j + 1)*NO_OF_SCALARS_H];
 		}
-		divv_v_columns(vertical_velocity, vertical_velocity_divergence, i, grid);
 		// filling up the original vectors
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
@@ -233,7 +226,6 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 		state_new -> velocity_gas[i] = 0;
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
-			state_new -> temp_gas[i + j*NO_OF_SCALARS_H] = solution_vector[2*j];
 			// Klemp (2008) upper boundary layer
 			z_above_damping = grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - damping_start_height;
 			if (z_above_damping < 0)
@@ -242,13 +234,10 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 				damping_coeff = damping_coeff_max*pow(sin(0.5*M_PI*z_above_damping/(grid -> z_vector[0] - damping_start_height)), 2);
 			state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] = solution_vector[2*j + 1]/(1 + delta_t*damping_coeff);
 		}
-		state_new -> temp_gas[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H] = solution_vector[2*(NO_OF_LAYERS - 1)];
 	}
 	free(vertical_entropy_vector);
 	free(vertical_entropy_gradient);
 	free(temp_interface_values);
-	free(vertical_velocity);
-	free(vertical_velocity_divergence);
 	free(solution_vector);
 	free(a_vector);
 	free(b_vector);
@@ -280,11 +269,8 @@ int three_band_solver_ver_den_dry(State *state_old, State *state_new, State *sta
 		// diagnozing the vertical flux
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
+			vertical_flux_vector[j] = state_new -> velocity_gas[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
 			area = grid -> area[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
-			if (j + 1 >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
-				vertical_contravariant_normalized(state_new -> velocity_gas, j + 1, i, grid, &vertical_flux_vector[j]);
-			else
-				vertical_flux_vector[j] = state_new -> velocity_gas[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
 			vertical_flux_vector[j] = area*vertical_flux_vector[j];
 		}
 		// filling up the original vectors
@@ -347,11 +333,8 @@ int three_band_solver_ver_entropy_density_gas(State *state_old, State *state_new
 		// diagnozing the vertical flux
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
+			vertical_flux_vector[j] = state_new -> velocity_gas[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
 			area = grid -> area[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
-			if (j + 1 >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
-				vertical_contravariant_normalized(state_new -> velocity_gas, j + 1, i, grid, &vertical_flux_vector[j]);
-			else
-				vertical_flux_vector[j] = state_new -> velocity_gas[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
 			vertical_flux_vector[j] = area*vertical_flux_vector[j];
 		}
 		// filling up the original vectors
@@ -413,19 +396,12 @@ int three_band_solver_ver_tracers(State *state_old, State *state_new, State *sta
 	{
 		for (int k = 0; k < NO_OF_CONDENSATED_TRACERS; ++k)
 		{
-			// tracer masses
-			// diagnozing the vertical flux
+			// determining the vertical flux
 			for (int j = 0; j < NO_OF_LAYERS; ++j)
 			{
+				vertical_flux_vector[j] = state_new -> velocity_gas[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
+				vertical_flux_vector[j] -= ret_sink_velocity(i, 0, 0.001);
 				area = grid -> area[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
-				if (j + 1 >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
-				{
-					vertical_contravariant_normalized(state_new -> velocity_gas, j + 1, i, grid, &vertical_flux_vector[j]);
-					// small metric terms neglected here
-					vertical_flux_vector[j] -= ret_sink_velocity(i, 0, 0.001);
-				}
-				else
-					vertical_flux_vector[j] = state_new -> velocity_gas[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
 				vertical_flux_vector[j] = area*vertical_flux_vector[j];
 			}
 			// filling up the original vectors
@@ -454,19 +430,13 @@ int three_band_solver_ver_tracers(State *state_old, State *state_new, State *sta
 				if (state_new -> tracer_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] < 0)
 					state_new -> tracer_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = 0;
 			}
-			// tracer temberature densities
+			// tracer temperature densities
 			// diagnozing the vertical flux
 			for (int j = 0; j < NO_OF_LAYERS; ++j)
 			{
+				vertical_flux_vector[j] = state_new -> velocity_gas[k*NO_OF_SCALARS + NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
+				vertical_flux_vector[j] -= ret_sink_velocity(i, 0, 0.001);
 				area = grid -> area[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
-				if (j + 1 >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
-				{
-					vertical_contravariant_normalized(state_new -> velocity_gas, j + 1, i, grid, &vertical_flux_vector[j]);
-					// small metric term negelcted here
-					vertical_flux_vector[j] -= ret_sink_velocity(i, 0, 0.001);
-				}
-				else
-					vertical_flux_vector[j] = state_new -> velocity_gas[k*NO_OF_SCALARS + NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
 				vertical_flux_vector[j] = area*vertical_flux_vector[j];
 			}
 			// filling up the original vectors
@@ -500,11 +470,8 @@ int three_band_solver_ver_tracers(State *state_old, State *state_new, State *sta
 		// diagnozing the vertical flux
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
+			vertical_flux_vector[j] = state_new -> velocity_gas[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
 			area = grid -> area[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
-			if (j + 1 >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
-				vertical_contravariant_normalized(state_new -> velocity_gas, j + 1, i, grid, &vertical_flux_vector[j]);
-			else
-				vertical_flux_vector[j] = state_new -> velocity_gas[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
 			vertical_flux_vector[j] = area*vertical_flux_vector[j];
 		}
 		// filling up the original vectors
