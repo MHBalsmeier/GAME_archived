@@ -12,10 +12,10 @@ src/integrators/explicit_integrators/entropy_density_gas.c
 src/integrators/explicit_integrators/integrate_continuity_dry.c
 src/integrators/explicit_integrators/integrate_tracers.c
 src/integrators/implicit_integrators/vertical_slice_solvers.c
-src/spatial_operators/coriolis_gen.c src/spatial_operators/potential_vorticity.c
+src/spatial_operators/coriolis_gen.c src/spatial_operators/vorticities.c
 src/spatial_operators/dissipation.c
 src/spatial_operators/scalar_times_scalar.c
-src/spatial_operators/divergence_operators.c
+src/spatial_operators/divergence_h.c
 src/spatial_operators/scalar_times_vector.c
 src/spatial_operators/gradient_operators.c
 src/spatial_operators/kinetic_energy.c
