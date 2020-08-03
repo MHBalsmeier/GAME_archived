@@ -18,6 +18,7 @@ For more specific details see handbook.
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <omp.h>
 #include <netcdf.h>
 #include "geos95.h"
 #include "atmostracers.h"

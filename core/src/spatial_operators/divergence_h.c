@@ -6,17 +6,20 @@ Github repository: https://github.com/MHBalsmeier/game
 #include "../enum_and_typedefs.h"
 #include "../diagnostics/diagnostics.h"
 #include <stdio.h>
+#include <omp.h>
 
 int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
 {
     int layer_index, h_index;
     double contra_upper, contra_lower, comp_h, comp_v;
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
+    int i, j;
+	#pragma omp parallel for private (i, j, layer_index, h_index, contra_upper, contra_lower, comp_v, comp_h)
+    for (i = 0; i < NO_OF_SCALARS; ++i)
     {
         layer_index = i/NO_OF_SCALARS_H;
         h_index = i - layer_index*NO_OF_SCALARS_H;
         comp_h = 0;
-        for (int j = 0; j < 6; ++j)
+        for (j = 0; j < 6; ++j)
         {
             comp_h += in_field[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]*grid -> adjacent_signs_h[6*h_index + j]*grid -> area[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]];
         }

@@ -10,6 +10,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <string.h>
 #include "geos95.h"
 #include "enum.h"
+#include <omp.h>
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 #define UNIT "Z_SURFACE"
@@ -111,7 +112,9 @@ int main(int argc, char *argv[])
 	}
     double *z_in_vector = malloc(no_of_lat_points*no_of_lon_points*sizeof(double));
     int lat_index, lon_index;
-    for (int i = 0; i < no_of_lat_points*no_of_lon_points; ++i)
+    int i;
+	#pragma omp parallel for private (lat_index, lon_index, i) shared (z_in_vector)
+    for (i = 0; i < no_of_lat_points*no_of_lon_points; ++i)
     {
     	lat_index = i/no_of_lon_points;
     	lon_index = i - lat_index*no_of_lon_points;
@@ -121,7 +124,9 @@ int main(int argc, char *argv[])
     int min_indices_vector[4];
     double weights_vector[4];
     double weights_sum;
-	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+    int j;
+	// #pragma omp parallel for private(i, j, distance, latitude, lat_index, lon_index, distance_vector, min_indices_vector, weights_vector, weights_sum)
+	for (i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		if (ORO_ID == 0)
 		{
@@ -139,26 +144,25 @@ int main(int argc, char *argv[])
 		}
 		if (ORO_ID == 3)
 		{
-			for (int j = 0; j < no_of_lat_points*no_of_lon_points; ++j)
+			for (j = 0; j < no_of_lat_points*no_of_lon_points; ++j)
 			{
 				lat_index = j/no_of_lon_points;
 				lon_index = j - lat_index*no_of_lon_points;
 				distance_vector[j] = calculate_distance_h(deg2rad(latitude_input[lat_index]), deg2rad(longitude_input[lon_index]), latitude_scalar[i], longitude_scalar[i], 1);
-				
 			}
-			for (int j = 0; j < 4; ++j)
+			for (j = 0; j < 4; ++j)
 			{
 				min_indices_vector[j] = -1;
 			}
 			weights_sum = 0;
-			for (int j = 0; j < 4; ++j)
+			for (j = 0; j < 4; ++j)
 			{
 				min_indices_vector[j] = find_min_index_exclude(distance_vector, no_of_lat_points*no_of_lon_points, min_indices_vector, 4);
 				weights_vector[j] = 1/(distance_vector[min_indices_vector[j]] + 0.01);
 				weights_sum += weights_vector[j];
 			}
 			oro[i] = 0;
-			for (int j = 0; j < 4; ++j)
+			for (j = 0; j < 4; ++j)
 			{
 				oro[i] += z_in_vector[min_indices_vector[j]]*weights_vector[j]/weights_sum;
 			}

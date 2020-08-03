@@ -18,7 +18,9 @@ radiation_delta_t=10800
 write_out_mass_dry_integral=0
 write_out_entropy_gas_integral=0
 write_out_energy_integral=0
-export OMP_NUM_THREADS=4
+# relevant only for OMP
+export OMP_NUM_THREADS=5
+# relevant only for MPI
 number_of_cpus=1
 nwp_mode=1
 # necessary only for data assimilation
