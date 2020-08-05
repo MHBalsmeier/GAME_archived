@@ -1,7 +1,7 @@
 #include <math.h>
 
 enum grid_integers {
-RES_ID = 6,
+RES_ID = 5,
 NO_OF_BASIC_TRIANGLES = 20,
 NO_OF_PENTAGONS = 12,
 NO_OF_HEXAGONS = (int) (10*(pow(2, 2*RES_ID) - 1)),

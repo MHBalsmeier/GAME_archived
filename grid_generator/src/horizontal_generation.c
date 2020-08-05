@@ -105,9 +105,9 @@ int calc_cell_face_unity(double pent_hex_face_unity_sphere[], double latitude_sc
         {
         	no_of_edges = 5;
         }
-        double *lat_points = malloc(no_of_edges*sizeof(double));
-        double *lon_points = malloc(no_of_edges*sizeof(double));
-        int *cell_vector_indices = malloc(no_of_edges*sizeof(int));
+        double lat_points[no_of_edges];
+        double lon_points[no_of_edges];
+        int cell_vector_indices[no_of_edges];
         for (int j = 0; j < no_of_edges; ++j)
             cell_vector_indices[j] = adjacent_vector_indices_h[6*i + j];
         counter = 0;
@@ -126,9 +126,6 @@ int calc_cell_face_unity(double pent_hex_face_unity_sphere[], double latitude_sc
         if (counter != no_of_edges)
         	printf("Trouble in calc_cell_face_unity.\n");
         calc_spherical_polygon_face(lat_points, lon_points, no_of_edges, &pent_hex_face_unity_sphere[i]);
-        free(lat_points);
-        free(lon_points);
-        free(cell_vector_indices);
     }
     double pent_hex_sum_unity_sphere = 0;
     double pent_hex_avg_unity_sphere_ideal = 4*M_PI/NO_OF_SCALARS_H;

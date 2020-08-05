@@ -414,16 +414,16 @@ int find_triangles_per_face(int res_id, int *NO_OF_triangles_per_face)
 int build_icosahedron(double latitude_ico[], double longitude_ico[], int edge_vertices[][2], int face_vertices[][3], int face_edges[][3], int face_edges_reverse[][3])
 {
     latitude_ico[0] = M_PI/2;
-    latitude_ico[1] = M_PI/6;
-    latitude_ico[2] = M_PI/6;
-    latitude_ico[3] = M_PI/6;
-    latitude_ico[4] = M_PI/6;
-    latitude_ico[5] = M_PI/6;
-    latitude_ico[6] = -M_PI/6;
-    latitude_ico[7] = -M_PI/6;
-    latitude_ico[8] = -M_PI/6;
-    latitude_ico[9] = -M_PI/6;
-    latitude_ico[10] = -M_PI/6;
+    latitude_ico[1] = atan(0.5);
+    latitude_ico[2] = atan(0.5);
+    latitude_ico[3] = atan(0.5);
+    latitude_ico[4] = atan(0.5);
+    latitude_ico[5] = atan(0.5);
+    latitude_ico[6] = -atan(0.5);
+    latitude_ico[7] = -atan(0.5);
+    latitude_ico[8] = -atan(0.5);
+    latitude_ico[9] = -atan(0.5);
+    latitude_ico[10] = -atan(0.5);
     latitude_ico[11] = -M_PI/2;
     longitude_ico[0] = 0;
     longitude_ico[1] = 0;
