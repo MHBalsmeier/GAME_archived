@@ -22,6 +22,7 @@ int pot_temp_diagnostics(State *state, Scalar_field pot_temp)
 	This is only needed for the output.
 	*/
 	double condensates_density_sum, density_d_micro_value, density_h_micro_value, density_v_micro_value, R_h;
+	#pragma omp parallel for private (condensates_density_sum, density_d_micro_value, density_h_micro_value, density_v_micro_value, R_h)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	condensates_density_sum = calc_condensates_density_sum(i, state -> tracer_densities);
@@ -37,6 +38,7 @@ int pot_temp_diagnostics(State *state, Scalar_field pot_temp)
 int temperature_diagnostics(State *state_old, State *state_new)
 {
     double nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_0, density_1, delta_density, delta_entropy_density, temperature_0, entropy_0, entropy_1;
+	#pragma omp parallel for private (nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_0, density_1, delta_density, delta_entropy_density, temperature_0, entropy_0, entropy_1)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	entropy_density_gas_0 = state_old -> entropy_density_gas[i];
@@ -58,6 +60,7 @@ int temperature_diagnostics(State *state_old, State *state_new)
 int temperature_diagnostics_explicit(State *state_old, State *state_tendency, Diagnostics *diagnostics, double delta_t)
 {
     double nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_0, density_1, delta_density, delta_entropy_density, temperature_0, entropy_0, entropy_1;
+	#pragma omp parallel for private (nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_0, density_1, delta_density, delta_entropy_density, temperature_0, entropy_0, entropy_1)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	entropy_density_gas_0 = state_old -> entropy_density_gas[i];

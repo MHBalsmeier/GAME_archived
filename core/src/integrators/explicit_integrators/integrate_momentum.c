@@ -6,12 +6,12 @@ Github repository: https://github.com/MHBalsmeier/game
 In this source file, the calculation of the explicit part of the momentum equation is managed.
 */
 
+#include <stdlib.h>
+#include <stdio.h>
 #include "../../enum_and_typedefs.h"
 #include "../../spatial_operators/spatial_operators.h"
 #include "../../manage_time_stepping/manage_time_stepping.h"
 #include "atmostracers.h"
-#include <stdlib.h>
-#include <stdio.h>
 #include "../../diagnostics/diagnostics.h"
 
 int integrate_momentum(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Diffusion_info *diffusion_info, Config_info *config_info, int no_step_rk)
@@ -28,6 +28,7 @@ int integrate_momentum(State *current_state, State *state_tendency, Grid *grid, 
     // Now the explicit forces are added up.
     int layer_index, h_index;
     double metric_term, vertical_velocity, hor_non_trad_cori_term;
+    #pragma omp parallel for private(layer_index, h_index, metric_term, vertical_velocity, hor_non_trad_cori_term)
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
     	layer_index = i/NO_OF_VECTORS_PER_LAYER;

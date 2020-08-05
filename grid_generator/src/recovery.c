@@ -409,7 +409,7 @@ int set_recov_ver(int adjacent_vector_indices_h[], double direction[], double di
 		    recov_ver_weight[6*i + j] = 2*sign*triangle_area*delta_z_at_edge/(pent_hex_face_unity_sphere[h_index]*delta_z_at_cell);
 		    check_sum_pre += fabs(recov_ver_weight[6*i + j]);
 		}
-		if (fabs(check_sum_pre - 2) > 0.3)
+		if (fabs(check_sum_pre - 2) > 0.4)
 		{
 			printf("Problem with recov_ver_weight, check_sum_pre is %lf.\n", check_sum_pre);
 			exit(1);

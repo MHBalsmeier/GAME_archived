@@ -6,12 +6,12 @@ Github repository: https://github.com/MHBalsmeier/game
 In this source file, the forward part of the integration is managed.
 */
 
+#include <stdlib.h>
+#include <stdio.h>
 #include "../../enum_and_typedefs.h"
 #include "../../spatial_operators/spatial_operators.h"
 #include "../../manage_time_stepping/manage_time_stepping.h"
 #include "atmostracers.h"
-#include <stdlib.h>
-#include <stdio.h>
 #include "../../diagnostics/diagnostics.h"
 #include "../integrators.h"
 

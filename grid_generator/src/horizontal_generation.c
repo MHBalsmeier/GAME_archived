@@ -3,12 +3,12 @@ This source file is part of the Global Atmospheric Modeling Framework (GAME), wh
 Github repository: https://github.com/MHBalsmeier/game
 */
 
-#include "enum.h"
-#include "grid_generator.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "geos95.h"
 #include <netcdf.h>
+#include "geos95.h"
+#include "enum.h"
+#include "grid_generator.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 
@@ -97,25 +97,25 @@ int generate_horizontal_generators(double latitude_ico[], double longitude_ico[]
 
 int calc_cell_face_unity(double pent_hex_face_unity_sphere[], double latitude_scalar_dual[], double longitude_scalar_dual[], int adjacent_vector_indices_h [], int vorticity_indices_pre [])
 {
-    int check_0, check_1, check_2, counter, NO_OF_edges;
+    int check_0, check_1, check_2, counter, no_of_edges;
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
-    	NO_OF_edges = 6;
+    	no_of_edges = 6;
         if (i < NO_OF_PENTAGONS)
         {
-        	NO_OF_edges = 5;
+        	no_of_edges = 5;
         }
-        double *lat_points = malloc(NO_OF_edges*sizeof(double));
-        double *lon_points = malloc(NO_OF_edges*sizeof(double));
-        int *cell_vector_indices = malloc(NO_OF_edges*sizeof(int));
-        for (int j = 0; j < NO_OF_edges; ++j)
+        double *lat_points = malloc(no_of_edges*sizeof(double));
+        double *lon_points = malloc(no_of_edges*sizeof(double));
+        int *cell_vector_indices = malloc(no_of_edges*sizeof(int));
+        for (int j = 0; j < no_of_edges; ++j)
             cell_vector_indices[j] = adjacent_vector_indices_h[6*i + j];
         counter = 0;
         for (int j = 0; j < NO_OF_DUAL_SCALARS_H; ++j)
         {
-            check_0 = in_bool_calculator(vorticity_indices_pre[3*j + 0], cell_vector_indices, NO_OF_edges);
-            check_1 = in_bool_calculator(vorticity_indices_pre[3*j + 1], cell_vector_indices, NO_OF_edges);
-            check_2 = in_bool_calculator(vorticity_indices_pre[3*j + 2], cell_vector_indices, NO_OF_edges);
+            check_0 = in_bool_calculator(vorticity_indices_pre[3*j + 0], cell_vector_indices, no_of_edges);
+            check_1 = in_bool_calculator(vorticity_indices_pre[3*j + 1], cell_vector_indices, no_of_edges);
+            check_2 = in_bool_calculator(vorticity_indices_pre[3*j + 2], cell_vector_indices, no_of_edges);
             if (check_0 == 1 || check_1 == 1 || check_2 == 1)
             {
                 lat_points[counter] = latitude_scalar_dual[j];
@@ -123,9 +123,9 @@ int calc_cell_face_unity(double pent_hex_face_unity_sphere[], double latitude_sc
                 counter++;
             }
         }
-        if (counter != NO_OF_edges)
+        if (counter != no_of_edges)
         	printf("Trouble in calc_cell_face_unity.\n");
-        calc_spherical_polygon_face(lat_points, lon_points, NO_OF_edges, &pent_hex_face_unity_sphere[i]);
+        calc_spherical_polygon_face(lat_points, lon_points, no_of_edges, &pent_hex_face_unity_sphere[i]);
         free(lat_points);
         free(lon_points);
         free(cell_vector_indices);
@@ -146,7 +146,7 @@ int calc_cell_face_unity(double pent_hex_face_unity_sphere[], double latitude_sc
 			exit(1);
 		}
     }
-    if (fabs(pent_hex_sum_unity_sphere/(4*M_PI) - 1) > 1e-12)
+    if (fabs(pent_hex_sum_unity_sphere/(4*M_PI) - 1) > 1e-10)
 	{
         printf("Sum of faces of pentagons and hexagons on unity sphere does not match face of unit sphere.\n");
 		exit(1);
@@ -200,7 +200,7 @@ int calc_triangle_face_unity(double triangle_face_unit_sphere[], double latitude
 			exit(1);
 		}
     }
-    if (fabs(triangle_sum_unit_sphere/(4*M_PI) - 1) > 1e-12)
+    if (fabs(triangle_sum_unit_sphere/(4*M_PI) - 1) > 1e-10)
 	{
         printf("Sum of faces of triangles on unit sphere does not match face of unit sphere.\n");
 		exit(1);
@@ -277,6 +277,7 @@ int set_scalar_h_dual_coords(double latitude_scalar_dual[], double longitude_sca
 {
 	double lat_res, lon_res;
 	int point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, small_triangle_edge_index, dual_scalar_index, coord_0, coord_1, coord_0_points_amount, face_index, on_face_index, triangle_on_face_index;
+	#pragma omp parallel for private(lat_res, lon_res, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, small_triangle_edge_index, dual_scalar_index, coord_0, coord_1, coord_0_points_amount, face_index, on_face_index, triangle_on_face_index)
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         if (i >= NO_OF_EDGES*(POINTS_PER_EDGE + 1))

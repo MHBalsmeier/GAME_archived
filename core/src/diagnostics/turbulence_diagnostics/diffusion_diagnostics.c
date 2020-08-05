@@ -15,6 +15,7 @@ int calc_mass_diffusion_coeffs(Scalar_field *temperature, Scalar_field *density,
     double mean_particle_mass = M_D/N_A;
     double eff_particle_radius = 130e-12;
     double mass_diffusion_coeff, mass_diffusion_coeff_para_ratio_h, mass_diffusion_coeff_para_ratio_v;
+    #pragma omp parallel for private (mass_diffusion_coeff, mass_diffusion_coeff_para_ratio_h, mass_diffusion_coeff_para_ratio_v)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         calc_diffusion_coeff((*temperature)[i], mean_particle_mass, (*density)[i], eff_particle_radius, &mass_diffusion_coeff);
@@ -31,6 +32,7 @@ int calc_temp_diffusion_coeffs(Scalar_field *temperature, Scalar_field *density,
     double mean_particle_mass = M_D/N_A;
     double eff_particle_radius = 130e-12;
     double temp_diffusion_coeff, temp_diffusion_coeff_para_ratio_h, temp_diffusion_coeff_para_ratio_v;
+    #pragma omp parallel for private (temp_diffusion_coeff, temp_diffusion_coeff_para_ratio_h, temp_diffusion_coeff_para_ratio_v)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         calc_diffusion_coeff((*temperature)[i], mean_particle_mass, (*density)[i], eff_particle_radius, &temp_diffusion_coeff);

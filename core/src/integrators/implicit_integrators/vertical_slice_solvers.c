@@ -4,11 +4,10 @@ Github repository: https://github.com/MHBalsmeier/game
 The vertical advection is organized here.
 */
 
-#include "../../enum_and_typedefs.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "../../enum_and_typedefs.h"
 #include "../../diagnostics/diagnostics.h"
-#include <omp.h>
 #include "../../spatial_operators/spatial_operators.h"
 #include "atmostracers.h"
 
@@ -22,25 +21,26 @@ int three_band_solver_hor_vel_adv(State *state_old, State *state_new, State *sta
 	Procedure derived in Kompendium.
 	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
 	*/
-	double *a_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *b_vector = malloc(NO_OF_LAYERS*sizeof(double));
-	double *c_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *d_vector = malloc(NO_OF_LAYERS*sizeof(double));
-	double *c_prime_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *d_prime_vector = malloc(NO_OF_LAYERS*sizeof(double));
-	double *vertical_velocity = malloc(NO_OF_LAYERS*sizeof(double));
-	double *solution_vector = malloc(NO_OF_LAYERS*sizeof(double));
 	double delta_z;
-	int i;
+	int i, j;
+	#pragma omp parallel for private(delta_z)
 	for (i = 0; i < NO_OF_VECTORS_H; ++i)
 	{
+		double a_vector[NO_OF_LAYERS - 1];
+		double b_vector[NO_OF_LAYERS];
+		double c_vector[NO_OF_LAYERS - 1];
+		double d_vector[NO_OF_LAYERS];
+		double c_prime_vector[NO_OF_LAYERS - 1];
+		double d_prime_vector[NO_OF_LAYERS];
+		double vertical_velocity[NO_OF_LAYERS];
+		double solution_vector[NO_OF_LAYERS];
 		// diagnozing the vertical velocity
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
 		{
 			recov_hor_ver_pri(state_old -> velocity_gas, j, i, &vertical_velocity[j], grid);
 		}
 		// filling up the original vectors
-		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
 			if (j == NO_OF_LAYERS - 2)
 				delta_z = grid -> z_vector[NO_OF_SCALARS_H + j*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[NO_OF_SCALARS_H + (j + 1)*NO_OF_VECTORS_PER_LAYER + i];
@@ -53,7 +53,7 @@ int three_band_solver_hor_vel_adv(State *state_old, State *state_new, State *sta
 				delta_z = grid -> z_vector[NO_OF_SCALARS_H + (j - 1)*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[NO_OF_SCALARS_H + (j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 			c_vector[j] = -0.5*vertical_velocity[j]*delta_t/(2*delta_z);
 		}
-		for (int j = 0; j < NO_OF_LAYERS; ++j)
+		for (j = 0; j < NO_OF_LAYERS; ++j)
 		{
 			if (j == 0)
 			{
@@ -72,19 +72,11 @@ int three_band_solver_hor_vel_adv(State *state_old, State *state_new, State *sta
 			d_vector[j] = state_old -> velocity_gas[NO_OF_SCALARS_H + j*NO_OF_VECTORS_PER_LAYER + i] + delta_t*state_tendency -> velocity_gas[NO_OF_SCALARS_H + j*NO_OF_VECTORS_PER_LAYER + i];
 		}
 		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, NO_OF_LAYERS);
-		for (int j = 0; j < NO_OF_LAYERS; ++j)
+		for (j = 0; j < NO_OF_LAYERS; ++j)
 		{
 			state_new -> velocity_gas[NO_OF_SCALARS_H + j*NO_OF_VECTORS_PER_LAYER + i] = solution_vector[j];
 		}
 	}
-	free(solution_vector);
-	free(vertical_velocity);
-	free(a_vector);
-	free(b_vector);
-	free(c_vector);
-	free(d_vector);
-	free(c_prime_vector);
-	free(d_prime_vector);
 	return 0;
 }
 
@@ -95,18 +87,19 @@ int three_band_solver_ver_vel_adv(State *state_old, State *state_new, State *sta
 	Procedure derived in Kompendium.
 	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
 	*/
-	double *a_vector = malloc((NO_OF_LAYERS - 2)*sizeof(double));
-	double *b_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *c_vector = malloc((NO_OF_LAYERS - 2)*sizeof(double));
-	double *d_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *c_prime_vector = malloc((NO_OF_LAYERS - 2)*sizeof(double));
-	double *d_prime_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *vertical_velocity = malloc(NO_OF_LAYERS*sizeof(double));
-	double *solution_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
 	double delta_z;
 	int i;
+	#pragma omp parallel for private(delta_z)
 	for (i = 0; i < NO_OF_SCALARS_H; ++i)
-	{
+	{	
+		double a_vector[NO_OF_LAYERS - 2];
+		double b_vector[NO_OF_LAYERS - 1];
+		double c_vector[NO_OF_LAYERS - 2];
+		double d_vector[NO_OF_LAYERS - 1];
+		double c_prime_vector[NO_OF_LAYERS - 2];
+		double d_prime_vector[NO_OF_LAYERS - 1];
+		double vertical_velocity[NO_OF_LAYERS];
+		double solution_vector[NO_OF_LAYERS - 1];
 		// extracting the vertical velocity
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
@@ -150,36 +143,29 @@ int three_band_solver_ver_vel_adv(State *state_old, State *state_new, State *sta
 			state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] = solution_vector[j];
 		}
 	}
-	free(solution_vector);
-	free(vertical_velocity);
-	free(a_vector);
-	free(b_vector);
-	free(c_vector);
-	free(d_vector);
-	free(c_prime_vector);
-	free(d_prime_vector);
 	return 0;
 }
 
 int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, double delta_t, Grid *grid)
 {
-	double *a_vector = malloc((2*NO_OF_LAYERS - 2)*sizeof(double));
-	double *b_vector = malloc((2*NO_OF_LAYERS - 1)*sizeof(double));
-	double *c_vector = malloc((2*NO_OF_LAYERS - 2)*sizeof(double));
-	double *d_vector = malloc((2*NO_OF_LAYERS - 1)*sizeof(double));
-	double *c_prime_vector = malloc((2*NO_OF_LAYERS - 2)*sizeof(double));
-	double *d_prime_vector = malloc((2*NO_OF_LAYERS - 1)*sizeof(double));
-	double *solution_vector = malloc((2*NO_OF_LAYERS - 1)*sizeof(double));
-	double *vertical_entropy_vector = malloc(NO_OF_LAYERS*sizeof(double));
-	double *vertical_entropy_gradient = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *temp_interface_values = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	int upper_index, lower_index;
 	double delta_z, upper_weight, lower_weight, upper_volume, lower_volume, total_volume, damping_coeff, damping_coeff_max, damping_start_height, z_above_damping;
 	// This is for Klemp (2008).
 	damping_start_height = 0.75*grid -> z_vector[0];
 	damping_coeff_max = 0.2;
+	int upper_index, lower_index;
+	#pragma omp parallel for private(upper_index, lower_index, delta_z, upper_weight, lower_weight, upper_volume, lower_volume, total_volume, damping_coeff, z_above_damping)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
+		double a_vector[2*NO_OF_LAYERS - 2];
+		double b_vector[2*NO_OF_LAYERS - 1];
+		double c_vector[2*NO_OF_LAYERS - 2];
+		double d_vector[2*NO_OF_LAYERS - 1];
+		double c_prime_vector[2*NO_OF_LAYERS - 2];
+		double d_prime_vector[2*NO_OF_LAYERS - 1]; 
+		double solution_vector[2*NO_OF_LAYERS - 1];
+		double vertical_entropy_vector[NO_OF_LAYERS];
+		double vertical_entropy_gradient[NO_OF_LAYERS - 1];
+		double temp_interface_values[NO_OF_LAYERS - 1];
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
 		{
 			vertical_entropy_vector[j] = diagnostics -> specific_entropy_dry[i + j*NO_OF_SCALARS_H];
@@ -234,16 +220,6 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 			state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] = solution_vector[2*j + 1]/(1 + delta_t*damping_coeff);
 		}
 	}
-	free(vertical_entropy_vector);
-	free(vertical_entropy_gradient);
-	free(temp_interface_values);
-	free(solution_vector);
-	free(a_vector);
-	free(b_vector);
-	free(c_vector);
-	free(d_vector);
-	free(c_prime_vector);
-	free(d_prime_vector);
 	return 0;
 }
 
@@ -253,18 +229,19 @@ int three_band_solver_ver_den_dry(State *state_old, State *state_new, State *sta
 	Implicit vertical advection of dry mass (Euler).
 	Procedure derived in Kompendium.
 	*/
-	double *a_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *b_vector = malloc(NO_OF_LAYERS*sizeof(double));
-	double *c_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *d_vector = malloc(NO_OF_LAYERS*sizeof(double));
-	double *c_prime_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *d_prime_vector = malloc(NO_OF_LAYERS*sizeof(double));
-	double *vertical_flux_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *solution_vector = malloc(NO_OF_LAYERS*sizeof(double));
 	int i;
 	double area;
+	#pragma omp parallel for private(area)
 	for (i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
+		double a_vector[NO_OF_LAYERS - 1];
+		double b_vector[NO_OF_LAYERS];
+		double c_vector[NO_OF_LAYERS - 1];
+		double d_vector[NO_OF_LAYERS];
+		double c_prime_vector[NO_OF_LAYERS - 1];
+		double d_prime_vector[NO_OF_LAYERS];
+		double vertical_flux_vector[NO_OF_LAYERS - 1];
+		double solution_vector[NO_OF_LAYERS];
 		// diagnozing the vertical flux
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
@@ -300,14 +277,6 @@ int three_band_solver_ver_den_dry(State *state_old, State *state_new, State *sta
 			state_new -> density_dry[j*NO_OF_SCALARS_H + i] = solution_vector[j];
 		}
 	}
-	free(solution_vector);
-	free(vertical_flux_vector);
-	free(a_vector);
-	free(b_vector);
-	free(c_vector);
-	free(d_vector);
-	free(c_prime_vector);
-	free(d_prime_vector);
 	return 0;
 }
 
@@ -317,18 +286,19 @@ int three_band_solver_ver_entropy_density_gas(State *state_old, State *state_new
 	Implicit vertical advection of the entropy of the gas phase (Euler).
 	Procedure derived in Kompendium.
 	*/
-	double *a_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *b_vector = malloc(NO_OF_LAYERS*sizeof(double));
-	double *c_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *d_vector = malloc(NO_OF_LAYERS*sizeof(double));
-	double *c_prime_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *d_prime_vector = malloc(NO_OF_LAYERS*sizeof(double));
-	double *vertical_flux_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *solution_vector = malloc(NO_OF_LAYERS*sizeof(double));
 	double area;
 	int i;
+	#pragma omp parallel for private(area)
 	for (i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
+		double a_vector[NO_OF_LAYERS - 1];
+		double b_vector[NO_OF_LAYERS];
+		double c_vector[NO_OF_LAYERS - 1];
+		double d_vector[NO_OF_LAYERS];
+		double c_prime_vector[NO_OF_LAYERS - 1];
+		double d_prime_vector[NO_OF_LAYERS];
+		double vertical_flux_vector[NO_OF_LAYERS - 1];
+		double solution_vector[NO_OF_LAYERS];
 		// diagnozing the vertical flux
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
@@ -364,14 +334,6 @@ int three_band_solver_ver_entropy_density_gas(State *state_old, State *state_new
 			state_new -> entropy_density_gas[j*NO_OF_SCALARS_H + i] = solution_vector[j];
 		}
 	}
-	free(solution_vector);
-	free(vertical_flux_vector);
-	free(a_vector);
-	free(b_vector);
-	free(c_vector);
-	free(d_vector);
-	free(c_prime_vector);
-	free(d_prime_vector);
 	return 0;
 }
 
@@ -381,18 +343,19 @@ int three_band_solver_ver_tracers(State *state_old, State *state_new, State *sta
 	Implicit vertical advection of tracers (Euler).
 	Procedure derived in Kompendium.
 	*/
-	double *a_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *b_vector = malloc(NO_OF_LAYERS*sizeof(double));
-	double *c_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *d_vector = malloc(NO_OF_LAYERS*sizeof(double));
-	double *c_prime_vector = malloc((NO_OF_LAYERS - 1)*sizeof(double));
-	double *d_prime_vector = malloc(NO_OF_LAYERS*sizeof(double));
-	double *solution_vector = malloc(NO_OF_LAYERS*sizeof(double));
-	double *vertical_flux_vector = malloc(NO_OF_LAYERS*sizeof(double));
 	double area;
 	int i;
+	#pragma omp parallel for private(area)
 	for (i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
+		double a_vector[NO_OF_LAYERS - 1];
+		double b_vector[NO_OF_LAYERS];
+		double c_vector[NO_OF_LAYERS - 1];
+		double d_vector[NO_OF_LAYERS];
+		double c_prime_vector[NO_OF_LAYERS - 1];
+		double d_prime_vector[NO_OF_LAYERS];
+		double solution_vector[NO_OF_LAYERS];
+		double vertical_flux_vector[NO_OF_LAYERS];
 		for (int k = 0; k < NO_OF_CONDENSATED_TRACERS; ++k)
 		{
 			// determining the vertical flux
@@ -503,14 +466,6 @@ int three_band_solver_ver_tracers(State *state_old, State *state_new, State *sta
 				state_new -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = 0;
 		}
 	}
-	free(solution_vector);
-	free(vertical_flux_vector);
-	free(a_vector);
-	free(b_vector);
-	free(c_vector);
-	free(d_vector);
-	free(c_prime_vector);
-	free(d_prime_vector);
 	return 0;
 }
 

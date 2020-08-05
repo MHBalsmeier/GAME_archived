@@ -23,8 +23,7 @@ The main organizes the model, manages the time stepping, calls model output, col
 
 int main(int argc, char *argv[])
 {
-    clock_t begin;
-    begin = clock();
+    clock_t begin = clock();
     Grid *grid = calloc(1, sizeof(Grid));
     Dualgrid *dualgrid = calloc(1, sizeof(Dualgrid));
     size_t len = strlen(argv[1]);

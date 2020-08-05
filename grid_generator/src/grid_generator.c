@@ -6,13 +6,13 @@ Github repository: https://github.com/MHBalsmeier/game
 The grid generation procedure is manged from this file. Memory allocation and IO is done here, for the rest, functions are called residing in individual files.
 */
 
-#include "grid_generator.h"
-#include "enum.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <netcdf.h>
 #include <string.h>
 #include <math.h>
+#include "grid_generator.h"
+#include "enum.h"
 #include "geos95.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}

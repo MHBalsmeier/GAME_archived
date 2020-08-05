@@ -6,11 +6,11 @@ Github repository: https://github.com/MHBalsmeier/game
 The Lloyd algorithm is implemented here.
 */
 
-#include "enum.h"
-#include "grid_generator.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "geos95.h"
+#include "enum.h"
+#include "grid_generator.h"
 
 int find_cell_cgs(double [], double [], double [], double [], int [], int [], int []);
 
@@ -27,26 +27,27 @@ int optimize_to_scvt(double latitude_scalar[], double longitude_scalar[], double
 
 int find_cell_cgs(double latitude_scalar[], double longitude_scalar[], double latitude_scalar_dual[], double longitude_scalar_dual[], int adjacent_vector_indices_h[], int from_index_dual[], int to_index_dual[])
 {
-	int NO_OF_edges, counter, vertex_index_candidate_0, vertex_index_candidate_1, check_result;
+	int no_of_edges, counter, vertex_index_candidate_0, vertex_index_candidate_1, check_result;
 	double lat_res, lon_res, x_res, y_res, z_res, triangle_unity_face, x_0, y_0, z_0, x_1, y_1, z_1, x_2, y_2, z_2, lat_0, lon_0, lat_1, lon_1, lat_2, lon_2;
+	#pragma omp parallel for private(no_of_edges, counter, vertex_index_candidate_0, vertex_index_candidate_1, check_result, lat_res, lon_res, x_res, y_res, z_res, triangle_unity_face, x_0, y_0, z_0, x_1, y_1, z_1, x_2, y_2, z_2, lat_0, lon_0, lat_1, lon_1, lat_2, lon_2)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
-		NO_OF_edges = 6;
+		no_of_edges = 6;
 		if (i < NO_OF_PENTAGONS)
-			NO_OF_edges = 5;
-		double latitude_vertices[NO_OF_edges];
-		double longitude_vertices[NO_OF_edges];
-		int vertex_indices[NO_OF_edges];
-		int vertex_indices_resorted[NO_OF_edges];
-		int indices_resorted[NO_OF_edges];
-		for (int l = 0; l < NO_OF_edges; ++l)
+			no_of_edges = 5;
+		double latitude_vertices[no_of_edges];
+		double longitude_vertices[no_of_edges];
+		int vertex_indices[no_of_edges];
+		int vertex_indices_resorted[no_of_edges];
+		int indices_resorted[no_of_edges];
+		for (int l = 0; l < no_of_edges; ++l)
 			vertex_indices[l] = -1;
 		counter = 0;
-		for (int j = 0; j < NO_OF_edges; ++j)
+		for (int j = 0; j < no_of_edges; ++j)
 		{
 			vertex_index_candidate_0 = from_index_dual[adjacent_vector_indices_h[6*i + j]];
 			vertex_index_candidate_1 = to_index_dual[adjacent_vector_indices_h[6*i + j]];
-			check_result = in_bool_calculator(vertex_index_candidate_0, vertex_indices, NO_OF_edges);						
+			check_result = in_bool_calculator(vertex_index_candidate_0, vertex_indices, no_of_edges);						
 			if (check_result == 0)
 			{
 				vertex_indices[counter] = vertex_index_candidate_0;
@@ -54,7 +55,7 @@ int find_cell_cgs(double latitude_scalar[], double longitude_scalar[], double la
 				longitude_vertices[counter] = longitude_scalar_dual[vertex_indices[counter]];
 				++counter;
 			}
-			check_result = in_bool_calculator(vertex_index_candidate_1, vertex_indices, NO_OF_edges);						
+			check_result = in_bool_calculator(vertex_index_candidate_1, vertex_indices, no_of_edges);						
 			if (check_result == 0)
 			{
 				vertex_indices[counter] = vertex_index_candidate_1;
@@ -63,22 +64,22 @@ int find_cell_cgs(double latitude_scalar[], double longitude_scalar[], double la
 				++counter;
 			}
 		}
-		if (counter != NO_OF_edges)
+		if (counter != no_of_edges)
 			printf("Trouble in find_cell_cgs detected.\n");
-		sort_edge_indices(latitude_vertices, longitude_vertices, NO_OF_edges, indices_resorted);
-		for (int j = 0; j < NO_OF_edges; ++j)
+		sort_edge_indices(latitude_vertices, longitude_vertices, no_of_edges, indices_resorted);
+		for (int j = 0; j < no_of_edges; ++j)
 			vertex_indices_resorted[j] = vertex_indices[indices_resorted[j]];
 		x_res = 0;
 		y_res = 0;
 		z_res = 0;
-		for (int j = 0; j < NO_OF_edges; ++j)
+		for (int j = 0; j < no_of_edges; ++j)
 		{
 			lat_0 = latitude_scalar[i];
 			lon_0 = longitude_scalar[i];
 			lat_1 = latitude_scalar_dual[vertex_indices_resorted[j]];
 			lon_1 = longitude_scalar_dual[vertex_indices_resorted[j]];
-			lat_2 = latitude_scalar_dual[vertex_indices_resorted[(j + 1)%NO_OF_edges]];
-			lon_2 = longitude_scalar_dual[vertex_indices_resorted[(j + 1)%NO_OF_edges]];
+			lat_2 = latitude_scalar_dual[vertex_indices_resorted[(j + 1)%no_of_edges]];
+			lon_2 = longitude_scalar_dual[vertex_indices_resorted[(j + 1)%no_of_edges]];
 			find_global_normal(lat_0, lon_0, &x_0, &y_0, &z_0);
 			find_global_normal(lat_1, lon_1, &x_1, &y_1, &z_1);
 			find_global_normal(lat_2, lon_2, &x_2, &y_2, &z_2);

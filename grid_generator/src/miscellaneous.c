@@ -3,19 +3,20 @@ This source file is part of the Global Atmospheric Modeling Framework (GAME), wh
 Github repository: https://github.com/MHBalsmeier/game
 */
 
-#include "grid_generator.h"
-#include "enum.h"
+#include <netcdf.h>
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "grid_generator.h"
+#include "enum.h"
 #include "geos95.h"
-#include <netcdf.h>
-#include <math.h>
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 
 int set_f_vec(double latitude_vector[], double direction[], double direction_dual[], double f_vec[])
 {
+	#pragma omp parallel for
     for (int i = 0; i < 3*NO_OF_VECTORS_H; ++i)
     {
     	// horizontal component at dual vector points
@@ -76,6 +77,7 @@ int set_orography(int RES_ID, int ORO_ID, double z_surface[])
 int check_for_orthogonality(double direction[], double direction_dual[], double ORTH_CRITERION_DEG)
 {
 	double direction_change;
+	#pragma omp parallel for private(direction_change)
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         find_angle_change(direction[i], direction_dual[i], &direction_change);
@@ -92,6 +94,7 @@ int calc_vorticity_indices_pre(int from_index_dual[], int to_index_dual[], doubl
 {
 	int counter, sign;
 	double direction_change;
+	#pragma omp parallel for private(counter, sign, direction_change)
     for (int i = 0; i < NO_OF_DUAL_SCALARS_H; ++i)
     {
         counter = 0;

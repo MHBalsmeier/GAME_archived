@@ -10,7 +10,6 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <string.h>
 #include "geos95.h"
 #include "enum.h"
-#include <omp.h>
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 #define UNIT "Z_SURFACE"
@@ -29,13 +28,6 @@ double T_0 = 288;
 const double G = 9.80616;
 double GAMMA = 0.005;
 const double DELTA_T = 4.8e5;
-
-/*
-ORO_ID:
-0	sphere
-1	sphere with Gaussian mountain at 0 / 0, H = 10 km
-2	JW test
-*/
 
 int find_z_from_p(double, double, double *);
 
@@ -113,21 +105,21 @@ int main(int argc, char *argv[])
     double *z_in_vector = malloc(no_of_lat_points*no_of_lon_points*sizeof(double));
     int lat_index, lon_index;
     int i;
-	#pragma omp parallel for private (lat_index, lon_index, i) shared (z_in_vector)
+	#pragma omp parallel for private (lat_index, lon_index)
     for (i = 0; i < no_of_lat_points*no_of_lon_points; ++i)
     {
     	lat_index = i/no_of_lon_points;
     	lon_index = i - lat_index*no_of_lon_points;
     	z_in_vector[i] = z_input[lat_index][lon_index];
     }
-    double *distance_vector = malloc(no_of_lat_points*no_of_lon_points*sizeof(double));
-    int min_indices_vector[4];
-    double weights_vector[4];
     double weights_sum;
     int j;
-	// #pragma omp parallel for private(i, j, distance, latitude, lat_index, lon_index, distance_vector, min_indices_vector, weights_vector, weights_sum)
+	#pragma omp parallel for private(j, distance, latitude, lat_index, lon_index, weights_sum)
 	for (i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
+		double distance_vector[no_of_lat_points*no_of_lon_points];
+		int min_indices_vector[4];
+		double weights_vector[4];
 		if (ORO_ID == 0)
 		{
 			oro[i] = 0;
@@ -171,7 +163,6 @@ int main(int argc, char *argv[])
 		}
 	}
 	free(z_in_vector);
-	free(distance_vector);
 	free(z_input);
 	free(latitude_input);
 	free(longitude_input);

@@ -11,6 +11,7 @@ int integrate_entropy_density_gas(State *state_old, State *state_new, Interpolat
 	scalar_times_vector(state_old -> entropy_density_gas, state_new -> velocity_gas, diagnostics -> entropy_gas_flux_density, grid);
 	divv_h(diagnostics -> entropy_gas_flux_density, forcings -> entropy_gas_flux_density_divv, grid);
 	double rho_h, total_density;
+	#pragma omp parallel for private(rho_h, total_density)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 	    if (config_info -> scalar_diffusion_on == 1 && no_rk_step == 2)

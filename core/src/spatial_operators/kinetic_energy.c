@@ -5,7 +5,6 @@ Github repository: https://github.com/MHBalsmeier/game
 
 #include "../enum_and_typedefs.h"
 #include <stdio.h>
-#include <omp.h>
 
 int kinetic_energy(Vector_field in_field, Scalar_field out_field, Grid *grid, int diag_bool)
 {
@@ -13,7 +12,7 @@ int kinetic_energy(Vector_field in_field, Scalar_field out_field, Grid *grid, in
 	// For diag_bool == 1 it computes the 3D kinetic energy. This is only needed for diagnostics.
 	int layer_index, h_index;
 	int i, j;
-	#pragma omp parallel for private (i, j, layer_index, h_index)
+	#pragma omp parallel for private (layer_index, h_index)
     for (i = 0; i < NO_OF_SCALARS; ++i)
     {
     	layer_index = i/NO_OF_SCALARS_H;

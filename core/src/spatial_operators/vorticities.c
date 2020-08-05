@@ -15,6 +15,7 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
 	calc_abs_vort(velocity_field, out_field, grid, dualgrid);
     int layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index;
     double density_value, from_volume, to_volume, upper_volume, lower_volume;
+    #pragma omp parallel for private (layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index, density_value, from_volume, to_volume, upper_volume, lower_volume)
     for (int i = 0; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {
         layer_index = i/(2*NO_OF_VECTORS_H);
@@ -63,7 +64,9 @@ int calc_abs_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
 {
 	calc_rel_vort(velocity_field, out_field, grid, dualgrid);
     int layer_index, h_index;
-    for (int i = 0; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
+    int i;
+    #pragma omp parallel for private(i, layer_index, h_index)
+    for (i = 0; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {
         layer_index = i/(2*NO_OF_VECTORS_H);
         h_index = i - layer_index*2*NO_OF_VECTORS_H;
@@ -83,7 +86,9 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
 {
     int layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area, index_0, index_1, index_2, index_3, sign_0, sign_1, sign_2, sign_3;
     double rhombus_circ, dist_0, dist_1, dist_2, dist_3, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient;
-    for (int i = NO_OF_VECTORS_H; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
+    int i;
+	#pragma omp parallel for private(i, layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area, index_0, index_1, index_2, index_3, sign_0, sign_1, sign_2, sign_3, rhombus_circ, dist_0, dist_1, dist_2, dist_3, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient)
+    for (i = NO_OF_VECTORS_H; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {
         layer_index = i/(2*NO_OF_VECTORS_H);
         h_index = i - layer_index*2*NO_OF_VECTORS_H;
@@ -165,6 +170,7 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
         }
     }
     // At the upper boundary, the tangential vorticity is assumed to have no vertical shear.
+    #pragma omp parallel for
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
     	out_field[i] = out_field[i + 2*NO_OF_VECTORS_H];

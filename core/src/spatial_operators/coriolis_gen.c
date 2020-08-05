@@ -11,6 +11,7 @@ Github repository: https://github.com/MHBalsmeier/game
 int coriolis_gen(Vector_field a_field, Curl_field b_field, Vector_field out_field, Grid *grid)
 {
     int layer_index, h_index;
+	#pragma omp parallel for private(layer_index, h_index)
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;

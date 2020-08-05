@@ -18,7 +18,6 @@ For more specific details see handbook.
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <omp.h>
 #include <netcdf.h>
 #include "geos95.h"
 #include "atmostracers.h"
@@ -143,6 +142,7 @@ int main(int argc, char *argv[])
     double lon_perturb = M_PI/9;
     int layer_index, h_index;
     // 3D scalar fields determined here, apart from density
+    #pragma omp parallel for private(layer_index, h_index, lat, lon, z_height, eta, eta_v, T_perturb)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	layer_index = i/NO_OF_SCALARS_H;
@@ -191,6 +191,7 @@ int main(int argc, char *argv[])
     }
     // density is determined out of the hydrostatic equation
     double entropy_value, temperature_mean, delta_temperature, delta_gravity_potential, pot_temp_value, lower_entropy_value;
+    #pragma omp parallel for private(layer_index, temperature_mean, delta_temperature, delta_gravity_potential, pot_temp_value, lower_entropy_value, pressure_value)
     for (int i = NO_OF_SCALARS - 1; i >= 0; --i)
     {
     	layer_index = i/NO_OF_SCALARS_H;
@@ -218,6 +219,7 @@ int main(int argc, char *argv[])
     for (int i = 0; i < NO_OF_LAYERS; ++i)
     {
         // horizontal wind fields are determind here
+    	#pragma omp parallel for private(lat, lon, z_height, eta, eta_v, u, distance)
         for (int j = 0; j < NO_OF_VECTORS_H; ++j)
         {
             lat = latitude_vector[j];
@@ -244,6 +246,7 @@ int main(int argc, char *argv[])
     }
     for (int i = 0; i < NO_OF_LEVELS; ++i)
     {
+    	#pragma omp parallel for private(lat, lon, z_height)
         for (int j = 0; j < NO_OF_SCALARS_H; ++j)
         {
             lat = latitude_scalar[j];

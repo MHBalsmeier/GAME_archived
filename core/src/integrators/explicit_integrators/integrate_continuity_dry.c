@@ -17,6 +17,7 @@ int integrate_continuity_dry(State *state_old, State *state_new, Interpolate_inf
         calc_mass_diffusion_coeffs(state_old -> temp_gas, state_old -> density_dry, diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v);
         scalar_times_vector_scalar_h_v(diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v, diffusion_info -> mass_dry_diffusion_flux_density, diffusion_info -> mass_dry_diffusion_flux_density, grid);
         divv_h(diffusion_info -> mass_dry_diffusion_flux_density, diffusion_info -> mass_dry_diffusion_source_rate, grid);
+        #pragma omp parallel for
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
 		    state_tendency -> density_dry[i] = -forcings -> mass_dry_flux_density_divv[i] + diffusion_info -> mass_dry_diffusion_source_rate[i];
@@ -24,6 +25,7 @@ int integrate_continuity_dry(State *state_old, State *state_new, Interpolate_inf
     }
     else
     {
+    	#pragma omp parallel for
     	for (int i = 0; i < NO_OF_SCALARS; ++i)
         	state_tendency -> density_dry[i] = -forcings -> mass_dry_flux_density_divv[i];
     }

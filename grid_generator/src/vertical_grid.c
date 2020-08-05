@@ -167,7 +167,7 @@ int set_volume(double volume[], double z_scalar_dual[], double z_vector[], doubl
     volume_sum_ideal = 0;
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     	volume_sum_ideal += find_volume(area[NO_OF_VECTORS - NO_OF_SCALARS_H + i], RADIUS + z_vector[NO_OF_VECTORS- NO_OF_SCALARS_H + i], RADIUS + TOA);
-    if (fabs(volume_sum/volume_sum_ideal - 1) > 1e-12)
+    if (fabs(volume_sum/volume_sum_ideal - 1) > 1e-10)
 	{
         printf("Sum of volumes of grid boxes does not match volume of entire atmosphere.\n");
 		exit(1);

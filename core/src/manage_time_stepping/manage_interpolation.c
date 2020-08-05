@@ -22,6 +22,7 @@ int manage_pressure_gradient(State *current_state, Grid *grid, Dualgrid *dualgri
 		new_hor_grad_weight = 1;
 	}
     double rho_h, pressure_value_d, pressure_value_v, pressure_value, pot_temp, pot_temp_v;
+    #pragma omp parallel for private(rho_h, pressure_value_d, pressure_value_v, pressure_value, pot_temp, pot_temp_v)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
 		rho_h = current_state -> density_dry[i] + current_state -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];
@@ -40,6 +41,7 @@ int manage_pressure_gradient(State *current_state, Grid *grid, Dualgrid *dualgri
 	// Before the calculation of the new pressure gradient, the old value needs to be stored for extrapolation.
 	if (config_info -> totally_first_step_bool == 0)
 	{
+		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
 		{
 			interpolation -> pressure_gradient_0_old_m[i] = diagnostics -> pressure_gradient_0_m[i];
@@ -48,6 +50,7 @@ int manage_pressure_gradient(State *current_state, Grid *grid, Dualgrid *dualgri
 	}
 	else
 	{
+		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
 		{
 			interpolation -> pressure_gradient_0_old_m[i] = 0;
@@ -55,6 +58,7 @@ int manage_pressure_gradient(State *current_state, Grid *grid, Dualgrid *dualgri
 		}
 	}
 	// The new pressure gradient os only calculated at the first RK step.
+	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		if (config_info -> tracers_on == 1)
@@ -73,6 +77,7 @@ int manage_pressure_gradient(State *current_state, Grid *grid, Dualgrid *dualgri
 	double total_density;
 	if (config_info -> tracers_on == 1)
 	{
+		#pragma omp parallel for private(rho_h, total_density)
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
 			rho_h = current_state -> density_dry[i] + current_state -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];
