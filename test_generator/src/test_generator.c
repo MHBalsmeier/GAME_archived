@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
     double lon_perturb = M_PI/9;
     int layer_index, h_index;
     // 3D scalar fields determined here, apart from density
-    #pragma omp parallel for private(layer_index, h_index, lat, lon, z_height, eta, eta_v, T_perturb)
+    #pragma omp parallel for private(layer_index, h_index, lat, lon, z_height, eta, eta_v, T_perturb, pressure_value)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	layer_index = i/NO_OF_SCALARS_H;
@@ -191,7 +191,6 @@ int main(int argc, char *argv[])
     }
     // density is determined out of the hydrostatic equation
     double entropy_value, temperature_mean, delta_temperature, delta_gravity_potential, pot_temp_value, lower_entropy_value;
-    #pragma omp parallel for private(layer_index, temperature_mean, delta_temperature, delta_gravity_potential, pot_temp_value, lower_entropy_value, pressure_value)
     for (int i = NO_OF_SCALARS - 1; i >= 0; --i)
     {
     	layer_index = i/NO_OF_SCALARS_H;
@@ -219,7 +218,6 @@ int main(int argc, char *argv[])
     for (int i = 0; i < NO_OF_LAYERS; ++i)
     {
         // horizontal wind fields are determind here
-    	#pragma omp parallel for private(lat, lon, z_height, eta, eta_v, u, distance)
         for (int j = 0; j < NO_OF_VECTORS_H; ++j)
         {
             lat = latitude_vector[j];

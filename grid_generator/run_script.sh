@@ -8,7 +8,7 @@
 # 3			real data interpolated to model grid
 # See handbook for more information.
 
-oro_id=3
+oro_id=1
 optimize=0
 n_iterations=2000
 use_scalar_h_coords_file=1
