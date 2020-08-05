@@ -273,9 +273,6 @@ int set_gravity_potential(double z_scalar[], double gravity_potential[], double 
 int set_z_vector_and_normal_distance(double z_vector[], double z_surface[], double z_scalar[], double normal_distance[], double latitude_scalar[], double longitude_scalar[], int from_index[], int to_index[], double TOA)
 {
 	int layer_index, h_index, upper_index, lower_index;
-	double normal_distance_h_min,  normal_distance_h_max;
- 	normal_distance_h_min = RADIUS;
-  	normal_distance_h_max = -1;
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
@@ -289,10 +286,6 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_surface[], doub
 				exit(1);
 			}
             normal_distance[i] = calculate_distance_h(latitude_scalar[from_index[h_index - NO_OF_SCALARS_H]], longitude_scalar[from_index[h_index - NO_OF_SCALARS_H]], latitude_scalar[to_index[h_index - NO_OF_SCALARS_H]], longitude_scalar[to_index[h_index - NO_OF_SCALARS_H]], RADIUS + z_vector[i]);
-            if (normal_distance[i] > normal_distance_h_max)
-            	normal_distance_h_max = normal_distance[i];
-            if (normal_distance[i] < normal_distance_h_min)
-            	normal_distance_h_min = normal_distance[i];
         }
         else
         {
@@ -320,8 +313,6 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_surface[], doub
 			}
         }
     }
-    printf("\nShortest horizontal normal distance: %lf m.\n", normal_distance_h_min);
-    printf("Longest horizontal normal distance: %lf m.\n", normal_distance_h_max);
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         if (normal_distance[i] <= 0)
@@ -365,9 +356,6 @@ int map_area_to_sphere(double area[], double z_vector[], double pent_hex_face_un
 int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double normal_distance_dual[], double z_scalar_dual[], double TOA, double z_surface[], int from_index[], int to_index[], double z_vector[], int from_index_dual[], int to_index_dual[], double latitude_scalar_dual[], double longitude_scalar_dual[], int vorticity_indices_pre[])
 {
 	int layer_index, h_index, upper_index, lower_index;
-	double normal_distance_dual_h_min,  normal_distance_dual_h_max;
- 	normal_distance_dual_h_min = RADIUS;
-  	normal_distance_dual_h_max = -1;
     for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
     {
         layer_index = i/NO_OF_DUAL_VECTORS_PER_LAYER;
@@ -388,14 +376,8 @@ int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double n
 			else
 				z_vector_dual[i] = 0.5*(z_vector[NO_OF_SCALARS_H + h_index + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER] + z_vector[NO_OF_SCALARS_H + h_index + layer_index*NO_OF_VECTORS_PER_LAYER]);
             normal_distance_dual[i] = calculate_distance_h(latitude_scalar_dual[from_index_dual[h_index]], longitude_scalar_dual[from_index_dual[h_index]], latitude_scalar_dual[to_index_dual[h_index]], longitude_scalar_dual[to_index_dual[h_index]], RADIUS + z_vector_dual[i]);
-            if (normal_distance_dual[i] > normal_distance_dual_h_max)
-            	normal_distance_dual_h_max = normal_distance_dual[i];
-            if (normal_distance_dual[i] < normal_distance_dual_h_min)
-            	normal_distance_dual_h_min = normal_distance_dual[i];
         }
     }
-    printf("\nShortest horizontal normal distance dual: %lf m.\n", normal_distance_dual_h_min);
-    printf("Longest horizontal normal distance dual: %lf m.\n", normal_distance_dual_h_max);
 	int index_vector_for_dual_scalar_z[3];
 	double check_sum;
     for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
@@ -461,7 +443,6 @@ int calc_area_dual_pre(double area_dual_pre[], double z_vector_dual[], double no
             area_dual_pre[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
         }
     }
-    free(triangle_face_unit_sphere);
     for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
     {
         if (area_dual_pre[i] <= 0)

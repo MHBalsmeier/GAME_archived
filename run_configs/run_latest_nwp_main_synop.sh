@@ -5,8 +5,8 @@ source run_configs/.sh/determine_latest_synop_time.sh
 run_id=$year$month$day$hour"_nwp"
 run_span=0
 write_out_interval=900
-grid_props_file=grids/B5L26T30000_O3_OL17_SCVT.nc
-init_state_filename=$year$month$day$hour"_nwp_B5L26T30000_O3_OL17_SCVT.nc"
+grid_props_file=grids/B6L26T30000_O3_OL17_SCVT.nc
+init_state_filename=$year$month$day$hour"_nwp_B6L26T30000_O3_OL17_SCVT.nc"
 init_state_file=input/$init_state_filename
 output_dir_base=output
 cfl_margin=0.0

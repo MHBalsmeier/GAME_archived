@@ -129,7 +129,24 @@ int calc_vorticity_indices_pre(int from_index_dual[], int to_index_dual[], doubl
 	return 0;
 }
 
-
+int write_statistics_file(double pent_hex_face_unity_sphere[], double normal_distance[], double normal_distance_dual[], char statistics_file_name[])
+{
+    double area_max, area_min,  normal_distance_h_min, normal_distance_h_max,  normal_distance_dual_h_min, normal_distance_dual_h_max;
+    area_min = pent_hex_face_unity_sphere[find_min_index(pent_hex_face_unity_sphere, NO_OF_SCALARS_H)];
+    area_max = pent_hex_face_unity_sphere[find_max_index(pent_hex_face_unity_sphere, NO_OF_SCALARS_H)];
+    normal_distance_h_min = normal_distance[find_min_index(normal_distance, NO_OF_VECTORS_H)];
+    normal_distance_h_max = normal_distance[find_max_index(normal_distance, NO_OF_VECTORS_H)];
+    normal_distance_dual_h_min = normal_distance_dual[find_min_index(normal_distance_dual, NO_OF_VECTORS_H)];
+    normal_distance_dual_h_max = normal_distance_dual[find_max_index(normal_distance_dual, NO_OF_VECTORS_H)];
+    FILE *statistics_file = fopen(statistics_file_name, "w");
+    fprintf(statistics_file, "Ratio of minimum to maximum area: %lf\n", area_min/area_max);
+   	fprintf(statistics_file, "Shortest horizontal normal distance: %lf m.\n", normal_distance_h_min);
+    fprintf(statistics_file, "Longest horizontal normal distance: %lf m.\n", normal_distance_h_max);
+    fprintf(statistics_file, "Shortest horizontal normal distance dual: %lf m.\n", normal_distance_dual_h_min);
+    fprintf(statistics_file, "Longest horizontal normal distance dual: %lf m.\n", normal_distance_dual_h_max);
+    fclose(statistics_file);
+	return 0;
+}
 
 
 
