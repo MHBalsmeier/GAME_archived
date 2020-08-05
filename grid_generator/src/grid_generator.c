@@ -64,22 +64,12 @@ int main(int argc, char *argv[])
 		printf("It is NO_OF_ORO_LAYERS >= NO_OF_LAYERS.\n");
 		exit(1);
 	}
-    int OUTPUT_FILE_LENGTH = 100;
-    char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
+    char OUTPUT_FILE_PRE[200];
+    char STATISTICS_FILE_PRE[200];
     if (OPTIMIZE_BOOL == 1)
     {
     	sprintf(OUTPUT_FILE_PRE, "nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
-	}
-	else
-	{
-    	sprintf(OUTPUT_FILE_PRE, "nc_files/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
-	}
-    OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
-    free(OUTPUT_FILE_PRE);
-    char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-    if (OPTIMIZE_BOOL == 1)
-    {
-    	sprintf(OUTPUT_FILE, "nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
+    	sprintf(STATISTICS_FILE_PRE, "statistics/B%dL%dT%d_O%d_OL%d_SCVT.txt", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
 	}
 	else
 	{
@@ -88,21 +78,26 @@ int main(int argc, char *argv[])
 			if (SCALAR_H_FILE[strlen(SCALAR_H_FILE) - 1 - 6] == 'S' && SCALAR_H_FILE[strlen(SCALAR_H_FILE) - 1 - 5] == 'C' && 
 			SCALAR_H_FILE[strlen(SCALAR_H_FILE) - 1 - 4] == 'V' && SCALAR_H_FILE[strlen(SCALAR_H_FILE) - 1 - 3] == 'T')
 			{
-    			sprintf(OUTPUT_FILE, "nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
+    			sprintf(OUTPUT_FILE_PRE, "nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
+    			sprintf(STATISTICS_FILE_PRE, "statistics/B%dL%dT%d_O%d_OL%d_SCVT.txt", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
 			}
     		else
     		{
-    			sprintf(OUTPUT_FILE, "nc_files/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
+    			sprintf(OUTPUT_FILE_PRE, "nc_files/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
+    			sprintf(STATISTICS_FILE_PRE, "statistics/B%dL%dT%d_O%d_OL%d.txt", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
 			}
 		}
 		else
 		{
-    		sprintf(OUTPUT_FILE, "nc_files/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
+    		sprintf(OUTPUT_FILE_PRE, "nc_files/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
+    		sprintf(STATISTICS_FILE_PRE, "statistics/B%dL%dT%d_O%d_OL%d.txt", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
 		}
 	}
+    char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
+    char STATISTICS_FILE[strlen(OUTPUT_FILE_PRE) + 1];
+    strcpy(OUTPUT_FILE, OUTPUT_FILE_PRE);
+    strcpy(STATISTICS_FILE, STATISTICS_FILE_PRE);
 	printf("Output will be written to file %s.\n", OUTPUT_FILE);
-	char statistics_file_name[strlen(OUTPUT_FILE) + strlen("statistiscs") - strlen("nc_files")];
-	sprintf(statistics_file_name, "statistics/B%dL%dT%d_O%d_OL%d.txt", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
     double *latitude_ico = malloc(12*sizeof(double));
     double *longitude_ico = malloc(12*sizeof(double));
     int edge_vertices[NO_OF_EDGES][2];
@@ -261,7 +256,7 @@ int main(int argc, char *argv[])
     int ncid_g_prop;
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
-	write_statistics_file(pent_hex_face_unity_sphere, normal_distance, normal_distance_dual, statistics_file_name);
+	write_statistics_file(pent_hex_face_unity_sphere, normal_distance, normal_distance_dual, STATISTICS_FILE);
     int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_modified_weights_id, recov_ver_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_8_dimid, slope_id, scalar_2_dimid, volume_ratios_id, recov_primal2dual_weights_id, vector_h_dual_dimid_2, density_to_rhombus_indices_id, density_to_rhombus_weights_id;
     printf("Starting to write to output file ... ");
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NO_OF_SCALARS, &scalar_dimid)))
@@ -475,7 +470,6 @@ int main(int argc, char *argv[])
     if ((retval = nc_close(ncid_g_prop)))
         ERR(retval);
     printf(GREEN "finished.\n" RESET);
-    free(OUTPUT_FILE);
     free(SCALAR_H_FILE);
     free(pent_hex_face_unity_sphere);
     free(triangle_face_unit_sphere);
