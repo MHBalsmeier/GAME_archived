@@ -14,7 +14,6 @@ The vertical advection of horizontal momentum is organized here.
 int manage_pressure_gradient(State *current_state, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Interpolate_info *interpolation, Diffusion_info *diffusion_info, Config_info *config_info, int no_step_rk)
 {
 	double old_hor_grad_weight = R_D/C_D_P - 0.5;
-	old_hor_grad_weight = -C_D_V/C_D_P;
 	double new_hor_grad_weight = 1 - old_hor_grad_weight;
 	if (config_info -> totally_first_step_bool == 1)
 	{

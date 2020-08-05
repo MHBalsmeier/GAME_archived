@@ -11,9 +11,9 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
 {
     int layer_index, h_index;
     double contra_upper, contra_lower, comp_h, comp_v;
-    int i, j;
-	#pragma omp parallel for private (layer_index, h_index, contra_upper, contra_lower, comp_v, comp_h)
-    for (i = 0; i < NO_OF_SCALARS; ++i)
+    int j;
+	#pragma omp parallel for private (j, layer_index, h_index, contra_upper, contra_lower, comp_v, comp_h)
+    for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         layer_index = i/NO_OF_SCALARS_H;
         h_index = i - layer_index*NO_OF_SCALARS_H;

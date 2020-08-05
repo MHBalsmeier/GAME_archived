@@ -42,7 +42,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #define EPSILON_TRACERS 0.00001
 
 enum grid_integers {
-RES_ID = 6,
+RES_ID = 5,
 NO_OF_TRACERS = 3,
 NO_OF_CONDENSATED_TRACERS = 2,
 NO_OF_SOLID_TRACERS = 1,

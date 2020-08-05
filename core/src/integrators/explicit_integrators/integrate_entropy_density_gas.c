@@ -11,13 +11,14 @@ int integrate_entropy_density_gas(State *state_old, State *state_new, Interpolat
 	scalar_times_vector(state_old -> entropy_density_gas, state_new -> velocity_gas, diagnostics -> entropy_gas_flux_density, grid);
 	divv_h(diagnostics -> entropy_gas_flux_density, forcings -> entropy_gas_flux_density_divv, grid);
 	double rho_h, total_density;
-	#pragma omp parallel for private(rho_h, total_density)
+	int k;
+	#pragma omp parallel for private(rho_h, total_density, k)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 	    if (config_info -> scalar_diffusion_on == 1 && no_rk_step == 2)
 	    {
 	        total_density = state_old -> density_dry[i];
-	        for (int k = 0; k < NO_OF_TRACERS; ++k)
+	        for (k = 0; k < NO_OF_TRACERS; ++k)
 	            total_density += state_old -> tracer_densities[k*NO_OF_SCALARS + i];
 	        rho_h = state_old -> density_dry[i] + state_old -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];
 	        state_tendency -> entropy_density_gas[i] = -forcings -> entropy_gas_flux_density_divv[i] + 1/state_old -> temp_gas[i]*(rho_h/total_density*(diffusion_info -> temp_diffusion_heating[i] + config_info -> momentum_diffusion_on*diffusion_info -> heating_diss[i] + radiation_tendency[i]) + config_info -> tracers_on*config_info -> phase_transitions_on*diffusion_info -> tracer_heat_source_rates[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i]);

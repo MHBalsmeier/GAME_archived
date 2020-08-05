@@ -12,9 +12,8 @@ int grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
 {
     int layer_index, h_index, lower_index, upper_index;
     double vertical_gradient;
-    int i;    
 	#pragma omp parallel for private(layer_index, h_index, lower_index, upper_index, vertical_gradient)
-    for (i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
+    for (int i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
@@ -28,17 +27,17 @@ int grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
         }
     }
     #pragma omp parallel for
-    for (i = 0; i < NO_OF_SCALARS_H; ++i)
+    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
         out_field[i] = out_field[i + NO_OF_VECTORS_PER_LAYER] + out_field[i + NO_OF_VECTORS_PER_LAYER] - out_field[i + 2*NO_OF_VECTORS_PER_LAYER];
     }
     #pragma omp parallel for
-    for (i = NO_OF_VECTORS - NO_OF_SCALARS_H; i < NO_OF_VECTORS; ++i)
+    for (int i = NO_OF_VECTORS - NO_OF_SCALARS_H; i < NO_OF_VECTORS; ++i)
     {
         out_field[i] = out_field[i - NO_OF_VECTORS_PER_LAYER] + out_field[i - NO_OF_VECTORS_PER_LAYER] - out_field[i - 2*NO_OF_VECTORS_PER_LAYER];
     }
 	#pragma omp parallel for private(layer_index, h_index, vertical_gradient)
-    for (i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
+    for (int i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;

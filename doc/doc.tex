@@ -1,8 +1,13 @@
-\documentclass{article}
+\documentclass[10pt]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{a4wide}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{longtable}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{mathtools}
 \usepackage[style = numeric, backend = biber]{biblatex}
-\usepackage{graphicx, paralist, listings, fancybox, geometry, caption, floatrow, xcolor, color, colortbl, fancyhdr, amsmath, mathtools}
-\usepackage{fouriernc}
-\usepackage[T1]{fontenc}
 \geometry{a4paper, top = 15mm, left = 5mm, right = 5mm, bottom = 17mm}
 \fancypagestyle{plain}{
 \fancyhead[L]{\texttt{GAME} documentation}
@@ -27,8 +32,8 @@
 
 \maketitle
 
-\section{Overview of schemes}
-\label{sec:overview_of_schemes}
+\chapter{Overview of schemes}
+\label{chap:overview_of_schemes}
 
 \begin{itemize}
 \item Time stepping: Runge-Kutta third order scheme (RK3). In the vertical, at every substep, implicit methods are used.
@@ -36,8 +41,8 @@
 \item kinetic energy: \cite{doi:10.1002/qj.1960}
 \end{itemize}
 
-\section{Code structure}
-\label{sec:code_structure}
+\chapter{Code structure}
+\label{chap:code_structure}
 
 The code of the model resides in the directory \texttt{core/src}. It contains:
 %
@@ -51,8 +56,8 @@ The code of the model resides in the directory \texttt{core/src}. It contains:
 \item The directory \texttt{io} contains anything related to input and output.
 \end{itemize}
 
-\section{Performance}
-\label{sec:performance}
+\chapter{Performance}
+\label{chap:performance}
 
 The \textit{speed} $s$ of a model is defined by
 %
@@ -62,8 +67,8 @@ s \coloneqq \frac{\Delta t}{\Delta\tilde{t}},
 %
 where $\Delta t$ is the time step of the model and $\Delta\tilde{t}$ is the duration it takes to integrate from one time step to the next.
 
-\section{NWP mode}
-\label{sec:nwp_mode}
+\chapter{NWP mode}
+\label{chap:nwp_mode}
 
 In NWP mode, one wants to be able to integrate one day within 8.5 minutes, which corresponds to $s = \frac{24\cdot 60}{8.5} = 169$. As a general rule, one can say that the computation time is in equal parts needed for data assimilation, the dynamical core and the processes involving moisture and radiation. Thus, the dynamical core has a mimimum speed of
 %
@@ -71,16 +76,47 @@ In NWP mode, one wants to be able to integrate one day within 8.5 minutes, which
 s \geq 509.
 \end{eqnarray}
 
-\subsection{Grid optimization}
+\chapter{Grid generation}
+\label{chap:grid_generation}
+
+\section{Determining the horizontal positions of grid points}
+\label{sec:determining_the_horizontal_positions_of_grid_points}
+
+\section{Vertical grid structure}
+\label{sec:vertical_grid_structure}
+
+\section{Derived quantities}
+\label{sec:derived_quantities}
+
+Only the following eight arrays discussed until now need to be determined explicitly:
+
+\begin{itemize}
+\item \texttt{latitude\_scalar}, \texttt{longitude\_scalar}
+\item \texttt{latitude\_scalar\_dual}, \texttt{longitude\_scalar\_dual}
+\item \texttt{latitude\_vector}, \texttt{longitude\_vector}
+\item \texttt{from\_index}, \texttt{to\_index}
+\item \texttt{from\_index\_dual}, \texttt{to\_index\_dual}
+\end{itemize}
+%
+Everything else is determined implicitly by the grid generator. This minimizes errors.
+
+\subsection{Scalability}
+\label{sec:scalability}
+
+The computation time of the most expensive for loops scale with $N^2$, where $N$ is the number of horizontal grid points. This means that doubling the horizontal resolution (four times as much horizontal grid points) leads to a 16 times longer computation time of the grid generator. This is similar to the model itself, where a doubling of the horizontal and vertical resolution and a halfening of the time step leads to 16 times longer integration times. Therefore, the largely implicit formulation of the grid generator posos no problem to its performance at higher resoultions.
+
+\section{Grid optimization}
 \label{sec:grid_optimization}
 
 Hexagonal spherical grids need to be optimized for numerical modeling. Therefore, the Lloyd algorithm is used, which yields a \textit{spherical centroidal Voronoi tesselation (SCVT)} after convergence \cite{Du2003}. \cite{PEIXOTO201361} gives an overview of optimization alternatives and it seems to be that the SCVT is the most suitable for modeling. The procedure employed for executing the Lloyd algorithm is the one described in \cite{10.1175/MWR2991.1}.
 
-\subsection{Parallelization}
-\label{sec:parallelization}
+\section{Permutations of the grid points}
+\label{sec:permutations_of_the_grid_points}
 
-\section{Radiation scheme}
-\label{sec:radiation_scheme}
+
+
+\chapter{Radiation scheme}
+\label{chap:radiation_scheme}
 
 GAME employs the so-called \texttt{RTE+RRTMGP (Radiative Transfer for Energetics + Rapid and Accurate Radiative Transfer Model for General Circulation Model Applications—Parallel)} \cite{doi:10.1029/2019MS001621}, \cite{rte-rrtmgp-github} scheme. It is bound to the C code through the API \texttt{RTE-RRTMGP-C} \cite{rte-rrtmgp-c-github}.
 

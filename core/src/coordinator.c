@@ -19,7 +19,6 @@ The main organizes the model, manages the time stepping, calls model output, col
 #include "rte-rrtmgp-c.h"
 #include "geos95.h"
 #include <mpi.h>
-#include <omp.h>
 
 int main(int argc, char *argv[])
 {
