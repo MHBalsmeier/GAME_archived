@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 		}
 	}
     char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
-    char STATISTICS_FILE[strlen(OUTPUT_FILE_PRE) + 1];
+    char STATISTICS_FILE[strlen(STATISTICS_FILE_PRE) + 1];
     strcpy(OUTPUT_FILE, OUTPUT_FILE_PRE);
     strcpy(STATISTICS_FILE, STATISTICS_FILE_PRE);
 	printf("Output will be written to file %s.\n", OUTPUT_FILE);
