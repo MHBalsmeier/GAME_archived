@@ -8,11 +8,11 @@
 # 3			real data interpolated to model grid
 # See handbook for more information.
 
-oro_id=0
-optimize=1
+oro_id=3
+optimize=0
 n_iterations=2000
-use_scalar_h_coords_file=0
-scalar_h_coords_file="nc_files/B5L26T30000_O0_OL17_SCVT.nc"
+use_scalar_h_coords_file=1
+scalar_h_coords_file="nc_files/B6L26T30000_O0_OL17_SCVT.nc"
 # relevant only for MPI
 number_of_cpus=1
 # relevant only for OMP

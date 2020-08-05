@@ -37,6 +37,11 @@ int main(int argc, char *argv[])
 	char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
 	int ORO_ID;
    	ORO_ID = strtod(argv[1], NULL);
+   	if (ORO_ID < 1 || ORO_ID > 3)
+   	{
+   		printf("Error: oro_id must not be smaller than one or larger than 3.\n");
+   		exit(1);
+	}
 	sprintf(OUTPUT_FILE_PRE, "nc_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
 	OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
 	free(OUTPUT_FILE_PRE);
@@ -120,10 +125,6 @@ int main(int argc, char *argv[])
 		double distance_vector[no_of_lat_points*no_of_lon_points];
 		int min_indices_vector[4];
 		double weights_vector[4];
-		if (ORO_ID == 0)
-		{
-			oro[i] = 0;
-		}
 		if (ORO_ID == 1)
 		{
             distance = calculate_distance_h(latitude_scalar[i], longitude_scalar[i], 0, 0, RADIUS);

@@ -9,7 +9,7 @@
 # 4:	JW test, moist, balanced
 # 5:	JW test, moist, perturbed
 
-test_id=0
+test_id=5
 # relevant only for MPI
 number_of_cpus=1
 # relevant only for OMP

@@ -2,13 +2,12 @@
 # Github repository: https://github.com/MHBalsmeier/game
 
 # oroid		description
-# 0			no orography
 # 1			Gaussian mountain at 0 N / 0 E, H = 10 km
 # 2			JW-test orography
 # 3			real data interpolated to model grid
 # See handbook for more information.
 
-oro_id=0
+oro_id=3
 # relevant only for OMP
 export OMP_NUM_THREADS=5
 # relevant only for MPI
