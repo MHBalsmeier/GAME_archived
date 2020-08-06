@@ -27,7 +27,7 @@ int calc_adjacent_vector_indices_h(int from_index[], int to_index[], int adjacen
             {
                 if (from_index[j] == to_index[j])
 				{
-                    printf("It is from_index == to_index at some point.\n");
+                    printf("It is from_index == to_index at point %d.\n", j);
 					exit(1);
 				}
                 adjacent_vector_indices_h[6*i + counter] = j;

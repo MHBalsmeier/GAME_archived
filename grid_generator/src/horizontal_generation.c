@@ -435,9 +435,9 @@ int set_from_to_index_dual(int from_index_dual[], int to_index_dual[], int face_
     return 0;
 }
 
-int read_horizontal_generators(double latitude_scalar[], double longitude_scalar[], char filename[])
+int read_horizontal_explicit(double latitude_scalar[], double longitude_scalar[], int from_index[], int to_index[], int from_index_dual[], int to_index_dual[], char filename[])
 {
-	int ncid, latitude_scalar_id, longitude_scalar_id, retval;
+	int ncid, latitude_scalar_id, longitude_scalar_id, retval, from_index_id, to_index_id, from_index_dual_id, to_index_dual_id;
 	retval = 0;
     if ((nc_open(filename, NC_NOWRITE, &ncid)))
         ERR(retval);
@@ -445,9 +445,25 @@ int read_horizontal_generators(double latitude_scalar[], double longitude_scalar
         ERR(retval);
     if ((nc_inq_varid(ncid, "longitude_scalar", &longitude_scalar_id)))
         ERR(retval);
+    if ((nc_inq_varid(ncid, "from_index", &from_index_id)))
+        ERR(retval);
+    if ((nc_inq_varid(ncid, "to_index", &to_index_id)))
+        ERR(retval);
+    if ((nc_inq_varid(ncid, "from_index_dual", &from_index_dual_id)))
+        ERR(retval);
+    if ((nc_inq_varid(ncid, "to_index_dual", &to_index_dual_id)))
+        ERR(retval);
     if ((nc_get_var_double(ncid, latitude_scalar_id, &latitude_scalar[0])))
         ERR(retval);
     if ((nc_get_var_double(ncid, longitude_scalar_id, &longitude_scalar[0])))
+        ERR(retval);
+    if ((nc_get_var_int(ncid, from_index_id, &from_index[0])))
+        ERR(retval);
+    if ((nc_get_var_int(ncid, to_index_id, &to_index[0])))
+        ERR(retval);
+    if ((nc_get_var_int(ncid, from_index_dual_id, &from_index_dual[0])))
+        ERR(retval);
+    if ((nc_get_var_int(ncid, to_index_dual_id, &to_index_dual[0])))
         ERR(retval);
     if ((nc_close(ncid)))
         ERR(retval);

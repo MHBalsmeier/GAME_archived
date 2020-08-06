@@ -169,44 +169,34 @@ int main(int argc, char *argv[])
     printf("Establishing horizontal grid structure ... \n");
     if (USE_SCALAR_H_FILE == 0)
     {
-    	retval = generate_horizontal_generators(latitude_ico, longitude_ico, latitude_scalar, longitude_scalar, x_unity, y_unity, z_unity, face_edges_reverse, face_edges, face_vertices);
+    	// Here, the positions of the horizontal generators, i.e. the horizontal scalar points are determined.
+    	generate_horizontal_generators(latitude_ico, longitude_ico, latitude_scalar, longitude_scalar, x_unity, y_unity, z_unity, face_edges_reverse, face_edges, face_vertices);
+    	// By setting the from_index and to_index arrrays, the discrete positions of the vector points are determined.
+    	set_from_to_index(from_index, to_index, face_edges, face_edges_reverse, face_vertices, edge_vertices);
+    	// By setting the from_index_dual and to_index_dual arrrays, the discrete positions of the dual scalar points are determined.
+		set_from_to_index_dual(from_index_dual, to_index_dual, face_edges, face_edges_reverse);
     }
-    if (USE_SCALAR_H_FILE == 1)
+    else
     {
-    	retval = read_horizontal_generators(latitude_scalar, longitude_scalar, SCALAR_H_FILE);
+    	read_horizontal_explicit(latitude_scalar, longitude_scalar, from_index, to_index, from_index_dual, to_index_dual, SCALAR_H_FILE);
     }
-    printf("Connecting vector points to scalar points ... ");
-    set_from_to_index(from_index, to_index, face_edges, face_edges_reverse, face_vertices, edge_vertices);
-	calc_adjacent_vector_indices_h(from_index, to_index, adjacent_signs_h, adjacent_vector_indices_h);
-    printf(GREEN "finished.\n" RESET);
-    printf("Connecting dual vector points to dual scalar points ... ");
-    set_from_to_index_dual(from_index_dual, to_index_dual, face_edges, face_edges_reverse);
-    printf(GREEN "finished.\n" RESET);
 	if (OPTIMIZE_BOOL == 1)
 	{
 		optimize_to_scvt(latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, N_ITERATIONS, face_edges, face_edges_reverse, face_vertices, edge_vertices, adjacent_vector_indices_h, from_index_dual, to_index_dual);
 	}
+	// Calculation of the horizontal coordinates of the dual scalar points. The dual scalar points are the vertices of the Voronoi mesh of the primal grid.
 	set_scalar_h_dual_coords(latitude_scalar_dual, longitude_scalar_dual, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
+	// Calculation of the horizontal coordinates of the vector points. The vector points are in the middle between the neighbouring scalar points.
 	set_vector_h_doubles(from_index, to_index, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, direction);
-    if (retval != 0)
-    {
-    	printf("set_vector_h_doubles failed with exit code %d.\n", retval);
-    	exit(1);
-    }
-    calc_triangle_face_unity(triangle_face_unit_sphere, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
-    if (retval != 0)
-    {
-    	printf("calc_triangle_face_unity failed with exit code %d.\n", retval);
-    	exit(1);
-    }
-    free(x_unity);
-    free(y_unity);
-    free(z_unity);
+	// Same as before but for dual vectors. They have the same positions as the primal vectors.
 	set_dual_vector_h_doubles(latitude_scalar_dual, latitude_vector, direction_dual, longitude_vector, to_index_dual, from_index_dual, longitude_scalar_dual, rel_on_line_dual);
+	// Setting the Coriolis vector.
     set_f_vec(latitude_vector, direction, direction_dual, f_vec);
     printf(GREEN "Horizontal grid structure determined.\n" RESET);
+    calc_triangle_face_unity(triangle_face_unit_sphere, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
 	calc_vorticity_indices_pre(from_index_dual, to_index_dual, direction, direction_dual, vorticity_indices_pre, ORTH_CRITERION_DEG, vorticity_signs_pre);
 	check_for_orthogonality(direction, direction_dual, ORTH_CRITERION_DEG);
+	calc_adjacent_vector_indices_h(from_index, to_index, adjacent_signs_h, adjacent_vector_indices_h);
 	calc_cell_face_unity(pent_hex_face_unity_sphere, latitude_scalar_dual, longitude_scalar_dual, adjacent_vector_indices_h, vorticity_indices_pre);
 	// building the vertical grid
    	double z_oro_off = TOA*(NO_OF_ORO_LAYERS + 0.0)/NO_OF_LAYERS;
@@ -253,12 +243,12 @@ int main(int argc, char *argv[])
     printf("Setting gravity potential ... ");
 	set_gravity_potential(z_scalar, gravity_potential, GRAVITY_MEAN_SFC_ABS);
     printf(GREEN "finished.\n" RESET);
-    int ncid_g_prop;
+    // A statistics file is created to compare the fundamental statistical properties of the grid with the literature.
+	write_statistics_file(pent_hex_face_unity_sphere, normal_distance, normal_distance_dual, STATISTICS_FILE);
+    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_modified_weights_id, recov_ver_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_8_dimid, slope_id, scalar_2_dimid, volume_ratios_id, recov_primal2dual_weights_id, vector_h_dual_dimid_2, density_to_rhombus_indices_id, density_to_rhombus_weights_id, ncid_g_prop;
+    printf("Starting to write to output file ... ");
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
-	write_statistics_file(pent_hex_face_unity_sphere, normal_distance, normal_distance_dual, STATISTICS_FILE);
-    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_modified_weights_id, recov_ver_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_8_dimid, slope_id, scalar_2_dimid, volume_ratios_id, recov_primal2dual_weights_id, vector_h_dual_dimid_2, density_to_rhombus_indices_id, density_to_rhombus_weights_id;
-    printf("Starting to write to output file ... ");
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NO_OF_SCALARS, &scalar_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_8_index", 8*NO_OF_SCALARS, &scalar_8_dimid)))
@@ -371,9 +361,13 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "density_to_rhombus_weights", NC_DOUBLE, 1, &vector_h_dimid_4, &density_to_rhombus_weights_id)))
         ERR(retval);
+    if ((retval = nc_def_var(ncid_g_prop, "from_index", NC_INT, 1, &vector_h_dimid, &from_index_id)))
+        ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "to_index", NC_INT, 1, &vector_h_dimid, &to_index_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "from_index", NC_INT, 1, &vector_h_dimid, &from_index_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "from_index_dual", NC_INT, 1, &vector_h_dimid, &from_index_dual_id)))
+        ERR(retval);
+    if ((retval = nc_def_var(ncid_g_prop, "to_index_dual", NC_INT, 1, &vector_h_dimid, &to_index_dual_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "adjacent_vector_indices_h", NC_INT, 1, &scalar_h_dimid_6, &adjacent_vector_indices_h_id)))
         ERR(retval);
@@ -445,9 +439,13 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, density_to_rhombus_weights_id, &density_to_rhombus_weights[0])))
         ERR(retval);
+    if ((retval = nc_put_var_int(ncid_g_prop, from_index_id, &from_index[0])))
+        ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, to_index_id, &to_index[0])))
         ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, from_index_id, &from_index[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, from_index_dual_id, &from_index_dual[0])))
+        ERR(retval);
+    if ((retval = nc_put_var_int(ncid_g_prop, to_index_dual_id, &to_index_dual[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, adjacent_vector_indices_h_id, &adjacent_vector_indices_h[0])))
         ERR(retval);
@@ -471,6 +469,9 @@ int main(int argc, char *argv[])
         ERR(retval);
     printf(GREEN "finished.\n" RESET);
     free(SCALAR_H_FILE);
+    free(x_unity);
+    free(y_unity);
+    free(z_unity);
     free(pent_hex_face_unity_sphere);
     free(triangle_face_unit_sphere);
     free(direction_dual);
