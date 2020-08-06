@@ -6,7 +6,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include "../../enum_and_typedefs.h"
 #include "../../spatial_operators/spatial_operators.h"
 
-int integrate_entropy_density_gas(State *state_old, State *state_new, Interpolate_info *interpolation, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Diffusion_info *diffusion_info, Config_info *config_info, int no_rk_step)
+int integrate_entropy_density_gas(State *state_old, State *state_new, Interpolate_info *interpolation, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Diffusion_info *diffusion_info, Config_info *config_info, int no_rk_step)
 {
 	scalar_times_vector(state_old -> entropy_density_gas, state_new -> velocity_gas, diagnostics -> entropy_gas_flux_density, grid);
 	divv_h(diagnostics -> entropy_gas_flux_density, forcings -> entropy_gas_flux_density_divv, grid);

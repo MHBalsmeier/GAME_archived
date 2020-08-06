@@ -7,7 +7,7 @@
 # 3			real data interpolated to model grid
 # See handbook for more information.
 
-oro_id=3
+oro_id=1
 # relevant only for OMP
 export OMP_NUM_THREADS=5
 # relevant only for MPI

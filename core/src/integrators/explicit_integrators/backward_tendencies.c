@@ -11,7 +11,7 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int backward_tendencies(State *state_old, State *state_new, Interpolate_info *interpolation, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Diffusion_info *diffusion_info, Config_info *config_info, int no_rk_step)
 {
-	integrate_continuity_dry(state_old, state_new, interpolation, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, diffusion_info, config_info, no_rk_step);
+	integrate_continuity_dry(state_old, state_new, interpolation, state_tendency, grid, dualgrid, radiation_tendency, diagnostics, forcings, diffusion_info, config_info, no_rk_step);
     // Radiation is updated here.
     if (config_info -> rad_update == 1)
     {
@@ -41,6 +41,6 @@ int backward_tendencies(State *state_old, State *state_new, Interpolate_info *in
     {
 		integrate_tracers(state_old, state_new, interpolation, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, diffusion_info, config_info, no_rk_step);
 	}
-	integrate_entropy_density_gas(state_old, state_new, interpolation, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, diffusion_info, config_info, no_rk_step);
+	integrate_entropy_density_gas(state_old, state_new, interpolation, state_tendency, grid, dualgrid, radiation_tendency, diagnostics, forcings, diffusion_info, config_info, no_rk_step);
     return 0;
 }
