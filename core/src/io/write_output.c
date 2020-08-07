@@ -1076,7 +1076,7 @@ int write_out_integral(State *state_write_out, double t_write, char output_direc
     if (integral_id == 1)
     {
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
-    	global_scalar_integrator(state_write_out -> entropy_density_gas, grid, &global_integral);
+    	global_scalar_integrator(state_write_out -> entropy_density_dry, grid, &global_integral);
     	fprintf(global_integral_file, "%lf\t%lf\n", t_write, global_integral);
     	fclose(global_integral_file);
     }

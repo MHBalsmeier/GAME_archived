@@ -14,16 +14,16 @@ In this source file, the calculation of the explicit part of the momentum equati
 #include "atmostracers.h"
 #include "../../diagnostics/diagnostics.h"
 
-int integrate_momentum(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Diffusion_info *diffusion_info, Config_info *config_info, int no_step_rk)
+int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Diffusion_info *diffusion_info, Config_info *config_info, int no_step_rk)
 {
 	// Here, the gaseous flux density is prepared for the generalized Coriolis term.
-    scalar_times_vector(current_state -> density_dry, current_state -> velocity_gas, diagnostics -> mass_dry_flux_density, grid);
+    scalar_times_vector(state -> density_dry, state -> velocity_gas, diagnostics -> mass_dry_flux_density, grid);
     // Now, the potential vorticity is evaluated.
-    calc_pot_vort(current_state -> velocity_gas, current_state -> density_dry, diagnostics -> pot_vort, grid, dualgrid);
+    calc_pot_vort(state -> velocity_gas, state -> density_dry, diagnostics -> pot_vort, grid, dualgrid);
     // Now, the generalized Coriolis term is evaluated.
     coriolis_gen(diagnostics -> mass_dry_flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid);
     // Horizontal kinetic energy is prepared for the gradient term of the Lamb transformation.
-    kinetic_energy(current_state -> velocity_gas, diagnostics -> e_kin_h, grid, 0);
+    kinetic_energy(state -> velocity_gas, diagnostics -> e_kin_h, grid, 0);
     grad(diagnostics -> e_kin_h, forcings -> e_kin_h_grad, grid);
     // Now the explicit forces are added up.
     int layer_index, h_index;
@@ -41,8 +41,8 @@ int integrate_momentum(State *current_state, State *state_tendency, Grid *grid, 
         	{
         		if (h_index >= NO_OF_SCALARS_H)
         		{
-        			recov_hor_ver_pri(current_state -> velocity_gas, layer_index, h_index - NO_OF_SCALARS_H, &vertical_velocity, grid);
-        			metric_term = -vertical_velocity*current_state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
+        			recov_hor_ver_pri(state -> velocity_gas, layer_index, h_index - NO_OF_SCALARS_H, &vertical_velocity, grid);
+        			metric_term = -vertical_velocity*state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
         			hor_non_trad_cori_term = -vertical_velocity*dualgrid -> f_vec[2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
             		state_tendency -> velocity_gas[i] = forcings -> pressure_gradient_acc[i] + forcings -> pot_vort_tend[i] - grid -> gravity_m[i] - forcings -> e_kin_h_grad[i] + hor_non_trad_cori_term + metric_term + diffusion_info -> friction_acc[i];
         		}
@@ -55,8 +55,8 @@ int integrate_momentum(State *current_state, State *state_tendency, Grid *grid, 
             {
         		if (h_index >= NO_OF_SCALARS_H)
         		{
-        			recov_hor_ver_pri(current_state -> velocity_gas, layer_index, h_index - NO_OF_SCALARS_H, &vertical_velocity, grid);
-        			metric_term = -vertical_velocity*current_state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
+        			recov_hor_ver_pri(state -> velocity_gas, layer_index, h_index - NO_OF_SCALARS_H, &vertical_velocity, grid);
+        			metric_term = -vertical_velocity*state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
         			hor_non_trad_cori_term = -vertical_velocity*dualgrid -> f_vec[2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
             		state_tendency -> velocity_gas[i] = forcings -> pressure_gradient_acc[i] + forcings -> pot_vort_tend[i] - grid -> gravity_m[i] - forcings -> e_kin_h_grad[i] + hor_non_trad_cori_term + metric_term;
         		}

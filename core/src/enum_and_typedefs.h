@@ -118,7 +118,7 @@ int h_curl_signs[4*NO_OF_VECTORS_H];
 typedef struct state {
 Scalar_field density_dry;
 Scalar_field temp_gas;
-Scalar_field entropy_density_gas;
+Scalar_field entropy_density_dry;
 Vector_field velocity_gas;
 // density order: solid, liquid, vapour
 Tracer_densities tracer_densities;
@@ -144,13 +144,13 @@ Vector_field pressure_gradient_1_dry;
 Vector_field pressure_gradient_1_vapour;
 Vector_field temperature_flux_density;
 Scalar_field wind_field_divv_h;
-Vector_field entropy_gas_flux_density;
+Vector_field entropy_dry_flux_density;
 } Diagnostics;
 
 // Collects forcings.
 typedef struct forcings {
 Scalar_field mass_dry_flux_density_divv;
-Scalar_field entropy_gas_flux_density_divv;
+Scalar_field entropy_dry_flux_density_divv;
 Scalar_field temp_gas_flux_divv_h;
 Vector_field pressure_gradient_acc;
 Vector_field e_kin_h_grad;

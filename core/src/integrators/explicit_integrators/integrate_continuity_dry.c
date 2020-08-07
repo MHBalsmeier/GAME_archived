@@ -9,6 +9,7 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int integrate_continuity_dry(State *state_old, State *state_new, Interpolate_info *interpolation, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Diffusion_info *diffusion_info, Config_info *config_info, int no_rk_step)
 {
+	// The dry mass flux density needs to be updated, becasue now, the new velocity value is known. This is a result of the forward-backward scheme.
     scalar_times_vector(state_old -> density_dry, state_new -> velocity_gas, diagnostics -> mass_dry_flux_density, grid);
     divv_h(diagnostics -> mass_dry_flux_density, forcings -> mass_dry_flux_density_divv, grid);
     if (config_info -> scalar_diffusion_on == 1 && no_rk_step == 2)

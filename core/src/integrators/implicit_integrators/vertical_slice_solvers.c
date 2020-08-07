@@ -281,7 +281,7 @@ int three_band_solver_ver_den_dry(State *state_old, State *state_new, State *sta
 	return 0;
 }
 
-int three_band_solver_ver_entropy_density_gas(State *state_old, State *state_new, State *state_tendency, double delta_t, Grid *grid)
+int three_band_solver_ver_entropy_density_dry(State *state_old, State *state_new, State *state_tendency, double delta_t, Grid *grid)
 {
 	/*
 	Implicit vertical advection of the entropy of the gas phase (Euler).
@@ -327,12 +327,12 @@ int three_band_solver_ver_entropy_density_gas(State *state_old, State *state_new
 			{
 				b_vector[j] = 1 + delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*(vertical_flux_vector[j - 1] - vertical_flux_vector[j]);
 			}
-			d_vector[j] = state_old -> entropy_density_gas[j*NO_OF_SCALARS_H + i] + delta_t*state_tendency -> entropy_density_gas[j*NO_OF_SCALARS_H + i];
+			d_vector[j] = state_old -> entropy_density_dry[j*NO_OF_SCALARS_H + i] + delta_t*state_tendency -> entropy_density_dry[j*NO_OF_SCALARS_H + i];
 		}
 		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, NO_OF_LAYERS);
 		for (j = 0; j < NO_OF_LAYERS; ++j)
 		{
-			state_new -> entropy_density_gas[j*NO_OF_SCALARS_H + i] = solution_vector[j];
+			state_new -> entropy_density_dry[j*NO_OF_SCALARS_H + i] = solution_vector[j];
 		}
 	}
 	return 0;

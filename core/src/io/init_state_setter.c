@@ -74,14 +74,9 @@ int set_init_data(char FILE_NAME[], State *init_state)
         }
     }
 	pot_temp_diagnostics(init_state, pot_temperature);
-	double pot_temperature_vapour, pressure_value, pressure_value_d, pressure_value_v;
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-    	pressure_value_d = init_state -> density_dry[i]*R_D*init_state -> temp_gas[i];
-    	pressure_value_v = init_state -> tracer_densities[2*NO_OF_SCALARS + i]*R_V*init_state -> temp_gas[i];
-    	pressure_value = pressure_value_d + pressure_value_v; 
-        pot_temperature_vapour = temperature_gas[i]*pow(P_0/pressure_value, R_V/C_V_P);
-        init_state -> entropy_density_gas[i] = density_dry[i]*(C_D_P*log(pot_temperature[i]) + ENTROPY_CONSTANT_D) + water_vapour_density[i]*(C_V_P*log(pot_temperature_vapour) + ENTROPY_CONSTANT_V);
+        init_state -> entropy_density_dry[i] = density_dry[i]*(C_D_P*log(pot_temperature[i]) + ENTROPY_CONSTANT_D);
     }
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {

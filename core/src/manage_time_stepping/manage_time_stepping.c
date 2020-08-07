@@ -44,7 +44,7 @@ int manage_time_stepping(State *state_0, State *state_p1, Interpolate_info *inte
 		// now that the new vertical velocity is known, the new dry density can be calculated via implicit vertical advection
 		three_band_solver_ver_den_dry(state_0, state_p1, state_tendency, delta_t_rk, grid);
 		// Now the entropy density is at the new step is calculated using the advection equation in flux form.
-		three_band_solver_ver_entropy_density_gas(state_0, state_p1, state_tendency, delta_t_rk, grid);
+		three_band_solver_ver_entropy_density_dry(state_0, state_p1, state_tendency, delta_t_rk, grid);
 		// Diagnozing the temperature out of the linearized equation of state for energetic consistency.
 		temperature_diagnostics(state_0, state_p1);
 		// Vertical tracer advection with 3-band matrices.
