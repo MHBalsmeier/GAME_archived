@@ -17,7 +17,7 @@ int integrate_entropy_density_dry(State *state_old, State *state_new, Interpolat
 		}
 	}
 	// The dry mass flux density has already been updated.
-	scalar_times_vector(diagnostics -> specific_entropy_dry, diagnostics -> mass_dry_flux_density, diagnostics -> entropy_dry_flux_density, grid);
+	scalar_times_vector_for_advection(diagnostics -> specific_entropy_dry, diagnostics -> mass_dry_flux_density, diagnostics -> entropy_dry_flux_density, grid);
 	divv_h(diagnostics -> entropy_dry_flux_density, forcings -> entropy_dry_flux_density_divv, grid);
 	double rho_h, total_density;
 	int k;
