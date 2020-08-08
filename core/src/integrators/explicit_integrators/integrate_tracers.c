@@ -24,8 +24,20 @@ int integrate_tracers(State *state_old, State *state_new, Interpolate_info *inte
 		}
 		for (int i = 0; i < NO_OF_TRACERS; ++i)
 		{
-		    for (int j = 0; j < NO_OF_SCALARS; ++j)
-		        diffusion_info -> tracer_density[j] = state_old -> tracer_densities[i*NO_OF_SCALARS + j];
+			if (no_rk_step == 0)
+			{
+				for (int j = 0; j < NO_OF_SCALARS; ++j)
+				{
+				    diffusion_info -> tracer_density[j] = state_old -> tracer_densities[i*NO_OF_SCALARS + j];
+			    }
+	        }
+			else
+			{
+				for (int j = 0; j < NO_OF_SCALARS; ++j)
+				{
+				    diffusion_info -> tracer_density[j] = state_new -> tracer_densities[i*NO_OF_SCALARS + j];
+			    }
+	        }
 		    if (i < NO_OF_CONDENSATED_TRACERS)
 		    {
 		        for (int j = 0; j < NO_OF_VECTORS; ++j)

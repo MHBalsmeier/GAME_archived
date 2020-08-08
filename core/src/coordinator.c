@@ -159,8 +159,8 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     printf("It begins.\n");
     printf("%s", stars);
-    State *state_init = calloc(1, sizeof(State));
-    set_init_data(INIT_STATE_FILE, state_init);
+    State *state_old = calloc(1, sizeof(State));
+    set_init_data(INIT_STATE_FILE, state_old);
     free(INIT_STATE_FILE);
     int min_no_of_output_steps = 600/delta_t;
     double *wind_h_lowest_layer_array = calloc(1, min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
@@ -170,28 +170,25 @@ int main(int argc, char *argv[])
 	{
 		time_step_10_m_wind = i/NO_OF_VECTORS_H;
 		h_index = i - time_step_10_m_wind*NO_OF_VECTORS_H;
-    	wind_h_lowest_layer_array[time_step_10_m_wind*NO_OF_VECTORS_H + h_index] = state_init -> velocity_gas[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + h_index];
+    	wind_h_lowest_layer_array[time_step_10_m_wind*NO_OF_VECTORS_H + h_index] = state_old -> velocity_gas[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + h_index];
     }
     Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
     Forcings *forcings = calloc(1, sizeof(Forcings));
-    write_out(state_init, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, OUTPUT_FOLDER, diagnostics, forcings, grid, dualgrid);
+    write_out(state_old, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, OUTPUT_FOLDER, diagnostics, forcings, grid, dualgrid);
     t_write += WRITE_OUT_INTERVAL;
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     double t_0;
     t_0 = t_init;
     double t_write_integral = t_init;
-    State *state_0 = calloc(1, sizeof(State));
-    linear_combine_two_states(state_init, state_init, state_0, 1, 0);
-    free(state_init);
     clock_t first_time, second_time;
     first_time = clock();
-    State *state_p1 = calloc(1, sizeof(State));
+    State *state_new = calloc(1, sizeof(State));
     if (write_out_dry_mass_integral == 1)
-		write_out_integral(state_0, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
+		write_out_integral(state_old, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
     if (write_out_entropy_integral == 1)
-		write_out_integral(state_0, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 1);
+		write_out_integral(state_old, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 1);
     if (write_out_energy_integral == 1)
-		write_out_integral(state_0, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
+		write_out_integral(state_old, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
 	Scalar_field *radiation_tendency = calloc(1, sizeof(Scalar_field));
     if (config_info -> rad_on == 1)
     {
@@ -208,16 +205,16 @@ int main(int argc, char *argv[])
     Interpolate_info *interpolation = calloc(1, sizeof(Interpolate_info));
     Diffusion_info *diffusion = calloc(1, sizeof(Diffusion_info));
     config_info -> rad_update = 1;
-    linear_combine_two_states(state_0, state_0, state_p1, 1, 0);
+    linear_combine_two_states(state_old, state_old, state_new, 1, 0);
     config_info -> totally_first_step_bool = 1;
-    manage_time_stepping(state_0, state_p1, interpolation, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
+    manage_time_stepping(state_old, state_new, interpolation, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
     counter += 1;
     if (write_out_dry_mass_integral == 1)
-		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
+		write_out_integral(state_new, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
     if (write_out_entropy_integral == 1)
-		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 1);
+		write_out_integral(state_new, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 1);
     if (write_out_energy_integral == 1)
-		write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
+		write_out_integral(state_new, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
 	t_write_integral += delta_t;
     State *state_write = calloc(1, sizeof(State));
     double speed;
@@ -230,7 +227,7 @@ int main(int argc, char *argv[])
     while (t_0 + delta_t < t_init + TOTAL_RUN_SPAN + 300)
     {
         t_0 += delta_t;
-    	linear_combine_two_states(state_p1, state_p1, state_0, 1, 0);
+    	linear_combine_two_states(state_new, state_new, state_old, 1, 0);
         if (t_0 <= t_rad_update && t_0 + delta_t >= t_rad_update)
         {
         	config_info -> rad_update = 1;
@@ -238,22 +235,22 @@ int main(int argc, char *argv[])
         }
         else
         	config_info -> rad_update = 0;
-            manage_time_stepping(state_0, state_p1, interpolation, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
+            manage_time_stepping(state_old, state_new, interpolation, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
 		if (write_out_dry_mass_integral == 1)
-			write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
+			write_out_integral(state_new, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
 		if (write_out_entropy_integral == 1)
-			write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 1);
+			write_out_integral(state_new, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 1);
 		if (write_out_energy_integral == 1)
-			write_out_integral(state_p1, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
+			write_out_integral(state_new, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
 		t_write_integral += delta_t;
         if(t_0 + delta_t >= t_write && t_0 <= t_write)
-            interpolation_t(state_0, state_p1, state_write, t_0, t_0 + delta_t, t_write);
+            interpolation_t(state_old, state_new, state_write, t_0, t_0 + delta_t, t_write);
         if (t_0 >= t_write - 300)
         {
         	if (wind_10_m_step_counter < min_no_of_output_steps)
         	{
 		    	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-		    		wind_h_lowest_layer_array[wind_10_m_step_counter*NO_OF_VECTORS_H + i] = state_0 -> velocity_gas[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i];
+		    		wind_h_lowest_layer_array[wind_10_m_step_counter*NO_OF_VECTORS_H + i] = state_old -> velocity_gas[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i];
 		    	wind_10_m_step_counter += 1;
         	}
         }
@@ -289,8 +286,8 @@ int main(int argc, char *argv[])
     free(grid);
     free(dualgrid);
     free(OUTPUT_FOLDER);
-    free(state_0);
-    free(state_p1);
+    free(state_old);
+    free(state_new);
     free(state_write);
     printf("%s", stars);
     free(stars);

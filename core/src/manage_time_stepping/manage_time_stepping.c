@@ -11,7 +11,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdlib.h>
 #include <stdio.h>
 
-int manage_time_stepping(State *state_0, State *state_p1, Interpolate_info *interpolation, Grid *grid, Dualgrid *dualgrid, Scalar_field radiation_tendency, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Diffusion_info *diffusion_info, Config_info *config_info, double delta_t)
+int manage_time_stepping(State *state_old, State *state_new, Interpolate_info *interpolation, Grid *grid, Dualgrid *dualgrid, Scalar_field radiation_tendency, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Diffusion_info *diffusion_info, Config_info *config_info, double delta_t)
 {
 	/*
 	Here, the RK3 scheme is implemented.
@@ -26,30 +26,30 @@ int manage_time_stepping(State *state_0, State *state_p1, Interpolate_info *inte
 		delta_t_rk = delta_t/(3 - i);
 		// Calculatung explicit horizontal momentum tendencies and vertical advective momentum tendencies.
 		if (i == 0)
-			forward_tendencies(state_0, state_tendency, grid, dualgrid, diagnostics, forcings, interpolation, diffusion_info, config_info, i);
+			forward_tendencies(state_old, state_tendency, grid, dualgrid, diagnostics, forcings, interpolation, diffusion_info, config_info, i);
 		else
-			forward_tendencies(state_p1, state_tendency, grid, dualgrid, diagnostics, forcings, interpolation, diffusion_info, config_info, i);
+			forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, interpolation, diffusion_info, config_info, i);
 		// calculating the new values of the horizontal momentum, vertical horizontal advection handled implcitly
-		three_band_solver_hor_vel_adv(state_0, state_p1, state_tendency, delta_t_rk, grid);
+		three_band_solver_hor_vel_adv(state_old, state_new, state_tendency, delta_t_rk, grid);
 		// Horizontal velocities can be considered as updated from now on.
 		// The advective part of the vertical velocity equation is solved here, the vertical advection is calculated implicitly.
-		three_band_solver_ver_vel_adv(state_0, state_p1, state_tendency, delta_t_rk, grid);
+		three_band_solver_ver_vel_adv(state_old, state_new, state_tendency, delta_t_rk, grid);
 		// here, the horizontal divergences are calculated with the new values of the horizontal velocity
-		backward_tendencies(state_0, state_p1, interpolation, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, diffusion_info, config_info, i);
+		backward_tendencies(state_old, state_new, interpolation, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, diffusion_info, config_info, i);
 		// determining the explicit component of the new temperature
-		temperature_diagnostics_explicit(state_0, state_tendency, diagnostics, delta_t_rk);
+		temperature_diagnostics_explicit(state_old, state_tendency, diagnostics, delta_t_rk);
 		// here, the non-advective part of the vertical velocity equation is solved implicitly (sound wave solver)
-		three_band_solver_ver_sound_waves(state_0, state_p1, state_tendency, diagnostics, delta_t_rk, grid);
+		three_band_solver_ver_sound_waves(state_old, state_new, state_tendency, diagnostics, delta_t_rk, grid);
 		// Vertical velocities can be seen as updated from now on.
 		// now that the new vertical velocity is known, the new dry density can be calculated via implicit vertical advection
-		three_band_solver_ver_den_dry(state_0, state_p1, state_tendency, delta_t_rk, grid);
+		three_band_solver_ver_den_dry(state_old, state_new, state_tendency, delta_t_rk, grid);
 		// Now the entropy density is at the new step is calculated using the advection equation in flux form.
-		three_band_solver_ver_entropy_density_dry(state_0, state_p1, state_tendency, delta_t_rk, grid);
+		three_band_solver_ver_entropy_density_dry(state_old, state_new, state_tendency, delta_t_rk, grid);
 		// Diagnozing the temperature out of the linearized equation of state for energetic consistency.
-		temperature_diagnostics(state_0, state_p1);
+		temperature_diagnostics(state_old, state_new);
 		// Vertical tracer advection with 3-band matrices.
 		if (config_info -> tracers_on == 1)
-			three_band_solver_ver_tracers(state_0, state_p1, state_tendency, delta_t_rk, grid);
+			three_band_solver_ver_tracers(state_old, state_new, state_tendency, delta_t_rk, grid);
     }
     return 0;
 }
