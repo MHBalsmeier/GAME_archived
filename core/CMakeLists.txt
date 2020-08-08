@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.10)
 project(core VERSION 0.0)
 set(CMAKE_C_COMPILER mpicc)
 add_executable(
-game src/coordinator.c
+game
+src/coordinator.c
+src/settings.c
 src/manage_time_stepping/manage_time_stepping.c
 src/manage_time_stepping/manage_interpolation.c
 src/integrators/explicit_integrators/forward_tendencies.c

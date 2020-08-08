@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.5.21)  5 AUG 2020 22:58
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.5.21)  8 AUG 2020 14:33
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -807,6 +807,11 @@ Package biblatex Info: Reference section=0 on input line 25.
 Package biblatex Info: Reference segment=0 on input line 25.
 LaTeX Font Info:    Font shape `T1/fnc/m/n' will be
 (Font)              scaled to size 16.07027pt on input line 27.
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 2
+7.
+(/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
+File: t1cmtt.fd 2019/12/16 v2.5j Standard LaTeX font definitions
+)
 LaTeX Font Info:    Font shape `T1/fnc/m/n' will be
 (Font)              scaled to size 11.15991pt on input line 27.
 LaTeX Font Info:    Font shape `T1/fnc/m/n' will be
@@ -821,6 +826,7 @@ LaTeX Font Info:    Font shape `FMX/futm/m/n' will be
 (Font)              scaled to size 6.43999pt on input line 27.
 LaTeX Font Info:    Trying to load font information for FML+fncm on input line 
 27.
+
 (/usr/share/texlive/texmf-dist/tex/latex/fouriernc/fmlfncm.fd
 File: fmlfncm.fd 2005/12/20 Fontinst v1.928 font definitions for FML/fncm.
 )
@@ -832,11 +838,21 @@ LaTeX Font Info:    Font shape `U/futm/m/n' will be
 (Font)              scaled to size 6.43999pt on input line 27.
  [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [1]
+Chapter 1.
 LaTeX Font Info:    Font shape `T1/fnc/m/n' will be
-(Font)              scaled to size 13.39188pt on input line 29.
+(Font)              scaled to size 19.28804pt on input line 36.
 LaTeX Font Info:    Font shape `T1/fnc/b/n' will be
-(Font)              scaled to size 13.39188pt on input line 29.
+(Font)              scaled to size 19.28804pt on input line 36.
+LaTeX Font Info:    Font shape `T1/fnc/b/n' will be
+(Font)              scaled to size 23.13821pt on input line 36.
+LaTeX Font Info:    Trying to load font information for TS1+fnc on input line 4
+2.
+(/usr/share/texlive/texmf-dist/tex/latex/fouriernc/ts1fnc.fd
+File: ts1fnc.fd 2005/12/13 font definitions for TS1/fnc.
+)
+LaTeX Font Info:    Font shape `TS1/fnc/m/n' will be
+(Font)              scaled to size 9.29993pt on input line 42.
 
 (/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2019/09/10 1.8c listings language file
@@ -851,64 +867,65 @@ LaTeX Font Info:    Font shape `T1/fnc/b/n' will be
 (Font)              scaled to size 9.29993pt on input line 21.
 )
 LaTeX Font Info:    Font shape `T1/fnc/m/n' will be
-(Font)              scaled to size 7.06795pt on input line 41.
+(Font)              scaled to size 7.06795pt on input line 54.
 LaTeX Font Info:    Font shape `T1/fnc/m/n' will be
-(Font)              scaled to size 5.57996pt on input line 41.
+(Font)              scaled to size 5.57996pt on input line 54.
 LaTeX Font Info:    Font shape `FMX/futm/m/n' will be
-(Font)              scaled to size 9.19998pt on input line 41.
+(Font)              scaled to size 9.19998pt on input line 54.
 LaTeX Font Info:    Font shape `FMX/futm/m/n' will be
-(Font)              scaled to size 6.99199pt on input line 41.
+(Font)              scaled to size 6.99199pt on input line 54.
 LaTeX Font Info:    Font shape `FMX/futm/m/n' will be
-(Font)              scaled to size 5.51999pt on input line 41.
+(Font)              scaled to size 5.51999pt on input line 54.
 LaTeX Font Info:    Font shape `U/futm/m/n' will be
-(Font)              scaled to size 9.19998pt on input line 41.
+(Font)              scaled to size 9.19998pt on input line 54.
 LaTeX Font Info:    Font shape `U/futm/m/n' will be
-(Font)              scaled to size 6.99199pt on input line 41.
+(Font)              scaled to size 6.99199pt on input line 54.
 LaTeX Font Info:    Font shape `U/futm/m/n' will be
-(Font)              scaled to size 5.51999pt on input line 41.
-LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 4
-3.
+(Font)              scaled to size 5.51999pt on input line 54.
+LaTeX Font Info:    Font shape `T1/fnc/m/sc' will be
+(Font)              scaled to size 9.29993pt on input line 81.
+ [2
 
-(/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
-File: t1cmtt.fd 2019/12/16 v2.5j Standard LaTeX font definitions
-)
-LaTeX Font Info:    Font shape `T1/fnc/b/n' will be
-(Font)              scaled to size 11.15991pt on input line 71.
-LaTeX Font Info:    Trying to load font information for TS1+fnc on input line 7
-7.
+] [3]
+Chapter 2.
+[4
 
-(/usr/share/texlive/texmf-dist/tex/latex/fouriernc/ts1fnc.fd
-File: ts1fnc.fd 2005/12/13 font definitions for TS1/fnc.
-)
-LaTeX Font Info:    Font shape `TS1/fnc/m/n' will be
-(Font)              scaled to size 9.29993pt on input line 77.
+]
+Chapter 3.
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <10> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 110.
- [1] [2] [3]
-(./game_handbook.aux)
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 120.
+[5
+
+]
+Chapter 4.
+[6
+
+] (./game_handbook.aux)
 Package logreq Info: Writing requests to 'game_handbook.run.xml'.
 \openout1 = `game_handbook.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 13186 strings out of 481239
- 217837 string characters out of 5920377
- 881257 words of memory out of 5000000
- 28276 multiletter control sequences out of 15000+600000
- 573484 words of font info for 85 fonts, out of 8000000 for 9000
+ 13196 strings out of 481239
+ 217932 string characters out of 5920377
+ 875251 words of memory out of 5000000
+ 28281 multiletter control sequences out of 15000+600000
+ 578295 words of font info for 90 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  38i,15n,51p,824b,1233s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc}{/usr/share/texliv
-e/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texlive/texmf-dist/fonts/t
+{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}{/usr/share/texmf/
+fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/share/texlive/texmf-dist/fonts/t
 ype1/public/fourier/fourier-ml.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
-ublic/fourier/fourier-ms.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt
-1000.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncb8a.pfb></u
-sr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncr8a.pfb></usr/share/tex
-live/texmf-dist/fonts/type1/urw/ncntrsbk/uncri8a.pfb>
-Output written on game_handbook.pdf (4 pages, 86249 bytes).
+ublic/fourier/fourier-ms.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftc
+1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1000.pfb></usr/share
+/texmf/fonts/type1/public/cm-super/sftt1200.pfb></usr/share/texmf/fonts/type1/p
+ublic/cm-super/sftt1728.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncnt
+rsbk/uncb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncr8a.
+pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncri8a.pfb>
+Output written on game_handbook.pdf (7 pages, 101655 bytes).
 PDF statistics:
- 43 PDF objects out of 1000 (max. 8388607)
- 30 compressed objects within 1 object stream
+ 66 PDF objects out of 1000 (max. 8388607)
+ 47 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

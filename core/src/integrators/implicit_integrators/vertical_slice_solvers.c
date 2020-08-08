@@ -7,6 +7,7 @@ The vertical advection is organized here.
 #include <stdlib.h>
 #include <stdio.h>
 #include "../../enum_and_typedefs.h"
+#include "../../settings.h"
 #include "../../diagnostics/diagnostics.h"
 #include "../../spatial_operators/spatial_operators.h"
 #include "atmostracers.h"
@@ -148,10 +149,10 @@ int three_band_solver_ver_vel_adv(State *state_old, State *state_new, State *sta
 
 int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, double delta_t, Grid *grid)
 {
-	double delta_z, upper_weight, lower_weight, upper_volume, lower_volume, total_volume, damping_coeff, damping_coeff_max, damping_start_height, z_above_damping;
+	double delta_z, upper_weight, lower_weight, upper_volume, lower_volume, total_volume, damping_coeff, damping_coeff_max, damping_start_height, z_above_damping, damping_start_height_over_toa;
 	// This is for Klemp (2008).
-	damping_start_height = 0.75*grid -> z_vector[0];
-	damping_coeff_max = 0.2;
+	get_damping_layer_properties(&damping_start_height_over_toa, &damping_coeff_max);
+	damping_start_height = damping_start_height_over_toa*grid -> z_vector[0];
 	int upper_index, lower_index;
 	int j;
 	#pragma omp parallel for private(upper_index, lower_index, delta_z, upper_weight, lower_weight, upper_volume, lower_volume, total_volume, damping_coeff, z_above_damping, j)

@@ -42,16 +42,20 @@ Github repository: https://github.com/MHBalsmeier/game
 #define EPSILON_TRACERS 0.00001
 
 enum grid_integers {
+// This determines the horizontal resolution.
 RES_ID = 5,
+// The number of layers. TOA is determined by the grid file. This has to conform with the grid file and the initialization state file
+NO_OF_LAYERS = 26,
+// The number of layers affected by orography. This also has to conform with the grid file and the initialization state file
+NO_OF_ORO_LAYERS = 17,
 NO_OF_TRACERS = 3,
 NO_OF_CONDENSATED_TRACERS = 2,
 NO_OF_SOLID_TRACERS = 1,
+// Nothing may be changed below this line. These are fundamentals properties of the grid.
 NO_OF_BASIC_TRIANGLES = 20,
 NO_OF_PENTAGONS = 12,
 NO_OF_HEXAGONS = (int) (10*(pow(2, 2*RES_ID) - 1)),
 NO_OF_EDGES = 3*NO_OF_BASIC_TRIANGLES/2,
-NO_OF_LAYERS = 26,
-NO_OF_ORO_LAYERS = 17,
 NO_OF_LEVELS = NO_OF_LAYERS + 1,
 NO_OF_SCALARS_H = NO_OF_PENTAGONS + NO_OF_HEXAGONS,
 NO_OF_VECTORS_H = (5*NO_OF_PENTAGONS/2 + 6/2*NO_OF_HEXAGONS),

@@ -6,13 +6,13 @@
 \usepackage[T1]{fontenc}
 \geometry{a4paper, top = 15mm, left = 5mm, right = 5mm, bottom = 17mm}
 \fancypagestyle{plain}{
-\fancyhead[L]{GAME handbook}
-\fancyhead[R]{\textsc{GAME development team}}
+\fancyhead[L]{\texttt{GAME} handbook}
+\fancyhead[R]{\textsc{\texttt{GAME} development team}}
 \fancyfoot[C]{\thepage}
 \addtolength\footskip{12pt}}
 \definecolor{table_green}{rgb}{0, 0.6, 0}
-\title{GAME Handbook}
-\author{GAME Development Team}
+\title{\texttt{GAME} Handbook}
+\author{\texttt{GAME} Development Team}
 \date{}
 \newcommand{\md}[1]{\frac{D#1}{Dt}}
 \newcommand{\omegabi}{\text{{\osgbi ω}}}
@@ -26,10 +26,23 @@
 
 \maketitle
 
-\section{Running the model}
-\label{sec:running_the_model}
-
+\vspace*{5 cm}
+\begin{center}
 All physical quantities in this document are to be multiplied with their respective SI units.
+\end{center}
+
+\newpage
+
+\chapter{Running the model}
+\label{chap:running_the_model}
+
+The configuration of the model must be set in three different files:
+
+\begin{itemize}
+\item \texttt{src/enum\_and\_typedefs.h}: modify \texttt{RES\_ID}, \texttt{NO\_OF\_LAYERS} and \texttt{NO\_OF\_ORO\_LAYERS}. These must conform with the grid file and the initialization state file.
+\item The file \texttt{src/settings.c}: modify the characteristics of damping at the model top and diffusion.
+\item The run script: explanation below.
+\end{itemize}
 
 \lstinputlisting[language = Bash, caption = {Example input file.}, frame = on]{../run_configs/jw_perturbed_moist.sh}\label{lst:input_file_example}
 
@@ -65,11 +78,8 @@ Listing \ref{lst:input_file_example} is an example of an input file. Table \ref{
 \end{table}
 \renewcommand{\arraystretch}{1}
 
-\section{Generating required files}
-\label{sec:generating_required_files}
-
-\subsection{Grid generation procedure}
-\label{sec:grid_generation_procedure}
+\chapter{Grid generation procedure}
+\label{chap:grid_generation_procedure}
 
 A grid is determined by the following five properties:
 
@@ -100,8 +110,8 @@ The grid generator needs to be recompiled for every specific resolution, top hei
 \end{table}
 \renewcommand{\arraystretch}{1}
 
-\subsection{Generating a new orography file}
-\label{sec:generating_a_new_orography_file}
+\chapter{Generating a new orography file}
+\label{chap:generating_a_new_orography_file}
 
 \renewcommand{\arraystretch}{1.2}
 \begin{table}
@@ -127,8 +137,8 @@ Orography files are generated with the code residing in the directory \texttt{or
 %
 These files are stored in the directory \texttt{orography\_generator/real}. An information file explains them. A $1/r$-interpolation with four values is used to interpolate data to the scalar data points.
 
-\subsection{Generating a new test state file}
-\label{sec:generating_a_new_test_state_file}
+\chapter{Generating a new test state file}
+\label{chap:generating_a_new_test_state_file}
 
 \renewcommand{\arraystretch}{1.2}
 \begin{table}
