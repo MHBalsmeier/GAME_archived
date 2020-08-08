@@ -1,5 +1,7 @@
 The Global Atmospheric Modeling Framework (GAME) is a global non-hydrostatic hexagonal C grid dynamical core with the possibility to advect a variable number of tracers. For radiation, it is coupled to RTE+RRTMGP via the C binding rte-rrtmgp-c (to be done).
 
+![](sample_output/movie.mp4)
+
 ## Overview
 
 It is known that the forecast skill of a NWP model depends much more on physics and data assimilation than on the dynamical core. With MPAS and FV3 for the global scale and WRF-ARW for the regional scale, efficient and capable dynamical cores exist. However, all global dynamical cores I know of have inconsistencies even in the most fundamental dynamical quantities (mass, energy forms and entropy). That is why the aim of this project is to develop a next generation global dynamical core with the following properties:
