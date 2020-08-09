@@ -2,7 +2,7 @@ import numpy as np;
 import math as mat;
 from colorama import Fore;
 from colorama import Style;
-import help_scripts_game_plotting.constants as cons;
+import toolbox.constants as cons;
 
 earth_radius = cons.return_constant(0);
 def calc_distance(lat_deg_1, lon_deg_1, lat_deg_2, lon_deg_2):

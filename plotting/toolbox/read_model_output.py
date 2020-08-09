@@ -1,4 +1,4 @@
-import help_scripts_game_plotting.game_grid_generator as gametrafo;
+import toolbox.game_grid_generator as gametrafo;
 import eccodes as ec;
 import numpy as np;
 from colorama import Fore;

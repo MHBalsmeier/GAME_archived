@@ -1,12 +1,12 @@
 import numpy as np;
 import sys;
-import help_scripts_game_plotting.read_model_output as rmo;
+import toolbox.read_model_output as rmo;
 from matplotlib.colors import BoundaryNorm;
 import cartopy.feature as cfeature;
 import iris;
-import help_scripts_game_plotting.game_grid_generator as ggg;
-import help_scripts_game_plotting.dist_stuff as ds;
-import help_scripts_game_plotting.conversions as conv;
+import toolbox.game_grid_generator as ggg;
+import toolbox.dist_stuff as ds;
+import toolbox.conversions as conv;
 import matplotlib.pyplot as plt;
 import matplotlib as mpl;
 import cartopy.crs as ccrs;
@@ -21,8 +21,8 @@ short_name = sys.argv[4];
 grid_props_file = sys.argv[5];
 save_folder = sys.argv[6];
 grib_dir_name = sys.argv[7];
+projection = sys.argv[8];
 
-rescale = 1;
 shift = 0;
 colormap = "jet";
 if short_name == "pt":
@@ -140,6 +140,7 @@ if color_bar_range > 4000:
     color_bar_dist = 800;
 if color_bar_range > 6000:
     color_bar_dist = 1000;
+
 cmap = plt.get_cmap(colormap);
 norm = BoundaryNorm(bounds, ncolors = cmap.N, clip = True);
 points = np.zeros([len(values[:, 0]), 2]);
@@ -147,9 +148,20 @@ fig_size = 10;
 for i in range(int(max_interval/time_step) + 1):
 	time_after_init = i*time_step;
 	print("plotting movie element for t - t_init = " + str(time_after_init) + " s ...");
-	fig = plt.figure(figsize = (fig_size, fig_size));
-	ax = plt.axes(projection=ccrs.Orthographic(central_latitude = 0, central_longitude = 0));
-	ax.coastlines(resolution = "10m", linewidth = 2);
+	if (projection == "Orthographic"):
+		fig = plt.figure(figsize = (fig_size, fig_size));
+	if (projection == "Mollweide"):
+		fig = plt.figure(figsize = (fig_size, 0.5*fig_size));
+	if (projection == "EckertIII"):
+		fig = plt.figure(figsize = (fig_size, 0.5*fig_size));
+	else:
+		fig = plt.figure(figsize = (fig_size, fig_size));
+	if (projection == "Orthographic"):
+		ax = plt.axes(projection=ccrs.Orthographic(central_latitude = 0, central_longitude = 0));
+	if (projection == "Mollweide"):
+		ax = plt.axes(projection=ccrs.Mollweide());
+	if (projection == "EckertIII"):
+		ax = plt.axes(projection=ccrs.EckertIII());
 	lat_plot_deg = np.linspace(-90, 90, 1000);
 	lon_plot_deg = np.linspace(-180, 180, 1000);
 	Xi, Yi = np.meshgrid(lon_plot_deg, lat_plot_deg);
