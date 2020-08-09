@@ -10,6 +10,7 @@ import toolbox.conversions as conv;
 import matplotlib.pyplot as plt;
 import matplotlib as mpl;
 import cartopy.crs as ccrs;
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER;
 from iris.coord_systems import GeogCS;
 import iris.plot as iplt;
 from scipy.interpolate import griddata;
@@ -154,14 +155,15 @@ for i in range(int(max_interval/time_step) + 1):
 		fig = plt.figure(figsize = (fig_size, 0.5*fig_size));
 	if (projection == "EckertIII"):
 		fig = plt.figure(figsize = (fig_size, 0.5*fig_size));
-	else:
-		fig = plt.figure(figsize = (fig_size, fig_size));
 	if (projection == "Orthographic"):
 		ax = plt.axes(projection=ccrs.Orthographic(central_latitude = 0, central_longitude = 0));
 	if (projection == "Mollweide"):
 		ax = plt.axes(projection=ccrs.Mollweide());
 	if (projection == "EckertIII"):
 		ax = plt.axes(projection=ccrs.EckertIII());
+	gl = ax.gridlines(draw_labels = True);
+	gl.xformatter = LONGITUDE_FORMATTER;
+	gl.yformatter = LATITUDE_FORMATTER;
 	lat_plot_deg = np.linspace(-90, 90, 1000);
 	lon_plot_deg = np.linspace(-180, 180, 1000);
 	Xi, Yi = np.meshgrid(lon_plot_deg, lat_plot_deg);
