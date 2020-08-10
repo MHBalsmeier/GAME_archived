@@ -1,6 +1,8 @@
 The Global Atmospheric Modeling Framework (GAME) is a global non-hydrostatic hexagonal C grid dynamical core with the possibility to advect a variable number of tracers. For radiation, it is coupled to RTE+RRTMGP via the C binding rte-rrtmgp-c (to be done).
 
-View some sample output [here](sample_output).
+![sample_image](sample_output/jw_sp_+200h.png)
+
+View some more sample output [here](sample_output).
 
 ## Overview
 
