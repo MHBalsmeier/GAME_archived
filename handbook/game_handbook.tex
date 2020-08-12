@@ -44,7 +44,7 @@ The configuration of the model must be set in three different files:
 \item The run script: explanation below.
 \end{itemize}
 
-\lstinputlisting[language = Bash, caption = {Example input file.}, frame = on]{../run_configs/jw_perturbed_moist.sh}\label{lst:input_file_example}
+\lstinputlisting[language = Bash, caption = {Example input file.}, frame = on]{../run_scripts/jw_perturbed_moist.sh}\label{lst:input_file_example}
 
 Listing \ref{lst:input_file_example} is an example of an input file. Table \ref{tab:input_file_explanation} explains the meanings of the variables.
 
@@ -63,7 +63,10 @@ Listing \ref{lst:input_file_example} is an example of an input file. Table \ref{
 \hline init\_state\_file & string & Full path of the initialization state file. \tabularnewline
 \hline output\_dir\_base & string & The directory to which output shall be written. \tabularnewline
 \hline cfl\_margin & double & Manual reduction of the time step below the CFL criterion: $\Delta t = \left(1 - \text{cfl\_margin}\right)\Delta t^{(\text{CFL})}$. \tabularnewline
-\hline diffusion\_on & 0, 1 & diffusion switch \tabularnewline
+\hline temperature\_diff\_h & 0, 1 & horizontal temperature diffusion switch \tabularnewline
+\hline temperature\_diff\_v & 0, 1 & vertical temperature diffusion switch \tabularnewline
+\hline momentum\_diff\_h & 0, 1 & horizontal momentum diffusion switch \tabularnewline
+\hline momentum\_diff\_v & 0, 1 & vertical momentum diffusion switch \tabularnewline
 \hline dissipation\_on & 10, 1 & dissipation switch \tabularnewline
 \hline tracers\_on & 0, 1 & tracers switch \tabularnewline
 \hline rad\_on & 0, 1 & radiation switch \tabularnewline
