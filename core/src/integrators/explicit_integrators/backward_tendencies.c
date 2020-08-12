@@ -18,25 +18,20 @@ int backward_tendencies(State *state_old, State *state_new, Interpolate_info *in
         calc_rad_heating(radiation_tendency, NO_OF_SCALARS);
     }
     double rho_h, c_h_v;
-    // Diffusion gets updated here.
-    if (config_info -> scalar_diffusion_on == 1 && no_rk_step == 2)
+    // Temperature diffusion gets updated here.
+    if (no_rk_step == 2)
     {
-        calc_temp_diffusion_coeffs(state_old -> temp_gas, state_old -> density_dry, diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v);
+        calc_temp_diffusion_coeffs(config_info, state_old -> temp_gas, state_old -> density_dry, diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v);
 		grad(state_old -> temp_gas, diagnostics -> temp_gradient, grid);
         scalar_times_vector_scalar_h_v(diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v, diagnostics -> temp_gradient, diagnostics -> temperature_flux_density, grid);
         divv_h(diagnostics -> temperature_flux_density, diffusion_info -> temp_diffusion_heating, grid);
-		for (int i = 0; i < NO_OF_SCALARS; ++i)
-		{
-			if (config_info -> tracers_on == 1)
-			{
-				rho_h = state_old -> density_dry[i] + state_old -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];
-				c_h_v = spec_heat_cap_diagnostics_v(state_old -> density_dry[i], state_old -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i]);
-				diffusion_info -> temp_diffusion_heating[i] = rho_h*c_h_v*diffusion_info -> temp_diffusion_heating[i];
-			}
-			else
-				diffusion_info -> temp_diffusion_heating[i] = state_old -> density_dry[i]*C_D_V*diffusion_info -> temp_diffusion_heating[i];
-		}
     }
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		rho_h = state_old -> density_dry[i] + state_old -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];
+		c_h_v = spec_heat_cap_diagnostics_v(state_old -> density_dry[i], state_old -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i]);
+		diffusion_info -> temp_diffusion_heating[i] = rho_h*c_h_v*diffusion_info -> temp_diffusion_heating[i];
+	}
     if (config_info -> tracers_on == 1)
     {
 		integrate_tracers(state_old, state_new, interpolation, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, diffusion_info, config_info, no_rk_step);

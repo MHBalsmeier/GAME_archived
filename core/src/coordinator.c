@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     strcpy(OUTPUT_FOLDER, argv[5]);
     double cfl_margin = strtof(argv[6], NULL);
     Config_info *config_info = calloc(1, sizeof(Config_info));
-    config_info -> momentum_diffusion_on = strtod(argv[7], NULL);
+    config_info -> momentum_diff_h = strtod(argv[7], NULL);
     config_info -> rad_on = strtod(argv[8], NULL);
     config_info -> tracers_on = strtod(argv[9], NULL);
     len = strlen(argv[10]);
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     write_out_entropy_integral = strtod(argv[12], NULL);
     int write_out_energy_integral;
     write_out_energy_integral = strtod(argv[13], NULL);
-    config_info -> scalar_diffusion_on = strtod(argv[14], NULL);
+    config_info -> temperature_diff_h = strtod(argv[14], NULL);
     double radiation_delta_t;
     radiation_delta_t = strtof(argv[15], NULL);
     int year;
@@ -74,6 +74,8 @@ int main(int argc, char *argv[])
     day = strtod(argv[18], NULL);
     int hour;
     hour = strtod(argv[19], NULL);
+    config_info -> momentum_diff_v = strtod(argv[20], NULL);
+    config_info -> temperature_diff_v = strtod(argv[21], NULL);
     double t_init;
     find_time_coord(year, month, day, hour, 0, 0, 0, &t_init);
     char *stars  = malloc(83*sizeof(char));
@@ -129,21 +131,37 @@ int main(int argc, char *argv[])
 	{
 		printf("Moisture is turned on.\n");
 	}
-	if (config_info -> scalar_diffusion_on == 0)
+	if (config_info -> temperature_diff_h == 0)
 	{
-		printf("Scalar diffusion is turned off.\n");
+		printf("Horizontal temperature diffusion is turned off.\n");
 	}
 	else
 	{
-		printf("Scalar diffusion is turned on.\n");
+		printf("Horizontal temperature diffusion is turned on.\n");
 	}
-	if (config_info -> momentum_diffusion_on == 0)
+	if (config_info -> temperature_diff_v == 0)
 	{
-		printf("Momentum diffusion is turned off.\n");
+		printf("Vertical temperature diffusion is turned off.\n");
 	}
 	else
 	{
-		printf("Momentum diffusion is turned on.\n");
+		printf("Vertical temperature diffusion is turned on.\n");
+	}
+	if (config_info -> momentum_diff_h == 0)
+	{
+		printf("Horizontal momentum diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Horizontal momentum diffusion is turned on.\n");
+	}
+	if (config_info -> momentum_diff_v == 0)
+	{
+		printf("Vertical momentum diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Vertical momentum diffusion is turned on.\n");
 	}
 	printf("reading grid data and checking ... ");
     set_grid_properties(grid, dualgrid, GEO_PROP_FILE);

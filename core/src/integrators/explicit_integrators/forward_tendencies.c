@@ -22,9 +22,9 @@ int forward_tendencies(State *current_state, State *state_tendency, Grid *grid, 
 	{
 		manage_pressure_gradient(current_state, grid, dualgrid, diagnostics, forcings, interpolation, diffusion_info, config_info, no_step_rk);
 	}
-    if (config_info -> momentum_diffusion_on == 1 && no_step_rk == 2)
+    if (no_step_rk == 2)
     {
-		dissipation(current_state -> velocity_gas, current_state -> density_dry, diffusion_info -> friction_acc, diffusion_info -> heating_diss, grid);
+		momentum_diff_diss(current_state -> velocity_gas, current_state -> density_dry, diffusion_info -> friction_acc, diffusion_info -> heating_diss, config_info, grid);
 		// In the presence of condensates, the friction acceleration needs to get a deceleration factor.
 		if (config_info -> tracers_on == 1)
 		{

@@ -164,8 +164,12 @@ Vector_field pot_vort_tend;
 // Info on the run configuration is collected here.
 typedef struct config_info {
 int totally_first_step_bool;
-int scalar_diffusion_on;
-int momentum_diffusion_on;
+int momentum_diff_h;
+int momentum_diff_v;
+int temperature_diff_h;
+int temperature_diff_v;
+int mass_diff_h;
+int mass_diff_v;
 int tracers_on;
 int phase_transitions_on;
 int rad_on;

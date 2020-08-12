@@ -37,34 +37,17 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
             state_tendency -> velocity_gas[i] = 0;
         else
         {
-        	if (config_info -> momentum_diffusion_on == 1 && no_step_rk == 2)
+    		if (h_index >= NO_OF_SCALARS_H)
+    		{
+    			recov_hor_ver_pri(state -> velocity_gas, layer_index, h_index - NO_OF_SCALARS_H, &vertical_velocity, grid);
+    			metric_term = -vertical_velocity*state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
+    			hor_non_trad_cori_term = -vertical_velocity*dualgrid -> f_vec[2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
+        		state_tendency -> velocity_gas[i] = forcings -> pressure_gradient_acc[i] + forcings -> pot_vort_tend[i] - grid -> gravity_m[i] - forcings -> e_kin_h_grad[i] + hor_non_trad_cori_term + metric_term + diffusion_info -> friction_acc[i];
+    		}
+        	if (h_index < NO_OF_SCALARS_H)
         	{
-        		if (h_index >= NO_OF_SCALARS_H)
-        		{
-        			recov_hor_ver_pri(state -> velocity_gas, layer_index, h_index - NO_OF_SCALARS_H, &vertical_velocity, grid);
-        			metric_term = -vertical_velocity*state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
-        			hor_non_trad_cori_term = -vertical_velocity*dualgrid -> f_vec[2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
-            		state_tendency -> velocity_gas[i] = forcings -> pressure_gradient_acc[i] + forcings -> pot_vort_tend[i] - grid -> gravity_m[i] - forcings -> e_kin_h_grad[i] + hor_non_trad_cori_term + metric_term + diffusion_info -> friction_acc[i];
-        		}
-            	if (h_index < NO_OF_SCALARS_H)
-            	{
-            		state_tendency -> velocity_gas[i] = forcings -> pot_vort_tend[i] - forcings -> e_kin_h_grad[i] + diffusion_info -> friction_acc[i] - grid -> gravity_m[i] + R_D/C_D_P*forcings -> pressure_gradient_acc[i];
-        		}
-        	}
-            else
-            {
-        		if (h_index >= NO_OF_SCALARS_H)
-        		{
-        			recov_hor_ver_pri(state -> velocity_gas, layer_index, h_index - NO_OF_SCALARS_H, &vertical_velocity, grid);
-        			metric_term = -vertical_velocity*state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
-        			hor_non_trad_cori_term = -vertical_velocity*dualgrid -> f_vec[2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
-            		state_tendency -> velocity_gas[i] = forcings -> pressure_gradient_acc[i] + forcings -> pot_vort_tend[i] - grid -> gravity_m[i] - forcings -> e_kin_h_grad[i] + hor_non_trad_cori_term + metric_term;
-        		}
-        		if (h_index < NO_OF_SCALARS_H)
-        		{
-            		state_tendency -> velocity_gas[i] = forcings -> pot_vort_tend[i] - forcings -> e_kin_h_grad[i] - grid -> gravity_m[i] + R_D/C_D_P*forcings -> pressure_gradient_acc[i];
-        		}
-        	}
+        		state_tendency -> velocity_gas[i] = forcings -> pot_vort_tend[i] - forcings -> e_kin_h_grad[i] + diffusion_info -> friction_acc[i] - grid -> gravity_m[i] + R_D/C_D_P*forcings -> pressure_gradient_acc[i];
+    		}
         }
     }
     return 0;

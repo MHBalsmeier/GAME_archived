@@ -5,7 +5,7 @@ Github repository: https://github.com/MHBalsmeier/game
 
 #include "../enum_and_typedefs.h"
 
-int dissipation(Vector_field velocity, Scalar_field density, Vector_field friction_acc, Scalar_field heating, Grid *grid)
+int momentum_diff_diss(Vector_field velocity, Scalar_field density, Vector_field friction_acc, Scalar_field heating, Config_info *config_info, Grid *grid)
 {
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_VECTORS; ++i)

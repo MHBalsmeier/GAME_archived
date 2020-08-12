@@ -15,7 +15,7 @@ src/integrators/explicit_integrators/integrate_entropy_density_dry.c
 src/integrators/explicit_integrators/integrate_tracers.c
 src/integrators/implicit_integrators/vertical_slice_solvers.c
 src/spatial_operators/coriolis_gen.c src/spatial_operators/vorticities.c
-src/spatial_operators/dissipation.c
+src/spatial_operators/momentum_diff_diss.c
 src/spatial_operators/scalar_times_scalar.c
 src/spatial_operators/divergence_h.c
 src/spatial_operators/scalar_times_vector.c
@@ -28,7 +28,7 @@ src/diagnostics/dynamic_diagnostics/recovery/recov_hor_ver_pri.c
 src/diagnostics/dynamic_diagnostics/recovery/recov_hor_par_pri.c
 src/diagnostics/dynamic_diagnostics/recovery/recov_primal2dual.c
 src/diagnostics/dynamic_diagnostics/ricci.c
-src/diagnostics/turbulence_diagnostics/diffusion_diagnostics.c
+src/diagnostics/irreversible_diagnostics/diffusion_diagnostics.c
 src/diagnostics/output_diagnostics/global_scalar_integral.c
 src/diagnostics/output_diagnostics/linear_combine_two_states.c
 src/io/init_state_setter.c
