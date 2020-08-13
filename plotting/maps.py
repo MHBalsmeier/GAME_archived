@@ -177,7 +177,7 @@ for i in range(int(max_interval/plot_interval) + 1):
 	time_after_init_title = time_after_init;
 	if disp_time_in_hr == 1:
 		time_after_init_title = int(time_after_init/3600);
-	plt.title(variable_name + "; " + str(time_after_init_title) + " " + time_unit_string + " after init", fontsize = 20);
+	plt.title(variable_name + " at level " + str(level) + "; " + str(time_after_init_title) + " " + time_unit_string + " after init", fontsize = 20);
 	fig.savefig(save_folder + "/" + savename + "+" + str(time_after_init) + "s.png", dpi = 500);
 	plt.close();
 	print("done");
