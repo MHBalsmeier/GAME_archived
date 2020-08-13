@@ -16,7 +16,7 @@ import iris.plot as iplt;
 from scipy.interpolate import griddata;
 
 max_interval = int(sys.argv[1]);
-time_step = int(sys.argv[2]);
+plot_interval = int(sys.argv[2]);
 level = int(sys.argv[3]);
 short_name = sys.argv[4];
 grid_props_file = sys.argv[5];
@@ -110,48 +110,32 @@ savename = run_id + "_" + short_name + "_" + str(level);
 input_file = grib_dir_name + "/" + run_id + "+0s.grb2";
 lat, lon, values_pre = rmo.fetch_model_output(input_file, 0, short_name, level, 4, grid_props_file);
 
-values = np.zeros([len(lat), int(max_interval/time_step) + 1]);
+values = np.zeros([len(lat), int(max_interval/plot_interval) + 1]);
 values[:, 0] = rescale*values_pre + shift;
 
-for i in np.arange(1, int(max_interval/time_step) + 1):
-    time_after_init = i*time_step;
+for i in np.arange(1, int(max_interval/plot_interval) + 1):
+    time_after_init = i*plot_interval;
     input_file = grib_dir_name + "/" + run_id + "+" + str(time_after_init) + "s.grb2";
     lat, lon, values[:, i] = rmo.fetch_model_output(input_file, time_after_init, short_name, level, 4, grid_props_file);
     values[:, i] = rescale*values[:, i] + shift;
 
-color_bar_min = np.floor(np.min(values));
-color_bar_max = np.ceil(np.max(values));
-color_bar_range = color_bar_max - color_bar_min;
-color_plot_dist = 0.01;
-if color_bar_range > 30:
-    color_plot_dist = 0.5;
-if color_bar_range > 100:
-    color_plot_dist = 2;
-if color_bar_range > 1000:
-    color_plot_dist = 20;
-bounds = np.arange(color_bar_min, color_bar_max + color_plot_dist, color_plot_dist);
-color_bar_dist = 1;
-if color_bar_range > 10:
-    color_bar_dist = 2;
-if color_bar_range > 30:
-    color_bar_dist = 5;
-if color_bar_range > 70:
-    color_bar_dist = 10;
-if color_bar_range > 200:
-    color_bar_dist = 30;
-if color_bar_range > 2000:
-    color_bar_dist = 250;
-if color_bar_range > 4000:
-    color_bar_dist = 800;
-if color_bar_range > 6000:
-    color_bar_dist = 1000;
+total_min = np.min(values);
+total_max = np.max(values);
+values_range_for_plot = total_max - total_min;
+if (values_range_for_plot > 0.5):
+	total_min = np.floor(np.min(values));
+	total_max = np.ceil(np.max(values));
+	values_range_for_plot = total_max - total_min;
+color_plot_dist = values_range_for_plot/500;
+bounds = np.arange(total_min, total_max + color_plot_dist, color_plot_dist);
+color_bar_dist = values_range_for_plot/5;
 
 cmap = plt.get_cmap(colormap);
 norm = BoundaryNorm(bounds, ncolors = cmap.N, clip = True);
 points = np.zeros([len(values[:, 0]), 2]);
 fig_size = 10;
-for i in range(int(max_interval/time_step) + 1):
-	time_after_init = i*time_step;
+for i in range(int(max_interval/plot_interval) + 1):
+	time_after_init = i*plot_interval;
 	print("plotting " + short_name + " at level " + str(level) + " for t - t_init = " + str(time_after_init) + " s ...");
 	if (projection == "Orthographic"):
 		fig = plt.figure(figsize = (fig_size, fig_size));
@@ -181,8 +165,8 @@ for i in range(int(max_interval/time_step) + 1):
 	lon_coord.guess_bounds();
 	new_cube = iris.cube.Cube(values_interpolated, units = unit_string, dim_coords_and_dims = [(lat_coord, 0), (lon_coord, 1)]);
 	mesh = iplt.pcolormesh(new_cube, cmap = cmap, norm = norm);
-	cbar = plt.colorbar(mesh, fraction = 0.02, pad = 0.04, aspect = 40, orientation = "horizontal", ticks = np.arange(color_bar_min, color_bar_max + color_bar_dist, color_bar_dist));
-	cbar.ax.tick_params(labelsize = 16)
+	cbar = plt.colorbar(mesh, fraction = 0.02, pad = 0.04, aspect = 80, orientation = "horizontal", ticks = np.arange(total_min, total_max + color_bar_dist, color_bar_dist));
+	cbar.ax.tick_params(labelsize = 12)
 	cbar.set_label(unit_string, fontsize = 16);
 	time_after_init_title = time_after_init;
 	if disp_time_in_hr == 1:
