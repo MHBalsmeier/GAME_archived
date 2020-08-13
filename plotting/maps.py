@@ -97,6 +97,10 @@ if short_name == "wz":
     variable_name = "Vertical velocity";
     unit_string = "m/s";
     rescale = 1;
+if short_name == "d":
+    variable_name = "Horizontal divergence";
+    unit_string = "1/s";
+    rescale = 1;
 
 disp_time_in_hr = 0;
 time_unit_string = "s";
@@ -126,6 +130,8 @@ if (values_range_for_plot > 0.5):
 	total_min = np.floor(np.min(values));
 	total_max = np.ceil(np.max(values));
 	values_range_for_plot = total_max - total_min;
+if (values_range_for_plot == 0):
+	values_range_for_plot = 0.1;
 color_plot_dist = values_range_for_plot/500;
 bounds = np.arange(total_min, total_max + color_plot_dist, color_plot_dist);
 color_bar_dist = values_range_for_plot/5;

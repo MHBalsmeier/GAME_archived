@@ -147,7 +147,6 @@ Vector_field pressure_gradient_0_m;
 Vector_field pressure_gradient_1_dry;
 Vector_field pressure_gradient_1_vapour;
 Vector_field temperature_flux_density;
-Scalar_field wind_field_divv_h;
 Vector_field entropy_dry_flux_density;
 } Diagnostics;
 

@@ -10,10 +10,18 @@ Github repository: https://github.com/MHBalsmeier/game
 const double DAMPING_START_HEIGHT_OVER_TOA = 0.75;
 // The maximum damping coefficient (the damping coefficient increases towards the TOA).
 const double DAMPING_COEFF_MAX = 0.2;
+// Wether or not horizontal wind divergence shall be written out.
+const int WRITE_OUT_DIVV_H = 1;
 
 int get_damping_layer_properties(double *damping_start_height_over_toa, double *damping_coeff_max)
 {
 	 *damping_start_height_over_toa = DAMPING_START_HEIGHT_OVER_TOA;
 	 *damping_coeff_max = DAMPING_COEFF_MAX;
+	return 0;
+}
+
+int get_write_settings(int *write_out_divv_h)
+{
+	*write_out_divv_h = WRITE_OUT_DIVV_H;
 	return 0;
 }

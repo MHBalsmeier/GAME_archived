@@ -4,3 +4,4 @@ Github repository: https://github.com/MHBalsmeier/game
 */
 
 int get_damping_layer_properties(double *, double *);
+int get_write_settings(int *);

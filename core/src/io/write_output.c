@@ -12,6 +12,7 @@ Here, the output is written to grib files and integrals are written to text file
 #include "io.h"
 #include "../diagnostics/diagnostics.h"
 #include "../spatial_operators/spatial_operators.h"
+#include "../settings.h"
 #include "eccodes.h"
 #include "geos95.h"
 #include "atmostracers.h"
@@ -22,6 +23,8 @@ double calc_std_dev(double [], int);
 
 int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, char output_directory[], Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[])
 {
+	int write_out_divv_h;
+	get_write_settings(&write_out_divv_h);
 	// Diagnostics and forcings are primarily handed over for checks.
     int init_year, init_month, init_day, init_hour, init_minute, init_second, init_microsecond;
     find_hour_from_time_coord(t_init, &init_year, &init_month, &init_day, &init_hour, &init_minute, &init_second, &init_microsecond);
@@ -50,6 +53,12 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     double *wind_u_h = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *wind_v_h = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *rel_vort_h = malloc(NO_OF_VECTORS_H*sizeof(double));
+    double *divv_h_all_layers = malloc(NO_OF_SCALARS*sizeof(double));
+    if (write_out_divv_h == 1)
+    {
+    	divv_h(state_write_out -> velocity_gas, divv_h_all_layers, grid);
+    }
+    double *divv_h = malloc(NO_OF_SCALARS_H*sizeof(double));
     double *wind_w_h = malloc(NO_OF_SCALARS_H*sizeof(double));
     double *mslp = malloc(NO_OF_SCALARS_H*sizeof(double));
     double *surface_p = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -79,6 +88,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     codes_handle *handle_rel_vort = NULL;
     codes_handle *handle_rh = NULL;
     codes_handle *handle_cape = NULL;
+    codes_handle *handle_divv_h = NULL;
 	pot_temp_diagnostics(state_write_out, pot_temperature);
 	calc_rel_vort(state_write_out -> velocity_gas, *rel_vort, grid, dualgrid);
 	int layer_index;
@@ -763,6 +773,59 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
         if ((retval = codes_write_message(handle_rel_vort, OUTPUT_FILE, "a")))
             ECCERR(retval);
 		codes_handle_delete(handle_rel_vort);
+		if (write_out_divv_h == 1)
+		{	
+			for (int j = 0; j < NO_OF_SCALARS_H; ++j)
+			{
+				divv_h[j] = divv_h_all_layers[i*NO_OF_SCALARS_H + j];
+			}
+			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
+			handle_divv_h = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
+			if (err != 0)
+				ECCERR(err);
+			fclose(SAMPLE_FILE);
+		    if ((retval = codes_set_long(handle_divv_h, "discipline", 0)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_divv_h, "centre", 255)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_divv_h, "significanceOfReferenceTime", 1)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_divv_h, "productionStatusOfProcessedData", 1)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_divv_h, "typeOfProcessedData", 1)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_divv_h, "indicatorOfUnitOfTimeRange", 13)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_divv_h, "stepUnits", 13)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_divv_h, "dataDate", data_date)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_divv_h, "dataTime", data_time)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_divv_h, "forecastTime", t_write - t_init)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_divv_h, "stepRange", t_write - t_init)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_divv_h, "typeOfGeneratingProcess", 1)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_divv_h, "parameterCategory", 2)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_divv_h, "parameterNumber", 13)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_divv_h, "typeOfFirstFixedSurface", 26)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_divv_h, "scaledValueOfFirstFixedSurface", i)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_divv_h, "scaleFactorOfFirstFixedSurface", 1)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_divv_h, "level", i)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_double_array(handle_divv_h, "values", divv_h, NO_OF_SCALARS_H)))
+		        ECCERR(retval);
+		    if ((retval = codes_write_message(handle_divv_h, OUTPUT_FILE, "a")))
+		        ECCERR(retval);
+			codes_handle_delete(handle_divv_h);
+		}
     }
 	double *wind_10_m_both_dir_array = malloc(2*min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
 	double wind_10_m_downscale_factor = 0.667;
@@ -968,6 +1031,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	if ((retval = codes_write_message(handle_wind_10m_gusts, OUTPUT_FILE, "a")))
 	    ECCERR(retval);
 	codes_handle_delete(handle_wind_10m_gusts);
+	free(divv_h_all_layers);
 	free(wind_10_m_speed);
 	free(wind_10_m_gusts_speed);
 	free(wind_10_m_both_dir_array);
@@ -979,6 +1043,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     free(tcdc);
     free(pot_temperature);
     free(rel_vort_h);
+    free(divv_h);
     free(rel_vort);
     free(temperature_h);
     free(pressure_h);
