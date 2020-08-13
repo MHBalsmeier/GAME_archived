@@ -1,11 +1,11 @@
 #!/bin/bash
 operator=MHB
 overwrite_run_id=1
-run_id=jw_perturbed_dry_reversible
+run_id=standard_steep
 run_span=43200
 write_out_interval=900
-grid_props_file=grids/B6L26T30000_O2_OL17_SCVT.nc
-init_state_filename=test_3_B6L26T30000_O2_OL17_SCVT.nc
+grid_props_file=grids/B6L26T30000_O1_OL17_SCVT.nc
+init_state_filename=test_1_B6L26T30000_O1_OL17_SCVT.nc
 init_state_file=input/$init_state_filename
 output_dir_base=output
 cfl_margin=0.0

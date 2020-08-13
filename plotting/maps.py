@@ -23,9 +23,13 @@ grid_props_file = sys.argv[5];
 save_folder = sys.argv[6];
 grib_dir_name = sys.argv[7];
 projection = sys.argv[8];
+run_id = sys.argv[9];
 
+# default values
 shift = 0;
+rescale = 1;
 colormap = "jet";
+
 if short_name == "pt":
     variable_name = "Potential temperature";
     unit_string = "K";
@@ -101,9 +105,9 @@ if max_interval > 24*3600:
     disp_time_in_hr = 1;
     time_unit_string = "hr";
 
-savename = "file";
+savename = run_id + "_" + short_name + "_" + str(level);
 
-input_file = grib_dir_name + "/init+0s.grb2";
+input_file = grib_dir_name + "/" + run_id + "+0s.grb2";
 lat, lon, values_pre = rmo.fetch_model_output(input_file, 0, short_name, level, 4, grid_props_file);
 
 values = np.zeros([len(lat), int(max_interval/time_step) + 1]);
@@ -111,7 +115,7 @@ values[:, 0] = rescale*values_pre + shift;
 
 for i in np.arange(1, int(max_interval/time_step) + 1):
     time_after_init = i*time_step;
-    input_file = grib_dir_name + "/init+" + str(time_after_init) + "s.grb2";
+    input_file = grib_dir_name + "/" + run_id + "+" + str(time_after_init) + "s.grb2";
     lat, lon, values[:, i] = rmo.fetch_model_output(input_file, time_after_init, short_name, level, 4, grid_props_file);
     values[:, i] = rescale*values[:, i] + shift;
 
@@ -148,7 +152,7 @@ points = np.zeros([len(values[:, 0]), 2]);
 fig_size = 10;
 for i in range(int(max_interval/time_step) + 1):
 	time_after_init = i*time_step;
-	print("plotting movie element for t - t_init = " + str(time_after_init) + " s ...");
+	print("plotting " + short_name + " at level " + str(level) + " for t - t_init = " + str(time_after_init) + " s ...");
 	if (projection == "Orthographic"):
 		fig = plt.figure(figsize = (fig_size, fig_size));
 	if (projection == "Mollweide"):
@@ -180,10 +184,11 @@ for i in range(int(max_interval/time_step) + 1):
 	cbar = plt.colorbar(mesh, fraction = 0.02, pad = 0.04, aspect = 40, orientation = "horizontal", ticks = np.arange(color_bar_min, color_bar_max + color_bar_dist, color_bar_dist));
 	cbar.ax.tick_params(labelsize = 16)
 	cbar.set_label(unit_string, fontsize = 16);
+	time_after_init_title = time_after_init;
 	if disp_time_in_hr == 1:
-		time_after_init = int(time_after_init/3600);
-	plt.title(variable_name + "; " + str(time_after_init) + " " + time_unit_string + " after init", fontsize = 20);
-	fig.savefig(save_folder + "/" + savename + "-" + str(i) + ".png", dpi = 500);
+		time_after_init_title = int(time_after_init/3600);
+	plt.title(variable_name + "; " + str(time_after_init_title) + " " + time_unit_string + " after init", fontsize = 20);
+	fig.savefig(save_folder + "/" + savename + "+" + str(time_after_init) + "s.png", dpi = 500);
 	plt.close();
 	print("done");
 

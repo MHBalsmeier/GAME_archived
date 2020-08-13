@@ -76,6 +76,9 @@ int main(int argc, char *argv[])
     hour = strtod(argv[19], NULL);
     config_info -> momentum_diff_v = strtod(argv[20], NULL);
     config_info -> temperature_diff_v = strtod(argv[21], NULL);
+    len = strlen(argv[22]);
+    char *RUN_ID = malloc((len + 1)*sizeof(char));
+    strcpy(RUN_ID, argv[22]);
     double t_init;
     find_time_coord(year, month, day, hour, 0, 0, 0, &t_init);
     char *stars  = malloc(83*sizeof(char));
@@ -192,7 +195,7 @@ int main(int argc, char *argv[])
     }
     Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
     Forcings *forcings = calloc(1, sizeof(Forcings));
-    write_out(state_old, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, OUTPUT_FOLDER, diagnostics, forcings, grid, dualgrid);
+    write_out(state_old, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, OUTPUT_FOLDER, diagnostics, forcings, grid, dualgrid, RUN_ID);
     t_write += WRITE_OUT_INTERVAL;
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     double t_0;
@@ -274,7 +277,7 @@ int main(int argc, char *argv[])
         }
         if(t_0 + delta_t >= t_write + 300 && t_0 <= t_write + 300)
         {
-            write_out(state_write, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, OUTPUT_FOLDER, diagnostics, forcings, grid, dualgrid);
+            write_out(state_write, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, OUTPUT_FOLDER, diagnostics, forcings, grid, dualgrid, RUN_ID);
             t_write += WRITE_OUT_INTERVAL;
             second_time = clock();
             if (second_write_out_bool == 1)
@@ -294,6 +297,7 @@ int main(int argc, char *argv[])
     	counter += 1;
     }
     MPI_Finalize();
+   	free(RUN_ID);
     free(diffusion);
     free(config_info);
     free(diagnostics);

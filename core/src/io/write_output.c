@@ -20,7 +20,7 @@ Here, the output is written to grib files and integrals are written to text file
 
 double calc_std_dev(double [], int);
 
-int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, char output_directory[], Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid)
+int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, char output_directory[], Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[])
 {
 	// Diagnostics and forcings are primarily handed over for checks.
     int init_year, init_month, init_day, init_hour, init_minute, init_second, init_microsecond;
@@ -29,11 +29,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     long data_time = init_hour;
     int OUTPUT_FILE_LENGTH = 300;
     char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(OUTPUT_FILE_PRE, "%s/init+%ds.grb2", output_directory, (int) (t_write - t_init));
+    sprintf(OUTPUT_FILE_PRE, "%s/%s+%ds.grb2", output_directory, RUN_ID, (int) (t_write - t_init));
     OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
     free(OUTPUT_FILE_PRE);
     char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(OUTPUT_FILE, "%s/init+%ds.grb2", output_directory, (int) (t_write - t_init));
+    sprintf(OUTPUT_FILE, "%s/%s+%ds.grb2", output_directory, RUN_ID, (int) (t_write - t_init));
     char *SAMPLE_FILENAME = "./grids/grib_template.grb2";
     FILE *SAMPLE_FILE;
     int err = 0;
