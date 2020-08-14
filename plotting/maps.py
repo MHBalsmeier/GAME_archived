@@ -24,6 +24,9 @@ save_folder = sys.argv[6];
 grib_dir_name = sys.argv[7];
 projection = sys.argv[8];
 run_id = sys.argv[9];
+uniform_colormap = int(sys.argv[10]);
+coastlines_on = int(sys.argv[11]);
+scope = sys.argv[12];
 
 # default values
 shift = 0;
@@ -123,24 +126,40 @@ for i in np.arange(1, int(max_interval/plot_interval) + 1):
     lat, lon, values[:, i] = rmo.fetch_model_output(input_file, time_after_init, short_name, level, 4, grid_props_file);
     values[:, i] = rescale*values[:, i] + shift;
 
-total_min = np.min(values);
-total_max = np.max(values);
-values_range_for_plot = total_max - total_min;
-if (values_range_for_plot > 0.5):
-	total_min = np.floor(np.min(values));
-	total_max = np.ceil(np.max(values));
+if uniform_colormap == 1:
+	total_min = np.min(values);
+	total_max = np.max(values);
 	values_range_for_plot = total_max - total_min;
-if (values_range_for_plot == 0):
-	values_range_for_plot = 0.1;
-color_plot_dist = values_range_for_plot/500;
-bounds = np.arange(total_min, total_max + color_plot_dist, color_plot_dist);
-color_bar_dist = values_range_for_plot/5;
+	if (values_range_for_plot > 0.5):
+		total_min = np.floor(np.min(values));
+		total_max = np.ceil(np.max(values));
+		values_range_for_plot = total_max - total_min;
+	if (values_range_for_plot == 0):
+		values_range_for_plot = 0.1;
+	color_plot_dist = values_range_for_plot/500;
+	bounds = np.arange(total_min, total_max + color_plot_dist, color_plot_dist);
+	color_bar_dist = values_range_for_plot/5;
+	cmap = plt.get_cmap(colormap);
+	norm = BoundaryNorm(bounds, ncolors = cmap.N, clip = True);
 
-cmap = plt.get_cmap(colormap);
-norm = BoundaryNorm(bounds, ncolors = cmap.N, clip = True);
 points = np.zeros([len(values[:, 0]), 2]);
 fig_size = 10;
 for i in range(int(max_interval/plot_interval) + 1):
+	if uniform_colormap == 0:
+		total_min = np.min(values[:, i]);
+		total_max = np.max(values[:, i]);
+		if total_min == total_max:
+			total_max = total_min + 0.001;
+		values_range_for_plot = total_max - total_min;
+		if (values_range_for_plot > 0.5):
+			total_min = np.floor(np.min(values));
+			total_max = np.ceil(np.max(values));
+			values_range_for_plot = total_max - total_min;
+		color_plot_dist = values_range_for_plot/500;
+		bounds = np.arange(total_min, total_max + color_plot_dist, color_plot_dist);
+		color_bar_dist = values_range_for_plot/5;
+		cmap = plt.get_cmap(colormap);
+		norm = BoundaryNorm(bounds, ncolors = cmap.N, clip = True);
 	time_after_init = i*plot_interval;
 	print("plotting " + short_name + " at level " + str(level) + " for t - t_init = " + str(time_after_init) + " s ...");
 	if (projection == "Orthographic"):
@@ -171,6 +190,11 @@ for i in range(int(max_interval/plot_interval) + 1):
 	lon_coord.guess_bounds();
 	new_cube = iris.cube.Cube(values_interpolated, units = unit_string, dim_coords_and_dims = [(lat_coord, 0), (lon_coord, 1)]);
 	mesh = iplt.pcolormesh(new_cube, cmap = cmap, norm = norm);
+	if (coastlines_on == 1):
+		if scope == "World":
+			ax.coastlines(color = "grey");
+		else:
+			ax.add_feature(cfeature.GSHHSFeature(levels = (1, 2), linewidth = 1.0));
 	cbar = plt.colorbar(mesh, fraction = 0.02, pad = 0.04, aspect = 80, orientation = "horizontal", ticks = np.arange(total_min, total_max + color_bar_dist, color_bar_dist));
 	cbar.ax.tick_params(labelsize = 12)
 	cbar.set_label(unit_string, fontsize = 16);
