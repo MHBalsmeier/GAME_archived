@@ -44,7 +44,7 @@ The configuration of the model must be set in three different files:
 \item The run script: explanation below.
 \end{itemize}
 
-\lstinputlisting[language = Bash, caption = {Example input file.}, frame = on]{../run_scripts/jw_perturbed_moist.sh}\label{lst:input_file_example}
+\lstinputlisting[language = Bash, caption = {Example input file.}, frame = on]{../run_scripts/jw_pert_moist.sh}\label{lst:input_file_example}
 
 Listing \ref{lst:input_file_example} is an example of an input file. Table \ref{tab:input_file_explanation} explains the meanings of the variables.
 
@@ -94,15 +94,15 @@ A grid is determined by the following five properties:
 \item the number of layers following the orography, specified via the parameter \texttt{NUMBER\_OF\_ORO\_LAYERS}
 \end{itemize}
 %
-The grid generator needs to be recompiled for every specific resolution, top height, number of layers as well as number of orography following layers. Therefore change the respective constants in the file \texttt{grid\_generator.c} and execute the bash script \texttt{compile.sh}. Then run the grid generator using the bash script \texttt{run.sh} with the desired \texttt{oro\_id}. Table \ref{tab:grid_generator_run_file_explanation} explains all the parameters to be set in \texttt{run.sh}. Otimized grids have the postfix \texttt{\_SCVT}.
+The grid generator needs to be recompiled for every specific resolution, top height, number of layers as well as number of orography following layers. Therefore change the respective constants in the file \texttt{grid\_generator.c} and execute the bash script \texttt{compile.sh}. Then run the grid generator using the bash script \texttt{run.sh} with the desired \texttt{\texttt{ORO\_ID}}. Table \ref{tab:grid_generator_run_file_explanation} explains all the parameters to be set in \texttt{run.sh}. Otimized grids have the postfix \texttt{\_SCVT}.
 
 \renewcommand{\arraystretch}{1.2}
 \begin{table}
 \centering
 \begin{tabular}{|>{\centering}p{5.0 cm}|>{\centering}p{3 cm}|>{\centering}p{7 cm}|}
 \hline \textbf{name} & \textbf{domain} & \textbf{meaning} \tabularnewline
-\hline\hline \texttt{oro\_id} & all value for which an orography is defined & orography ID \tabularnewline
-\hline\hline \texttt{optimize} & 0, 1 & optimization switch (fails if \texttt{oro\_id} is not 0) \tabularnewline
+\hline\hline \texttt{\texttt{ORO\_ID}} & all value for which an orography is defined & orography ID \tabularnewline
+\hline\hline \texttt{optimize} & 0, 1 & optimization switch (fails if \texttt{\texttt{ORO\_ID}} is not 0) \tabularnewline
 \hline\hline \texttt{n\_iterations} & integer $\geq$ 1 & number of iterations (ignored if \texttt{optimize} = 0), 2000 seems to be a safe value \tabularnewline
 \hline\hline \texttt{use\_scalar\_h\_coords\_file} & 0, 1 & switch to determine wether horizontal coordinates of triangle vertices (generators of the grid) shall be used from another file \tabularnewline
 \hline\hline \texttt{scalar\_h\_coords\_file} & string & input file for dual triangle vertices (only relevant if \texttt{use\_scalar\_h\_coords\_file} = 1) \tabularnewline
@@ -120,11 +120,11 @@ The grid generator needs to be recompiled for every specific resolution, top hei
 \begin{table}
 \centering
 \begin{tabular}{|>{\centering}p{4.0 cm}|>{\centering}p{8 cm}|}
-\hline \textbf{\texttt{ORO\_ID}} & \textbf{description} \tabularnewline
+\hline \textbf{\texttt{ORO\_ID}} & \textbf{Description} \tabularnewline
 \hline\hline 0 & no orography \tabularnewline
 \hline 1 & orography of JW test \tabularnewline
 \hline 2 & Gaussian mountain of 8 km height and 224 m standard deviation located ad 0 N / 0 E\tabularnewline
-\hline 3 & real orography \tabularnewline
+\hline $\geq$ 3 & real orography \tabularnewline
 \hline
 \end{tabular}
 \caption{Definition of orography IDs.}
@@ -132,13 +132,13 @@ The grid generator needs to be recompiled for every specific resolution, top hei
 \end{table}
 \renewcommand{\arraystretch}{1}
 
-Orography files are generated with the code residing in the directory \texttt{orography\_generator/src}. Firstly, change the parameter \texttt{RES\_ID} in the file \texttt{orography\_generator.c} to the desired value and compile. Then source the bash scribt \texttt{run.sh} with the desired \texttt{oro\_id}. Tab. \ref{tab:oro_id_definition} shows the definition of the orography IDs. Real orography can be downloaded from
+Orography files are generated with the code residing in the directory \texttt{orography\_generator/src}. Firstly, change the parameter \texttt{RES\_ID} in the file \texttt{orography\_generator.c} to the desired value and compile. Then source the bash scribt \texttt{run.sh} with the desired \texttt{\texttt{ORO\_ID}}. Tab. \ref{tab:oro_id_definition} shows the definition of the orography IDs. Real orography can be downloaded from
 %
 \begin{itemize}
-\item \texttt{https://psl.noaa.gov/cgi-bin/db\_search/DBSearch.pl?Dataset=NCEP+Reanalysis\\\&Variable=Geopotential+height\&group=0\&submit=Search}
+\item \texttt{https://psl.noaa.gov/cgi-bin/db\_search/DBSearch.pl?Dataset=NCEP+Reanalysis\\\&Variable=Geopotential+height\&group=0\&submit=Search} (\texttt{ORO\_ID} = 3)
 \end{itemize}
 %
-These files are stored in the directory \texttt{orography\_generator/real}. An information file explains them. A $1/r$-interpolation with four values is used to interpolate data to the scalar data points.
+These files are stored in the directory \texttt{orography\_generator/real}. An information file explains them and defines their individual \texttt{ORO\_ID}s. A $1/r$-interpolation with four values is used to interpolate the data to the scalar data points.
 
 \chapter{Generating a new test state file}
 \label{chap:generating_a_new_test_state_file}
@@ -147,13 +147,15 @@ These files are stored in the directory \texttt{orography\_generator/real}. An i
 \begin{table}
 \centering
 \begin{tabular}{|>{\centering}p{4.0 cm}|>{\centering}p{8 cm}|}
-\hline \textbf{\texttt{TEST\_ID}} & \textbf{description} \tabularnewline
+\hline \textbf{\texttt{TEST\_ID}} & \textbf{Description} \tabularnewline
 \hline\hline 0 & standard atmosphere \tabularnewline
 \hline\hline 1 & standard atmosphere with Gaussian mountain (\texttt{ORO\_ID} = 2) \tabularnewline
 \hline\hline 2 & JW dry unperturbed \tabularnewline
 \hline 3 & JW dry perturbed \tabularnewline
 \hline 4 & JW moist unperturbed \tabularnewline
 \hline 5 & JW moist perturbed \tabularnewline
+\hline 6 & JW dry, balanced, with \texttt{ORO\_ID} = 3 \tabularnewline
+\hline 7 & JW moist, balanced, with \texttt{ORO\_ID} = 3 \tabularnewline
 \hline
 \end{tabular}
 \caption{Definition of test IDs.}

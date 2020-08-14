@@ -59,8 +59,10 @@ int main(int argc, char *argv[])
 		ORO_ID = 0;
 	if (TEST_ID == 1)
 		ORO_ID = 1;
-	if (TEST_ID > 1)
+	if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
 		ORO_ID = 2;
+	if (TEST_ID == 6 || TEST_ID == 7)
+		ORO_ID = 3;
     double *direction = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *latitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
     double *longitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -166,7 +168,7 @@ int main(int argc, char *argv[])
             }
         }
         // JW atmosphere
-        if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
+        if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6)
         {
             find_pressure_value(lat, z_height, &pressure_value);
             pressure[i] = pressure_value;
@@ -176,7 +178,7 @@ int main(int argc, char *argv[])
             if (eta >= ETA_T)
             {
                 temperature[i] = T_0*pow(eta, R_D*GAMMA/G) + T_perturb;
-                if (TEST_ID == 4 || TEST_ID == 5)
+                if (TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 7)
                     rel_humidity[i] = 0.7;
                 else
                     rel_humidity[i] = 0;
@@ -227,7 +229,7 @@ int main(int argc, char *argv[])
             if (TEST_ID == 0 || TEST_ID == 1)
                 wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = 0;
             // JW test: specific wind field
-            if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
+            if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6 || TEST_ID == 7)
             {
                 find_pressure_value(lat, z_height, &pressure_value);
                 eta = pressure_value/P_0;

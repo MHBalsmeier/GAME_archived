@@ -8,8 +8,10 @@
 # 3:	JW test, dry, perturbed
 # 4:	JW test, moist, balanced
 # 5:	JW test, moist, perturbed
+# 6:	JW test, dry, balanced, with oro_id = 3
+# 7:	JW test, moist, balanced, with oro_id = 3
 
-test_id=0
+test_id=7
 # relevant only for MPI
 number_of_cpus=1
 # relevant only for OMP
