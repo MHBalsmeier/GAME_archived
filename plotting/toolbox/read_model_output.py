@@ -1,4 +1,4 @@
-import toolbox.game_grid_generator as gametrafo;
+import toolbox.grid_reader as grid_reader;
 import eccodes as ec;
 import numpy as np;
 from colorama import Fore;
@@ -22,7 +22,7 @@ def gid_read_values(filename, short_name, step, level):
     ec.codes_release(gid);
     return return_array;
     
-def fetch_model_output(input_file, step, short_name, level, res_id, grid_props_file):
+def fetch_model_output(input_file, step, short_name, level, grid_props_file):
     file = open(input_file, "rb");
     gid = ec.codes_grib_new_from_file(file);
     file.close();
@@ -30,7 +30,7 @@ def fetch_model_output(input_file, step, short_name, level, res_id, grid_props_f
     variable_name_suffix = "scalar";
     if short_name == "u" or short_name == "v" or short_name == "vo" or short_name == "10u" or short_name == "10v" or short_name == "gust":
         variable_name_suffix = "vector";
-    lat, lon = gametrafo.trafo_scalar(res_id, grid_props_file, "latitude_" + variable_name_suffix, "longitude_" + variable_name_suffix);
+    lat, lon = grid_reader.read_grid_props(grid_props_file, "latitude_" + variable_name_suffix, "longitude_" + variable_name_suffix);
     return lat, lon, values;
     
     

@@ -198,6 +198,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
                 ECCERR(retval);
             if ((retval = codes_set_double_array(handle_mslp, "values", mslp, NO_OF_SCALARS_H)))
                 ECCERR(retval);
+            if ((retval = codes_write_message(handle_mslp, OUTPUT_FILE, "a")))
+                ECCERR(retval);
 			codes_handle_delete(handle_mslp);
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_surface_p = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
