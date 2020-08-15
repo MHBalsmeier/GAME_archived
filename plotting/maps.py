@@ -21,13 +21,12 @@ plot_interval = int(sys.argv[2]);
 level = int(sys.argv[3]);
 short_name = sys.argv[4];
 grid_props_file = sys.argv[5];
-save_folder = sys.argv[6];
+save_directory = sys.argv[6];
 grib_dir_name = sys.argv[7];
 projection = sys.argv[8];
 run_id = sys.argv[9];
 uniform_range = int(sys.argv[10]);
-coastlines_on = int(sys.argv[11]);
-scope = sys.argv[12];
+scope = sys.argv[11];
 
 # default values
 shift = 0;
@@ -250,17 +249,15 @@ for i in range(int(max_interval/plot_interval) + 1):
 		linewidths_vector[big_index] = 1.5*basic_width;
 		mesh = iplt.contour(new_cube, levels_vector, linewidths = linewidths_vector, colors = "black");
 		plt.clabel(mesh, inline = True, fmt = "%1.0f", fontsize = 12, colors = "k");
-	if (coastlines_on == 1):
-		if scope == "World":
-			ax.coastlines(color = "grey");
-		else:
+	if (scope != "World"):
 			ax.add_feature(cfeature.LAND);
-			ax.add_feature(cfeature.COASTLINE);
-			if (scope == "US"):
-				states_provinces = cfeature.NaturalEarthFeature(category = "cultural", name = "admin_1_states_provinces_lines", scale = "10m", facecolor = "none");
-				ax.add_feature(states_provinces, edgecolor = "gray");
-			countries = cfeature.NaturalEarthFeature(category = "cultural", name = "admin_0_countries", scale = "10m", facecolor = "none");
-			ax.add_feature(countries, edgecolor = "gray");
+			ax.add_feature(cfeature.OCEAN);
+	if (scope == "CONUS"):
+		states_provinces = cfeature.NaturalEarthFeature(category = "cultural", name = "admin_1_states_provinces_lines", scale = "10m", facecolor = "none");
+		ax.add_feature(states_provinces, edgecolor = "gray");
+	if (scope != "World"):
+		countries = cfeature.NaturalEarthFeature(category = "cultural", name = "admin_0_countries", scale = "10m", facecolor = "none");
+		ax.add_feature(countries, edgecolor = "black");
 	time_after_init_title = time_after_init;
 	if disp_time_in_hr == 1:
 		time_after_init_title = int(time_after_init/3600);
@@ -270,7 +267,7 @@ for i in range(int(max_interval/plot_interval) + 1):
 		textstr = variable_name + "\n" + "init + " + str(time_after_init_title) + " " + time_unit_string;
 	ob = offsetbox.AnchoredText(textstr, loc = 3);
 	ax.add_artist(ob);
-	fig.savefig(save_folder + "/" + savename + "+" + str(time_after_init) + "s.png", dpi = 500, bbox_inches = "tight");
+	fig.savefig(save_directory + "/" + savename + "+" + str(time_after_init) + "s.png", dpi = 500, bbox_inches = "tight");
 	plt.close();
 	print("done");
 
