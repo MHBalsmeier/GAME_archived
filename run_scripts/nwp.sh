@@ -19,6 +19,7 @@ rad_on=1
 radiation_delta_t=10800
 write_out_mass_dry_integral=0
 write_out_entropy_gas_integral=0
+write_out_linearized_entropy_gas_integral=0
 write_out_energy_integral=0
 # relevant only for OMP
 export OMP_NUM_THREADS=1

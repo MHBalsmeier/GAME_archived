@@ -1129,6 +1129,10 @@ int write_out_integral(State *state_write_out, double t_write, char output_direc
    		sprintf(INTEGRAL_FILE_PRE, "%s/%s", output_directory, "entropy");
     if (integral_id == 2)
    		sprintf(INTEGRAL_FILE_PRE, "%s/%s", output_directory, "energy");
+    if (integral_id == 2)
+   		sprintf(INTEGRAL_FILE_PRE, "%s/%s", output_directory, "energy");
+    if (integral_id == 3)
+   		sprintf(INTEGRAL_FILE_PRE, "%s/%s", output_directory, "linearized_entropy");
     INTEGRAL_FILE_LENGTH = strlen(INTEGRAL_FILE_PRE);
     char *INTEGRAL_FILE = malloc((INTEGRAL_FILE_LENGTH + 1)*sizeof(char));
     sprintf(INTEGRAL_FILE, "%s", INTEGRAL_FILE_PRE);
@@ -1165,6 +1169,22 @@ int write_out_integral(State *state_write_out, double t_write, char output_direc
     	global_scalar_integrator(*int_energy_density, grid, &internal_integral);
     	fprintf(global_integral_file, "%lf\t%lf\t%lf\t%lf\n", t_write, kinetic_integral, potential_integral, C_D_V*internal_integral);
     	free(int_energy_density);
+    	fclose(global_integral_file);
+    }
+    if (integral_id == 3)
+    {
+    	global_integral_file = fopen(INTEGRAL_FILE, "a");
+    	Scalar_field *pot_temp = malloc(sizeof(Scalar_field));
+		pot_temp_diagnostics(state_write_out, *pot_temp);
+    	Scalar_field *linear_entropy = malloc(sizeof(Scalar_field));
+    	for (int i = 0; i < NO_OF_SCALARS; ++i)
+    	{
+    		(*linear_entropy)[i] = C_D_P*state_write_out -> density_dry[i]*(*pot_temp)[i];
+    	}
+    	global_scalar_integrator(*linear_entropy, grid, &global_integral);
+    	fprintf(global_integral_file, "%lf\t%lf\n", t_write, global_integral);
+    	free(linear_entropy);
+    	free(pot_temp);
     	fclose(global_integral_file);
     }
     free(INTEGRAL_FILE);

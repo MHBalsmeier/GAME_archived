@@ -79,6 +79,8 @@ int main(int argc, char *argv[])
     len = strlen(argv[22]);
     char *RUN_ID = malloc((len + 1)*sizeof(char));
     strcpy(RUN_ID, argv[22]);
+    int write_out_linearized_entropy_integral;
+    write_out_linearized_entropy_integral = strtod(argv[23], NULL);
     double t_init;
     find_time_coord(year, month, day, hour, 0, 0, 0, &t_init);
     char *stars  = malloc(83*sizeof(char));
@@ -210,6 +212,8 @@ int main(int argc, char *argv[])
 		write_out_integral(state_old, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 1);
     if (write_out_energy_integral == 1)
 		write_out_integral(state_old, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
+    if (write_out_linearized_entropy_integral == 1)
+		write_out_integral(state_old, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 3);
 	Scalar_field *radiation_tendency = calloc(1, sizeof(Scalar_field));
     if (config_info -> rad_on == 1)
     {
@@ -236,6 +240,8 @@ int main(int argc, char *argv[])
 		write_out_integral(state_new, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 1);
     if (write_out_energy_integral == 1)
 		write_out_integral(state_new, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
+    if (write_out_linearized_entropy_integral == 1)
+		write_out_integral(state_old, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 3);
 	t_write_integral += delta_t;
     State *state_write = calloc(1, sizeof(State));
     double speed;
@@ -263,6 +269,8 @@ int main(int argc, char *argv[])
 			write_out_integral(state_new, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 1);
 		if (write_out_energy_integral == 1)
 			write_out_integral(state_new, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
+		if (write_out_linearized_entropy_integral == 1)
+			write_out_integral(state_old, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 3);
 		t_write_integral += delta_t;
         if(t_0 + delta_t >= t_write && t_0 <= t_write)
             interpolation_t(state_old, state_new, state_write, t_0, t_0 + delta_t, t_write);
