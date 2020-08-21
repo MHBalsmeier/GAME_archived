@@ -1,5 +1,5 @@
 /*
-This source file is part of the Global Atmospheric Modeling Framework (GAME), which is released under the MIT license.
+This source file is part of the General Atmospheric Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/MHBalsmeier/game
 Here, vorticities are calculated. The word "vorticity" hereby refers to both vertical and tangential components.
 */
