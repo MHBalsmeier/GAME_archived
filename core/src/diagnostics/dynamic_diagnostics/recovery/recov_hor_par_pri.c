@@ -1,5 +1,5 @@
 /*
-This source file is part of the General Atmospheric Modeling Framework (GAME), which is released under the MIT license.
+This source file is part of the General Geophysical Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/MHBalsmeier/game
 This is a recovery function at horizontal vector points. If layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS, a vertical interpolation of the input field onto the desired z coordinate must be done.
 */
