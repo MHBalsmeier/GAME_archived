@@ -36,7 +36,7 @@ What GAME does not do and why:
 
 * It does not sacrifice physical consistency for a bit of speed up and tuning possibilities, like ICON-DWD does.
 * It does not contain an option for calculations in 2D, on the plane, in vertical columns or any other purely academic features. If schemes need to be tested individually, it can be done in an individual Python code.
-* It does not contain a nesting option. There are basically two ways this could be done: 1.) The MPAS way, where smooth transitions between coarser and finer mesh regions are possible, minimizing numerical noise. However, the global time step is bound by the smallest grid distance, which is unefficicent in coarser mesh regions. 2.) The ICON-DWD way, where a two-step nesting option exists and a smaller time step can be used only in the finer domain. This, however, leads to numerical noise. In my view one should use a global model with a uniform resolution and then simply regional models in specific areas based on rectangular C grids like COSMO, also with uniform resolutions.
+* It does not contain a nesting option. There are basically two ways this could be done: 1.) The MPAS way, where smooth transitions between coarser and finer mesh regions are possible, minimizing numerical noise. However, the global time step is bound by the smallest grid distance, which is unefficicent in coarser mesh regions. 2.) The ICON-DWD way, where a two-step nesting option exists and a smaller time step can be used only in the finer domain. This, however, leads to numerical noise. In my view one should use a global model with a uniform resolution and then simply regional models in specific areas.
 
 Things to be done:
 
