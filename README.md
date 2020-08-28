@@ -62,15 +62,14 @@ The handbook of the model can be found in the subdirectory handbook. It contains
 
 ## Prerequisites
 
-* geos95 (https://github.com/MHBalsmeier/geos95, only for grid generator)
+* [geos95](https://github.com/MHBalsmeier/geos95, only for grid generator)
 * netcdf library
-* OpenMPI
-* OpenMP
 * eccodes library (installation manual: https://mhbalsmeier.github.io/tutorials/eccodes_on_ubuntu.html)
 * CMake
-* atmostracers (https://github.com/MHBalsmeier/atmostracers)
-* rte-rrtmgp-c (https://github.com/MHBalsmeier/rte-rrtmgp-c)
+* [atmostracers](https://github.com/MHBalsmeier/atmostracers)
+* [rte-rrtmgp-c](https://github.com/MHBalsmeier/rte-rrtmgp-c)
 * Python (only for the plotting routines, which are of course not part of the actual model)
+* OpenMPI (not yet)
 
 ## Installing the model
 
