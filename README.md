@@ -52,6 +52,8 @@ The handbook of the model can be found in the subdirectory handbook. It contains
 
 ## Dependencies
 
+Everything is easy and quick to install.
+
 * [geos95](https://github.com/MHBalsmeier/geos95)
 * netcdf library
 * eccodes library (installation manual: https://mhbalsmeier.github.io/tutorials/eccodes_on_ubuntu.html)
