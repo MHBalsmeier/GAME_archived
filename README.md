@@ -50,7 +50,7 @@ The documentation can be found in the subdirectory doc. It contains an overview 
 
 The handbook of the model can be found in the subdirectory handbook. It contains information on how to generate necessary files like grid files and input data and explains how to compile, configure and run the model.
 
-## Prerequisites
+## Dependencies
 
 * [geos95](https://github.com/MHBalsmeier/geos95)
 * netcdf library
