@@ -73,7 +73,7 @@ The handbook of the model can be found in the subdirectory handbook. It contains
 
 ## Installing the model
 
-It will only run on Linux.
+It is recommended to run the model on Linux.
 
 ### Download
 
