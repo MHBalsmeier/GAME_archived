@@ -62,7 +62,7 @@ The handbook of the model can be found in the subdirectory handbook. It contains
 
 ## Prerequisites
 
-* [geos95](https://github.com/MHBalsmeier/geos95, only for grid generator)
+* [geos95](https://github.com/MHBalsmeier/geos95)
 * netcdf library
 * eccodes library (installation manual: https://mhbalsmeier.github.io/tutorials/eccodes_on_ubuntu.html)
 * CMake
