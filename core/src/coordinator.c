@@ -17,7 +17,6 @@ The main organizes the model, manages the time stepping, calls model output, col
 #include "diagnostics/diagnostics.h"
 #include "manage_time_stepping/manage_time_stepping.h"
 #include "rte-rrtmgp-c.h"
-#include "geos95.h"
 #include <mpi.h>
 
 int main(int argc, char *argv[])
@@ -81,8 +80,39 @@ int main(int argc, char *argv[])
     strcpy(RUN_ID, argv[22]);
     int write_out_linearized_entropy_integral;
     write_out_linearized_entropy_integral = strtod(argv[23], NULL);
-    double t_init;
-    find_time_coord(year, month, day, hour, 0, 0, 0, &t_init);
+    // determining the time stamp of 2000-01-01
+    struct tm offset_t, *p_offset;
+    time_t offset_time_pre;
+    offset_t.tm_year = 2000 - 1900;
+    offset_t.tm_mon = 0;
+    offset_t.tm_mday = 1;
+    offset_t.tm_hour = 0;
+    offset_t.tm_min = 0;
+    offset_t.tm_sec = 0;
+    offset_t.tm_isdst = -1;
+    offset_time_pre = mktime(&offset_t);
+    // this is necessary for conversion to UTC
+    p_offset = gmtime(&offset_time_pre);
+    offset_t = *p_offset;
+    offset_time_pre = mktime(&offset_t);
+    double offset_time = (double) offset_time_pre;
+    // determining the time stamp of the initialization
+    struct tm init_t, *p_init;
+    time_t init_time_pre;
+    init_t.tm_year = year - 1900;
+    init_t.tm_mon = month - 1;
+    init_t.tm_mday = day;
+    init_t.tm_hour = hour;
+    init_t.tm_min = 0;
+    init_t.tm_sec = 0;
+    init_t.tm_isdst = -1;
+    init_time_pre = mktime(&init_t);
+    // this is necessary for conversion to UTC
+    p_init = gmtime(&init_time_pre);
+    init_t = *p_init;
+    init_time_pre = mktime(&init_t);
+    // substracting the C time coordinate of 2000-01-01
+    double t_init = (double) init_time_pre - offset_time;
     char *stars  = malloc(83*sizeof(char));
     for (int i = 0; i < 81; ++i)
         stars[i] = '*';

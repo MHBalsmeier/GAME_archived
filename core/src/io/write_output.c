@@ -9,6 +9,7 @@ Here, the output is written to grib files and integrals are written to text file
 #include "../../../core/src/enum_and_typedefs.h"
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include "io.h"
 #include "../diagnostics/diagnostics.h"
 #include "../spatial_operators/spatial_operators.h"
@@ -23,11 +24,15 @@ double calc_std_dev(double [], int);
 
 int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, char output_directory[], Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[])
 {
+	// Diagnostics and forcings are primarily handed over for checks.
 	int write_out_divv_h;
 	get_write_settings(&write_out_divv_h);
-	// Diagnostics and forcings are primarily handed over for checks.
-    int init_year, init_month, init_day, init_hour, init_minute, init_second, init_microsecond;
-    find_hour_from_time_coord(t_init, &init_year, &init_month, &init_day, &init_hour, &init_minute, &init_second, &init_microsecond);
+    time_t t_init_tt = (time_t) t_init;
+    struct tm *p_init_time = gmtime(&t_init_tt);
+    int init_year = p_init_time -> tm_year;
+    int init_month = p_init_time -> tm_mon;
+    int init_day = p_init_time -> tm_mday;
+    int init_hour = p_init_time -> tm_hour;
     long data_date = 10000*init_year + 100*init_month + init_day;
     long data_time = init_hour;
     int OUTPUT_FILE_LENGTH = 300;

@@ -33,6 +33,53 @@ All physical quantities in this document are to be multiplied with their respect
 
 \newpage
 
+\chapter{Overview}
+\label{chap:overview}
+
+The \texttt{GAME} projects incorporates four different executables:
+
+\begin{itemize}
+\item \texttt{grid\_generator}, a program for creating model grids
+\item \texttt{orography\_generator}, a tool for creating orography files
+\item \texttt{test\_generator}, a tool for creating initialization states of test scenarios
+\item \texttt{game}, the model executable itself
+\end{itemize}
+
+\chapter{Installation}
+\label{chap:installation}
+
+\section{Dependencies}
+\label{sec:dependencies}
+
+The following dependencies must be installed before being able to successfully build the model:
+
+\begin{itemize}
+\item geos95 \url{https://github.com/MHBalsmeier/geos95}
+\item netcdf library
+\item eccodes library (installation manual: \url{https://mhbalsmeier.github.io/tutorials/eccodes_on_ubuntu.html})
+\item CMake
+\item atmostracers (\url{https://github.com/MHBalsmeier/atmostracers})
+\item rte-rrtmgp-c (\url{https://github.com/MHBalsmeier/rte-rrtmgp-c})
+\item Python (only for the plotting routines, which are of course not part of the actual model)
+\item OpenMPI (not yet)
+\end{itemize}
+
+\section{Building}
+\label{sec:building}
+
+\texttt{CMake} is used for building \texttt{GAME}. The building process is managed using the bash scripts in the directory \texttt{build\_scripts}. The following list gives an overview of the scripts residing in this directory:
+
+\begin{itemize}
+\item \texttt{debug.sh}: 
+\item \texttt{build.sh}: The installation directory is controlled by the variable \texttt{aim\_dir}.
+\item \texttt{install\_output.sh}: 
+\item \texttt{build\_install.sh}:
+\item \texttt{install\_plotting\_routines.sh}:
+\item \texttt{install\_run\_scripts.sh}: 
+\end{itemize}
+
+Scripts with the suffix \texttt{\_dev} are not different from the original scripts, they allow choosing a different installation directory for installations of test versions.
+
 \chapter{Running the model}
 \label{chap:running_the_model}
 

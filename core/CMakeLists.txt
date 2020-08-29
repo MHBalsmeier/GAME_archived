@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
-project(core VERSION 0.0)
+set(version_major 0)
+set(version_minor 1)
+set(version_patch 2)
+set(version ${version_major}.${version_minor}.${version_patch})
+project(game VERSION ${version})
 set(CMAKE_C_COMPILER mpicc)
 add_executable(
 game
