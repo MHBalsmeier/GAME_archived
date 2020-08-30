@@ -13,7 +13,6 @@
 \definecolor{table_green}{rgb}{0, 0.6, 0}
 \title{\texttt{GAME} Handbook}
 \author{\texttt{GAME} Development Team}
-\date{}
 \newcommand{\md}[1]{\frac{D#1}{Dt}}
 \newcommand{\omegabi}{\text{{\osgbi ω}}}
 \newcommand{\mubi}{\text{{\osgbi μ}}}
@@ -33,10 +32,14 @@ All physical quantities in this document are to be multiplied with their respect
 
 \newpage
 
+\tableofcontents
+
 \chapter{Overview}
 \label{chap:overview}
 
-The \texttt{GAME} projects incorporates four different executables:
+This is only the handbook (manual) of the \texttt{General Geophysical Modeling Framework}, it explains how to configure, compile and run (use) the model. For a scientific derivation of the model see the documentation and the literature cited therein. The source code of the project is maintained on github (\url{https://github.com/MHBalsmeier/game}), this is also the place to ask questions or report errors. It is never wrong to think a bit before you post something there.
+
+The \texttt{GAME} project incorporates four different executables:
 
 \begin{itemize}
 \item \texttt{grid\_generator}, a program for creating model grids
@@ -54,14 +57,14 @@ The \texttt{GAME} projects incorporates four different executables:
 The following dependencies must be installed before being able to successfully build the model:
 
 \begin{itemize}
-\item geos95 \url{https://github.com/MHBalsmeier/geos95}
-\item netcdf library
-\item eccodes library (installation manual: \url{https://mhbalsmeier.github.io/tutorials/eccodes_on_ubuntu.html})
-\item CMake
-\item atmostracers (\url{https://github.com/MHBalsmeier/atmostracers})
-\item rte-rrtmgp-c (\url{https://github.com/MHBalsmeier/rte-rrtmgp-c})
+\item geos95 \url{https://github.com/MHBalsmeier/geos95} for doing geospatial calculations
+\item netcdf library for writing netcdf files
+\item eccodes library (installation manual: \url{https://mhbalsmeier.github.io/tutorials/eccodes_on_ubuntu.html}) for writing grib files
+\item CMake, because it is used for the build process
+\item atmostracers (\url{https://github.com/MHBalsmeier/atmostracers}), an open-source libraries for calculating source terms for tracers in the atmosphere
+\item rte-rrtmgp-c (\url{https://github.com/MHBalsmeier/rte-rrtmgp-c}), a C binding to the atmospheric radiation scheme RTE+RRTMGP
 \item Python (only for the plotting routines, which are of course not part of the actual model)
-\item OpenMPI (not yet)
+\item OpenMPI (will be needed later for MPI parallelization, which is not yet implemented)
 \end{itemize}
 
 \section{Building}
@@ -71,14 +74,15 @@ The following dependencies must be installed before being able to successfully b
 
 \begin{itemize}
 \item \texttt{debug.sh}: 
-\item \texttt{build.sh}: The installation directory is controlled by the variable \texttt{aim\_dir}.
-\item \texttt{install\_output.sh}: 
-\item \texttt{build\_install.sh}:
-\item \texttt{install\_plotting\_routines.sh}:
-\item \texttt{install\_run\_scripts.sh}: 
+\item \texttt{build.sh}:  
+\item \texttt{build\_install.sh}: The installation directory is controlled by the variable \texttt{aim\_dir}.
+\item \texttt{install\_run\_scripts.sh}: Installs the run scripts to the installation directory.
+\item \texttt{install\_output.sh}: Creates an empty subdirectory for output in the installation directory. This has the effect of deleting what has previously been in the directory.
+\item \texttt{install\_plotting\_routines.sh}: Installs the plotting routines to the installation directory.
+\item \texttt{install\_everything.sh}: Executes all the other install scripts.
 \end{itemize}
 
-Scripts with the suffix \texttt{\_dev} are not different from the original scripts, they allow choosing a different installation directory for installations of test versions.
+Scripts with the suffix \texttt{\_dev} are not different from the original scripts, they only allow choosing a different installation directory for installations of test versions.
 
 \chapter{Running the model}
 \label{chap:running_the_model}
@@ -90,6 +94,8 @@ The configuration of the model must be set in three different files:
 \item The file \texttt{src/settings.c}: modify the characteristics of damping at the model top and diffusion.
 \item The run script: explanation below.
 \end{itemize}
+
+Since the files \texttt{src/enum\_and\_typedefs.h} and \texttt{src/settings.c} are part of the model's source code, the model must be recompiled if something is changed in them. Alternatively, one can compile several eecutables and name them according to their configuration.
 
 \lstinputlisting[language = Bash, caption = {Example input file.}, frame = on]{../run_scripts/jw_pert_moist.sh}\label{lst:input_file_example}
 
