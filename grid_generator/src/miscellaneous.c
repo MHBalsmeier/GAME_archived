@@ -50,11 +50,11 @@ int set_orography(int RES_ID, int ORO_ID, double z_surface[])
     	int retval, z_surface_id, ncid;
 		int ORO_FILE_LENGTH = 100;
 		char *ORO_FILE_PRE = malloc((ORO_FILE_LENGTH + 1)*sizeof(char));
-		sprintf(ORO_FILE_PRE, "../orography_generator/nc_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
+		sprintf(ORO_FILE_PRE, "../orography_generator/orographies/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
 		ORO_FILE_LENGTH = strlen(ORO_FILE_PRE);
 		free(ORO_FILE_PRE);
 		char *ORO_FILE = malloc((ORO_FILE_LENGTH + 1)*sizeof(char));
-		sprintf(ORO_FILE, "../orography_generator/nc_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);	    
+		sprintf(ORO_FILE, "../orography_generator/orographies/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);	    
 		if ((retval = nc_open(ORO_FILE, NC_NOWRITE, &ncid)))
 		    ERR(retval);
 		if ((retval = nc_inq_varid(ncid, "z_surface", &z_surface_id)))

@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     char STATISTICS_FILE_PRE[200];
     if (OPTIMIZE_BOOL == 1)
     {
-    	sprintf(OUTPUT_FILE_PRE, "nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
+    	sprintf(OUTPUT_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
     	sprintf(STATISTICS_FILE_PRE, "statistics/B%dL%dT%d_O%d_OL%d_SCVT.txt", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
 	}
 	else
@@ -78,18 +78,18 @@ int main(int argc, char *argv[])
 			if (SCALAR_H_FILE[strlen(SCALAR_H_FILE) - 1 - 6] == 'S' && SCALAR_H_FILE[strlen(SCALAR_H_FILE) - 1 - 5] == 'C' && 
 			SCALAR_H_FILE[strlen(SCALAR_H_FILE) - 1 - 4] == 'V' && SCALAR_H_FILE[strlen(SCALAR_H_FILE) - 1 - 3] == 'T')
 			{
-    			sprintf(OUTPUT_FILE_PRE, "nc_files/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
+    			sprintf(OUTPUT_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
     			sprintf(STATISTICS_FILE_PRE, "statistics/B%dL%dT%d_O%d_OL%d_SCVT.txt", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
 			}
     		else
     		{
-    			sprintf(OUTPUT_FILE_PRE, "nc_files/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
+    			sprintf(OUTPUT_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
     			sprintf(STATISTICS_FILE_PRE, "statistics/B%dL%dT%d_O%d_OL%d.txt", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
 			}
 		}
 		else
 		{
-    		sprintf(OUTPUT_FILE_PRE, "nc_files/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
+    		sprintf(OUTPUT_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
     		sprintf(STATISTICS_FILE_PRE, "statistics/B%dL%dT%d_O%d_OL%d.txt", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
 		}
 	}

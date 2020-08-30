@@ -42,21 +42,21 @@ int main(int argc, char *argv[])
    		printf("Error: oro_id must not be smaller than one or larger than 3.\n");
    		exit(1);
 	}
-	sprintf(OUTPUT_FILE_PRE, "nc_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
+	sprintf(OUTPUT_FILE_PRE, "orographies/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
 	OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
 	free(OUTPUT_FILE_PRE);
 	char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-	sprintf(OUTPUT_FILE, "nc_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
+	sprintf(OUTPUT_FILE, "orographies/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
 	int ncid, scalar_h_dimid, var_dimid, oro_id, latitude_scalar_id, longitude_scalar_id;
 	double *oro, latitude;
 	oro = malloc(NO_OF_SCALARS_H*sizeof(double));
     int GEO_PROP_FILE_LENGTH = 100;
     char *GEO_PROP_FILE_PRE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(GEO_PROP_FILE_PRE, "../grid_generator/nc_files/B%dL26T30000_O0_OL17_SCVT.nc", RES_ID);
+    sprintf(GEO_PROP_FILE_PRE, "../grid_generator/grids/B%dL26T30000_O0_OL17_SCVT.nc", RES_ID);
     GEO_PROP_FILE_LENGTH = strlen(GEO_PROP_FILE_PRE);
     free(GEO_PROP_FILE_PRE);
     char *GEO_PROP_FILE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(GEO_PROP_FILE, "../grid_generator/nc_files/B%dL26T30000_O0_OL17_SCVT.nc", RES_ID);
+    sprintf(GEO_PROP_FILE, "../grid_generator/grids/B%dL26T30000_O0_OL17_SCVT.nc", RES_ID);
 	int scalar_index, retval;
     double *latitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
     double *longitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
