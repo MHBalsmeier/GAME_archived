@@ -1,4 +1,7 @@
 aim_dir=~/compiled/game
+
+### END OF USUAL INPUT SECTION
+
 rm -r $aim_dir/core
 rm -r $aim_dir/input
 rm -r $aim_dir/grids

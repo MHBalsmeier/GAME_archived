@@ -42,7 +42,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     free(OUTPUT_FILE_PRE);
     char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
     sprintf(OUTPUT_FILE, "%s/%s+%ds.grb2", output_directory, RUN_ID, (int) (t_write - t_init));
-    char *SAMPLE_FILENAME = "./grids/grib_template.grb2";
+    char *SAMPLE_FILENAME = "./input/grib_template.grb2";
     FILE *SAMPLE_FILE;
     int err = 0;
     int retval;

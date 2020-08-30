@@ -1,8 +1,11 @@
+aim_dir=~/compiled/game
+
+### END OF USUAL INPUT SECTION
+
 echo installing plotting routines ...
-aim_dir=~/compiled/game/plotting
-if [ -d $aim_dir ]
+if [ -d $aim_dir/plotting ]
 then
-rm -r $aim_dir
+rm -r $aim_dir/plotting
 fi
-cp -r plotting $aim_dir
+cp -r plotting $aim_dir/plotting
 echo Plotting routines installed.

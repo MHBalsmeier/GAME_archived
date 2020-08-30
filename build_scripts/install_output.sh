@@ -1,8 +1,11 @@
+aim_dir=~/compiled/game
+
+### END OF USUAL INPUT SECTION
+
 echo installing output ...
-aim_dir=~/compiled/game/output
-if [ -d $aim_dir ]
+if [ -d $aim_dir/output ]
 then
-rm -r $aim_dir
+rm -r $aim_dir/output
 fi
-mkdir $aim_dir
+mkdir $aim_dir/output
 echo output installed.

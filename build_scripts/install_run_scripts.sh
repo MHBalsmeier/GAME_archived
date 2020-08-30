@@ -1,8 +1,11 @@
+aim_dir=~/compiled/game
+
+### END OF USUAL INPUT SECTION
+
 echo installing run scripts ...
-aim_dir=~/compiled/game/run_scripts
-if [ -d $aim_dir ]
+if [ -d $aim_dir/run_scripts ]
 then
-rm -r $aim_dir
+rm -r $aim_dir/run_scripts
 fi
-cp -r run_scripts $aim_dir
+cp -r run_scripts $aim_dir/run_scripts
 echo run scripts installed.

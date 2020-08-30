@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.8.25)  30 AUG 2020 08:11
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.5.21)  30 AUG 2020 21:50
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -331,7 +331,7 @@ Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 \bibhang=\skip78
 \blx@bcfin=\read2
 \blx@bcfout=\write3
-\blx@langwohyphens=\language8
+\blx@langwohyphens=\language85
 \c@mincomprange=\count317
 \c@maxcomprange=\count318
 \c@mincompwidth=\count319
@@ -920,7 +920,7 @@ Chapter 4.
 ]
 Chapter 5.
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <10> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 176.
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 178.
 [8
 
 ]
@@ -933,27 +933,26 @@ Package logreq Info: Writing requests to 'game_handbook.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 13212 strings out of 483130
- 218170 string characters out of 5963883
- 873602 words of memory out of 5000000
- 28058 multiletter control sequences out of 15000+600000
+ 13212 strings out of 481239
+ 218170 string characters out of 5920377
+ 878288 words of memory out of 5000000
+ 28293 multiletter control sequences out of 15000+600000
  582945 words of font info for 94 fonts, out of 8000000 for 9000
- 14 hyphenation exceptions out of 8191
+ 1141 hyphenation exceptions out of 8191
  38i,15n,51p,824b,1233s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc} </home/max/.texli
-ve2019/texmf-var/fonts/pk/ljfour/jknappen/ec/ectc1000.600pk> </home/max/.texliv
-e2019/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk> </home/max/.texlive
-2019/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1200.600pk> </home/max/.texlive2
-019/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1728.600pk></usr/share/texlive/te
-xmf-dist/fonts/type1/public/fourier/fourier-ml.pfb></usr/share/texlive/texmf-di
-st/fonts/type1/public/fourier/fourier-ms.pfb></usr/share/texlive/texmf-dist/fon
-ts/type1/urw/ncntrsbk/uncb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw
-/ncntrsbk/uncr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/un
-cri8a.pfb>
-Output written on game_handbook.pdf (10 pages, 80421 bytes).
+{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}{/usr/share/texmf/
+fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/share/texlive/texmf-dist/fonts/t
+ype1/public/fourier/fourier-ml.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
+ublic/fourier/fourier-ms.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftc
+1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1000.pfb></usr/share
+/texmf/fonts/type1/public/cm-super/sftt1200.pfb></usr/share/texmf/fonts/type1/p
+ublic/cm-super/sftt1728.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncnt
+rsbk/uncb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncr8a.
+pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncri8a.pfb>
+Output written on game_handbook.pdf (10 pages, 109765 bytes).
 PDF statistics:
- 144 PDF objects out of 1000 (max. 8388607)
- 56 compressed objects within 1 object stream
+ 75 PDF objects out of 1000 (max. 8388607)
+ 53 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
