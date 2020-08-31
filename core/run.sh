@@ -1,5 +1,4 @@
 #!/bin/bash
-
 time_string=$(date --utc +%Y%m%d%H%M%S)
 if [ $overwrite_run_id -eq 0 ]
 then
@@ -9,6 +8,18 @@ output_dir=$output_dir_base/$run_id
 if [ -d $output_dir ]
 then
 rm -r $output_dir
+fi
+if [ ! -f $grid_props_file ]
+then
+echo "The file $grid_props_file does not exist. Please create and install the grid file before running the model."
+echo "Aborting."
+return
+fi
+if [ ! -f $init_state_file ]
+then
+echo "The file $init_state_file does not exist. Please create and install the initialization state before running the model."
+echo "Aborting."
+return
 fi
 mkdir $output_dir
 if [ $nwp_mode -eq 1 ]
