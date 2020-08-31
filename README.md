@@ -70,7 +70,8 @@ It is recommended to run the model on Linux. We will not help people who have pr
 ### Download
 
 	git clone https://github.com/MHBalsmeier/game.git
-	./setup_build_directories.sh
+	cd game
+	./create_directories_for_large_files.sh
 
 ### Build and install
 

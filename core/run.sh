@@ -1,4 +1,5 @@
 #!/bin/bash
+
 time_string=$(date --utc +%Y%m%d%H%M%S)
 if [ $overwrite_run_id -eq 0 ]
 then
