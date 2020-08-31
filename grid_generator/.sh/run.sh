@@ -17,6 +17,11 @@ echo "Optimization is switched off."
 fi
 if [ $use_scalar_h_coords_file -eq 1 ]
 then
+if [ ! -f $scalar_h_coords_file ]
+then
+echo "$scalar_h_coords_file does not exist."
+echo "Aborting."
+fi
 echo "Horizontal coordinates of the generating points (the scalar points in terms of the model) will be read from file $scalar_h_coords_file."
 fi
 echo ""
