@@ -18,3 +18,4 @@ int scalar_times_vector_vector_h_v(Scalar_field, Vector_field, Vector_field, Vec
 int linear_combine_two_states(State *, State *, State *, double, double);
 int momentum_diff_diss(Vector_field, Scalar_field, Vector_field, Scalar_field, Config_info *, Grid *);
 int grad_v_scalar_column(double [], double [], int, Grid *);
+int inner_product(Vector_field, Vector_field, Scalar_field, Grid *);
