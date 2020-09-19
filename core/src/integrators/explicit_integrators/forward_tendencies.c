@@ -24,12 +24,15 @@ int forward_tendencies(State *current_state, State *state_tendency, Grid *grid, 
 	}
     if (no_step_rk == 2)
     {
-		momentum_diff_diss(current_state -> velocity_gas, current_state -> density_dry, diffusion_info -> friction_acc, diffusion_info -> heating_diss, config_info, grid);
+	if (config_info -> momentum_diff_h == 1 || config_info -> momentum_diff_v == 1)
+	{
+		momentum_diff_diss(current_state, diagnostics, diffusion_info, config_info, grid);
 		// In the presence of condensates, the friction acceleration needs to get a deceleration factor.
 		if (config_info -> tracers_on == 1)
 		{
 			scalar_times_vector(diffusion_info -> pressure_gradient_decel_factor, diffusion_info -> friction_acc, diffusion_info -> friction_acc, grid);
 		}
+	}
     }
 	// Only the horizontal momentum is a forward tendency.
 	integrate_momentum(current_state, state_tendency, grid, dualgrid, diagnostics, forcings, diffusion_info, config_info, no_step_rk);

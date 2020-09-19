@@ -139,6 +139,7 @@ Scalar_field pressure_gradient_1_dry_prefactor;
 Scalar_field pressure_gradient_1_vapour_prefactor;
 Scalar_field temp_gas_explicit;
 Curl_field pot_vort;
+Scalar_field c_h_v_field;
 Scalar_field c_h_p_field;
 Scalar_field e_kin_h;
 // nabla h
