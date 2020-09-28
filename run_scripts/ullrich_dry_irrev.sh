@@ -1,5 +1,6 @@
 #!/bin/bash
-
+shopt -s expand_aliases
+source ~/.bashrc
 operator=MHB
 overwrite_run_id=1
 run_id=jw_pert_dry_irrev

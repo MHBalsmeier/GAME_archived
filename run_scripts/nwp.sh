@@ -1,5 +1,6 @@
 #!/bin/bash
-
+shopt -s expand_aliases
+source ~/.bashrc
 operator=MHB
 overwrite_run_id=1
 source run_configs/.sh/determine_latest_synop_time.sh
