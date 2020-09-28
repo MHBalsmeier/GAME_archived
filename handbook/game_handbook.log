@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.5.21)  30 AUG 2020 21:50
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.9.3)  28 SEP 2020 13:23
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -908,7 +908,7 @@ File: lstlang1.sty 2019/09/10 1.8c listings language file
 (/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2019/09/10 1.8c listings language file
 )
-(../run_scripts/jw_pert_moist.sh
+(../run_scripts/ullrich_moist.sh
 LaTeX Font Info:    Font shape `T1/fnc/m/it' will be
 (Font)              scaled to size 9.29993pt on input line 1.
 ) [5
@@ -933,10 +933,10 @@ Package logreq Info: Writing requests to 'game_handbook.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 13212 strings out of 481239
- 218170 string characters out of 5920377
- 878288 words of memory out of 5000000
- 28293 multiletter control sequences out of 15000+600000
+ 13211 strings out of 481239
+ 218148 string characters out of 5920378
+ 878289 words of memory out of 5000000
+ 28292 multiletter control sequences out of 15000+600000
  582945 words of font info for 94 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  38i,15n,51p,824b,1233s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -949,7 +949,7 @@ ublic/fourier/fourier-ms.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftc
 ublic/cm-super/sftt1728.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncnt
 rsbk/uncb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncr8a.
 pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncri8a.pfb>
-Output written on game_handbook.pdf (10 pages, 109765 bytes).
+Output written on game_handbook.pdf (10 pages, 109892 bytes).
 PDF statistics:
  75 PDF objects out of 1000 (max. 8388607)
  53 compressed objects within 1 object stream

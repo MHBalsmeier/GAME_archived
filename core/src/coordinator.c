@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     strcpy(OUTPUT_FOLDER, argv[5]);
     double cfl_margin = strtof(argv[6], NULL);
     Config_info *config_info = calloc(1, sizeof(Config_info));
-    config_info -> momentum_diff_h = strtod(argv[7], NULL);
+    config_info -> momentum_diff = strtod(argv[7], NULL);
     config_info -> rad_on = strtod(argv[8], NULL);
     config_info -> tracers_on = strtod(argv[9], NULL);
     len = strlen(argv[10]);
@@ -73,13 +73,12 @@ int main(int argc, char *argv[])
     day = strtod(argv[18], NULL);
     int hour;
     hour = strtod(argv[19], NULL);
-    config_info -> momentum_diff_v = strtod(argv[20], NULL);
-    config_info -> temperature_diff_v = strtod(argv[21], NULL);
-    len = strlen(argv[22]);
+    config_info -> temperature_diff_v = strtod(argv[20], NULL);
+    len = strlen(argv[21]);
     char *RUN_ID = malloc((len + 1)*sizeof(char));
-    strcpy(RUN_ID, argv[22]);
+    strcpy(RUN_ID, argv[21]);
     int write_out_linearized_entropy_integral;
-    write_out_linearized_entropy_integral = strtod(argv[23], NULL);
+    write_out_linearized_entropy_integral = strtod(argv[22], NULL);
     // determining the time stamp of 2000-01-01
     struct tm offset_t, *p_offset;
     time_t offset_time_pre;
@@ -182,21 +181,13 @@ int main(int argc, char *argv[])
 	{
 		printf("Vertical temperature diffusion is turned on.\n");
 	}
-	if (config_info -> momentum_diff_h == 0)
+	if (config_info -> momentum_diff == 0)
 	{
-		printf("Horizontal momentum diffusion is turned off.\n");
+		printf("Momentum diffusion is turned off.\n");
 	}
 	else
 	{
 		printf("Horizontal momentum diffusion is turned on.\n");
-	}
-	if (config_info -> momentum_diff_v == 0)
-	{
-		printf("Vertical momentum diffusion is turned off.\n");
-	}
-	else
-	{
-		printf("Vertical momentum diffusion is turned on.\n");
 	}
 	printf("reading grid data and checking ... ");
     set_grid_properties(grid, dualgrid, GEO_PROP_FILE);

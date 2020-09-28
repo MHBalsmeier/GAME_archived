@@ -24,7 +24,7 @@ int forward_tendencies(State *current_state, State *state_tendency, Grid *grid, 
 	}
     if (no_step_rk == 2)
     {
-	if (config_info -> momentum_diff_h == 1 || config_info -> momentum_diff_v == 1)
+	if (config_info -> momentum_diff == 1)
 	{
 		momentum_diff_diss(current_state, diagnostics, diffusion_info, config_info, grid);
 		// In the presence of condensates, the friction acceleration needs to get a deceleration factor.

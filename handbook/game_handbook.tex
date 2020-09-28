@@ -99,7 +99,7 @@ The configuration of the model must be set in three different files:
 
 Since the files \texttt{src/enum\_and\_typedefs.h} and \texttt{src/settings.c} are part of the model's source code, the model must be recompiled if something is changed in them. Alternatively, one can compile several eecutables and name them according to their configuration.
 
-\lstinputlisting[language = Bash, caption = {Example input file.}, frame = on]{../run_scripts/jw_pert_moist.sh}\label{lst:input_file_example}
+\lstinputlisting[language = Bash, caption = {Example input file.}, frame = on]{../run_scripts/ullrich_moist.sh}\label{lst:input_file_example}
 
 Listing \ref{lst:input_file_example} is an example of an input file. Table \ref{tab:input_file_explanation} explains the meanings of the variables.
 
@@ -204,13 +204,17 @@ These files are stored in the directory \texttt{orography\_generator/real}. An i
 \begin{tabular}{|>{\centering}p{4.0 cm}|>{\centering}p{8 cm}|}
 \hline \textbf{\texttt{TEST\_ID}} & \textbf{Description} \tabularnewline
 \hline\hline 0 & standard atmosphere \tabularnewline
-\hline\hline 1 & standard atmosphere with Gaussian mountain (\texttt{ORO\_ID} = 2) \tabularnewline
-\hline\hline 2 & JW dry unperturbed \tabularnewline
+\hline 1 & standard atmosphere with Gaussian mountain (\texttt{ORO\_ID} = 2) \tabularnewline
+\hline 2 & JW dry unperturbed \tabularnewline
 \hline 3 & JW dry perturbed \tabularnewline
 \hline 4 & JW moist unperturbed \tabularnewline
 \hline 5 & JW moist perturbed \tabularnewline
 \hline 6 & JW dry, balanced, with \texttt{ORO\_ID} = 3 \tabularnewline
 \hline 7 & JW moist, balanced, with \texttt{ORO\_ID} = 3 \tabularnewline
+\hline 8 & Ullrich dry \tabularnewline
+\hline 9 & Ullrich moist \tabularnewline
+\hline 10 & Ullrich dry with \texttt{ORO\_ID} = 3 \tabularnewline
+\hline 11 & Ullrich moist with \texttt{ORO\_ID} = 3 \tabularnewline
 \hline
 \end{tabular}
 \caption{Definition of test IDs.}

@@ -2,18 +2,17 @@
 
 operator=MHB
 overwrite_run_id=1
-run_id=jw_bal_dry_rev
+run_id=jw_pert_dry_irrev
 run_span=43200
 write_out_interval=900
 grid_props_file=grids/B6L26T30000_O2_OL17_SCVT.nc
-init_state_filename=test_2_B6L26T30000_O2_OL17_SCVT.nc
+init_state_filename=test_8_B6L26T30000_O2_OL17_SCVT.nc
 init_state_file=input/$init_state_filename
 output_dir_base=output
 cfl_margin=0.0
-temperature_diff_h=0
-temperature_diff_v=0
-momentum_diff_h=0
-momentum_diff_v=0
+temperature_diff_h=1
+temperature_diff_v=1
+momentum_diff=1
 tracers_on=0
 rad_on=0
 radiation_delta_t=3600
