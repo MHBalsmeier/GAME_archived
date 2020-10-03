@@ -26,11 +26,11 @@ src/spatial_operators/scalar_times_vector.c
 src/spatial_operators/gradient_operators.c
 src/spatial_operators/kinetic_energy.c
 src/diagnostics/thermodynamic_diagnostics/thermodynamic_diagnostics.c
-src/diagnostics/dynamic_diagnostics/recovery/vertical_coriolis_gen.c
-src/diagnostics/dynamic_diagnostics/recovery/trsk_modified.c
-src/diagnostics/dynamic_diagnostics/recovery/recov_hor_ver_pri.c
-src/diagnostics/dynamic_diagnostics/recovery/recov_hor_par_pri.c
-src/diagnostics/dynamic_diagnostics/recovery/recov_primal2dual.c
+src/diagnostics/dynamic_diagnostics/vertical_coriolis_gen.c
+src/diagnostics/dynamic_diagnostics/trsk_modified.c
+src/diagnostics/dynamic_diagnostics/recov_hor_ver_pri.c
+src/diagnostics/dynamic_diagnostics/recov_hor_par_pri.c
+src/diagnostics/dynamic_diagnostics/recov_primal2dual.c
 src/diagnostics/dynamic_diagnostics/ricci.c
 src/diagnostics/irreversible_diagnostics/diffusion_diagnostics.c
 src/diagnostics/output_diagnostics/global_scalar_integral.c

@@ -386,7 +386,7 @@ int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid)
 void grid_check_failed()
 {
     printf("failed\n");
-    exit(2);
+    exit(0);
 }
 
 

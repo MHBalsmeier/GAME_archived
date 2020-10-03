@@ -3,8 +3,8 @@ This source file is part of the General Geophysical Modeling Framework (GAME), w
 Github repository: https://github.com/MHBalsmeier/game
 */
 
-#include "../../../enum_and_typedefs.h"
-#include "../../diagnostics.h"
+#include "../../enum_and_typedefs.h"
+#include "../diagnostics.h"
 #include <stdio.h>
 
 int vertical_coriolis_gen(Vector_field in_field_0, Curl_field in_field_1, int layer_index, int h_index, double *component, Grid *grid)

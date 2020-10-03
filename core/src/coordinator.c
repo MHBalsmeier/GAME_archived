@@ -36,49 +36,95 @@ int main(int argc, char *argv[])
     if (WRITE_OUT_INTERVAL < 900)
     {
     	printf("It is WRITE_OUT_INTERVAL < 900.\n");
-    	exit(1);
+    	printf("Aborting.\n");
+    	exit(0);
     }
     free(WRITE_OUT_INTERVAL_PRE);
-    len = strlen(argv[3]);
-    char *GEO_PROP_FILE = malloc((len + 1)*sizeof(char));
-    strcpy(GEO_PROP_FILE, argv[3]);
-    len = strlen(argv[4]);
-    char *INIT_STATE_FILE = malloc((len + 1)*sizeof(char));
-    strcpy(INIT_STATE_FILE, argv[4]);
-    len = strlen(argv[5]);
-    char *OUTPUT_FOLDER = malloc((len + 1)*sizeof(char));
-    strcpy(OUTPUT_FOLDER, argv[5]);
-    double cfl_margin = strtof(argv[6], NULL);
+    int res_id_input;
+    res_id_input = strtod(argv[3], NULL);
+    if (res_id_input != RES_ID)
+    {
+    	printf("You demanded res_id = %d in your input file, but the model has been compiled with RES_ID = %d.\n", res_id_input, RES_ID);
+    	printf("Recompile with RES_ID = %d or choose an executable which has been compiled with RES_ID = %d.\n", res_id_input, res_id_input);
+    	printf("Aborting.\n");
+    	exit(0);
+    }
+    int no_of_layers_input;
+	no_of_layers_input = strtod(argv[4], NULL);
+    if (no_of_layers_input != NO_OF_LAYERS)
+    {
+    	printf("You demanded no_of_layers = %d in your input file, but the model has been compiled with NO_OF_LAYERS = %d.\n", no_of_layers_input, NO_OF_LAYERS);
+    	printf("Recompile with NO_OF_LAYERS = %d or choose an executable which has been compiled with NO_OF_LAYERS = %d.\n", no_of_layers_input, no_of_layers_input);
+    	printf("Aborting.\n");
+    	exit(0);
+    }
+    double cfl_margin = strtof(argv[5], NULL);
     Config_info *config_info = calloc(1, sizeof(Config_info));
-    config_info -> momentum_diff = strtod(argv[7], NULL);
-    config_info -> rad_on = strtod(argv[8], NULL);
-    config_info -> tracers_on = strtod(argv[9], NULL);
-    len = strlen(argv[10]);
+    config_info -> momentum_diff = strtod(argv[6], NULL);
+    config_info -> rad_on = strtod(argv[7], NULL);
+    config_info -> tracers_on = strtod(argv[8], NULL);
+    len = strlen(argv[9]);
     char *OPERATOR = malloc((len + 1)*sizeof(char));
-    strcpy(OPERATOR, argv[10]);
+    strcpy(OPERATOR, argv[9]);
     int write_out_dry_mass_integral;
-    write_out_dry_mass_integral = strtod(argv[11], NULL);
+    write_out_dry_mass_integral = strtod(argv[10], NULL);
     int write_out_entropy_integral; 
-    write_out_entropy_integral = strtod(argv[12], NULL);
+    write_out_entropy_integral = strtod(argv[11], NULL);
     int write_out_energy_integral;
-    write_out_energy_integral = strtod(argv[13], NULL);
-    config_info -> temperature_diff_h = strtod(argv[14], NULL);
+    write_out_energy_integral = strtod(argv[12], NULL);
+    config_info -> temperature_diff_h = strtod(argv[13], NULL);
     double radiation_delta_t;
-    radiation_delta_t = strtof(argv[15], NULL);
+    radiation_delta_t = strtof(argv[14], NULL);
     int year;
-    year = strtod(argv[16], NULL);
+    year = strtod(argv[15], NULL);
+    printf("%d\n", year);
     int month;
-    month = strtod(argv[17], NULL);
+    month = strtod(argv[16], NULL);
     int day;
-    day = strtod(argv[18], NULL);
+    day = strtod(argv[17], NULL);
     int hour;
-    hour = strtod(argv[19], NULL);
-    config_info -> temperature_diff_v = strtod(argv[20], NULL);
-    len = strlen(argv[21]);
+    hour = strtod(argv[18], NULL);
+    config_info -> temperature_diff_v = strtod(argv[19], NULL);
+    len = strlen(argv[20]);
     char *RUN_ID = malloc((len + 1)*sizeof(char));
-    strcpy(RUN_ID, argv[21]);
+    strcpy(RUN_ID, argv[20]);
     int write_out_linearized_entropy_integral;
-    write_out_linearized_entropy_integral = strtod(argv[22], NULL);
+    write_out_linearized_entropy_integral = strtod(argv[21], NULL);
+    int toa;
+	toa = strtod(argv[22], NULL);
+    int no_of_oro_layers_input;
+	no_of_oro_layers_input = strtod(argv[23], NULL);
+    if (no_of_oro_layers_input != NO_OF_ORO_LAYERS)
+    {
+    	printf("You demanded no_of_oro_layers = %d in your input file, but the model has been compiled with NO_OF_ORO_LAYERS = %d.\n", no_of_oro_layers_input, NO_OF_ORO_LAYERS);
+    	printf("Recompile with NO_OF_ORO_LAYERS = %d or choose an executable which has been compiled with NO_OF_ORO_LAYERS = %d.\n", no_of_oro_layers_input, no_of_oro_layers_input);
+    	printf("Aborting.\n");
+    	exit(0);
+    }
+    int TEST_ID;
+    TEST_ID = strtod(argv[24], NULL);
+    // This sets the ORO_ID (orography ID) as a function of the TEST_ID.
+    int ORO_ID;	
+	if (TEST_ID == -1)
+		ORO_ID = 3;
+	if (TEST_ID == 0)
+		ORO_ID = 0;
+	if (TEST_ID == 1)
+		ORO_ID = 1;
+	if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
+		ORO_ID = 2;
+	if (TEST_ID == 6 || TEST_ID == 7)
+		ORO_ID = 3;
+	// Determining the name of the grid file from the RES_ID, NO_OF_LAYERS and so on.
+    char GEO_PROP_FILE_PRE[200];
+	sprintf(GEO_PROP_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, toa, ORO_ID, NO_OF_ORO_LAYERS);
+    char GEO_PROP_FILE[strlen(GEO_PROP_FILE_PRE) + 1];
+    strcpy(GEO_PROP_FILE, GEO_PROP_FILE_PRE);
+	// Determining the name of the init state file from the TEST_ID, RES_ID, NO_OF_LAYERS and so on.
+    char INIT_STATE_FILE_PRE[200];
+	sprintf(INIT_STATE_FILE_PRE, "input/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", TEST_ID, RES_ID, NO_OF_LAYERS, toa, ORO_ID, NO_OF_ORO_LAYERS);
+    char INIT_STATE_FILE[strlen(INIT_STATE_FILE_PRE) + 1];
+    strcpy(INIT_STATE_FILE, INIT_STATE_FILE_PRE);
     // determining the time stamp of 2000-01-01
     struct tm offset_t, *p_offset;
     time_t offset_time_pre;
@@ -112,6 +158,7 @@ int main(int argc, char *argv[])
     init_time_pre = mktime(&init_t);
     // substracting the C time coordinate of 2000-01-01
     double t_init = (double) init_time_pre - offset_time;
+    // Giving the user some information on the run to about to be executed.
     char *stars  = malloc(83*sizeof(char));
     for (int i = 0; i < 81; ++i)
         stars[i] = '*';
@@ -135,7 +182,6 @@ int main(int argc, char *argv[])
 	printf("Start month:\t\t\t%d\n", month);
 	printf("Start day:\t\t\t%d\n", day);
 	printf("Start hour:\t\t\t%d\n", hour);
-	printf("output directory:\t\t%s\n", OUTPUT_FOLDER);
 	printf("%s", stars);
 	printf("configuration information:\n");
 	printf("number of layers: %d\n", NO_OF_LAYERS);
@@ -191,7 +237,6 @@ int main(int argc, char *argv[])
 	}
 	printf("reading grid data and checking ... ");
     set_grid_properties(grid, dualgrid, GEO_PROP_FILE);
-    free(GEO_PROP_FILE);
     double delta_t;
     calc_delta_t(cfl_margin, &delta_t, grid);
     if (radiation_delta_t < delta_t)
@@ -205,7 +250,6 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     State *state_old = calloc(1, sizeof(State));
     set_init_data(INIT_STATE_FILE, state_old);
-    free(INIT_STATE_FILE);
     int min_no_of_output_steps = 600/delta_t;
     double *wind_h_lowest_layer_array = calloc(1, min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
     double t_write = t_init;
@@ -218,7 +262,7 @@ int main(int argc, char *argv[])
     }
     Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
     Forcings *forcings = calloc(1, sizeof(Forcings));
-    write_out(state_old, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, OUTPUT_FOLDER, diagnostics, forcings, grid, dualgrid, RUN_ID);
+    write_out(state_old, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID);
     t_write += WRITE_OUT_INTERVAL;
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     double t_0;
@@ -228,13 +272,13 @@ int main(int argc, char *argv[])
     first_time = clock();
     State *state_new = calloc(1, sizeof(State));
     if (write_out_dry_mass_integral == 1)
-		write_out_integral(state_old, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
+		write_out_integral(state_old, t_write_integral, RUN_ID, grid, dualgrid, 0);
     if (write_out_entropy_integral == 1)
-		write_out_integral(state_old, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 1);
+		write_out_integral(state_old, t_write_integral, RUN_ID, grid, dualgrid, 1);
     if (write_out_energy_integral == 1)
-		write_out_integral(state_old, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
+		write_out_integral(state_old, t_write_integral, RUN_ID, grid, dualgrid, 2);
     if (write_out_linearized_entropy_integral == 1)
-		write_out_integral(state_old, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 3);
+		write_out_integral(state_old, t_write_integral, RUN_ID, grid, dualgrid, 3);
 	Scalar_field *radiation_tendency = calloc(1, sizeof(Scalar_field));
     if (config_info -> rad_on == 1)
     {
@@ -256,13 +300,13 @@ int main(int argc, char *argv[])
     manage_time_stepping(state_old, state_new, interpolation, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
     counter += 1;
     if (write_out_dry_mass_integral == 1)
-		write_out_integral(state_new, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
+		write_out_integral(state_new, t_write_integral, RUN_ID, grid, dualgrid, 0);
     if (write_out_entropy_integral == 1)
-		write_out_integral(state_new, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 1);
+		write_out_integral(state_new, t_write_integral, RUN_ID, grid, dualgrid, 1);
     if (write_out_energy_integral == 1)
-		write_out_integral(state_new, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
+		write_out_integral(state_new, t_write_integral, RUN_ID, grid, dualgrid, 2);
     if (write_out_linearized_entropy_integral == 1)
-		write_out_integral(state_old, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 3);
+		write_out_integral(state_old, t_write_integral, RUN_ID, grid, dualgrid, 3);
 	t_write_integral += delta_t;
     State *state_write = calloc(1, sizeof(State));
     double speed;
@@ -285,13 +329,13 @@ int main(int argc, char *argv[])
         	config_info -> rad_update = 0;
             manage_time_stepping(state_old, state_new, interpolation, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
 		if (write_out_dry_mass_integral == 1)
-			write_out_integral(state_new, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 0);
+			write_out_integral(state_new, t_write_integral, RUN_ID, grid, dualgrid, 0);
 		if (write_out_entropy_integral == 1)
-			write_out_integral(state_new, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 1);
+			write_out_integral(state_new, t_write_integral, RUN_ID, grid, dualgrid, 1);
 		if (write_out_energy_integral == 1)
-			write_out_integral(state_new, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 2);
+			write_out_integral(state_new, t_write_integral, RUN_ID, grid, dualgrid, 2);
 		if (write_out_linearized_entropy_integral == 1)
-			write_out_integral(state_old, t_write_integral, OUTPUT_FOLDER, grid, dualgrid, 3);
+			write_out_integral(state_old, t_write_integral, RUN_ID, grid, dualgrid, 3);
 		t_write_integral += delta_t;
         if(t_0 + delta_t >= t_write && t_0 <= t_write)
             interpolation_t(state_old, state_new, state_write, t_0, t_0 + delta_t, t_write);
@@ -306,7 +350,7 @@ int main(int argc, char *argv[])
         }
         if(t_0 + delta_t >= t_write + 300 && t_0 <= t_write + 300)
         {
-            write_out(state_write, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, OUTPUT_FOLDER, diagnostics, forcings, grid, dualgrid, RUN_ID);
+            write_out(state_write, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID);
             t_write += WRITE_OUT_INTERVAL;
             second_time = clock();
             if (second_write_out_bool == 1)
@@ -336,7 +380,6 @@ int main(int argc, char *argv[])
     free(radiation_tendency);
     free(grid);
     free(dualgrid);
-    free(OUTPUT_FOLDER);
     free(state_old);
     free(state_new);
     free(state_write);

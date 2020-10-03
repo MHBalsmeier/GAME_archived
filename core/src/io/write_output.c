@@ -22,7 +22,7 @@ Here, the output is written to grib files and integrals are written to text file
 
 double calc_std_dev(double [], int);
 
-int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, char output_directory[], Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[])
+int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[])
 {
 	// Diagnostics and forcings are primarily handed over for checks.
 	int write_out_divv_h;
@@ -37,11 +37,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     long data_time = init_hour;
     int OUTPUT_FILE_LENGTH = 300;
     char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(OUTPUT_FILE_PRE, "%s/%s+%ds.grb2", output_directory, RUN_ID, (int) (t_write - t_init));
+    sprintf(OUTPUT_FILE_PRE, "output/%s/%s+%ds.grb2", RUN_ID, RUN_ID, (int) (t_write - t_init));
     OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
     free(OUTPUT_FILE_PRE);
     char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(OUTPUT_FILE, "%s/%s+%ds.grb2", output_directory, RUN_ID, (int) (t_write - t_init));
+    sprintf(OUTPUT_FILE, "output/%s/%s+%ds.grb2", RUN_ID, RUN_ID, (int) (t_write - t_init));
     char *SAMPLE_FILENAME = "./input/grib_template.grb2";
     FILE *SAMPLE_FILE;
     int err = 0;
@@ -1116,7 +1116,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     return 0;
 }
 
-int write_out_integral(State *state_write_out, double t_write, char output_directory[], Grid *grid, Dualgrid *dualgrid, int integral_id)
+int write_out_integral(State *state_write_out, double t_write, char RUN_ID[], Grid *grid, Dualgrid *dualgrid, int integral_id)
 {
 	/*
 	integral_id:
@@ -1129,15 +1129,15 @@ int write_out_integral(State *state_write_out, double t_write, char output_direc
     int INTEGRAL_FILE_LENGTH = 200;
     char *INTEGRAL_FILE_PRE = malloc((INTEGRAL_FILE_LENGTH + 1)*sizeof(char));
     if (integral_id == 0)
-   		sprintf(INTEGRAL_FILE_PRE, "%s/%s", output_directory, "dry_mass");
+   		sprintf(INTEGRAL_FILE_PRE, "output/%s/%s", RUN_ID, "dry_mass");
     if (integral_id == 1)
-   		sprintf(INTEGRAL_FILE_PRE, "%s/%s", output_directory, "entropy");
+   		sprintf(INTEGRAL_FILE_PRE, "output/%s/%s", RUN_ID, "entropy");
     if (integral_id == 2)
-   		sprintf(INTEGRAL_FILE_PRE, "%s/%s", output_directory, "energy");
+   		sprintf(INTEGRAL_FILE_PRE, "output/%s/%s", RUN_ID, "energy");
     if (integral_id == 2)
-   		sprintf(INTEGRAL_FILE_PRE, "%s/%s", output_directory, "energy");
+   		sprintf(INTEGRAL_FILE_PRE, "output/%s/%s", RUN_ID, "energy");
     if (integral_id == 3)
-   		sprintf(INTEGRAL_FILE_PRE, "%s/%s", output_directory, "linearized_entropy");
+   		sprintf(INTEGRAL_FILE_PRE, "output/%s/%s", RUN_ID, "linearized_entropy");
     INTEGRAL_FILE_LENGTH = strlen(INTEGRAL_FILE_PRE);
     char *INTEGRAL_FILE = malloc((INTEGRAL_FILE_LENGTH + 1)*sizeof(char));
     sprintf(INTEGRAL_FILE, "%s", INTEGRAL_FILE_PRE);

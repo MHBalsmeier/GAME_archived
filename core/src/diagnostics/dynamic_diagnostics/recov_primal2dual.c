@@ -6,7 +6,7 @@ Github repository: https://github.com/MHBalsmeier/game
 This function revocers vertical components of primal vectors at edges. Terrain following ccordinates are taken into account through vertical interpolation.
 */
 
-#include "../../../enum_and_typedefs.h"
+#include "../../enum_and_typedefs.h"
 #include <stdio.h>
 
 int recov_primal2dual(Vector_field in_field, int layer_index, int h_index, double *component, Grid *grid)

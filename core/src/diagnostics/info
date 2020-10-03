@@ -1,0 +1,6 @@
+/*
+This source file is part of the General Geophysical Modeling Framework (GAME), which is released under the MIT license.
+Github repository: https://github.com/MHBalsmeier/game
+*/
+
+"Diagnostics" refers to the calculation of dynamic and thermodynamic quantities which are not prognostic variables but still needed for the model integration or for I/O.
