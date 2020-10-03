@@ -132,9 +132,9 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, density_to_rhombus_weights_id, &density_to_rhombus_weights[0])))
         ERR(retval);
-    if ((retval = nc_get_var_int(ncid, to_index_id, &to_index[0])))
-        ERR(retval);
     if ((retval = nc_get_var_int(ncid, from_index_id, &from_index[0])))
+        ERR(retval);
+    if ((retval = nc_get_var_int(ncid, to_index_id, &to_index[0])))
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, adjacent_vector_indices_h_id, &adjacent_vector_indices_h[0])))
         ERR(retval);
