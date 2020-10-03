@@ -30,7 +30,7 @@ int pot_temp_diagnostics(State *state, Scalar_field pot_temp)
     	density_v_micro_value = calc_micro_density(state -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i], condensates_density_sum);
 		R_h = gas_constant_diagnostics(density_d_micro_value, density_v_micro_value);
     	density_h_micro_value = density_d_micro_value + density_v_micro_value;
-    	pot_temp[i] = state -> temp_gas[i]*pow(P_0/(density_h_micro_value*R_h*state -> temp_gas[i]), R_D/C_D_P);
+    	pot_temp[i] = state -> temperature_gas[i]*pow(P_0/(density_h_micro_value*R_h*state -> temperature_gas[i]), R_D/C_D_P);
 	}
     return 0;
 }
@@ -47,12 +47,12 @@ int temperature_diagnostics(State *state_old, State *state_new)
     	density_0 = state_old -> density_dry[i];
     	density_1 = state_new -> density_dry[i];
     	delta_density = density_1 - density_0;
-    	temperature_0 = state_old -> temp_gas[i];
+    	temperature_0 = state_old -> temperature_gas[i];
     	entropy_0 = entropy_density_dry_0/density_0;
     	entropy_1 = entropy_density_dry_1/density_1;
     	nominator = C_D_V*density_0*temperature_0 + (R_D*temperature_0 - R_D/C_D_P*entropy_0*temperature_0)*delta_density + R_D/C_D_P*temperature_0*delta_entropy_density;
     	denominator = C_D_V*density_0 + C_D_V/C_D_P*entropy_1*delta_density - C_D_V/C_D_P*delta_entropy_density;
-    	state_new -> temp_gas[i] = nominator/denominator;
+    	state_new -> temperature_gas[i] = nominator/denominator;
     }
     return 0;
 }
@@ -69,12 +69,12 @@ int temperature_diagnostics_explicit(State *state_old, State *state_tendency, Di
     	density_0 = state_old -> density_dry[i];
     	density_1 = state_old -> density_dry[i] + delta_t*state_tendency -> density_dry[i];
     	delta_density = density_1 - density_0;
-    	temperature_0 = state_old -> temp_gas[i];
+    	temperature_0 = state_old -> temperature_gas[i];
     	entropy_0 = entropy_density_dry_0/density_0;
     	entropy_1 = entropy_density_dry_1/density_1;
     	nominator = C_D_V*density_0*temperature_0 + (R_D*temperature_0 - R_D/C_D_P*entropy_0*temperature_0)*delta_density + R_D/C_D_P*temperature_0*delta_entropy_density;
     	denominator = C_D_V*density_0 + C_D_V/C_D_P*entropy_1*delta_density - C_D_V/C_D_P*delta_entropy_density;
-    	diagnostics -> temp_gas_explicit[i] = nominator/denominator;
+    	diagnostics -> temperature_gas_explicit[i] = nominator/denominator;
     }
     return 0;
 }

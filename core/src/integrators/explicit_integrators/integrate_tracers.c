@@ -20,7 +20,7 @@ int integrate_tracers(State *state_old, State *state_new, Interpolate_info *inte
     	*/
     	if (config_info -> phase_transitions_on == 1)
     	{
-		    calc_h2otracers_source_rates(diffusion_info -> tracer_mass_source_rates, diffusion_info -> tracer_heat_source_rates, state_old-> tracer_densities, state_old -> tracer_density_temperatures, state_old -> temp_gas, NO_OF_TRACERS, NO_OF_SCALARS, delta_t);
+		    calc_h2otracers_source_rates(diffusion_info -> tracer_mass_source_rates, diffusion_info -> tracer_heat_source_rates, state_old-> tracer_densities, state_old -> tracer_density_temperatures, state_old -> temperature_gas, NO_OF_TRACERS, NO_OF_SCALARS, delta_t);
 		}
 		for (int i = 0; i < NO_OF_TRACERS; ++i)
 		{

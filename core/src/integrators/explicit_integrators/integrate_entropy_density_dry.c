@@ -28,7 +28,7 @@ int integrate_entropy_density_dry(State *state_old, State *state_new, Interpolat
         for (k = 0; k < NO_OF_TRACERS; ++k)
             total_density += state_old -> tracer_densities[k*NO_OF_SCALARS + i];
         rho_h = state_old -> density_dry[i] + state_old -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];
-        state_tendency -> entropy_density_dry[i] = -forcings -> entropy_dry_flux_density_divv[i] + 1/state_old -> temp_gas[i]*(rho_h/total_density*(diffusion_info -> temp_diffusion_heating[i] + diffusion_info -> heating_diss[i] + radiation_tendency[i]) + config_info -> phase_transitions_on*diffusion_info -> tracer_heat_source_rates[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i]);
+        state_tendency -> entropy_density_dry[i] = -forcings -> entropy_dry_flux_density_divv[i] + 1/state_old -> temperature_gas[i]*(rho_h/total_density*(diffusion_info -> temp_diffusion_heating[i] + diffusion_info -> heating_diss[i] + radiation_tendency[i]) + config_info -> phase_transitions_on*diffusion_info -> tracer_heat_source_rates[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i]);
 	}
 	return 0;
 }

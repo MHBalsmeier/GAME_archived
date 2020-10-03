@@ -25,16 +25,16 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
 		rho_h = state -> density_dry[i] + state -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];
-    	pressure_value_d = state -> density_dry[i]*R_D*state -> temp_gas[i];
-    	pressure_value_v = state -> tracer_densities[2*NO_OF_SCALARS + i]*R_V*state -> temp_gas[i];
+    	pressure_value_d = state -> density_dry[i]*R_D*state -> temperature_gas[i];
+    	pressure_value_v = state -> tracer_densities[2*NO_OF_SCALARS + i]*R_V*state -> temperature_gas[i];
     	pressure_value = pressure_value_d + pressure_value_v; 
     	// Preparation of dry part of the second pressure gradient term.
 		diagnostics -> specific_entropy_dry[i] = state -> entropy_density_dry[i]/state -> density_dry[i];
-		diagnostics -> pressure_gradient_1_dry_prefactor[i] = state -> temp_gas[i]*state -> density_dry[i]/rho_h;
+		diagnostics -> pressure_gradient_1_dry_prefactor[i] = state -> temperature_gas[i]*state -> density_dry[i]/rho_h;
     	// Preparation of water vapour part of the second pressure gradient term.
-    	pot_temp_v = state -> temp_gas[i]*pow(P_0/pressure_value, R_V/C_V_P);
+    	pot_temp_v = state -> temperature_gas[i]*pow(P_0/pressure_value, R_V/C_V_P);
 		diagnostics -> specific_entropy_vapour[i] = C_V_P*(log(pot_temp_v) + ENTROPY_CONSTANT_V);
-		diagnostics -> pressure_gradient_1_vapour_prefactor[i] = state -> temp_gas[i]*state -> tracer_densities[2*NO_OF_SCALARS + i]/rho_h;
+		diagnostics -> pressure_gradient_1_vapour_prefactor[i] = state -> temperature_gas[i]*state -> tracer_densities[2*NO_OF_SCALARS + i]/rho_h;
 	}
 	// Before the calculation of the new pressure gradient, the old value needs to be stored for extrapolation.
 	if (config_info -> totally_first_step_bool == 0)
@@ -64,7 +64,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		else
 			diagnostics -> c_h_p_field[i] = C_D_P;
 	}
-	scalar_times_grad(diagnostics -> c_h_p_field, state -> temp_gas, diagnostics -> pressure_gradient_0_m, grid);
+	scalar_times_grad(diagnostics -> c_h_p_field, state -> temperature_gas, diagnostics -> pressure_gradient_0_m, grid);
 	scalar_times_grad(diagnostics -> pressure_gradient_1_dry_prefactor, diagnostics -> specific_entropy_dry, diagnostics -> pressure_gradient_1_dry, grid);
 	scalar_times_grad(diagnostics -> pressure_gradient_1_vapour_prefactor, diagnostics -> specific_entropy_vapour, diagnostics -> pressure_gradient_1_vapour, grid);
 	for (int i = 0; i < NO_OF_VECTORS; ++i)

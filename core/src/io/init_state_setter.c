@@ -63,7 +63,7 @@ int set_init_data(char FILE_NAME[], State *init_state)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         init_state -> density_dry[i] = density_dry[i];
-        init_state -> temp_gas[i] = temperature_gas[i];
+        init_state -> temperature_gas[i] = temperature_gas[i];
         if (NO_OF_TRACERS > 0)
         {
             init_state -> tracer_densities[i] = solid_water_density[i];

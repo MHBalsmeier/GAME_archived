@@ -103,7 +103,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     {
         for (int j = 0; j < NO_OF_SCALARS_H; ++j)
         {
-        	temperature_h[j] = state_write_out -> temp_gas[i*NO_OF_SCALARS_H + j];
+        	temperature_h[j] = state_write_out -> temperature_gas[i*NO_OF_SCALARS_H + j];
         	pressure_h[j] = state_write_out -> density_dry[j + i*NO_OF_SCALARS_H]*R_D*temperature_h[j];
         	rh_h[j] = 100*rel_humidity(temperature_h[j], state_write_out -> tracer_densities[2*NO_OF_SCALARS + i*NO_OF_SCALARS_H + j]);
         }
@@ -112,7 +112,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
             for (int j = 0; j < NO_OF_SCALARS_H; ++j)
             {
             	// Now the aim is to determine the value of the MSLP.
-                temp_lowest_layer = state_write_out -> temp_gas[i*NO_OF_SCALARS_H + j];
+                temp_lowest_layer = state_write_out -> temperature_gas[i*NO_OF_SCALARS_H + j];
                 pressure_value = state_write_out -> density_dry[j + i*NO_OF_SCALARS_H]*R_D*temp_lowest_layer + state_write_out -> tracer_densities[2*NO_OF_SCALARS + i]*R_V*temp_lowest_layer;
                 temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[j + i*NO_OF_SCALARS_H];
                 mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
@@ -123,7 +123,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				surface_p[j] = pressure_value/surface_p_factor;
 				// Now the aim is to calculate the 2 m temperature.
                 delta_z_temp = 2 - grid -> z_scalar[j + i*NO_OF_SCALARS_H];
-                temp_upper = state_write_out -> temp_gas[(i - 1)*NO_OF_SCALARS_H + j];
+                temp_upper = state_write_out -> temperature_gas[(i - 1)*NO_OF_SCALARS_H + j];
                 temp_lower = temp_lowest_layer;
                 temp_gradient = (temp_upper - temp_lower)/(grid -> z_scalar[j + (i - 1)*NO_OF_SCALARS_H] - grid -> z_scalar[j + i*NO_OF_SCALARS_H]);
                 // Finally the temperature in 2 m height AGL can bo obtained via linear extrapolation.
@@ -1170,7 +1170,7 @@ int write_out_integral(State *state_write_out, double t_write, char output_direc
     	global_scalar_integrator(*pot_energy_density, grid, &potential_integral);
     	free(pot_energy_density);
     	Scalar_field *int_energy_density = malloc(sizeof(Scalar_field));
-    	scalar_times_scalar(state_write_out -> density_dry, state_write_out -> temp_gas, *int_energy_density);
+    	scalar_times_scalar(state_write_out -> density_dry, state_write_out -> temperature_gas, *int_energy_density);
     	global_scalar_integrator(*int_energy_density, grid, &internal_integral);
     	fprintf(global_integral_file, "%lf\t%lf\t%lf\t%lf\n", t_write, kinetic_integral, potential_integral, C_D_V*internal_integral);
     	free(int_energy_density);

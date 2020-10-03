@@ -182,7 +182,7 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
             total_volume = upper_volume + lower_volume;
             upper_weight = upper_volume/total_volume;
             lower_weight = lower_volume/total_volume;
-			temp_interface_values[j] = upper_weight*state_old -> temp_gas[i + j*NO_OF_SCALARS_H] + lower_weight*state_old -> temp_gas[i + (j + 1)*NO_OF_SCALARS_H];
+			temp_interface_values[j] = upper_weight*state_old -> temperature_gas[i + j*NO_OF_SCALARS_H] + lower_weight*state_old -> temperature_gas[i + (j + 1)*NO_OF_SCALARS_H];
 		}
 		// filling up the original vectors
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
@@ -190,12 +190,12 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 			delta_z = grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i];
 			a_vector[2*j] = delta_t*C_D_V/C_D_P*C_D_P/delta_z - delta_t*C_D_V/C_D_P*0.5*vertical_entropy_gradient[j];
 			delta_z = grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 2)*NO_OF_VECTORS_PER_LAYER + i];
-			a_vector[2*j + 1] = delta_t*((R_D/C_D_V - 1)*state_old -> temp_gas[i + (j + 1)*NO_OF_SCALARS_H] + temp_interface_values[j])/delta_z;
+			a_vector[2*j + 1] = delta_t*((R_D/C_D_V - 1)*state_old -> temperature_gas[i + (j + 1)*NO_OF_SCALARS_H] + temp_interface_values[j])/delta_z;
 		}
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
 			delta_z = grid -> z_vector[j*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
-			c_vector[2*j] = -delta_t*((R_D/C_D_V - 1)*state_old -> temp_gas[i + j*NO_OF_SCALARS_H] + temp_interface_values[j])/delta_z;
+			c_vector[2*j] = -delta_t*((R_D/C_D_V - 1)*state_old -> temperature_gas[i + j*NO_OF_SCALARS_H] + temp_interface_values[j])/delta_z;
 			delta_z = grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i];
 			c_vector[2*j + 1] = -delta_t*C_D_V/C_D_P*C_D_P/delta_z - delta_t*C_D_V/C_D_P*0.5*vertical_entropy_gradient[j];
 		}
@@ -203,11 +203,11 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 		{
 			b_vector[2*j] = 1;
 			b_vector[2*j + 1] = 1;
-			d_vector[2*j] = diagnostics -> temp_gas_explicit[j*NO_OF_SCALARS_H + i];
+			d_vector[2*j] = diagnostics -> temperature_gas_explicit[j*NO_OF_SCALARS_H + i];
 			d_vector[2*j + 1] = state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 		}
 		b_vector[2*NO_OF_LAYERS - 2] =  1;
-		d_vector[2*NO_OF_LAYERS - 2] = diagnostics -> temp_gas_explicit[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		d_vector[2*NO_OF_LAYERS - 2] = diagnostics -> temperature_gas_explicit[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		// calling the algorithm to solve the system of linear equations
 		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, 2*NO_OF_LAYERS - 1);
 		// writing the result into the new state
