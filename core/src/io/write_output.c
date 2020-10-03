@@ -73,7 +73,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     double *sprate = malloc(NO_OF_SCALARS_H*sizeof(double));
     double *cape = malloc(NO_OF_SCALARS_H*sizeof(double));
     Curl_field *rel_vort = calloc(1, sizeof(Curl_field));
-    double pressure_value, mslp_factor, surface_p_factor, temp_lowest_layer, temp_mslp, temp_surface, wind_0, wind_1, wind_u, wind_v, delta_z_temp, temp_gradient, temp_upper, temp_lower;
+    double pressure_value, mslp_factor, surface_p_factor, temp_lowest_layer, temp_mslp, temp_surface, wind_0, wind_1, wind_u, wind_v, delta_z_temp, temperature_gradient, temp_upper, temp_lower;
     double standard_vert_lapse_rate = 0.0065;
     long unsigned length = 4;
     codes_handle *handle_temperature_h = NULL;
@@ -125,9 +125,9 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
                 delta_z_temp = 2 - grid -> z_scalar[j + i*NO_OF_SCALARS_H];
                 temp_upper = state_write_out -> temperature_gas[(i - 1)*NO_OF_SCALARS_H + j];
                 temp_lower = temp_lowest_layer;
-                temp_gradient = (temp_upper - temp_lower)/(grid -> z_scalar[j + (i - 1)*NO_OF_SCALARS_H] - grid -> z_scalar[j + i*NO_OF_SCALARS_H]);
+                temperature_gradient = (temp_upper - temp_lower)/(grid -> z_scalar[j + (i - 1)*NO_OF_SCALARS_H] - grid -> z_scalar[j + i*NO_OF_SCALARS_H]);
                 // Finally the temperature in 2 m height AGL can bo obtained via linear extrapolation.
-                t2[j] = temp_lowest_layer + delta_z_temp*temp_gradient;
+                t2[j] = temp_lowest_layer + delta_z_temp*temperature_gradient;
                 z_height = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j];
                 cape[j] = 0;
                 theta_prime = pot_temperature[i*NO_OF_SCALARS_H + j];

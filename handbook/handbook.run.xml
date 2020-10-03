@@ -44,10 +44,10 @@
   <internal package="biblatex" priority="9" active="0">
     <generic>latex</generic>
     <provides type="dynamic">
-      <file>game_handbook.bcf</file>
+      <file>handbook.bcf</file>
     </provides>
     <requires type="dynamic">
-      <file>game_handbook.bbl</file>
+      <file>handbook.bbl</file>
     </requires>
     <requires type="static">
       <file>blx-dm.def</file>
@@ -64,19 +64,19 @@
     <generic>biber</generic>
     <cmdline>
       <binary>biber</binary>
-      <infile>game_handbook</infile>
+      <infile>handbook</infile>
     </cmdline>
     <input>
-      <file>game_handbook.bcf</file>
+      <file>handbook.bcf</file>
     </input>
     <output>
-      <file>game_handbook.bbl</file>
+      <file>handbook.bbl</file>
     </output>
     <provides type="dynamic">
-      <file>game_handbook.bbl</file>
+      <file>handbook.bbl</file>
     </provides>
     <requires type="dynamic">
-      <file>game_handbook.bcf</file>
+      <file>handbook.bcf</file>
     </requires>
   </external>
 </requests>

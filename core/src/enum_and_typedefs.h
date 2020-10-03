@@ -132,7 +132,7 @@ Tracer_density_temperatures tracer_density_temperatures;
 // Collects diagnostic quantities. Note: in fact, forcings are also diagnostic quiantities.
 typedef struct diagnostics {
 Vector_field mass_dry_flux_density;
-Vector_field temp_gradient;
+Vector_field temperature_gradient;
 Scalar_field specific_entropy_dry;
 Scalar_field specific_entropy_vapour;
 Scalar_field pressure_gradient_1_dry_prefactor;

@@ -42,7 +42,7 @@ write_out_energy_integral=1
 
 # parallelization
 # relevant only for OMP
-export OMP_NUM_THREADS=5
+export OMP_NUM_THREADS=1
 # relevant only for MPI
 number_of_cpus=1
 
