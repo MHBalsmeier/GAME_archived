@@ -112,12 +112,14 @@ double calc_micro_density(double density_macro, double condensates_density_sum)
 	if (result < -EPSILON_TRACERS/(1 - condensates_density_sum/RHO_WATER))
 	{
 		printf("Error: microscopic density negative.\n");
-		exit(1);
+		printf("Aborting.\n");
+		exit(0);
 	}
 	if (isnan(result))
 	{
 		printf("Error: microscopic density is nan.\n");
-		exit(1);
+		printf("Aborting.\n");
+		exit(0);
 	}
 	return result;
 }
@@ -133,12 +135,14 @@ double calc_condensates_density_sum(int scalar_gridpoint_index, Tracer_densities
 	if (result < -NO_OF_CONDENSATED_TRACERS*EPSILON_TRACERS)
 	{
 		printf("Error: condensates_density_sum negative.\n");
-		exit(1);
+		printf("Aborting.\n");
+		exit(0);
 	}
 	if (result >= RHO_WATER)
 	{
 		printf("Error: condensates_density_sum >= RHO_WATER.\n");
-		exit(1);
+		printf("Aborting.\n");
+		exit(0);
 	}
 	return result;
 }
