@@ -19,8 +19,8 @@ int integrate_continuity_dry(State *state_old, State *state_new, Interpolate_inf
     	scalar_times_vector(state_new -> density_dry, state_new -> velocity_gas, diagnostics -> mass_dry_flux_density, grid);
 	}
     divv_h(diagnostics -> mass_dry_flux_density, forcings -> mass_dry_flux_density_divv, grid);
-    // Temperature diffusion gets updated here, but only at the last RK step and if mass diffusion is switched on.
-    if (no_rk_step == 2 && (config_info -> mass_diff_h == 1 || config_info -> mass_diff_v == 1))
+    // Mass diffusion gets updated here, but only at the last RK step and if mass diffusion is switched on.
+    if (no_rk_step == 2 && (config_info -> mass_dry_diff_h == 1 || config_info -> mass_dry_diff_v == 1))
     {
         grad(state_old -> density_dry, diffusion_info -> mass_dry_diffusion_flux_density, grid);
         calc_mass_diffusion_coeffs(state_old, config_info, diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v);

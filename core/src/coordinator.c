@@ -77,7 +77,6 @@ int main(int argc, char *argv[])
     radiation_delta_t = strtof(argv[14], NULL);
     int year;
     year = strtod(argv[15], NULL);
-    printf("%d\n", year);
     int month;
     month = strtod(argv[16], NULL);
     int day;
@@ -94,6 +93,8 @@ int main(int argc, char *argv[])
 	toa = strtod(argv[22], NULL);
     int no_of_oro_layers_input;
 	no_of_oro_layers_input = strtod(argv[23], NULL);
+	config_info -> mass_dry_diff_h = strtod(argv[24], NULL);
+	config_info -> mass_dry_diff_h = strtod(argv[25], NULL);
     if (no_of_oro_layers_input != NO_OF_ORO_LAYERS)
     {
     	printf("You demanded no_of_oro_layers = %d in your input file, but the model has been compiled with NO_OF_ORO_LAYERS = %d.\n", no_of_oro_layers_input, NO_OF_ORO_LAYERS);
@@ -210,6 +211,22 @@ int main(int argc, char *argv[])
 	else
 	{
 		printf("Moisture is turned on.\n");
+	}
+	if (config_info -> mass_dry_diff_h == 0)
+	{
+		printf("Horizontal dry mass diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Horizontal dry mass diffusion is turned on.\n");
+	}
+	if (config_info -> mass_dry_diff_v == 0)
+	{
+		printf("Vertical dry mass diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Vertical dry mass diffusion is turned on.\n");
 	}
 	if (config_info -> temperature_diff_h == 0)
 	{

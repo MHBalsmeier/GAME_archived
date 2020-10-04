@@ -13,7 +13,7 @@ int calc_diffusion_coeff(double temperature, double particle_mass, double densti
 
 int calc_mass_diffusion_coeffs(State *state, Config_info *config_info, Scalar_field mass_diffusion_coeff_numerical_h, Scalar_field mass_diffusion_coeff_numerical_v)
 {
-	if (config_info -> mass_diff_h == 1 || config_info -> mass_diff_v == 1)
+	if (config_info -> mass_dry_diff_h == 1 || config_info -> mass_dry_diff_v == 1)
 	{
 		double mean_particle_mass = M_D/N_A;
 		double eff_particle_radius = 130e-12;
@@ -22,7 +22,7 @@ int calc_mass_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
 		    calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> density_dry[i], eff_particle_radius, &mass_diffusion_coeff);
-		    if (config_info -> mass_diff_h == 1)
+		    if (config_info -> mass_dry_diff_h == 1)
 		    {
 		    	mass_diffusion_coeff_para_ratio_h = pow(10, 5);
 	    	}
@@ -30,7 +30,7 @@ int calc_mass_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 		    {
 		    	mass_diffusion_coeff_para_ratio_h = 0;
 	    	}
-		    if (config_info -> mass_diff_v == 1)
+		    if (config_info -> mass_dry_diff_v == 1)
 		    {
 		    	mass_diffusion_coeff_para_ratio_v = pow(10, 3);
 	    	}
