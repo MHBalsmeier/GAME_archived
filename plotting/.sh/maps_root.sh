@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ -d $fig_save_path ]
+then
+rm -r $fig_save_path
+fi
+mkdir $fig_save_path
+echo plotting maps ...
+number_of_variables=${#disp_shortname_list[@]}
+for (( i=0; $i<$number_of_variables ; i=$(($i+1)) ))
+do
+python3 plotting/.py/plt_maps.py $run_span ${plot_intervals_list[$i]} ${disp_level_list[$i]} ${disp_shortname_list[$i]} $grid_props_file $fig_save_path $output_dir ${projections_list[$i]} $run_id ${uniform_colormap_list[$i]} ${scope_list[$i]}
+done
+echo Finished plotting maps.

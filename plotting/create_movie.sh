@@ -1,8 +1,7 @@
-echo creating movie ...
-ffmpeg -y -hide_banner -loglevel warning -framerate 50 -i $fig_save_path/$run_id"_"$disp_shortname"_"$disp_level-%00ds.png -c:v libx264 -profile:v high -crf 20 -pix_fmt yuv420p $fig_save_path/$run_id"_"$disp_shortname"_"$disp_level.mp4
-if [ $? -ne 0 ]
-then
-echo -e ${RED}Creaing movie failed.$NC
-else
-echo Movie successfully created.
-fi
+#!/bin/bash
+
+run_id=ullrich_dry_rev
+output_dir=/home/max/compiled/game_dev/output/$run_id
+fig_save_path=/home/max/figs/game_output/$run_id
+disp_shortname=2t
+disp_level=2
