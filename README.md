@@ -37,7 +37,6 @@ Things to be done:
 
 * A 3D implicit solver for efficiency and better energy conservation properties.
 * A way to construct Voronoi meshes on an ellipsoid.
-* (How) can EPV be conserved?
 
 ## Documents
 

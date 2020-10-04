@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # basic run properties
+game_home_dir=/home/max/compiled/game_dev # the root directory of your GAME instance
 operator=MHB # the ID of the person / group / institution running the model
 nwp_mode=0 # switches on or off the numerical weather prediction mode (calls data assimilation, special output, etc.)
 test_id=0 # Must only be set if nwp_mode == 0. In this case, it specifies which test scenario to run.
@@ -46,7 +47,7 @@ number_of_cpus=1
 ndvar_directory=/home/max/compiled/ndvar # The directory, where the ndvar program is stored. Only relevant in NWP mode.
 
 # that's it, now the basic run script will be sourced
-source core/run.sh
+source $game_home_dir/core/run.sh
 
 
 

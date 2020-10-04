@@ -1,5 +1,6 @@
 #!/bin/bash
 
+game_home_dir=/home/max/compiled/game_dev
 run_id=ullrich_dry_rev
 run_span=43200
 output_dir=/home/max/compiled/game_dev/output/$run_id
@@ -11,5 +12,5 @@ uniform_colormap_list=(0 0 0 0)
 scope_list=(CONUS CONUS CEU CEU)
 projections_list=(Gnomonic Gnomonic Gnomonic Gnomonic)
 fig_save_path=~/figs/game_output/$run_id
-grid_props_file=/home/max/compiled/game_dev/grids/B5L26T30000_O2_OL17_SCVT.nc
-source plotting/.sh/maps_root.sh
+grid_props_file=$game_home_dir/grids/B5L26T30000_O2_OL17_SCVT.nc
+source $game_home_dir/plotting/.sh/maps_root.sh
