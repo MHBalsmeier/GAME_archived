@@ -64,8 +64,8 @@ Everything is easy and quick to install.
 * CMake (Ubuntu: sudo apt-get install cmake)
 * [atmostracers](https://github.com/MHBalsmeier/atmostracers)
 * [rte-rrtmgp-c](https://github.com/MHBalsmeier/rte-rrtmgp-c)
-* Python (only for the plotting routines, which are of course not part of the actual model)
 * OpenMPI (Ubuntu: sudo apt-get install mpich)
+* Python and the visualization library scitools-iris (installation manual: https://mhbalsmeier.github.io/tutorials/iris_on_ubuntu.html, only for the plotting routines, which are of course not part of the actual model)
 
 ### Download
 
