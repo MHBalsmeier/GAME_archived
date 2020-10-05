@@ -1,21 +1,23 @@
-The General Geophysical Modeling Framework (GAME) is a global non-hydrostatic hexagonal C grid dynamical core with the possibility to advect a variable number of tracers. For radiation, it is coupled to RTE+RRTMGP via the C binding rte-rrtmgp-c (to be done).
+The General Geophysical Modeling Framework (GAME) is a global non-hydrostatic hexagonal C grid dynamical core with the possibility to advect a variable number of tracers. For radiation, it is coupled to RTE+RRTMGP via the C binding rte-rrtmgp-c (yet to be implemented).
 
 ## Overview
 
-It is known that the forecast skill of a NWP model depends much more on physics and data assimilation than on the dynamical core. However, all global dynamical cores I know of have inconsistencies even in the most fundamental dynamical quantities (mass, energy forms and entropy). That is why the aim of this project is to develop a next generation global dynamical core with the following properties:
+It is known that the forecast skill of a NWP model depends more on physics and data assimilation than on the dynamical core. However, all global dynamical cores I know of have inconsistencies even in the most fundamental dynamical quantities (mass, energy forms and entropy). That is why the aim of this project is to develop a next generation global dynamical core with the following properties:
 
 * Stability.
 * The numerical dispersion relation shall contain no unphysical branches.
 * The numerical dispersion relation shall contain all relevant physical branches, including a geostrophic mode.
 * Strong scalability on massively parallel computer architectures.
-* Mass conservation.
-* Consistent local energy conversions with physical global integrals as a conseqeuence (especially energy conservation).
-* Consistent local dissipation and entropy production, global satisfaction of the Second Law of Thermodynamics.
-* No problems with terrain following coordinates. For example: A resting atmosphere around steep orography shall remain at rest.
+* Mass conservation to machine precision.
+* Energy conversions shall be based on a spatial discretization of Poisson brackets.
+* Global total energy conservation, apart from non-cancelling errors through explicit time stepping.
+* Consistent local dissipation and entropy production.
+* Global satisfaction of the Second Law of Thermodynamics including entropy conservation to machine precision in an adiabatic setup.
 * Absence of unphysical numerical stabilizers like divergence damping, fixers, filters and so on.
+* No problems with terrain following coordinates. For example: A resting atmosphere around steep orography shall remain at rest.
 * Ellipsoidal grid geometry.
 * A capable and flexible framework for coupling to physics and to other components of an Earth system model.
-* Consistecy also in the presence of tracers and radiation.
+* Consistency also in the presence of tracers and radiation.
 
 According to my understanding, a hexagonal C grid is the only discretization where all this can be achieved.
 
@@ -23,20 +25,24 @@ According to my understanding, a hexagonal C grid is the only discretization whe
 
 What GAME does what other models do not do and why:
 
-* It uses the entropy as a prognostic variable. Usually, models use the potential temperature as a prognostic variable and modelers then call it the entropy, which is wrong. The potential temperature is a conserved quantity and therefore the only forcings are the diabatic forcings rendering it a suitable variable for modeling. However, the same is true for the real entropy (connected to the density times the logarithm of the potential temperature), and this last quantitiy is the much more fundamental physical property.
-* It employs the modified TRSK scheme as well as the physically conistent dissipation proposed by Gassmann (2018).
+* It uses the entropy as a prognostic variable. Usually, models use the potential temperature as a prognostic variable which is a conserved quantity and therefore the only forcings are the diabatic forcings rendering it a suitable variable for modeling. However, the same is true for the real entropy (connected to the density times the logarithm of the potential temperature), and this last quantitiy is the much more fundamental physical property.
+* It employs the modified TRSK scheme.
 * It assigns individual densities (instead of mixing ratios) to tracers as well as individual temperatures and sink velocities.
 
 What GAME does not do and why:
 
-* It does not sacrifice physical consistency for a bit of speed up and tuning possibilities, like ICON-DWD does.
+* It does not sacrifice physical consistency (mimetic properties of operators and conservation laws) for a higher convergence order or a performance speed-up. Higher-order schemes are only employed within the restrictions imposed by physical consistency contraints.
 * It does not contain an option for calculations in 2D, on the plane, in vertical columns or any other purely academic features. If schemes need to be tested individually, it can be done in an individual Python code.
-* It does not contain a nesting option. There are basically two ways this could be done: 1.) The MPAS way, where smooth transitions between coarser and finer mesh regions are possible, minimizing numerical noise. However, the global time step is bound by the smallest grid distance, which is unefficicent in coarser mesh regions. 2.) The ICON-DWD way, where a two-step nesting option exists and a smaller time step can be used only in the finer domain. This, however, leads to numerical noise. In my view one should use a global model with a uniform resolution and then simply regional models in specific areas.
 
-Things to be done:
+### Things to be done
 
-* A 3D implicit solver for efficiency and better energy conservation properties.
+* Dicretization of a momentum diffusion operator including dissipation.
+* A regional mode.
+* Implementation of SLEVE.
+* Implementation of MPI parallelization.
 * A way to construct Voronoi meshes on an ellipsoid.
+* A largely implicit 3D solver for efficiency (larger time step) and better energy conservation properties.
+* Maybe a nesting option, but I am still undecided on whether this is at all useful and how it should be done.
 
 ## Documents
 
@@ -44,22 +50,22 @@ The documentation can be found in the subdirectory doc. It contains an overview 
 
 The handbook of the model can be found in the subdirectory handbook. It contains information on how to generate necessary files like grid files and input data and explains how to compile, configure and run the model.
 
-## Dependencies
+## Installing the model
+
+It is recommended to run the model on Linux. We will not help people who have problems trying to install the model on other operating systems.
+
+### Dependencies
 
 Everything is easy and quick to install.
 
 * [geos95](https://github.com/MHBalsmeier/geos95)
-* netcdf library
+* netcdf library (Ubuntu: sudo apt-get libnetcdf-dev)
 * eccodes library (installation manual: https://mhbalsmeier.github.io/tutorials/eccodes_on_ubuntu.html)
-* CMake
+* CMake (Ubuntu: sudo apt-get install cmake)
 * [atmostracers](https://github.com/MHBalsmeier/atmostracers)
 * [rte-rrtmgp-c](https://github.com/MHBalsmeier/rte-rrtmgp-c)
 * Python (only for the plotting routines, which are of course not part of the actual model)
-* OpenMPI (not yet)
-
-## Installing the model
-
-It is recommended to run the model on Linux. We will not help people who have problems trying to install the model on other operating systems.
+* OpenMPI (Ubuntu: sudo apt-get install mpich)
 
 ### Download
 
@@ -74,6 +80,7 @@ In the shell scripts controlling the build process (residing in the directory bu
 ## Fundamental literature
 
 * Staniforth, A. and Thuburn, J. (2012), Horizontal grids for global weather and climate prediction models: a review. Q.J.R. Meteorol. Soc., 138: 1-26. doi:10.1002/qj.958
+* Thuburn, John. (2008). Numerical wave propagation on the hexagonal C-grid. Journal of Computational Physics. 227. 5836-5858. 10.1016/j.jcp.2008.02.010. 
 * Gassmann, Almut & Herzog, Hans-Joachim. (2008). Towards a consistent numerical compressible non‐hydrostatic model using generalized Hamiltonian tools. Quarterly Journal of the Royal Meteorological Society. 134. 1597 - 1613. 10.1002/qj.297.
 * Thuburn, John et al. “Numerical representation of geostrophic modes on arbitrarily structured C-grids.” J. Comput. Phys. 228 (2009): 8321-8335.
 * Ringler, Todd & Thuburn, John & Klemp, J. & Skamarock, W.C.. (2010). A unified approach to energy conservation and potential vorticity dynamics on arbitrarily structured C-grids. J. Comput. Physics. 229. 3065-3090. 10.1016/j.jcp.2009.12.007.
