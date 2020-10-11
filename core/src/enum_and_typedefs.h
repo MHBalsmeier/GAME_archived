@@ -202,7 +202,13 @@ double tracer_mass_source_rates[NO_OF_TRACERS*NO_OF_SCALARS];
 double tracer_heat_source_rates[NO_OF_TRACERS*NO_OF_SCALARS];
 } Diffusion_info;
 
-
+// Info on input and output is collected here.
+typedef struct io_config {
+int grib_output_switch;
+int netcdf_output_switch;
+int synop_output_switch;
+int aviation_output_switch;
+} Io_config;
 
 
 

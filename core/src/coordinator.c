@@ -94,7 +94,18 @@ int main(int argc, char *argv[])
     int no_of_oro_layers_input;
 	no_of_oro_layers_input = strtod(argv[23], NULL);
 	config_info -> mass_dry_diff_h = strtod(argv[24], NULL);
-	config_info -> mass_dry_diff_h = strtod(argv[25], NULL);
+	config_info -> mass_dry_diff_v = strtod(argv[25], NULL);
+    Io_config *io_config = calloc(1, sizeof(Io_config));
+	io_config -> grib_output_switch = strtod(argv[26], NULL);
+	io_config -> netcdf_output_switch = strtod(argv[27], NULL);
+	io_config -> synop_output_switch = strtod(argv[28], NULL);
+	io_config -> aviation_output_switch = strtod(argv[29], NULL);
+	if (io_config -> grib_output_switch == 0 && io_config -> netcdf_output_switch == 0)
+	{
+		printf("Either grib_output_switch or netcdf_output_switch must be set to 1.\n");
+    	printf("Aborting.\n");
+		exit(0);
+	}
     if (no_of_oro_layers_input != NO_OF_ORO_LAYERS)
     {
     	printf("You demanded no_of_oro_layers = %d in your input file, but the model has been compiled with NO_OF_ORO_LAYERS = %d.\n", no_of_oro_layers_input, NO_OF_ORO_LAYERS);
@@ -279,7 +290,7 @@ int main(int argc, char *argv[])
     }
     Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
     Forcings *forcings = calloc(1, sizeof(Forcings));
-    write_out(state_old, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID);
+    write_out(state_old, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config);
     t_write += WRITE_OUT_INTERVAL;
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     double t_0;
@@ -367,7 +378,7 @@ int main(int argc, char *argv[])
         }
         if(t_0 + delta_t >= t_write + 300 && t_0 <= t_write + 300)
         {
-            write_out(state_write, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID);
+            write_out(state_write, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config);
             t_write += WRITE_OUT_INTERVAL;
             second_time = clock();
             if (second_write_out_bool == 1)
@@ -390,6 +401,7 @@ int main(int argc, char *argv[])
    	free(RUN_ID);
     free(diffusion);
     free(config_info);
+    free(io_config);
     free(diagnostics);
     free(interpolation);
     free(forcings);
