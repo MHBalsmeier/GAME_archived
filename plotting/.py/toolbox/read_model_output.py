@@ -1,3 +1,6 @@
+# This source file is part of the General Geophysical Modeling Framework (GAME), which is released under the MIT license.
+# Github repository: https://github.com/MHBalsmeier/game
+
 import toolbox.grid_reader as grid_reader;
 import eccodes as ec;
 import numpy as np;

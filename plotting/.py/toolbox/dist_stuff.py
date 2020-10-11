@@ -1,3 +1,6 @@
+# This source file is part of the General Geophysical Modeling Framework (GAME), which is released under the MIT license.
+# Github repository: https://github.com/MHBalsmeier/game
+
 import numpy as np;
 import math as mat;
 from colorama import Fore;

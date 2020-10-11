@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This source file is part of the General Geophysical Modeling Framework (GAME), which is released under the MIT license.
+# Github repository: https://github.com/MHBalsmeier/game
+
 time_string=$(date --utc +%Y%m%d%H%M%S)
 if [ $overwrite_run_id -eq 0 ]
 then
@@ -18,5 +21,5 @@ source run.sh
 cd - > /dev/null
 fi
 cd $game_home_dir
-mpirun -np $number_of_cpus $game_home_dir/core/game $run_span $write_out_interval $res_id $number_of_layers $cfl_margin $momentum_diff $rad_on $tracers_on $operator $write_out_mass_dry_integral $write_out_entropy_gas_integral $write_out_energy_integral $temperature_diff_h $radiation_delta_t $start_year $start_month $start_day $start_hour $temperature_diff_v $run_id $write_out_linearized_entropy_gas_integral $toa $orography_layers $orography_id $test_id $mass_dry_diff_h $mass_dry_diff_v
+mpirun -np $number_of_cpus $game_home_dir/core/game $run_span $write_out_interval $res_id $number_of_layers $cfl_margin $momentum_diff $rad_on $tracers_on $operator $write_out_mass_dry_integral $write_out_entropy_gas_integral $write_out_energy_integral $temperature_diff_h $radiation_delta_t $start_year $start_month $start_day $start_hour $temperature_diff_v $run_id $write_out_linearized_entropy_gas_integral $toa $orography_layers $orography_id $test_id $mass_dry_diff_h $mass_dry_diff_v $grib_output_switch $netcdf_output_switch $synop_output_mode $aviation_output_mode
 cd - > /dev/null

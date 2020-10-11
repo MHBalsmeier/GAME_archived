@@ -1,3 +1,6 @@
+[comment]: <> (This source file is part of the General Geophysical Modeling Framework (GAME), which is released under the MIT license.)
+[comment]: <> (Github repository: https://github.com/MHBalsmeier/game)
+
 The General Geophysical Modeling Framework (GAME) is a global non-hydrostatic hexagonal C grid dynamical core with the possibility to advect a variable number of tracers. For radiation, it is coupled to RTE+RRTMGP via the C binding rte-rrtmgp-c (yet to be implemented).
 
 ## Overview

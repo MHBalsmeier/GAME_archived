@@ -1,3 +1,6 @@
+# This source file is part of the General Geophysical Modeling Framework (GAME), which is released under the MIT license.
+# Github repository: https://github.com/MHBalsmeier/game
+
 def return_constant(const_id):
     if const_id == 0:
         earth_radius = 6378137; 

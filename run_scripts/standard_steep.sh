@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This source file is part of the General Geophysical Modeling Framework (GAME), which is released under the MIT license.
+# Github repository: https://github.com/MHBalsmeier/game
+
 # basic run properties
 game_home_dir=/home/max/compiled/game_dev # the root directory of your GAME instance
 operator=MHB # the ID of the person / group / institution running the model
@@ -36,6 +39,10 @@ write_out_mass_dry_integral=1 # If set to 1, the total dry mass of the atmospher
 write_out_entropy_gas_integral=1 # If set to 1, the total entropy of the atmosphere will be written out at every time step.
 write_out_linearized_entropy_gas_integral=1 # If set to 1, the total linearized entropy (proportional to density times potential temperature) of the atmosphere will be written out at every time step.
 write_out_energy_integral=1 # If set to 1, the total integrals of the energy forms of the atmosphere will be written out at every time step.
+grib_output_switch=1 # If set to 1, output will be written to grib files.
+netcdf_output_switch=0 # If set to 1, output will be written to netcdf files.
+synop_output_mode=0 # If set to 1, additional output on synoptical pressure levels will be created.
+aviation_output_mode=0 # If set to 1, additional output on flight levels will be created.
 
 # parallelization
 # relevant only for OMP
