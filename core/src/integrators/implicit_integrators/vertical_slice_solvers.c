@@ -1,6 +1,9 @@
 /*
 This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/MHBalsmeier/game
+*/
+
+/*
 The vertical advection is organized here.
 */
 
@@ -19,8 +22,7 @@ int three_band_solver_hor_vel_adv(State *state_old, State *state_new, State *sta
 {
 	/*
 	Semi-implicit vertical advection of vertical momentum (Crank-Nicolson).
-	Procedure derived in Kompendium.
-	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
+	procedure derived in https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
 	*/
 	double delta_z;
 	int i, j;
@@ -85,8 +87,7 @@ int three_band_solver_ver_vel_adv(State *state_old, State *state_new, State *sta
 {
 	/*
 	Semi-implicit vertical advection of vertical momentum (Crank-Nicolson).
-	Procedure derived in Kompendium.
-	The algorithm follows https://de.wikipedia.org/wiki/Thomas-Algorithmus .
+	procedure derived in https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
 	*/
 	double delta_z;
 	int i, j;
@@ -229,7 +230,7 @@ int three_band_solver_ver_den_dry(State *state_old, State *state_new, State *sta
 {
 	/*
 	Implicit vertical advection of dry mass (Euler).
-	Procedure derived in Kompendium.
+	procedure derived in https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
 	*/
 	double area;
 	int j;
@@ -286,7 +287,7 @@ int three_band_solver_ver_entropy_density_dry(State *state_old, State *state_new
 {
 	/*
 	Implicit vertical advection of the entropy of the gas phase (Euler).
-	Procedure derived in Kompendium.
+	procedure derived in https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
 	*/
 	double area;
 	int j;
@@ -343,7 +344,7 @@ int three_band_solver_ver_tracers(State *state_old, State *state_new, State *sta
 {
 	/*
 	Implicit vertical advection of tracers (Euler).
-	Procedure derived in Kompendium.
+	procedure derived in https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
 	*/
 	double area;
 	int j, k;
@@ -473,7 +474,7 @@ int three_band_solver_ver_tracers(State *state_old, State *state_new, State *sta
 
 int thomas_algorithm(double a_vector[], double b_vector[], double c_vector[], double d_vector[], double c_prime_vector[], double d_prime_vector[], double solution_vector[], int solution_length)
 {
-	// https://de.wikipedia.org/wiki/Thomas-Algorithmus
+	// https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm
 	c_prime_vector[0] = c_vector[0]/b_vector[0];
 	for (int j = 1; j < solution_length - 1; ++j)
 	{
