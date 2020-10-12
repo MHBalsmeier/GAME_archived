@@ -42,7 +42,7 @@ What GAME does not do and why:
 * Implementation of MPI parallelization.
 * A way to construct Voronoi meshes on an ellipsoid.
 * A largely implicit 3D solver for efficiency (larger time step) and better energy conservation properties.
-* Maybe a nesting option, but I am still undecided on whether this is at all useful and how it should be done.
+* A nesting option.
 
 ## Documents
 
@@ -75,7 +75,7 @@ Everything is easy and quick to install.
 
 ### Build and install
 
-In the shell scripts controlling the build process (residing in the directory build\_scripts) change the variable aim\_dir to a place of your choice, then run the scripts. The files with the suffix \_dev are meant to install to a location where new versions can be tested. You also need to install the run configs in order to have the run scripts of the model where they belong. Install the plotting routines if you want to make use of them.
+In the shell scripts controlling the build process (residing in the directory build\_scripts) change the variable aim\_dir to a place of your choice, then run the scripts. The files with the suffix \_dev are meant to install to a location where new versions can be tested. You also need to install the run scripts in order to have the run scripts of the model where they belong. Install the plotting routines if you want to make use of them.
 
 ## Fundamental literature
 
