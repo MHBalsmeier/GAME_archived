@@ -1,5 +1,5 @@
 /*
-This source file is part of the General Geophysical Modeling Framework (GAME), which is released under the MIT license.
+This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/MHBalsmeier/game
 */
 
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     printf("*\t\t\t\t\t\t\t\t\t\t*\n");
     printf("*\t\t\t\tThis is the GAME\t\t\t\t*\n");
-    printf("*\t\t\tGeneral Geophysical Modeling Framework\t\t\t*\n");
+    printf("*\t\t\tGeophysical Fluids Modeling Framework\t\t\t*\n");
     printf("*\t\t\t\t\t\t\t\t\t\t*\n");
     printf("%s", stars);
     printf("Released under the MIT license, visit https://github.com/MHBalsmeier/game for more information.\n");

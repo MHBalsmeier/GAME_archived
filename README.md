@@ -1,4 +1,4 @@
-The General Geophysical Modeling Framework (GAME) is a global non-hydrostatic hexagonal C grid dynamical core with the possibility to advect a variable number of tracers. For radiation, it is coupled to RTE+RRTMGP via the C binding rte-rrtmgp-c (yet to be implemented).
+The Geophysical Fluids Modeling Framework (GAME) is a global non-hydrostatic hexagonal C grid dynamical core with the possibility to advect a variable number of tracers. For radiation, it is coupled to RTE+RRTMGP via the C binding rte-rrtmgp-c (yet to be implemented).
 
 ## Overview
 
@@ -43,6 +43,7 @@ What GAME does not do and why:
 * A way to construct Voronoi meshes on an ellipsoid.
 * A largely implicit 3D solver for efficiency (larger time step) and better energy conservation properties.
 * A nesting option.
+* An ocean solver.
 
 ## Documents
 

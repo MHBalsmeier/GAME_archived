@@ -1,5 +1,5 @@
 /*
-This source file is part of the General Geophysical Modeling Framework (GAME), which is released under the MIT license.
+This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/MHBalsmeier/game
 This implements the modified TRSK scheme by Gassmann (2018).
 */

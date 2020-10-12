@@ -1,5 +1,5 @@
 /*
-This source file is part of the General Geophysical Modeling Framework (GAME), which is released under the MIT license.
+This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/MHBalsmeier/game
 Here, vorticities are calculated. The word "vorticity" hereby refers to both vertical and tangential components.
 */
