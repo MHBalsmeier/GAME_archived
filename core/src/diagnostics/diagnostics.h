@@ -5,6 +5,7 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int calc_mass_diffusion_coeffs(State *, Config_info *, Scalar_field, Scalar_field);
 int calc_temp_diffusion_coeffs(State *, Config_info *, Scalar_field, Scalar_field);
+int calc_kinematic_shear_viscosity_eff(State *, Config_info *, Scalar_field);
 int global_scalar_integrator(Scalar_field, Grid *, double *);
 int recov_hor_par_curl(Curl_field, int, int, double *, Grid *);
 int recov_primal2dual(Vector_field, int, int, double *, Grid *);

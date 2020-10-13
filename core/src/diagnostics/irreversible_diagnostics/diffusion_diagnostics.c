@@ -81,6 +81,19 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 	return 0;
 }
 
+int calc_kinematic_shear_viscosity_eff(State *state, Config_info *config_info, Scalar_field kinematic_shear_viscosity_eff)
+{
+	double mean_particle_mass = M_D/N_A;
+	double eff_particle_radius = 130e-12;
+	double kinematic_shear_viscosity_eff_value;
+	#pragma omp parallel for private(kinematic_shear_viscosity_eff_value)
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> density_dry[i], eff_particle_radius, &kinematic_shear_viscosity_eff_value);
+		kinematic_shear_viscosity_eff[i] = 1e5*kinematic_shear_viscosity_eff_value;
+	}
+	return 0;
+}
 
 int calc_diffusion_coeff(double temperature, double particle_mass, double density, double particle_radius, double *result)
 {

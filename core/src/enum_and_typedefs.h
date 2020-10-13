@@ -149,6 +149,8 @@ Vector_field pressure_gradient_1_dry;
 Vector_field pressure_gradient_1_vapour;
 Vector_field temperature_flux_density;
 Vector_field entropy_dry_flux_density;
+// This is for the momentum diffusion.
+Scalar_field velocity_gas_divv_h;
 } Diagnostics;
 
 // Collects forcings.
@@ -200,6 +202,7 @@ Scalar_field tracer_temperature_flux_density_divv;
 Scalar_field pressure_gradient_decel_factor;
 double tracer_mass_source_rates[NO_OF_TRACERS*NO_OF_SCALARS];
 double tracer_heat_source_rates[NO_OF_TRACERS*NO_OF_SCALARS];
+Scalar_field kinematic_shear_viscosity_eff;
 } Diffusion_info;
 
 // Info on input and output is collected here.
