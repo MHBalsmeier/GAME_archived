@@ -30,7 +30,7 @@ int forward_tendencies(State *current_state, State *state_tendency, Grid *grid, 
 		// In the presence of condensates, the friction acceleration needs to get a deceleration factor.
 		if (config_info -> tracers_on == 1)
 		{
-			scalar_times_vector(diffusion_info -> pressure_gradient_decel_factor, diffusion_info -> friction_acc, diffusion_info -> friction_acc, grid);
+			scalar_times_vector(diffusion_info -> pressure_gradient_decel_factor, diffusion_info -> friction_acc, diffusion_info -> friction_acc, grid, 0);
 		}
 	}
     }

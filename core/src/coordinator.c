@@ -93,13 +93,13 @@ int main(int argc, char *argv[])
 	toa = strtod(argv[22], NULL);
     int no_of_oro_layers_input;
 	no_of_oro_layers_input = strtod(argv[23], NULL);
-	config_info -> mass_dry_diff_h = strtod(argv[24], NULL);
-	config_info -> mass_dry_diff_v = strtod(argv[25], NULL);
+	config_info -> mass_dry_diff_h = strtod(argv[25], NULL);
+	config_info -> mass_dry_diff_v = strtod(argv[26], NULL);
     Io_config *io_config = calloc(1, sizeof(Io_config));
-	io_config -> grib_output_switch = strtod(argv[26], NULL);
-	io_config -> netcdf_output_switch = strtod(argv[27], NULL);
-	io_config -> synop_output_switch = strtod(argv[28], NULL);
-	io_config -> aviation_output_switch = strtod(argv[29], NULL);
+	io_config -> grib_output_switch = strtod(argv[27], NULL);
+	io_config -> netcdf_output_switch = strtod(argv[28], NULL);
+	io_config -> synop_output_switch = strtod(argv[20], NULL);
+	io_config -> aviation_output_switch = strtod(argv[30], NULL);
 	if (io_config -> grib_output_switch == 0 && io_config -> netcdf_output_switch == 0)
 	{
 		printf("Either grib_output_switch or netcdf_output_switch must be set to 1.\n");
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		printf("Horizontal momentum diffusion is turned on.\n");
+		printf("Momentum diffusion is turned on.\n");
 	}
 	printf("reading grid data and checking ... ");
     set_grid_properties(grid, dualgrid, GEO_PROP_FILE);

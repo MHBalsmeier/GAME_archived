@@ -78,7 +78,7 @@ int scalar_times_grad(Scalar_field in_field_for_prefactor, Scalar_field in_field
     {
         out_field[i] = out_field[i - NO_OF_VECTORS_PER_LAYER] + out_field[i - NO_OF_VECTORS_PER_LAYER] - out_field[i - 2*NO_OF_VECTORS_PER_LAYER];
     }
-	scalar_times_vector(in_field_for_prefactor, out_field, out_field, grid);
+	scalar_times_vector(in_field_for_prefactor, out_field, out_field, grid, 0);
 	#pragma omp parallel for private(layer_index, h_index, vertical_component)
     for (int i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
     {

@@ -49,11 +49,11 @@ int integrate_tracers(State *state_old, State *state_new, Interpolate_info *inte
 		            else
 		            	diffusion_info -> tracer_velocity[j] = state_new -> velocity_gas[j];
 		        }
-		        scalar_times_vector(diffusion_info -> tracer_density, diffusion_info -> tracer_velocity, diffusion_info -> tracer_flux_density, grid);
+		        scalar_times_vector(diffusion_info -> tracer_density, diffusion_info -> tracer_velocity, diffusion_info -> tracer_flux_density, grid, 0);
 		        divv_h(diffusion_info -> tracer_flux_density, diffusion_info -> tracer_flux_density_divv, grid);
 				for (int j = 0; j < NO_OF_SCALARS; ++j)
 					diffusion_info -> tracer_density_temperature[j] = state_old -> tracer_density_temperatures[i*NO_OF_SCALARS + j];
-		        scalar_times_vector(diffusion_info -> tracer_density_temperature, diffusion_info -> tracer_velocity, diffusion_info -> tracer_temperature_flux_density, grid);
+		        scalar_times_vector(diffusion_info -> tracer_density_temperature, diffusion_info -> tracer_velocity, diffusion_info -> tracer_temperature_flux_density, grid, 0);
 		        divv_h(diffusion_info -> tracer_temperature_flux_density, diffusion_info -> tracer_temperature_flux_density_divv, grid);
 				for (int j = 0; j < NO_OF_SCALARS; ++j)
 				{

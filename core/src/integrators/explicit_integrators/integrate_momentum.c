@@ -17,9 +17,9 @@ In this source file, the calculation of the explicit part of the momentum equati
 int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Diffusion_info *diffusion_info, Config_info *config_info, int no_step_rk)
 {
 	// Here, the gaseous flux density is prepared for the generalized Coriolis term.
-    scalar_times_vector(state -> density_dry, state -> velocity_gas, diagnostics -> mass_dry_flux_density, grid);
+    scalar_times_vector(state -> density_dry, state -> velocity_gas, diagnostics -> mass_dry_flux_density, grid, 0);
     // Now, the potential vorticity is evaluated.
-    calc_pot_vort(state -> velocity_gas, state -> density_dry, diagnostics -> pot_vort, grid, dualgrid);
+    calc_pot_vort(state -> velocity_gas, state -> density_dry, diagnostics, grid, dualgrid);
     // Now, the generalized Coriolis term is evaluated.
     coriolis_gen(diagnostics -> mass_dry_flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid);
     // Horizontal kinetic energy is prepared for the gradient term of the Lamb transformation.
@@ -46,7 +46,7 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
     		}
         	if (h_index < NO_OF_SCALARS_H)
         	{
-        		state_tendency -> velocity_gas[i] = forcings -> pot_vort_tend[i] - forcings -> e_kin_h_grad[i] + diffusion_info -> friction_acc[i] - grid -> gravity_m[i] + R_D/C_D_P*forcings -> pressure_gradient_acc[i];
+        		state_tendency -> velocity_gas[i] = forcings -> pot_vort_tend[i] - forcings -> e_kin_h_grad[i] - grid -> gravity_m[i] + R_D/C_D_P*forcings -> pressure_gradient_acc[i] + diffusion_info -> friction_acc[i];
     		}
         }
     }

@@ -12,11 +12,11 @@ int integrate_continuity_dry(State *state_old, State *state_new, Interpolate_inf
 	// The dry mass flux density needs to be updated, becasue now, the new velocity value is known. This is a result of the forward-backward scheme.
 	if (no_rk_step == 0)
 	{
-    	scalar_times_vector(state_old -> density_dry, state_new -> velocity_gas, diagnostics -> mass_dry_flux_density, grid);
+    	scalar_times_vector(state_old -> density_dry, state_new -> velocity_gas, diagnostics -> mass_dry_flux_density, grid, 0);
 	}
 	else
 	{
-    	scalar_times_vector(state_new -> density_dry, state_new -> velocity_gas, diagnostics -> mass_dry_flux_density, grid);
+    	scalar_times_vector(state_new -> density_dry, state_new -> velocity_gas, diagnostics -> mass_dry_flux_density, grid, 0);
 	}
     divv_h(diagnostics -> mass_dry_flux_density, forcings -> mass_dry_flux_density_divv, grid);
     // Mass diffusion gets updated here, but only at the last RK step and if mass diffusion is switched on.

@@ -9,10 +9,12 @@ Here, vorticities are calculated. The word "vorticity" hereby refers to both ver
 #include "../diagnostics/diagnostics.h"
 #include "spatial_operators.h"
 
-int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_field out_field, Grid *grid, Dualgrid *dualgrid)
+int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagnostics *diagnostics, Grid *grid, Dualgrid *dualgrid)
 {
 	// It is called "potential vorticity", but it is not Ertel's potential vorticity. It is the absolute vorticity divided by the density.
-	calc_abs_vort(velocity_field, out_field, grid, dualgrid);
+	calc_rel_vort(velocity_field, diagnostics -> rel_vort, grid, dualgrid);
+	// pot_vort is a misuse of name here
+	add_f_to_rel_vort(diagnostics -> rel_vort, diagnostics -> pot_vort, dualgrid);
     int layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index;
     double density_value, from_volume, to_volume, upper_volume, lower_volume;
     #pragma omp parallel for private (layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index, density_value, from_volume, to_volume, upper_volume, lower_volume)
@@ -55,14 +57,13 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Curl_
             	density_value += 0.5*lower_volume/to_volume*density_field[upper_to_index + NO_OF_SCALARS_H];
             }
         }
-		out_field[i] = out_field[i]/density_value;
+		diagnostics -> pot_vort[i] = diagnostics -> pot_vort[i]/density_value;
     }
     return 0;
 }
 
-int calc_abs_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid, Dualgrid *dualgrid)
+int add_f_to_rel_vort(Curl_field rel_vort, Curl_field out_field, Dualgrid *dualgrid)
 {
-	calc_rel_vort(velocity_field, out_field, grid, dualgrid);
     int layer_index, h_index;
     int i;
     #pragma omp parallel for private(i, layer_index, h_index)
@@ -72,11 +73,11 @@ int calc_abs_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
         h_index = i - layer_index*2*NO_OF_VECTORS_H;
         if (h_index >= NO_OF_VECTORS_H)
         {
-       		out_field[i] += dualgrid -> f_vec[h_index];
+       		out_field[i] = rel_vort[i] + dualgrid -> f_vec[h_index];
         }
         else
         {
-   			out_field[i] += dualgrid -> f_vec[h_index];
+   			out_field[i] = rel_vort[i] + dualgrid -> f_vec[h_index];
         }
     }
     return 0;

@@ -4,7 +4,7 @@
 # Github repository: https://github.com/MHBalsmeier/game
 
 game_home_dir=/home/max/compiled/game_dev
-run_id=ullrich_dry_rev
+run_id=ullrich_dry_irrev
 run_span=43200
 output_dir=$game_home_dir/output/$run_id
 grid_props_file=$game_home_dir/grids/B5L26T30000_O2_OL17_SCVT.nc

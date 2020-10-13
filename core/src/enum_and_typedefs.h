@@ -129,7 +129,7 @@ Tracer_densities tracer_densities;
 Tracer_density_temperatures tracer_density_temperatures;
 } State;
 
-// Collects diagnostic quantities. Note: in fact, forcings are also diagnostic quiantities.
+// Collects diagnostic quantities. Note: in fact, forcings are also diagnostic quantities.
 typedef struct diagnostics {
 Vector_field mass_dry_flux_density;
 Vector_field temperature_gradient;
@@ -138,6 +138,7 @@ Scalar_field specific_entropy_vapour;
 Scalar_field pressure_gradient_1_dry_prefactor;
 Scalar_field pressure_gradient_1_vapour_prefactor;
 Scalar_field temperature_gas_explicit;
+Curl_field rel_vort;
 Curl_field pot_vort;
 Scalar_field c_h_v_field;
 Scalar_field c_h_p_field;
@@ -151,6 +152,7 @@ Vector_field temperature_flux_density;
 Vector_field entropy_dry_flux_density;
 // This is for the momentum diffusion.
 Scalar_field velocity_gas_divv;
+Vector_field curl_of_vorticity_m;
 } Diagnostics;
 
 // Collects forcings.

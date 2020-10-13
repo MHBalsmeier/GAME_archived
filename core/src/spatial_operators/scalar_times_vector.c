@@ -6,7 +6,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include "../enum_and_typedefs.h"
 #include <stdio.h>
 
-int scalar_times_vector(Scalar_field in_field_0, Vector_field in_field_1, Vector_field out_field, Grid *grid)
+int scalar_times_vector(Scalar_field in_field_0, Vector_field in_field_1, Vector_field out_field, Grid *grid, int add_bool)
 {
     int layer_index, h_index, lower_index, upper_index;
     double scalar_value, total_volume, upper_volume, lower_volume, upper_weight, lower_weight;
@@ -30,13 +30,19 @@ int scalar_times_vector(Scalar_field in_field_0, Vector_field in_field_1, Vector
             lower_weight = lower_volume/total_volume;
             scalar_value = upper_weight*in_field_0[upper_index] + lower_weight*in_field_0[lower_index];
         }
-        out_field[i] = scalar_value*in_field_1[i];
+        if (add_bool == 0)
+        	out_field[i] = scalar_value*in_field_1[i];
+        else
+        	out_field[i] += scalar_value*in_field_1[i];
     }
     #pragma omp parallel for private(scalar_value)
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
         scalar_value = in_field_0[i] + 0.5*(in_field_0[i] - in_field_0[i + NO_OF_SCALARS_H]);
-        out_field[i] = scalar_value*in_field_1[i];
+        if (add_bool == 0)
+        	out_field[i] = scalar_value*in_field_1[i];
+        else
+        	out_field[i] += scalar_value*in_field_1[i];
     }
     #pragma omp parallel for private(layer_index, h_index, upper_index, scalar_value)
     for (int i = NO_OF_VECTORS - NO_OF_SCALARS_H; i < NO_OF_VECTORS; ++i)
@@ -45,7 +51,10 @@ int scalar_times_vector(Scalar_field in_field_0, Vector_field in_field_1, Vector
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
         upper_index = h_index + (layer_index - 1)*NO_OF_SCALARS_H;
         scalar_value = in_field_0[upper_index] + 0.5*(in_field_0[upper_index] - in_field_0[upper_index - NO_OF_SCALARS_H]);
-        out_field[i] = scalar_value*in_field_1[i];
+        if (add_bool == 0)
+        	out_field[i] = scalar_value*in_field_1[i];
+        else
+        	out_field[i] += scalar_value*in_field_1[i];
     }
     return 0;
 }
