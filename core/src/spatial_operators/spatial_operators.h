@@ -11,6 +11,7 @@ int calc_abs_vort(Vector_field, Curl_field, Grid *, Dualgrid *);
 int coriolis_gen(Vector_field, Dual_vector_field, Vector_field, Grid *);
 int kinetic_energy(Vector_field, Scalar_field, Grid *, int);
 int divv_h(Vector_field, Scalar_field, Grid *);
+int add_vertical_divv(Vector_field, Scalar_field, Grid *);
 int scalar_times_scalar(Scalar_field, Scalar_field, Scalar_field);
 int scalar_times_vector(Scalar_field, Vector_field, Vector_field, Grid *);
 int scalar_times_vector_scalar_h_v(Scalar_field, Scalar_field, Vector_field, Vector_field, Grid *);

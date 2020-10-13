@@ -10,15 +10,18 @@ Github repository: https://github.com/MHBalsmeier/game
 int momentum_diff_diss(State *state, Diagnostics *diagnostics, Diffusion_info *diffusion, Config_info *config_info, Grid *grid)
 {	
 	// Firstly the diffusion.
-	divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv_h, grid);
-        grad(diagnostics -> velocity_gas_divv_h, diffusion -> friction_acc, grid);
-        // Diagnozing the effective (including turbulence) shear viscosity coefficient.
-        calc_kinematic_shear_viscosity_eff(state, config_info, diffusion -> kinematic_shear_viscosity_eff);
-    	scalar_times_vector(diffusion -> kinematic_shear_viscosity_eff, diffusion -> friction_acc, diffusion -> friction_acc, grid);
-    	
+	// Evaluating necessary differential operators.
+	divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
+	add_vertical_divv(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
+        grad(diagnostics -> velocity_gas_divv, diffusion -> friction_acc, grid);
+        // Calculating the effective viscosity coefficients.
+        calc_divv_term_viscosity_eff(state, config_info, diffusion -> divv_term_viscosity_eff);
+        calc_curl_term_viscosity_eff(state, config_info, diffusion -> curl_term_viscosity_eff);
+        // Multiplying the values of the differential operators by the effective viscosities.
+    	scalar_times_vector(diffusion -> divv_term_viscosity_eff, diffusion -> friction_acc, diffusion -> friction_acc, grid);
     	// Then the dissipation (preliminary version).
-	inner_product(state -> velocity_gas, diffusion -> friction_acc, diffusion -> heating_diss, grid);
-	// Now, diagnozing the isobaric specific heat capacity of the humid air (the gas phase) needs to be carried out. 
+    	// to be implemented
+	// Now, the isobaric specific heat capacity of the humid air (the gas phase) needs to be diagnozed. 
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
@@ -31,7 +34,7 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Diffusion_info *d
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		diffusion -> heating_diss[i] = -diagnostics -> c_h_v_field[i]*(state -> density_dry[i] + state -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i])*diffusion -> heating_diss[i];
+		diffusion -> heating_diss[i] = diagnostics -> c_h_v_field[i]*(state -> density_dry[i] + state -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i])*diffusion -> heating_diss[i];
 	}
 	return 0;
 }

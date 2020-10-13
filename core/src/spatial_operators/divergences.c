@@ -20,16 +20,16 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
         comp_h = 0;
         for (j = 0; j < 6; ++j)
         {
-            comp_h += in_field[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]*grid -> adjacent_signs_h[6*h_index + j]*grid -> area[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]];
+			comp_h += in_field[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]*grid -> adjacent_signs_h[6*h_index + j]*grid -> area[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]];
         }
         if (layer_index == 0)
         {
-            comp_v = 0;
+		comp_v = 0;
         }
         else if (layer_index == NO_OF_LAYERS - 1)
         {
-        	vertical_contravariant_normalized_h(in_field, layer_index, h_index, grid, &contra_upper);
-            comp_v = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
+			vertical_contravariant_normalized_h(in_field, layer_index, h_index, grid, &contra_upper);
+		comp_v = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
         }
         else
         {
@@ -46,6 +46,34 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
             comp_v = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - contra_lower*grid -> area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
         }
         out_field[i] = 1/grid -> volume[i]*(comp_h + comp_v);
+    }
+    return 0;
+}
+
+int add_vertical_divv(Vector_field in_field, Scalar_field out_field, Grid *grid)
+{
+	/*
+	This adds the divergence of the vertical component of a vector field to the input scalar field.	
+	*/
+    int layer_index, h_index;
+    double contra_upper, contra_lower, comp_v;
+	#pragma omp parallel for private (layer_index, h_index, contra_upper, contra_lower, comp_v)
+    for (int i = 0; i < NO_OF_SCALARS; ++i)
+    {
+        layer_index = i/NO_OF_SCALARS_H;
+        h_index = i - layer_index*NO_OF_SCALARS_H;
+        if (layer_index == 0)
+        {
+        	contra_upper = 0;
+            	contra_lower = in_field[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
+        }
+        else
+        {
+            contra_upper = in_field[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
+            contra_lower = in_field[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
+        }
+    	comp_v = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - contra_lower*grid -> area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
+        out_field[i] += 1/grid -> volume[i]*comp_v;
     }
     return 0;
 }
