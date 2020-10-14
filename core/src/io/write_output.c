@@ -210,13 +210,20 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     }
     
     int retval;
+	int err = 0;
+	
+	// Synoptical output.
     if (io_config -> synop_output_switch == 1)
     {
+    	double *synoptic_pressure_levels = malloc(sizeof(double)*NO_OF_PRESSURE_LEVELS);
+    	get_synoptic_pressure_levels(synoptic_pressure_levels);
+    	
     	double (*geopotential_height)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
     	double (*t_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
     	double (*rh_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
     	double (*u_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_PRESSURE_LEVELS]));
     	double (*v_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_PRESSURE_LEVELS]));
+    	
 		// Netcdf output.
 		if (io_config -> netcdf_output_switch == 1)
 		{
@@ -227,7 +234,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			free(OUTPUT_FILE_SYNOP_PRE);
 			char *OUTPUT_FILE_SYNOP = malloc((OUTPUT_FILE_SYNOP_LENGTH + 1)*sizeof(char));
 			sprintf(OUTPUT_FILE_SYNOP, "output/%s/%s+%ds_synop.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
-			int ncid_synop, scalar_h_dimid, vector_h_dimid, level_dimid, geopot_height_id, temp_synop_id, rh_synop_id, wind_u_synop_id, wind_v_synop_id;
+			int ncid_synop, scalar_h_dimid, vector_h_dimid, level_dimid, geopot_height_id, temp_synop_id, rh_synop_id, wind_u_synop_id, wind_v_synop_id, synoptic_pressure_levels_id;
 			
 			if ((retval = nc_create(OUTPUT_FILE_SYNOP, NC_CLOBBER, &ncid_synop)))
 				NCERR(retval);
@@ -245,6 +252,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			dimids_synop_vector[0] = vector_h_dimid;
 			dimids_synop_vector[1] = level_dimid;
 			// Defining the variables.
+			if ((retval = nc_def_var(ncid_synop, "pressure_levels", NC_DOUBLE, 1, &level_dimid, &synoptic_pressure_levels_id)))
+				NCERR(retval);
+			if ((retval = nc_put_att_text(ncid_synop, synoptic_pressure_levels_id, "units", strlen("Pa"), "Pa")))
+				NCERR(retval);
 			if ((retval = nc_def_var(ncid_synop, "geopotential_height", NC_DOUBLE, 2, dimids_synop_scalar, &geopot_height_id)))
 				NCERR(retval);
 			if ((retval = nc_put_att_text(ncid_synop, geopot_height_id, "units", strlen("gpm"), "gpm")))
@@ -269,6 +280,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				NCERR(retval);
 			
 			// Writing the arrays.
+			if ((retval = nc_put_var_double(ncid_synop, synoptic_pressure_levels_id, &synoptic_pressure_levels[0])))
+				NCERR(retval);
 			if ((retval = nc_put_var_double(ncid_synop, geopot_height_id, &geopotential_height[0][0])))
 				NCERR(retval);
 			if ((retval = nc_put_var_double(ncid_synop, temp_synop_id, &t_on_pressure_levels[0][0])))
@@ -284,85 +297,376 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if ((retval = nc_close(ncid_synop)))
 				NCERR(retval);
 		}
+		
+		// Grib output.
+		if (io_config -> grib_output_switch == 1)
+		{
+			char *SAMPLE_FILENAME = "./input/grib_template.grb2";
+			FILE *SAMPLE_FILE;
+			int OUTPUT_FILE_SYNOP_LENGTH = 300;
+			char *OUTPUT_FILE_SYNOP_PRE = malloc((OUTPUT_FILE_SYNOP_LENGTH + 1)*sizeof(char));
+			sprintf(OUTPUT_FILE_SYNOP_PRE, "output/%s/%s+%ds_synop.grb2", RUN_ID, RUN_ID, (int) (t_write - t_init));
+			OUTPUT_FILE_SYNOP_LENGTH = strlen(OUTPUT_FILE_SYNOP_PRE);
+			free(OUTPUT_FILE_SYNOP_PRE);
+			char *OUTPUT_FILE_SYNOP = malloc((OUTPUT_FILE_SYNOP_LENGTH + 1)*sizeof(char));
+			sprintf(OUTPUT_FILE_SYNOP, "output/%s/%s+%ds_synop.grb2", RUN_ID, RUN_ID, (int) (t_write - t_init));
+			FILE *OUT_GRIB;
+			OUT_GRIB = fopen(OUTPUT_FILE_SYNOP, "w+");
+			
+			double *geopotential_height_pressure_level = malloc(NO_OF_SCALARS_H*sizeof(double));
+			double *temperature_pressure_level = malloc(NO_OF_SCALARS_H*sizeof(double));
+			double *rh_pressure_level = malloc(NO_OF_SCALARS_H*sizeof(double));
+			double *wind_u_pressure_level = malloc(NO_OF_VECTORS_H*sizeof(double));
+			double *wind_v_pressure_level = malloc(NO_OF_VECTORS_H*sizeof(double));
+			
+			codes_handle *handle_geopotential_height_pressure_level = NULL;
+			codes_handle *handle_temperature_pressure_level = NULL;
+			codes_handle *handle_rh_pressure_level = NULL;
+			codes_handle *handle_wind_u_pressure_level = NULL;
+			codes_handle *handle_wind_v_pressure_level = NULL;
+			
+			for (int i = 0; i < NO_OF_PRESSURE_LEVELS; ++i)
+			{
+				for (int j = 0; j < NO_OF_SCALARS_H; ++j)
+					geopotential_height_pressure_level[j] = geopotential_height[j][i];
+				for (int j = 0; j < NO_OF_SCALARS_H; ++j)
+					temperature_pressure_level[j] = t_on_pressure_levels[j][i];
+				for (int j = 0; j < NO_OF_SCALARS_H; ++j)
+					rh_pressure_level[j] = rh_on_pressure_levels[j][i];
+				for (int j = 0; j < NO_OF_VECTORS_H; ++j)
+					wind_u_pressure_level[j] = u_on_pressure_levels[j][i];
+				for (int j = 0; j < NO_OF_VECTORS_H; ++j)
+					wind_v_pressure_level[j] = v_on_pressure_levels[j][i];
+				
+				SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
+				handle_geopotential_height_pressure_level = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
+				if (err != 0)
+					ECCERR(err);
+				fclose(SAMPLE_FILE);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "discipline", 0)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "centre", 255)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "significanceOfReferenceTime", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "productionStatusOfProcessedData", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "typeOfProcessedData", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "indicatorOfUnitOfTimeRange", 13)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "stepUnits", 13)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "dataDate", data_date)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "dataTime", data_time)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "forecastTime", t_write - t_init)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "stepRange", t_write - t_init)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "typeOfGeneratingProcess", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "parameterCategory", 3)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "parameterNumber", 5)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "typeOfFirstFixedSurface", 100)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "scaledValueOfFirstFixedSurface", (int) synoptic_pressure_levels[i])))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "scaleFactorOfFirstFixedSurface", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "level", 0.01*synoptic_pressure_levels[i])))
+			        ECCERR(retval);
+			    if ((retval = codes_set_double_array(handle_geopotential_height_pressure_level, "values", temperature_pressure_level, NO_OF_SCALARS_H)))
+			        ECCERR(retval);
+			    if ((retval = codes_write_message(handle_geopotential_height_pressure_level, OUTPUT_FILE_SYNOP, "a")))
+			        ECCERR(retval);
+				codes_handle_delete(handle_geopotential_height_pressure_level);
+
+				SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
+				handle_temperature_pressure_level = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
+				if (err != 0)
+					ECCERR(err);
+				fclose(SAMPLE_FILE);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "discipline", 0)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "centre", 255)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "significanceOfReferenceTime", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "productionStatusOfProcessedData", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "typeOfProcessedData", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "indicatorOfUnitOfTimeRange", 13)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "stepUnits", 13)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "dataDate", data_date)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "dataTime", data_time)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "forecastTime", t_write - t_init)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "stepRange", t_write - t_init)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "typeOfGeneratingProcess", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "parameterCategory", 0)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "parameterNumber", 0)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "typeOfFirstFixedSurface", 100)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "scaledValueOfFirstFixedSurface", (int) synoptic_pressure_levels[i])))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "scaleFactorOfFirstFixedSurface", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "level", 0.01*synoptic_pressure_levels[i])))
+			        ECCERR(retval);
+			    if ((retval = codes_set_double_array(handle_temperature_pressure_level, "values", temperature_pressure_level, NO_OF_SCALARS_H)))
+			        ECCERR(retval);
+			    if ((retval = codes_write_message(handle_temperature_pressure_level, OUTPUT_FILE_SYNOP, "a")))
+			        ECCERR(retval);
+				codes_handle_delete(handle_temperature_pressure_level);
+				
+				SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
+				handle_rh_pressure_level = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
+				if (err != 0)
+					ECCERR(err);
+				fclose(SAMPLE_FILE);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "discipline", 0)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "centre", 255)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "significanceOfReferenceTime", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "productionStatusOfProcessedData", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "typeOfProcessedData", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "indicatorOfUnitOfTimeRange", 13)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "stepUnits", 13)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "dataDate", data_date)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "dataTime", data_time)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "forecastTime", t_write - t_init)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "stepRange", t_write - t_init)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "typeOfGeneratingProcess", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "parameterCategory", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "parameterNumber", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "typeOfFirstFixedSurface", 100)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "scaledValueOfFirstFixedSurface", (int) synoptic_pressure_levels[i])))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "scaleFactorOfFirstFixedSurface", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "level", 0.01*synoptic_pressure_levels[i])))
+			        ECCERR(retval);
+			    if ((retval = codes_set_double_array(handle_rh_pressure_level, "values", rh_pressure_level, NO_OF_SCALARS_H)))
+			        ECCERR(retval);
+			    if ((retval = codes_write_message(handle_rh_pressure_level, OUTPUT_FILE_SYNOP, "a")))
+			        ECCERR(retval);
+				codes_handle_delete(handle_rh_pressure_level);
+				
+				SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
+				handle_wind_u_pressure_level = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
+				if (err != 0)
+					ECCERR(err);
+				fclose(SAMPLE_FILE);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "discipline", 0)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "centre", 255)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "significanceOfReferenceTime", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "productionStatusOfProcessedData", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "typeOfProcessedData", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "indicatorOfUnitOfTimeRange", 13)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "stepUnits", 13)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "dataDate", data_date)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "dataTime", data_time)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "forecastTime", t_write - t_init)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "stepRange", t_write - t_init)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "typeOfGeneratingProcess", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "parameterCategory", 2)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "parameterNumber", 2)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "typeOfFirstFixedSurface", 100)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "scaledValueOfFirstFixedSurface", (int) synoptic_pressure_levels[i])))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "scaleFactorOfFirstFixedSurface", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "level", 0.01*synoptic_pressure_levels[i])))
+			        ECCERR(retval);
+			    if ((retval = codes_set_double_array(handle_wind_u_pressure_level, "values", wind_u_pressure_level, NO_OF_VECTORS_H)))
+			        ECCERR(retval);
+			    if ((retval = codes_write_message(handle_wind_u_pressure_level, OUTPUT_FILE_SYNOP, "a")))
+			        ECCERR(retval);
+				codes_handle_delete(handle_wind_u_pressure_level);
+				
+				SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
+				handle_wind_v_pressure_level = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
+				if (err != 0)
+					ECCERR(err);
+				fclose(SAMPLE_FILE);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "discipline", 0)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "centre", 255)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "significanceOfReferenceTime", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "productionStatusOfProcessedData", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "typeOfProcessedData", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "indicatorOfUnitOfTimeRange", 13)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "stepUnits", 13)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "dataDate", data_date)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "dataTime", data_time)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "forecastTime", t_write - t_init)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "stepRange", t_write - t_init)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "typeOfGeneratingProcess", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "parameterCategory", 2)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "parameterNumber", 3)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "typeOfFirstFixedSurface", 100)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "scaledValueOfFirstFixedSurface", (int) synoptic_pressure_levels[i])))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "scaleFactorOfFirstFixedSurface", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "level", 0.01*synoptic_pressure_levels[i])))
+			        ECCERR(retval);
+			    if ((retval = codes_set_double_array(handle_wind_v_pressure_level, "values", wind_v_pressure_level, NO_OF_VECTORS_H)))
+			        ECCERR(retval);
+			    if ((retval = codes_write_message(handle_wind_v_pressure_level, OUTPUT_FILE_SYNOP, "a")))
+			        ECCERR(retval);
+				codes_handle_delete(handle_wind_v_pressure_level);
+			}
+			
+			free(geopotential_height_pressure_level);
+			free(temperature_pressure_level);
+			free(rh_pressure_level);
+			free(wind_u_pressure_level);
+			free(wind_v_pressure_level);
+			
+			fclose(OUT_GRIB);
+		}
     	free(geopotential_height);
     	free(t_on_pressure_levels);
     	free(rh_on_pressure_levels);
     	free(u_on_pressure_levels);
     	free(v_on_pressure_levels);
+    	free(synoptic_pressure_levels);
     }
 
+	// Aviation output.
     if (io_config -> aviation_output_switch == 1)
     {
+    	double *flight_levels = malloc(sizeof(double)*NO_OF_FLIGHT_LEVELS);
+    	get_flight_levels(flight_levels);
+    	
     	double (*t_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_FLIGHT_LEVELS]));
     	double (*rh_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_FLIGHT_LEVELS]));
     	double (*u_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_FLIGHT_LEVELS]));
     	double (*v_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_FLIGHT_LEVELS]));
-		// Netcdf output.
-		if (io_config -> netcdf_output_switch == 1)
-		{
-			int OUTPUT_FILE_AVIATION_LENGTH = 300;
-			char *OUTPUT_FILE_AVIATION_PRE = malloc((OUTPUT_FILE_AVIATION_LENGTH + 1)*sizeof(char));
-			sprintf(OUTPUT_FILE_AVIATION_PRE, "output/%s/%s+%ds_aviation.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
-			OUTPUT_FILE_AVIATION_LENGTH = strlen(OUTPUT_FILE_AVIATION_PRE);
-			free(OUTPUT_FILE_AVIATION_PRE);
-			char *OUTPUT_FILE_AVIATION = malloc((OUTPUT_FILE_AVIATION_LENGTH + 1)*sizeof(char));
-			sprintf(OUTPUT_FILE_AVIATION, "output/%s/%s+%ds_aviation.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
-			int ncid_aviation, scalar_h_dimid, vector_h_dimid, level_dimid, temp_aviation_id, rh_aviation_id, wind_u_aviation_id, wind_v_aviation_id;
-			
-			if ((retval = nc_create(OUTPUT_FILE_AVIATION, NC_CLOBBER, &ncid_aviation)))
-				NCERR(retval);
-			free(OUTPUT_FILE_AVIATION);
-			if ((retval = nc_def_dim(ncid_aviation, "scalar_index_h", NO_OF_SCALARS_H, &scalar_h_dimid)))
-				NCERR(retval);
-			if ((retval = nc_def_dim(ncid_aviation, "vector_index_h", NO_OF_VECTORS_H, &vector_h_dimid)))
-				NCERR(retval);
-			if ((retval = nc_def_dim(ncid_aviation, "level_index", NO_OF_FLIGHT_LEVELS, &level_dimid)))
-				NCERR(retval);
-			int dimids_aviation_scalar[2];
-			dimids_aviation_scalar[0] = scalar_h_dimid;
-			dimids_aviation_scalar[1] = level_dimid;
-			int dimids_aviation_vector[2];
-			dimids_aviation_vector[0] = vector_h_dimid;
-			dimids_aviation_vector[1] = level_dimid;
-			
-			// Defining the variables.
-			if ((retval = nc_def_var(ncid_aviation, "temperature", NC_DOUBLE, 2, dimids_aviation_scalar, &temp_aviation_id)))
-				NCERR(retval);
-			if ((retval = nc_put_att_text(ncid_aviation, temp_aviation_id, "units", strlen("K"), "K")))
-				NCERR(retval);
-			if ((retval = nc_def_var(ncid_aviation, "relative_humidity", NC_DOUBLE, 2, dimids_aviation_scalar, &rh_aviation_id)))
-				NCERR(retval);
-			if ((retval = nc_put_att_text(ncid_aviation, rh_aviation_id, "units", strlen("%"), "%")))
-				NCERR(retval);
-			if ((retval = nc_def_var(ncid_aviation, "wind_u", NC_DOUBLE, 2, dimids_aviation_vector, &wind_u_aviation_id)))
-				NCERR(retval);
-			if ((retval = nc_put_att_text(ncid_aviation, wind_u_aviation_id, "units", strlen("m/s"), "m/s")))
-				NCERR(retval);
-			if ((retval = nc_def_var(ncid_aviation, "wind_v", NC_DOUBLE, 2, dimids_aviation_vector, &wind_v_aviation_id)))
-				NCERR(retval);
-			if ((retval = nc_put_att_text(ncid_aviation, wind_v_aviation_id, "units", strlen("m/s"), "m/s")))
-				NCERR(retval);
-			if ((retval = nc_enddef(ncid_aviation)))
-				NCERR(retval);
-			
-			// Writing the arrays.
-			if ((retval = nc_put_var_double(ncid_aviation, temp_aviation_id, &t_on_flight_levels[0][0])))
-				NCERR(retval);
-			if ((retval = nc_put_var_double(ncid_aviation, rh_aviation_id, &rh_on_flight_levels[0][0])))
-				NCERR(retval);
-			if ((retval = nc_put_var_double(ncid_aviation, wind_u_aviation_id, &u_on_flight_levels[0][0])))
-				NCERR(retval);
-			if ((retval = nc_put_var_double(ncid_aviation, wind_v_aviation_id, &v_on_flight_levels[0][0])))
-				NCERR(retval);
-			
-			// Closing the netcdf file.
-			if ((retval = nc_close(ncid_aviation)))
-				NCERR(retval);
-		}
+		int OUTPUT_FILE_AVIATION_LENGTH = 300;
+		char *OUTPUT_FILE_AVIATION_PRE = malloc((OUTPUT_FILE_AVIATION_LENGTH + 1)*sizeof(char));
+		sprintf(OUTPUT_FILE_AVIATION_PRE, "output/%s/%s+%ds_aviation.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
+		OUTPUT_FILE_AVIATION_LENGTH = strlen(OUTPUT_FILE_AVIATION_PRE);
+		free(OUTPUT_FILE_AVIATION_PRE);
+		char *OUTPUT_FILE_AVIATION = malloc((OUTPUT_FILE_AVIATION_LENGTH + 1)*sizeof(char));
+		sprintf(OUTPUT_FILE_AVIATION, "output/%s/%s+%ds_aviation.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
+		int ncid_aviation, scalar_h_dimid, vector_h_dimid, level_dimid, temp_aviation_id, rh_aviation_id, wind_u_aviation_id, wind_v_aviation_id, flight_levels_id;
+		
+		if ((retval = nc_create(OUTPUT_FILE_AVIATION, NC_CLOBBER, &ncid_aviation)))
+			NCERR(retval);
+		free(OUTPUT_FILE_AVIATION);
+		if ((retval = nc_def_dim(ncid_aviation, "scalar_index_h", NO_OF_SCALARS_H, &scalar_h_dimid)))
+			NCERR(retval);
+		if ((retval = nc_def_dim(ncid_aviation, "vector_index_h", NO_OF_VECTORS_H, &vector_h_dimid)))
+			NCERR(retval);
+		if ((retval = nc_def_dim(ncid_aviation, "level_index", NO_OF_FLIGHT_LEVELS, &level_dimid)))
+			NCERR(retval);
+		int dimids_aviation_scalar[2];
+		dimids_aviation_scalar[0] = scalar_h_dimid;
+		dimids_aviation_scalar[1] = level_dimid;
+		int dimids_aviation_vector[2];
+		dimids_aviation_vector[0] = vector_h_dimid;
+		dimids_aviation_vector[1] = level_dimid;
+		
+		// Defining the variables.
+		if ((retval = nc_def_var(ncid_aviation, "flight_levels", NC_DOUBLE, 1, &level_dimid, &flight_levels_id)))
+			NCERR(retval);
+		if ((retval = nc_put_att_text(ncid_aviation, flight_levels_id, "units", strlen("1"), "1")))
+			NCERR(retval);
+		if ((retval = nc_def_var(ncid_aviation, "temperature", NC_DOUBLE, 2, dimids_aviation_scalar, &temp_aviation_id)))
+			NCERR(retval);
+		if ((retval = nc_put_att_text(ncid_aviation, temp_aviation_id, "units", strlen("K"), "K")))
+			NCERR(retval);
+		if ((retval = nc_def_var(ncid_aviation, "relative_humidity", NC_DOUBLE, 2, dimids_aviation_scalar, &rh_aviation_id)))
+			NCERR(retval);
+		if ((retval = nc_put_att_text(ncid_aviation, rh_aviation_id, "units", strlen("%"), "%")))
+			NCERR(retval);
+		if ((retval = nc_def_var(ncid_aviation, "wind_u", NC_DOUBLE, 2, dimids_aviation_vector, &wind_u_aviation_id)))
+			NCERR(retval);
+		if ((retval = nc_put_att_text(ncid_aviation, wind_u_aviation_id, "units", strlen("m/s"), "m/s")))
+			NCERR(retval);
+		if ((retval = nc_def_var(ncid_aviation, "wind_v", NC_DOUBLE, 2, dimids_aviation_vector, &wind_v_aviation_id)))
+			NCERR(retval);
+		if ((retval = nc_put_att_text(ncid_aviation, wind_v_aviation_id, "units", strlen("m/s"), "m/s")))
+			NCERR(retval);
+		if ((retval = nc_enddef(ncid_aviation)))
+			NCERR(retval);
+		
+		// Writing the arrays.
+		if ((retval = nc_put_var_double(ncid_aviation, temp_aviation_id, &t_on_flight_levels[0][0])))
+			NCERR(retval);
+		if ((retval = nc_put_var_double(ncid_aviation, rh_aviation_id, &rh_on_flight_levels[0][0])))
+			NCERR(retval);
+		if ((retval = nc_put_var_double(ncid_aviation, wind_u_aviation_id, &u_on_flight_levels[0][0])))
+			NCERR(retval);
+		if ((retval = nc_put_var_double(ncid_aviation, wind_v_aviation_id, &v_on_flight_levels[0][0])))
+			NCERR(retval);
+		
+		// Closing the netcdf file.
+		if ((retval = nc_close(ncid_aviation)))
+			NCERR(retval);
     	free(t_on_flight_levels);
     	free(rh_on_flight_levels);
     	free(u_on_flight_levels);
     	free(v_on_flight_levels);
+    	free(flight_levels);
     }
     
     // Grib output.
@@ -387,7 +691,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		sprintf(OUTPUT_FILE, "output/%s/%s+%ds.grb2", RUN_ID, RUN_ID, (int) (t_write - t_init));
 		char *SAMPLE_FILENAME = "./input/grib_template.grb2";
 		FILE *SAMPLE_FILE;
-		int err = 0;
 		if (t_init < 0)
 			exit(1);
 		FILE *OUT_GRIB;
