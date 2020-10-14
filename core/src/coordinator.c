@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
     Io_config *io_config = calloc(1, sizeof(Io_config));
 	io_config -> grib_output_switch = strtod(argv[27], NULL);
 	io_config -> netcdf_output_switch = strtod(argv[28], NULL);
-	io_config -> synop_output_switch = strtod(argv[20], NULL);
+	io_config -> synop_output_switch = strtod(argv[29], NULL);
 	io_config -> aviation_output_switch = strtod(argv[30], NULL);
 	if (io_config -> grib_output_switch == 0 && io_config -> netcdf_output_switch == 0)
 	{

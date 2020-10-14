@@ -31,7 +31,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	
 	// Time stuff.
 	int write_out_divv_h;
-	get_write_settings(&write_out_divv_h);
+	ask_for_divergence_output(&write_out_divv_h);
     time_t t_init_tt = (time_t) t_init;
     struct tm *p_init_time = gmtime(&t_init_tt);
     int init_year = p_init_time -> tm_year;
@@ -209,6 +209,162 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     	(*pressure)[i] = (state_write_out -> tracer_densities[2*NO_OF_SCALARS + i]*R_V + state_write_out -> density_dry[i]*R_D)*state_write_out -> temperature_gas[i];
     }
     
+    int retval;
+    if (io_config -> synop_output_switch == 1)
+    {
+    	double (*geopotential_height)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
+    	double (*t_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
+    	double (*rh_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
+    	double (*u_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_PRESSURE_LEVELS]));
+    	double (*v_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_PRESSURE_LEVELS]));
+		// Netcdf output.
+		if (io_config -> netcdf_output_switch == 1)
+		{
+			int OUTPUT_FILE_SYNOP_LENGTH = 300;
+			char *OUTPUT_FILE_SYNOP_PRE = malloc((OUTPUT_FILE_SYNOP_LENGTH + 1)*sizeof(char));
+			sprintf(OUTPUT_FILE_SYNOP_PRE, "output/%s/%s+%ds_synop.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
+			OUTPUT_FILE_SYNOP_LENGTH = strlen(OUTPUT_FILE_SYNOP_PRE);
+			free(OUTPUT_FILE_SYNOP_PRE);
+			char *OUTPUT_FILE_SYNOP = malloc((OUTPUT_FILE_SYNOP_LENGTH + 1)*sizeof(char));
+			sprintf(OUTPUT_FILE_SYNOP, "output/%s/%s+%ds_synop.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
+			int ncid_synop, scalar_h_dimid, vector_h_dimid, level_dimid, geopot_height_id, temp_synop_id, rh_synop_id, wind_u_synop_id, wind_v_synop_id;
+			
+			if ((retval = nc_create(OUTPUT_FILE_SYNOP, NC_CLOBBER, &ncid_synop)))
+				NCERR(retval);
+			free(OUTPUT_FILE_SYNOP);
+			if ((retval = nc_def_dim(ncid_synop, "scalar_index_h", NO_OF_SCALARS_H, &scalar_h_dimid)))
+				NCERR(retval);
+			if ((retval = nc_def_dim(ncid_synop, "vector_index_h", NO_OF_VECTORS_H, &vector_h_dimid)))
+				NCERR(retval);
+			if ((retval = nc_def_dim(ncid_synop, "level_index", NO_OF_PRESSURE_LEVELS, &level_dimid)))
+				NCERR(retval);
+			int dimids_synop_scalar[2];
+			dimids_synop_scalar[0] = scalar_h_dimid;
+			dimids_synop_scalar[1] = level_dimid;
+			int dimids_synop_vector[2];
+			dimids_synop_vector[0] = vector_h_dimid;
+			dimids_synop_vector[1] = level_dimid;
+			// Defining the variables.
+			if ((retval = nc_def_var(ncid_synop, "geopotential_height", NC_DOUBLE, 2, dimids_synop_scalar, &geopot_height_id)))
+				NCERR(retval);
+			if ((retval = nc_put_att_text(ncid_synop, geopot_height_id, "units", strlen("gpm"), "gpm")))
+				NCERR(retval);
+			if ((retval = nc_def_var(ncid_synop, "temperature", NC_DOUBLE, 2, dimids_synop_scalar, &temp_synop_id)))
+				NCERR(retval);
+			if ((retval = nc_put_att_text(ncid_synop, temp_synop_id, "units", strlen("K"), "K")))
+				NCERR(retval);
+			if ((retval = nc_def_var(ncid_synop, "relative_humidity", NC_DOUBLE, 2, dimids_synop_scalar, &rh_synop_id)))
+				NCERR(retval);
+			if ((retval = nc_put_att_text(ncid_synop, rh_synop_id, "units", strlen("%"), "%")))
+				NCERR(retval);
+			if ((retval = nc_def_var(ncid_synop, "wind_u", NC_DOUBLE, 2, dimids_synop_vector, &wind_u_synop_id)))
+				NCERR(retval);
+			if ((retval = nc_put_att_text(ncid_synop, wind_u_synop_id, "units", strlen("m/s"), "m/s")))
+				NCERR(retval);
+			if ((retval = nc_def_var(ncid_synop, "wind_v", NC_DOUBLE, 2, dimids_synop_vector, &wind_v_synop_id)))
+				NCERR(retval);
+			if ((retval = nc_put_att_text(ncid_synop, wind_v_synop_id, "units", strlen("m/s"), "m/s")))
+				NCERR(retval);
+			if ((retval = nc_enddef(ncid_synop)))
+				NCERR(retval);
+			
+			// Writing the arrays.
+			if ((retval = nc_put_var_double(ncid_synop, geopot_height_id, &geopotential_height[0][0])))
+				NCERR(retval);
+			if ((retval = nc_put_var_double(ncid_synop, temp_synop_id, &t_on_pressure_levels[0][0])))
+				NCERR(retval);
+			if ((retval = nc_put_var_double(ncid_synop, rh_synop_id, &rh_on_pressure_levels[0][0])))
+				NCERR(retval);
+			if ((retval = nc_put_var_double(ncid_synop, wind_u_synop_id, &u_on_pressure_levels[0][0])))
+				NCERR(retval);
+			if ((retval = nc_put_var_double(ncid_synop, wind_v_synop_id, &v_on_pressure_levels[0][0])))
+				NCERR(retval);
+			
+			// Closing the netcdf file.
+			if ((retval = nc_close(ncid_synop)))
+				NCERR(retval);
+		}
+    	free(geopotential_height);
+    	free(t_on_pressure_levels);
+    	free(rh_on_pressure_levels);
+    	free(u_on_pressure_levels);
+    	free(v_on_pressure_levels);
+    }
+
+    if (io_config -> aviation_output_switch == 1)
+    {
+    	double (*t_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_FLIGHT_LEVELS]));
+    	double (*rh_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_FLIGHT_LEVELS]));
+    	double (*u_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_FLIGHT_LEVELS]));
+    	double (*v_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_FLIGHT_LEVELS]));
+		// Netcdf output.
+		if (io_config -> netcdf_output_switch == 1)
+		{
+			int OUTPUT_FILE_AVIATION_LENGTH = 300;
+			char *OUTPUT_FILE_AVIATION_PRE = malloc((OUTPUT_FILE_AVIATION_LENGTH + 1)*sizeof(char));
+			sprintf(OUTPUT_FILE_AVIATION_PRE, "output/%s/%s+%ds_aviation.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
+			OUTPUT_FILE_AVIATION_LENGTH = strlen(OUTPUT_FILE_AVIATION_PRE);
+			free(OUTPUT_FILE_AVIATION_PRE);
+			char *OUTPUT_FILE_AVIATION = malloc((OUTPUT_FILE_AVIATION_LENGTH + 1)*sizeof(char));
+			sprintf(OUTPUT_FILE_AVIATION, "output/%s/%s+%ds_aviation.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
+			int ncid_aviation, scalar_h_dimid, vector_h_dimid, level_dimid, temp_aviation_id, rh_aviation_id, wind_u_aviation_id, wind_v_aviation_id;
+			
+			if ((retval = nc_create(OUTPUT_FILE_AVIATION, NC_CLOBBER, &ncid_aviation)))
+				NCERR(retval);
+			free(OUTPUT_FILE_AVIATION);
+			if ((retval = nc_def_dim(ncid_aviation, "scalar_index_h", NO_OF_SCALARS_H, &scalar_h_dimid)))
+				NCERR(retval);
+			if ((retval = nc_def_dim(ncid_aviation, "vector_index_h", NO_OF_VECTORS_H, &vector_h_dimid)))
+				NCERR(retval);
+			if ((retval = nc_def_dim(ncid_aviation, "level_index", NO_OF_FLIGHT_LEVELS, &level_dimid)))
+				NCERR(retval);
+			int dimids_aviation_scalar[2];
+			dimids_aviation_scalar[0] = scalar_h_dimid;
+			dimids_aviation_scalar[1] = level_dimid;
+			int dimids_aviation_vector[2];
+			dimids_aviation_vector[0] = vector_h_dimid;
+			dimids_aviation_vector[1] = level_dimid;
+			
+			// Defining the variables.
+			if ((retval = nc_def_var(ncid_aviation, "temperature", NC_DOUBLE, 2, dimids_aviation_scalar, &temp_aviation_id)))
+				NCERR(retval);
+			if ((retval = nc_put_att_text(ncid_aviation, temp_aviation_id, "units", strlen("K"), "K")))
+				NCERR(retval);
+			if ((retval = nc_def_var(ncid_aviation, "relative_humidity", NC_DOUBLE, 2, dimids_aviation_scalar, &rh_aviation_id)))
+				NCERR(retval);
+			if ((retval = nc_put_att_text(ncid_aviation, rh_aviation_id, "units", strlen("%"), "%")))
+				NCERR(retval);
+			if ((retval = nc_def_var(ncid_aviation, "wind_u", NC_DOUBLE, 2, dimids_aviation_vector, &wind_u_aviation_id)))
+				NCERR(retval);
+			if ((retval = nc_put_att_text(ncid_aviation, wind_u_aviation_id, "units", strlen("m/s"), "m/s")))
+				NCERR(retval);
+			if ((retval = nc_def_var(ncid_aviation, "wind_v", NC_DOUBLE, 2, dimids_aviation_vector, &wind_v_aviation_id)))
+				NCERR(retval);
+			if ((retval = nc_put_att_text(ncid_aviation, wind_v_aviation_id, "units", strlen("m/s"), "m/s")))
+				NCERR(retval);
+			if ((retval = nc_enddef(ncid_aviation)))
+				NCERR(retval);
+			
+			// Writing the arrays.
+			if ((retval = nc_put_var_double(ncid_aviation, temp_aviation_id, &t_on_flight_levels[0][0])))
+				NCERR(retval);
+			if ((retval = nc_put_var_double(ncid_aviation, rh_aviation_id, &rh_on_flight_levels[0][0])))
+				NCERR(retval);
+			if ((retval = nc_put_var_double(ncid_aviation, wind_u_aviation_id, &u_on_flight_levels[0][0])))
+				NCERR(retval);
+			if ((retval = nc_put_var_double(ncid_aviation, wind_v_aviation_id, &v_on_flight_levels[0][0])))
+				NCERR(retval);
+			
+			// Closing the netcdf file.
+			if ((retval = nc_close(ncid_aviation)))
+				NCERR(retval);
+		}
+    	free(t_on_flight_levels);
+    	free(rh_on_flight_levels);
+    	free(u_on_flight_levels);
+    	free(v_on_flight_levels);
+    }
+    
     // Grib output.
     if (io_config -> grib_output_switch == 1)
     {
@@ -232,7 +388,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		char *SAMPLE_FILENAME = "./input/grib_template.grb2";
 		FILE *SAMPLE_FILE;
 		int err = 0;
-		int retval;
 		if (t_init < 0)
 			exit(1);
 		FILE *OUT_GRIB;

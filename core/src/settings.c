@@ -3,25 +3,54 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/MHBalsmeier/game
 */
 
+/*
+In this file, the model run and I/O configurations can be set, which are not accessible via the run script.
+*/
 
-
-// This is for Klemp (2008).
-// This is where the damping starts in relation to the TOA. 0.75, for example, means that the upper 25 % of the atmosphere are affected by Klemp damping.
-const double DAMPING_START_HEIGHT_OVER_TOA = 0.75;
-// The maximum damping coefficient (the damping coefficient increases towards the TOA).
-const double DAMPING_COEFF_MAX = 0.2;
-// Wether or not horizontal wind divergence shall be written out.
-const int WRITE_OUT_DIVV_H = 1;
-
+// This is for the Klemp (2008) upper boundary damping layer.
 int get_damping_layer_properties(double *damping_start_height_over_toa, double *damping_coeff_max)
 {
-	 *damping_start_height_over_toa = DAMPING_START_HEIGHT_OVER_TOA;
-	 *damping_coeff_max = DAMPING_COEFF_MAX;
+	// This is where the damping starts in relation to the TOA. 0.75, for example, means that the upper 25 % of the atmosphere are affected by Klemp damping.
+	*damping_start_height_over_toa = 0.75;
+	// The maximum damping coefficient (the damping coefficient increases towards the TOA).
+	*damping_coeff_max = 0.2;
 	return 0;
 }
 
-int get_write_settings(int *write_out_divv_h)
+// Wether or not horizontal wind divergence shall be written out.
+int ask_for_divergence_output(int *write_out_divv_h)
 {
-	*write_out_divv_h = WRITE_OUT_DIVV_H;
+	*write_out_divv_h = 1;
 	return 0;
 }
+
+// This function returns the pressure levels for the synoptic output.
+int get_synoptic_pressure_levels(double synoptic_pressure_levels[])
+{
+	synoptic_pressure_levels[0] = 20000;
+	synoptic_pressure_levels[1] = 30000;
+	synoptic_pressure_levels[2] = 50000;
+	synoptic_pressure_levels[3] = 70000;
+	synoptic_pressure_levels[4] = 85000;
+	synoptic_pressure_levels[5] = 92500;
+	return 0;
+}
+
+// This function returns the flight levels for the aviation output.
+int get_flight_levels(double flight_levels[])
+{
+	flight_levels[0] = 100;
+	flight_levels[1] = 150;
+	flight_levels[2] = 200;
+	flight_levels[3] = 250;
+	flight_levels[4] = 300;
+	flight_levels[5] = 350;
+	flight_levels[6] = 400;
+	return 0;
+}
+
+
+
+
+
+
