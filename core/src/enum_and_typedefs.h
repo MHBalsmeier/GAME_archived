@@ -94,17 +94,17 @@ Vector_field z_vector;
 Scalar_field gravity_potential;
 Vector_field gravity_m;
 Vector_field slope;
-double volume_ratios[2*NO_OF_SCALARS];
-double e_kin_weights[8*NO_OF_SCALARS];
+int trsk_modified_velocity_indices[10*NO_OF_VECTORS_H];
+int trsk_modified_curl_indices[10*NO_OF_VECTORS_H];
 int from_index[NO_OF_VECTORS_H];
 int to_index[NO_OF_VECTORS_H];
-double direction[NO_OF_VECTORS_H];
 int adjacent_vector_indices_h[6*NO_OF_SCALARS_H];
 int adjacent_signs_h[6*NO_OF_SCALARS_H];
 int density_to_rhombus_indices[4*NO_OF_VECTORS_H];
+double volume_ratios[2*NO_OF_SCALARS];
+double e_kin_weights[8*NO_OF_SCALARS];
+double direction[NO_OF_VECTORS_H];
 double density_to_rhombus_weights[4*NO_OF_VECTORS_H];
-int trsk_modified_velocity_indices[10*NO_OF_VECTORS_H];
-int trsk_modified_curl_indices[10*NO_OF_VECTORS_H];
 double trsk_modified_weights[10*NO_OF_VECTORS_H];
 double recov_ver_weight[6*NO_OF_LEVELS*NO_OF_SCALARS_H];
 double recov_primal2dual_weights[2*NO_OF_DUAL_H_VECTORS];
@@ -113,11 +113,15 @@ double recov_primal2dual_weights[2*NO_OF_DUAL_H_VECTORS];
 // Contains properties of the dual grid.
 typedef struct dualgrid {
 Curl_field area;
-double f_vec[3*NO_OF_VECTORS_H];
+Dual_vector_field normal_distance;
+int from_index[NO_OF_VECTORS_H];
+int to_index[NO_OF_VECTORS_H];
+int adjacent_vector_indices_h[3*NO_OF_DUAL_SCALARS_H];
 int vorticity_indices[4*NO_OF_VECTORS_H];
 int vorticity_signs[4*NO_OF_VECTORS_H];
 int h_curl_indices[4*NO_OF_VECTORS_H];
 int h_curl_signs[4*NO_OF_VECTORS_H];
+double f_vec[3*NO_OF_VECTORS_H];
 } Dualgrid;
 
 typedef struct state {

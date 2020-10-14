@@ -10,7 +10,7 @@
 # 3			real data interpolated to model grid
 # See handbook for more information.
 
-oro_id=2 # The orography ID.
+oro_id=3 # The orography ID.
 optimize=0 # Determines wether or not the grid will be optimized.
 n_iterations=2000 #  The number of iterations to be used for the optimization. Only relevant, if optimize == 1.
 use_scalar_h_coords_file=1 # If this is set to one, the horizontal coordinates of the grid points will be read from the file specified in the next line.

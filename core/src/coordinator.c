@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     {
     	printf("It is WRITE_OUT_INTERVAL < 900.\n");
     	printf("Aborting.\n");
-    	exit(0);
+    	exit(1);
     }
     free(WRITE_OUT_INTERVAL_PRE);
     int res_id_input;
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     	printf("You demanded res_id = %d in your input file, but the model has been compiled with RES_ID = %d.\n", res_id_input, RES_ID);
     	printf("Recompile with RES_ID = %d or choose an executable which has been compiled with RES_ID = %d.\n", res_id_input, res_id_input);
     	printf("Aborting.\n");
-    	exit(0);
+    	exit(1);
     }
     int no_of_layers_input;
 	no_of_layers_input = strtod(argv[4], NULL);
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     	printf("You demanded no_of_layers = %d in your input file, but the model has been compiled with NO_OF_LAYERS = %d.\n", no_of_layers_input, NO_OF_LAYERS);
     	printf("Recompile with NO_OF_LAYERS = %d or choose an executable which has been compiled with NO_OF_LAYERS = %d.\n", no_of_layers_input, no_of_layers_input);
     	printf("Aborting.\n");
-    	exit(0);
+    	exit(1);
     }
     double cfl_margin = strtof(argv[5], NULL);
     Config_info *config_info = calloc(1, sizeof(Config_info));
@@ -104,14 +104,14 @@ int main(int argc, char *argv[])
 	{
 		printf("Either grib_output_switch or netcdf_output_switch must be set to 1.\n");
     	printf("Aborting.\n");
-		exit(0);
+		exit(1);
 	}
     if (no_of_oro_layers_input != NO_OF_ORO_LAYERS)
     {
     	printf("You demanded no_of_oro_layers = %d in your input file, but the model has been compiled with NO_OF_ORO_LAYERS = %d.\n", no_of_oro_layers_input, NO_OF_ORO_LAYERS);
     	printf("Recompile with NO_OF_ORO_LAYERS = %d or choose an executable which has been compiled with NO_OF_ORO_LAYERS = %d.\n", no_of_oro_layers_input, no_of_oro_layers_input);
     	printf("Aborting.\n");
-    	exit(0);
+    	exit(1);
     }
     int TEST_ID;
     TEST_ID = strtod(argv[24], NULL);
@@ -196,7 +196,41 @@ int main(int argc, char *argv[])
 	printf("Start day:\t\t\t%d\n", day);
 	printf("Start hour:\t\t\t%d\n", hour);
 	printf("%s", stars);
-	printf("configuration information:\n");
+	printf("I/O configuration information:\n");
+	if (io_config -> grib_output_switch == 0)
+	{
+		printf("Grib output is turned off.\n");
+	}
+	else
+	{
+		printf("Grib output is turned on.\n");
+	}
+	if (io_config -> netcdf_output_switch == 0)
+	{
+		printf("Netcdf output is turned off.\n");
+	}
+	else
+	{
+		printf("Netcdf output is turned on.\n");
+	}
+	if (io_config -> synop_output_switch == 0)
+	{
+		printf("Synoptical output is turned off.\n");
+	}
+	else
+	{
+		printf("Synoptical output is turned on.\n");
+	}
+	if (io_config -> aviation_output_switch == 0)
+	{
+		printf("Aviation output is turned off.\n");
+	}
+	else
+	{
+		printf("Aviation output is turned on.\n");
+	}
+	printf("%s", stars);
+	printf("model run configuration information:\n");
 	printf("number of layers: %d\n", NO_OF_LAYERS);
 	printf("number of layers following orography: %d\n", NO_OF_ORO_LAYERS);
 	printf("number of scalar data points per layer: %d\n", NO_OF_SCALARS_H);

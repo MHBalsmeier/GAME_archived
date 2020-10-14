@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
     printf(GREEN "finished.\n" RESET);
     // A statistics file is created to compare the fundamental statistical properties of the grid with the literature.
 	write_statistics_file(pent_hex_face_unity_sphere, normal_distance, normal_distance_dual, STATISTICS_FILE);
-    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_modified_weights_id, recov_ver_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_8_dimid, slope_id, scalar_2_dimid, volume_ratios_id, recov_primal2dual_weights_id, vector_h_dual_dimid_2, density_to_rhombus_indices_id, density_to_rhombus_weights_id, ncid_g_prop;
+    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_modified_weights_id, recov_ver_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_8_dimid, slope_id, scalar_2_dimid, volume_ratios_id, recov_primal2dual_weights_id, vector_h_dual_dimid_2, density_to_rhombus_indices_id, density_to_rhombus_weights_id, vorticity_indices_pre_id, ncid_g_prop;
     printf("Starting to write to output file ... ");
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
@@ -383,6 +383,8 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "vorticity_signs", NC_INT, 1, &vector_h_dimid_4, &vorticity_signs_id)))
         ERR(retval);
+    if ((retval = nc_def_var(ncid_g_prop, "adjacent_vector_indices_dual_h", NC_INT, 1, &scalar_dual_h_dimid_3, &vorticity_indices_pre_id)))
+        ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "h_curl_signs", NC_INT, 1, &vector_h_dimid_4, &h_curl_signs_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "density_to_rhombus_indices", NC_INT, 1, &vector_h_dimid_4, &density_to_rhombus_indices_id)))
@@ -460,6 +462,8 @@ int main(int argc, char *argv[])
     if ((retval = nc_put_var_int(ncid_g_prop, adjacent_signs_h_id, &adjacent_signs_h[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, vorticity_signs_id, &vorticity_signs[0])))
+        ERR(retval);
+    if ((retval = nc_put_var_int(ncid_g_prop, vorticity_indices_pre_id, &vorticity_indices_pre[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, h_curl_signs_id, &h_curl_signs[0])))
         ERR(retval);
