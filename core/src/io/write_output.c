@@ -4,13 +4,14 @@ Github repository: https://github.com/MHBalsmeier/game
 */
 
 /*
-Here, the output is written to grib and/or netcdf files and global integrals are written to text files if configured that way.
+Here, the output is written to grib and/or netcdf files and integrals are written to text files if configured that way.
 */
 
 #include "../../../core/src/enum_and_typedefs.h"
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <netcdf.h>
 #include "io.h"
 #include "../diagnostics/diagnostics.h"
 #include "../spatial_operators/spatial_operators.h"
@@ -20,6 +21,7 @@ Here, the output is written to grib and/or netcdf files and global integrals are
 #include "atmostracers.h"
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
+#define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 
 double calc_std_dev(double [], int);
 
@@ -40,7 +42,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     long data_time = init_hour;
     
     // Diagnostics of surface speicific quantities. These are always written out.
-    double *pot_temperature = malloc(NO_OF_SCALARS*sizeof(double));
+    Scalar_field *pot_temperature = calloc(1, sizeof(Scalar_field));
 	double *mslp = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *surface_p = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *t2 = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -48,65 +50,164 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	double *rprate = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *sprate = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *cape = malloc(NO_OF_SCALARS_H*sizeof(double));
-    double temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta_prime, theta, cape_integrand, delta_z, temp_upper, temp_lower, delta_z_temp, temperature_gradient;
+    double temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta_v_prime, theta_v, cape_integrand, delta_z, temp_upper, temp_lower, delta_z_temp, temperature_gradient, density_v, density_h;
 	double z_tropopause = 15e3;
     double standard_vert_lapse_rate = 0.0065;
     int layer_index;
-	pot_temp_diagnostics(state_write_out, pot_temperature);
-    for (int j = 0; j < NO_OF_SCALARS_H; ++j)
+	pot_temp_diagnostics(state_write_out, *pot_temperature);
+    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
     	// Now the aim is to determine the value of the MSLP.
-        temp_lowest_layer = state_write_out -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + j];
-        pressure_value = state_write_out -> density_dry[j + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]*R_D*temp_lowest_layer + state_write_out -> tracer_densities[2*NO_OF_SCALARS + j + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]*R_V*temp_lowest_layer;
-        temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[j + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
-        mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
-        mslp[j] = pressure_value/mslp_factor;
+        temp_lowest_layer = state_write_out -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+        pressure_value = state_write_out -> density_dry[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]*R_D*temp_lowest_layer + state_write_out -> tracer_densities[2*NO_OF_SCALARS + i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]*R_V*temp_lowest_layer;
+        temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
+        mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]/(R_D*standard_vert_lapse_rate));
+        mslp[i] = pressure_value/mslp_factor;
+        
 		// Now the aim is to determine the value of the surface pressure.
-		temp_surface = temp_lowest_layer + standard_vert_lapse_rate*(grid -> z_scalar[j + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + j]);
-        surface_p_factor = pow(1 - (temp_surface - temp_lowest_layer)/temp_surface, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j]/(R_D*standard_vert_lapse_rate));
-		surface_p[j] = pressure_value/surface_p_factor;
+		temp_surface = temp_lowest_layer + standard_vert_lapse_rate*(grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i]);
+        surface_p_factor = pow(1 - (temp_surface - temp_lowest_layer)/temp_surface, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]/(R_D*standard_vert_lapse_rate));
+		surface_p[i] = pressure_value/surface_p_factor;
+		
 		// Now the aim is to calculate the 2 m temperature.
-        delta_z_temp = 2 - grid -> z_scalar[j + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
-        temp_upper = state_write_out -> temperature_gas[(NO_OF_LAYERS - 2)*NO_OF_SCALARS_H + j];
+        delta_z_temp = 2 - grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
+        temp_upper = state_write_out -> temperature_gas[(NO_OF_LAYERS - 2)*NO_OF_SCALARS_H + i];
         temp_lower = temp_lowest_layer;
-        temperature_gradient = (temp_upper - temp_lower)/(grid -> z_scalar[j + (NO_OF_LAYERS - 2)*NO_OF_SCALARS_H] - grid -> z_scalar[j + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]);
+        temperature_gradient = (temp_upper - temp_lower)/(grid -> z_scalar[i + (NO_OF_LAYERS - 2)*NO_OF_SCALARS_H] - grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]);
+        
         // Finally the temperature in 2 m height AGL can bo obtained via linear extrapolation.
-        t2[j] = temp_lowest_layer + delta_z_temp*temperature_gradient;
-        z_height = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + j];
-        cape[j] = 0;
-        theta_prime = pot_temperature[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + j];
+        t2[i] = temp_lowest_layer + delta_z_temp*temperature_gradient;
+        z_height = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i];
+        cape[i] = 0;
+        density_v = state_write_out -> tracer_densities[2*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+        density_h = state_write_out -> density_dry[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H] + state_write_out -> tracer_densities[2*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+        theta_v_prime = (*pot_temperature)[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]*(1 + density_v/density_h*(1/EPSILON - 1));
         layer_index = NO_OF_LAYERS - 1;
-        cape[j] = 0;
+        cape[i] = 0;
         while (z_height < z_tropopause)
         {
-            theta = pot_temperature[layer_index*NO_OF_SCALARS_H + j];
-        	delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + j] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + j];
+		    density_v = state_write_out -> tracer_densities[2*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		    density_h = state_write_out -> density_dry[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H] + state_write_out -> tracer_densities[2*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+            theta_v = (*pot_temperature)[layer_index*NO_OF_SCALARS_H + i]*(1 + density_v/density_h*(1/EPSILON - 1));
+        	delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + i];
         	z_height += delta_z;
-        	cape_integrand = grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + j]*(theta_prime - theta)/theta;
+        	cape_integrand = grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i]*(theta_v_prime - theta_v)/theta_v;
         	if (cape_integrand > 0)
-        		cape[j] += cape_integrand*delta_z;
+        		cape[i] += cape_integrand*delta_z;
         	--layer_index;
         }
+        
         // Now come the hydrometeors.
-        sprate[j] = 0;
-        rprate[j] = 0;
-        tcdc[j] = 0;
+        sprate[i] = 0;
+        rprate[i] = 0;
+        tcdc[i] = 0;
         for (int k = 0; k < NO_OF_CONDENSATED_TRACERS; ++k)
         {
             for (int l = 0; l < NO_OF_LAYERS; ++l)
             {
-                if (state_write_out -> tracer_densities[k*NO_OF_SCALARS + l*NO_OF_SCALARS_H + j] > 0)
-                    tcdc[j] = 100*1;
+                if (state_write_out -> tracer_densities[k*NO_OF_SCALARS + l*NO_OF_SCALARS_H + i] > 0)
+                    tcdc[i] = 100*1;
             }
         }
         for (int k = 0; k < NO_OF_SOLID_TRACERS; ++k)
-            sprate[j] += fmax(ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + j], 0);
+            sprate[i] += fmax(ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i], 0);
         for (int k = NO_OF_SOLID_TRACERS; k < NO_OF_CONDENSATED_TRACERS; ++k)
-            rprate[j] += fmax(ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + j], 0);
+            rprate[i] += fmax(ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i], 0);
     }
     
+    // 10 m wind diagnostics
+	double *wind_10_m_both_dir_array = malloc(2*min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
+	double wind_10_m_downscale_factor = 0.667;
+	double wind_tangential, wind_u_value, wind_v_value;
+	int time_step_10_m_wind, h_index;
+	double *wind_10_m_speed = malloc(min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
+	double *wind_10_m_mean_u = malloc(NO_OF_VECTORS_H*sizeof(double));
+	double *wind_10_m_mean_v = malloc(NO_OF_VECTORS_H*sizeof(double));
+	for (int j = 0; j < min_no_of_output_steps*NO_OF_VECTORS_H; ++j)
+	{
+		time_step_10_m_wind = j/NO_OF_VECTORS_H;
+		h_index = j - time_step_10_m_wind*NO_OF_VECTORS_H;
+		wind_10_m_both_dir_array[2*j + 0] = wind_10_m_downscale_factor*wind_h_lowest_layer_array[j];
+		wind_tangential = 0;
+		for (int i = 0; i < 10; ++i)
+			wind_tangential += grid -> trsk_modified_weights[10*h_index + i]*wind_h_lowest_layer_array[time_step_10_m_wind*NO_OF_VECTORS_H + grid -> trsk_modified_velocity_indices[10*h_index + i]];
+		wind_10_m_both_dir_array[2*j + 1] = wind_10_m_downscale_factor*wind_tangential;
+		wind_10_m_speed[j] = sqrt(pow(wind_10_m_both_dir_array[2*j + 0], 2) + pow(wind_10_m_both_dir_array[2*j + 1], 2));
+		if (time_step_10_m_wind == 0)
+		{
+			wind_10_m_mean_u[h_index] = 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 0];
+			wind_10_m_mean_v[h_index] = 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 1];
+		}
+		else
+		{
+			wind_10_m_mean_u[h_index] += 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 0];
+			wind_10_m_mean_v[h_index] += 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 1];
+		}
+	}
+	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+	{
+	    passive_turn(wind_10_m_mean_u[i], wind_10_m_mean_v[i], -grid -> direction[i], &wind_u_value, &wind_v_value);
+	    wind_10_m_mean_u[i] = wind_u_value;
+	    wind_10_m_mean_v[i] = wind_v_value;
+	}
+	double standard_deviation;
+	double gusts_parameter = 3;
+	double *wind_10_m_gusts_speed = malloc(NO_OF_VECTORS_H*sizeof(double));
+	double *vector_for_std_deviation = malloc(min_no_of_output_steps*sizeof(double));
+	double wind_speed_10_m_mean;
+	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+	{
+		wind_speed_10_m_mean = 0;
+		for (int j = 0; j < min_no_of_output_steps; ++j)
+		{
+			vector_for_std_deviation[j] = wind_10_m_speed[j*NO_OF_VECTORS_H + i];
+			wind_speed_10_m_mean += 1.0/min_no_of_output_steps*wind_10_m_speed[j*NO_OF_VECTORS_H + i];
+		}
+		standard_deviation = calc_std_dev(vector_for_std_deviation, min_no_of_output_steps);
+		if (t_write != t_init)
+			wind_10_m_gusts_speed[i] = wind_speed_10_m_mean + gusts_parameter*standard_deviation;
+		else
+			wind_10_m_gusts_speed[i] = (1 + 0.2)*wind_speed_10_m_mean;
+	}
+	free(vector_for_std_deviation);
+    
+    // Diagnostics of quantities that are not surface-specific.    
+	double *divv_h_all_layers = malloc(NO_OF_SCALARS*sizeof(double));
+	if (write_out_divv_h == 1)
+	{
+		divv_h(state_write_out -> velocity_gas, divv_h_all_layers, grid);
+	}
     Curl_field *rel_vort = calloc(1, sizeof(Curl_field));
-    double wind_0, wind_1, wind_u, wind_v;
+	calc_rel_vort(state_write_out -> velocity_gas, *rel_vort, grid, dualgrid);
+	
+	// Diagnozing the u and v wind components at the vector points.
+    double wind_0, wind_1;
+	double *wind_u = malloc(NO_OF_H_VECTORS*sizeof(double));
+	double *wind_v = malloc(NO_OF_H_VECTORS*sizeof(double));
+	double *wind_w = malloc(NO_OF_V_VECTORS*sizeof(double));
+	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
+	{
+		layer_index = i/NO_OF_VECTORS_H;
+		h_index = i - layer_index*NO_OF_VECTORS_H;
+        wind_0 = state_write_out -> velocity_gas[h_index + layer_index*NO_OF_VECTORS_H + (layer_index + 1)*NO_OF_SCALARS_H];
+        recov_hor_par_pri(state_write_out -> velocity_gas, layer_index, h_index, &wind_1, grid);
+        passive_turn(wind_0, wind_1, -grid -> direction[h_index], &wind_u_value, &wind_v_value);
+        wind_u[i] = wind_u_value;
+        wind_v[i] = wind_v_value;
+	}
+	for (int i = 0; i < NO_OF_V_VECTORS; ++i)
+	{
+		layer_index = i/NO_OF_VECTORS_PER_LAYER;
+		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
+		wind_w[i] = state_write_out -> velocity_gas[layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+	}
+    Scalar_field *rh = calloc(1, sizeof(Scalar_field));
+    Scalar_field *pressure = calloc(1, sizeof(Scalar_field));
+    for (int i = 0; i < NO_OF_SCALARS; ++i)
+    {
+    	(*rh)[i] = 100*rel_humidity(state_write_out -> temperature_gas[i], state_write_out -> tracer_densities[2*NO_OF_SCALARS + i]);
+    	(*pressure)[i] = (state_write_out -> tracer_densities[2*NO_OF_SCALARS + i]*R_V + state_write_out -> density_dry[i]*R_D)*state_write_out -> temperature_gas[i];
+    }
     
     // Grib output.
     if (io_config -> grib_output_switch == 1)
@@ -119,11 +220,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		double *wind_u_h = malloc(NO_OF_VECTORS_H*sizeof(double));
 		double *wind_v_h = malloc(NO_OF_VECTORS_H*sizeof(double));
 		double *rel_vort_h = malloc(NO_OF_VECTORS_H*sizeof(double));
-		double *divv_h_all_layers = malloc(NO_OF_SCALARS*sizeof(double));
-		if (write_out_divv_h == 1)
-		{
-			divv_h(state_write_out -> velocity_gas, divv_h_all_layers, grid);
-		}
 		double *divv_h = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *wind_w_h = malloc(NO_OF_SCALARS_H*sizeof(double));
 		int OUTPUT_FILE_LENGTH = 300;
@@ -159,14 +255,13 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		codes_handle *handle_rh = NULL;
 		codes_handle *handle_cape = NULL;
 		codes_handle *handle_divv_h = NULL;
-		calc_rel_vort(state_write_out -> velocity_gas, *rel_vort, grid, dualgrid);
 		for (int i = 0; i < NO_OF_LAYERS; ++i)
 		{
 		    for (int j = 0; j < NO_OF_SCALARS_H; ++j)
 		    {
 		    	temperature_h[j] = state_write_out -> temperature_gas[i*NO_OF_SCALARS_H + j];
-		    	pressure_h[j] = state_write_out -> density_dry[j + i*NO_OF_SCALARS_H]*R_D*temperature_h[j];
-		    	rh_h[j] = 100*rel_humidity(temperature_h[j], state_write_out -> tracer_densities[2*NO_OF_SCALARS + i*NO_OF_SCALARS_H + j]);
+		    	pressure_h[j] = (*pressure)[i*NO_OF_SCALARS_H + j];
+		    	rh_h[j] = (*rh)[i*NO_OF_SCALARS_H + j];
 		    }
 		    if (i == NO_OF_LAYERS - 1)
 		    {
@@ -645,11 +740,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			codes_handle_delete(handle_rh);
 		    for (int j = 0; j < NO_OF_VECTORS_H; ++j)
 		    {
-		        wind_0 = state_write_out -> velocity_gas[j + i*NO_OF_VECTORS_H + (i + 1)*NO_OF_SCALARS_H];
-		        recov_hor_par_pri(state_write_out -> velocity_gas, i, j, &wind_1, grid);
-		        passive_turn(wind_0, wind_1, -grid -> direction[j], &wind_u, &wind_v);
-		        wind_u_h[j] = wind_u;
-		        wind_v_h[j] = wind_v;
+		        wind_u_h[j] = wind_u[i*NO_OF_VECTORS_H + j];
+		        wind_v_h[j] = wind_v[i*NO_OF_VECTORS_H + j];
 		        rel_vort_h[j] = (*rel_vort)[NO_OF_VECTORS_H + i*2*NO_OF_VECTORS_H + j];
 		    }
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
@@ -844,70 +936,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				codes_handle_delete(handle_divv_h);
 			}
 		}
-		double *wind_10_m_both_dir_array = malloc(2*min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
-		double wind_10_m_downscale_factor = 0.667;
-		double wind_tangential;
-		int time_step_10_m_wind, h_index;
-		double *wind_10_m_speed = malloc(min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
-		double *wind_10_m_mean_u = malloc(NO_OF_VECTORS_H*sizeof(double));
-		double *wind_10_m_mean_v = malloc(NO_OF_VECTORS_H*sizeof(double));
-		for (int j = 0; j < min_no_of_output_steps*NO_OF_VECTORS_H; ++j)
-		{
-			time_step_10_m_wind = j/NO_OF_VECTORS_H;
-			h_index = j - time_step_10_m_wind*NO_OF_VECTORS_H;
-			wind_10_m_both_dir_array[2*j + 0] = wind_10_m_downscale_factor*wind_h_lowest_layer_array[j];
-			wind_tangential = 0;
-			for (int i = 0; i < 10; ++i)
-				wind_tangential += grid -> trsk_modified_weights[10*h_index + i]*wind_h_lowest_layer_array[time_step_10_m_wind*NO_OF_VECTORS_H + grid -> trsk_modified_velocity_indices[10*h_index + i]];
-			wind_10_m_both_dir_array[2*j + 1] = wind_10_m_downscale_factor*wind_tangential;
-			wind_10_m_speed[j] = sqrt(pow(wind_10_m_both_dir_array[2*j + 0], 2) + pow(wind_10_m_both_dir_array[2*j + 1], 2));
-			if (time_step_10_m_wind == 0)
-			{
-				wind_10_m_mean_u[h_index] = 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 0];
-				wind_10_m_mean_v[h_index] = 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 1];
-			}
-			else
-			{
-				wind_10_m_mean_u[h_index] += 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 0];
-				wind_10_m_mean_v[h_index] += 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 1];
-			}
-		}
-		// This is useful for checking a forcing.
-		// double u_forcing, v_forcing;
-		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-		{
-		    passive_turn(wind_10_m_mean_u[i], wind_10_m_mean_v[i], -grid -> direction[i], &wind_u, &wind_v);
-		    wind_10_m_mean_u[i] = wind_u;
-		    wind_10_m_mean_v[i] = wind_v;
-		    // This is useful for checking a forcing.
-		    /*u_forcing = grid -> gravity_m[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i];
-			v_forcing = 0;
-			for (int j = 0; j < 10; ++j)
-				v_forcing += grid -> trsk_modified_weights[10*i + j]*grid -> gravity_m[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*i + j]];
-		    passive_turn(u_forcing, v_forcing, -grid -> direction[i], &wind_u, &wind_v);
-		    wind_10_m_mean_u[i] = 10000*wind_u;
-		    wind_10_m_mean_v[i] = 10000*wind_v;*/
-		}
-		double standard_deviation;
-		double gusts_parameter = 3;
-		double *wind_10_m_gusts_speed = malloc(NO_OF_VECTORS_H*sizeof(double));
-		double *vector_for_std_deviation = malloc(min_no_of_output_steps*sizeof(double));
-		double wind_speed_10_m_mean;
-		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-		{
-			wind_speed_10_m_mean = 0;
-			for (int j = 0; j < min_no_of_output_steps; ++j)
-			{
-				vector_for_std_deviation[j] = wind_10_m_speed[j*NO_OF_VECTORS_H + i];
-				wind_speed_10_m_mean += 1.0/min_no_of_output_steps*wind_10_m_speed[j*NO_OF_VECTORS_H + i];
-			}
-			standard_deviation = calc_std_dev(vector_for_std_deviation, min_no_of_output_steps);
-			if (t_write != t_init)
-				wind_10_m_gusts_speed[i] = wind_speed_10_m_mean + gusts_parameter*standard_deviation;
-			else
-				wind_10_m_gusts_speed[i] = (1 + 0.2)*wind_speed_10_m_mean;
-		}
-		free(vector_for_std_deviation);
 		SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 		handle_wind_u_10m_mean = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 		if (err != 0)
@@ -1048,26 +1076,13 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		if ((retval = codes_write_message(handle_wind_10m_gusts, OUTPUT_FILE, "a")))
 			ECCERR(retval);
 		codes_handle_delete(handle_wind_10m_gusts);
-		free(divv_h_all_layers);
-		free(wind_10_m_speed);
-		free(wind_10_m_gusts_speed);
-		free(wind_10_m_both_dir_array);
-		free(t2);
-		free(mslp);
-		free(surface_p);
-		free(rprate);
-		free(sprate);
-		free(tcdc);
-		free(pot_temperature);
-		free(rel_vort_h);
-		free(divv_h);
-		free(rel_vort);
-		free(temperature_h);
-		free(pressure_h);
 		free(wind_u_h);
 		free(wind_v_h);
+		free(rel_vort_h);
+		free(divv_h);
+		free(temperature_h);
+		free(pressure_h);
 		free(rh_h);
-		free(cape);
 		SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 		handle_wind_w_h = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 		if (err != 0)
@@ -1120,6 +1135,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    if ((retval = codes_write_message(handle_wind_w_h, OUTPUT_FILE, "a")))
 		        ECCERR(retval);
 		}
+		free(OUTPUT_FILE);
 		codes_handle_delete(handle_wind_w_h);
 		free(wind_w_h);
 		fclose(OUT_GRIB);
@@ -1135,9 +1151,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		free(OUTPUT_FILE_PRE);
 		char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
 		sprintf(OUTPUT_FILE, "output/%s/%s+%ds.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
-		int scalar_dimid, scalar_h_dimid, vector_h_dimid, vector_v_dimid, temp_id, density_dry_id, pressure_id, wind_h_id, wind_v_id, density_vapour_id, density_liquid_id, density_solid_id, temperature_liquid_id, temperature_solid_id, ncid;
+		int scalar_dimid, scalar_h_dimid, vector_h_dimid, vector_v_dimid, temp_id, density_dry_id, pressure_id, wind_u_id, wind_v_id, wind_w_id, rh_id, mslp_id, ncid, retval, surface_p_id, rprate_id, sprate_id, cape_id, tcdc_id, t2_id, divv_h_all_layers_id, rel_vort_id, curl_field_dimid;
+		
 		if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
 		    NCERR(retval);
+		free(OUTPUT_FILE);
 		if ((retval = nc_def_dim(ncid, "scalar_index", NO_OF_SCALARS, &scalar_dimid)))
 		    NCERR(retval);
 		if ((retval = nc_def_dim(ncid, "scalar_index_h", NO_OF_SCALARS_H, &scalar_h_dimid)))
@@ -1146,6 +1164,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    NCERR(retval);
 		if ((retval = nc_def_dim(ncid, "vector_index_v", NO_OF_V_VECTORS, &vector_v_dimid)))
 		    NCERR(retval);
+		if ((retval = nc_def_dim(ncid, "curl_point_index", NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H, &curl_field_dimid)))
+		    NCERR(retval);
+		
+		// Defining the variables.
 		if ((retval = nc_def_var(ncid, "temperature_gas", NC_DOUBLE, 1, &scalar_dimid, &temp_id)))
 		    NCERR(retval);
 		if ((retval = nc_put_att_text(ncid, temp_id, "units", strlen("K"), "K")))
@@ -1158,26 +1180,33 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    NCERR(retval);
 		if ((retval = nc_put_att_text(ncid, pressure_id, "units", strlen("Pa"), "Pa")))
 		    NCERR(retval);
-		if ((retval = nc_def_var(ncid, "wind_h", NC_DOUBLE, 1, &vector_h_dimid, &wind_h_id)))
+		if ((retval = nc_def_var(ncid, "wind_u", NC_DOUBLE, 1, &vector_h_dimid, &wind_u_id)))
 		    NCERR(retval);
-		if ((retval = nc_put_att_text(ncid, wind_id, "units", strlen("m/s"), "m/s")))
+		if ((retval = nc_put_att_text(ncid, wind_u_id, "units", strlen("m/s"), "m/s")))
 		    NCERR(retval);
-		if ((retval = nc_def_var(ncid, "wind_v", NC_DOUBLE, 1, &vector_v_dimid, &wind_v_id)))
+		if ((retval = nc_def_var(ncid, "wind_v", NC_DOUBLE, 1, &vector_h_dimid, &wind_v_id)))
 		    NCERR(retval);
-		if ((retval = nc_put_att_text(ncid, wind_id, "units", strlen("m/s"), "m/s")))
+		if ((retval = nc_put_att_text(ncid, wind_v_id, "units", strlen("m/s"), "m/s")))
 		    NCERR(retval);
-		if ((retval = nc_def_var(ncid, "density_vapour", NC_DOUBLE, 1, &scalar_dimid, &density_vapour_id)))
+		if ((retval = nc_def_var(ncid, "wind_w", NC_DOUBLE, 1, &vector_v_dimid, &wind_w_id)))
 		    NCERR(retval);
-		if ((retval = nc_put_att_text(ncid, density_vapour_id, "units", strlen("kg/m^3"), "kg/m^3")))
+		if ((retval = nc_put_att_text(ncid, wind_w_id, "units", strlen("m/s"), "m/s")))
 		    NCERR(retval);
-		if ((retval = nc_def_var(ncid, "density_liquid", NC_DOUBLE, 1, &scalar_dimid, &density_liquid_id)))
+		if ((retval = nc_def_var(ncid, "rh", NC_DOUBLE, 1, &scalar_dimid, &rh_id)))
 		    NCERR(retval);
-		if ((retval = nc_put_att_text(ncid, density_liquid_id, "units", strlen("kg/m^3"), "kg/m^3")))
+		if ((retval = nc_put_att_text(ncid, rh_id, "units", strlen("%"), "%")))
 		    NCERR(retval);
-		if ((retval = nc_def_var(ncid, "density_solid", NC_DOUBLE, 1, &scalar_dimid, &density_solid_id)))
+		if ((retval = nc_def_var(ncid, "rel_vort", NC_DOUBLE, 1, &curl_field_dimid, &rel_vort_id)))
 		    NCERR(retval);
-		if ((retval = nc_put_att_text(ncid, density_solid_id, "units", strlen("kg/m^3"), "kg/m^3")))
+		if ((retval = nc_put_att_text(ncid, rel_vort_id, "units", strlen("1/s"), "1/s")))
 		    NCERR(retval);
+		if (write_out_divv_h == 1)
+		{
+			if ((retval = nc_def_var(ncid, "divv_h_all_layers", NC_DOUBLE, 1, &scalar_dimid, &divv_h_all_layers_id)))
+				NCERR(retval);
+			if ((retval = nc_put_att_text(ncid, divv_h_all_layers_id, "units", strlen("1/s"), "1/s")))
+				NCERR(retval);
+		}
 		if ((retval = nc_def_var(ncid, "mslp", NC_DOUBLE, 1, &scalar_h_dimid, &mslp_id)))
 		    NCERR(retval);
 		if ((retval = nc_put_att_text(ncid, mslp_id, "units", strlen("Pa"), "Pa")))
@@ -1200,7 +1229,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    NCERR(retval);
 		if ((retval = nc_def_var(ncid, "sprate", NC_DOUBLE, 1, &scalar_h_dimid, &sprate_id)))
 		    NCERR(retval);
-		if ((retval = nc_put_att_text(ncid, sprate_id, "units", strlen("kg/(m^2s)"), "kg/(m^2s)mm/h")))
+		if ((retval = nc_put_att_text(ncid, sprate_id, "units", strlen("kg/(m^2s)"), "kg/(m^2s)")))
 		    NCERR(retval);
 		if ((retval = nc_def_var(ncid, "cape", NC_DOUBLE, 1, &scalar_h_dimid, &cape_id)))
 		    NCERR(retval);
@@ -1208,22 +1237,31 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    NCERR(retval);
 		if ((retval = nc_enddef(ncid)))
 		    NCERR(retval);
+		
+		// Writing the 3D arrays.
 		if ((retval = nc_put_var_double(ncid, temp_id, &state_write_out -> temperature_gas[0])))
 		    NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, density_dry_id, &state_write_out -> density_dry[0])))
 		    NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, pressure_id, &pressure[0])))
+		if ((retval = nc_put_var_double(ncid, pressure_id, &(*rel_vort)[0])))
 		    NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, wind_h_id, &wind_v[0])))
+		if ((retval = nc_put_var_double(ncid, wind_u_id, &wind_u[0])))
 		    NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, wind_v_id, &wind_h[0])))
+		if ((retval = nc_put_var_double(ncid, wind_v_id, &wind_v[0])))
 		    NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, density_vapour_id, &water_vapour_density[0])))
-		    NCERR(retval);    
-		if ((retval = nc_put_var_double(ncid, density_liquid_id, &liquid_water_density[0])))
+		if ((retval = nc_put_var_double(ncid, wind_w_id, &wind_w[0])))
 		    NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, density_solid_id, &solid_water_density[0])))
+		if ((retval = nc_put_var_double(ncid, rh_id, &(*rh)[0])))
 		    NCERR(retval);
+		if ((retval = nc_put_var_double(ncid, rel_vort_id, &(*rel_vort)[0])))
+		    NCERR(retval);
+		if (write_out_divv_h == 1)
+		{
+			if ((retval = nc_put_var_double(ncid, divv_h_all_layers_id, &divv_h_all_layers[0])))
+				NCERR(retval);
+	    }
+		    
+		// Writing out the surface specific variables.
 		if ((retval = nc_put_var_double(ncid, mslp_id, &mslp[0])))
 		    NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, surface_p_id, &surface_p[0])))
@@ -1238,10 +1276,30 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, cape_id, &cape[0])))
 		    NCERR(retval);
+		
+		// Closing the netcdf file.
 		if ((retval = nc_close(ncid)))
 			NCERR(retval);
 	}
-    return 0;
+	free(divv_h_all_layers);
+	free(wind_10_m_speed);
+	free(wind_10_m_gusts_speed);
+	free(wind_10_m_both_dir_array);
+	free(t2);
+	free(mslp);
+	free(surface_p);
+	free(rprate);
+	free(sprate);
+	free(tcdc);
+	free(pot_temperature);
+	free(rel_vort);
+	free(cape);
+	free(wind_u);
+	free(wind_v);
+	free(wind_w);
+	free(rh);
+	free(pressure);
+	return 0;
 }
 
 int write_out_integral(State *state_write_out, double t_write, char RUN_ID[], Grid *grid, Dualgrid *dualgrid, int integral_id)

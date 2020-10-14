@@ -9,6 +9,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #define K_B (1.380649e-23)
 #define M_D 0.028964420
 #define M_V 0.0180152
+#define EPSILON (M_V/M_D)
 // #define R (N_A*K_B)
 #define R 8.314463
 // #define R_D (R/M_D)

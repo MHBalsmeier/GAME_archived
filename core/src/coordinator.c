@@ -185,6 +185,7 @@ int main(int argc, char *argv[])
     printf("Released under the MIT license, visit https://github.com/MHBalsmeier/game for more information.\n");
 	printf("What you want to do:\n");
 	printf("operator:\t\t\t%s\n", OPERATOR);
+	printf("run_id:\t\t\t\t%s\n", RUN_ID);
 	free(OPERATOR);
 	printf("run time span:\t\t\t%d s\n", TOTAL_RUN_SPAN);
 	printf("output written in intervals of\t%d s\n", WRITE_OUT_INTERVAL);
