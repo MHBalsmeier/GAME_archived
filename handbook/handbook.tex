@@ -95,12 +95,12 @@ Scripts with the suffix \texttt{\_dev} are not different from the original scrip
 The configuration of the model must be set in three different files:
 
 \begin{itemize}
-\item \texttt{src/enum\_and\_typedefs.h}: modify \texttt{RES\_ID}, \texttt{NO\_OF\_LAYERS} and \texttt{NO\_OF\_ORO\_LAYERS}. These must conform with the grid file and the initialization state file.
-\item The file \texttt{src/settings.c}: modify the characteristics of damping at the model top and diffusion.
+\item \texttt{core/src/enum\_and\_typedefs.h}: modify \texttt{RES\_ID}, \texttt{NO\_OF\_LAYERS} and \texttt{NO\_OF\_ORO\_LAYERS}. These must conform with the grid file and the initialization state file.
+\item The file \texttt{core/src/settings.c}: configure  settings that are not accessible via the run scripts. Some quantities in \texttt{core/src/settings.h} will also need to be modified.
 \item The run script: one of the files contained in the directory \texttt{run\_scripts}. The comments in these files explain the meaning of the variables.
 \end{itemize}
 %
-Since the files \texttt{src/enum\_and\_typedefs.h} and \texttt{src/settings.c} are part of the model's source code, the model must be recompiled if something is changed in them. Alternatively, one can compile several executables and name them according to their configuration.
+Since the files \texttt{core/src/enum\_and\_typedefs.h} and \texttt{core/src/settings.c} are part of the model's source code, the model must be recompiled if something is changed in them. Alternatively, one can compile several executables and name them according to their configuration.
 
 \chapter{Grid generation procedure}
 \label{chap:grid_generation_procedure}

@@ -23,7 +23,18 @@ Here, the output is written to grib and/or netcdf files and integrals are writte
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 
+// constants that are specific to the ICAO standard atmosphere
+const double GRAVITY_MEAN = 9.80616;
+const double TEMP_GRADIENT = -0.65/100;
+const double T_SFC = 273.15 + 15;
+const double P_0_STANDARD = 101325;
+const double TROPO_HEIGHT_STANDARD = 11e3;
+const double INVERSE_HEIGHT_STANDARD = 20e3;
+const double TEMP_GRADIENT_INV_STANDARD = 0.1/100;
+
 double calc_std_dev(double [], int);
+int get_pressure_on_flight_levels(double [], double []);
+double get_pressure_at_altitude_standard(double);
 
 int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Io_config *io_config)
 {
@@ -213,16 +224,89 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	int err = 0;
 	
 	// Synoptical output.
+	int closest_layer_index, other_layer_index;
+	double closest_weight;
     if (io_config -> synop_output_switch == 1)
     {
     	double *synoptic_pressure_levels = malloc(sizeof(double)*NO_OF_PRESSURE_LEVELS);
+    	double *distance_from_synoptic_pressure_level = malloc(sizeof(double)*NO_OF_LAYERS);
+    	double *pressure_at_vector_points = malloc(sizeof(double)*NO_OF_LAYERS);
     	get_synoptic_pressure_levels(synoptic_pressure_levels);
-    	
+    	// Allocating memory for the variables on pressure levels.
     	double (*geopotential_height)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
     	double (*t_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
     	double (*rh_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
     	double (*u_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_PRESSURE_LEVELS]));
     	double (*v_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_PRESSURE_LEVELS]));
+    	
+    	// Vertical interpolation to the pressure levels.
+		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+		{
+    		for (int j = 0; j < NO_OF_PRESSURE_LEVELS; ++j)
+			{
+				for (int k = 0; k < NO_OF_LAYERS; ++k)
+				{
+					distance_from_synoptic_pressure_level[k] = fabs(synoptic_pressure_levels[j] - (*pressure)[k*NO_OF_SCALARS_H + i]);
+				}
+				closest_layer_index = find_min_index(distance_from_synoptic_pressure_level, NO_OF_LAYERS);
+				other_layer_index = closest_layer_index + 1;
+				if (synoptic_pressure_levels[j] < (*pressure)[closest_layer_index*NO_OF_SCALARS_H + i])
+				{
+					other_layer_index = closest_layer_index - 1;
+				}
+				if ((closest_layer_index == NO_OF_LAYERS - 1 && other_layer_index == NO_OF_LAYERS) || (closest_layer_index < 0 || other_layer_index < 0))
+				{
+					t_on_pressure_levels[i][j] = 9999;
+					rh_on_pressure_levels[i][j] = 9999;
+				}
+				else
+				{
+					closest_weight = 1 - distance_from_synoptic_pressure_level[closest_layer_index]/
+					fabs((*pressure)[closest_layer_index*NO_OF_SCALARS_H + i] - (*pressure)[other_layer_index*NO_OF_SCALARS_H + i]);
+					geopotential_height[i][j] = closest_weight*grid -> gravity_potential[closest_layer_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*grid -> gravity_potential[other_layer_index*NO_OF_SCALARS_H + i];
+					geopotential_height[i][j] = geopotential_height[i][j]/GRAVITY_MEAN;
+					t_on_pressure_levels[i][j] = closest_weight*state_write_out -> temperature_gas[closest_layer_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*state_write_out -> temperature_gas[other_layer_index*NO_OF_SCALARS_H + i];
+					rh_on_pressure_levels[i][j] = closest_weight*(*rh)[closest_layer_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*(*rh)[other_layer_index*NO_OF_SCALARS_H + i];
+				}
+			}
+		}
+		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+		{
+    		for (int j = 0; j < NO_OF_PRESSURE_LEVELS; ++j)
+			{
+				for (int k = 0; k < NO_OF_LAYERS; ++k)
+				{
+					pressure_at_vector_points[k] = 0.5*((*pressure)[k*NO_OF_SCALARS_H + grid -> from_index[i]] + (*pressure)[k*NO_OF_SCALARS_H + grid -> to_index[i]]);
+				}
+				for (int k = 0; k < NO_OF_LAYERS; ++k)
+				{
+					distance_from_synoptic_pressure_level[k] = fabs(synoptic_pressure_levels[j] - pressure_at_vector_points[k]);
+				}
+				closest_layer_index = find_min_index(distance_from_synoptic_pressure_level, NO_OF_LAYERS);
+				other_layer_index = closest_layer_index + 1;
+				if (synoptic_pressure_levels[j] < pressure_at_vector_points[closest_layer_index])
+				{
+					other_layer_index = closest_layer_index - 1;
+				}
+    			if ((closest_layer_index == NO_OF_LAYERS - 1 && other_layer_index == NO_OF_LAYERS) || (closest_layer_index < 0 || other_layer_index < 0))
+    			{
+					u_on_pressure_levels[i][j] = 9999;
+					v_on_pressure_levels[i][j] = 9999;
+    			}
+    			else
+    			{
+					closest_weight = 1 - distance_from_synoptic_pressure_level[closest_layer_index]/
+					fabs(pressure_at_vector_points[closest_layer_index*NO_OF_SCALARS_H + i] - pressure_at_vector_points[other_layer_index*NO_OF_SCALARS_H + i]);
+					u_on_pressure_levels[i][j] = closest_weight*wind_u[closest_layer_index*NO_OF_VECTORS_H + i]
+					+ (1 - closest_weight)*wind_u[other_layer_index*NO_OF_VECTORS_H + i];
+					v_on_pressure_levels[i][j] = closest_weight*wind_v[closest_layer_index*NO_OF_VECTORS_H + i]
+					+ (1 - closest_weight)*wind_v[other_layer_index*NO_OF_VECTORS_H + i];
+    			}
+			}
+    	}
     	
 		// Netcdf output.
 		if (io_config -> netcdf_output_switch == 1)
@@ -588,6 +672,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     	free(u_on_pressure_levels);
     	free(v_on_pressure_levels);
     	free(synoptic_pressure_levels);
+    	free(distance_from_synoptic_pressure_level);
+    	free(pressure_at_vector_points);
     }
 
 	// Aviation output.
@@ -595,11 +681,84 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     {
     	double *flight_levels = malloc(sizeof(double)*NO_OF_FLIGHT_LEVELS);
     	get_flight_levels(flight_levels);
-    	
+    	double *pressure_on_flight_levels = malloc(sizeof(double)*NO_OF_FLIGHT_LEVELS);
+    	get_pressure_on_flight_levels(flight_levels, pressure_on_flight_levels);
+    	double *distance_from_pressure_on_flight_level = malloc(sizeof(double)*NO_OF_FLIGHT_LEVELS);
+    	double *pressure_on_flight_levels_at_vector_points = malloc(sizeof(double)*NO_OF_FLIGHT_LEVELS);
+    	// Allocating memory for the output arrays.
     	double (*t_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_FLIGHT_LEVELS]));
     	double (*rh_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_FLIGHT_LEVELS]));
     	double (*u_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_FLIGHT_LEVELS]));
     	double (*v_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_FLIGHT_LEVELS]));
+    	
+    	// Vertical interpolation to the flight levels.
+		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+		{
+			for (int j = 0; j < NO_OF_FLIGHT_LEVELS; ++j)
+    		{
+				for (int k = 0; k < NO_OF_LAYERS; ++k)
+				{
+					distance_from_pressure_on_flight_level[k] = fabs(pressure_on_flight_levels[j] - (*pressure)[k*NO_OF_SCALARS_H + i]);
+				}
+				closest_layer_index = find_min_index(distance_from_pressure_on_flight_level, NO_OF_LAYERS);
+				other_layer_index = closest_layer_index + 1;
+				if (pressure_on_flight_levels[j] < (*pressure)[closest_layer_index*NO_OF_SCALARS_H + i])
+				{
+					other_layer_index = closest_layer_index - 1;
+				}
+    			if ((closest_layer_index == NO_OF_LAYERS - 1 && other_layer_index == NO_OF_LAYERS) || (closest_layer_index < 0 || other_layer_index < 0))
+    			{
+    				t_on_flight_levels[i][j] = 9999;
+    				rh_on_flight_levels[i][j] = 9999;
+    			}
+    			else
+    			{
+					closest_weight = 1 - distance_from_pressure_on_flight_level[closest_layer_index]/
+					fabs((*pressure)[closest_layer_index*NO_OF_SCALARS_H + i] - (*pressure)[other_layer_index*NO_OF_SCALARS_H + i]);
+					t_on_flight_levels[i][j] = closest_weight*state_write_out -> temperature_gas[closest_layer_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*state_write_out -> temperature_gas[other_layer_index*NO_OF_SCALARS_H + i];
+					rh_on_flight_levels[i][j] = closest_weight*(*rh)[closest_layer_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*(*rh)[other_layer_index*NO_OF_SCALARS_H + i];
+    			}
+    			
+    		}
+		}
+		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+		{
+			for (int j = 0; j < NO_OF_FLIGHT_LEVELS; ++j)
+    		{
+				for (int k = 0; k < NO_OF_LAYERS; ++k)
+				{
+					pressure_on_flight_levels_at_vector_points[k] = 0.5*((*pressure)[k*NO_OF_SCALARS_H + grid -> from_index[i]] + (*pressure)[k*NO_OF_SCALARS_H + grid -> to_index[i]]);
+				}
+				for (int k = 0; k < NO_OF_LAYERS; ++k)
+				{
+					distance_from_pressure_on_flight_level[k] = fabs(pressure_on_flight_levels[j] - pressure_on_flight_levels_at_vector_points[k]);
+				}
+				closest_layer_index = find_min_index(distance_from_pressure_on_flight_level, NO_OF_LAYERS);
+				other_layer_index = closest_layer_index + 1;
+				if (pressure_on_flight_levels[j] < pressure_on_flight_levels_at_vector_points[closest_layer_index])
+				{
+					other_layer_index = closest_layer_index - 1;
+				}
+    			if ((closest_layer_index == NO_OF_LAYERS - 1 && other_layer_index == NO_OF_LAYERS) || (closest_layer_index < 0 || other_layer_index < 0))
+    			{
+					u_on_flight_levels[i][j] = 9999;
+					v_on_flight_levels[i][j] = 9999;
+    			}
+    			else
+    			{
+					closest_weight = 1 - distance_from_pressure_on_flight_level[closest_layer_index]/
+					fabs(pressure_on_flight_levels_at_vector_points[closest_layer_index] - pressure_on_flight_levels_at_vector_points[other_layer_index]);
+					u_on_flight_levels[i][j] = closest_weight*wind_u[closest_layer_index*NO_OF_VECTORS_H + i]
+					+ (1 - closest_weight)*wind_u[other_layer_index*NO_OF_VECTORS_H + i];
+					v_on_flight_levels[i][j] = closest_weight*wind_v[closest_layer_index*NO_OF_VECTORS_H + i]
+					+ (1 - closest_weight)*wind_v[other_layer_index*NO_OF_VECTORS_H + i];
+    			}
+    			
+    		}
+    	}
+    	
 		int OUTPUT_FILE_AVIATION_LENGTH = 300;
 		char *OUTPUT_FILE_AVIATION_PRE = malloc((OUTPUT_FILE_AVIATION_LENGTH + 1)*sizeof(char));
 		sprintf(OUTPUT_FILE_AVIATION_PRE, "output/%s/%s+%ds_aviation.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
@@ -667,6 +826,9 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     	free(u_on_flight_levels);
     	free(v_on_flight_levels);
     	free(flight_levels);
+    	free(pressure_on_flight_levels);
+    	free(pressure_on_flight_levels_at_vector_points);
+    	free(distance_from_pressure_on_flight_level);
     }
     
     // Grib output.
@@ -1851,4 +2013,36 @@ double calc_std_dev(double vector_for_std_deviation[], int no_of_values)
 	result = 1/sqrt(no_of_values)*sqrt(result);
 	return result;
 }
+
+int get_pressure_on_flight_levels(double flight_levels[], double pressure_on_flight_levels[])
+{
+	for (int i = 0; i < NO_OF_FLIGHT_LEVELS; ++i)
+	{
+		pressure_on_flight_levels[i] = get_pressure_at_altitude_standard(100*FOOT*flight_levels[i]);
+	}
+	return 0;
+}
+
+double get_pressure_at_altitude_standard(double altitude)
+{
+    const double TROPO_TEMP_STANDARD = T_SFC + TROPO_HEIGHT_STANDARD*TEMP_GRADIENT;
+	double pressure_at_inv_standard, result;
+    if (altitude < TROPO_HEIGHT_STANDARD)
+    {
+        result = P_0_STANDARD*pow(1 + TEMP_GRADIENT*altitude/T_SFC, -GRAVITY_MEAN/(R_D*TEMP_GRADIENT));
+    }
+    else if (altitude < INVERSE_HEIGHT_STANDARD)
+    {
+        result = P_0_STANDARD*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT_STANDARD/T_SFC, -GRAVITY_MEAN/(R_D*TEMP_GRADIENT))*exp(-GRAVITY_MEAN*(altitude - TROPO_HEIGHT_STANDARD)/(R_D*TROPO_TEMP_STANDARD));
+    }
+    else
+    {
+    	pressure_at_inv_standard = P_0_STANDARD*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT_STANDARD/T_SFC, -GRAVITY_MEAN/(R_D*TEMP_GRADIENT))*exp(-GRAVITY_MEAN*(INVERSE_HEIGHT_STANDARD - TROPO_HEIGHT_STANDARD)/(R_D*TROPO_TEMP_STANDARD));
+        result = pressure_at_inv_standard*pow(1 + TEMP_GRADIENT*(altitude - INVERSE_HEIGHT_STANDARD)/T_SFC, -GRAVITY_MEAN/(R_D*TEMP_GRADIENT));
+    }
+	return result;
+}
+
+
+
 

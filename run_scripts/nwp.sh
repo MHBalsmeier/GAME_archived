@@ -43,8 +43,8 @@ write_out_linearized_entropy_gas_integral=0 # If set to 1, the total linearized 
 write_out_energy_integral=0 # If set to 1, the total integrals of the energy forms of the atmosphere will be written out at every time step.
 grib_output_switch=1 # If set to 1, output will be written to grib files.
 netcdf_output_switch=0 # If set to 1, output will be written to netcdf files.
-synop_output_mode=1 # If set to 1, additional output on synoptical pressure levels will be created.
-aviation_output_mode=1 # If set to 1, additional output on flight levels will be created.
+synop_output_mode=1 # If set to 1, additional output on synoptical pressure levels will be created. The pressure levels can be set in the file core/src/settings.c. The numer of pressure levels must be set in the file core/src/settings.h.
+aviation_output_mode=1 # If set to 1, additional output on flight levels will be created. The flight levels can be set in the file core/src/settings.c. The numer of flight levels must be set in the file core/src/settings.h.
 
 # parallelization
 # relevant only for OMP
