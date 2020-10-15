@@ -263,7 +263,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				else
 				{
 					closest_weight = 1 - distance_from_synoptic_pressure_level[closest_layer_index]/
-					fabs(log((*pressure)[closest_layer_index*NO_OF_SCALARS_H + i]/(*pressure)[other_layer_index*NO_OF_SCALARS_H + i]) + 1e-12);
+					(fabs(log((*pressure)[closest_layer_index*NO_OF_SCALARS_H + i]/(*pressure)[other_layer_index*NO_OF_SCALARS_H + i])) + 1e-11);
 					geopotential_height[i][j] = closest_weight*grid -> gravity_potential[closest_layer_index*NO_OF_SCALARS_H + i]
 					+ (1 - closest_weight)*grid -> gravity_potential[other_layer_index*NO_OF_SCALARS_H + i];
 					geopotential_height[i][j] = geopotential_height[i][j]/GRAVITY_MEAN;
@@ -276,12 +276,12 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		}
 		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 		{
+			for (int k = 0; k < NO_OF_LAYERS; ++k)
+			{
+				pressure_at_vector_points[k] = 0.5*((*pressure)[k*NO_OF_SCALARS_H + grid -> from_index[i]] + (*pressure)[k*NO_OF_SCALARS_H + grid -> to_index[i]]);
+			}
     		for (int j = 0; j < NO_OF_PRESSURE_LEVELS; ++j)
 			{
-				for (int k = 0; k < NO_OF_LAYERS; ++k)
-				{
-					pressure_at_vector_points[k] = 0.5*((*pressure)[k*NO_OF_SCALARS_H + grid -> from_index[i]] + (*pressure)[k*NO_OF_SCALARS_H + grid -> to_index[i]]);
-				}
 				for (int k = 0; k < NO_OF_LAYERS; ++k)
 				{
 					distance_from_synoptic_pressure_level[k] = fabs(log(synoptic_pressure_levels[j]/pressure_at_vector_points[k]));
@@ -300,7 +300,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     			else
     			{
 					closest_weight = 1 - distance_from_synoptic_pressure_level[closest_layer_index]/
-					fabs(log(pressure_at_vector_points[closest_layer_index*NO_OF_SCALARS_H + i]/pressure_at_vector_points[other_layer_index*NO_OF_SCALARS_H + i]) + 1e-12);
+					(fabs(log(pressure_at_vector_points[closest_layer_index]/pressure_at_vector_points[other_layer_index])) + 1e-11);
 					u_on_pressure_levels[i][j] = closest_weight*wind_u[closest_layer_index*NO_OF_VECTORS_H + i]
 					+ (1 - closest_weight)*wind_u[other_layer_index*NO_OF_VECTORS_H + i];
 					v_on_pressure_levels[i][j] = closest_weight*wind_v[closest_layer_index*NO_OF_VECTORS_H + i]
@@ -320,7 +320,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			char *OUTPUT_FILE_SYNOP = malloc((OUTPUT_FILE_SYNOP_LENGTH + 1)*sizeof(char));
 			sprintf(OUTPUT_FILE_SYNOP, "output/%s/%s+%ds_synop.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
 			int ncid_synop, scalar_h_dimid, vector_h_dimid, level_dimid, geopot_height_id, temp_synop_id, rh_synop_id, wind_u_synop_id, wind_v_synop_id, synoptic_pressure_levels_id;
-			
 			if ((retval = nc_create(OUTPUT_FILE_SYNOP, NC_CLOBBER, &ncid_synop)))
 				NCERR(retval);
 			free(OUTPUT_FILE_SYNOP);
@@ -397,7 +396,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			sprintf(OUTPUT_FILE_SYNOP, "output/%s/%s+%ds_synop.grb2", RUN_ID, RUN_ID, (int) (t_write - t_init));
 			FILE *OUT_GRIB;
 			OUT_GRIB = fopen(OUTPUT_FILE_SYNOP, "w+");
-			
 			double *geopotential_height_pressure_level = malloc(NO_OF_SCALARS_H*sizeof(double));
 			double *temperature_pressure_level = malloc(NO_OF_SCALARS_H*sizeof(double));
 			double *rh_pressure_level = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -464,7 +462,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "level", 0.01*synoptic_pressure_levels[i])))
 			        ECCERR(retval);
-			    if ((retval = codes_set_double_array(handle_geopotential_height_pressure_level, "values", temperature_pressure_level, NO_OF_SCALARS_H)))
+			    if ((retval = codes_set_double_array(handle_geopotential_height_pressure_level, "values", geopotential_height_pressure_level, NO_OF_SCALARS_H)))
 			        ECCERR(retval);
 			    if ((retval = codes_write_message(handle_geopotential_height_pressure_level, OUTPUT_FILE_SYNOP, "a")))
 			        ECCERR(retval);
@@ -664,6 +662,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			free(rh_pressure_level);
 			free(wind_u_pressure_level);
 			free(wind_v_pressure_level);
+			free(OUTPUT_FILE_SYNOP);
 			
 			fclose(OUT_GRIB);
 		}
@@ -684,8 +683,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     	get_flight_levels(flight_levels);
     	double *pressure_on_flight_levels = malloc(sizeof(double)*NO_OF_FLIGHT_LEVELS);
     	get_pressure_on_flight_levels(flight_levels, pressure_on_flight_levels);
-    	double *distance_from_pressure_on_flight_level = malloc(sizeof(double)*NO_OF_FLIGHT_LEVELS);
-    	double *pressure_on_flight_levels_at_vector_points = malloc(sizeof(double)*NO_OF_FLIGHT_LEVELS);
+    	double *distance_from_pressure_on_flight_level = malloc(sizeof(double)*NO_OF_LAYERS);
+    	double *pressure_at_vector_points = malloc(sizeof(double)*NO_OF_LAYERS);
     	// Allocating memory for the output arrays.
     	double (*t_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_FLIGHT_LEVELS]));
     	double (*rh_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_FLIGHT_LEVELS]));
@@ -699,7 +698,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     		{
 				for (int k = 0; k < NO_OF_LAYERS; ++k)
 				{
-					distance_from_pressure_on_flight_level[k] = log(fabs(pressure_on_flight_levels[j]/(*pressure)[k*NO_OF_SCALARS_H + i]));
+					distance_from_pressure_on_flight_level[k] = fabs(log(pressure_on_flight_levels[j]/(*pressure)[k*NO_OF_SCALARS_H + i]));
 				}
 				closest_layer_index = find_min_index(distance_from_pressure_on_flight_level, NO_OF_LAYERS);
 				other_layer_index = closest_layer_index + 1;
@@ -715,7 +714,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     			else
     			{
 					closest_weight = 1 - distance_from_pressure_on_flight_level[closest_layer_index]/
-					fabs(log((*pressure)[closest_layer_index*NO_OF_SCALARS_H + i]/(*pressure)[other_layer_index*NO_OF_SCALARS_H + i]) + 1e-12);
+					(fabs(log((*pressure)[closest_layer_index*NO_OF_SCALARS_H + i]/(*pressure)[other_layer_index*NO_OF_SCALARS_H + i])) + 1e-11);
 					t_on_flight_levels[i][j] = closest_weight*state_write_out -> temperature_gas[closest_layer_index*NO_OF_SCALARS_H + i]
 					+ (1 - closest_weight)*state_write_out -> temperature_gas[other_layer_index*NO_OF_SCALARS_H + i];
 					rh_on_flight_levels[i][j] = closest_weight*(*rh)[closest_layer_index*NO_OF_SCALARS_H + i]
@@ -726,19 +725,19 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		}
 		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 		{
+			for (int k = 0; k < NO_OF_LAYERS; ++k)
+			{
+				pressure_at_vector_points[k] = 0.5*((*pressure)[k*NO_OF_SCALARS_H + grid -> from_index[i]] + (*pressure)[k*NO_OF_SCALARS_H + grid -> to_index[i]]);
+			}
 			for (int j = 0; j < NO_OF_FLIGHT_LEVELS; ++j)
     		{
 				for (int k = 0; k < NO_OF_LAYERS; ++k)
 				{
-					pressure_on_flight_levels_at_vector_points[k] = 0.5*((*pressure)[k*NO_OF_SCALARS_H + grid -> from_index[i]] + (*pressure)[k*NO_OF_SCALARS_H + grid -> to_index[i]]);
-				}
-				for (int k = 0; k < NO_OF_LAYERS; ++k)
-				{
-					distance_from_pressure_on_flight_level[k] = fabs(log(pressure_on_flight_levels[j]/pressure_on_flight_levels_at_vector_points[k]));
+					distance_from_pressure_on_flight_level[k] = fabs(log(pressure_on_flight_levels[j]/pressure_at_vector_points[k]));
 				}
 				closest_layer_index = find_min_index(distance_from_pressure_on_flight_level, NO_OF_LAYERS);
 				other_layer_index = closest_layer_index + 1;
-				if (pressure_on_flight_levels[j] < pressure_on_flight_levels_at_vector_points[closest_layer_index])
+				if (pressure_on_flight_levels[j] < pressure_at_vector_points[closest_layer_index])
 				{
 					other_layer_index = closest_layer_index - 1;
 				}
@@ -750,7 +749,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     			else
     			{
 					closest_weight = 1 - distance_from_pressure_on_flight_level[closest_layer_index]/
-					fabs(log(pressure_on_flight_levels_at_vector_points[closest_layer_index]/pressure_on_flight_levels_at_vector_points[other_layer_index]) + 1e-12);
+					(fabs(log(pressure_at_vector_points[closest_layer_index]/pressure_at_vector_points[other_layer_index])) + 1e-11);
 					u_on_flight_levels[i][j] = closest_weight*wind_u[closest_layer_index*NO_OF_VECTORS_H + i]
 					+ (1 - closest_weight)*wind_u[other_layer_index*NO_OF_VECTORS_H + i];
 					v_on_flight_levels[i][j] = closest_weight*wind_v[closest_layer_index*NO_OF_VECTORS_H + i]
@@ -759,6 +758,9 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     			
     		}
     	}
+    	free(pressure_on_flight_levels);
+    	free(pressure_at_vector_points);
+    	free(distance_from_pressure_on_flight_level);
     	
 		int OUTPUT_FILE_AVIATION_LENGTH = 300;
 		char *OUTPUT_FILE_AVIATION_PRE = malloc((OUTPUT_FILE_AVIATION_LENGTH + 1)*sizeof(char));
@@ -776,7 +778,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			NCERR(retval);
 		if ((retval = nc_def_dim(ncid_aviation, "vector_index_h", NO_OF_VECTORS_H, &vector_h_dimid)))
 			NCERR(retval);
-		if ((retval = nc_def_dim(ncid_aviation, "level_index", NO_OF_FLIGHT_LEVELS, &level_dimid)))
+		if ((retval = nc_def_dim(ncid_aviation, "flight_levels", NO_OF_FLIGHT_LEVELS, &level_dimid)))
 			NCERR(retval);
 		int dimids_aviation_scalar[2];
 		dimids_aviation_scalar[0] = scalar_h_dimid;
@@ -784,7 +786,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		int dimids_aviation_vector[2];
 		dimids_aviation_vector[0] = vector_h_dimid;
 		dimids_aviation_vector[1] = level_dimid;
-		
 		// Defining the variables.
 		if ((retval = nc_def_var(ncid_aviation, "flight_levels", NC_DOUBLE, 1, &level_dimid, &flight_levels_id)))
 			NCERR(retval);
@@ -810,6 +811,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			NCERR(retval);
 		
 		// Writing the arrays.
+		if ((retval = nc_put_var_double(ncid_aviation, flight_levels_id, &flight_levels[0])))
+			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid_aviation, temp_aviation_id, &t_on_flight_levels[0][0])))
 			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid_aviation, rh_aviation_id, &rh_on_flight_levels[0][0])))
@@ -822,14 +825,12 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		// Closing the netcdf file.
 		if ((retval = nc_close(ncid_aviation)))
 			NCERR(retval);
+			
     	free(t_on_flight_levels);
     	free(rh_on_flight_levels);
     	free(u_on_flight_levels);
     	free(v_on_flight_levels);
     	free(flight_levels);
-    	free(pressure_on_flight_levels);
-    	free(pressure_on_flight_levels_at_vector_points);
-    	free(distance_from_pressure_on_flight_level);
     }
     
     // Grib output.

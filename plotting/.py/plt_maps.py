@@ -30,6 +30,7 @@ projection = sys.argv[8];
 run_id = sys.argv[9];
 uniform_range = int(sys.argv[10]);
 scope = sys.argv[11];
+on_pressure_bool = int(sys.argv[12]);
 
 # default values
 shift = 0;
@@ -37,7 +38,17 @@ rescale = 1;
 colormap = "jet";
 show_level_on = 1;
 contourf_plot = 1;
+gravity_mean = 9.80616;
 
+if short_name == "gh":
+    variable_name = "Geopotential height";
+    unit_string = "gpdam";
+    rescale = 1/gravity_mean;
+    contourf_plot = 0;
+if short_name == "t":
+    variable_name = "Temperature";
+    unit_string = "°C";
+    shift = -conv.c2k(0);
 if short_name == "pt":
     variable_name = "Potential temperature";
     unit_string = "K";
@@ -121,6 +132,10 @@ if short_name == "d":
     unit_string = "1/s";
     rescale = 1;
 
+unit_string_for_iris = unit_string;
+if short_name == "gh":
+    unit_string_for_iris = "dam";
+
 disp_time_in_hr = 0;
 time_unit_string = "s";
 
@@ -130,17 +145,25 @@ if max_interval > 24*3600:
 
 savename = run_id + "_" + short_name + "_" + str(level) + "_" + scope;
 
-input_file = grib_dir_name + "/" + run_id + "+0s.grb2";
+if on_pressure_bool == 0:
+	input_file = grib_dir_name + "/" + run_id + "+0s.grb2";
+else:
+	input_file = grib_dir_name + "/" + run_id + "+0s_synop.grb2";
+
+	
 lat, lon, values_pre = rmo.fetch_model_output(input_file, 0, short_name, level, grid_props_file);
 
 values = np.zeros([len(lat), int(max_interval/plot_interval) + 1]);
 values[:, 0] = rescale*values_pre + shift;
 
 for i in np.arange(1, int(max_interval/plot_interval) + 1):
-    time_after_init = i*plot_interval;
-    input_file = grib_dir_name + "/" + run_id + "+" + str(time_after_init) + "s.grb2";
-    lat, lon, values[:, i] = rmo.fetch_model_output(input_file, time_after_init, short_name, level, grid_props_file);
-    values[:, i] = rescale*values[:, i] + shift;
+	time_after_init = i*plot_interval;
+	if on_pressure_bool == 0:
+		input_file = grib_dir_name + "/" + run_id + "+" + str(time_after_init) + "s.grb2";
+	else:
+		input_file = grib_dir_name + "/" + run_id + "+" + str(time_after_init) + "s_synop.grb2";
+	lat, lon, values[:, i] = rmo.fetch_model_output(input_file, time_after_init, short_name, level, grid_props_file);
+	values[:, i] = rescale*values[:, i] + shift;
 
 scope_bool_vector = np.zeros([len(values[:, 0])], dtype = bool);
 if projection == "Gnomonic":
@@ -238,14 +261,17 @@ for i in range(int(max_interval/plot_interval) + 1):
 	gl.yformatter = LATITUDE_FORMATTER;
 	if scope == "World":
 		gl.left_labels = False;
-	new_cube = iris.cube.Cube(values_interpolated, units = unit_string, dim_coords_and_dims = [(lat_coord, 0), (lon_coord, 1)]);
+	new_cube = iris.cube.Cube(values_interpolated, units = unit_string_for_iris, dim_coords_and_dims = [(lat_coord, 0), (lon_coord, 1)]);
 	if contourf_plot == 1:
 		mesh = iplt.pcolormesh(new_cube, cmap = cmap, norm = norm);
 		cbar = plt.colorbar(mesh, fraction = 0.02, pad = 0.04, aspect = 80, orientation = "horizontal", ticks = np.arange(total_min, total_max + color_bar_dist, color_bar_dist));
 		cbar.ax.tick_params(labelsize = 12)
 		cbar.set_label(unit_string, fontsize = 16);
 	else:
-		levels_vector = np.arange(900, 1055, 4);
+		if short_name == "gh":
+			levels_vector = np.arange(100, 2055, 8);
+		else:
+			levels_vector = np.arange(100, 2055, 4);
 		big_index = np.where(levels_vector == 1012);
 		basic_width = 1;
 		linewidths_vector = basic_width*np.ones(np.size(levels_vector));
@@ -265,7 +291,13 @@ for i in range(int(max_interval/plot_interval) + 1):
 	if disp_time_in_hr == 1:
 		time_after_init_title = int(time_after_init/3600);
 	if show_level_on == 1:
-		textstr = variable_name + " at level " + str(level) + "\n" + "init + " + str(time_after_init_title) + " " + time_unit_string;
+		if on_pressure_bool == 1:
+			if contourf_plot == 0:
+				textstr = str(level) + " hPa " + variable_name + " / " + unit_string + "\n" + "init + " + str(time_after_init_title) + " " + time_unit_string;
+			if contourf_plot == 1:
+				textstr = str(level) + " hPa " + variable_name + "\n" + "init + " + str(time_after_init_title) + " " + time_unit_string;
+		else:
+			textstr = variable_name + " at level " + str(level) + "\n" + "init + " + str(time_after_init_title) + " " + time_unit_string;
 	else:
 		textstr = variable_name + "\n" + "init + " + str(time_after_init_title) + " " + time_unit_string;
 	ob = offsetbox.AnchoredText(textstr, loc = 3);
