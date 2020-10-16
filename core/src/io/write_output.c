@@ -41,17 +41,18 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 {
 	// Diagnostics and forcings are primarily handed over for checks.
 	
-	// Time stuff.
 	int write_out_divv_h;
 	ask_for_divergence_output(&write_out_divv_h);
-    time_t t_init_tt = (time_t) t_init;
-    struct tm *p_init_time = gmtime(&t_init_tt);
+	
+	// Time stuff.
+    time_t t_init_t = (time_t) t_init;
+    struct tm *p_init_time = localtime(&t_init_t);
     int init_year = p_init_time -> tm_year;
     int init_month = p_init_time -> tm_mon;
     int init_day = p_init_time -> tm_mday;
     int init_hour = p_init_time -> tm_hour;
-    long data_date = 10000*init_year + 100*init_month + init_day;
-    long data_time = init_hour;
+    long data_date = 10000*(init_year + 1900) + 100*(init_month + 1) + init_day;
+    long data_time = 100*init_hour;
     
     // Diagnostics of surface speicific quantities. These are always written out.
     Scalar_field *pot_temperature = calloc(1, sizeof(Scalar_field));
@@ -450,6 +451,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "typeOfGeneratingProcess", 1)))
 			        ECCERR(retval);
+			    if ((retval = codes_set_double(handle_geopotential_height_pressure_level, "missingValue", 9999)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "bitmapPresent", 1)))
+			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "parameterCategory", 3)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "parameterNumber", 5)))
@@ -496,6 +501,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			    if ((retval = codes_set_long(handle_temperature_pressure_level, "stepRange", t_write - t_init)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_temperature_pressure_level, "typeOfGeneratingProcess", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_double(handle_temperature_pressure_level, "missingValue", 9999)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "bitmapPresent", 1)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_temperature_pressure_level, "parameterCategory", 0)))
 			        ECCERR(retval);
@@ -544,6 +553,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_rh_pressure_level, "typeOfGeneratingProcess", 1)))
 			        ECCERR(retval);
+			    if ((retval = codes_set_double(handle_rh_pressure_level, "missingValue", 9999)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "bitmapPresent", 1)))
+			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_rh_pressure_level, "parameterCategory", 1)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_rh_pressure_level, "parameterNumber", 1)))
@@ -591,6 +604,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "typeOfGeneratingProcess", 1)))
 			        ECCERR(retval);
+			    if ((retval = codes_set_double(handle_wind_u_pressure_level, "missingValue", 9999)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "bitmapPresent", 1)))
+			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "parameterCategory", 2)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "parameterNumber", 2)))
@@ -637,6 +654,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "stepRange", t_write - t_init)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "typeOfGeneratingProcess", 1)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_double(handle_wind_v_pressure_level, "missingValue", 9999)))
+			        ECCERR(retval);
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "bitmapPresent", 1)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "parameterCategory", 2)))
 			        ECCERR(retval);

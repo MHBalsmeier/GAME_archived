@@ -137,25 +137,12 @@ int main(int argc, char *argv[])
 	sprintf(INIT_STATE_FILE_PRE, "input/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", TEST_ID, RES_ID, NO_OF_LAYERS, toa, ORO_ID, NO_OF_ORO_LAYERS);
     char INIT_STATE_FILE[strlen(INIT_STATE_FILE_PRE) + 1];
     strcpy(INIT_STATE_FILE, INIT_STATE_FILE_PRE);
-    // determining the time stamp of 2000-01-01
-    struct tm offset_t, *p_offset;
-    time_t offset_time_pre;
-    offset_t.tm_year = 2000 - 1900;
-    offset_t.tm_mon = 0;
-    offset_t.tm_mday = 1;
-    offset_t.tm_hour = 0;
-    offset_t.tm_min = 0;
-    offset_t.tm_sec = 0;
-    offset_t.tm_isdst = -1;
-    offset_time_pre = mktime(&offset_t);
-    // this is necessary for conversion to UTC
-    p_offset = gmtime(&offset_time_pre);
-    offset_t = *p_offset;
-    offset_time_pre = mktime(&offset_t);
-    double offset_time = (double) offset_time_pre;
-    // determining the time stamp of the initialization
-    struct tm init_t, *p_init;
-    time_t init_time_pre;
+    
+    /*
+    determining the time stamp of the initialization
+    This will be in the time zone of the machine, which is not a problem, since the offset is added here and substracted when the output is written.
+    */
+    struct tm init_t;
     init_t.tm_year = year - 1900;
     init_t.tm_mon = month - 1;
     init_t.tm_mday = day;
@@ -163,13 +150,9 @@ int main(int argc, char *argv[])
     init_t.tm_min = 0;
     init_t.tm_sec = 0;
     init_t.tm_isdst = -1;
-    init_time_pre = mktime(&init_t);
-    // this is necessary for conversion to UTC
-    p_init = gmtime(&init_time_pre);
-    init_t = *p_init;
-    init_time_pre = mktime(&init_t);
-    // substracting the C time coordinate of 2000-01-01
-    double t_init = (double) init_time_pre - offset_time;
+    time_t init_time = mktime(&init_t);
+    double t_init = (double) init_time;
+    
     // Giving the user some information on the run to about to be executed.
     char *stars  = malloc(83*sizeof(char));
     for (int i = 0; i < 81; ++i)
