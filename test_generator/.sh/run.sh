@@ -18,5 +18,5 @@ if [ $? -ne 0 ]
 then
 echo -e ${RED}Test state file creation failed.$NC
 else
-echo "Test state file for test_id=$test_id created sucessfully."
+echo "Test state file for test_id = $test_id created sucessfully."
 fi

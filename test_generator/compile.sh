@@ -4,7 +4,7 @@
 # Github repository: https://github.com/MHBalsmeier/game
 
 echo "Starting to compile test generator."
-mpicc src/* -leccodes -lnetcdf -lm -lgeos95 -fopenmp -latmostracers -Wl,-rpath=/lib -Wall -o test_generator
+mpicc src/* ../shared/various.c -leccodes -lnetcdf -lm -lgeos95 -fopenmp -latmostracers -Wl,-rpath=/lib -Wall -o test_generator
 if [ $? -ne 0 ]
 then
 echo -e ${RED}Test generator compilation failed.$NC

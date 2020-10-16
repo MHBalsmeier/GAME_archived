@@ -9,5 +9,5 @@ if [ $? -ne 0 ]
 then
 echo -e ${RED}Orography file creation failed.$NC
 else
-echo "Orography file for oro_id $oro_id created sucessfully."
+echo "Orography file for oro_id = $oro_id created sucessfully."
 fi
