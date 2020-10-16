@@ -328,107 +328,104 @@ int set_from_to_index_dual(int from_index_dual[], int to_index_dual[], int face_
     int edge_rel_to_face_1 = 0;
     int face_index_0 = 0;
     int face_index_1 = 0;
-    for (int i = 0; i < NO_OF_DUAL_VECTORS_PER_LAYER; ++i)
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
-        if (i < NO_OF_VECTORS_H)
+        if (i < NO_OF_EDGES*(POINTS_PER_EDGE + 1))
         {
-            if (i < NO_OF_EDGES*(POINTS_PER_EDGE + 1))
+            edge_index = i/(POINTS_PER_EDGE + 1);
+            on_edge_index = i - edge_index*(POINTS_PER_EDGE + 1);
+            first_face_found = 0;
+            for (int j = 0; j < NO_OF_BASIC_TRIANGLES; ++j)
             {
-                edge_index = i/(POINTS_PER_EDGE + 1);
-                on_edge_index = i - edge_index*(POINTS_PER_EDGE + 1);
-                first_face_found = 0;
-                for (int j = 0; j < NO_OF_BASIC_TRIANGLES; ++j)
+                if (face_edges[j][0] == edge_index || face_edges[j][1] == edge_index || face_edges[j][2] == edge_index)
                 {
-                    if (face_edges[j][0] == edge_index || face_edges[j][1] == edge_index || face_edges[j][2] == edge_index)
+                    if (first_face_found == 0)
                     {
-                        if (first_face_found == 0)
-                        {
-                            face_index_0 = j;
-                            first_face_found = 1;
-                        }
-                        else
-                            face_index_1 = j;
+                        face_index_0 = j;
+                        first_face_found = 1;
                     }
-                }
-                if (face_edges[face_index_0][0] == edge_index)
-                    edge_rel_to_face_0 = 0;
-                if (face_edges[face_index_0][1] == edge_index)
-                    edge_rel_to_face_0 = 1;
-                if (face_edges[face_index_0][2] == edge_index)
-                    edge_rel_to_face_0 = 2;
-                if (face_edges[face_index_1][0] == edge_index)
-                    edge_rel_to_face_1 = 0;
-                if (face_edges[face_index_1][1] == edge_index)
-                    edge_rel_to_face_1 = 1;
-                if (face_edges[face_index_1][2] == edge_index)
-                    edge_rel_to_face_1 = 2;
-                if (edge_rel_to_face_0 == 0)
-                {
-                    if (face_edges_reverse[face_index_0][edge_rel_to_face_0] == 0)
-                        triangle_on_face_index = 2*on_edge_index;
                     else
-                        triangle_on_face_index = 2*POINTS_PER_EDGE - 2*on_edge_index;
+                        face_index_1 = j;
                 }
-                if (edge_rel_to_face_0 == 1)
-                {
-                    if (face_edges_reverse[face_index_0][edge_rel_to_face_0] == 0)
-                        triangle_on_face_index = -1 + (on_edge_index + 1)*(2*POINTS_PER_EDGE - on_edge_index + 1);
-                    else
-                        triangle_on_face_index = TRIANGLES_PER_FACE - on_edge_index*on_edge_index - 1;
-                }
-                if (edge_rel_to_face_0 == 2)
-                {
-                    if (face_edges_reverse[face_index_0][edge_rel_to_face_0] == 0)
-                        triangle_on_face_index = TRIANGLES_PER_FACE - 1 - on_edge_index*(on_edge_index + 2);
-                    else
-                        triangle_on_face_index = on_edge_index*(2*POINTS_PER_EDGE + 2 - on_edge_index);
-                }
-                to_index_dual[i] = face_index_0*TRIANGLES_PER_FACE + triangle_on_face_index;
-                if (edge_rel_to_face_1 == 0)
-                {
-                    if (face_edges_reverse[face_index_1][edge_rel_to_face_1] == 0)
-                        triangle_on_face_index = 2*on_edge_index;
-                    else
-                        triangle_on_face_index = 2*POINTS_PER_EDGE - 2*on_edge_index;
-                }
-                if (edge_rel_to_face_1 == 1)
-                {
-                    if (face_edges_reverse[face_index_1][edge_rel_to_face_1] == 0)
-                        triangle_on_face_index = -1 + (on_edge_index + 1)*(2*POINTS_PER_EDGE - on_edge_index + 1);
-                    else
-                        triangle_on_face_index = TRIANGLES_PER_FACE - on_edge_index*on_edge_index - 1;
-                }
-                if (edge_rel_to_face_1 == 2)
-                {
-                    if (face_edges_reverse[face_index_1][edge_rel_to_face_1] == 0)
-                        triangle_on_face_index = TRIANGLES_PER_FACE - 1 - on_edge_index*(on_edge_index + 2);
-                    else
-                        triangle_on_face_index = on_edge_index*(2*POINTS_PER_EDGE + 2 - on_edge_index);
-                }
-                from_index_dual[i] = face_index_1*TRIANGLES_PER_FACE + triangle_on_face_index;
             }
-            else
+            if (face_edges[face_index_0][0] == edge_index)
+                edge_rel_to_face_0 = 0;
+            if (face_edges[face_index_0][1] == edge_index)
+                edge_rel_to_face_0 = 1;
+            if (face_edges[face_index_0][2] == edge_index)
+                edge_rel_to_face_0 = 2;
+            if (face_edges[face_index_1][0] == edge_index)
+                edge_rel_to_face_1 = 0;
+            if (face_edges[face_index_1][1] == edge_index)
+                edge_rel_to_face_1 = 1;
+            if (face_edges[face_index_1][2] == edge_index)
+                edge_rel_to_face_1 = 2;
+            if (edge_rel_to_face_0 == 0)
             {
-                face_index = (i - NO_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
-                on_face_index = i - (NO_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
-                triangle_on_face_index = on_face_index/3;
-                small_triangle_edge_index = on_face_index - 3*triangle_on_face_index;
-                find_coords_from_triangle_on_face_index(triangle_on_face_index, RES_ID, &coord_0, &coord_1, &coord_0_points_amount);
-                if (small_triangle_edge_index == 0)
-                {
-                    from_index_dual[i] = face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + coord_1;
-                    to_index_dual[i] = from_index_dual[i] + 1;
-                }
-                if (small_triangle_edge_index == 1)
-                {
-                    from_index_dual[i] = face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + 1 + coord_1;
-                    to_index_dual[i] = from_index_dual[i] + 1;
-                }
-                if (small_triangle_edge_index == 2)
-                {
-                    from_index_dual[i] = face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + 1 + coord_1;
-                    to_index_dual[i] = from_index_dual[i] + 2*coord_0_points_amount;
-                }
+                if (face_edges_reverse[face_index_0][edge_rel_to_face_0] == 0)
+                    triangle_on_face_index = 2*on_edge_index;
+                else
+                    triangle_on_face_index = 2*POINTS_PER_EDGE - 2*on_edge_index;
+            }
+            if (edge_rel_to_face_0 == 1)
+            {
+                if (face_edges_reverse[face_index_0][edge_rel_to_face_0] == 0)
+                    triangle_on_face_index = -1 + (on_edge_index + 1)*(2*POINTS_PER_EDGE - on_edge_index + 1);
+                else
+                    triangle_on_face_index = TRIANGLES_PER_FACE - on_edge_index*on_edge_index - 1;
+            }
+            if (edge_rel_to_face_0 == 2)
+            {
+                if (face_edges_reverse[face_index_0][edge_rel_to_face_0] == 0)
+                    triangle_on_face_index = TRIANGLES_PER_FACE - 1 - on_edge_index*(on_edge_index + 2);
+                else
+                    triangle_on_face_index = on_edge_index*(2*POINTS_PER_EDGE + 2 - on_edge_index);
+            }
+            to_index_dual[i] = face_index_0*TRIANGLES_PER_FACE + triangle_on_face_index;
+            if (edge_rel_to_face_1 == 0)
+            {
+                if (face_edges_reverse[face_index_1][edge_rel_to_face_1] == 0)
+                    triangle_on_face_index = 2*on_edge_index;
+                else
+                    triangle_on_face_index = 2*POINTS_PER_EDGE - 2*on_edge_index;
+            }
+            if (edge_rel_to_face_1 == 1)
+            {
+                if (face_edges_reverse[face_index_1][edge_rel_to_face_1] == 0)
+                    triangle_on_face_index = -1 + (on_edge_index + 1)*(2*POINTS_PER_EDGE - on_edge_index + 1);
+                else
+                    triangle_on_face_index = TRIANGLES_PER_FACE - on_edge_index*on_edge_index - 1;
+            }
+            if (edge_rel_to_face_1 == 2)
+            {
+                if (face_edges_reverse[face_index_1][edge_rel_to_face_1] == 0)
+                    triangle_on_face_index = TRIANGLES_PER_FACE - 1 - on_edge_index*(on_edge_index + 2);
+                else
+                    triangle_on_face_index = on_edge_index*(2*POINTS_PER_EDGE + 2 - on_edge_index);
+            }
+            from_index_dual[i] = face_index_1*TRIANGLES_PER_FACE + triangle_on_face_index;
+        }
+        else
+        {
+            face_index = (i - NO_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
+            on_face_index = i - (NO_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
+            triangle_on_face_index = on_face_index/3;
+            small_triangle_edge_index = on_face_index - 3*triangle_on_face_index;
+            find_coords_from_triangle_on_face_index(triangle_on_face_index, RES_ID, &coord_0, &coord_1, &coord_0_points_amount);
+            if (small_triangle_edge_index == 0)
+            {
+                from_index_dual[i] = face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + coord_1;
+                to_index_dual[i] = from_index_dual[i] + 1;
+            }
+            if (small_triangle_edge_index == 1)
+            {
+                from_index_dual[i] = face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + 1 + coord_1;
+                to_index_dual[i] = from_index_dual[i] + 1;
+            }
+            if (small_triangle_edge_index == 2)
+            {
+                from_index_dual[i] = face_index*TRIANGLES_PER_FACE + 2*triangle_on_face_index + 1 + coord_1;
+                to_index_dual[i] = from_index_dual[i] + 2*coord_0_points_amount;
             }
         }
     }

@@ -59,6 +59,28 @@ int main(int argc, char *argv[])
     int len = strlen(argv[5]);
     char *SCALAR_H_FILE = malloc((len + 1)*sizeof(char));
     strcpy(SCALAR_H_FILE, argv[5]);
+    
+    // Checking wether the RES_ID of the SCALAR_H_FILE corresponds to the RES_ID in enum.h.
+    char res_id_as_string[2];
+    res_id_as_string[0] = SCALAR_H_FILE[7];
+    res_id_as_string[1] = SCALAR_H_FILE[8];
+    int res_id_from_scalar_h_file;
+    if (res_id_as_string[1] == 'L')
+    {
+    	res_id_from_scalar_h_file = res_id_as_string[0] - '0';
+    }
+    else
+    {
+    	res_id_from_scalar_h_file = strtod(res_id_as_string, NULL);
+    }
+    if (USE_SCALAR_H_FILE == 1 && res_id_from_scalar_h_file != RES_ID)
+    {
+    	printf("The resolution (res_id = %d) of the scalar_h_coords_file does not correspond to the resolution (RES_ID = %d) in enum.h.\n", res_id_from_scalar_h_file, RES_ID);
+    	printf("Recompile with RES_ID = %d or choose a scalar_h_coords_file with res_id = %d, then try again.\n", res_id_from_scalar_h_file, RES_ID);
+    	printf("Aborting.\n");
+    	exit(1);
+    }
+    
 	if (NO_OF_ORO_LAYERS >= NO_OF_LAYERS)
 	{
 		printf("It is NO_OF_ORO_LAYERS >= NO_OF_LAYERS.\n");
@@ -180,6 +202,7 @@ int main(int argc, char *argv[])
     {
     	read_horizontal_explicit(latitude_scalar, longitude_scalar, from_index, to_index, from_index_dual, to_index_dual, SCALAR_H_FILE);
     }
+	calc_adjacent_vector_indices_h(from_index, to_index, adjacent_signs_h, adjacent_vector_indices_h);
 	if (OPTIMIZE_BOOL == 1)
 	{
 		optimize_to_scvt(latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, N_ITERATIONS, face_edges, face_edges_reverse, face_vertices, edge_vertices, adjacent_vector_indices_h, from_index_dual, to_index_dual);
@@ -196,7 +219,6 @@ int main(int argc, char *argv[])
     calc_triangle_face_unity(triangle_face_unit_sphere, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
 	calc_vorticity_indices_pre(from_index_dual, to_index_dual, direction, direction_dual, vorticity_indices_pre, ORTH_CRITERION_DEG, vorticity_signs_pre);
 	check_for_orthogonality(direction, direction_dual, ORTH_CRITERION_DEG);
-	calc_adjacent_vector_indices_h(from_index, to_index, adjacent_signs_h, adjacent_vector_indices_h);
 	calc_cell_face_unity(pent_hex_face_unity_sphere, latitude_scalar_dual, longitude_scalar_dual, adjacent_vector_indices_h, vorticity_indices_pre);
 	// building the vertical grid
    	double z_oro_off = TOA*(NO_OF_ORO_LAYERS + 0.0)/NO_OF_LAYERS;

@@ -1,8 +1,8 @@
-The Geophysical Fluids Modeling Framework (GAME) is a global non-hydrostatic hexagonal C grid dynamical core with the possibility to advect a variable number of tracers. For radiation, it is coupled to RTE+RRTMGP via the C binding rte-rrtmgp-c (yet to be implemented).
+The Geophysical Fluids Modeling Framework (GAME) is a non-hydrostatic hexagonal C grid dynamical core with the possibility to advect a variable number of tracers. For radiation, it is coupled to RTE+RRTMGP via the C binding rte-rrtmgp-c (yet to be implemented).
 
 ## Overview
 
-It is known that the forecast skill of a NWP model depends more on physics and data assimilation than on the dynamical core. However, all global dynamical cores I know of have inconsistencies even in the most fundamental dynamical quantities (mass, energy forms and entropy). That is why the aim of this project is to develop a next generation global dynamical core with the following properties:
+It is known that the forecast skill of a NWP model depends more on physics and data assimilation than on the dynamical core. However, all dynamical cores I know of have inconsistencies even in the most fundamental dynamical quantities (mass, energy forms and entropy). That is why the aim of this project is to develop a next generation dynamical core with the following properties:
 
 * Stability.
 * The numerical dispersion relation shall contain no unphysical branches.
@@ -10,9 +10,9 @@ It is known that the forecast skill of a NWP model depends more on physics and d
 * Strong scalability on massively parallel computer architectures.
 * Mass conservation to machine precision.
 * Energy conversions shall be based on a spatial discretization of Poisson brackets.
-* Global total energy conservation, apart from non-cancelling errors through explicit time stepping.
+* Total energy conservation, apart from non-cancelling errors through explicit time stepping.
 * Consistent local dissipation and entropy production.
-* Global satisfaction of the Second Law of Thermodynamics including entropy conservation to machine precision in an adiabatic setup.
+* Satisfaction of the Second Law of Thermodynamics including entropy conservation to machine precision in an adiabatic setup.
 * Absence of unphysical numerical stabilizers like divergence damping, fixers, filters and so on.
 * No problems with terrain following coordinates. For example: A resting atmosphere around steep orography shall remain at rest.
 * Ellipsoidal grid geometry.
@@ -21,7 +21,7 @@ It is known that the forecast skill of a NWP model depends more on physics and d
 
 According to my understanding, a hexagonal C grid is the only discretization where all this can be achieved.
 
-### GAME's principles a.k.a. why a new global model is necessary
+### GAME's principles a.k.a. why a new model is necessary
 
 What GAME does what other models do not do and why:
 
