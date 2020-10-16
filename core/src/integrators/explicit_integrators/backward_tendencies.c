@@ -20,15 +20,21 @@ int backward_tendencies(State *state_old, State *state_new, Interpolate_info *in
     // Temperature diffusion gets updated here, but only at the last RK step and if heat conduction is switched on.
     if (no_rk_step == 2 && (config_info -> temperature_diff_h == 1 || config_info -> temperature_diff_v == 1))
     {
-        calc_temp_diffusion_coeffs(state_old, config_info, diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v);
+    	// Now we need to calculate the scalar diffusion coefficients.
+        calc_temp_diffusion_coeffs(state_old, config_info, diffusion_info -> scalar_diffusion_coeff_numerical_h, diffusion_info -> scalar_diffusion_coeff_numerical_v);
+        // The diffusion of the temperature depends on its gradient.
 		grad(state_old -> temperature_gas, diagnostics -> temperature_gradient, grid);
-        scalar_times_vector_scalar_h_v(diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v, diagnostics -> temperature_gradient, diagnostics -> temperature_flux_density, grid);
-        divv_h(diagnostics -> temperature_flux_density, diffusion_info -> temp_diffusion_heating, grid);
+		// Now the diffusive temperature flux density can be obtained.
+        scalar_times_vector_scalar_h_v(diffusion_info -> scalar_diffusion_coeff_numerical_h, diffusion_info -> scalar_diffusion_coeff_numerical_v, diagnostics -> temperature_gradient, diffusion_info -> temperature_diffusive_flux_density, grid);
+        // The divergence of the diffusive temperature flux density is the diffusive temperature heating.
+        divv_h(diffusion_info -> temperature_diffusive_flux_density, diffusion_info -> temperature_diffusion_heating, grid);
     }
     if (config_info -> tracers_on == 1)
     {
+		// The explicit part of the tracer equations integration is called here.
 		integrate_tracers(state_old, state_new, interpolation, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, diffusion_info, config_info, no_rk_step);
 	}
+	// Now we call the function which integrates the explicit part of the dry entropy density equation,
 	integrate_entropy_density_dry(state_old, state_new, interpolation, state_tendency, grid, dualgrid, radiation_tendency, diagnostics, forcings, diffusion_info, config_info, no_rk_step);
     return 0;
 }

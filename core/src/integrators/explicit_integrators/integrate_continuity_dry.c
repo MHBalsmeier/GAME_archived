@@ -23,8 +23,8 @@ int integrate_continuity_dry(State *state_old, State *state_new, Interpolate_inf
     if (no_rk_step == 2 && (config_info -> mass_dry_diff_h == 1 || config_info -> mass_dry_diff_v == 1))
     {
         grad(state_old -> density_dry, diffusion_info -> mass_dry_diffusion_flux_density, grid);
-        calc_mass_diffusion_coeffs(state_old, config_info, diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v);
-        scalar_times_vector_scalar_h_v(diffusion_info -> diffusion_coeff_numerical_h, diffusion_info -> diffusion_coeff_numerical_v, diffusion_info -> mass_dry_diffusion_flux_density, diffusion_info -> mass_dry_diffusion_flux_density, grid);
+        calc_mass_diffusion_coeffs(state_old, config_info, diffusion_info -> scalar_diffusion_coeff_numerical_h, diffusion_info -> scalar_diffusion_coeff_numerical_v);
+        scalar_times_vector_scalar_h_v(diffusion_info -> scalar_diffusion_coeff_numerical_h, diffusion_info -> scalar_diffusion_coeff_numerical_v, diffusion_info -> mass_dry_diffusion_flux_density, diffusion_info -> mass_dry_diffusion_flux_density, grid);
         divv_h(diffusion_info -> mass_dry_diffusion_flux_density, diffusion_info -> mass_dry_diffusion_source_rate, grid);
     }
     #pragma omp parallel for

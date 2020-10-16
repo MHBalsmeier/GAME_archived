@@ -151,10 +151,9 @@ Scalar_field c_h_p_field;
 Scalar_field e_kin_h;
 // nabla h
 Vector_field pressure_gradient_0_m;
-// temp nabla s
+// temperature times nabla s
 Vector_field pressure_gradient_1_dry;
 Vector_field pressure_gradient_1_vapour;
-Vector_field temperature_flux_density;
 Vector_field entropy_dry_flux_density;
 // This is for the momentum diffusion.
 Scalar_field velocity_gas_divv;
@@ -193,11 +192,12 @@ Vector_field pressure_gradient_1_old;
 
 // Contains everything on turbulence parametrizations as well as tracer-related quantities.
 typedef struct diffusion_info {
-Scalar_field temp_diffusion_heating;
+Vector_field temperature_diffusive_flux_density;
+Scalar_field temperature_diffusion_heating;
 Vector_field friction_acc;
 Scalar_field heating_diss;
-Scalar_field diffusion_coeff_numerical_h;
-Scalar_field diffusion_coeff_numerical_v;
+Scalar_field scalar_diffusion_coeff_numerical_h;
+Scalar_field scalar_diffusion_coeff_numerical_v;
 Vector_field mass_dry_diffusion_flux_density;
 Scalar_field mass_dry_diffusion_source_rate;
 Scalar_field tracer_density;

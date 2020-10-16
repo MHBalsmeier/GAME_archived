@@ -3,6 +3,10 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/MHBalsmeier/game
 */
 
+/*
+This is the horizontal (explicit) part of the tracer integration.
+*/
+
 #include "../../enum_and_typedefs.h"
 #include "atmostracers.h"
 #include "../../spatial_operators/spatial_operators.h"
@@ -38,16 +42,23 @@ int integrate_tracers(State *state_old, State *state_new, Interpolate_info *inte
 				    diffusion_info -> tracer_density[j] = state_new -> tracer_densities[i*NO_OF_SCALARS + j];
 			    }
 	        }
+	        // This is the case where the tracer at hand is a condensated tracer.
 		    if (i < NO_OF_CONDENSATED_TRACERS)
 		    {
 		        for (int j = 0; j < NO_OF_VECTORS; ++j)
 		        {
 		            layer_index = j/NO_OF_VECTORS_PER_LAYER;
 		            h_index = j - layer_index*NO_OF_VECTORS_PER_LAYER;
+		            // If the component is vertical, the sink velocity of this tracer must substracted.
 		            if (h_index < NO_OF_SCALARS_H)
+		            {
 		                diffusion_info -> tracer_velocity[j] = state_new -> velocity_gas[j] - ret_sink_velocity(i, 0, 0.001);
+	                }
+	                // The horizontal movement is not affected by the sink velocity.
 		            else
+		            {
 		            	diffusion_info -> tracer_velocity[j] = state_new -> velocity_gas[j];
+	            	}
 		        }
 		        scalar_times_vector(diffusion_info -> tracer_density, diffusion_info -> tracer_velocity, diffusion_info -> tracer_flux_density, grid, 0);
 		        divv_h(diffusion_info -> tracer_flux_density, diffusion_info -> tracer_flux_density_divv, grid);
@@ -61,19 +72,37 @@ int integrate_tracers(State *state_old, State *state_new, Interpolate_info *inte
 				    total_density = state_old -> density_dry[j];
 				    for (int k = 0; k < NO_OF_TRACERS; ++k)
 				        total_density += state_old -> tracer_densities[k*NO_OF_SCALARS + j];
-			        state_tendency -> tracer_density_temperatures[i*NO_OF_SCALARS + j] = -diffusion_info -> tracer_temperature_flux_density_divv[j] + state_old -> tracer_densities[i*NO_OF_SCALARS + j]/(c_v_cond*total_density)*(diffusion_info -> temp_diffusion_heating[j] + diffusion_info -> heating_diss[j] + radiation_tendency[j]) + 1/c_v_cond*config_info -> phase_transitions_on*diffusion_info -> tracer_heat_source_rates[i*NO_OF_SCALARS + j] + diffusion_info -> tracer_density_temperature[j]*config_info -> phase_transitions_on*(diffusion_info -> tracer_mass_source_rates[i*NO_OF_SCALARS + j]);
+			        state_tendency -> tracer_density_temperatures[i*NO_OF_SCALARS + j] =
+			        // the advection
+			         -diffusion_info -> tracer_temperature_flux_density_divv[j]
+			        // the source terms
+			         + state_old -> tracer_densities[i*NO_OF_SCALARS + j]/(c_v_cond*total_density)*(diffusion_info -> temperature_diffusion_heating[j] + diffusion_info -> heating_diss[j] + radiation_tendency[j]) + 1/c_v_cond*config_info -> phase_transitions_on*diffusion_info -> tracer_heat_source_rates[i*NO_OF_SCALARS + j] + diffusion_info -> tracer_density_temperature[j]*config_info -> phase_transitions_on*(diffusion_info -> tracer_mass_source_rates[i*NO_OF_SCALARS + j]);
 				}
 		    }
+		    // In this case, the tracer is gaseous.
 		    else
 		    {
 		        scalar_times_vector_vector_h_v(diffusion_info -> tracer_density, state_new -> velocity_gas, state_new -> velocity_gas, diffusion_info -> tracer_flux_density, grid);
 		        divv_h(diffusion_info -> tracer_flux_density, diffusion_info -> tracer_flux_density_divv, grid);
 				for (int j = 0; j < NO_OF_SCALARS; ++j)
 				{
-				    state_tendency -> tracer_densities[i*NO_OF_SCALARS + j] = -diffusion_info -> tracer_flux_density_divv[j] + config_info -> phase_transitions_on*diffusion_info -> tracer_mass_source_rates[i*NO_OF_SCALARS + j];
+				    state_tendency -> tracer_densities[i*NO_OF_SCALARS + j] = 
+				    // the advection
+				    -diffusion_info -> tracer_flux_density_divv[j]
+				    // the phase transition rates
+				    + config_info -> phase_transitions_on*diffusion_info -> tracer_mass_source_rates[i*NO_OF_SCALARS + j];
 	            }
 		    }
 		}
     }
 	return 0;
 }
+
+
+
+
+
+
+
+
+
