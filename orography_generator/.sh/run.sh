@@ -5,6 +5,7 @@
 
 echo "Starting orography generation ..."
 mpirun -np $number_of_cpus ./orography_generator $oro_id
+# valgrind ./orography_generator $oro_id
 if [ $? -ne 0 ]
 then
 echo -e ${RED}Orography file creation failed.$NC

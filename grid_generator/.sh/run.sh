@@ -28,7 +28,7 @@ echo ""
 echo "********** Calling the GAME grid generator **********"
 echo ""
 mpirun -np $number_of_cpus ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file
-# valgrind mpirun -np $number_of_cpus ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file
+# valgrind ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file
 if [ $? -ne 0 ]
 then
 echo -e ${RED}Grid file creation failed.$NC

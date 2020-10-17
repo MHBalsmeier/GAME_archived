@@ -258,6 +258,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				}
 				if ((closest_layer_index == NO_OF_LAYERS - 1 && other_layer_index == NO_OF_LAYERS) || (closest_layer_index < 0 || other_layer_index < 0))
 				{
+					geopotential_height[i][j] = 9999;
 					t_on_pressure_levels[i][j] = 9999;
 					rh_on_pressure_levels[i][j] = 9999;
 				}
