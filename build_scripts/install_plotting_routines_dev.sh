@@ -12,5 +12,5 @@ if [ -d $aim_dir/plotting ]
 then
 rm -r $aim_dir/plotting
 fi
-cp -r plotting $aim_dir/plotting
+cp -r ../plotting $aim_dir/plotting
 echo Plotting routines installed.

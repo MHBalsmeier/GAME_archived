@@ -3,8 +3,7 @@
 # This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 # Github repository: https://github.com/MHBalsmeier/game
 
-./build_scripts/install_grids.sh
-./build_scripts/install_tests.sh
-./build_scripts/install_run_scripts.sh
-./build_scripts/install_output.sh
-./build_scripts/install_plotting_routines.sh
+./install_grids.sh
+./install_tests.sh
+./install_run_scripts.sh
+./install_plotting_routines.sh

@@ -48,6 +48,22 @@
       \field{pages}{8321\bibrangedash 8335}
       \range{pages}{15}
     \endentry
+    \entry{atmostracers-github}{online}{}
+      \field{sortinit}{A}
+      \field{sortinithash}{a3dcedd53b04d1adfd5ac303ecd5e6fa}
+      \field{labeltitlesource}{title}
+      \field{day}{22}
+      \field{month}{10}
+      \field{title}{Atmostracers github repository}
+      \field{year}{2020}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://github.com/MHBalsmeier/atmostacers
+      \endverb
+      \verb{url}
+      \verb https://github.com/MHBalsmeier/atmostacers
+      \endverb
+    \endentry
     \entry{Du2003}{article}{}
       \name{author}{3}{}{%
         {{hash=3f79fb13c57a91bb57a69f1cd97b6cc8}{%

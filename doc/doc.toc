@@ -1,0 +1,25 @@
+\boolfalse {citerequest}\boolfalse {citetracker}\boolfalse {pagetracker}\boolfalse {backtracker}\relax 
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {1}Introduction}{2}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {2}Overview of schemes}{3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {3}Code structure}{4}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {4}Grid generation}{5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {4.1}Fundamental grid quantities}{5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {4.1.1}Grid optimization}{5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {4.2}Determining the horizontal positions of grid points}{5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {4.3}Derived quantities}{5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {4.4}Vertical grid structure}{5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {4.5}Scalability}{5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {4.5.1}Permutations of the grid points}{5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {5}Radiation scheme}{7}%

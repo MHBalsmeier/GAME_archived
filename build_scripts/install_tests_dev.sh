@@ -12,5 +12,5 @@ if [ -d $aim_dir/input ]
 then
 rm -r $aim_dir/input
 fi
-cp -r test_generator/test_states $aim_dir/input
+cp -r ../test_generator/test_states $aim_dir/input
 echo Test initialization states installed.

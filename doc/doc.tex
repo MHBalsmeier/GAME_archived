@@ -14,7 +14,7 @@
 \fancyfoot[C]{\thepage}
 \addtolength\footskip{12pt}}
 \definecolor{table_green}{rgb}{0, 0.6, 0}
-\title{\texttt{GAME} Documentation}
+\title{\texttt{Geophysical Fluids Modeling Framework} Documentation}
 \author{\texttt{GAME} Development Team}
 \date{}
 \newcommand{\md}[1]{\frac{D#1}{Dt}}
@@ -30,13 +30,21 @@
 \begin{document}
 
 \maketitle
+\tableofcontents
+
+\chapter{Introduction}
+\label{chap:introduction}
+
+The \texttt{Geophysical Fluids Modeling Framework (GAME)} is a non-hydrostatic hexagonal C grid dynamical core with the possibility to advect a variable number of tracers. The term \textit{dynamical core} typically refers to the simulation of a dry atmosphere. Everything else is then referred to as \textit{physics}. Diffusive terms, including turbulence parameterizations, are sometimes understood to be part of the dynamical core and sometimes seen as part of the model's physics. The dry air is in this understanding a "carrier medium", whereas tracers, including water in different phases, are usually only passively advected. This thinking always leads to deep physical inconsistencies during later stages of model development, whose impact on forecast and climate simulation accuracy remains unknown.
+
+Therefore, a new, capaple framework for simulating geophysical fluids is necessary and, due to the advent of even more powerful computers, also realistic. The \texttt{GAME} can be seen as a dynamical core, but not in the traditional sense, instead rather in a modernized sense. Its aim is to simulate the dynamics of geophysical fluid flow accurately, and at the same time make it possible to couple the model to different tracers \textit{consistently}, which means without violating fundamental physical constraints. Following a modular way of thinking, the actual quantifications of the tracer's source terms have been split off into the \texttt{atmostracers} library \cite{atmostracers-github}, which is meant to evolve into a wide collection of source terms for atmospheric tracers, also including chemistry and parameterizations. For radiation, it is coupled to the \texttt{RTE+RRTMGP (Radiative Transfer for Energetics + Rapid and Accurate Radiative Transfer Model for Geophysical Circulation Model Applications—Parallel)} \cite{doi:10.1029/2019MS001621}, \cite{rte-rrtmgp-github} scheme, which follows a similar approach to radiation simulation as \texttt{GAME} follows to fluid simulation.
 
 \chapter{Overview of schemes}
 \label{chap:overview_of_schemes}
 
 \begin{itemize}
 \item Time stepping: Runge-Kutta third order scheme (RK3). In the vertical, at every substep, implicit methods are used.
-\item Corolis: \cite{thuburn_f_discrete_plane} and \cite{ringler_trsk} modified by \cite{doi:10.1002/qj.3294}
+\item Coriolis: \cite{thuburn_f_discrete_plane} and \cite{ringler_trsk} modified by \cite{doi:10.1002/qj.3294}
 \item kinetic energy: \cite{doi:10.1002/qj.1960}
 \end{itemize}
 
@@ -45,59 +53,58 @@
 
 The code of the model resides in the directory \texttt{core/src}. Every subdirectory in there, including \texttt{core/src} itself, contains a file named \texttt{info} containing information on the purpose and contents of this specific directory.
 
-\chapter{Performance}
-\label{chap:performance}
-
-The \textit{speed} $s$ of a model is defined by
-%
-\begin{eqnarray}
-s \coloneqq \frac{\Delta t}{\Delta\tilde{t}},
-\end{eqnarray}
-%
-where $\Delta t$ is the time step of the model and $\Delta\tilde{t}$ is the duration it takes to integrate from one time step to the next.
-
-\chapter{NWP mode}
-\label{chap:nwp_mode}
-
-In NWP mode, one wants to be able to integrate one day within 8.5 minutes, which corresponds to $s = \frac{24\cdot 60}{8.5} = 169$. As a general rule, one can say that the computation time is in equal parts needed for data assimilation, the dynamical core and the processes involving moisture and radiation. Thus, the dynamical core has a mimimum speed of
-%
-\begin{eqnarray}
-s \geq 509.
-\end{eqnarray}
-
 \chapter{Grid generation}
 \label{chap:grid_generation}
 
-\section{Determining the horizontal positions of grid points}
-\label{sec:determining_the_horizontal_positions_of_grid_points}
+\begin{figure}
+\begin{center}
+\includegraphics[width = 0.6\textwidth]{hexagonal_grid_0.pdf}
+\caption{A subset of a regular horizontal hexagonal grid. The hexagonal grid (blue lines) and the triangular grid (red lines) form a pair of a primal-dual grid. In \texttt{GAME}, the hexagonal grid is the primal grid, while the triangulars for the dual one. In a triangular grid model it is the other way around. During the grid generation procedure we refer to the triangle edge points (hexagon centers) as the generating points or generators, for short.}
+\label{fig:hexagonal_grid_0}
+\end{center}
+\end{figure}
 
-\section{Vertical grid structure}
-\label{sec:vertical_grid_structure}
 
-\section{Derived quantities}
-\label{sec:derived_quantities}
 
-Only the following 6 arrays discussed until now need to be determined explicitly:
+\section{Fundamental grid quantities}
+\label{sec:fundamental_grid_quantities}
+
+The following 6 arrays are sufficient to totally define the grid:
 
 \begin{itemize}
 \item \texttt{latitude\_scalar}, \texttt{longitude\_scalar}
 \item \texttt{from\_index}, \texttt{to\_index}
 \item \texttt{from\_index\_dual}, \texttt{to\_index\_dual}
 \end{itemize}
-%
-Everything else is determined implicitly by the grid generator. This minimizes errors.
 
-\subsection{Scalability}
-\label{sec:scalability}
-
-The computation time of the most expensive for loops scale with $N^2$, where $N$ is the number of horizontal grid points. This means that doubling the horizontal resolution (four times as much horizontal grid points) leads to a 16 times longer computation time of the grid generator. This is similar to the model itself, where a doubling of the horizontal and vertical resolution and a halfening of the time step leads to 16 times longer integration times. Therefore, the largely implicit formulation of the grid generator posos no problem to its performance at higher resoultions.
-
-\section{Grid optimization}
+\subsection{Grid optimization}
 \label{sec:grid_optimization}
 
 Hexagonal spherical grids need to be optimized for numerical modeling. Therefore, the Lloyd algorithm is used, which yields a \textit{spherical centroidal Voronoi tesselation (SCVT)} after convergence \cite{Du2003}. \cite{PEIXOTO201361} gives an overview of optimization alternatives and it seems to be that the SCVT is the most suitable for modeling. The procedure employed for executing the Lloyd algorithm is the one described in \cite{10.1175/MWR2991.1}.
 
-\section{Permutations of the grid points}
+\section{Determining the horizontal positions of grid points}
+\label{sec:determining_the_horizontal_positions_of_grid_points}
+
+\section{Derived quantities}
+\label{sec:derived_quantities}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width = 0.5\textwidth]{hexagonal_grid_1.pdf}
+\caption{A sample hexagon with a horizontal scalar index of 5381. The directions of the arrows indicate the directions of unit vectors at cell edges. The drawn orientations would lead to $\texttt{adjacent\_vector\_signs\_h}[6\cdot 5381 + 0] = 1$, $\texttt{adjacent\_vector\_signs\_h}[6\cdot 5381 + 1] = 1$, $\texttt{adjacent\_vector\_signs\_h}[6\cdot 5381 + 2] = 1$, $\texttt{adjacent\_vector\_signs\_h}[6\cdot 5381 + 3] = -1$, $\texttt{adjacent\_vector\_signs\_h}[6\cdot 5381 + 4] = 1$, $\texttt{adjacent\_vector\_signs\_h}[6\cdot 5381 + 5] = -1$.}
+\label{fig:hexagonal_grid_1}
+\end{center}
+\end{figure}
+
+\section{Vertical grid structure}
+\label{sec:vertical_grid_structure}
+
+\section{Scalability}
+\label{sec:scalability}
+
+The computation time of the most expensive for loops scale with $N^2$, where $N$ is the number of horizontal grid points. This means that doubling the horizontal resolution (four times as much horizontal grid points) leads to a 16 times longer computation time of the grid generator. This is similar to the model itself, where a doubling of the horizontal and vertical resolution and a halfening of the time step leads to 16 times longer integration times. Therefore, the largely implicit formulation of the grid generator posos no problem to its performance at higher resoultions.
+
+\subsection{Permutations of the grid points}
 \label{sec:permutations_of_the_grid_points}
 
 
@@ -105,7 +112,7 @@ Hexagonal spherical grids need to be optimized for numerical modeling. Therefore
 \chapter{Radiation scheme}
 \label{chap:radiation_scheme}
 
-GAME employs the so-called \texttt{RTE+RRTMGP (Radiative Transfer for Energetics + Rapid and Accurate Radiative Transfer Model for Geophysical Circulation Model Applications—Parallel)} \cite{doi:10.1029/2019MS001621}, \cite{rte-rrtmgp-github} scheme. It is bound to the C code through the API \texttt{RTE-RRTMGP-C} \cite{rte-rrtmgp-c-github}.
+\texttt{GAME} employs the so-called \texttt{RTE+RRTMGP (Radiative Transfer for Energetics + Rapid and Accurate Radiative Transfer Model for Geophysical Circulation Model Applications—Parallel)} \cite{doi:10.1029/2019MS001621}, \cite{rte-rrtmgp-github} scheme. It is bound to the C code through the API \texttt{RTE-RRTMGP-C} \cite{rte-rrtmgp-c-github}.
 
 \appendix
 

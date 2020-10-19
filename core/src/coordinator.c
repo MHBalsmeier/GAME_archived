@@ -172,7 +172,6 @@ int main(int argc, char *argv[])
 	printf("run_id:\t\t\t\t%s\n", RUN_ID);
 	free(OPERATOR);
 	printf("run time span:\t\t\t%d s\n", TOTAL_RUN_SPAN);
-	printf("output written in intervals of\t%d s\n", WRITE_OUT_INTERVAL);
 	printf("geo properties file:\t\t%s\n", GEO_PROP_FILE);
 	printf("initialization state file:\t%s\n", INIT_STATE_FILE);
 	printf("Start year:\t\t\t%d\n", year);
@@ -181,6 +180,7 @@ int main(int argc, char *argv[])
 	printf("Start hour:\t\t\t%d\n", hour);
 	printf("%s", stars);
 	printf("I/O configuration information:\n");
+	printf("output written in intervals of %d s\n", WRITE_OUT_INTERVAL);
 	if (io_config -> grib_output_switch == 0)
 	{
 		printf("Grib output is turned off.\n");
