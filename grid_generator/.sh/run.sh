@@ -5,7 +5,7 @@
 
 
 echo "***** GRID FILE CREATION *****"
-echo "(C) 2020 The GAME development team."
+echo "Copyright (C) 2020 The GAME development team."
 echo ""
 echo "Setup:"
 echo "oro_id = $oro_id."
@@ -27,8 +27,14 @@ fi
 echo ""
 echo "********** Calling the GAME grid generator **********"
 echo ""
+if [ $valgrind_check -eq 0 ]
+then
 mpirun -np $number_of_cpus ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file
-# valgrind ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file
+fi
+if [ $valgrind_check -eq 1 ]
+then
+valgrind ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file
+fi
 if [ $? -ne 0 ]
 then
 echo -e ${RED}Grid file creation failed.$NC

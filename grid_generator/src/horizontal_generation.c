@@ -90,8 +90,6 @@ int generate_horizontal_generators(double latitude_ico[], double longitude_ico[]
 	        }
 	    }
 	}
-	free(latitude_ico);
-	free(longitude_ico);
 	return 0;
 }
 

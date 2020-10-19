@@ -2,6 +2,7 @@
 This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/MHBalsmeier/game
 */
+
 /*
 The grid generation procedure is manged from this file. Memory allocation and IO is done here, for the rest, functions are called residing in individual files.
 */
@@ -43,7 +44,7 @@ The grid generation procedure is manged from this file. Memory allocation and IO
 #define BOLDCYAN "\033[1m\033[36m"
 #define BOLDWHITE "\033[1m\033[37m"
 
-const double TOA = 30000.0;
+const double TOA = 30000.0; // TOA = top of atmosphere
 const double ORTH_CRITERION_DEG = 89.99;
 
 int main(int argc, char *argv[])
@@ -267,7 +268,7 @@ int main(int argc, char *argv[])
     printf(GREEN "finished.\n" RESET);
     // A statistics file is created to compare the fundamental statistical properties of the grid with the literature.
 	write_statistics_file(pent_hex_face_unity_sphere, normal_distance, normal_distance_dual, STATISTICS_FILE);
-    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_modified_weights_id, recov_ver_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_11, vector_h_dimid_10, vector_h_dimid_2, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, vector_dual_h_dimid, vector_dual_v_dimid_3, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_8_dimid, slope_id, scalar_2_dimid, volume_ratios_id, recov_primal2dual_weights_id, vector_h_dual_dimid_2, density_to_rhombus_indices_id, density_to_rhombus_weights_id, vorticity_indices_pre_id, ncid_g_prop;
+    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_modified_weights_id, recov_ver_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_10, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_8_dimid, slope_id, scalar_2_dimid, volume_ratios_id, recov_primal2dual_weights_id, vector_h_dual_dimid_2, density_to_rhombus_indices_id, density_to_rhombus_weights_id, vorticity_indices_pre_id, ncid_g_prop;
     printf("Starting to write to output file ... ");
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
@@ -291,15 +292,9 @@ int main(int argc, char *argv[])
         ERR(retval);
 	if ((retval = nc_def_dim(ncid_g_prop, "vector_h_10_index", 10*NO_OF_VECTORS_H, &vector_h_dimid_10)))
 	    ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_h_11_index", 11*NO_OF_VECTORS_H, &vector_h_dimid_11)))
-        ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_h_2_index", 2*NO_OF_VECTORS_H, &vector_h_dimid_2)))
-        ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_h_4_index", 4*NO_OF_VECTORS_H, &vector_h_dimid_4)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_v_6_index", 6*NO_OF_LEVELS*NO_OF_SCALARS_H, &vector_v_dimid_6)))
-        ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_index_h_dual", NO_OF_VECTORS_H, &vector_dual_h_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "f_vec_index", 3*NO_OF_VECTORS_H, &f_vec_dimid)))
         ERR(retval);
@@ -308,8 +303,6 @@ int main(int argc, char *argv[])
     if ((retval = nc_def_dim(ncid_g_prop, "vector_index_dual_area", NO_OF_DUAL_H_VECTORS + NO_OF_H_VECTORS, &vector_dual_area_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_index_h_2_dual", 2*NO_OF_DUAL_H_VECTORS, &vector_h_dual_dimid_2)))
-        ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "vector_dual_v_3_index", 3*NO_OF_DUAL_SCALARS_H, &vector_dual_v_dimid_3)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "latitude_scalar", NC_DOUBLE, 1, &scalar_h_dimid, &latitude_scalar_id)))
         ERR(retval);
@@ -495,6 +488,8 @@ int main(int argc, char *argv[])
         ERR(retval);
     printf(GREEN "finished.\n" RESET);
     free(SCALAR_H_FILE);
+    free(latitude_ico);
+    free(longitude_ico);
     free(x_unity);
     free(y_unity);
     free(z_unity);

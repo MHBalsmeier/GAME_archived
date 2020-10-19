@@ -385,6 +385,7 @@ int set_recov_ver(int adjacent_vector_indices_h[], double direction[], double di
 		if (h_index < NO_OF_PENTAGONS)
 		{
 			no_of_edges = 5;
+			recov_ver_weight[6*i + 5] = 0;
 	    }
 	    check_sum_pre = 0;
 		for (int j = 0; j < no_of_edges; ++j)

@@ -11,9 +11,16 @@
 # 4:	JW test, moist, balanced
 # 5:	JW test, moist, perturbed
 
-echo "Starting the test state generation ..."
+echo "***** TEST FILE CREATION *****"
+echo "Copyright (C) 2020 The GAME development team."
+if [ $valgrind_check -eq 0 ]
+then
 mpirun -np $number_of_cpus ./test_generator $test_id
-# valgrind ./test_generator $test_id
+fi
+if [ $valgrind_check -eq 1 ]
+then
+valgrind ./test_generator $test_id
+fi
 if [ $? -ne 0 ]
 then
 echo -e ${RED}Test state file creation failed.$NC

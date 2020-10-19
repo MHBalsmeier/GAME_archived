@@ -9,9 +9,8 @@
 # 3			real data interpolated to model grid
 # See handbook for more information.
 
-oro_id=3 # The orography ID.
-# relevant only for OMP
-export OMP_NUM_THREADS=5
-# relevant only for MPI
-number_of_cpus=1
+oro_id=2 # The orography ID.
+valgrind_check=0 # set this to 1, if you want to check the code with Valgrind
+export OMP_NUM_THREADS=5 # relevant only for OMP
+number_of_cpus=1 # relevant only for MPI
 source .sh/run.sh

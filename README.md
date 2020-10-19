@@ -36,7 +36,7 @@ What GAME does not do and why:
 
 ### Things to be done
 
-* Dicretization of a momentum diffusion operator including dissipation.
+* Improvement of the momentum diffusion operator including dissipation.
 * A regional mode.
 * Implementation of SLEVE.
 * Implementation of MPI parallelization.
@@ -67,6 +67,8 @@ Everything is easy and quick to install.
 * [rte-rrtmgp-c](https://github.com/MHBalsmeier/rte-rrtmgp-c)
 * OpenMPI (Ubuntu: sudo apt-get install mpich)
 * Python and the visualization library scitools-iris (installation manual: https://mhbalsmeier.github.io/tutorials/iris_on_ubuntu.html, only for the plotting routines, which are of course not part of the actual model)
+* sudo apt-get install ffmpeg (only for the plotting routines)
+* sudo apt-get install valgrind (only necessary for developers for doing checks)
 
 ### Download
 

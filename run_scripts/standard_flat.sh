@@ -11,6 +11,7 @@ test_id=0 # Must only be set if nwp_mode == 0. In this case, it specifies which 
 overwrite_run_id=1 # this overwrites the otherwise automatically chosen run_id
 run_id=standard_flat # run_id must only be set if overwrite_run_id == 0 (otherwise it is chosen automatically)
 run_span=43200 # how long the model is supposed to run
+valgrind_check=0 # set this to 1, if you want to check the code with Valgrind
 
 # grid properties
 res_id=5 #  resolution ID (number of bisections of basic icosahedral triangles)
@@ -45,10 +46,8 @@ synop_output_mode=0 # If set to 1, additional output on synoptical pressure leve
 aviation_output_mode=0 # If set to 1, additional output on flight levels will be created. The flight levels can be set in the file core/src/settings.c. The numer of flight levels must be set in the file core/src/settings.h.
 
 # parallelization
-# relevant only for OMP
-export OMP_NUM_THREADS=1
-# relevant only for MPI
-number_of_cpus=1
+export OMP_NUM_THREADS=1 # relevant only for OMP
+number_of_cpus=1 # relevant only for MPI
 
 # data assimilation
 ndvar_directory=/home/max/compiled/ndvar # The directory, where the ndvar program is stored. Only relevant in NWP mode.
