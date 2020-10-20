@@ -69,7 +69,7 @@ Everything is easy and quick to install.
 
 #### For using the plotting routines
 
-The following packages are additionally required if you want to make use of the plotting routines.
+The following packages are additionally required if you want to make use of the plotting routines:
 
 * Python and the visualization library scitools-iris (installation manual: https://mhbalsmeier.github.io/tutorials/iris_on_ubuntu.html)
 * FFMPEG (Ubuntu: sudo apt-get install ffmpeg)

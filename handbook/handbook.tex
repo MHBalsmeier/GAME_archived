@@ -68,9 +68,19 @@ The following dependencies must be installed before being able to successfully b
 \item atmostracers (\url{https://github.com/MHBalsmeier/atmostracers})
 \item rte-rrtmgp-c (\url{https://github.com/MHBalsmeier/rte-rrtmgp-c})
 \item OpenMPI (Ubuntu: \texttt{sudo apt-get install mpich})
+
+\subsection{For using the plotting routines}
+\label{sec:for_using_the_plotting_routines}
+
+The following packages are additionally required if you want to make use of the plotting routines:
+%
 \item Python and the visualization library scitools-iris (installation manual: \url{https://mhbalsmeier.github.io/tutorials/iris_on_ubuntu.html}, only for the plotting routines, which are of course not art of the actual model)
 \item FFMPEG (Ubuntu: \texttt{sudo apt-get install ffmpeg}, only for the plotting routines)
-\item Valgrind (Ubuntu: \texttt{sudo apt-get install valgrind}, only necessary for developers for doing checks)
+
+\subsection{For developing}
+\label{sec:for_developing}
+
+\item Valgrind (Ubuntu: \texttt{sudo apt-get install valgrind}, for doing checks)
 \end{itemize}
 
 \section{Building}

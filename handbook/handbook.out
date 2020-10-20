@@ -1,8 +1,10 @@
 \BOOKMARK [0][-]{chapter.1}{Overview}{}% 1
 \BOOKMARK [0][-]{chapter.2}{Installation}{}% 2
 \BOOKMARK [1][-]{section.2.1}{Dependencies}{chapter.2}% 3
-\BOOKMARK [1][-]{section.2.2}{Building}{chapter.2}% 4
-\BOOKMARK [0][-]{chapter.3}{Running the model}{}% 5
-\BOOKMARK [0][-]{chapter.4}{Grid generation procedure}{}% 6
-\BOOKMARK [0][-]{chapter.5}{Generating a new orography file}{}% 7
-\BOOKMARK [0][-]{chapter.6}{Generating a new test state file}{}% 8
+\BOOKMARK [2][-]{subsection.2.1.1}{For using the plotting routines}{section.2.1}% 4
+\BOOKMARK [2][-]{subsection.2.1.2}{For developing}{section.2.1}% 5
+\BOOKMARK [1][-]{section.2.2}{Building}{chapter.2}% 6
+\BOOKMARK [0][-]{chapter.3}{Running the model}{}% 7
+\BOOKMARK [0][-]{chapter.4}{Grid generation procedure}{}% 8
+\BOOKMARK [0][-]{chapter.5}{Generating a new orography file}{}% 9
+\BOOKMARK [0][-]{chapter.6}{Generating a new test state file}{}% 10
