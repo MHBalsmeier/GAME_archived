@@ -66,9 +66,17 @@ Everything is easy and quick to install.
 * [atmostracers](https://github.com/MHBalsmeier/atmostracers)
 * [rte-rrtmgp-c](https://github.com/MHBalsmeier/rte-rrtmgp-c)
 * OpenMPI (Ubuntu: sudo apt-get install mpich)
-* Python and the visualization library scitools-iris (installation manual: https://mhbalsmeier.github.io/tutorials/iris_on_ubuntu.html, only for the plotting routines, which are of course not part of the actual model)
-* FFMPEG (Ubuntu: sudo apt-get install ffmpeg, only for the plotting routines)
-* Valgrind (Ubuntu: sudo apt-get install valgrind, only necessary for developers for doing checks)
+
+#### For using the plotting routines
+
+The following packages are additionally required if you want to make use of the plotting routines.
+
+* Python and the visualization library scitools-iris (installation manual: https://mhbalsmeier.github.io/tutorials/iris_on_ubuntu.html)
+* FFMPEG (Ubuntu: sudo apt-get install ffmpeg)
+
+#### For developing
+
+* Valgrind (Ubuntu: sudo apt-get install valgrind, for doing checks)
 
 ### Download
 
