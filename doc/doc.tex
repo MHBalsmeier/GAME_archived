@@ -56,8 +56,6 @@ The code of the model resides in the directory \texttt{core/src}. Every subdirec
 \end{center}
 \end{figure}
 
-
-
 \section{Fundamental grid quantities}
 \label{sec:fundamental_grid_quantities}
 
@@ -68,13 +66,15 @@ The following quantities are sufficient to uniquely define the grid:
 \item the numbering of the generating points
 \item the numbering and orientation of the horizontal vectors
 \item the numbering of the dual cell mid points
-\item the numbering and orientation of the dual horizontal vectors
+\item The orientation of the dual horizontal vectors. Since their horizontal positions coincide with the horizontal positions of the primal vectors, both sets of vectors can be numbered in the same way.
 \end{itemize}
 %
 All other quantities, be it floating point numbers like grid box volumes or areas, or integer quantities like neighborhood relationships, can be implicitly derived. Consequently, once must firstly focus on the fundamental grid properties.
 
 \subsection{Creating a spherical geodesic grid}
 \label{sec:creating_a_spherical_geodesic_grid}
+
+By \textit{horizontal grid} we mean the grid on one single layer. Without loss of generality this layer can be assumed to coincide with the surface of the unity sphere.
 
 \subsection{Numbering and orienting the vector points}
 \label{sec:numbering_and_orienting_the_vector_points}
@@ -94,8 +94,14 @@ Until now, we have only operated with the six following arrays:
 \section{Derived quantities}
 \label{sec:derived_quantities}
 
-\subsection{Horizontal coordinates of dual cell midpoints}
-\label{sec:horizontal_coordinates_of_dual_cell_midpoints}
+\subsection{Horizontal coordinates of dual scalar points}
+\label{sec:horizontal_coordinates_of_dual_scalar_points}
+
+The dual cells of a hexagonal grid are the triangular grid cells. Since we aim at an orthogonal grid, the dual scalar points must be the Voronoi centers of the triangular cells. Label the vertices of one triangle with $\mathbf{r}_0, \mathbf{r}_1, \mathbf{r}_2$, then its Voronoi center $\mathbf{r}_v$ is located at the position
+%
+\begin{align}
+\mathbf{r}_v \coloneqq \frac{\left(\mathbf{r}_1 - \mathbf{r}_0\right)\times\left(\mathbf{r}_2 - \mathbf{r}_0\right)}{\left|\left(\mathbf{r}_1 - \mathbf{r}_0\right)\times\left(\mathbf{r}_2 - \mathbf{r}_0\right)\right|}.
+\end{align}
 
 \subsection{Finding the neighboring vector points of a primal cell and their orientation}
 \label{sec:finding_the_neighboring_vector_points_of_a_primal_cell_and_their_orientation}
@@ -116,9 +122,15 @@ Until now, we have only operated with the six following arrays:
 
 Hexagonal spherical grids need to be optimized for numerical modeling. Therefore, the Lloyd algorithm is used, which yields a \textit{spherical centroidal Voronoi tesselation (SCVT)} after convergence \cite{Du2003}. \cite{PEIXOTO201361} gives an overview of optimization alternatives and it seems to be that the SCVT is the most suitable for modeling. The procedure employed for executing the Lloyd algorithm is the one described in \cite{10.1175/MWR2991.1}.
 
-
 \section{Vertical grid structure}
 \label{sec:vertical_grid_structure}
+
+So far, only a horizontal grid has been examined. The grid generator, however, shall produce full three-dimensional grids. In order to simplify matters, the following conventions are made:
+%
+\begin{itemize}
+\item Since the vertically oriented primal vector points have the same horizontal coordinates as the primal scalar points, their horizontal numbering is also the same.
+\item Since the vertically oriented dual vector points have the same horizontal coordinates as the dual scalar points, their horizontal numbering is also the same.
+\end{itemize}
 
 \section{Scalability}
 \label{sec:scalability}
@@ -130,6 +142,8 @@ The computation time of the most expensive for loops scale with $N^2$, where $N$
 
 \chapter{Orography generator}
 \label{sec:orography_generator}
+
+The orography generator resides in the directory \texttt{orography\_generator} and is an individual executable meant to produce orographies for different cases defined by and \texttt{oro\_id}, given the horizontal positions of the primal scalar points.
 
 \chapter{Prognostic and diagnostic quantities}
 \label{sec:prognostic_and_diagnostic_quantities}

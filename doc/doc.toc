@@ -16,13 +16,13 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {3.2}Derived quantities}{4}{section.3.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.1}Horizontal coordinates of dual cell midpoints}{4}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.1}Horizontal coordinates of dual scalar points}{4}{subsection.3.2.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.2}Finding the neighboring vector points of a primal cell and their orientation}{4}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.2}Finding the neighboring vector points of a primal cell and their orientation}{6}{subsection.3.2.2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.3}Finding the neighboring vector points of a dual cell and their orientation}{4}{subsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.2.3}Finding the neighboring vector points of a dual cell and their orientation}{6}{subsection.3.2.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.3}Grid optimization}{4}{section.3.3}%
+\contentsline {section}{\numberline {3.3}Grid optimization}{6}{section.3.3}%
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {3.4}Vertical grid structure}{6}{section.3.4}%
 \defcounter {refsection}{0}\relax 
