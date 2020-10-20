@@ -1,0 +1,22 @@
+\BOOKMARK [0][-]{chapter.1}{Introduction}{}% 1
+\BOOKMARK [0][-]{chapter.2}{Code structure}{}% 2
+\BOOKMARK [0][-]{chapter.3}{Grid generation}{}% 3
+\BOOKMARK [1][-]{section.3.1}{Fundamental grid quantities}{chapter.3}% 4
+\BOOKMARK [2][-]{subsection.3.1.1}{Creating a spherical geodesic grid}{section.3.1}% 5
+\BOOKMARK [2][-]{subsection.3.1.2}{Numbering and orienting the vector points}{section.3.1}% 6
+\BOOKMARK [2][-]{subsection.3.1.3}{Numbering and orienting the dual vector points}{section.3.1}% 7
+\BOOKMARK [1][-]{section.3.2}{Derived quantities}{chapter.3}% 8
+\BOOKMARK [2][-]{subsection.3.2.1}{Horizontal coordinates of dual cell midpoints}{section.3.2}% 9
+\BOOKMARK [2][-]{subsection.3.2.2}{Finding the neighboring vector points of a primal cell and their orientation}{section.3.2}% 10
+\BOOKMARK [2][-]{subsection.3.2.3}{Finding the neighboring vector points of a dual cell and their orientation}{section.3.2}% 11
+\BOOKMARK [1][-]{section.3.3}{Grid optimization}{chapter.3}% 12
+\BOOKMARK [1][-]{section.3.4}{Vertical grid structure}{chapter.3}% 13
+\BOOKMARK [1][-]{section.3.5}{Scalability}{chapter.3}% 14
+\BOOKMARK [2][-]{subsection.3.5.1}{Permutations of the grid points}{section.3.5}% 15
+\BOOKMARK [0][-]{chapter.4}{Orography generator}{}% 16
+\BOOKMARK [0][-]{chapter.5}{Prognostic and diagnostic quantities}{}% 17
+\BOOKMARK [0][-]{chapter.6}{Test generator}{}% 18
+\BOOKMARK [0][-]{chapter.7}{Spatial operators}{}% 19
+\BOOKMARK [0][-]{chapter.8}{Time stepping}{}% 20
+\BOOKMARK [0][-]{chapter.9}{Input and output}{}% 21
+\BOOKMARK [0][-]{chapter.10}{Coupling to the radiation field}{}% 22
