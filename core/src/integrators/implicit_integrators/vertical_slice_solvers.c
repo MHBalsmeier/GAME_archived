@@ -4,7 +4,7 @@ Github repository: https://github.com/MHBalsmeier/game
 */
 
 /*
-This file contains the vertically implicit solvers.
+This file contains the implicit vertical solvers.
 */
 
 #include <stdlib.h>
@@ -29,6 +29,7 @@ int three_band_solver_hor_vel_adv(State *state_old, State *state_new, State *sta
 	#pragma omp parallel for private(delta_z, j)
 	for (i = 0; i < NO_OF_VECTORS_H; ++i)
 	{
+		// for meanings of these vectors look into the definition of the function thomas_algorithm
 		double a_vector[NO_OF_LAYERS - 1];
 		double b_vector[NO_OF_LAYERS];
 		double c_vector[NO_OF_LAYERS - 1];
@@ -129,6 +130,7 @@ int three_band_solver_ver_vel_adv(State *state_old, State *state_new, State *sta
 	#pragma omp parallel for private(delta_z, j)
 	for (i = 0; i < NO_OF_SCALARS_H; ++i)
 	{	
+		// for meanings of these vectors look into the definition of the function thomas_algorithm
 		double a_vector[NO_OF_LAYERS - 2];
 		double b_vector[NO_OF_LAYERS - 1];
 		double c_vector[NO_OF_LAYERS - 2];
@@ -218,6 +220,7 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 	#pragma omp parallel for private(upper_index, lower_index, delta_z, upper_weight, lower_weight, upper_volume, lower_volume, total_volume, damping_coeff, z_above_damping, j)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
+		// for meanings of these vectors look into the definition of the function thomas_algorithm
 		double a_vector[2*NO_OF_LAYERS - 2];
 		double b_vector[2*NO_OF_LAYERS - 1];
 		double c_vector[2*NO_OF_LAYERS - 2];
@@ -296,6 +299,7 @@ int three_band_solver_ver_den_dry(State *state_old, State *state_new, State *sta
 	#pragma omp parallel for private(area, j)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
+		// for meanings of these vectors look into the definition of the function thomas_algorithm
 		double a_vector[NO_OF_LAYERS - 1];
 		double b_vector[NO_OF_LAYERS];
 		double c_vector[NO_OF_LAYERS - 1];
@@ -353,6 +357,7 @@ int three_band_solver_ver_entropy_density_dry(State *state_old, State *state_new
 	#pragma omp parallel for private(area, j)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
+		// for meanings of these vectors look into the definition of the function thomas_algorithm
 		double a_vector[NO_OF_LAYERS - 1];
 		double b_vector[NO_OF_LAYERS];
 		double c_vector[NO_OF_LAYERS - 1];
@@ -410,6 +415,7 @@ int three_band_solver_ver_tracers(State *state_old, State *state_new, State *sta
 	#pragma omp parallel for private(area, j, k)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
+		// for meanings of these vectors look into the definition of the function thomas_algorithm
 		double a_vector[NO_OF_LAYERS - 1];
 		double b_vector[NO_OF_LAYERS];
 		double c_vector[NO_OF_LAYERS - 1];
