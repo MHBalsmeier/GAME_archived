@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
    	TEST_ID = strtod(argv[1], NULL);
    	// determining the orography ID as a function of the test ID
 	int ORO_ID;
-	if (TEST_ID == 0)
+	if (TEST_ID == 0 || TEST_ID == 8 || TEST_ID == 9)
 		ORO_ID = 0;
 	if (TEST_ID == 1)
 		ORO_ID = 1;
@@ -143,12 +143,23 @@ int main(int argc, char *argv[])
     const double TROPO_TEMP_STANDARD = T_SFC + TROPO_HEIGHT_STANDARD*TEMP_GRADIENT;
     double z_height;
     double lat, lon;
-    double u, eta, eta_v, T_perturb, distance, pressure_value, pressure_at_inv_standard;
+    double u, v, eta, eta_v, T_perturb, distance, pressure_value, pressure_at_inv_standard;
     double u_p = 1.0;
     double distance_scale = RADIUS/10;
     double lat_perturb = 2*M_PI/9;
     double lon_perturb = M_PI/9;
+    // dummy arguments
+    double dummy_0 = 0.0;
+    double dummy_1 = 0.0;
+    double dummy_2 = 0.0;
+    double dummy_3 = 0.0;
+    double dummy_4 = 0.0;
+    double dummy_5 = 0.0;
+    double dummy_6 = 0.0;
     int layer_index, h_index;
+    int zero = 0;
+    int one = 1;
+    double one_double = 1;
     // 3D scalar fields determined here, apart from density
     #pragma omp parallel for private(layer_index, h_index, lat, lon, z_height, eta, eta_v, T_perturb, pressure_value)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
@@ -179,8 +190,8 @@ int main(int argc, char *argv[])
                 pressure[i] = pressure_at_inv_standard*pow(1 + TEMP_GRADIENT*(z_height - INVERSE_HEIGHT_STANDARD)/T_SFC, -G/(R_D*TEMP_GRADIENT));
             }
         }
-        // JW atmosphere
-        if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6)
+        // JW test
+        if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6 || TEST_ID == 7)
         {
             find_pressure_value(lat, z_height, &pressure_value);
             pressure[i] = pressure_value;
@@ -191,12 +202,28 @@ int main(int argc, char *argv[])
             {
                 temperature[i] = T_0*pow(eta, R_D*GAMMA/G) + T_perturb;
                 if (TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 7)
+                {
                     rel_humidity[i] = 0.7;
+                }
                 else
+                {
                     rel_humidity[i] = 0;
+                }
             }
             else
+            {
                 temperature[i] = T_0*pow(eta, R_D*GAMMA/G) + DELTA_T*pow(ETA_T - eta, 5) + T_perturb;
+            }
+        }
+        // dry Ullrich test
+        if (TEST_ID == 8)
+        {
+        	baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i], &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
+        }
+        // moist Ullrich test
+        if (TEST_ID == 9)
+        {
+        	baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i], &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
         }
         liquid_water_density[i] = 0;
         solid_water_density[i] = 0;
@@ -239,7 +266,9 @@ int main(int argc, char *argv[])
             z_height = z_vector[NO_OF_SCALARS_H + j + i*NO_OF_VECTORS_PER_LAYER];
             // standard atmosphere: no wind
             if (TEST_ID == 0 || TEST_ID == 1)
+            {
                 wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = 0;
+            }
             // JW test: specific wind field
             if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6 || TEST_ID == 7)
             {
@@ -254,6 +283,18 @@ int main(int argc, char *argv[])
                 }
                 wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(direction[j]);
             }
+            // dry Ullrich test
+            if (TEST_ID == 8)
+            {
+        		baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
+                wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(direction[j]) + v*sin(direction[j]);
+            }
+            // moist Ullrich test
+            if (TEST_ID == 9)
+            {
+        		baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
+                wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(direction[j]) + v*sin(direction[j]);
+            }
         }
     }
     for (int i = 0; i < NO_OF_LEVELS; ++i)
@@ -264,7 +305,7 @@ int main(int argc, char *argv[])
             lat = latitude_scalar[j];
             lon = longitude_scalar[j];
             z_height = z_vector[j + i*NO_OF_VECTORS_PER_LAYER];
-            if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
+            if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 8 || TEST_ID == 9)
                 wind[i*NO_OF_VECTORS_PER_LAYER + j] = 0;
         }
     }

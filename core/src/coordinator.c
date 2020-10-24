@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
     int ORO_ID;	
 	if (TEST_ID == -1)
 		ORO_ID = 3;
-	if (TEST_ID == 0)
+	if (TEST_ID == 0 || TEST_ID == 8 || TEST_ID == 9)
 		ORO_ID = 0;
 	if (TEST_ID == 1)
 		ORO_ID = 1;

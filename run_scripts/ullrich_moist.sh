@@ -7,7 +7,7 @@
 game_home_dir=/home/max/compiled/game_dev # the root directory of your GAME instance
 operator=MHB # the ID of the person / group / institution running the model
 nwp_mode=0 # switches on or off the numerical weather prediction mode (calls data assimilation, special output, etc.)
-test_id=5 # Must only be set if nwp_mode == 0. In this case, it specifies which test scenario to run.
+test_id=9 # Must only be set if nwp_mode == 0. In this case, it specifies which test scenario to run.
 overwrite_run_id=1 # this overwrites the otherwise automatically chosen run_id
 run_id=ullrich_moist # run_id must only be set if overwrite_run_id == 0 (otherwise it is chosen automatically)
 run_span=43200 # how long the model is supposed to run
