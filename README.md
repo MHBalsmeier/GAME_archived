@@ -47,9 +47,17 @@ What GAME does not do and why:
 
 ## Documents
 
-The documentation can be found in the subdirectory doc. It contains an overview of numerics and references to the literature as well as a description of the code.
+### Scientific derivations
 
-The handbook of the model can be found in the subdirectory handbook. It contains information on how to generate necessary files like grid files and input data and explains how to compile, configure and run the model.
+The derivations of both the continuous equations as well as of the discretization techniques can be found in my textbook on theoretical meteorology (in German): [Kompendium Theoretische Meteorologie](https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf). The most fundamental numerical techniques have firstly been published in the literature cited below.
+
+### Documentation
+
+The documentation can be found in the subdirectory doc. It does not contain scientific derivations but rather describes the details of the numerical implementation.
+
+### Handbook
+
+The handbook of the model can be found in the subdirectory handbook. It is to be understood as a user manual and contains information on how to generate necessary files like grid files and input data and explains how to compile, configure and run the model.
 
 ## Installing the model
 
@@ -97,8 +105,6 @@ In the shell scripts controlling the build process (residing in the directory bu
 * Ringler, Todd & Thuburn, John & Klemp, J. & Skamarock, W.C.. (2010). A unified approach to energy conservation and potential vorticity dynamics on arbitrarily structured C-grids. J. Comput. Physics. 229. 3065-3090. 10.1016/j.jcp.2009.12.007.
 * Gassmann, A. (2013), A global hexagonal C‐grid non‐hydrostatic dynamical core (ICON‐IAP) designed for energetic consistency. Q.J.R. Meteorol. Soc., 139: 152-175. doi:10.1002/qj.1960
 * Gassmann, A. Discretization of generalized Coriolis and friction terms on the deformed hexagonal C‐grid. Q J RMeteorol Soc. 2018; 144: 2038– 2053. https://doi.org/10.1002/qj.3294
-
-Lots of the derivations can also be found in my textbook on Theoretical Meteorology (in German): [Kompendium Theoretische Meteorologie](https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf)
 
 
 
