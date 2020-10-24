@@ -1,4 +1,4 @@
-The Geophysical Fluids Modeling Framework (GAME) is a non-hydrostatic hexagonal C grid dynamical core with the possibility to advect a variable number of tracers. For radiation, it is coupled to RTE+RRTMGP via the C binding rte-rrtmgp-c (yet to be implemented).
+The Geophysical Fluids Modeling Framework (GAME) is a non-hydrostatic hexagonal C grid dynamical core with the possibility to advect a variable number of tracers. For radiation, it is coupled to RTE+RRTMGP (yet to be implemented).
 
 ## Overview
 
@@ -72,7 +72,6 @@ Everything is easy and quick to install.
 * eccodes library (installation manual: https://mhbalsmeier.github.io/tutorials/eccodes_on_ubuntu.html)
 * CMake (Ubuntu: sudo apt-get install cmake)
 * [atmostracers](https://github.com/MHBalsmeier/atmostracers)
-* [rte-rrtmgp-c](https://github.com/MHBalsmeier/rte-rrtmgp-c)
 * OpenMPI (Ubuntu: sudo apt-get install mpich)
 
 #### For using the plotting routines

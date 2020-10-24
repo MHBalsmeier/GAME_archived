@@ -382,22 +382,6 @@
       \verb https://github.com/earth-system-radiation/rte-rrtmgp
       \endverb
     \endentry
-    \entry{rte-rrtmgp-c-github}{online}{}
-      \field{sortinit}{R}
-      \field{sortinithash}{b9c68a358aea118dfa887b6e902414a7}
-      \field{labeltitlesource}{title}
-      \field{day}{22}
-      \field{month}{6}
-      \field{title}{RTE-RRTMGP-C github repository}
-      \field{year}{2020}
-      \field{dateera}{ce}
-      \verb{urlraw}
-      \verb https://github.com/MHBalsmeier/rte-rrtmgp-c
-      \endverb
-      \verb{url}
-      \verb https://github.com/MHBalsmeier/rte-rrtmgp-c
-      \endverb
-    \endentry
   \enddatalist
 \endrefsection
 \endinput

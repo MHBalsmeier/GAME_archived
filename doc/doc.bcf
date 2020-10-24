@@ -2194,7 +2194,6 @@
     <bcf:citekey order="10">doi:10.1002/qj.1960</bcf:citekey>
     <bcf:citekey order="11">doi:10.1029/2019MS001621</bcf:citekey>
     <bcf:citekey order="12">rte-rrtmgp-github</bcf:citekey>
-    <bcf:citekey order="13">rte-rrtmgp-c-github</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nty">

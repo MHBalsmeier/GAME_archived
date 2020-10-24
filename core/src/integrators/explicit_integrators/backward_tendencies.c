@@ -5,7 +5,6 @@ Github repository: https://github.com/MHBalsmeier/game
 
 #include "../../enum_and_typedefs.h"
 #include "../integrators.h"
-#include "rte-rrtmgp-c.h"
 #include "../../spatial_operators/spatial_operators.h"
 #include "../../diagnostics/diagnostics.h"
 
@@ -15,7 +14,8 @@ int backward_tendencies(State *state_old, State *state_new, Interpolate_info *in
     // Radiation is updated here.
     if (config_info -> rad_update == 1)
     {
-        calc_rad_heating(radiation_tendency, NO_OF_SCALARS);
+    	// radiation will go here
+        ;
     }
     // Temperature diffusion gets updated here, but only at the last RK step and if heat conduction is switched on.
     if (no_rk_step == 2 && (config_info -> temperature_diff_h == 1 || config_info -> temperature_diff_v == 1))

@@ -16,7 +16,6 @@ The main organizes the model, manages the time stepping, calls model output, col
 #include "spatial_operators/spatial_operators.h"
 #include "diagnostics/diagnostics.h"
 #include "manage_time_stepping/manage_time_stepping.h"
-#include "rte-rrtmgp-c.h"
 #include <mpi.h>
 
 int main(int argc, char *argv[])
@@ -329,7 +328,8 @@ int main(int argc, char *argv[])
 	Scalar_field *radiation_tendency = calloc(1, sizeof(Scalar_field));
     if (config_info -> rad_on == 1)
     {
-		calc_rad_heating(*radiation_tendency, NO_OF_SCALARS);
+    	// first radiation calculation goes here
+    	;
     }
     else
     {
