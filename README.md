@@ -43,7 +43,7 @@ What GAME does not do and why:
 * A way to construct Voronoi meshes on an ellipsoid.
 * A largely implicit 3D solver for efficiency (larger time step) and better energy conservation properties.
 * A nesting option.
-* An ocean solver.
+* Implementation of ocean dynamics and physics.
 
 ## Documents
 

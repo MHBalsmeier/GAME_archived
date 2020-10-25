@@ -72,7 +72,7 @@ if short_name == "cape":
 if short_name == "pres":
     variable_name = "Pressure";
     unit_string = "Pa";
-if short_name == "rh":
+if short_name == "r":
     variable_name = "Relative humidity";
     unit_string = "%";
 if short_name == "u":
