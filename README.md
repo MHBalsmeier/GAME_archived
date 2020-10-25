@@ -73,6 +73,7 @@ Everything is easy and quick to install.
 * CMake (Ubuntu: sudo apt-get install cmake)
 * [atmostracers](https://github.com/MHBalsmeier/atmostracers)
 * OpenMPI (Ubuntu: sudo apt-get install mpich)
+* clone the DCMIP2016 repository: git clone https://github.com/ClimateGlobalChange/DCMIP2016.git
 
 #### For using the plotting routines
 
