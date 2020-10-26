@@ -53,11 +53,11 @@ The derivations of both the continuous equations as well as of the discretizatio
 
 ### Documentation
 
-The documentation can be found in the subdirectory doc. It does not contain scientific derivations but rather describes the details of the numerical implementation.
+The documentation can be found in the subdirectory doc. It does not contain scientific derivations but rather describes the code.
 
 ### Handbook
 
-The handbook of the model can be found in the subdirectory handbook. It is to be understood as a user manual and contains information on how to generate necessary files like grid files and input data and explains how to compile, configure and run the model.
+The handbook of the model can be found in the subdirectory handbook. It is to be understood as a user manual and contains information on how to generate necessary files like grid files, orography files and input data and explains how to compile, configure and run the model.
 
 ## Installing the model
 
