@@ -57,7 +57,7 @@ The documentation can be found in the subdirectory doc. It does not contain scie
 
 ### Handbook
 
-The handbook of the model can be found in the subdirectory handbook. It is to be understood as a user manual and contains information on how to generate necessary files like grid files, orography files and input data and explains how to configure, compile and run the model.
+The handbook of the model can be found in the subdirectory handbook. It is to be understood as a user manual and contains information on how to generate necessary files like grid files, geospatial data files (orography, for example) and input data and explains how to configure, compile and run the model.
 
 ## Installing the model
 
