@@ -6,8 +6,7 @@
 # basic run properties
 game_home_dir=/home/max/compiled/game_dev # the root directory of your GAME instance
 operator=MHB # the ID of the person / group / institution running the model
-nwp_mode=0 # switches on or off the numerical weather prediction mode (calls data assimilation, special output, etc.)
-test_id=1 # Must only be set if nwp_mode == 0. In this case, it specifies which test scenario to run.
+test_id=1 # specifies which test scenario to run
 overwrite_run_id=1 # this overwrites the otherwise automatically chosen run_id
 run_id=standard_steep # run_id must only be set if overwrite_run_id == 0 (otherwise it is chosen automatically)
 run_span=43200 # how long the model is supposed to run
@@ -31,10 +30,10 @@ rad_on=0 # turn on if you want radiation
 radiation_delta_t=3600 # every how many seconds the radiation fluxes wil be updated
 
 # I/O
-start_year=2000 # not relevant in NWP mode
-start_month=1 # not relevant in NWP mode
-start_day=1 # not relevant in NWP mode
-start_hour=0 # not relevant in NWP mode
+start_year=2000 # defines the start time of the model run
+start_month=1 # defines the start time of the model run
+start_day=1 # defines the start time of the model run
+start_hour=0 # defines the start time of the model run
 write_out_interval=900 # every how many seconds an output file will be created
 write_out_mass_dry_integral=1 # If set to 1, the total dry mass of the atmosphere will be written out at every time step.
 write_out_entropy_gas_integral=1 # If set to 1, the total entropy of the atmosphere will be written out at every time step.
@@ -48,9 +47,6 @@ aviation_output_mode=0 # If set to 1, additional output on flight levels will be
 # parallelization
 export OMP_NUM_THREADS=1 # relevant only for OMP
 number_of_cpus=1 # relevant only for MPI
-
-# data assimilation
-ndvar_directory=/home/max/compiled/ndvar # The directory, where the ndvar program is stored. Only relevant in NWP mode.
 
 # that's it, now the basic run script will be sourced
 source $game_home_dir/core/run.sh

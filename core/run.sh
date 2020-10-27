@@ -14,12 +14,6 @@ then
 rm -r $output_dir
 fi
 mkdir $output_dir
-if [ $nwp_mode -eq 1 ]
-then
-cd $ndvar_directory
-source run.sh
-cd - > /dev/null
-fi
 cd $game_home_dir
 if [ $valgrind_check -eq 0 ]
 then
