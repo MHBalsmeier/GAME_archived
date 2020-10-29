@@ -9,7 +9,6 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int vertical_contravariant_normalized_h(Vector_field in_field, int layer_index, int h_index, Grid *grid, double *result)
 {
-	// Attention: contains a rescaling factor for the tilting of the horizontal surface.
 	// Attention: adjacent_signs_h appears twice, thus does not need to be taken into account.
 	if (h_index < 0 || h_index >= NO_OF_SCALARS_H)
 		return 1;
@@ -57,11 +56,10 @@ int vertical_contravariant_normalized_h(Vector_field in_field, int layer_index, 
 
 int horizontal_covariant_normalized(Vector_field in_field, int layer_index, int h_index, Grid *grid, double *result)
 {
-	// Attention: contains a rescaling factor for the tilting of the horizontal edge length.
 	double vertical_component;
 	recov_hor_ver_pri(in_field, layer_index, h_index, &vertical_component, grid);
 	int vector_index = layer_index*NO_OF_VECTORS_PER_LAYER + NO_OF_SCALARS_H + h_index;
-	*result = in_field[vector_index] + grid -> slope[vector_index]*vertical_component;
+	*result = in_field[vector_index] + vertical_component*grid -> slope[vector_index];
 	return 0;
 }
 
