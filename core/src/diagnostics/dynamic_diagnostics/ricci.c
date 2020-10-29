@@ -59,7 +59,7 @@ int horizontal_covariant_normalized(Vector_field in_field, int layer_index, int 
 	double vertical_component;
 	recov_hor_ver_pri(in_field, layer_index, h_index, &vertical_component, grid);
 	int vector_index = layer_index*NO_OF_VECTORS_PER_LAYER + NO_OF_SCALARS_H + h_index;
-	*result = in_field[vector_index] + vertical_component*grid -> slope[vector_index];
+	*result = in_field[vector_index] + grid -> slope[vector_index]*vertical_component;
 	return 0;
 }
 
