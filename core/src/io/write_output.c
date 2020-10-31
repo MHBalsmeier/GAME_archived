@@ -2016,7 +2016,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	return 0;
 }
 
-int write_out_integral(State *state_write_out, double t_write, char RUN_ID[], Grid *grid, Dualgrid *dualgrid, int integral_id)
+int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], Grid *grid, Dualgrid *dualgrid, int integral_id)
 {
 	/*
 	integral_id:
@@ -2046,14 +2046,14 @@ int write_out_integral(State *state_write_out, double t_write, char RUN_ID[], Gr
     {
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
     	global_scalar_integrator(state_write_out -> density_dry, grid, &global_integral);
-    	fprintf(global_integral_file, "%lf\t%lf\n", t_write, global_integral);
+    	fprintf(global_integral_file, "%d\t%lf\n", step_counter, global_integral);
     	fclose(global_integral_file);
     }
     if (integral_id == 1)
     {
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
     	global_scalar_integrator(state_write_out -> entropy_density_dry, grid, &global_integral);
-    	fprintf(global_integral_file, "%lf\t%lf\n", t_write, global_integral);
+    	fprintf(global_integral_file, "%d\t%lf\n", step_counter, global_integral);
     	fclose(global_integral_file);
     }
     if (integral_id == 2)
@@ -2072,7 +2072,7 @@ int write_out_integral(State *state_write_out, double t_write, char RUN_ID[], Gr
     	Scalar_field *int_energy_density = malloc(sizeof(Scalar_field));
     	scalar_times_scalar(state_write_out -> density_dry, state_write_out -> temperature_gas, *int_energy_density);
     	global_scalar_integrator(*int_energy_density, grid, &internal_integral);
-    	fprintf(global_integral_file, "%lf\t%lf\t%lf\t%lf\n", t_write, kinetic_integral, potential_integral, C_D_V*internal_integral);
+    	fprintf(global_integral_file, "%d\t%lf\t%lf\t%lf\n", step_counter, kinetic_integral, potential_integral, C_D_V*internal_integral);
     	free(int_energy_density);
     	fclose(global_integral_file);
     }
@@ -2087,7 +2087,7 @@ int write_out_integral(State *state_write_out, double t_write, char RUN_ID[], Gr
     		(*linear_entropy)[i] = C_D_P*state_write_out -> density_dry[i]*(*pot_temp)[i];
     	}
     	global_scalar_integrator(*linear_entropy, grid, &global_integral);
-    	fprintf(global_integral_file, "%lf\t%lf\n", t_write, global_integral);
+    	fprintf(global_integral_file, "%d\t%lf\n", step_counter, global_integral);
     	free(linear_entropy);
     	free(pot_temp);
     	fclose(global_integral_file);

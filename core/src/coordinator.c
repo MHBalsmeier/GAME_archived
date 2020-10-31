@@ -339,18 +339,18 @@ int main(int argc, char *argv[])
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     double t_0;
     t_0 = t_init;
-    double t_write_integral = t_init;
+    int time_step_counter = 0;
     clock_t first_time, second_time;
     first_time = clock();
     State *state_new = calloc(1, sizeof(State));
     if (write_out_dry_mass_integral == 1)
-		write_out_integral(state_old, t_write_integral, RUN_ID, grid, dualgrid, 0);
+		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, 0);
     if (write_out_entropy_integral == 1)
-		write_out_integral(state_old, t_write_integral, RUN_ID, grid, dualgrid, 1);
+		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, 1);
     if (write_out_energy_integral == 1)
-		write_out_integral(state_old, t_write_integral, RUN_ID, grid, dualgrid, 2);
+		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, 2);
     if (write_out_linearized_entropy_integral == 1)
-		write_out_integral(state_old, t_write_integral, RUN_ID, grid, dualgrid, 3);
+		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, 3);
 	Scalar_field *radiation_tendency = calloc(1, sizeof(Scalar_field));
     if (config_info -> rad_on == 1)
     {
@@ -362,7 +362,7 @@ int main(int argc, char *argv[])
     	for (int i = 0; i < NO_OF_SCALARS; ++i)
     		(*radiation_tendency)[i] = 0;
     }
-	t_write_integral += delta_t;
+	time_step_counter += 1;
     int counter = 0;
     State *state_tendency = calloc(1, sizeof(State));
     Interpolate_info *interpolation = calloc(1, sizeof(Interpolate_info));
@@ -373,14 +373,14 @@ int main(int argc, char *argv[])
     manage_time_stepping(state_old, state_new, interpolation, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
     counter += 1;
     if (write_out_dry_mass_integral == 1)
-		write_out_integral(state_new, t_write_integral, RUN_ID, grid, dualgrid, 0);
+		write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, 0);
     if (write_out_entropy_integral == 1)
-		write_out_integral(state_new, t_write_integral, RUN_ID, grid, dualgrid, 1);
+		write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, 1);
     if (write_out_energy_integral == 1)
-		write_out_integral(state_new, t_write_integral, RUN_ID, grid, dualgrid, 2);
+		write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, 2);
     if (write_out_linearized_entropy_integral == 1)
-		write_out_integral(state_old, t_write_integral, RUN_ID, grid, dualgrid, 3);
-	t_write_integral += delta_t;
+		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, 3);
+	time_step_counter += 1;
     State *state_write = calloc(1, sizeof(State));
     double speed;
     config_info -> rad_update = 0;
@@ -402,14 +402,14 @@ int main(int argc, char *argv[])
         	config_info -> rad_update = 0;
             manage_time_stepping(state_old, state_new, interpolation, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
 		if (write_out_dry_mass_integral == 1)
-			write_out_integral(state_new, t_write_integral, RUN_ID, grid, dualgrid, 0);
+			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, 0);
 		if (write_out_entropy_integral == 1)
-			write_out_integral(state_new, t_write_integral, RUN_ID, grid, dualgrid, 1);
+			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, 1);
 		if (write_out_energy_integral == 1)
-			write_out_integral(state_new, t_write_integral, RUN_ID, grid, dualgrid, 2);
+			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, 2);
 		if (write_out_linearized_entropy_integral == 1)
-			write_out_integral(state_old, t_write_integral, RUN_ID, grid, dualgrid, 3);
-		t_write_integral += delta_t;
+			write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, 3);
+		time_step_counter += 1;
         if(t_0 + delta_t >= t_write && t_0 <= t_write)
             interpolation_t(state_old, state_new, state_write, t_0, t_0 + delta_t, t_write);
         if (t_0 >= t_write - 300)
