@@ -6,8 +6,7 @@
 # basic run properties
 game_home_dir=/home/max/compiled/game_dev # the root directory of your GAME instance
 operator=MHB # the ID of the person / group / institution running the model
-test_id=1 # specifies which test scenario to run
-overwrite_run_id=1 # this overwrites the otherwise automatically chosen run_id
+ideal_input_id=1 # specifies which test scenario to run
 run_id=standard_steep # run_id must only be set if overwrite_run_id == 0 (otherwise it is chosen automatically)
 run_span=43200 # how long the model is supposed to run
 valgrind_check=0 # set this to 1, if you want to check the code with Valgrind

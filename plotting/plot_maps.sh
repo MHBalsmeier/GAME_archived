@@ -3,9 +3,9 @@
 # This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 # Github repository: https://github.com/MHBalsmeier/game
 
-game_home_dir=/home/max/compiled/game_dev # the home directory of GAME
-run_id=ullrich_dry_irrev # the run id which you want to plot
-run_span=21600 # the length of the run
+game_home_dir=${BASH_ARGV[0]} # the home directory of GAME
+run_id=${BASH_ARGV[1]} # the run id which you want to plot
+run_span=${BASH_ARGV[2]} # the length of the run
 output_dir=$game_home_dir/output/$run_id # the directory where the grib files are stored
 fig_save_path=~/figs/game_output/$run_id # the path to which the figures will be saved
 grid_props_file=$game_home_dir/grids/B5L26T30000_O0_OL17_SCVT.nc # the file where the grid properties are stored
