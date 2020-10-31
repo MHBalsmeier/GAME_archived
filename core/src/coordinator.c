@@ -101,8 +101,10 @@ int main(int argc, char *argv[])
     Io_config *io_config = calloc(1, sizeof(Io_config));
 	io_config -> grib_output_switch = strtod(argv[28], NULL);
 	io_config -> netcdf_output_switch = strtod(argv[29], NULL);
-	io_config -> synop_output_switch = strtod(argv[30], NULL);
-	io_config -> aviation_output_switch = strtod(argv[31], NULL);
+	io_config -> pressure_level_output_switch = strtod(argv[30], NULL);
+	io_config -> flight_level_output_switch = strtod(argv[31], NULL);
+	io_config -> model_level_output_switch = strtod(argv[32], NULL);
+	io_config -> surface_output_switch = strtod(argv[33], NULL);
 	if (io_config -> grib_output_switch == 0 && io_config -> netcdf_output_switch == 0)
 	{
 		printf("Either grib_output_switch or netcdf_output_switch must be set to 1.\n");
@@ -204,21 +206,37 @@ int main(int argc, char *argv[])
 	{
 		printf("Netcdf output is turned on.\n");
 	}
-	if (io_config -> synop_output_switch == 0)
+	if (io_config -> model_level_output_switch == 0)
 	{
-		printf("Synoptical output is turned off.\n");
+		printf("Model level output is turned off.\n");
 	}
 	else
 	{
-		printf("Synoptical output is turned on.\n");
+		printf("Model level output is turned on.\n");
 	}
-	if (io_config -> aviation_output_switch == 0)
+	if (io_config -> surface_output_switch == 0)
 	{
-		printf("Aviation output is turned off.\n");
+		printf("Surface output is turned off.\n");
 	}
 	else
 	{
-		printf("Aviation output is turned on.\n");
+		printf("Surface output is turned on.\n");
+	}
+	if (io_config -> pressure_level_output_switch == 0)
+	{
+		printf("Pressure level output is turned off.\n");
+	}
+	else
+	{
+		printf("Pressure level output is turned on.\n");
+	}
+	if (io_config -> flight_level_output_switch == 0)
+	{
+		printf("Flight level output is turned off.\n");
+	}
+	else
+	{
+		printf("Flight level output is turned on.\n");
 	}
 	printf("%s", stars);
 	printf("model run configuration information:\n");

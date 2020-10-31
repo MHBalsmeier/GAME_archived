@@ -218,8 +218,10 @@ Scalar_field curl_term_viscosity_eff;
 typedef struct io_config {
 int grib_output_switch;
 int netcdf_output_switch;
-int synop_output_switch;
-int aviation_output_switch;
+int pressure_level_output_switch;
+int flight_level_output_switch;
+int model_level_output_switch;
+int surface_output_switch;
 } Io_config;
 
 

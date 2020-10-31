@@ -40,97 +40,108 @@ show_level_on = 1;
 contourf_plot = 1;
 gravity_mean = 9.80616;
 
+surface_bool = 0;
 if short_name == "gh":
-    variable_name = "Geopotential height";
-    unit_string = "gpdam";
-    rescale = 1/gravity_mean;
-    contourf_plot = 0;
+	variable_name = "Geopotential height";
+	unit_string = "gpdam";
+	rescale = 1/gravity_mean;
+	contourf_plot = 0;
 if short_name == "t":
-    variable_name = "Temperature";
-    unit_string = "°C";
-    shift = -conv.c2k(0);
+	variable_name = "Temperature";
+	unit_string = "°C";
+	shift = -conv.c2k(0);
 if short_name == "pt":
-    variable_name = "Potential temperature";
-    unit_string = "K";
+	variable_name = "Potential temperature";
+	unit_string = "K";
 if short_name == "prmsl":
-    variable_name = "MSLP / hPa";
-    rescale = 0.01;
-    shift = -1000;
-    unit_string = "hPa";
-    show_level_on = 0;
-    contourf_plot = 0;
+	variable_name = "MSLP / hPa";
+	rescale = 0.01;
+	shift = -1000;
+	unit_string = "hPa";
+	show_level_on = 0;
+	contourf_plot = 0;
+	surface_bool = 1;
 if short_name == "sp":
-    variable_name = "Surface pressure - 1000 hPa";
-    rescale = 0.01;
-    shift = -1000;
-    unit_string = "hPa";
-    show_level_on = 0;
+	variable_name = "Surface pressure - 1000 hPa";
+	rescale = 0.01;
+	shift = -1000;
+	unit_string = "hPa";
+	show_level_on = 0;
+	surface_bool = 1;
 if short_name == "cape":
-    variable_name = "CAPE";
-    unit_string = "J / kg";
-    show_level_on = 0;
+	variable_name = "CAPE";
+	unit_string = "J / kg";
+	show_level_on = 0;
+	surface_bool = 1;
 if short_name == "pres":
-    variable_name = "Pressure";
-    unit_string = "Pa";
+	variable_name = "Pressure";
+	unit_string = "Pa";
 if short_name == "r":
-    variable_name = "Relative humidity";
-    unit_string = "%";
+	variable_name = "Relative humidity";
+	unit_string = "%";
 if short_name == "u":
-    variable_name = "Zonal wind";
-    unit_string = "m/s";
+	variable_name = "Zonal wind";
+	unit_string = "m/s";
 if short_name == "v":
-    variable_name = "Meridional wind";
-    unit_string = "m/s";
+	variable_name = "Meridional wind";
+	unit_string = "m/s";
 if short_name == "2t":
-    variable_name = "2 m temperature";
-    unit_string = "°C";
-    shift = -conv.c2k(0);
-    show_level_on = 0;
+	variable_name = "2 m temperature";
+	unit_string = "°C";
+	shift = -conv.c2k(0);
+	show_level_on = 0;
+	surface_bool = 1;
 if short_name == "vo":
-    variable_name = "Relative vorticity";
-    unit_string = "10^-5/s";
-    rescale = 1e5;
+	variable_name = "Relative vorticity";
+	unit_string = "10^-5/s";
+	rescale = 1e5;
 if short_name == "10u":
-    variable_name = "10 m zonal wind";
-    unit_string = "m/s";
-    show_level_on = 0;
+	variable_name = "10 m zonal wind";
+	unit_string = "m/s";
+	show_level_on = 0;
+	surface_bool = 1;
 if short_name == "10v":
-    variable_name = "10 m meridional wind";
-    unit_string = "m/s";
-    show_level_on = 0;
+	variable_name = "10 m meridional wind";
+	unit_string = "m/s";
+	show_level_on = 0;
+	surface_bool = 1;
 if short_name == "gust":
-    variable_name = "10 m gusts";
-    unit_string = "m/s";
-    show_level_on = 0;
+	variable_name = "10 m gusts";
+	unit_string = "m/s";
+	show_level_on = 0;
+	surface_bool = 1;
 if short_name == "rprate":
-    variable_name = "Liquid precipitation rate";
-    unit_string = "mm/h";
-    rescale = conv.kgm_2s_12mmh_1(1);
-    colormap = "Greys";
-    show_level_on = 0;
+	variable_name = "Liquid precipitation rate";
+	unit_string = "mm/h";
+	rescale = conv.kgm_2s_12mmh_1(1);
+	colormap = "Greys";
+	show_level_on = 0;
+	surface_bool = 1;
 if short_name == "sprate":
-    variable_name = "Solid precipitation rate";
-    unit_string = "mm/h";
-    rescale = conv.kgm_2s_12mmh_1(1);
-    colormap = "Greys";
-    show_level_on = 0;
+	variable_name = "Solid precipitation rate";
+	unit_string = "mm/h";
+	rescale = conv.kgm_2s_12mmh_1(1);
+	colormap = "Greys";
+	show_level_on = 0;
+	surface_bool = 1;
 if short_name == "tcc":
-    variable_name = "Total cloud cover";
-    unit_string = "%";
-    colormap = "Greys";
-    show_level_on = 0;
+	variable_name = "Total cloud cover";
+	unit_string = "%";
+	colormap = "Greys";
+	show_level_on = 0;
+	surface_bool = 1;
 if short_name == "den":
-    variable_name = "Dry air density";
-    unit_string = "g/m^3";
-    rescale = 1000;
+	variable_name = "Dry air density";
+	unit_string = "g/m^3";
+	rescale = 1000;
 if short_name == "wz":
-    variable_name = "Vertical velocity";
-    unit_string = "m/s";
-    rescale = 1;
+	variable_name = "Vertical velocity";
+	unit_string = "m/s";
+	rescale = 1;
 if short_name == "d":
-    variable_name = "Horizontal divergence";
-    unit_string = "1/s";
-    rescale = 1;
+	variable_name = "Horizontal divergence";
+	unit_string = "1/s";
+	rescale = 1;
 
 unit_string_for_iris = unit_string;
 if short_name == "gh":
@@ -146,9 +157,12 @@ if max_interval > 24*3600:
 savename = run_id + "_" + short_name + "_" + str(level) + "_" + scope;
 
 if on_pressure_bool == 0:
-	input_file = grib_dir_name + "/" + run_id + "+0s.grb2";
+	if surface_bool == 1:
+		input_file = grib_dir_name + "/" + run_id + "+0s_surface.grb2";
+	else:
+		input_file = grib_dir_name + "/" + run_id + "+0s.grb2";
 else:
-	input_file = grib_dir_name + "/" + run_id + "+0s_synop.grb2";
+	input_file = grib_dir_name + "/" + run_id + "+0s_pressure_levels.grb2";
 
 	
 lat, lon, values_pre = rmo.fetch_model_output(input_file, 0, short_name, level, grid_props_file);
@@ -159,9 +173,12 @@ values[:, 0] = rescale*values_pre + shift;
 for i in np.arange(1, int(max_interval/plot_interval) + 1):
 	time_after_init = i*plot_interval;
 	if on_pressure_bool == 0:
-		input_file = grib_dir_name + "/" + run_id + "+" + str(time_after_init) + "s.grb2";
+		if surface_bool == 1:
+			input_file = grib_dir_name + "/" + run_id + "+" + str(time_after_init) + "s_surface.grb2";
+		else:
+			input_file = grib_dir_name + "/" + run_id + "+" + str(time_after_init) + "s.grb2";
 	else:
-		input_file = grib_dir_name + "/" + run_id + "+" + str(time_after_init) + "s_synop.grb2";
+		input_file = grib_dir_name + "/" + run_id + "+" + str(time_after_init) + "s_pressure_levels.grb2";
 	lat, lon, values[:, i] = rmo.fetch_model_output(input_file, time_after_init, short_name, level, grid_props_file);
 	values[:, i] = rescale*values[:, i] + shift;
 
