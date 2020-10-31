@@ -92,15 +92,17 @@ int main(int argc, char *argv[])
 	toa = strtod(argv[22], NULL);
     int no_of_oro_layers_input;
 	no_of_oro_layers_input = strtod(argv[23], NULL);
-	config_info -> mass_dry_diff_h = strtod(argv[25], NULL);
-	config_info -> mass_dry_diff_v = strtod(argv[26], NULL);
-    Io_config *io_config = calloc(1, sizeof(Io_config));
-	io_config -> grib_output_switch = strtod(argv[27], NULL);
-	io_config -> netcdf_output_switch = strtod(argv[28], NULL);
-	io_config -> synop_output_switch = strtod(argv[29], NULL);
-	io_config -> aviation_output_switch = strtod(argv[30], NULL);
 	int ORO_ID;
-	ORO_ID = strtod(argv[31], NULL);
+	ORO_ID = strtod(argv[24], NULL);
+    int IDEAL_INPUT_ID;
+    IDEAL_INPUT_ID = strtod(argv[25], NULL);
+	config_info -> mass_dry_diff_h = strtod(argv[26], NULL);
+	config_info -> mass_dry_diff_v = strtod(argv[27], NULL);
+    Io_config *io_config = calloc(1, sizeof(Io_config));
+	io_config -> grib_output_switch = strtod(argv[28], NULL);
+	io_config -> netcdf_output_switch = strtod(argv[29], NULL);
+	io_config -> synop_output_switch = strtod(argv[30], NULL);
+	io_config -> aviation_output_switch = strtod(argv[31], NULL);
 	if (io_config -> grib_output_switch == 0 && io_config -> netcdf_output_switch == 0)
 	{
 		printf("Either grib_output_switch or netcdf_output_switch must be set to 1.\n");
@@ -114,8 +116,6 @@ int main(int argc, char *argv[])
     	printf("Aborting.\n");
     	exit(1);
     }
-    int IDEAL_INPUT_ID;
-    IDEAL_INPUT_ID = strtod(argv[24], NULL);
     // This sets the ORO_ID (orography ID) as a function of the IDEAL_INPUT_ID.
 	if (IDEAL_INPUT_ID == 0 || IDEAL_INPUT_ID == 8 || IDEAL_INPUT_ID == 9)
 		ORO_ID = 0;
