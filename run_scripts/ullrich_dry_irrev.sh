@@ -12,7 +12,7 @@ run_span=43200 # how long the model is supposed to run
 valgrind_check=0 # set this to 1, if you want to check the code with Valgrind
 
 # grid properties
-res_id=5 #  resolution ID (number of bisections of basic icosahedral triangles)
+res_id=5 # resolution ID (number of bisections of basic icosahedral triangles)
 number_of_layers=26
 toa=30000 # top of atmosphere
 orography_layers=17 # number of layers following the orography

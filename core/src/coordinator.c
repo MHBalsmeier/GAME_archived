@@ -99,6 +99,8 @@ int main(int argc, char *argv[])
 	io_config -> netcdf_output_switch = strtod(argv[28], NULL);
 	io_config -> synop_output_switch = strtod(argv[29], NULL);
 	io_config -> aviation_output_switch = strtod(argv[30], NULL);
+	int ORO_ID;
+	ORO_ID = strtod(argv[31], NULL);
 	if (io_config -> grib_output_switch == 0 && io_config -> netcdf_output_switch == 0)
 	{
 		printf("Either grib_output_switch or netcdf_output_switch must be set to 1.\n");
@@ -112,28 +114,34 @@ int main(int argc, char *argv[])
     	printf("Aborting.\n");
     	exit(1);
     }
-    int TEST_ID;
-    TEST_ID = strtod(argv[24], NULL);
-    // This sets the ORO_ID (orography ID) as a function of the TEST_ID.
-    int ORO_ID;	
-	if (TEST_ID == -1)
-		ORO_ID = 3;
-	if (TEST_ID == 0 || TEST_ID == 8 || TEST_ID == 9)
+    int IDEAL_INPUT_ID;
+    IDEAL_INPUT_ID = strtod(argv[24], NULL);
+    // This sets the ORO_ID (orography ID) as a function of the IDEAL_INPUT_ID.
+	if (IDEAL_INPUT_ID == 0 || IDEAL_INPUT_ID == 8 || IDEAL_INPUT_ID == 9)
 		ORO_ID = 0;
-	if (TEST_ID == 1)
+	if (IDEAL_INPUT_ID == 1)
 		ORO_ID = 1;
-	if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
+	if (IDEAL_INPUT_ID == 2 || IDEAL_INPUT_ID == 3 || IDEAL_INPUT_ID == 4 || IDEAL_INPUT_ID == 5)
 		ORO_ID = 2;
-	if (TEST_ID == 6 || TEST_ID == 7)
+	if (IDEAL_INPUT_ID == 6 || IDEAL_INPUT_ID == 7)
 		ORO_ID = 3;
 	// Determining the name of the grid file from the RES_ID, NO_OF_LAYERS and so on.
     char GEO_PROP_FILE_PRE[200];
 	sprintf(GEO_PROP_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, toa, ORO_ID, NO_OF_ORO_LAYERS);
     char GEO_PROP_FILE[strlen(GEO_PROP_FILE_PRE) + 1];
     strcpy(GEO_PROP_FILE, GEO_PROP_FILE_PRE);
-	// Determining the name of the init state file from the TEST_ID, RES_ID, NO_OF_LAYERS and so on.
+	// Determining the name of the init state file from the IDEAL_INPUT_ID, RES_ID, NO_OF_LAYERS and so on.
     char INIT_STATE_FILE_PRE[200];
-	sprintf(INIT_STATE_FILE_PRE, "input/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", TEST_ID, RES_ID, NO_OF_LAYERS, toa, ORO_ID, NO_OF_ORO_LAYERS);
+    // The NWP case.
+    if (IDEAL_INPUT_ID == -1)
+    {
+    	sprintf(INIT_STATE_FILE_PRE, "input/%d%d%d%d_nwp_B%dL%dT%d_O%d_OL%d_SCVT.nc", year, month, day, hour, RES_ID, NO_OF_LAYERS, toa, ORO_ID, NO_OF_ORO_LAYERS);
+    }
+    // The idealized input case.
+    else
+    {
+		sprintf(INIT_STATE_FILE_PRE, "input/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", IDEAL_INPUT_ID, RES_ID, NO_OF_LAYERS, toa, ORO_ID, NO_OF_ORO_LAYERS);
+    }
     char INIT_STATE_FILE[strlen(INIT_STATE_FILE_PRE) + 1];
     strcpy(INIT_STATE_FILE, INIT_STATE_FILE_PRE);
     
