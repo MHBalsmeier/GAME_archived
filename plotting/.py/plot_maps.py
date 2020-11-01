@@ -324,13 +324,13 @@ for i in range(int(max_interval/plot_interval) + 1):
 	if show_level_on == 1:
 		if on_pressure_bool == 1:
 			if contourf_plot == 0:
-				textstr = str(level) + " hPa " + variable_name + " / " + unit_string + " (GAME) \n" + time_string;
+				textstr = str(level) + " hPa " + variable_name + " / " + unit_string + " (GAME)\n" + time_string;
 			if contourf_plot == 1:
-				textstr = str(level) + " hPa " + variable_name + " (GAME) \n" + time_string;
+				textstr = str(level) + " hPa " + variable_name + " (GAME)\n" + time_string;
 		else:
 			textstr = variable_name + " at level " + str(level) + "\n" + time_string;
 	else:
-		textstr = variable_name + " (GAME) \n" + time_string;
+		textstr = variable_name + " (GAME)\n" + time_string;
 	ob = offsetbox.AnchoredText(textstr, loc = 3);
 	ax.add_artist(ob);
 	fig.savefig(save_directory + "/" + savename + "+" + str(time_after_init) + "s.png", dpi = 500, bbox_inches = "tight");
