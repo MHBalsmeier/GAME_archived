@@ -287,6 +287,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		if (io_config -> grib_output_switch == 1)
 		{
 			long unsigned tcc_string_length = 4;
+			long unsigned cape_string_length = 5;
 			int OUTPUT_FILE_LENGTH = 300;
 			char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
 			sprintf(OUTPUT_FILE_PRE, "output/%s/%s+%ds_surface.grb2", RUN_ID, RUN_ID, (int) (t_write - t_init));
@@ -534,6 +535,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    if ((retval = codes_set_long(handle_cape, "scaledValueOfFirstFixedSurface", 0)))
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_cape, "scaleFactorOfFirstFixedSurface", 1)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_string(handle_cape, "shortName", "cape", &cape_string_length)))
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_cape, "level", 0)))
 		        ECCERR(retval);
