@@ -50,7 +50,7 @@ gravity_mean = 9.80616;
 
 surface_bool = 0;
 if short_name == "gh":
-	variable_name = "geopotential height";
+	variable_name = "Geopotential height";
 	unit_string = "gpdam";
 	rescale = 1/gravity_mean;
 	contourf_plot = 0;
@@ -87,6 +87,7 @@ if short_name == "pres":
 if short_name == "r":
 	variable_name = "Relative humidity";
 	unit_string = "%";
+	colormap = "Blues";
 if short_name == "u":
 	variable_name = "Zonal wind";
 	unit_string = "m/s";
@@ -119,14 +120,14 @@ if short_name == "gust":
 	show_level_on = 0;
 	surface_bool = 1;
 if short_name == "rprate":
-	variable_name = "Liquid precipitation rate";
+	variable_name = "Precipitation rate (rain)";
 	unit_string = "mm/h";
 	rescale = conv.kgm_2s_12mmh_1(1);
-	colormap = "Greys";
+	colormap = "Blues";
 	show_level_on = 0;
 	surface_bool = 1;
 if short_name == "sprate":
-	variable_name = "Solid precipitation rate";
+	variable_name = "Precipitation rate (snow)";
 	unit_string = "mm/h";
 	rescale = conv.kgm_2s_12mmh_1(1);
 	colormap = "Greys";
@@ -304,14 +305,13 @@ for i in range(int(max_interval/plot_interval) + 1):
 		mesh = iplt.contour(new_cube, levels_vector, linewidths = linewidths_vector, colors = "black");
 		plt.clabel(mesh, inline = True, fmt = "%1.0f", fontsize = 12, colors = "k");
 	if (scope != "World"):
-			ax.add_feature(cfeature.LAND);
-			ax.add_feature(cfeature.OCEAN);
-	if (scope == "CONUS"):
-		states_provinces = cfeature.NaturalEarthFeature(category = "cultural", name = "admin_1_states_provinces_lines", scale = "10m", facecolor = "none");
-		ax.add_feature(states_provinces, edgecolor = "gray");
-	if (scope != "World"):
+		ax.add_feature(cfeature.LAND);
+		ax.add_feature(cfeature.OCEAN);
 		countries = cfeature.NaturalEarthFeature(category = "cultural", name = "admin_0_countries", scale = "10m", facecolor = "none");
 		ax.add_feature(countries, edgecolor = "black");
+	if (scope == "CONUS" or scope == "INDIA" or scope == "CARIB" or scope == "CHINA"):
+		states_provinces = cfeature.NaturalEarthFeature(category = "cultural", name = "admin_1_states_provinces_lines", scale = "10m", facecolor = "none");
+		ax.add_feature(states_provinces, edgecolor = "gray");
 	time_after_init_title = time_after_init;
 	if disp_time_in_hr == 1:
 		time_after_init_title = int(time_after_init/3600);
