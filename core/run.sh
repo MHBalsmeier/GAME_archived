@@ -5,12 +5,10 @@
 
 time_string=$(date --utc +%Y%m%d%H%M%S)
 
-# this is the NWP case
-if [ $ideal_input_id -eq "-1" ]
+# this is the ideal input case
+if [ $ideal_input_id -gt "-1" ]
 then
-run_id=$start_year$start_month$start_day$start_hour"_nwp_B"$res_id"L"$number_of_layers"T"$toa"_O"$orography_id"_OL"$orography_layers"_SCVT"
-else
-orography_id=-1
+orography_id=-1 # orography_id will be set automatically, depending on the test ID
 fi
 
 output_dir=$game_home_dir/output/$run_id

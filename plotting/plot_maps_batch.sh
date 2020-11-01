@@ -3,15 +3,15 @@
 # This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 # Github repository: https://github.com/MHBalsmeier/game
 
-game_home_dir=/home/max/compiled/game_dev # the home directory of GAME
-run_id=ullrich_dry_irrev # the run id which you want to plot
-run_span=43200 # the length of the run
+game_home_dir=${BASH_ARGV[2]} # the home directory of GAME
+run_id=${BASH_ARGV[1]} # the run id which you want to plot
+run_span=${BASH_ARGV[0]} # the length of the run
 output_dir=$game_home_dir/output/$run_id # the directory where the grib files are stored
-fig_save_path=/home/max/figs/game_output # the path to which the figures will be saved
-init_year=0 # year of the start of the model run (irrelevant for tests)
-init_month=0 # month of the start of the model run (irrelevant for tests)
-init_day=0 # day of the start of the model run (irrelevant for tests)
-init_hr=0 # hour of the start of the model run (irrelevant for tests)
+fig_save_path=${BASH_ARGV[3]} # the path to which the figures will be saved
+init_year=${BASH_ARGV[4]} # year of the start of the model run
+init_month=${BASH_ARGV[5]} # month of the start of the model run
+init_day=${BASH_ARGV[6]} # day of the start of the model run
+init_hr=${BASH_ARGV[7]} # hour of the start of the model run
 grid_props_file=$game_home_dir/grids/B5L26T30000_O0_OL17_SCVT.nc # the file where the grid properties are stored
 disp_shortname_list=(2t prmsl t r gh 2t prmsl t r gh 2t prmsl t r gh) # short names according to grib as an array 
 disp_level_list=(2 0 850 850 500 2 0 850 850 500 2 0 850 850 500) # levels according to grib as an array

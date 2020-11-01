@@ -78,10 +78,19 @@ int main(int argc, char *argv[])
     year = strtod(argv[15], NULL);
     int month;
     month = strtod(argv[16], NULL);
+    len = strlen(argv[16]);
+    char *month_string = malloc((len + 1)*sizeof(char));
+    strcpy(month_string, argv[16]);
     int day;
     day = strtod(argv[17], NULL);
+    len = strlen(argv[17]);
+    char *day_string = malloc((len + 1)*sizeof(char));
+    strcpy(day_string, argv[17]);
     int hour;
     hour = strtod(argv[18], NULL);
+    len = strlen(argv[18]);
+    char *hour_string = malloc((len + 1)*sizeof(char));
+    strcpy(hour_string, argv[18]);
     config_info -> temperature_diff_v = strtod(argv[19], NULL);
     len = strlen(argv[20]);
     char *RUN_ID = malloc((len + 1)*sizeof(char));
@@ -137,7 +146,7 @@ int main(int argc, char *argv[])
     // The NWP case.
     if (IDEAL_INPUT_ID == -1)
     {
-    	sprintf(INIT_STATE_FILE_PRE, "input/%d%d%d%d_nwp_B%dL%dT%d_O%d_OL%d_SCVT.nc", year, month, day, hour, RES_ID, NO_OF_LAYERS, toa, ORO_ID, NO_OF_ORO_LAYERS);
+    	sprintf(INIT_STATE_FILE_PRE, "input/%d%s%s%s_nwp_B%dL%dT%d_O%d_OL%d_SCVT.nc", year, month_string, day_string, hour_string, RES_ID, NO_OF_LAYERS, toa, ORO_ID, NO_OF_ORO_LAYERS);
     }
     // The idealized input case.
     else
@@ -443,6 +452,9 @@ int main(int argc, char *argv[])
     	counter += 1;
     }
     MPI_Finalize();
+    free(month_string);
+    free(day_string);
+    free(hour_string);
    	free(RUN_ID);
     free(diffusion);
     free(config_info);
