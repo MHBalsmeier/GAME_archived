@@ -10,6 +10,7 @@ import cartopy.feature as cfeature;
 import iris;
 import toolbox.dist_stuff as ds;
 import toolbox.conversions as conv;
+import toolbox.time_coord_stuff as tcs;
 import matplotlib.pyplot as plt;
 import matplotlib as mpl;
 import cartopy.crs as ccrs;
@@ -31,6 +32,13 @@ run_id = sys.argv[9];
 uniform_range = int(sys.argv[10]);
 scope = sys.argv[11];
 on_pressure_bool = int(sys.argv[12]);
+synoptical_time_mode = int(sys.argv[13]);
+init_year = int(sys.argv[14]);
+init_month = int(sys.argv[15]);
+init_day = int(sys.argv[16]);
+init_hour = int(sys.argv[17]);
+
+start_timestamp = tcs.find_time_coord(init_year, init_month, init_day, init_hour, 0, 0, 0);
 
 # default values
 shift = 0;
@@ -42,7 +50,7 @@ gravity_mean = 9.80616;
 
 surface_bool = 0;
 if short_name == "gh":
-	variable_name = "Geopotential height";
+	variable_name = "geopotential height";
 	unit_string = "gpdam";
 	rescale = 1/gravity_mean;
 	contourf_plot = 0;
@@ -150,7 +158,7 @@ if short_name == "gh":
 disp_time_in_hr = 0;
 time_unit_string = "s";
 
-if max_interval > 24*3600:
+if max_interval > 24*3600 or synoptical_time_mode == 1:
     disp_time_in_hr = 1;
     time_unit_string = "hr";
 
@@ -307,16 +315,22 @@ for i in range(int(max_interval/plot_interval) + 1):
 	time_after_init_title = time_after_init;
 	if disp_time_in_hr == 1:
 		time_after_init_title = int(time_after_init/3600);
+	if synoptical_time_mode == 0:
+		time_string = "init + " + str(time_after_init_title) + " " + time_unit_string;
+	if synoptical_time_mode == 1:
+		time_string = "init: " + str(init_year) + "-" + str(init_month) + "-" + str(init_day) + ", " + str(init_hour) + " UTC\n";
+		valid_year, valid_month, valid_day, valid_hour, dump, dump, dump = tcs.return_date(start_timestamp + time_after_init);
+		time_string = time_string + "valid: " + str(valid_year) + "-" + str(valid_month) + "-" + str(valid_day) + ", " + str(valid_hour) + " UTC (+ " + str(time_after_init_title) + " hrs)";
 	if show_level_on == 1:
 		if on_pressure_bool == 1:
 			if contourf_plot == 0:
-				textstr = str(level) + " hPa " + variable_name + " / " + unit_string + "\n" + "init + " + str(time_after_init_title) + " " + time_unit_string;
+				textstr = str(level) + " hPa " + variable_name + " / " + unit_string + "\n" + time_string;
 			if contourf_plot == 1:
-				textstr = str(level) + " hPa " + variable_name + "\n" + "init + " + str(time_after_init_title) + " " + time_unit_string;
+				textstr = str(level) + " hPa " + variable_name + "\n" + time_string;
 		else:
-			textstr = variable_name + " at level " + str(level) + "\n" + "init + " + str(time_after_init_title) + " " + time_unit_string;
+			textstr = variable_name + " at level " + str(level) + "\n" + time_string;
 	else:
-		textstr = variable_name + "\n" + "init + " + str(time_after_init_title) + " " + time_unit_string;
+		textstr = variable_name + "\n" + time_string;
 	ob = offsetbox.AnchoredText(textstr, loc = 3);
 	ax.add_artist(ob);
 	fig.savefig(save_directory + "/" + savename + "+" + str(time_after_init) + "s.png", dpi = 500, bbox_inches = "tight");

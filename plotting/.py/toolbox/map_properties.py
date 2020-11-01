@@ -12,4 +12,9 @@ def return_central_point(scope):
 		central_lon_deg = -94;
 		height_map = 4100e3;
 		width_map = 5800e3;
+	if scope == "CHINA":
+		central_lat_deg = 36;
+		central_lon_deg = 104;
+		height_map = 4500e3;
+		width_map = 5800e3;
 	return central_lat_deg, central_lon_deg, height_map, width_map;
