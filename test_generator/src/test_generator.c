@@ -142,8 +142,7 @@ int main(int argc, char *argv[])
     double *solid_water_temp = malloc(NO_OF_SCALARS*sizeof(double));
     const double TROPO_TEMP_STANDARD = T_SFC + TROPO_HEIGHT_STANDARD*TEMP_GRADIENT;
     double z_height;
-    double lat, lon;
-    double u, v, eta, eta_v, T_perturb, distance, pressure_value, pressure_at_inv_standard;
+    double lat, lon, u, v, eta, eta_v, T_perturb, distance, pressure_value, pressure_at_inv_standard, specific_humidity, total_density;
     double u_p = 1.0;
     double distance_scale = RADIUS/10;
     double lat_perturb = 2*M_PI/9;
@@ -223,10 +222,18 @@ int main(int argc, char *argv[])
         // moist Ullrich test
         if (TEST_ID == 9)
         {
-        	baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i], &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
+        	baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i], &dummy_2, &dummy_3, &dummy_4, &total_density, &specific_humidity);
         }
-        liquid_water_density[i] = 0;
-        solid_water_density[i] = 0;
+        if (temperature[i] < 0)
+        {
+		    liquid_water_density[i] = 0;
+		    solid_water_density[i] = total_density*specific_humidity;
+	    }
+        if (temperature[i] >= 0)
+        {
+		    liquid_water_density[i] = total_density*specific_humidity;
+		    solid_water_density[i] = 0;
+	    }
         liquid_water_temp[i] = temperature[i];
         solid_water_temp[i] = temperature[i];
     }
