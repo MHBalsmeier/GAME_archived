@@ -54,6 +54,7 @@ NO_OF_TRACERS = 3,
 NO_OF_CONDENSATED_TRACERS = 2,
 NO_OF_SOLID_TRACERS = 1,
 // Nothing may be changed below this line. These are fundamentals properties of the grid.
+NO_OF_GASEOUS_TRACERS = NO_OF_TRACERS - NO_OF_CONDENSATED_TRACERS,
 NO_OF_BASIC_TRIANGLES = 20,
 NO_OF_PENTAGONS = 12,
 NO_OF_HEXAGONS = (int) (10*(pow(2, 2*RES_ID) - 1)),
@@ -83,6 +84,7 @@ typedef double Vector_field[NO_OF_VECTORS];
 typedef double Dual_vector_field[NO_OF_DUAL_VECTORS];
 typedef double Curl_field[NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H];
 typedef double Tracer_densities[NO_OF_TRACERS*NO_OF_SCALARS];
+typedef double Tracer_entropy_densities[NO_OF_GASEOUS_TRACERS*NO_OF_SCALARS];
 typedef double Tracer_density_temperatures[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS];
 
 // Contains properties of the primal grid.
@@ -132,6 +134,7 @@ Scalar_field entropy_density_dry;
 Vector_field velocity_gas;
 // density order: solid, liquid, vapour
 Tracer_densities tracer_densities;
+Tracer_entropy_densities tracer_entropy_densities;
 Tracer_density_temperatures tracer_density_temperatures;
 } State;
 
