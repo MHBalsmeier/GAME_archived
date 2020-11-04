@@ -223,17 +223,10 @@ int main(int argc, char *argv[])
         if (TEST_ID == 9)
         {
         	baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i], &dummy_2, &dummy_3, &dummy_4, &total_density, &specific_humidity);
+        	water_vapour_density[i] = total_density*specific_humidity;
         }
-        if (temperature[i] < 0)
-        {
-		    liquid_water_density[i] = 0;
-		    solid_water_density[i] = total_density*specific_humidity;
-	    }
-        if (temperature[i] >= 0)
-        {
-		    liquid_water_density[i] = total_density*specific_humidity;
-		    solid_water_density[i] = 0;
-	    }
+	    liquid_water_density[i] = 0;
+	    solid_water_density[i] = 0;
         liquid_water_temp[i] = temperature[i];
         solid_water_temp[i] = temperature[i];
     }
@@ -258,9 +251,14 @@ int main(int argc, char *argv[])
         	pressure_value = P_0*pow(temperature[i]/pot_temp_value, C_D_P/R_D);
         	rho[i] = pressure_value/(R_D*temperature[i]);
         }
-        water_vapour_density[i] = water_vapour_density_from_rel_humidity(rel_humidity[i], temperature[i], rho[i]);
-        if (water_vapour_density[i] < 0)
-        	printf("water_vapour_density negative.\n.");
+        if (TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 7)
+        {
+		    water_vapour_density[i] = water_vapour_density_from_rel_humidity(rel_humidity[i], temperature[i], rho[i]);
+		    if (water_vapour_density[i] < 0)
+		    {
+		    	printf("water_vapour_density negative.\n.");
+			}
+    	}
     }
     free(gravity_potential);
     for (int i = 0; i < NO_OF_LAYERS; ++i)

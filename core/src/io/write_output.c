@@ -59,14 +59,14 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	int err = 0;
 	
 	int layer_index, h_index;
-	double wind_u_value, wind_v_value;
+	double wind_u_value, wind_v_value, cloudy_box_counter;
 	
 	
 	// Surface output.
 	if (io_config -> surface_output_switch == 1)
 	{
 		Scalar_field *pot_temperature = calloc(1, sizeof(Scalar_field));
-		pot_temp_diagnostics(state_write_out, *pot_temperature);
+		pot_temp_diagnostics_dry(state_write_out, *pot_temperature);
 		double *mslp = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *surface_p = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *t2 = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -115,26 +115,45 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    	z_height += delta_z;
 		    	cape_integrand = grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i]*(theta_v_prime - theta_v)/theta_v;
 		    	if (cape_integrand > 0)
+		    	{
 		    		cape[i] += cape_integrand*delta_z;
+	    		}
 		    	--layer_index;
 		    }
 		    
 		    // Now come the hydrometeors.
-		    sprate[i] = 0;
-		    rprate[i] = 0;
-		    tcdc[i] = 0;
+        	cloudy_box_counter = 0;
 		    for (int k = 0; k < NO_OF_CONDENSED_TRACERS; ++k)
 		    {
 		        for (int l = 0; l < NO_OF_LAYERS; ++l)
 		        {
-		            if (state_write_out -> tracer_densities[k*NO_OF_SCALARS + l*NO_OF_SCALARS_H + i] > 0)
-		                tcdc[i] = 100*1;
+		            if (state_write_out -> tracer_densities[k*NO_OF_SCALARS + l*NO_OF_SCALARS_H + i] > EPSILON_SECURITY)
+		            {
+		        		cloudy_box_counter += 1;
+	                }
 		        }
 		    }
+            tcdc[i] = 100*cloudy_box_counter/(NO_OF_CONDENSED_TRACERS*NO_OF_LAYERS);
+            // solid precipitation rate
+		    sprate[i] = 0;
 		    for (int k = 0; k < NO_OF_SOLID_TRACERS; ++k)
-		        sprate[i] += fmax(ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i], 0);
+		    {
+		        sprate[i] += ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+	        }
+	        if (sprate[i] < EPSILON_SECURITY)
+	        {
+	        	sprate[i] = 0;
+	        }
+	        // liquid precipitation rate
+		    rprate[i] = 0;
 		    for (int k = NO_OF_SOLID_TRACERS; k < NO_OF_CONDENSED_TRACERS; ++k)
-		        rprate[i] += fmax(ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i], 0);
+		    {
+		        rprate[i] += ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+	        }
+	        if (rprate[i] < EPSILON_SECURITY)
+	        {
+	        	rprate[i] = 0;
+	        }
 		}
 		
 		// 10 m wind diagnostics
@@ -832,7 +851,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     	(*rh)[i] = 100*rel_humidity(state_write_out -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i], state_write_out -> temperature_gas[i]);
     	(*pressure)[i] = (state_write_out -> tracer_densities[2*NO_OF_SCALARS + i]*R_V + state_write_out -> density_dry[i]*R_D)*state_write_out -> temperature_gas[i];
     }
-	
 	// Pressure level output.
 	int closest_layer_index, other_layer_index;
 	double closest_weight;
@@ -2083,7 +2101,7 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
     {
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
     	Scalar_field *pot_temp = malloc(sizeof(Scalar_field));
-		pot_temp_diagnostics(state_write_out, *pot_temp);
+		pot_temp_diagnostics_dry(state_write_out, *pot_temp);
     	Scalar_field *linear_entropy = malloc(sizeof(Scalar_field));
     	for (int i = 0; i < NO_OF_SCALARS; ++i)
     	{

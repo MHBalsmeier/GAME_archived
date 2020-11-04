@@ -29,8 +29,8 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	// Determining the speicific entropied of the dry air as well as of the water vapour.
-		diagnostics -> specific_entropy_dry[i] = state -> entropy_density_dry[i]/state -> density_dry[i];
-		diagnostics -> specific_entropy_vapour[i] = state -> tracer_entropy_densities[i]/(1e-8 + state -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i]);
+		diagnostics -> specific_entropy_dry[i] = state -> entropy_density_dry[i]/(EPSILON_SECURITY + state -> density_dry[i]);
+		diagnostics -> specific_entropy_vapour[i] = state -> tracer_entropy_densities[i]/(EPSILON_SECURITY + state -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i]);
 		// Determining the density of the gas phase.
 		rho_h = state -> density_dry[i] + state -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i];
 		// The second pressure gradient terms for dry air as well as water vapour.
@@ -80,7 +80,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	{
 		forcings -> pressure_gradient_acc[i] = 
 		old_hor_grad_weight*(-interpolation -> pressure_gradient_0_old_m[i] + interpolation -> pressure_gradient_1_old[i])
-		 + new_hor_grad_weight*(-diagnostics -> pressure_gradient_0_m[i] + diagnostics -> pressure_gradient_1_dry[i] + diagnostics -> pressure_gradient_1_vapour[i]);
+		+ new_hor_grad_weight*(-diagnostics -> pressure_gradient_0_m[i] + diagnostics -> pressure_gradient_1_dry[i] + diagnostics -> pressure_gradient_1_vapour[i]);
 	}
 	
 	// The pressure gradient has to get a deceleration factor in presence of condensates.

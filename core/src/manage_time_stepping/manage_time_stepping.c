@@ -21,6 +21,7 @@ int manage_time_stepping(State *state_old, State *state_new, Interpolate_info *i
 	for (int i = 0; i < 3; ++i)
 	{
 		// If tracers are on, phase transitions are only updated at the third step.
+		config_info -> phase_transitions_on = 0;
 		if (i == 2 && config_info -> tracers_on == 1)
 		{
 			config_info -> phase_transitions_on = 1;

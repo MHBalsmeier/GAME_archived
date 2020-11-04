@@ -408,25 +408,39 @@ int main(int argc, char *argv[])
         	t_rad_update += radiation_delta_t;
         }
         else
+        {
         	config_info -> rad_update = 0;
-            manage_time_stepping(state_old, state_new, interpolation, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
+    	}
+        manage_time_stepping(state_old, state_new, interpolation, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
 		if (write_out_dry_mass_integral == 1)
+        {
 			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, 0);
+    	}
 		if (write_out_entropy_integral == 1)
+        {
 			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, 1);
+    	}
 		if (write_out_energy_integral == 1)
+        {
 			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, 2);
+    	}
 		if (write_out_linearized_entropy_integral == 1)
+        {
 			write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, 3);
+    	}
 		time_step_counter += 1;
         if(t_0 + delta_t >= t_write && t_0 <= t_write)
+        {
             interpolation_t(state_old, state_new, state_write, t_0, t_0 + delta_t, t_write);
+    	}
         if (t_0 >= t_write - 300)
         {
         	if (wind_10_m_step_counter < min_no_of_output_steps)
         	{
 		    	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+       			{
 		    		wind_h_lowest_layer_array[wind_10_m_step_counter*NO_OF_VECTORS_H + i] = state_old -> velocity_gas[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i];
+		    	}
 		    	wind_10_m_step_counter += 1;
         	}
         }

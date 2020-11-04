@@ -17,6 +17,7 @@ int integrate_tracers(State *state_old, State *state_new, Interpolate_info *inte
     double total_density;
     double c_v_cond;
     int h_index, layer_index;
+    
 	/*
 	phase transitions are on only at the third RK step
 	only then, they are also updated
@@ -86,7 +87,7 @@ int integrate_tracers(State *state_old, State *state_new, Interpolate_info *inte
 		    }
         }
         
-        // Explicit entropy integration (only needs to be done for the gaseous tracers)
+        // explicit entropy integration (only needs to be done for the gaseous tracers)
         // Determining the entropy density of the tracer at hand.
         if (i >= NO_OF_CONDENSED_TRACERS)
         {
@@ -132,7 +133,7 @@ int integrate_tracers(State *state_old, State *state_new, Interpolate_info *inte
 	        divv_h(diffusion_info -> tracer_temperature_flux_density, diffusion_info -> tracer_temperature_flux_density_divv, grid);
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
-			    c_v_cond = ret_c_v_cond(i, 0, state_old -> tracer_density_temperatures[i*NO_OF_SCALARS + j]/state_old -> tracer_densities[i*NO_OF_SCALARS + j]);
+			    c_v_cond = ret_c_v_cond(i, 0, state_old -> tracer_density_temperatures[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + state_old -> tracer_densities[i*NO_OF_SCALARS + j]));
 			    total_density = state_old -> density_dry[j];
 			    for (int k = 0; k < NO_OF_TRACERS; ++k)
 			    {

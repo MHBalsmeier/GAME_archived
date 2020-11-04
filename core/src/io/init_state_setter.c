@@ -16,7 +16,8 @@ int set_init_data(char FILE_NAME[], State *init_state)
     double *density_dry = malloc(NO_OF_SCALARS*sizeof(double));
     double *temperature_gas = malloc(NO_OF_SCALARS*sizeof(double));
     double *wind = malloc(NO_OF_VECTORS*sizeof(double));
-    double *pot_temperature = malloc(NO_OF_SCALARS*sizeof(double));
+    double *pot_temperature_dry = malloc(NO_OF_SCALARS*sizeof(double));
+    double *pot_temperature_vapour = malloc(NO_OF_SCALARS*sizeof(double));
     double *water_vapour_density = malloc(NO_OF_SCALARS*sizeof(double));
     double *liquid_water_density = malloc(NO_OF_SCALARS*sizeof(double));
     double *solid_water_density = malloc(NO_OF_SCALARS*sizeof(double));
@@ -74,10 +75,10 @@ int set_init_data(char FILE_NAME[], State *init_state)
 	        init_state -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i] = water_vapour_density[i];
 		}
     }    
-	pot_temp_diagnostics(init_state, pot_temperature);
+	pot_temp_diagnostics_dry(init_state, pot_temperature_dry);
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-        init_state -> entropy_density_dry[i] = density_dry[i]*(C_D_P*log(pot_temperature[i]) + ENTROPY_CONSTANT_D);
+        init_state -> entropy_density_dry[i] = density_dry[i]*(C_D_P*log(pot_temperature_dry[i]) + ENTROPY_CONSTANT_D);
     }
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
@@ -85,14 +86,16 @@ int set_init_data(char FILE_NAME[], State *init_state)
     }
     if (NO_OF_TRACERS > 0)
     {
+		pot_temp_diagnostics_dry(init_state, pot_temperature_vapour);
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
-	        init_state -> tracer_entropy_densities[i] = init_state -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i]*(C_V_P*log(pot_temperature[i]) + ENTROPY_CONSTANT_V);
+	        init_state -> tracer_entropy_densities[i] = init_state -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i]*(C_V_P*log(pot_temperature_vapour[i]) + ENTROPY_CONSTANT_V);
 	        init_state -> tracer_density_temperatures[i] = solid_water_density[i]*solid_water_temperature[i];
 	        init_state -> tracer_density_temperatures[NO_OF_SCALARS + i] = liquid_water_density[i]*liquid_water_temperature[i];
 		}
     }
-    free(pot_temperature);
+    free(pot_temperature_dry);
+    free(pot_temperature_vapour);
     free(density_dry);
     free(wind);
     free(water_vapour_density);

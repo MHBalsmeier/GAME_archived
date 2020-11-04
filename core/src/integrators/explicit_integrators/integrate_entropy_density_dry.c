@@ -26,11 +26,13 @@ int integrate_entropy_density_dry(State *state_old, State *state_new, Interpolat
 	{
         total_density = state_old -> density_dry[i];
         for (k = 0; k < NO_OF_TRACERS; ++k)
+        {
             total_density += state_old -> tracer_densities[k*NO_OF_SCALARS + i];
+        }
         rho_h = state_old -> density_dry[i] + state_old -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i];
         state_tendency -> entropy_density_dry[i] =
         // convergence of adiabatic flux density
-         -forcings -> entropy_dry_flux_density_divv[i]
+        -forcings -> entropy_dry_flux_density_divv[i]
         // diabatic source terms, need to be divided by the temperature, source terms have SI unit W/m^3
         // The source terms which act on the whole air must get the prefactor (dry density)/(total air density). 
          + 1/state_old -> temperature_gas[i]*(state_old -> density_dry[i]/total_density*(

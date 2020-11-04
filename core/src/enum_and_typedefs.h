@@ -25,11 +25,8 @@ Github repository: https://github.com/MHBalsmeier/game
 // #define DELTA_C_V_P (C_V_P - C_D_P)
 #define DELTA_C_V_P 853.000000
 #define P_0 100000.0
+#define SECONDS_PER_HOUR 3600
 #define RHO_WATER 1024.0
-#define SECONDS_PER_MIN 60.0
-#define SECONDS_PER_HOUR 3600.0
-#define SECONDS_PER_DAY 86400.0
-#define SECONDS_PER_YEAR 31536000.0
 #define OMEGA (7.292115e-5)
 #define SEMIMAJOR 6378137.0
 #define SEMIMINOR 6356752.314
@@ -40,7 +37,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #define ENTROPY_CONSTANT_D 1566.752670
 // #define ENTROPY_CONSTANT_V (0.4*C_V_P*log(K_B/P_0*pow(M_V/N_A*K_B*exp(5.0/3)/(2*M_PI*H_BAR*H_BAR), 1.5)))
 #define ENTROPY_CONSTANT_V 2367.178359
-#define EPSILON_TRACERS 0.00001
+#define EPSILON_SECURITY (1e-10)
 #define FOOT 0.3048
 
 enum grid_integers {
