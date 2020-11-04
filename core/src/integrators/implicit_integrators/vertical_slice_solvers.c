@@ -211,13 +211,13 @@ int three_band_solver_ver_vel_adv(State *state_old, State *state_new, State *sta
 
 int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, double delta_t, Grid *grid)
 {
-	double delta_z, upper_weight, lower_weight, upper_volume, lower_volume, total_volume, damping_coeff, damping_coeff_max, damping_start_height, z_above_damping, damping_start_height_over_toa;
+	double delta_z, upper_weight, lower_weight, upper_volume, lower_volume, total_volume, damping_coeff, damping_coeff_max, damping_start_height, z_above_damping, damping_start_height_over_toa, c_h_v, c_h_p, R_h, density_d_value, density_v_value;
 	// This is for Klemp (2008).
 	get_damping_layer_properties(&damping_start_height_over_toa, &damping_coeff_max);
 	damping_start_height = damping_start_height_over_toa*grid -> z_vector[0];
 	int upper_index, lower_index;
 	int j;
-	#pragma omp parallel for private(upper_index, lower_index, delta_z, upper_weight, lower_weight, upper_volume, lower_volume, total_volume, damping_coeff, z_above_damping, j)
+	#pragma omp parallel for private(upper_index, lower_index, delta_z, upper_weight, lower_weight, upper_volume, lower_volume, total_volume, damping_coeff, z_above_damping, j, c_h_v, c_h_p, R_h, density_d_value, density_v_value)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// for meanings of these vectors look into the definition of the function thomas_algorithm
@@ -250,17 +250,23 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 		// filling up the original vectors
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
+			density_d_value = state_old -> density_dry[j*NO_OF_SCALARS_H + i];
+			density_v_value = state_old -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+			c_h_v = spec_heat_cap_diagnostics_v(density_d_value, density_v_value);
+			c_h_p = spec_heat_cap_diagnostics_p(density_d_value, density_v_value);
+			R_h = gas_constant_diagnostics(density_d_value, density_v_value);
+			
+			// determining the elements of a_vector
 			delta_z = grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i];
-			a_vector[2*j] = delta_t*C_D_V/C_D_P*C_D_P/delta_z - delta_t*C_D_V/C_D_P*0.5*vertical_entropy_gradient[j];
+			a_vector[2*j] = delta_t*c_h_v/c_h_p*c_h_p/delta_z - delta_t*c_h_v/c_h_p*0.5*vertical_entropy_gradient[j];
 			delta_z = grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 2)*NO_OF_VECTORS_PER_LAYER + i];
-			a_vector[2*j + 1] = delta_t*((R_D/C_D_V - 1)*state_old -> temperature_gas[i + (j + 1)*NO_OF_SCALARS_H] + temp_interface_values[j])/delta_z;
-		}
-		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
-		{
+			a_vector[2*j + 1] = delta_t*((R_h/c_h_v - 1)*state_old -> temperature_gas[i + (j + 1)*NO_OF_SCALARS_H] + temp_interface_values[j])/delta_z;
+			
+			// determining the elements of c_vector
 			delta_z = grid -> z_vector[j*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
-			c_vector[2*j] = -delta_t*((R_D/C_D_V - 1)*state_old -> temperature_gas[i + j*NO_OF_SCALARS_H] + temp_interface_values[j])/delta_z;
+			c_vector[2*j] = -delta_t*((R_h/c_h_v - 1)*state_old -> temperature_gas[i + j*NO_OF_SCALARS_H] + temp_interface_values[j])/delta_z;
 			delta_z = grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i];
-			c_vector[2*j + 1] = -delta_t*C_D_V/C_D_P*C_D_P/delta_z - delta_t*C_D_V/C_D_P*0.5*vertical_entropy_gradient[j];
+			c_vector[2*j + 1] = -delta_t*c_h_v/c_h_p*c_h_p/delta_z - delta_t*c_h_v/c_h_p*0.5*vertical_entropy_gradient[j];
 		}
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
@@ -279,9 +285,13 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 			// Klemp (2008) upper boundary layer
 			z_above_damping = grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - damping_start_height;
 			if (z_above_damping < 0)
+			{
 				damping_coeff = 0;
-			else 
+			}
+			else
+			{
 				damping_coeff = damping_coeff_max*pow(sin(0.5*M_PI*z_above_damping/(grid -> z_vector[0] - damping_start_height)), 2);
+			}
 			state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] = solution_vector[2*j + 1]/(1 + delta_t*damping_coeff);
 		}
 	}
@@ -349,7 +359,7 @@ int three_band_solver_ver_den_dry(State *state_old, State *state_new, State *sta
 int three_band_solver_ver_entropy_density_dry(State *state_old, State *state_new, State *state_tendency, double delta_t, Grid *grid)
 {
 	/*
-	Implicit vertical advection of the entropy of the gas phase (Euler).
+	Implicit vertical advection of the entropy of the dry gas phase (Euler).
 	procedure derived in https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
 	*/
 	double area;
@@ -404,6 +414,73 @@ int three_band_solver_ver_entropy_density_dry(State *state_old, State *state_new
 	return 0;
 }
 
+int three_band_solver_ver_entropy_density_gaseous_tracers(State *state_old, State *state_new, State *state_tendency, double delta_t, Grid *grid)
+{
+	/*
+	Implicit vertical advection of the entropy of the gaseous tracers (Euler).
+	procedure derived in https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
+	*/
+	double area;
+	int j, k;
+	#pragma omp parallel for private(area, j, k)
+	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+	{
+		// for meanings of these vectors look into the definition of the function thomas_algorithm
+		double a_vector[NO_OF_LAYERS - 1];
+		double b_vector[NO_OF_LAYERS];
+		double c_vector[NO_OF_LAYERS - 1];
+		double d_vector[NO_OF_LAYERS];
+		double c_prime_vector[NO_OF_LAYERS - 1];
+		double d_prime_vector[NO_OF_LAYERS];
+		double vertical_flux_vector[NO_OF_LAYERS - 1];
+		double solution_vector[NO_OF_LAYERS];
+		for (k = 0; k < NO_OF_GASEOUS_TRACERS; ++k)
+		{
+			// diagnozing the vertical flux
+			for (j = 0; j < NO_OF_LAYERS - 1; ++j)
+			{
+				vertical_flux_vector[j] = state_new -> velocity_gas[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
+				area = grid -> area[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
+				vertical_flux_vector[j] = area*vertical_flux_vector[j];
+			}
+			// filling up the original vectors
+			for (j = 0; j < NO_OF_LAYERS - 1; ++j)
+			{
+				a_vector[j] = delta_t/(2*grid -> volume[i + (j + 1)*NO_OF_SCALARS_H])*vertical_flux_vector[j];
+				c_vector[j] = -delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[j];
+			}
+			for (j = 0; j < NO_OF_LAYERS; ++j)
+			{
+				if (j == 0)
+				{
+					b_vector[j] = 1 - delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[0];
+				}
+				else if (j == NO_OF_LAYERS - 1)
+				{
+					b_vector[j] = 1 + delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[j - 1];
+				}
+				else
+				{
+					b_vector[j] = 1 + delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*(vertical_flux_vector[j - 1] - vertical_flux_vector[j]);
+				}
+				d_vector[j] = state_old -> tracer_entropy_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
+				+ delta_t*state_tendency -> tracer_entropy_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+			}
+			thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, NO_OF_LAYERS);
+			for (j = 0; j < NO_OF_LAYERS; ++j)
+			{
+				state_new -> tracer_entropy_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = solution_vector[j];
+				// limiter
+				if (state_new -> tracer_entropy_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] < 0)
+				{
+					state_new -> tracer_entropy_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = 0;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
 int three_band_solver_ver_tracers(State *state_old, State *state_new, State *state_tendency, double delta_t, Grid *grid)
 {
 	/*
@@ -424,7 +501,7 @@ int three_band_solver_ver_tracers(State *state_old, State *state_new, State *sta
 		double d_prime_vector[NO_OF_LAYERS];
 		double solution_vector[NO_OF_LAYERS];
 		double vertical_flux_vector[NO_OF_LAYERS];
-		for (k = 0; k < NO_OF_CONDENSATED_TRACERS; ++k)
+		for (k = 0; k < NO_OF_CONDENSED_TRACERS; ++k)
 		{
 			// determining the vertical flux
 			for (j = 0; j < NO_OF_LAYERS; ++j)
@@ -458,7 +535,9 @@ int three_band_solver_ver_tracers(State *state_old, State *state_new, State *sta
 				state_new -> tracer_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = solution_vector[j];
 				// limiter
 				if (state_new -> tracer_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] < 0)
+				{
 					state_new -> tracer_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = 0;
+				}
 			}
 			// tracer temperature densities
 			// diagnozing the vertical flux
@@ -493,7 +572,9 @@ int three_band_solver_ver_tracers(State *state_old, State *state_new, State *sta
 				state_new -> tracer_density_temperatures[j*NO_OF_SCALARS_H + i] = solution_vector[j];
 				// limiter
 				if (state_new -> tracer_density_temperatures[j*NO_OF_SCALARS_H + i] < 0)
+				{
 					state_new -> tracer_density_temperatures[j*NO_OF_SCALARS_H + i] = 0;
+				}
 			}
 		}
 		// water vaour
@@ -524,14 +605,17 @@ int three_band_solver_ver_tracers(State *state_old, State *state_new, State *sta
 			{
 				b_vector[j] = 1 + delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*(vertical_flux_vector[j - 1] - vertical_flux_vector[j]);
 			}
-			d_vector[j] = state_old -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] + delta_t*state_tendency -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+			d_vector[j] = state_old -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] + delta_t*state_tendency -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
 		}
 		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, NO_OF_LAYERS);
 		for (j = 0; j < NO_OF_LAYERS; ++j)
 		{
-			state_new -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = solution_vector[j];
-			if (state_new -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] < 0)
-				state_new -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = 0;
+			state_new -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = solution_vector[j];
+			// limiter
+			if (state_new -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] < 0)
+			{
+				state_new -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = 0;
+			}
 		}
 	}
 	return 0;

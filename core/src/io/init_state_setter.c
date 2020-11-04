@@ -64,15 +64,16 @@ int set_init_data(char FILE_NAME[], State *init_state)
     {
         init_state -> density_dry[i] = density_dry[i];
         init_state -> temperature_gas[i] = temperature_gas[i];
-        if (NO_OF_TRACERS > 0)
-        {
-            init_state -> tracer_densities[i] = solid_water_density[i];
-            init_state -> tracer_densities[NO_OF_SCALARS + i] = liquid_water_density[i];
-            init_state -> tracer_densities[2*NO_OF_SCALARS + i] = water_vapour_density[i];
-            init_state -> tracer_density_temperatures[i] = solid_water_density[i]*solid_water_temperature[i];
-            init_state -> tracer_density_temperatures[NO_OF_SCALARS + i] = liquid_water_density[i]*liquid_water_temperature[i];
-        }
     }
+    if (NO_OF_TRACERS > 0)
+    {
+		for (int i = 0; i < NO_OF_SCALARS; ++i)
+		{
+	        init_state -> tracer_densities[i] = solid_water_density[i];
+	        init_state -> tracer_densities[NO_OF_SCALARS + i] = liquid_water_density[i];
+	        init_state -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i] = water_vapour_density[i];
+		}
+    }    
 	pot_temp_diagnostics(init_state, pot_temperature);
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
@@ -81,6 +82,15 @@ int set_init_data(char FILE_NAME[], State *init_state)
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         init_state -> velocity_gas[i] = wind[i];
+    }
+    if (NO_OF_TRACERS > 0)
+    {
+		for (int i = 0; i < NO_OF_SCALARS; ++i)
+		{
+	        init_state -> tracer_entropy_densities[i] = init_state -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i]*(C_V_P*log(pot_temperature[i]) + ENTROPY_CONSTANT_V);
+	        init_state -> tracer_density_temperatures[i] = solid_water_density[i]*solid_water_temperature[i];
+	        init_state -> tracer_density_temperatures[NO_OF_SCALARS + i] = liquid_water_density[i]*liquid_water_temperature[i];
+		}
     }
     free(pot_temperature);
     free(density_dry);

@@ -123,7 +123,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    sprate[i] = 0;
 		    rprate[i] = 0;
 		    tcdc[i] = 0;
-		    for (int k = 0; k < NO_OF_CONDENSATED_TRACERS; ++k)
+		    for (int k = 0; k < NO_OF_CONDENSED_TRACERS; ++k)
 		    {
 		        for (int l = 0; l < NO_OF_LAYERS; ++l)
 		        {
@@ -133,7 +133,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    }
 		    for (int k = 0; k < NO_OF_SOLID_TRACERS; ++k)
 		        sprate[i] += fmax(ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i], 0);
-		    for (int k = NO_OF_SOLID_TRACERS; k < NO_OF_CONDENSATED_TRACERS; ++k)
+		    for (int k = NO_OF_SOLID_TRACERS; k < NO_OF_CONDENSED_TRACERS; ++k)
 		        rprate[i] += fmax(ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i], 0);
 		}
 		
@@ -829,7 +829,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     Scalar_field *pressure = calloc(1, sizeof(Scalar_field));
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-    	(*rh)[i] = 100*rel_humidity(state_write_out -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i], state_write_out -> temperature_gas[i]);
+    	(*rh)[i] = 100*rel_humidity(state_write_out -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i], state_write_out -> temperature_gas[i]);
     	(*pressure)[i] = (state_write_out -> tracer_densities[2*NO_OF_SCALARS + i]*R_V + state_write_out -> density_dry[i]*R_D)*state_write_out -> temperature_gas[i];
     }
 	

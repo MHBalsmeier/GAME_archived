@@ -21,15 +21,15 @@ int pot_temp_diagnostics(State *state, Scalar_field pot_temp)
 	/*
 	This is only needed for the output.
 	*/
-	double condensates_density_sum, density_d_micro_value, density_h_micro_value, density_v_micro_value, R_h;
-	#pragma omp parallel for private (condensates_density_sum, density_d_micro_value, density_h_micro_value, density_v_micro_value, R_h)
+	double condensates_density_sum, density_d_value, density_h_micro_value, density_v_value, R_h;
+	#pragma omp parallel for private (condensates_density_sum, density_d_value, density_h_micro_value, density_v_value, R_h)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	condensates_density_sum = calc_condensates_density_sum(i, state -> tracer_densities);
-    	density_d_micro_value = calc_micro_density(state -> density_dry[i], condensates_density_sum);
-    	density_v_micro_value = calc_micro_density(state -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i], condensates_density_sum);
-		R_h = gas_constant_diagnostics(density_d_micro_value, density_v_micro_value);
-    	density_h_micro_value = density_d_micro_value + density_v_micro_value;
+    	density_d_value = calc_micro_density(state -> density_dry[i], condensates_density_sum);
+    	density_v_value = calc_micro_density(state -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i], condensates_density_sum);
+		R_h = gas_constant_diagnostics(density_d_value, density_v_value);
+    	density_h_micro_value = density_d_value + density_v_value;
     	pot_temp[i] = state -> temperature_gas[i]*pow(P_0/(density_h_micro_value*R_h*state -> temperature_gas[i]), R_D/C_D_P);
 	}
     return 0;
@@ -37,21 +37,26 @@ int pot_temp_diagnostics(State *state, Scalar_field pot_temp)
 
 int temperature_diagnostics(State *state_old, State *state_new)
 {
-    double nominator, denominator, entropy_density_dry_0, entropy_density_dry_1, density_0, density_1, delta_density, delta_entropy_density, temperature_0, entropy_0, entropy_1;
-	#pragma omp parallel for private (nominator, denominator, entropy_density_dry_0, entropy_density_dry_1, density_0, density_1, delta_density, delta_entropy_density, temperature_0, entropy_0, entropy_1)
+    double nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_gas_0, density_gas_1, delta_density_gas, delta_entropy_density, temperature_0, specific_entropy_gas_0, specific_entropy_gas_1, c_h_v, c_h_p, R_h, density_d_value, density_v_value;
+	#pragma omp parallel for private (nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_gas_0, density_gas_1, delta_density_gas, delta_entropy_density, temperature_0, specific_entropy_gas_0, specific_entropy_gas_1, c_h_v, c_h_p, R_h, density_d_value, density_v_value)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-    	entropy_density_dry_0 = state_old -> entropy_density_dry[i];
-    	entropy_density_dry_1 = state_new -> entropy_density_dry[i];
-    	delta_entropy_density = entropy_density_dry_1 - entropy_density_dry_0;
-    	density_0 = state_old -> density_dry[i];
-    	density_1 = state_new -> density_dry[i];
-    	delta_density = density_1 - density_0;
+    	entropy_density_gas_0 = state_old -> entropy_density_dry[i] + state_old -> tracer_entropy_densities[i];
+    	entropy_density_gas_1 = state_new -> entropy_density_dry[i] + state_new -> tracer_entropy_densities[i];
+    	delta_entropy_density = entropy_density_gas_1 - entropy_density_gas_0;
+    	density_gas_0 = state_old -> density_dry[i] + state_old -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i];
+    	density_gas_1 = state_new -> density_dry[i] + state_new -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i];
+    	delta_density_gas = density_gas_1 - density_gas_0;
     	temperature_0 = state_old -> temperature_gas[i];
-    	entropy_0 = entropy_density_dry_0/density_0;
-    	entropy_1 = entropy_density_dry_1/density_1;
-    	nominator = C_D_V*density_0*temperature_0 + (R_D*temperature_0 - R_D/C_D_P*entropy_0*temperature_0)*delta_density + R_D/C_D_P*temperature_0*delta_entropy_density;
-    	denominator = C_D_V*density_0 + C_D_V/C_D_P*entropy_1*delta_density - C_D_V/C_D_P*delta_entropy_density;
+    	specific_entropy_gas_0 = entropy_density_gas_0/density_gas_0;
+    	specific_entropy_gas_1 = entropy_density_gas_1/density_gas_1;
+    	density_d_value = state_old -> density_dry[i];
+    	density_v_value = state_old -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i];
+    	c_h_v = spec_heat_cap_diagnostics_v(density_d_value, density_v_value);
+    	c_h_p = spec_heat_cap_diagnostics_p(density_d_value, density_v_value);
+    	R_h = gas_constant_diagnostics(density_d_value, density_v_value);
+    	nominator = c_h_v*density_gas_0*temperature_0 + (R_h*temperature_0 - R_h/c_h_p*specific_entropy_gas_0*temperature_0)*delta_density_gas + R_h/c_h_p*temperature_0*delta_entropy_density;
+    	denominator = c_h_v*density_gas_0 + c_h_v/c_h_p*specific_entropy_gas_1*delta_density_gas - c_h_v/c_h_p*delta_entropy_density;
     	state_new -> temperature_gas[i] = nominator/denominator;
     }
     return 0;
@@ -59,47 +64,53 @@ int temperature_diagnostics(State *state_old, State *state_new)
 
 int temperature_diagnostics_explicit(State *state_old, State *state_tendency, Diagnostics *diagnostics, double delta_t)
 {
-    double nominator, denominator, entropy_density_dry_0, entropy_density_dry_1, density_0, density_1, delta_density, delta_entropy_density, temperature_0, entropy_0, entropy_1;
-	#pragma omp parallel for private (nominator, denominator, entropy_density_dry_0, entropy_density_dry_1, density_0, density_1, delta_density, delta_entropy_density, temperature_0, entropy_0, entropy_1)
+    double nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_gas_0, density_gas_1, delta_density_gas, delta_entropy_density, temperature_0, specific_entropy_gas_0, specific_entropy_gas_1, c_h_v, c_h_p, R_h, density_d_value, density_v_value;
+	#pragma omp parallel for private (nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_gas_0, density_gas_1, delta_density_gas, delta_entropy_density, temperature_0, specific_entropy_gas_0, specific_entropy_gas_1, c_h_v, c_h_p, R_h, density_d_value, density_v_value)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-    	entropy_density_dry_0 = state_old -> entropy_density_dry[i];
-    	entropy_density_dry_1 = state_old -> entropy_density_dry[i] + delta_t*state_tendency -> entropy_density_dry[i];
-    	delta_entropy_density = entropy_density_dry_1 - entropy_density_dry_0;
-    	density_0 = state_old -> density_dry[i];
-    	density_1 = state_old -> density_dry[i] + delta_t*state_tendency -> density_dry[i];
-    	delta_density = density_1 - density_0;
+    	entropy_density_gas_0 = state_old -> entropy_density_dry[i] + state_old -> tracer_entropy_densities[i];
+    	entropy_density_gas_1 = entropy_density_gas_0 + delta_t*(state_tendency -> entropy_density_dry[i] + state_tendency -> tracer_entropy_densities[i]);
+    	delta_entropy_density = entropy_density_gas_1 - entropy_density_gas_0;
+    	density_gas_0 = state_old -> density_dry[i] + state_old -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i];
+    	density_gas_1 = density_gas_0 + delta_t*(state_tendency -> density_dry[i] + state_tendency -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i]);
+    	delta_density_gas = density_gas_1 - density_gas_0;
     	temperature_0 = state_old -> temperature_gas[i];
-    	entropy_0 = entropy_density_dry_0/density_0;
-    	entropy_1 = entropy_density_dry_1/density_1;
-    	nominator = C_D_V*density_0*temperature_0 + (R_D*temperature_0 - R_D/C_D_P*entropy_0*temperature_0)*delta_density + R_D/C_D_P*temperature_0*delta_entropy_density;
-    	denominator = C_D_V*density_0 + C_D_V/C_D_P*entropy_1*delta_density - C_D_V/C_D_P*delta_entropy_density;
+    	specific_entropy_gas_0 = entropy_density_gas_0/density_gas_0;
+    	specific_entropy_gas_1 = entropy_density_gas_1/density_gas_1;
+    	density_d_value = R_D/C_D_P*state_old -> density_dry[i] + C_D_V/C_D_P*(state_old -> density_dry[i] + delta_t*state_tendency -> density_dry[i]);
+    	density_v_value = R_D/C_D_P*state_old -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i]
+    	+ C_D_V/C_D_P*(state_old -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i] + delta_t*state_tendency -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i]);
+    	c_h_v = spec_heat_cap_diagnostics_v(density_d_value, density_v_value);
+    	c_h_p = spec_heat_cap_diagnostics_p(density_d_value, density_v_value);
+    	R_h = gas_constant_diagnostics(density_d_value, density_v_value);
+    	nominator = c_h_v*density_gas_0*temperature_0 + (R_h*temperature_0 - R_h/c_h_p*specific_entropy_gas_0*temperature_0)*delta_density_gas + R_h/c_h_p*temperature_0*delta_entropy_density;
+    	denominator = c_h_v*density_gas_0 + c_h_v/c_h_p*specific_entropy_gas_1*delta_density_gas - c_h_v/c_h_p*delta_entropy_density;
     	diagnostics -> temperature_gas_explicit[i] = nominator/denominator;
     }
     return 0;
 }
 
-double spec_heat_cap_diagnostics_p(double density_d_micro_value, double density_v_micro_value)
+double spec_heat_cap_diagnostics_p(double density_d_value, double density_v_value)
 {
-	double result = (density_d_micro_value*C_D_P + density_v_micro_value*C_V_P)/(density_d_micro_value + density_v_micro_value);
+	double result = (density_d_value*C_D_P + density_v_value*C_V_P)/(density_d_value + density_v_value);
 	return result;
 }
 
-double spec_heat_cap_diagnostics_v(double density_d_micro_value, double density_v_micro_value)
+double spec_heat_cap_diagnostics_v(double density_d_value, double density_v_value)
 {
-	double result = (density_d_micro_value*C_D_V + density_v_micro_value*C_V_V)/(density_d_micro_value + density_v_micro_value);
+	double result = (density_d_value*C_D_V + density_v_value*C_V_V)/(density_d_value + density_v_value);
 	return result;
 }
 
-double gas_constant_diagnostics(double density_d_micro_value, double density_v_micro_value)
+double gas_constant_diagnostics(double density_d_value, double density_v_value)
 {
-	double result = R_D*(1 - density_v_micro_value/(density_d_micro_value + density_v_micro_value) + density_v_micro_value/(density_d_micro_value + density_v_micro_value)*M_D/M_V);
+	double result = R_D*(1 - density_v_value/(density_d_value + density_v_value) + density_v_value/(density_d_value + density_v_value)*M_D/M_V);
 	return result;
 }
 
-double entropy_constant_diagnostics(double density_d_micro_value, double density_v_micro_value)
+double entropy_constant_diagnostics(double density_d_value, double density_v_value)
 {
-	double result = (density_d_micro_value*ENTROPY_CONSTANT_D + density_v_micro_value*ENTROPY_CONSTANT_V)/(density_d_micro_value + density_v_micro_value);
+	double result = (density_d_value*ENTROPY_CONSTANT_D + density_v_value*ENTROPY_CONSTANT_V)/(density_d_value + density_v_value);
 	return result;
 }
 
@@ -130,9 +141,9 @@ double calc_condensates_density_sum(int scalar_gridpoint_index, Tracer_densities
 	This is only needed for calculating the "micro densities".
 	*/
 	double result = 0;
-	for (int i = 0; i < NO_OF_CONDENSATED_TRACERS; ++i)
+	for (int i = 0; i < NO_OF_CONDENSED_TRACERS; ++i)
 		result += tracer_densities[i*NO_OF_SCALARS + scalar_gridpoint_index];
-	if (result < -NO_OF_CONDENSATED_TRACERS*EPSILON_TRACERS)
+	if (result < -NO_OF_CONDENSED_TRACERS*EPSILON_TRACERS)
 	{
 		printf("Error: condensates_density_sum negative.\n");
 		printf("Aborting.\n");

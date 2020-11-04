@@ -70,8 +70,8 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 	    {
 			temp_diffusion_coeff_para_ratio_v = 0;
     	}
-		rho_h = state -> density_dry[i] + state -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];
-		c_h_v = spec_heat_cap_diagnostics_v(state -> density_dry[i], state -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i]);
+		rho_h = state -> density_dry[i] + state -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i];
+		c_h_v = spec_heat_cap_diagnostics_v(state -> density_dry[i], state -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i]);
 	    temp_diffusion_coeff_numerical_h[i] = temp_diffusion_coeff_para_ratio_h*rho_h*c_h_v*temp_diffusion_coeff;
 	    temp_diffusion_coeff_numerical_v[i] = temp_diffusion_coeff_para_ratio_v*rho_h*c_h_v*temp_diffusion_coeff;
 	}

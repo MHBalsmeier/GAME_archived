@@ -14,4 +14,5 @@ int three_band_solver_ver_sound_waves(State *, State *, State *, Diagnostics *, 
 int three_band_solver_ver_vel_adv(State *, State *, State *, double, Grid *);
 int three_band_solver_ver_den_dry(State *, State *, State *, double, Grid *);
 int three_band_solver_ver_entropy_density_dry(State *, State *, State *, double, Grid *);
+int three_band_solver_ver_entropy_density_gaseous_tracers(State *, State *, State *, double, Grid *);
 int three_band_solver_ver_tracers(State *, State *, State *, double, Grid *);

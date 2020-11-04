@@ -27,7 +27,7 @@ int integrate_entropy_density_dry(State *state_old, State *state_new, Interpolat
         total_density = state_old -> density_dry[i];
         for (k = 0; k < NO_OF_TRACERS; ++k)
             total_density += state_old -> tracer_densities[k*NO_OF_SCALARS + i];
-        rho_h = state_old -> density_dry[i] + state_old -> tracer_densities[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i];
+        rho_h = state_old -> density_dry[i] + state_old -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i];
         state_tendency -> entropy_density_dry[i] =
         // convergence of adiabatic flux density
          -forcings -> entropy_dry_flux_density_divv[i]
@@ -41,7 +41,7 @@ int integrate_entropy_density_dry(State *state_old, State *state_new, Interpolat
          // This is the source term from radiative forcing.
          + radiation_tendency[i])
          // This is the power density arising from the phase transitions. They act on the gas phase and thus must get the prefactor (dry density)/(moist air density).
-         + state_old -> density_dry[i]/rho_h*config_info -> phase_transitions_on*diffusion_info -> tracer_heat_source_rates[NO_OF_CONDENSATED_TRACERS*NO_OF_SCALARS + i]);
+         + state_old -> density_dry[i]/rho_h*config_info -> phase_transitions_on*diffusion_info -> tracer_heat_source_rates[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i]);
 	}
 	return 0;
 }
