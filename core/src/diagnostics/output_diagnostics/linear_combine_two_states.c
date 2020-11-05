@@ -23,6 +23,10 @@ int linear_combine_two_states(State *state_0, State *state_1, State *state_out, 
         {
             state_out -> tracer_density_temperatures[j*NO_OF_SCALARS + i] = coeff_0*state_0 -> tracer_density_temperatures[j*NO_OF_SCALARS + i] + coeff_1*state_1 -> tracer_density_temperatures[j*NO_OF_SCALARS + i];
         }
+        for (int j = 0; j < NO_OF_GASEOUS_TRACERS; ++j)
+        {
+            state_out -> tracer_entropy_densities[j*NO_OF_SCALARS + i] = coeff_0*state_0 -> tracer_entropy_densities[j*NO_OF_SCALARS + i] + coeff_1*state_1 -> tracer_entropy_densities[j*NO_OF_SCALARS + i];
+        }
     }
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {

@@ -9,6 +9,8 @@ Github repository: https://github.com/MHBalsmeier/game
 #define K_B (1.380649e-23)
 #define M_D 0.028964420
 #define M_V 0.0180152
+#define MEAN_MASS_D (M_D/N_A)
+#define MEAN_MASS_V (M_V/N_A)
 #define EPSILON (M_V/M_D)
 // #define R (N_A*K_B)
 #define R 8.314463
@@ -33,10 +35,8 @@ Github repository: https://github.com/MHBalsmeier/game
 // #define RADIUS pow(SEMIMAJOR*SEMIMAJOR*SEMIMINOR, 1.0/3.0)
 #define RADIUS 6371000.789927
 #define H_BAR (1.054571817e-34)
-// #define ENTROPY_CONSTANT_D (0.4*C_D_P*log(K_B/P_0*pow(M_D/N_A*K_B*exp(5.0/3)/(2*M_PI*H_BAR*H_BAR), 1.5)))
-#define ENTROPY_CONSTANT_D 1566.752670
-// #define ENTROPY_CONSTANT_V (0.4*C_V_P*log(K_B/P_0*pow(M_V/N_A*K_B*exp(5.0/3)/(2*M_PI*H_BAR*H_BAR), 1.5)))
-#define ENTROPY_CONSTANT_V 2367.178359
+#define ENTROPY_CONSTANT_D ((MEAN_MASS_D*exp(5.0/3))/(3*M_PI*H_BAR*H_BAR))
+#define ENTROPY_CONSTANT_V ((MEAN_MASS_V*exp(5.0/3))/(3*M_PI*H_BAR*H_BAR))
 #define EPSILON_SECURITY (1e-10)
 #define FOOT 0.3048
 
