@@ -35,7 +35,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		rho_h = state -> density_dry[i] + state -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i];
 		// The second pressure gradient terms for dry air as well as water vapour.
 		diagnostics -> pressure_gradient_1_dry_prefactor[i] = state -> temperature_gas[i]*state -> density_dry[i]/rho_h;
-		diagnostics -> pressure_gradient_1_vapour_prefactor[i] = state -> temperature_gas[i]*state -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i]/rho_h;
+		diagnostics -> pressure_gradient_1_vapour_prefactor[i] = 0*state -> temperature_gas[i]*state -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i]/rho_h;
 	}
 	
 	// Before the calculation of the new pressure gradient, the old value needs to be stored for extrapolation.

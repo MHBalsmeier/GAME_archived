@@ -55,14 +55,11 @@ int temperature_diagnostics(State *state_old, State *state_new)
     	temperature_0 = state_old -> temperature_gas[i];
     	
 		// Determining the thermodynamic properties of the gas phase.
-    	density_d_value = R_D/C_D_P*state_old -> density_dry[i] + C_D_V/C_D_P*state_new -> density_dry[i];
-    	density_v_value = R_D/C_D_P*state_old -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i] + C_D_V/C_D_P*state_new -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i];
+    	density_d_value = state_old -> density_dry[i];
+    	density_v_value = state_old -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i];
     	c_h_v = spec_heat_cap_diagnostics_v(density_d_value, density_v_value);
     	c_h_p = spec_heat_cap_diagnostics_p(density_d_value, density_v_value);
     	R_h = gas_constant_diagnostics(density_d_value, density_v_value);
-    	c_h_v = C_D_V;
-    	c_h_p = C_D_P;
-    	R_h = R_D;
     	
     	nominator = c_h_v*density_gas_0*temperature_0 + (R_h*temperature_0 - R_h/c_h_p*specific_entropy_gas_0*temperature_0)*delta_density_gas + R_h/c_h_p*temperature_0*delta_entropy_density;
     	denominator = c_h_v*density_gas_0 + c_h_v/c_h_p*specific_entropy_gas_1*delta_density_gas - c_h_v/c_h_p*delta_entropy_density;
@@ -99,9 +96,6 @@ int temperature_diagnostics_explicit(State *state_old, State *state_tendency, Di
     	c_h_v = spec_heat_cap_diagnostics_v(density_d_value, density_v_value);
     	c_h_p = spec_heat_cap_diagnostics_p(density_d_value, density_v_value);
     	R_h = gas_constant_diagnostics(density_d_value, density_v_value);
-    	c_h_v = C_D_V;
-    	c_h_p = C_D_P;
-    	R_h = R_D;
     	
     	nominator = c_h_v*density_gas_0*temperature_0 + (R_h*temperature_0 - R_h/c_h_p*specific_entropy_gas_0*temperature_0)*delta_density_gas + R_h/c_h_p*temperature_0*delta_entropy_density;
     	denominator = c_h_v*density_gas_0 + c_h_v/c_h_p*specific_entropy_gas_1*delta_density_gas - c_h_v/c_h_p*delta_entropy_density;
