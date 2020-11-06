@@ -5,11 +5,7 @@ Github repository: https://github.com/MHBalsmeier/game
 
 #include <math.h>
 // some fundamental constants
-#define N_A (6.0221409e23)
 #define K_B (1.380649e-23)
-#define M_D 0.028964420
-#define M_V 0.0180152
-#define EPSILON 0.621977 // (M_V/M_D)
 #define P_0 100000.0
 #define SECONDS_PER_HOUR 3600
 #define RHO_WATER 1024.0

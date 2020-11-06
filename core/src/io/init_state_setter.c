@@ -104,7 +104,7 @@ int set_init_data(char FILE_NAME[], State *init_state)
 		init_state -> entropy_densities[i] = 0;
 		init_state -> entropy_densities[NO_OF_SCALARS + i] = 0;
 		
-		particle_density = init_state -> entropy_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]/mean_particle_masses_gas(0);
+		particle_density = init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]/mean_particle_masses_gas(0);
 		// This is the Sackur-Tetrode equation.
 	    init_state -> entropy_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] =
 	    K_B*particle_density*3.0/2*log(entropy_constants_gas(0))

@@ -4,6 +4,7 @@ Github repository: https://github.com/MHBalsmeier/game
 */
 
 #include "../enum_and_typedefs.h"
+#include "../settings.h"
 #include "diagnostics.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -15,7 +16,7 @@ int calc_mass_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 {
 	if (config_info -> mass_diff_h == 1 || config_info -> mass_diff_v == 1)
 	{
-		double mean_particle_mass = M_D/N_A;
+		double mean_particle_mass = mean_particle_masses_gas(0);
 		double eff_particle_radius = 130e-12;
 		double mass_diffusion_coeff, mass_diffusion_coeff_para_ratio_h, mass_diffusion_coeff_para_ratio_v;
 		#pragma omp parallel for private (mass_diffusion_coeff, mass_diffusion_coeff_para_ratio_h, mass_diffusion_coeff_para_ratio_v)
@@ -47,7 +48,7 @@ int calc_mass_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 
 int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Scalar_field temp_diffusion_coeff_numerical_h, Scalar_field temp_diffusion_coeff_numerical_v)
 {
-	double mean_particle_mass = M_D/N_A;
+	double mean_particle_mass = mean_particle_masses_gas(0);
 	double eff_particle_radius = 130e-12;
 	double temp_diffusion_coeff, temp_diffusion_coeff_para_ratio_h, temp_diffusion_coeff_para_ratio_v, rho_g, c_g_v;
 	#pragma omp parallel for private (temp_diffusion_coeff, temp_diffusion_coeff_para_ratio_h, temp_diffusion_coeff_para_ratio_v)
@@ -80,7 +81,7 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 
 int calc_divv_term_viscosity_eff(State *state, Config_info *config_info, Scalar_field divv_term_viscosity_eff)
 {
-	double mean_particle_mass = M_D/N_A;
+	double mean_particle_mass = mean_particle_masses_gas(0);
 	double eff_particle_radius = 130e-12;
 	double divv_term_viscosity_eff_value;
 	#pragma omp parallel for private(divv_term_viscosity_eff_value)
@@ -94,7 +95,7 @@ int calc_divv_term_viscosity_eff(State *state, Config_info *config_info, Scalar_
 
 int calc_curl_term_viscosity_eff(State *state, Config_info *config_info, Scalar_field curl_term_viscosity_eff)
 {
-	double mean_particle_mass = M_D/N_A;
+	double mean_particle_mass = mean_particle_masses_gas(0);
 	double eff_particle_radius = 130e-12;
 	double curl_term_viscosity_eff_value;
 	#pragma omp parallel for private(curl_term_viscosity_eff_value)

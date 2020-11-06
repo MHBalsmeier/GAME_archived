@@ -92,7 +92,7 @@ int temperature_diagnostics_explicit(State *state_old, State *state_tendency, Di
     	for (int j = 0; j < NO_OF_GASEOUS_CONSTITUENTS; ++j)
     	{
 			entropy_density_gas_0 = state_old -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
-			entropy_density_gas_1 = density_gas_0 + delta_t*state_tendency -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
+			entropy_density_gas_1 = entropy_density_gas_0 + delta_t*state_tendency -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
     	}
     	delta_entropy_density = entropy_density_gas_1 - entropy_density_gas_0;
     	
@@ -117,11 +117,7 @@ int temperature_diagnostics_explicit(State *state_old, State *state_tendency, Di
 
 double spec_heat_cap_diagnostics_v(State *state, int grid_point_index)
 {
-	double rho_g = 0;
-	for (int i = 0; i < NO_OF_GASEOUS_CONSTITUENTS; ++i)
-	{
-		rho_g += state -> mass_densities[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index];
-	}
+	double rho_g = density_gas(state, grid_point_index);
 	
 	double result = 0;
 	for (int i = 0; i < NO_OF_GASEOUS_CONSTITUENTS; ++i)
@@ -133,11 +129,7 @@ double spec_heat_cap_diagnostics_v(State *state, int grid_point_index)
 
 double spec_heat_cap_diagnostics_p(State *state, int grid_point_index)
 {
-	double rho_g = 0;
-	for (int i = 0; i < NO_OF_GASEOUS_CONSTITUENTS; ++i)
-	{
-		rho_g += state -> mass_densities[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index];
-	}
+	double rho_g = density_gas(state, grid_point_index);
 	
 	double result = 0;
 	for (int i = 0; i < NO_OF_GASEOUS_CONSTITUENTS; ++i)
@@ -149,11 +141,7 @@ double spec_heat_cap_diagnostics_p(State *state, int grid_point_index)
 
 double gas_constant_diagnostics(State *state, int grid_point_index)
 {
-	double rho_g = 0;
-	for (int i = 0; i < NO_OF_GASEOUS_CONSTITUENTS; ++i)
-	{
-		rho_g += state -> mass_densities[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index];
-	}
+	double rho_g = density_gas(state, grid_point_index);
 	
 	double result = 0;
 	for (int i = 0; i < NO_OF_GASEOUS_CONSTITUENTS; ++i)
