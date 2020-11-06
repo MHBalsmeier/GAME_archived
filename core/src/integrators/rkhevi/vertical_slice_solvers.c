@@ -30,19 +30,12 @@ int three_band_solver_ver_vel_adv(State *state_old, State *state_new, State *sta
 
 int three_band_solver_gen_densitites(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, Grid *grid)
 {
-	
 	// Vertical constituent advection with 3-band matrices.
 	int layer_index, h_index;
-	double density_gas;
-	// Mass densities.
+	double density_gas_value;
 	for (int k = 0; k < NO_OF_CONSTITUENTS; ++k)
 	{
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_SCALARS; ++i)
-		{
-			diagnostics -> density_gen[i] = state_old -> mass_densities[k*NO_OF_SCALARS + i];
-			diagnostics -> density_gen_explicit_tendency[i] = state_tendency -> mass_densities[k*NO_OF_SCALARS + i];
-		}
+		// The velocity field.
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
 		{
@@ -53,38 +46,36 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 			{
 				if (layer_index == 0)
 				{
-					for (int j = 0; j < NO_OF_GASEOUS_CONSTITUENTS; ++j)
-					{
-						density_gas += state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + h_index];
-					}
+					density_gas_value = density_gas(state_old, layer_index*NO_OF_SCALARS_H + h_index);
 				}
 				else if (layer_index == NO_OF_LAYERS)
 				{
-					for (int j = 0; j < NO_OF_GASEOUS_CONSTITUENTS; ++j)
-					{
-						density_gas += state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + (layer_index - 1)*NO_OF_SCALARS_H + h_index];
-					}
+					density_gas_value = density_gas(state_old, (layer_index - 1)*NO_OF_SCALARS_H + h_index);
 				}
 				else
 				{
-					for (int j = 0; j < NO_OF_GASEOUS_CONSTITUENTS; ++j)
-					{
-						density_gas += 0.5*(state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + (layer_index - 1)*NO_OF_SCALARS_H + h_index]
-						+ state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + h_index]);
-					}
+					density_gas_value = 0.5*(density_gas(state_old, (layer_index - 1)*NO_OF_SCALARS_H + h_index) + density_gas(state_old, layer_index*NO_OF_SCALARS_H + h_index));
 				}
 				
 				// The solid case.
 				if (k < NO_OF_SOLID_CONSTITUENTS)
 				{
-					diagnostics -> velocity_gen[i] -= ret_sink_velocity(0, 0.001, density_gas);
+					diagnostics -> velocity_gen[i] -= ret_sink_velocity(0, 0.001, density_gas_value);
 				}
 				// The liquid case.
 				else
 				{
-					diagnostics -> velocity_gen[i] -= ret_sink_velocity(1, 0.001, density_gas);
+					diagnostics -> velocity_gen[i] -= ret_sink_velocity(1, 0.001, density_gas_value);
 				}
 			}
+		}
+		
+		// Mass densities.
+		#pragma omp parallel for
+		for (int i = 0; i < NO_OF_SCALARS; ++i)
+		{
+			diagnostics -> density_gen[i] = state_old -> mass_densities[k*NO_OF_SCALARS + i];
+			diagnostics -> density_gen_explicit_tendency[i] = state_tendency -> mass_densities[k*NO_OF_SCALARS + i];
 		}
 		three_band_solver_ver_gen_density(diagnostics, delta_t, grid);
 		#pragma omp parallel for
@@ -92,27 +83,13 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 		{
 			state_new -> mass_densities[k*NO_OF_SCALARS + i] = diagnostics -> density_gen[i];
 		}
-	}
-	
-	// Entropy densities.
-	for (int k = 0; k < NO_OF_CONSTITUENTS; ++k)
-	{
+		
+		// Entropy densities.
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
 			diagnostics -> density_gen[i] = state_old -> entropy_densities[k*NO_OF_SCALARS + i];
 			diagnostics -> density_gen_explicit_tendency[i] = state_tendency -> entropy_densities[k*NO_OF_SCALARS + i];
-		}
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_VECTORS; ++i)
-		{
-			layer_index = i/NO_OF_VECTORS_PER_LAYER;
-			h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-			diagnostics -> velocity_gen[i] = state_new -> velocity_gas[i];
-			if (h_index < NO_OF_SCALARS_H && k < NO_OF_CONDENSED_CONSTITUENTS)
-			{
-				diagnostics -> velocity_gen[i] -= ret_sink_velocity(k, 0, 0.001);
-			}
 		}
 		three_band_solver_ver_gen_density(diagnostics, delta_t, grid);
 		#pragma omp parallel for
@@ -120,37 +97,25 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 		{
 			state_new -> entropy_densities[k*NO_OF_SCALARS + i] = diagnostics -> density_gen[i];
 		}
-	}
-			
-	// constituent temperature densities
-	for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS; ++k)
-	{
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_SCALARS; ++i)
-		{
-			diagnostics -> density_gen[i] = state_old -> condensed_density_temperatures[k*NO_OF_SCALARS + i];
-			diagnostics -> density_gen_explicit_tendency[i] = state_tendency -> condensed_density_temperatures[k*NO_OF_SCALARS + i];
-		}
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_VECTORS; ++i)
-		{
-			layer_index = i/NO_OF_VECTORS_PER_LAYER;
-			h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-			diagnostics -> velocity_gen[i] = state_new -> velocity_gas[i];
-			if (h_index < NO_OF_SCALARS_H)
+		
+		// Internal energy densities.
+		if (k < NO_OF_CONDENSED_CONSTITUENTS)
+		{	
+			#pragma omp parallel for
+			for (int i = 0; i < NO_OF_SCALARS; ++i)
 			{
-				diagnostics -> velocity_gen[i] -= ret_sink_velocity(k, 0, 0.001);
+				diagnostics -> density_gen[i] = state_old -> condensed_density_temperatures[k*NO_OF_SCALARS + i];
+				diagnostics -> density_gen_explicit_tendency[i] = state_tendency -> condensed_density_temperatures[k*NO_OF_SCALARS + i];
 			}
-		}
-		three_band_solver_ver_gen_density(diagnostics, delta_t, grid);
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_SCALARS; ++i)
-		{
-			state_new -> condensed_density_temperatures[k*NO_OF_SCALARS + i] = diagnostics -> density_gen[i];
+			three_band_solver_ver_gen_density(diagnostics, delta_t, grid);
+			#pragma omp parallel for
+			for (int i = 0; i < NO_OF_SCALARS; ++i)
+			{
+				state_new -> condensed_density_temperatures[k*NO_OF_SCALARS + i] = diagnostics -> density_gen[i];
+			}
 		}
 	}
 	
-	// Internal energy densities.
 	return 0;
 }	
 
