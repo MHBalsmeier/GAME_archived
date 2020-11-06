@@ -36,6 +36,7 @@ const double SCALE_HEIGHT = 8e3;
 double calc_std_dev(double [], int);
 int get_pressure_on_flight_levels(double [], double []);
 double get_pressure_at_altitude_standard(double);
+int global_scalar_integrator(Scalar_field, Grid *, double *);
 
 int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Io_config *io_config)
 {
@@ -81,14 +82,18 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		{
 			// Now the aim is to determine the value of the MSLP.
 		    temp_lowest_layer = state_write_out -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
-		    pressure_value = state_write_out -> density_dry[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]*R_D*temp_lowest_layer + state_write_out -> tracer_densities[2*NO_OF_SCALARS + i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]*R_V*temp_lowest_layer;
+		    pressure_value = density_gas(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i)
+		    *gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i)
+		    *temp_lowest_layer;
 		    temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
-		    mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]/(R_D*standard_vert_lapse_rate));
+		    mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]/
+		    (gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i)*standard_vert_lapse_rate));
 		    mslp[i] = pressure_value/mslp_factor;
 		    
 			// Now the aim is to determine the value of the surface pressure.
 			temp_surface = temp_lowest_layer + standard_vert_lapse_rate*(grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i]);
-		    surface_p_factor = pow(1 - (temp_surface - temp_lowest_layer)/temp_surface, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]/(R_D*standard_vert_lapse_rate));
+		    surface_p_factor = pow(1 - (temp_surface - temp_lowest_layer)/temp_surface, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]/
+		    (gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i)*standard_vert_lapse_rate));
 			surface_p[i] = pressure_value/surface_p_factor;
 			
 			// Now the aim is to calculate the 2 m temperature.
@@ -97,19 +102,19 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    temp_lower = temp_lowest_layer;
 		    temperature_gradient = (temp_upper - temp_lower)/(grid -> z_scalar[i + (NO_OF_LAYERS - 2)*NO_OF_SCALARS_H] - grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]);
 		    
-		    // Finally the temperature in 2 m height AGL can bo obtained via linear extrapolation.
+		    // Finally the temperature in 2 m height AGL can be obtained via linear extrapolation.
 		    t2[i] = temp_lowest_layer + delta_z_temp*temperature_gradient;
 		    z_height = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i];
 		    cape[i] = 0;
-		    density_v = state_write_out -> tracer_densities[2*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
-		    density_h = state_write_out -> density_dry[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H] + state_write_out -> tracer_densities[2*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		    density_v = state_write_out -> mass_densities[3*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		    density_h = density_gas(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i);
 		    theta_v_prime = (*pot_temperature)[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]*(1 + density_v/density_h*(1/EPSILON - 1));
 		    layer_index = NO_OF_LAYERS - 1;
 		    cape[i] = 0;
 		    while (z_height < z_tropopause)
 		    {
-				density_v = state_write_out -> tracer_densities[2*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
-				density_h = state_write_out -> density_dry[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H] + state_write_out -> tracer_densities[2*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+				density_v = state_write_out -> mass_densities[3*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + i];
+				density_h = density_gas(state_write_out, layer_index*NO_OF_SCALARS_H + i);
 		        theta_v = (*pot_temperature)[layer_index*NO_OF_SCALARS_H + i]*(1 + density_v/density_h*(1/EPSILON - 1));
 		    	delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + i];
 		    	z_height += delta_z;
@@ -123,22 +128,23 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    
 		    // Now come the hydrometeors.
         	cloudy_box_counter = 0;
-		    for (int k = 0; k < NO_OF_CONDENSED_TRACERS; ++k)
+		    for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS; ++k)
 		    {
 		        for (int l = 0; l < NO_OF_LAYERS; ++l)
 		        {
-		            if (state_write_out -> tracer_densities[k*NO_OF_SCALARS + l*NO_OF_SCALARS_H + i] > EPSILON_SECURITY)
+		            if (state_write_out -> mass_densities[k*NO_OF_SCALARS + l*NO_OF_SCALARS_H + i] > EPSILON_SECURITY)
 		            {
 		        		cloudy_box_counter += 1;
 	                }
 		        }
 		    }
-            tcdc[i] = 100*cloudy_box_counter/(NO_OF_CONDENSED_TRACERS*NO_OF_LAYERS);
+            tcdc[i] = 100*cloudy_box_counter/(NO_OF_CONDENSED_CONSTITUENTS*NO_OF_LAYERS);
             // solid precipitation rate
 		    sprate[i] = 0;
-		    for (int k = 0; k < NO_OF_SOLID_TRACERS; ++k)
+		    for (int k = 0; k < NO_OF_SOLID_CONSTITUENTS; ++k)
 		    {
-		        sprate[i] += ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		        sprate[i] += ret_sink_velocity(0, 0.001, density_gas(state_write_out, (layer_index - 1)*NO_OF_SCALARS_H + i))
+		        *state_write_out -> mass_densities[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
 	        if (sprate[i] < EPSILON_SECURITY)
 	        {
@@ -146,9 +152,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	        }
 	        // liquid precipitation rate
 		    rprate[i] = 0;
-		    for (int k = NO_OF_SOLID_TRACERS; k < NO_OF_CONDENSED_TRACERS; ++k)
+		    for (int k = NO_OF_SOLID_CONSTITUENTS; k < NO_OF_CONDENSED_CONSTITUENTS; ++k)
 		    {
-		        rprate[i] += ret_sink_velocity(k, 0, 0.001)*state_write_out -> tracer_densities[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		        rprate[i] += ret_sink_velocity(1, 0.001, density_gas(state_write_out, (layer_index - 1)*NO_OF_SCALARS_H + i))
+		        *state_write_out -> mass_densities[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
 	        if (rprate[i] < EPSILON_SECURITY)
 	        {
@@ -848,8 +855,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     Scalar_field *pressure = calloc(1, sizeof(Scalar_field));
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-    	(*rh)[i] = 100*rel_humidity(state_write_out -> tracer_densities[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS + i], state_write_out -> temperature_gas[i]);
-    	(*pressure)[i] = (state_write_out -> tracer_densities[2*NO_OF_SCALARS + i]*R_V + state_write_out -> density_dry[i]*R_D)*state_write_out -> temperature_gas[i];
+    	(*rh)[i] = 100*rel_humidity(state_write_out -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], state_write_out -> temperature_gas[i]);
+    	(*pressure)[i] = density_gas(state_write_out, i)*gas_constant_diagnostics(state_write_out, i)*state_write_out -> temperature_gas[i];
     }
 	// Pressure level output.
 	int closest_layer_index, other_layer_index;
@@ -2002,7 +2009,12 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			
 			if ((retval = nc_put_var_double(ncid, temp_id, &state_write_out -> temperature_gas[0])))
 				NCERR(retval);
-			if ((retval = nc_put_var_double(ncid, density_dry_id, &state_write_out -> density_dry[0])))
+			#pragma omp parallel for
+			for (int i = 0; i < NO_OF_SCALARS; ++i)
+			{
+				diagnostics -> density_gen[i] = state_write_out -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
+			}
+			if ((retval = nc_put_var_double(ncid, density_dry_id, &diagnostics -> density_gen[0])))
 				NCERR(retval);
 			if ((retval = nc_put_var_double(ncid, pressure_id, &(*rel_vort)[0])))
 				NCERR(retval);
@@ -2037,7 +2049,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	return 0;
 }
 
-int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], Grid *grid, Dualgrid *dualgrid, int integral_id)
+int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, int integral_id)
 {
 	/*
 	integral_id:
@@ -2066,14 +2078,24 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
     if (integral_id == 0)
     {
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
-    	global_scalar_integrator(state_write_out -> density_dry, grid, &global_integral);
+		#pragma omp parallel for
+		for (int i = 0; i< NO_OF_SCALARS; ++i)
+		{
+			diagnostics -> density_gen[i] = state_write_out -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
+		}
+    	global_scalar_integrator(diagnostics -> density_gen, grid, &global_integral);
     	fprintf(global_integral_file, "%d\t%lf\n", step_counter, global_integral);
     	fclose(global_integral_file);
     }
     if (integral_id == 1)
     {
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
-    	global_scalar_integrator(state_write_out -> entropy_density_dry, grid, &global_integral);
+		#pragma omp parallel for
+		for (int i = 0; i< NO_OF_SCALARS; ++i)
+		{
+			diagnostics -> density_gen[i] = state_write_out -> entropy_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
+		}
+    	global_scalar_integrator(diagnostics -> density_gen, grid, &global_integral);
     	fprintf(global_integral_file, "%d\t%lf\n", step_counter, global_integral);
     	fclose(global_integral_file);
     }
@@ -2083,17 +2105,22 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
     	Scalar_field *e_kin_density = malloc(sizeof(Scalar_field));
     	kinetic_energy(state_write_out -> velocity_gas, *e_kin_density, grid, 1);
-    	scalar_times_scalar(state_write_out -> density_dry, *e_kin_density, *e_kin_density);
+		#pragma omp parallel for
+		for (int i = 0; i< NO_OF_SCALARS; ++i)
+		{
+			diagnostics -> density_gen[i] = state_write_out -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
+		}
+    	scalar_times_scalar(diagnostics -> density_gen, *e_kin_density, *e_kin_density);
     	global_scalar_integrator(*e_kin_density, grid, &kinetic_integral);
     	free(e_kin_density);
     	Scalar_field *pot_energy_density = malloc(sizeof(Scalar_field));
-    	scalar_times_scalar(state_write_out -> density_dry, grid -> gravity_potential, *pot_energy_density);
+    	scalar_times_scalar(diagnostics -> density_gen, grid -> gravity_potential, *pot_energy_density);
     	global_scalar_integrator(*pot_energy_density, grid, &potential_integral);
     	free(pot_energy_density);
     	Scalar_field *int_energy_density = malloc(sizeof(Scalar_field));
-    	scalar_times_scalar(state_write_out -> density_dry, state_write_out -> temperature_gas, *int_energy_density);
+    	scalar_times_scalar(diagnostics -> density_gen, state_write_out -> temperature_gas, *int_energy_density);
     	global_scalar_integrator(*int_energy_density, grid, &internal_integral);
-    	fprintf(global_integral_file, "%d\t%lf\t%lf\t%lf\n", step_counter, kinetic_integral, potential_integral, C_D_V*internal_integral);
+    	fprintf(global_integral_file, "%d\t%lf\t%lf\t%lf\n", step_counter, kinetic_integral, potential_integral, spec_heat_capacities_v_gas(0)*internal_integral);
     	free(int_energy_density);
     	fclose(global_integral_file);
     }
@@ -2105,7 +2132,7 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
     	Scalar_field *linear_entropy = malloc(sizeof(Scalar_field));
     	for (int i = 0; i < NO_OF_SCALARS; ++i)
     	{
-    		(*linear_entropy)[i] = C_D_P*state_write_out -> density_dry[i]*(*pot_temp)[i];
+    		(*linear_entropy)[i] = spec_heat_capacities_p_gas(0)*state_write_out -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*(*pot_temp)[i];
     	}
     	global_scalar_integrator(*linear_entropy, grid, &global_integral);
     	fprintf(global_integral_file, "%d\t%lf\n", step_counter, global_integral);
@@ -2144,20 +2171,34 @@ double get_pressure_at_altitude_standard(double altitude)
 	double pressure_at_inv_standard, result;
     if (altitude < TROPO_HEIGHT_STANDARD)
     {
-        result = P_0_STANDARD*pow(1 + TEMP_GRADIENT*altitude/T_SFC, -GRAVITY_MEAN/(R_D*TEMP_GRADIENT));
+        result = P_0_STANDARD*pow(1 + TEMP_GRADIENT*altitude/T_SFC, -GRAVITY_MEAN/(specific_gas_constants(0)*TEMP_GRADIENT));
     }
     else if (altitude < INVERSE_HEIGHT_STANDARD)
     {
-        result = P_0_STANDARD*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT_STANDARD/T_SFC, -GRAVITY_MEAN/(R_D*TEMP_GRADIENT))*exp(-GRAVITY_MEAN*(altitude - TROPO_HEIGHT_STANDARD)/(R_D*TROPO_TEMP_STANDARD));
+        result = P_0_STANDARD*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT_STANDARD/T_SFC, -GRAVITY_MEAN/(specific_gas_constants(0)*TEMP_GRADIENT))*exp(-GRAVITY_MEAN*(altitude - TROPO_HEIGHT_STANDARD)/(specific_gas_constants(0)*TROPO_TEMP_STANDARD));
     }
     else
     {
-    	pressure_at_inv_standard = P_0_STANDARD*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT_STANDARD/T_SFC, -GRAVITY_MEAN/(R_D*TEMP_GRADIENT))*exp(-GRAVITY_MEAN*(INVERSE_HEIGHT_STANDARD - TROPO_HEIGHT_STANDARD)/(R_D*TROPO_TEMP_STANDARD));
-        result = pressure_at_inv_standard*pow(1 + TEMP_GRADIENT*(altitude - INVERSE_HEIGHT_STANDARD)/T_SFC, -GRAVITY_MEAN/(R_D*TEMP_GRADIENT));
+    	pressure_at_inv_standard = P_0_STANDARD*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT_STANDARD/T_SFC, -GRAVITY_MEAN/(specific_gas_constants(0)*TEMP_GRADIENT))*exp(-GRAVITY_MEAN*(INVERSE_HEIGHT_STANDARD - TROPO_HEIGHT_STANDARD)/(specific_gas_constants(0)*TROPO_TEMP_STANDARD));
+        result = pressure_at_inv_standard*pow(1 + TEMP_GRADIENT*(altitude - INVERSE_HEIGHT_STANDARD)/T_SFC, -GRAVITY_MEAN/(specific_gas_constants(0)*TEMP_GRADIENT));
     }
 	return result;
 }
 
+int global_scalar_integrator(Scalar_field density_gen, Grid *grid, double *result)
+{
+    *result = 0;
+    for (int i = 0; i < NO_OF_SCALARS; ++i)
+        *result += density_gen[i]*grid -> volume[i];
+    return 0;
+}
 
-
+int interpolation_t(State *state_0, State *state_p1, State *state_write, double t_0, double t_p1, double t_write)
+{
+    double weight_0, weight_p1;
+    weight_p1 = (t_write - t_0)/(t_p1 - t_0);
+    weight_0 = 1 - weight_p1;
+    linear_combine_two_states(state_0, state_p1, state_write, weight_0, weight_p1);
+    return 0;
+}
 

@@ -1,6 +1,0 @@
-/*
-This file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
-Github repository: https://github.com/MHBalsmeier/game
-*/
-
-In this directory diagnostics are computed which are not essential for the model integration but for writing output.

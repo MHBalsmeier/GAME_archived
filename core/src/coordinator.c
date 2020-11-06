@@ -15,7 +15,7 @@ The main organizes the model, manages the time stepping, calls model output, col
 #include "io/io.h"
 #include "spatial_operators/spatial_operators.h"
 #include "diagnostics/diagnostics.h"
-#include "manage_time_stepping/manage_time_stepping.h"
+#include "integrators/integrators.h"
 #include <mpi.h>
 
 int main(int argc, char *argv[])
@@ -61,59 +61,58 @@ int main(int argc, char *argv[])
     Config_info *config_info = calloc(1, sizeof(Config_info));
     config_info -> momentum_diff = strtod(argv[6], NULL);
     config_info -> rad_on = strtod(argv[7], NULL);
-    config_info -> tracers_on = strtod(argv[8], NULL);
-    len = strlen(argv[9]);
+    len = strlen(argv[8]);
     char *OPERATOR = malloc((len + 1)*sizeof(char));
-    strcpy(OPERATOR, argv[9]);
+    strcpy(OPERATOR, argv[8]);
     int write_out_dry_mass_integral;
-    write_out_dry_mass_integral = strtod(argv[10], NULL);
+    write_out_dry_mass_integral = strtod(argv[9], NULL);
     int write_out_entropy_integral; 
-    write_out_entropy_integral = strtod(argv[11], NULL);
+    write_out_entropy_integral = strtod(argv[10], NULL);
     int write_out_energy_integral;
-    write_out_energy_integral = strtod(argv[12], NULL);
-    config_info -> temperature_diff_h = strtod(argv[13], NULL);
+    write_out_energy_integral = strtod(argv[11], NULL);
+    config_info -> temperature_diff_h = strtod(argv[12], NULL);
     double radiation_delta_t;
-    radiation_delta_t = strtof(argv[14], NULL);
+    radiation_delta_t = strtof(argv[13], NULL);
     int year;
-    year = strtod(argv[15], NULL);
+    year = strtod(argv[14], NULL);
     int month;
-    month = strtod(argv[16], NULL);
-    len = strlen(argv[16]);
+    month = strtod(argv[15], NULL);
+    len = strlen(argv[15]);
     char *month_string = malloc((len + 1)*sizeof(char));
-    strcpy(month_string, argv[16]);
+    strcpy(month_string, argv[15]);
     int day;
-    day = strtod(argv[17], NULL);
-    len = strlen(argv[17]);
+    day = strtod(argv[16], NULL);
+    len = strlen(argv[16]);
     char *day_string = malloc((len + 1)*sizeof(char));
-    strcpy(day_string, argv[17]);
+    strcpy(day_string, argv[16]);
     int hour;
-    hour = strtod(argv[18], NULL);
-    len = strlen(argv[18]);
+    hour = strtod(argv[17], NULL);
+    len = strlen(argv[17]);
     char *hour_string = malloc((len + 1)*sizeof(char));
-    strcpy(hour_string, argv[18]);
-    config_info -> temperature_diff_v = strtod(argv[19], NULL);
-    len = strlen(argv[20]);
+    strcpy(hour_string, argv[17]);
+    config_info -> temperature_diff_v = strtod(argv[18], NULL);
+    len = strlen(argv[19]);
     char *RUN_ID = malloc((len + 1)*sizeof(char));
-    strcpy(RUN_ID, argv[20]);
+    strcpy(RUN_ID, argv[19]);
     int write_out_linearized_entropy_integral;
-    write_out_linearized_entropy_integral = strtod(argv[21], NULL);
+    write_out_linearized_entropy_integral = strtod(argv[20], NULL);
     int toa;
-	toa = strtod(argv[22], NULL);
+	toa = strtod(argv[21], NULL);
     int no_of_oro_layers_input;
-	no_of_oro_layers_input = strtod(argv[23], NULL);
+	no_of_oro_layers_input = strtod(argv[22], NULL);
 	int ORO_ID;
-	ORO_ID = strtod(argv[24], NULL);
+	ORO_ID = strtod(argv[23], NULL);
     int IDEAL_INPUT_ID;
-    IDEAL_INPUT_ID = strtod(argv[25], NULL);
-	config_info -> mass_dry_diff_h = strtod(argv[26], NULL);
-	config_info -> mass_dry_diff_v = strtod(argv[27], NULL);
+    IDEAL_INPUT_ID = strtod(argv[24], NULL);
+	config_info -> mass_diff_h = strtod(argv[25], NULL);
+	config_info -> mass_diff_v = strtod(argv[26], NULL);
     Io_config *io_config = calloc(1, sizeof(Io_config));
-	io_config -> grib_output_switch = strtod(argv[28], NULL);
-	io_config -> netcdf_output_switch = strtod(argv[29], NULL);
-	io_config -> pressure_level_output_switch = strtod(argv[30], NULL);
-	io_config -> flight_level_output_switch = strtod(argv[31], NULL);
-	io_config -> model_level_output_switch = strtod(argv[32], NULL);
-	io_config -> surface_output_switch = strtod(argv[33], NULL);
+	io_config -> grib_output_switch = strtod(argv[27], NULL);
+	io_config -> netcdf_output_switch = strtod(argv[28], NULL);
+	io_config -> pressure_level_output_switch = strtod(argv[29], NULL);
+	io_config -> flight_level_output_switch = strtod(argv[30], NULL);
+	io_config -> model_level_output_switch = strtod(argv[31], NULL);
+	io_config -> surface_output_switch = strtod(argv[32], NULL);
 	if (io_config -> grib_output_switch == 0 && io_config -> netcdf_output_switch == 0)
 	{
 		printf("Either grib_output_switch or netcdf_output_switch must be set to 1.\n");
@@ -268,25 +267,17 @@ int main(int argc, char *argv[])
 	{
 		printf("Radiation is turned on.\n");
 	}
-	if (config_info -> tracers_on == 0)
+	if (config_info -> mass_diff_h == 0)
 	{
-		printf("Moisture is turned off.\n");
-	}
-	else
-	{
-		printf("Moisture is turned on.\n");
-	}
-	if (config_info -> mass_dry_diff_h == 0)
-	{
-		printf("Horizontal dry mass diffusion is turned off.\n");
+		printf("Horizontal mass diffusion is turned off.\n");
 	}
 	else
 	{
 		printf("Horizontal dry mass diffusion is turned on.\n");
 	}
-	if (config_info -> mass_dry_diff_v == 0)
+	if (config_info -> mass_diff_v == 0)
 	{
-		printf("Vertical dry mass diffusion is turned off.\n");
+		printf("Vertical mass diffusion is turned off.\n");
 	}
 	else
 	{
@@ -353,13 +344,13 @@ int main(int argc, char *argv[])
     first_time = clock();
     State *state_new = calloc(1, sizeof(State));
     if (write_out_dry_mass_integral == 1)
-		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, 0);
+		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 0);
     if (write_out_entropy_integral == 1)
-		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, 1);
+		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 1);
     if (write_out_energy_integral == 1)
-		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, 2);
+		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 2);
     if (write_out_linearized_entropy_integral == 1)
-		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, 3);
+		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
 	Scalar_field *radiation_tendency = calloc(1, sizeof(Scalar_field));
     if (config_info -> rad_on == 1)
     {
@@ -379,16 +370,16 @@ int main(int argc, char *argv[])
     config_info -> rad_update = 1;
     linear_combine_two_states(state_old, state_old, state_new, 1, 0);
     config_info -> totally_first_step_bool = 1;
-    manage_time_stepping(state_old, state_new, interpolation, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
+    manage_rkhevi(state_old, state_new, interpolation, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
     counter += 1;
     if (write_out_dry_mass_integral == 1)
-		write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, 0);
+		write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 0);
     if (write_out_entropy_integral == 1)
-		write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, 1);
+		write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 1);
     if (write_out_energy_integral == 1)
-		write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, 2);
+		write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 2);
     if (write_out_linearized_entropy_integral == 1)
-		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, 3);
+		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
 	time_step_counter += 1;
     State *state_write = calloc(1, sizeof(State));
     double speed;
@@ -411,22 +402,22 @@ int main(int argc, char *argv[])
         {
         	config_info -> rad_update = 0;
     	}
-        manage_time_stepping(state_old, state_new, interpolation, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
+        manage_rkhevi(state_old, state_new, interpolation, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
 		if (write_out_dry_mass_integral == 1)
         {
-			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, 0);
+			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 0);
     	}
 		if (write_out_entropy_integral == 1)
         {
-			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, 1);
+			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 1);
     	}
 		if (write_out_energy_integral == 1)
         {
-			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, 2);
+			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 2);
     	}
 		if (write_out_linearized_entropy_integral == 1)
         {
-			write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, 3);
+			write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
     	}
 		time_step_counter += 1;
         if(t_0 + delta_t >= t_write && t_0 <= t_write)

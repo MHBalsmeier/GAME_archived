@@ -24,7 +24,6 @@ mass_dry_diff_v=0 # turn on if you want vetical dry mass diffusion
 temperature_diff_h=0 # turn on if you want horizontal temperature diffusion
 temperature_diff_v=0 # turn on if you want vetical temperature diffusion
 momentum_diff=0 # turn on if you want momentum diffusion
-tracers_on=0 # turn on if you want advect tracers and have phase transitions
 rad_on=0 # turn on if you want radiation
 radiation_delta_t=3600 # every how many seconds the radiation fluxes wil be updated
 

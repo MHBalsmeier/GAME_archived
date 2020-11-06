@@ -1,6 +1,0 @@
-/*
-This file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
-Github repository: https://github.com/MHBalsmeier/game
-*/
-
-The time stepping routine is controlled by the files in this directory. This entails calling integrators and diagnostics with specific settings dependant on the RK stubstep.

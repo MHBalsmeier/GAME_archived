@@ -1,6 +1,0 @@
-/*
-This file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
-Github repository: https://github.com/MHBalsmeier/game
-*/
-
-The functions contained in the files in this directory call and collect spatial operators constituting the prognostic equations.

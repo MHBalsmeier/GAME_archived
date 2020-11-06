@@ -1,6 +1,0 @@
-/*
-This file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
-Github repository: https://github.com/MHBalsmeier/game
-*/
-
-In the subdirectory of this directory, the so called "integrators" are stored, which are functions calling and collecting spatial operators or doing subprocesses of the time stepping.

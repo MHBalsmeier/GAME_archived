@@ -11,5 +11,10 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int get_damping_layer_properties(double *, double *);
 int ask_for_divergence_output(int *);
+double entropy_constants_gas(int);
+double mean_particle_masses_gas(int);
+double spec_heat_capacities_v_gas(int);
+double spec_heat_capacities_p_gas(int);
+double specific_gas_constants(int);
 int get_flight_levels(double []);
 int get_pressure_leveltic_pressure_levels(double []);

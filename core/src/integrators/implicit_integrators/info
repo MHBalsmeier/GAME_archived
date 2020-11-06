@@ -1,6 +1,0 @@
-/*
-This file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
-Github repository: https://github.com/MHBalsmeier/game
-*/
-
-This directory contains implicit integrators, which are vertical slice solvers (the time stepping scheme is a horizontally explicit, vertically implicit scheme).

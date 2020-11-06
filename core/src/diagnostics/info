@@ -3,4 +3,4 @@ This file is part of the Geophysical Fluids Modeling Framework (GAME), which is 
 Github repository: https://github.com/MHBalsmeier/game
 */
 
-"Diagnostics" refers to the calculation of dynamic and thermodynamic quantities which are not prognostic variables but still needed for the model integration or for I/O.
+The files stored in this directory reconstruct vector field components thrown away during the discretization but still needed for the model integration.

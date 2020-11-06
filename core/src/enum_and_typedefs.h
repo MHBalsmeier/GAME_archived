@@ -9,49 +9,28 @@ Github repository: https://github.com/MHBalsmeier/game
 #define K_B (1.380649e-23)
 #define M_D 0.028964420
 #define M_V 0.0180152
-#define MEAN_MASS_D (M_D/N_A)
-#define MEAN_MASS_V (M_V/N_A)
-#define EPSILON (M_V/M_D)
-// #define R (N_A*K_B)
-#define R 8.314463
-// #define R_D (R/M_D)
-#define R_D 287.057811
-// #define R_V (R/M_V)
-#define R_V 461.524879
-#define C_D_P 1005.0
-// #define C_D_V (C_D_P - R_D)
-#define C_D_V 717.942189
-#define C_V_P 1858.0
-// #define C_V_V (C_V_P - R_V)
-#define C_V_V 1396.475121
-// #define DELTA_C_V_P (C_V_P - C_D_P)
-#define DELTA_C_V_P 853.000000
+#define EPSILON 0.621977 // (M_V/M_D)
 #define P_0 100000.0
 #define SECONDS_PER_HOUR 3600
 #define RHO_WATER 1024.0
 #define OMEGA (7.292115e-5)
-#define SEMIMAJOR 6378137.0
-#define SEMIMINOR 6356752.314
-// #define RADIUS pow(SEMIMAJOR*SEMIMAJOR*SEMIMINOR, 1.0/3.0)
 #define RADIUS 6371000.789927
-#define H_BAR (1.054571817e-34)
-#define ENTROPY_CONSTANT_D ((MEAN_MASS_D*exp(5.0/3))/(3*M_PI*H_BAR*H_BAR))
-#define ENTROPY_CONSTANT_V ((MEAN_MASS_V*exp(5.0/3))/(3*M_PI*H_BAR*H_BAR))
-#define EPSILON_SECURITY (1e-10)
+#define EPSILON_SECURITY (0)
 #define FOOT 0.3048
 
 enum grid_integers {
 // This determines the horizontal resolution.
 RES_ID = 5,
-// The number of layers. TOA is determined by the grid file. This has to conform with the grid file and the initialization state file
+// This has to conform with the grid file and the initialization state file.
 NO_OF_LAYERS = 26,
-// The number of layers affected by orography. This also has to conform with the grid file and the initialization state file
+// The number of layers affected by orography. This also has to conform with the grid file and the initialization state file.
 NO_OF_ORO_LAYERS = 17,
-NO_OF_TRACERS = 3,
-NO_OF_CONDENSED_TRACERS = 2,
-NO_OF_SOLID_TRACERS = 1,
-// Nothing may be changed below this line. These are fundamentals properties of the grid.
-NO_OF_GASEOUS_TRACERS = NO_OF_TRACERS - NO_OF_CONDENSED_TRACERS,
+NO_OF_SOLID_CONSTITUENTS = 1,
+NO_OF_LIQUID_CONSTITUENTS = 1,
+NO_OF_GASEOUS_CONSTITUENTS = 2,
+// Nothing should be changed by the user below this line.
+NO_OF_CONDENSED_CONSTITUENTS = (NO_OF_SOLID_CONSTITUENTS + NO_OF_LIQUID_CONSTITUENTS),
+NO_OF_CONSTITUENTS = (NO_OF_CONDENSED_CONSTITUENTS + NO_OF_GASEOUS_CONSTITUENTS),
 NO_OF_BASIC_TRIANGLES = 20,
 NO_OF_PENTAGONS = 12,
 NO_OF_HEXAGONS = (int) (10*(pow(2, 2*RES_ID) - 1)),
@@ -80,9 +59,9 @@ typedef double Scalar_field[NO_OF_SCALARS];
 typedef double Vector_field[NO_OF_VECTORS];
 typedef double Dual_vector_field[NO_OF_DUAL_VECTORS];
 typedef double Curl_field[NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H];
-typedef double Tracer_densities[NO_OF_TRACERS*NO_OF_SCALARS];
-typedef double Tracer_entropy_densities[NO_OF_GASEOUS_TRACERS*NO_OF_SCALARS];
-typedef double Tracer_density_temperatures[NO_OF_CONDENSED_TRACERS*NO_OF_SCALARS];
+typedef double Mass_densities[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
+typedef double Entropy_densities[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
+typedef double Condensed_density_temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS];
 
 // Contains properties of the primal grid.
 typedef struct grid {
@@ -125,46 +104,42 @@ double f_vec[3*NO_OF_VECTORS_H];
 } Dualgrid;
 
 typedef struct state {
-Scalar_field density_dry;
 Scalar_field temperature_gas;
-Scalar_field entropy_density_dry;
 Vector_field velocity_gas;
 // density order: solid, liquid, vapour
-Tracer_densities tracer_densities;
-Tracer_entropy_densities tracer_entropy_densities;
-Tracer_density_temperatures tracer_density_temperatures;
+Mass_densities mass_densities;
+Entropy_densities entropy_densities;
+Condensed_density_temperatures condensed_density_temperatures;
 } State;
 
 // Collects diagnostic quantities. Note: in fact, forcings are also diagnostic quantities.
 typedef struct diagnostics {
-Vector_field mass_dry_flux_density;
+Vector_field flux_density;
+Scalar_field flux_density_divv;
 Vector_field temperature_gradient;
-Scalar_field specific_entropy_dry;
-Scalar_field specific_entropy_vapour;
-Scalar_field pressure_gradient_1_dry_prefactor;
-Scalar_field pressure_gradient_1_vapour_prefactor;
+Scalar_field specific_entropy;
+Vector_field pressure_gradient_1_prefactor;
 Scalar_field temperature_gas_explicit;
 Curl_field rel_vort;
 Curl_field pot_vort;
-Scalar_field c_h_v_field;
-Scalar_field c_h_p_field;
+Scalar_field c_g_v_field;
+Scalar_field c_g_p_field;
 Scalar_field e_kin_h;
 // nabla h
 Vector_field pressure_gradient_0_m;
 // temperature times nabla s
-Vector_field pressure_gradient_1_dry;
-Vector_field pressure_gradient_1_vapour;
-Vector_field entropy_dry_flux_density;
+Vector_field pressure_gradient_1_component;
+Vector_field pressure_gradient_1;
 // This is for the momentum diffusion.
 Scalar_field velocity_gas_divv;
 Vector_field curl_of_vorticity_m;
+Scalar_field density_gen;
+Scalar_field density_gen_explicit_tendency;
+Vector_field velocity_gen;
 } Diagnostics;
 
 // Collects forcings.
 typedef struct forcings {
-Scalar_field mass_dry_flux_density_divv;
-Scalar_field entropy_dry_flux_density_divv;
-Scalar_field temperature_gas_flux_divv_h;
 Vector_field pressure_gradient_acc;
 Vector_field e_kin_h_grad;
 Vector_field pot_vort_tend;
@@ -173,12 +148,11 @@ Vector_field pot_vort_tend;
 // Info on the run configuration is collected here.
 typedef struct config_info {
 int totally_first_step_bool;
-int mass_dry_diff_h;
-int mass_dry_diff_v;
+int mass_diff_h;
+int mass_diff_v;
 int temperature_diff_h;
 int temperature_diff_v;
 int momentum_diff;
-int tracers_on;
 int phase_transitions_on;
 int rad_on;
 int rad_update;
@@ -190,27 +164,18 @@ Vector_field pressure_gradient_0_old_m;
 Vector_field pressure_gradient_1_old;
 } Interpolate_info;
 
-// Contains everything on turbulence parametrizations as well as tracer-related quantities.
+// Contains everything on turbulence parametrizations as well as constituent-related quantities.
 typedef struct diffusion_info {
-Vector_field temperature_diffusive_flux_density;
 Scalar_field temperature_diffusion_heating;
 Vector_field friction_acc;
 Scalar_field heating_diss;
 Scalar_field scalar_diffusion_coeff_numerical_h;
 Scalar_field scalar_diffusion_coeff_numerical_v;
-Vector_field mass_dry_diffusion_flux_density;
-Scalar_field mass_dry_diffusion_source_rate;
-Scalar_field tracer_density;
-Scalar_field tracer_entropy_density;
-Vector_field tracer_velocity;
-Vector_field tracer_flux_density;
-Scalar_field tracer_flux_density_divv;
-Scalar_field tracer_density_temperature;
-Vector_field tracer_temperature_flux_density;
-Scalar_field tracer_temperature_flux_density_divv;
+Vector_field mass_diffusion_flux_density;
+Scalar_field mass_diffusion_source_rate;
 Scalar_field pressure_gradient_decel_factor;
-double tracer_mass_source_rates[NO_OF_TRACERS*NO_OF_SCALARS];
-double tracer_heat_source_rates[NO_OF_TRACERS*NO_OF_SCALARS];
+double constituent_mass_source_rates[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
+double constituent_heat_source_rates[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
 Scalar_field divv_term_viscosity_eff;
 Scalar_field curl_term_viscosity_eff;
 } Diffusion_info;

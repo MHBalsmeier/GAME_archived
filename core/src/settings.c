@@ -17,11 +17,77 @@ int get_damping_layer_properties(double *damping_start_height_over_toa, double *
 	return 0;
 }
 
-// Wether or not horizontal wind divergence shall be written out.
-int ask_for_divergence_output(int *write_out_divv_h)
+// thermodynamic quantities
+// ------------------------
+
+double entropy_constants_gas(int gas_constituent_id)
 {
-	*write_out_divv_h = 1;
-	return 0;
+	double result = 0;
+	if (gas_constituent_id == 0)
+	{
+		result = 2429487178047751925300627872548148580712448.000000; // ((MEAN_MASS_D*exp(5.0/3))/(3*M_PI*H_BAR*H_BAR))
+	}
+	if (gas_constituent_id == 1)
+	{
+		result = 1511084890012154487904341578321985168998400.000000; // ((MEAN_MASS_V*exp(5.0/3))/(3*M_PI*H_BAR*H_BAR))
+	}
+	return result;
+}
+
+double mean_particle_masses_gas(int gas_constituent_id)
+{
+	double result = 0;
+	if (gas_constituent_id == 0)
+	{
+		result = 0.004810e-23;
+	}
+	if (gas_constituent_id == 1)
+	{
+		result = 0.002991e-23;
+	}
+	return result;
+}
+
+double spec_heat_capacities_v_gas(int gas_constituent_id)
+{
+	double result = 0;
+	if (gas_constituent_id == 0)
+	{
+		result = 717.942189;
+	}
+	if (gas_constituent_id == 1)
+	{
+		result = 1396.475121;
+	}
+	return result;
+}
+
+double spec_heat_capacities_p_gas(int gas_constituent_id)
+{
+	double result = 0;
+	if (gas_constituent_id == 0)
+	{
+		result = 1005.0;
+	}
+	if (gas_constituent_id == 1)
+	{
+		result = 1858.0;
+	}
+	return result;
+}
+
+double specific_gas_constants(int gas_constituent_id)
+{
+	double result = 0;
+	if (gas_constituent_id == 0)
+	{
+		result = 287.057811;
+	}
+	if (gas_constituent_id == 1)
+	{
+		result = 461.524879;
+	}
+	return result;
 }
 
 // This function returns the pressure levels for the pressure_leveltic output.
@@ -33,6 +99,16 @@ int get_pressure_leveltic_pressure_levels(double pressure_leveltic_pressure_leve
 	pressure_leveltic_pressure_levels[3] = 70000;
 	pressure_leveltic_pressure_levels[4] = 85000;
 	pressure_leveltic_pressure_levels[5] = 92500;
+	return 0;
+}
+
+// input and output
+// ---------------------
+
+// Wether or not horizontal wind divergence shall be written out.
+int ask_for_divergence_output(int *write_out_divv_h)
+{
+	*write_out_divv_h = 1;
 	return 0;
 }
 
