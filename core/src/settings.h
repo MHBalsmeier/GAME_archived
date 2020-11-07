@@ -17,4 +17,4 @@ double spec_heat_capacities_v_gas(int);
 double spec_heat_capacities_p_gas(int);
 double specific_gas_constants(int);
 int get_flight_levels(double []);
-int get_pressure_leveltic_pressure_levels(double []);
+int get_pressure_levels(double []);

@@ -863,10 +863,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	double closest_weight;
     if (io_config -> pressure_level_output_switch == 1)
     {
-    	double *pressure_leveltic_pressure_levels = malloc(sizeof(double)*NO_OF_PRESSURE_LEVELS);
-    	double *distance_from_pressure_leveltic_pressure_level = malloc(sizeof(double)*NO_OF_LAYERS);
+    	double *pressure_levels = malloc(sizeof(double)*NO_OF_PRESSURE_LEVELS);
+    	double *distance_from_pressure_level = malloc(sizeof(double)*NO_OF_LAYERS);
     	double *pressure_at_vector_points = malloc(sizeof(double)*NO_OF_LAYERS);
-    	get_pressure_leveltic_pressure_levels(pressure_leveltic_pressure_levels);
+    	get_pressure_levels(pressure_levels);
     	// Allocating memory for the variables on pressure levels.
     	double (*geopotential_height)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
     	double (*t_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
@@ -881,11 +881,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			{
 				for (int k = 0; k < NO_OF_LAYERS; ++k)
 				{
-					distance_from_pressure_leveltic_pressure_level[k] = fabs(log(pressure_leveltic_pressure_levels[j]/(*pressure)[k*NO_OF_SCALARS_H + i]));
+					distance_from_pressure_level[k] = fabs(log(pressure_levels[j]/(*pressure)[k*NO_OF_SCALARS_H + i]));
 				}
-				closest_layer_index = find_min_index(distance_from_pressure_leveltic_pressure_level, NO_OF_LAYERS);
+				closest_layer_index = find_min_index(distance_from_pressure_level, NO_OF_LAYERS);
 				other_layer_index = closest_layer_index + 1;
-				if (pressure_leveltic_pressure_levels[j] < (*pressure)[closest_layer_index*NO_OF_SCALARS_H + i])
+				if (pressure_levels[j] < (*pressure)[closest_layer_index*NO_OF_SCALARS_H + i])
 				{
 					other_layer_index = closest_layer_index - 1;
 				}
@@ -897,7 +897,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				}
 				else
 				{
-					closest_weight = 1 - distance_from_pressure_leveltic_pressure_level[closest_layer_index]/
+					closest_weight = 1 - distance_from_pressure_level[closest_layer_index]/
 					(fabs(log((*pressure)[closest_layer_index*NO_OF_SCALARS_H + i]/(*pressure)[other_layer_index*NO_OF_SCALARS_H + i])) + 1e-11);
 					geopotential_height[i][j] = closest_weight*grid -> gravity_potential[closest_layer_index*NO_OF_SCALARS_H + i]
 					+ (1 - closest_weight)*grid -> gravity_potential[other_layer_index*NO_OF_SCALARS_H + i];
@@ -919,11 +919,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			{
 				for (int k = 0; k < NO_OF_LAYERS; ++k)
 				{
-					distance_from_pressure_leveltic_pressure_level[k] = fabs(log(pressure_leveltic_pressure_levels[j]/pressure_at_vector_points[k]));
+					distance_from_pressure_level[k] = fabs(log(pressure_levels[j]/pressure_at_vector_points[k]));
 				}
-				closest_layer_index = find_min_index(distance_from_pressure_leveltic_pressure_level, NO_OF_LAYERS);
+				closest_layer_index = find_min_index(distance_from_pressure_level, NO_OF_LAYERS);
 				other_layer_index = closest_layer_index + 1;
-				if (pressure_leveltic_pressure_levels[j] < pressure_at_vector_points[closest_layer_index])
+				if (pressure_levels[j] < pressure_at_vector_points[closest_layer_index])
 				{
 					other_layer_index = closest_layer_index - 1;
 				}
@@ -934,7 +934,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     			}
     			else
     			{
-					closest_weight = 1 - distance_from_pressure_leveltic_pressure_level[closest_layer_index]/
+					closest_weight = 1 - distance_from_pressure_level[closest_layer_index]/
 					(fabs(log(pressure_at_vector_points[closest_layer_index]/pressure_at_vector_points[other_layer_index])) + 1e-11);
 					u_on_pressure_levels[i][j] = closest_weight*wind_u[closest_layer_index*NO_OF_VECTORS_H + i]
 					+ (1 - closest_weight)*wind_u[other_layer_index*NO_OF_VECTORS_H + i];
@@ -954,7 +954,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			free(OUTPUT_FILE_PRESSURE_LEVEL_PRE);
 			char *OUTPUT_FILE_PRESSURE_LEVEL = malloc((OUTPUT_FILE_PRESSURE_LEVEL_LENGTH + 1)*sizeof(char));
 			sprintf(OUTPUT_FILE_PRESSURE_LEVEL, "output/%s/%s+%ds_pressure_level.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
-			int ncid_pressure_level, scalar_h_dimid, vector_h_dimid, level_dimid, geopot_height_id, temp_pressure_level_id, rh_pressure_level_id, wind_u_pressure_level_id, wind_v_pressure_level_id, pressure_leveltic_pressure_levels_id;
+			int ncid_pressure_level, scalar_h_dimid, vector_h_dimid, level_dimid, geopot_height_id, temp_pressure_level_id, rh_pressure_level_id, wind_u_pressure_level_id, wind_v_pressure_level_id, pressure_levels_id;
 			if ((retval = nc_create(OUTPUT_FILE_PRESSURE_LEVEL, NC_CLOBBER, &ncid_pressure_level)))
 				NCERR(retval);
 			free(OUTPUT_FILE_PRESSURE_LEVEL);
@@ -971,9 +971,9 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			dimids_pressure_level_vector[0] = vector_h_dimid;
 			dimids_pressure_level_vector[1] = level_dimid;
 			// Defining the variables.
-			if ((retval = nc_def_var(ncid_pressure_level, "pressure_levels", NC_DOUBLE, 1, &level_dimid, &pressure_leveltic_pressure_levels_id)))
+			if ((retval = nc_def_var(ncid_pressure_level, "pressure_levels", NC_DOUBLE, 1, &level_dimid, &pressure_levels_id)))
 				NCERR(retval);
-			if ((retval = nc_put_att_text(ncid_pressure_level, pressure_leveltic_pressure_levels_id, "units", strlen("Pa"), "Pa")))
+			if ((retval = nc_put_att_text(ncid_pressure_level, pressure_levels_id, "units", strlen("Pa"), "Pa")))
 				NCERR(retval);
 			if ((retval = nc_def_var(ncid_pressure_level, "geopotential_height", NC_DOUBLE, 2, dimids_pressure_level_scalar, &geopot_height_id)))
 				NCERR(retval);
@@ -999,7 +999,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				NCERR(retval);
 			
 			// Writing the arrays.
-			if ((retval = nc_put_var_double(ncid_pressure_level, pressure_leveltic_pressure_levels_id, &pressure_leveltic_pressure_levels[0])))
+			if ((retval = nc_put_var_double(ncid_pressure_level, pressure_levels_id, &pressure_levels[0])))
 				NCERR(retval);
 			if ((retval = nc_put_var_double(ncid_pressure_level, geopot_height_id, &geopotential_height[0][0])))
 				NCERR(retval);
@@ -1095,11 +1095,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "typeOfFirstFixedSurface", 100)))
 			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "scaledValueOfFirstFixedSurface", (int) pressure_leveltic_pressure_levels[i])))
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "scaledValueOfFirstFixedSurface", (int) pressure_levels[i])))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "scaleFactorOfFirstFixedSurface", 1)))
 			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "level", 0.01*pressure_leveltic_pressure_levels[i])))
+			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "level", 0.01*pressure_levels[i])))
 			        ECCERR(retval);
 			    if ((retval = codes_set_double_array(handle_geopotential_height_pressure_level, "values", geopotential_height_pressure_level, NO_OF_SCALARS_H)))
 			        ECCERR(retval);
@@ -1146,11 +1146,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_temperature_pressure_level, "typeOfFirstFixedSurface", 100)))
 			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_temperature_pressure_level, "scaledValueOfFirstFixedSurface", (int) pressure_leveltic_pressure_levels[i])))
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "scaledValueOfFirstFixedSurface", (int) pressure_levels[i])))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_temperature_pressure_level, "scaleFactorOfFirstFixedSurface", 1)))
 			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_temperature_pressure_level, "level", 0.01*pressure_leveltic_pressure_levels[i])))
+			    if ((retval = codes_set_long(handle_temperature_pressure_level, "level", 0.01*pressure_levels[i])))
 			        ECCERR(retval);
 			    if ((retval = codes_set_double_array(handle_temperature_pressure_level, "values", temperature_pressure_level, NO_OF_SCALARS_H)))
 			        ECCERR(retval);
@@ -1197,11 +1197,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_rh_pressure_level, "typeOfFirstFixedSurface", 100)))
 			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rh_pressure_level, "scaledValueOfFirstFixedSurface", (int) pressure_leveltic_pressure_levels[i])))
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "scaledValueOfFirstFixedSurface", (int) pressure_levels[i])))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_rh_pressure_level, "scaleFactorOfFirstFixedSurface", 1)))
 			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rh_pressure_level, "level", 0.01*pressure_leveltic_pressure_levels[i])))
+			    if ((retval = codes_set_long(handle_rh_pressure_level, "level", 0.01*pressure_levels[i])))
 			        ECCERR(retval);
 			    if ((retval = codes_set_double_array(handle_rh_pressure_level, "values", rh_pressure_level, NO_OF_SCALARS_H)))
 			        ECCERR(retval);
@@ -1248,11 +1248,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "typeOfFirstFixedSurface", 100)))
 			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "scaledValueOfFirstFixedSurface", (int) pressure_leveltic_pressure_levels[i])))
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "scaledValueOfFirstFixedSurface", (int) pressure_levels[i])))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "scaleFactorOfFirstFixedSurface", 1)))
 			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "level", 0.01*pressure_leveltic_pressure_levels[i])))
+			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "level", 0.01*pressure_levels[i])))
 			        ECCERR(retval);
 			    if ((retval = codes_set_double_array(handle_wind_u_pressure_level, "values", wind_u_pressure_level, NO_OF_VECTORS_H)))
 			        ECCERR(retval);
@@ -1299,11 +1299,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "typeOfFirstFixedSurface", 100)))
 			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "scaledValueOfFirstFixedSurface", (int) pressure_leveltic_pressure_levels[i])))
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "scaledValueOfFirstFixedSurface", (int) pressure_levels[i])))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "scaleFactorOfFirstFixedSurface", 1)))
 			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "level", 0.01*pressure_leveltic_pressure_levels[i])))
+			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "level", 0.01*pressure_levels[i])))
 			        ECCERR(retval);
 			    if ((retval = codes_set_double_array(handle_wind_v_pressure_level, "values", wind_v_pressure_level, NO_OF_VECTORS_H)))
 			        ECCERR(retval);
@@ -1326,8 +1326,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     	free(rh_on_pressure_levels);
     	free(u_on_pressure_levels);
     	free(v_on_pressure_levels);
-    	free(pressure_leveltic_pressure_levels);
-    	free(distance_from_pressure_leveltic_pressure_level);
+    	free(pressure_levels);
+    	free(distance_from_pressure_level);
     	free(pressure_at_vector_points);
     }
 

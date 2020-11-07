@@ -13,7 +13,7 @@ game
 src/coordinator.c
 src/settings.c
 src/integrators/rkhevi/manage_rkhevi.c
-src/integrators/rkhevi/manage_interpolation.c
+src/integrators/rkhevi/manage_pressure_gradient.c
 src/integrators/rkhevi/forward_tendencies.c
 src/integrators/rkhevi/integrate_momentum.c
 src/integrators/rkhevi/backward_tendencies.c

@@ -91,14 +91,14 @@ double specific_gas_constants(int gas_constituent_id)
 }
 
 // This function returns the pressure levels for the pressure_leveltic output.
-int get_pressure_leveltic_pressure_levels(double pressure_leveltic_pressure_levels[])
+int get_pressure_levels(double pressure_levels[])
 {
-	pressure_leveltic_pressure_levels[0] = 20000;
-	pressure_leveltic_pressure_levels[1] = 30000;
-	pressure_leveltic_pressure_levels[2] = 50000;
-	pressure_leveltic_pressure_levels[3] = 70000;
-	pressure_leveltic_pressure_levels[4] = 85000;
-	pressure_leveltic_pressure_levels[5] = 92500;
+	pressure_levels[0] = 20000;
+	pressure_levels[1] = 30000;
+	pressure_levels[2] = 50000;
+	pressure_levels[3] = 70000;
+	pressure_levels[4] = 85000;
+	pressure_levels[5] = 92500;
 	return 0;
 }
 

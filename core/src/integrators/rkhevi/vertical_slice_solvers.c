@@ -31,7 +31,7 @@ int three_band_solver_ver_vel_adv(State *state_old, State *state_new, State *sta
 int three_band_solver_gen_densitites(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, Grid *grid)
 {
 	// Vertical constituent advection with 3-band matrices.
-	int layer_index, h_index;
+	int layer_index, h_index, is_gas;
 	double density_gas_value;
 	for (int k = 0; k < NO_OF_CONSTITUENTS; ++k)
 	{
@@ -82,6 +82,16 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
 			state_new -> mass_densities[k*NO_OF_SCALARS + i] = diagnostics -> density_gen[i];
+			// limiter
+			is_gas = 0;
+			if (k >= NO_OF_CONDENSED_CONSTITUENTS)
+			{
+				is_gas = 1;
+			}
+			if (state_new -> mass_densities[k*NO_OF_SCALARS + i] < is_gas*EPSILON_SECURITY)
+			{
+				state_new -> mass_densities[k*NO_OF_SCALARS + i] = is_gas*EPSILON_SECURITY;
+			}
 		}
 		
 		// Entropy densities.
@@ -96,6 +106,11 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
 			state_new -> entropy_densities[k*NO_OF_SCALARS + i] = diagnostics -> density_gen[i];
+			// limiter
+			if (state_new -> entropy_densities[k*NO_OF_SCALARS + i] < 0)
+			{
+				state_new -> entropy_densities[k*NO_OF_SCALARS + i] = 0;
+			}
 		}
 		
 		// Internal energy densities.
@@ -112,6 +127,11 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 			for (int i = 0; i < NO_OF_SCALARS; ++i)
 			{
 				state_new -> condensed_density_temperatures[k*NO_OF_SCALARS + i] = diagnostics -> density_gen[i];
+				// limiter
+				if (state_new -> condensed_density_temperatures[k*NO_OF_SCALARS + i] < 0)
+				{
+					state_new -> condensed_density_temperatures[k*NO_OF_SCALARS + i] = 0;
+				}
 			}
 		}
 	}
