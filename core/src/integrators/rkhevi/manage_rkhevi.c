@@ -61,7 +61,7 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolate_info *interpol
 		
 		// 7.) Solving the implicit component of the generalized density equaitons.
 		// ----------------------------------------------------------------------------
-		three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, config_info, delta_t_rk, grid);
+		three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, delta_t_rk, grid);
 		
 		// 8.) Diagnozing the temperature at the new time step.
 		// ----------------------------------------------------------------------------

@@ -28,7 +28,7 @@ int three_band_solver_ver_vel_adv(State *state_old, State *state_new, State *sta
 	return 0;
 }
 
-int three_band_solver_gen_densitites(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, Grid *grid)
+int three_band_solver_gen_densitites(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, double delta_t, Grid *grid)
 {
 	// Vertical constituent advection with 3-band matrices.
 	int layer_index, h_index, is_gas;
@@ -196,7 +196,7 @@ int three_band_solver_ver_hor_vel_adv(State *state_old, State *state_new, State 
 			else
 			{
 				b_vector[j] = 1;
-				delta_z = grid -> z_vector[NO_OF_SCALARS_H + (j - 1)*NO_OF_VECTORS_PER_LAYER + i]- grid -> z_vector[NO_OF_SCALARS_H + (j + 1)*NO_OF_VECTORS_PER_LAYER + i];
+				delta_z = grid -> z_vector[NO_OF_SCALARS_H + (j - 1)*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[NO_OF_SCALARS_H + (j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 				// right hand side
 				// old value
 				d_vector[j] = state_old -> velocity_gas[NO_OF_SCALARS_H + j*NO_OF_VECTORS_PER_LAYER + i]
