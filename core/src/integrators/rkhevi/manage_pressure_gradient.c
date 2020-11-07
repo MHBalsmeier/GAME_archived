@@ -12,6 +12,8 @@ The vertical advection of horizontal momentum is organized here.
 #include <omp.h>
 #include "../../spatial_operators/spatial_operators.h"
 
+double pressure_gradient_1_damping_factor(double);
+
 int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Interpolate_info *interpolation, Diffusion_info *diffusion_info, Config_info *config_info, int no_step_rk)
 {
 	// 1.) The weights for the horizontal pressure gradient acceleration extrapolation.
@@ -80,7 +82,11 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 				diagnostics -> specific_entropy[i] = 0;
 			}
 			// The second pressure gradient term prefactors for dry air as well as water vapour.
-			diagnostics -> pressure_gradient_1_prefactor[i] = state -> temperature_gas[i]
+			diagnostics -> pressure_gradient_1_prefactor[i] =
+			// damping term for small densities
+			pressure_gradient_1_damping_factor(state -> mass_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i])
+			// the physical term
+			*state -> temperature_gas[i]
 			*state -> mass_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i]/density_gas(state, i);
 		}
 		scalar_times_grad(diagnostics -> pressure_gradient_1_prefactor, diagnostics -> specific_entropy, diagnostics -> pressure_gradient_1_component, grid);
@@ -112,7 +118,17 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	return 0;
 }
 
-
+double pressure_gradient_1_damping_factor(double density_value)
+{
+	double safe_density = 1e-8;
+	double result;
+	result = density_value/safe_density;
+	if (result > 1)
+	{
+		result = 1;
+	}
+	return result;
+}
 
 
 
