@@ -14,7 +14,6 @@ The vertical advection of horizontal momentum is organized here.
 
 int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Interpolate_info *interpolation, Diffusion_info *diffusion_info, Config_info *config_info, int no_step_rk)
 {
-	
 	// 1.) The weights for the horizontal pressure gradient acceleration extrapolation.
 	// --------------------------------------------------------------------------------
 	double old_hor_grad_weight, new_hor_grad_weight;
@@ -71,8 +70,15 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
 			// Determining the speicific entropied of the dry air as well as of the water vapour.
-			diagnostics -> specific_entropy[i] = state -> entropy_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i]/
-			state -> mass_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i];
+			if (state -> mass_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i] != 0)
+			{
+				diagnostics -> specific_entropy[i] = state -> entropy_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i]/
+				state -> mass_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i];
+			}
+			else
+			{
+				diagnostics -> specific_entropy[i] = 0;
+			}
 			// The second pressure gradient term prefactors for dry air as well as water vapour.
 			diagnostics -> pressure_gradient_1_prefactor[i] = state -> temperature_gas[i]
 			*state -> mass_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i]/density_gas(state, i);

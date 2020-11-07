@@ -115,7 +115,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 		
 		// Internal energy densities.
 		if (k < NO_OF_CONDENSED_CONSTITUENTS)
-		{	
+		{
 			#pragma omp parallel for
 			for (int i = 0; i < NO_OF_SCALARS; ++i)
 			{

@@ -42,17 +42,21 @@ int temperature_diagnostics(State *state_old, State *state_new)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	// Difference of the mass densities of the gas phase.
+    	density_gas_0 = 0;
+    	density_gas_1 = 0;
     	for (int j = 0; j < NO_OF_GASEOUS_CONSTITUENTS; ++j)
     	{
-			density_gas_0 = state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
-			density_gas_1 = state_new -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
+			density_gas_0 += state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
+			density_gas_1 += state_new -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
 		}
     	delta_density_gas = density_gas_1 - density_gas_0;
     	
+    	entropy_density_gas_0 = 0;
+    	entropy_density_gas_1 = 0;
     	for (int j = 0; j < NO_OF_GASEOUS_CONSTITUENTS; ++j)
     	{
-			entropy_density_gas_0 = state_old -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
-			entropy_density_gas_1 = state_new -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
+			entropy_density_gas_0 += state_old -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
+			entropy_density_gas_1 += state_new -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
 		}
     	delta_entropy_density = entropy_density_gas_1 - entropy_density_gas_0;
     	
@@ -82,17 +86,23 @@ int temperature_diagnostics_explicit(State *state_old, State *state_tendency, Di
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	// Difference of the mass densities of the gas phase.
+    	density_gas_0 = 0;
+    	density_gas_1 = 0;
     	for (int j = 0; j < NO_OF_GASEOUS_CONSTITUENTS; ++j)
     	{
-			density_gas_0 = state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
-			density_gas_1 = density_gas_0 + delta_t*state_tendency -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
+			density_gas_0 += state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
+			density_gas_1 += state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i]
+			+ delta_t*state_tendency -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
     	}
     	delta_density_gas = density_gas_1 - density_gas_0;
     	
+    	entropy_density_gas_0 = 0;
+    	entropy_density_gas_1 = 0;
     	for (int j = 0; j < NO_OF_GASEOUS_CONSTITUENTS; ++j)
     	{
-			entropy_density_gas_0 = state_old -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
-			entropy_density_gas_1 = entropy_density_gas_0 + delta_t*state_tendency -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
+			entropy_density_gas_0 += state_old -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
+			entropy_density_gas_1 += state_old -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i]
+			+ delta_t*state_tendency -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
     	}
     	delta_entropy_density = entropy_density_gas_1 - entropy_density_gas_0;
     	

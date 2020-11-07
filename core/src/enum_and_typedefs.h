@@ -11,7 +11,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #define RHO_WATER 1024.0
 #define OMEGA (7.292115e-5)
 #define RADIUS 6371000.789927
-#define EPSILON_SECURITY (1e-10)
+#define EPSILON_SECURITY (0)
 #define FOOT 0.3048
 
 enum grid_integers {

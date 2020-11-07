@@ -121,10 +121,17 @@ int set_init_data(char FILE_NAME[], State *init_state)
 	    
 		particle_density = init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i]/mean_particle_masses_gas(1);
 		// This is the Sackur-Tetrode equation.
-        init_state -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] =
-        K_B*particle_density*3.0/2*log(entropy_constants_gas(1))
-        + K_B*particle_density*log(1/particle_density)
-        + K_B*particle_density*3.0/2*log(mean_particle_masses_gas(1)*spec_heat_capacities_v_gas(1)*init_state -> temperature_gas[i]);
+		if (particle_density == 0)
+		{
+			init_state -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = 0;
+		}
+		else
+		{
+		    init_state -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] =
+		    K_B*particle_density*3.0/2*log(entropy_constants_gas(1))
+		    + K_B*particle_density*log(1/particle_density)
+		    + K_B*particle_density*3.0/2*log(mean_particle_masses_gas(1)*spec_heat_capacities_v_gas(1)*init_state -> temperature_gas[i]);
+        }
         
         init_state -> condensed_density_temperatures[i] = solid_water_density[i]*solid_water_temperature[i];
         init_state -> condensed_density_temperatures[NO_OF_SCALARS + i] = liquid_water_density[i]*liquid_water_temperature[i];
