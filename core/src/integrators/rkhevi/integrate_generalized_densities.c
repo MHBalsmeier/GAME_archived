@@ -66,11 +66,11 @@ int integrate_generalized_densities(State *state_old, State *state_new, Interpol
 					}
 					else if (layer_index == NO_OF_LAYERS)
 					{
-						density_gas_value = density_gas(state_old, (layer_index - 1)*NO_OF_SCALARS + h_index);
+						density_gas_value = density_gas(state_old, (layer_index - 1)*NO_OF_SCALARS_H + h_index);
 					}
 					else
 					{
-						density_gas_value = 0.5*(density_gas(state_old, (layer_index - 1)*NO_OF_SCALARS + h_index) + density_gas(state_old, layer_index*NO_OF_SCALARS + h_index));
+						density_gas_value = 0.5*(density_gas(state_old, (layer_index - 1)*NO_OF_SCALARS_H + h_index) + density_gas(state_old, layer_index*NO_OF_SCALARS_H + h_index));
 					}
 					
 					// The solid case.
