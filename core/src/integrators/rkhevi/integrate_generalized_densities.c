@@ -160,7 +160,7 @@ int integrate_generalized_densities(State *state_old, State *state_new, Interpol
 			    // the advection
 			     -diagnostics -> flux_density_divv[j]
 			    // the source terms
-			    + state_old -> mass_densities[i*NO_OF_SCALARS + j]/(c_v_cond*density_total(state_old, j))*(diffusion_info -> temperature_diffusion_heating[j] + diffusion_info -> heating_diss[j] + radiation_tendency[j]) + 1/c_v_cond*config_info -> phase_transitions_on*diffusion_info -> constituent_heat_source_rates[i*NO_OF_SCALARS + j] + diagnostics -> density_gen[j]*config_info -> phase_transitions_on*(diffusion_info -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]);
+			    + state_old -> mass_densities[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state_old, j))*(diffusion_info -> temperature_diffusion_heating[j] + diffusion_info -> heating_diss[j] + radiation_tendency[j]) + 1/c_v_cond*config_info -> phase_transitions_on*diffusion_info -> constituent_heat_source_rates[i*NO_OF_SCALARS + j] + diagnostics -> density_gen[j]*config_info -> phase_transitions_on*(diffusion_info -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]);
 			}
 		}
 	}

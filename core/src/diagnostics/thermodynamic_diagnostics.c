@@ -187,7 +187,7 @@ double calc_micro_density(double density_macro, double condensates_density_sum)
 	In a moist atmosphere one needs to distinguish between the densities with respect to the whole volume and the densities with respect to exclusively the gas phase.
 	*/
 	double result = density_macro/(1 - condensates_density_sum/RHO_WATER);
-	if (result < -EPSILON_SECURITY/(1 - condensates_density_sum/RHO_WATER))
+	if (result < 0)
 	{
 		printf("Error: microscopic density negative.\n");
 		printf("Aborting.\n");
@@ -212,7 +212,7 @@ double calc_condensates_density_sum(int scalar_gridpoint_index, Mass_densities m
 	{
 		result += mass_densities[i*NO_OF_SCALARS + scalar_gridpoint_index];
 	}
-	if (result < -NO_OF_CONDENSED_CONSTITUENTS*EPSILON_SECURITY)
+	if (result < 0)
 	{
 		printf("Error: condensates_density_sum negative.\n");
 		printf("Aborting.\n");

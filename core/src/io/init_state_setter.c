@@ -90,9 +90,9 @@ int set_init_data(char FILE_NAME[], State *init_state)
         	printf("Aborting.\n");
         	exit(1);
         }
-        if (init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] < EPSILON_SECURITY)
+        if (init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] < 0)
         {
-        	init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = EPSILON_SECURITY;
+        	init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = 0;
         }
         init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = water_vapour_density[i];
         if (init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] < 0)
@@ -101,9 +101,9 @@ int set_init_data(char FILE_NAME[], State *init_state)
         	printf("Aborting.\n");
         	exit(1);
         }
-        if (init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] < EPSILON_SECURITY)
+        if (init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] < 0)
         {
-        	init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = EPSILON_SECURITY;
+        	init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = 0;
         }
 	}
 	
