@@ -28,9 +28,13 @@ int find_z_from_p(double lat, double p, double *result)
     double phi, phi_bg, phi_perturb;
     double eta_v = (eta - ETA_0)*M_PI/2;
     if (eta >= ETA_T)
+    {
         phi_bg = T_0*G/GAMMA*(1 - pow(eta, R_D*GAMMA/G));
+    }
     else
+    {
         phi_bg = T_0*G/GAMMA*(1 - pow(eta, R_D*GAMMA/G)) - R_D*DELTA_T*((log(eta/ETA_T) + 137.0/60)*pow(ETA_T, 5) - 5*eta*pow(ETA_T, 4) + 5*pow(ETA_T, 3)*pow(eta, 2) - 10.0/3*pow(ETA_T, 2)*pow(eta, 3) + 5.0/4*ETA_T*pow(eta, 4) - 1.0/5*pow(eta, 5));
+    }
     phi_perturb = U_0*pow(cos(eta_v), 1.5)*((-2*pow(sin(lat), 6)*(pow(cos(lat), 2) + 1.0/3) + 10.0/63)*U_0*pow(cos(eta_v), 1.5) + RADIUS*OMEGA*(8.0/5*pow(cos(lat), 3)*(pow(sin(lat), 2) + 2.0/3) - M_PI/4));
     phi = phi_bg + phi_perturb;
     z = phi/G;

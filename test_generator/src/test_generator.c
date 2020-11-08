@@ -31,6 +31,7 @@ For more specific details see handbook.
 #define P_0 100000.0
 #define OMEGA (7.292115e-5)
 #define C_D_P 1005.0
+#define C_D_V 717.942189
 
 // constants specifying the grid
 const double TOA = 30000;
@@ -54,6 +55,8 @@ const double INVERSE_HEIGHT_STANDARD = 20e3;
 const double TEMP_GRADIENT_INV_STANDARD = 0.1/100;
 
 int find_pressure_value(double, double, double *);
+double sackur_tetrode(double, double);
+double solve_specific_entropy_for_density(double, double);
 
 int main(int argc, char *argv[])
 {
@@ -242,14 +245,12 @@ int main(int argc, char *argv[])
         }
         else
         {
-        	lower_entropy_value = C_D_P*log(temperature[i + NO_OF_SCALARS_H]*pow(P_0/(rho[i + NO_OF_SCALARS_H]*R_D*temperature[i + NO_OF_SCALARS_H]), R_D/C_D_P));
+        	lower_entropy_value = sackur_tetrode(rho[i + NO_OF_SCALARS_H], temperature[i + NO_OF_SCALARS_H]);
         	temperature_mean = 0.5*(temperature[i] + temperature[i + NO_OF_SCALARS_H]);
         	delta_temperature = temperature[i] - temperature[i + NO_OF_SCALARS_H];
         	delta_gravity_potential = gravity_potential[i] - gravity_potential[i + NO_OF_SCALARS_H];
         	entropy_value = lower_entropy_value + (delta_gravity_potential + C_D_P*delta_temperature)/temperature_mean;
-        	pot_temp_value = exp(entropy_value/C_D_P);
-        	pressure_value = P_0*pow(temperature[i]/pot_temp_value, C_D_P/R_D);
-        	rho[i] = pressure_value/(R_D*temperature[i]);
+        	rho[i] = solve_specific_entropy_for_density(entropy_value, temperature[i]);
         }
         if (TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 7)
         {
@@ -421,10 +422,28 @@ int find_pressure_value(double lat, double z_height, double *result)
     return 0;
 }
 
+double sackur_tetrode(double mass_density, double temperature)
+{
+	double mean_particle_mass = 0.004810e-23;
+	double entropy_constant = 2429487178047751925300627872548148580712448.000000;
+	double particle_density = mass_density/mean_particle_mass;
+	// returns the specific entropy as a function of the mass density and the temperature
+	double result;
+    result = K_B*(3.0/2*log(entropy_constant)
+    + log(1/particle_density)
+    + 3.0/2*log(mean_particle_mass*C_D_V*temperature))/mean_particle_mass;
+    return result;
+}
 
-
-
-
+double solve_specific_entropy_for_density(double specific_entropy, double temperature)
+{
+	// returns the density as a function of the specific entropy and the temperature
+	double mean_particle_mass = 0.004810e-23;
+	double entropy_constant = 2429487178047751925300627872548148580712448.000000;
+    double particle_density = exp(-mean_particle_mass*specific_entropy/K_B)*pow(entropy_constant, 1.5)*pow(mean_particle_mass*C_D_V*temperature, 1.5);
+    double result = particle_density*mean_particle_mass;
+    return result;
+}
 
 
 
