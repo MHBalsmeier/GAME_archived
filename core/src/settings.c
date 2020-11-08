@@ -8,6 +8,7 @@ In this file, the model run and I/O configurations can be set, which are not acc
 */
 
 #include "../../shared/shared.h"
+#include "atmostracers.h"
 
 int get_gas_contituents_ids(int);
 
