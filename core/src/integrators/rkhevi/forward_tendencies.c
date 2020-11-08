@@ -19,7 +19,7 @@ int forward_tendencies(State *current_state, State *state_tendency, Grid *grid, 
 	// The calculation of the pressure gradient is only done at the first RK step.
 	if (no_step_rk == 0)
 	{
-		manage_pressure_gradient(current_state, grid, dualgrid, diagnostics, forcings, interpolation, diffusion_info, config_info, no_step_rk);
+		manage_pressure_gradient(current_state, grid, dualgrid, diagnostics, forcings, interpolation, diffusion_info, config_info);
 	}
     if (no_step_rk == 2 && config_info -> momentum_diff == 1)
     {

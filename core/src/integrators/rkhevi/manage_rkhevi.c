@@ -25,7 +25,7 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolate_info *interpol
 		config_info -> phase_transitions_on = 0;
 		if (i == 2)
 		{
-			config_info -> phase_transitions_on = 1;
+			config_info -> phase_transitions_on = 0;
 		}
 		delta_t_rk = delta_t/(3 - i);
 		

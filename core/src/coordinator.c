@@ -451,7 +451,9 @@ int main(int argc, char *argv[])
             first_time = clock();
             printf("run progress: %f h\n", (t_0 + delta_t - t_init)/SECONDS_PER_HOUR);
             for (int i = 0; i < min_no_of_output_steps*NO_OF_VECTORS_H; ++i)
+            {
             	wind_h_lowest_layer_array[i] = 0;
+        	}
             wind_10_m_step_counter = 0;
         }
     	counter += 1;

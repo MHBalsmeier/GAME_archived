@@ -130,7 +130,6 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 			}
 		}
 	}
-	
 	return 0;
 }	
 
