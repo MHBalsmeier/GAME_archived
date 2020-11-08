@@ -7,6 +7,10 @@ Github repository: https://github.com/MHBalsmeier/game
 In this file, the model run and I/O configurations can be set, which are not accessible via the run script.
 */
 
+#include "../../shared/shared.h"
+
+int get_gas_contituents_ids(int);
+
 // This is for the Klemp (2008) upper boundary damping layer.
 int get_damping_layer_properties(double *damping_start_height_over_toa, double *damping_coeff_max)
 {
@@ -17,80 +21,25 @@ int get_damping_layer_properties(double *damping_start_height_over_toa, double *
 	return 0;
 }
 
-// thermodynamic quantities
-// ------------------------
-
-double entropy_constants_gas(int gas_constituent_id)
+int get_gas_contituents_ids(int gas_constituent_id)
 {
-	double result = 0;
+	// This defines the constituents of the gas phase.
+	int result = 0;
 	if (gas_constituent_id == 0)
 	{
-		result = 2429487178047751925300627872548148580712448.000000; // ((MEAN_MASS_D*exp(5.0/3))/(3*M_PI*H_BAR*H_BAR))
+		result = 0;
 	}
 	if (gas_constituent_id == 1)
 	{
-		result = 1511084890012154487904341578321985168998400.000000; // ((MEAN_MASS_V*exp(5.0/3))/(3*M_PI*H_BAR*H_BAR))
+		result = 1;
 	}
 	return result;
 }
 
-double mean_particle_masses_gas(int gas_constituent_id)
-{
-	double result = 0;
-	if (gas_constituent_id == 0)
-	{
-		result = 0.004810e-23;
-	}
-	if (gas_constituent_id == 1)
-	{
-		result = 0.002991e-23;
-	}
-	return result;
-}
+// input and output
+// ---------------------
 
-double spec_heat_capacities_v_gas(int gas_constituent_id)
-{
-	double result = 0;
-	if (gas_constituent_id == 0)
-	{
-		result = 717.942189;
-	}
-	if (gas_constituent_id == 1)
-	{
-		result = 1396.475121;
-	}
-	return result;
-}
-
-double spec_heat_capacities_p_gas(int gas_constituent_id)
-{
-	double result = 0;
-	if (gas_constituent_id == 0)
-	{
-		result = 1005.0;
-	}
-	if (gas_constituent_id == 1)
-	{
-		result = 1858.0;
-	}
-	return result;
-}
-
-double specific_gas_constants(int gas_constituent_id)
-{
-	double result = 0;
-	if (gas_constituent_id == 0)
-	{
-		result = 287.057811;
-	}
-	if (gas_constituent_id == 1)
-	{
-		result = 461.524879;
-	}
-	return result;
-}
-
-// This function returns the pressure levels for the pressure_leveltic output.
+// This function returns the pressure levels for the pressure_level output.
 int get_pressure_levels(double pressure_levels[])
 {
 	pressure_levels[0] = 20000;
@@ -101,9 +50,6 @@ int get_pressure_levels(double pressure_levels[])
 	pressure_levels[5] = 92500;
 	return 0;
 }
-
-// input and output
-// ---------------------
 
 // Wether or not horizontal wind divergence shall be written out.
 int ask_for_divergence_output(int *write_out_divv_h)
@@ -124,6 +70,38 @@ int get_flight_levels(double flight_levels[])
 	flight_levels[6] = 400;
 	return 0;
 }
+
+
+// the user should not change anything below here
+// ----------------------------------------------
+
+double entropy_constants_gas(int gas_constituent_id)
+{
+	return entropy_constants_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
+}
+
+double mean_particle_masses_gas(int gas_constituent_id)
+{
+	return mean_particle_masses_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
+}
+
+double spec_heat_capacities_v_gas(int gas_constituent_id)
+{
+	return spec_heat_capacities_v_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
+}
+
+double spec_heat_capacities_p_gas(int gas_constituent_id)
+{
+	return spec_heat_capacities_p_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
+}
+
+double specific_gas_constants(int gas_constituent_id)
+{
+	return specific_gas_constants_lookup(get_gas_contituents_ids(gas_constituent_id));
+}
+
+
+
 
 
 

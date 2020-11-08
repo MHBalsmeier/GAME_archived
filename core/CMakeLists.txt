@@ -11,6 +11,7 @@ set(CMAKE_C_COMPILER mpicc)
 add_executable(
 game
 src/coordinator.c
+../shared/various.c
 src/settings.c
 src/integrators/rkhevi/manage_rkhevi.c
 src/integrators/rkhevi/manage_pressure_gradient.c
