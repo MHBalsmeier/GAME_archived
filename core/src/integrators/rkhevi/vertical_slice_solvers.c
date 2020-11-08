@@ -435,8 +435,8 @@ int three_band_solver_ver_gen_density(Diagnostics *diagnostics, double delta_t, 
 		// diagnozing the vertical flux
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
-			vertical_flux_vector[j] = diagnostics -> velocity_gen[j*NO_OF_VECTORS_PER_LAYER + i];
-			area = grid -> area[NO_OF_VECTORS_PER_LAYER + j*NO_OF_VECTORS_PER_LAYER + i];
+			vertical_flux_vector[j] = diagnostics -> velocity_gen[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
+			area = grid -> area[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 			vertical_flux_vector[j] = area*vertical_flux_vector[j];
 		}
 		// filling up the original vectors
