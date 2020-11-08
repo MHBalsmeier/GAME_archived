@@ -36,14 +36,14 @@ int integrate_generalized_densities(State *state_old, State *state_new, Interpol
 		{
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
-			    diagnostics -> density_gen[j] = state_old -> mass_densities[i*NO_OF_SCALARS + j];
+			    diagnostics -> scalar_field_placeholder[j] = state_old -> mass_densities[i*NO_OF_SCALARS + j];
 		    }
         }
 		else
 		{
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
-			    diagnostics -> density_gen[j] = state_new -> mass_densities[i*NO_OF_SCALARS + j];
+			    diagnostics -> scalar_field_placeholder[j] = state_new -> mass_densities[i*NO_OF_SCALARS + j];
 		    }
         }
         
@@ -91,12 +91,12 @@ int integrate_generalized_densities(State *state_old, State *state_new, Interpol
 	            	diagnostics -> velocity_gen[j] = state_new -> velocity_gas[j];
             	}
 	        }
-        	scalar_times_vector(diagnostics -> density_gen, diagnostics -> velocity_gen, diagnostics -> flux_density, grid, 0);
+        	scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> velocity_gen, diagnostics -> flux_density, grid, 0);
     	}
     	// This is not the case for gaseous constituents.
     	else
     	{
-        	scalar_times_vector(diagnostics -> density_gen, state_new -> velocity_gas, diagnostics -> flux_density, grid, 0);
+        	scalar_times_vector(diagnostics -> scalar_field_placeholder, state_new -> velocity_gas, diagnostics -> flux_density, grid, 0);
     	}
         divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
@@ -115,28 +115,28 @@ int integrate_generalized_densities(State *state_old, State *state_new, Interpol
 		{
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
-				diagnostics -> density_gen[j] = state_old -> mass_densities[i*NO_OF_SCALARS + j];
+				diagnostics -> scalar_field_placeholder[j] = state_old -> mass_densities[i*NO_OF_SCALARS + j];
 			}
 		}
 		else
 		{
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
-				diagnostics -> density_gen[j] = state_new -> mass_densities[i*NO_OF_SCALARS + j];
+				diagnostics -> scalar_field_placeholder[j] = state_new -> mass_densities[i*NO_OF_SCALARS + j];
 			}
 		}
-	    scalar_times_vector(diagnostics -> density_gen, state_new -> velocity_gas, diagnostics -> flux_density, grid, 0);
+	    scalar_times_vector(diagnostics -> scalar_field_placeholder, state_new -> velocity_gas, diagnostics -> flux_density, grid, 0);
 		if (no_rk_step == 0)
 		{
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
 				if (state_old -> mass_densities[i*NO_OF_SCALARS + j] != 0)
 				{
-					diagnostics -> density_gen[j] = state_old -> entropy_densities[i*NO_OF_SCALARS + j]/state_old -> mass_densities[i*NO_OF_SCALARS + j];
+					diagnostics -> scalar_field_placeholder[j] = state_old -> entropy_densities[i*NO_OF_SCALARS + j]/state_old -> mass_densities[i*NO_OF_SCALARS + j];
 				}
 				else
 				{
-					diagnostics -> density_gen[j] = 0;
+					diagnostics -> scalar_field_placeholder[j] = 0;
 				}
 			}
 		}
@@ -146,15 +146,15 @@ int integrate_generalized_densities(State *state_old, State *state_new, Interpol
 			{
 				if (state_new -> mass_densities[i*NO_OF_SCALARS + j] != 0)
 				{
-					diagnostics -> density_gen[j] = state_new -> entropy_densities[i*NO_OF_SCALARS + j]/state_new -> mass_densities[i*NO_OF_SCALARS + j];
+					diagnostics -> scalar_field_placeholder[j] = state_new -> entropy_densities[i*NO_OF_SCALARS + j]/state_new -> mass_densities[i*NO_OF_SCALARS + j];
 				}
 				else
 				{
-					diagnostics -> density_gen[j] = 0;
+					diagnostics -> scalar_field_placeholder[j] = 0;
 				}
 			}
 		}
-	    scalar_times_vector(diagnostics -> density_gen, diagnostics -> flux_density, diagnostics -> flux_density, grid, 0);
+	    scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid, 0);
 	    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
 		{
@@ -170,18 +170,18 @@ int integrate_generalized_densities(State *state_old, State *state_new, Interpol
 			{
 				for (int j = 0; j < NO_OF_SCALARS; ++j)
 				{
-					diagnostics -> density_gen[j] = state_old -> condensed_density_temperatures[i*NO_OF_SCALARS + j];
+					diagnostics -> scalar_field_placeholder[j] = state_old -> condensed_density_temperatures[i*NO_OF_SCALARS + j];
 				}
 			}
 			else
 			{
 				for (int j = 0; j < NO_OF_SCALARS; ++j)
 				{
-					diagnostics -> density_gen[j] = state_new -> condensed_density_temperatures[i*NO_OF_SCALARS + j];
+					diagnostics -> scalar_field_placeholder[j] = state_new -> condensed_density_temperatures[i*NO_OF_SCALARS + j];
 				}
 			}		
 			// The constituent velocity has already been calculated.
-		    scalar_times_vector(diagnostics -> density_gen, diagnostics -> velocity_gen, diagnostics -> flux_density, grid, 0);
+		    scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> velocity_gen, diagnostics -> flux_density, grid, 0);
 		    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
@@ -190,7 +190,7 @@ int integrate_generalized_densities(State *state_old, State *state_new, Interpol
 			    // the advection
 			     -diagnostics -> flux_density_divv[j]
 			    // the source terms
-			    + state_old -> mass_densities[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state_old, j))*(diffusion_info -> temperature_diffusion_heating[j] + diffusion_info -> heating_diss[j] + radiation_tendency[j]) + 1/c_v_cond*config_info -> phase_transitions_on*diffusion_info -> constituent_heat_source_rates[i*NO_OF_SCALARS + j] + diagnostics -> density_gen[j]*config_info -> phase_transitions_on*(diffusion_info -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]);
+			    + state_old -> mass_densities[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state_old, j))*(diffusion_info -> temperature_diffusion_heating[j] + diffusion_info -> heating_diss[j] + radiation_tendency[j]) + 1/c_v_cond*config_info -> phase_transitions_on*diffusion_info -> constituent_heat_source_rates[i*NO_OF_SCALARS + j] + diagnostics -> scalar_field_placeholder[j]*config_info -> phase_transitions_on*(diffusion_info -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]);
 			}
 		}
 	}

@@ -74,12 +74,12 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 			// Determining the speicific entropied of the dry air as well as of the water vapour.
 			if (state -> mass_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i] != 0)
 			{
-				diagnostics -> specific_entropy[i] = state -> entropy_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i]/
+				diagnostics -> scalar_field_placeholder[i] = state -> entropy_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i]/
 				state -> mass_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i];
 			}
 			else
 			{
-				diagnostics -> specific_entropy[i] = 0;
+				diagnostics -> scalar_field_placeholder[i] = 0;
 			}
 			// The second pressure gradient term prefactors for dry air as well as water vapour.
 			diagnostics -> pressure_gradient_1_prefactor[i] =
@@ -89,7 +89,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 			*state -> temperature_gas[i]
 			*state -> mass_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i]/density_gas(state, i);
 		}
-		scalar_times_grad(diagnostics -> pressure_gradient_1_prefactor, diagnostics -> specific_entropy, diagnostics -> pressure_gradient_1_component, grid);
+		scalar_times_grad(diagnostics -> pressure_gradient_1_prefactor, diagnostics -> scalar_field_placeholder, diagnostics -> pressure_gradient_1_component, grid);
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
 		{

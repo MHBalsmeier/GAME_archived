@@ -2013,9 +2013,9 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			#pragma omp parallel for
 			for (int i = 0; i < NO_OF_SCALARS; ++i)
 			{
-				diagnostics -> density_gen[i] = state_write_out -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
+				diagnostics -> scalar_field_placeholder[i] = state_write_out -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
 			}
-			if ((retval = nc_put_var_double(ncid, density_dry_id, &diagnostics -> density_gen[0])))
+			if ((retval = nc_put_var_double(ncid, density_dry_id, &diagnostics -> scalar_field_placeholder[0])))
 				NCERR(retval);
 			if ((retval = nc_put_var_double(ncid, pressure_id, &(*rel_vort)[0])))
 				NCERR(retval);
@@ -2082,9 +2082,9 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
 		#pragma omp parallel for
 		for (int i = 0; i< NO_OF_SCALARS; ++i)
 		{
-			diagnostics -> density_gen[i] = state_write_out -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
+			diagnostics -> scalar_field_placeholder[i] = state_write_out -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
 		}
-    	global_scalar_integrator(diagnostics -> density_gen, grid, &global_integral);
+    	global_scalar_integrator(diagnostics -> scalar_field_placeholder, grid, &global_integral);
     	fprintf(global_integral_file, "%d\t%lf\n", step_counter, global_integral);
     	fclose(global_integral_file);
     }
@@ -2094,9 +2094,9 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
 		#pragma omp parallel for
 		for (int i = 0; i< NO_OF_SCALARS; ++i)
 		{
-			diagnostics -> density_gen[i] = state_write_out -> entropy_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
+			diagnostics -> scalar_field_placeholder[i] = state_write_out -> entropy_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
 		}
-    	global_scalar_integrator(diagnostics -> density_gen, grid, &global_integral);
+    	global_scalar_integrator(diagnostics -> scalar_field_placeholder, grid, &global_integral);
     	fprintf(global_integral_file, "%d\t%lf\n", step_counter, global_integral);
     	fclose(global_integral_file);
     }
@@ -2109,17 +2109,17 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
 		#pragma omp parallel for
 		for (int i = 0; i< NO_OF_SCALARS; ++i)
 		{
-			diagnostics -> density_gen[i] = state_write_out -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
+			diagnostics -> scalar_field_placeholder[i] = state_write_out -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
 		}
-    	scalar_times_scalar(diagnostics -> density_gen, *e_kin_density, *e_kin_density);
+    	scalar_times_scalar(diagnostics -> scalar_field_placeholder, *e_kin_density, *e_kin_density);
     	global_scalar_integrator(*e_kin_density, grid, &kinetic_integral);
     	free(e_kin_density);
     	Scalar_field *pot_energy_density = malloc(sizeof(Scalar_field));
-    	scalar_times_scalar(diagnostics -> density_gen, grid -> gravity_potential, *pot_energy_density);
+    	scalar_times_scalar(diagnostics -> scalar_field_placeholder, grid -> gravity_potential, *pot_energy_density);
     	global_scalar_integrator(*pot_energy_density, grid, &potential_integral);
     	free(pot_energy_density);
     	Scalar_field *int_energy_density = malloc(sizeof(Scalar_field));
-    	scalar_times_scalar(diagnostics -> density_gen, state_write_out -> temperature_gas, *int_energy_density);
+    	scalar_times_scalar(diagnostics -> scalar_field_placeholder, state_write_out -> temperature_gas, *int_energy_density);
     	global_scalar_integrator(*int_energy_density, grid, &internal_integral);
     	fprintf(global_integral_file, "%d\t%lf\t%lf\t%lf\n", step_counter, kinetic_integral, potential_integral, spec_heat_capacities_v_gas(0)*internal_integral);
     	free(int_energy_density);

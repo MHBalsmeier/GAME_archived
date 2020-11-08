@@ -19,11 +19,11 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		diagnostics -> density_gen[i] = density_gas(state, i);
+		diagnostics -> scalar_field_placeholder[i] = density_gas(state, i);
 	}
-    scalar_times_vector(diagnostics -> density_gen, state -> velocity_gas, diagnostics -> flux_density, grid, 0);
+    scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid, 0);
     // Now, the potential vorticity is evaluated.
-    calc_pot_vort(state -> velocity_gas, diagnostics -> density_gen, diagnostics, grid, dualgrid);
+    calc_pot_vort(state -> velocity_gas, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
     // Now, the generalized Coriolis term is evaluated.
     coriolis_gen(diagnostics -> flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid);
     // Horizontal kinetic energy is prepared for the gradient term of the Lamb transformation.

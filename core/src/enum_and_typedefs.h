@@ -113,8 +113,7 @@ typedef struct diagnostics {
 Vector_field flux_density;
 Scalar_field flux_density_divv;
 Vector_field temperature_gradient;
-Scalar_field specific_entropy;
-Vector_field pressure_gradient_1_prefactor;
+Scalar_field pressure_gradient_1_prefactor;
 Scalar_field temperature_gas_explicit;
 Curl_field rel_vort;
 Curl_field pot_vort;
@@ -129,7 +128,7 @@ Vector_field pressure_gradient_1;
 // This is for the momentum diffusion.
 Scalar_field velocity_gas_divv;
 Vector_field curl_of_vorticity_m;
-Scalar_field density_gen;
+Scalar_field scalar_field_placeholder;
 Scalar_field density_gen_explicit_tendency;
 Vector_field velocity_gen;
 } Diagnostics;

@@ -74,14 +74,14 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
-			diagnostics -> density_gen[i] = state_old -> mass_densities[k*NO_OF_SCALARS + i];
+			diagnostics -> scalar_field_placeholder[i] = state_old -> mass_densities[k*NO_OF_SCALARS + i];
 			diagnostics -> density_gen_explicit_tendency[i] = state_tendency -> mass_densities[k*NO_OF_SCALARS + i];
 		}
 		three_band_solver_ver_gen_density(diagnostics, delta_t, grid);
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
-			state_new -> mass_densities[k*NO_OF_SCALARS + i] = diagnostics -> density_gen[i];
+			state_new -> mass_densities[k*NO_OF_SCALARS + i] = diagnostics -> scalar_field_placeholder[i];
 			// limiter
 			if (state_new -> mass_densities[k*NO_OF_SCALARS + i] < 0)
 			{
@@ -93,14 +93,14 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
-			diagnostics -> density_gen[i] = state_old -> entropy_densities[k*NO_OF_SCALARS + i];
+			diagnostics -> scalar_field_placeholder[i] = state_old -> entropy_densities[k*NO_OF_SCALARS + i];
 			diagnostics -> density_gen_explicit_tendency[i] = state_tendency -> entropy_densities[k*NO_OF_SCALARS + i];
 		}
 		three_band_solver_ver_gen_density(diagnostics, delta_t, grid);
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
-			state_new -> entropy_densities[k*NO_OF_SCALARS + i] = diagnostics -> density_gen[i];
+			state_new -> entropy_densities[k*NO_OF_SCALARS + i] = diagnostics -> scalar_field_placeholder[i];
 			// limiter
 			if (state_new -> entropy_densities[k*NO_OF_SCALARS + i] < 0)
 			{
@@ -114,14 +114,14 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 			#pragma omp parallel for
 			for (int i = 0; i < NO_OF_SCALARS; ++i)
 			{
-				diagnostics -> density_gen[i] = state_old -> condensed_density_temperatures[k*NO_OF_SCALARS + i];
+				diagnostics -> scalar_field_placeholder[i] = state_old -> condensed_density_temperatures[k*NO_OF_SCALARS + i];
 				diagnostics -> density_gen_explicit_tendency[i] = state_tendency -> condensed_density_temperatures[k*NO_OF_SCALARS + i];
 			}
 			three_band_solver_ver_gen_density(diagnostics, delta_t, grid);
 			#pragma omp parallel for
 			for (int i = 0; i < NO_OF_SCALARS; ++i)
 			{
-				state_new -> condensed_density_temperatures[k*NO_OF_SCALARS + i] = diagnostics -> density_gen[i];
+				state_new -> condensed_density_temperatures[k*NO_OF_SCALARS + i] = diagnostics -> scalar_field_placeholder[i];
 				// limiter
 				if (state_new -> condensed_density_temperatures[k*NO_OF_SCALARS + i] < 0)
 				{
@@ -459,12 +459,12 @@ int three_band_solver_ver_gen_density(Diagnostics *diagnostics, double delta_t, 
 			{
 				b_vector[j] = 1 + delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*(vertical_flux_vector[j - 1] - vertical_flux_vector[j]);
 			}
-			d_vector[j] = diagnostics -> density_gen[j*NO_OF_SCALARS_H + i] + delta_t*diagnostics -> density_gen_explicit_tendency[j*NO_OF_SCALARS_H + i];
+			d_vector[j] = diagnostics -> scalar_field_placeholder[j*NO_OF_SCALARS_H + i] + delta_t*diagnostics -> density_gen_explicit_tendency[j*NO_OF_SCALARS_H + i];
 		}
 		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, NO_OF_LAYERS);
 		for (j = 0; j < NO_OF_LAYERS; ++j)
 		{
-			diagnostics -> density_gen[j*NO_OF_SCALARS_H + i] = solution_vector[j];
+			diagnostics -> scalar_field_placeholder[j*NO_OF_SCALARS_H + i] = solution_vector[j];
 		}
 	}
 	return 0;
