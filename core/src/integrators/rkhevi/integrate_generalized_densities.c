@@ -91,12 +91,12 @@ int integrate_generalized_densities(State *state_old, State *state_new, Interpol
 	            	diagnostics -> velocity_gen[j] = state_new -> velocity_gas[j];
             	}
 	        }
-        	scalar_times_vector_vector_h_v(diagnostics -> density_gen, diagnostics -> velocity_gen, diagnostics -> velocity_gen, diagnostics -> flux_density, grid);
+        	scalar_times_vector(diagnostics -> density_gen, diagnostics -> velocity_gen, diagnostics -> flux_density, grid, 0);
     	}
     	// This is not the case for gaseous constituents.
     	else
     	{
-        	scalar_times_vector_vector_h_v(diagnostics -> density_gen, state_new -> velocity_gas, state_new -> velocity_gas, diagnostics -> flux_density, grid);
+        	scalar_times_vector(diagnostics -> density_gen, state_new -> velocity_gas, diagnostics -> flux_density, grid, 0);
     	}
         divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
@@ -115,17 +115,46 @@ int integrate_generalized_densities(State *state_old, State *state_new, Interpol
 		{
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
-				diagnostics -> density_gen[j] = state_old -> entropy_densities[i*NO_OF_SCALARS + j];
+				diagnostics -> density_gen[j] = state_old -> mass_densities[i*NO_OF_SCALARS + j];
 			}
 		}
 		else
 		{
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
-				diagnostics -> density_gen[j] = state_new -> entropy_densities[i*NO_OF_SCALARS + j];
+				diagnostics -> density_gen[j] = state_new -> mass_densities[i*NO_OF_SCALARS + j];
 			}
 		}
-	    scalar_times_vector_vector_h_v(diagnostics -> density_gen, state_new -> velocity_gas, state_new -> velocity_gas, diagnostics -> flux_density, grid);
+	    scalar_times_vector(diagnostics -> density_gen, state_new -> velocity_gas, diagnostics -> flux_density, grid, 0);
+		if (no_rk_step == 0)
+		{
+			for (int j = 0; j < NO_OF_SCALARS; ++j)
+			{
+				if (state_old -> mass_densities[i*NO_OF_SCALARS + j] != 0)
+				{
+					diagnostics -> density_gen[j] = state_old -> entropy_densities[i*NO_OF_SCALARS + j]/state_old -> mass_densities[i*NO_OF_SCALARS + j];
+				}
+				else
+				{
+					diagnostics -> density_gen[j] = 0;
+				}
+			}
+		}
+		else
+		{
+			for (int j = 0; j < NO_OF_SCALARS; ++j)
+			{
+				if (state_new -> mass_densities[i*NO_OF_SCALARS + j] != 0)
+				{
+					diagnostics -> density_gen[j] = state_new -> entropy_densities[i*NO_OF_SCALARS + j]/state_new -> mass_densities[i*NO_OF_SCALARS + j];
+				}
+				else
+				{
+					diagnostics -> density_gen[j] = 0;
+				}
+			}
+		}
+	    scalar_times_vector(diagnostics -> density_gen, diagnostics -> flux_density, diagnostics -> flux_density, grid, 0);
 	    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
 		{

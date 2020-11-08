@@ -29,7 +29,7 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
         else if (layer_index == NO_OF_LAYERS - 1)
         {
 			vertical_contravariant_normalized_h(in_field, layer_index, h_index, grid, &contra_upper);
-		comp_v = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
+			comp_v = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
         }
         else
         {
