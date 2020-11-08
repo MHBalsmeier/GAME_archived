@@ -120,12 +120,9 @@ Curl_field pot_vort;
 Scalar_field c_g_v_field;
 Scalar_field c_g_p_field;
 Scalar_field e_kin_h;
-// nabla h
 Vector_field pressure_gradient_0_m;
-// temperature times nabla s
 Vector_field pressure_gradient_1_component;
 Vector_field pressure_gradient_1;
-// This is for the momentum diffusion.
 Scalar_field velocity_gas_divv;
 Vector_field curl_of_vorticity_m;
 Scalar_field scalar_field_placeholder;
