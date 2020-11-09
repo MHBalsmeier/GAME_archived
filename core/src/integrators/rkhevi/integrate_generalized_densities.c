@@ -24,9 +24,9 @@ int integrate_generalized_densities(State *state_old, State *state_new, Interpol
 	phase transitions are on only at the third RK step
 	only then, they are also updated
 	*/
-	if (config_info -> phase_transitions_on == 1)
+	if (config_info -> phase_transitions_on == 1 && NO_OF_CONSTITUENTS == 4)
 	{
-	    calc_h2otracers_source_rates(irreversible_quantities -> constituent_mass_source_rates, irreversible_quantities -> constituent_heat_source_rates, state_old-> mass_densities, state_old -> condensed_density_temperatures, state_old -> temperature_gas, NO_OF_CONSTITUENTS, NO_OF_SCALARS, delta_t);
+	    calc_h2otracers_source_rates(irreversible_quantities -> constituent_mass_source_rates, irreversible_quantities -> constituent_heat_source_rates, state_old-> mass_densities, state_old -> condensed_density_temperatures, state_old -> temperature_gas, NO_OF_SCALARS, delta_t);
 	}
 	
 	for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
