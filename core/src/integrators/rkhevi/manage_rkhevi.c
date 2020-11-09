@@ -10,7 +10,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdlib.h>
 #include <stdio.h>
 
-int manage_rkhevi(State *state_old, State *state_new, Interpolate_info *interpolation, Grid *grid, Dualgrid *dualgrid, Scalar_field radiation_tendency, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Diffusion_info *diffusion_info, Config_info *config_info, double delta_t)
+int manage_rkhevi(State *state_old, State *state_new, Interpolate_info *interpolation, Grid *grid, Dualgrid *dualgrid, Scalar_field radiation_tendency, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, double delta_t)
 {
 	/*
 	Here, the RK3 scheme is implemented.
@@ -33,11 +33,11 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolate_info *interpol
 		// ----------------------------------------------------------------------------
 		if (i == 0)
 		{
-			forward_tendencies(state_old, state_tendency, grid, dualgrid, diagnostics, forcings, interpolation, diffusion_info, config_info, i);
+			forward_tendencies(state_old, state_tendency, grid, dualgrid, diagnostics, forcings, interpolation, irreversible_quantities, config_info, i);
 		}
 		else
 		{
-			forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, interpolation, diffusion_info, config_info, i);
+			forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, interpolation, irreversible_quantities, config_info, i);
 		}
 		
 		// 3.) Vertical advection of momentum.
@@ -47,7 +47,7 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolate_info *interpol
 		
 		// 4.) Explicit component of the generalized density equations.
 		// ----------------------------------------------------------------------------
-		backward_tendencies(state_old, state_new, interpolation, state_tendency, grid, dualgrid, delta_t_rk, radiation_tendency, diagnostics, forcings, diffusion_info, config_info, i);
+		backward_tendencies(state_old, state_new, interpolation, state_tendency, grid, dualgrid, delta_t_rk, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i);
 		// determining the explicit component of the new temperature
 		
 		// 5.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies.

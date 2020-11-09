@@ -366,7 +366,7 @@ int main(int argc, char *argv[])
     int counter = 0;
     State *state_tendency = calloc(1, sizeof(State));
     Interpolate_info *interpolation = calloc(1, sizeof(Interpolate_info));
-    Diffusion_info *diffusion = calloc(1, sizeof(Diffusion_info));
+    Irreversible_quantities *diffusion = calloc(1, sizeof(Irreversible_quantities));
     config_info -> rad_update = 1;
     linear_combine_two_states(state_old, state_old, state_new, 1, 0);
     config_info -> totally_first_step_bool = 1;

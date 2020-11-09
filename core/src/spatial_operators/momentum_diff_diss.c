@@ -7,7 +7,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include "spatial_operators.h"
 #include "../diagnostics/diagnostics.h"
 
-int momentum_diff_diss(State *state, Diagnostics *diagnostics, Diffusion_info *diffusion, Config_info *config_info, Grid *grid, Dualgrid *dualgrid)
+int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quantities *diffusion, Config_info *config_info, Grid *grid, Dualgrid *dualgrid)
 {	
 	// Firstly the diffusion.
 	// Evaluating necessary differential operators.

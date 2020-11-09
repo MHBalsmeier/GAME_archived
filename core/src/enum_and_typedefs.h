@@ -157,7 +157,7 @@ Vector_field pressure_gradient_1_old;
 } Interpolate_info;
 
 // Contains everything on turbulence parametrizations as well as constituent-related quantities.
-typedef struct diffusion_info {
+typedef struct irreversible_quantities {
 Scalar_field temperature_diffusion_heating;
 Vector_field friction_acc;
 Scalar_field heating_diss;
@@ -170,7 +170,7 @@ double constituent_mass_source_rates[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
 double constituent_heat_source_rates[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
 Scalar_field divv_term_viscosity_eff;
 Scalar_field curl_term_viscosity_eff;
-} Diffusion_info;
+} Irreversible_quantities;
 
 // Info on input and output is collected here.
 typedef struct io_config {

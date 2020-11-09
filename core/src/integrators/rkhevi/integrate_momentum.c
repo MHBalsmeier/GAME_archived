@@ -13,7 +13,7 @@ In this source file, the calculation of the explicit part of the momentum equati
 #include "atmostracers.h"
 #include "../../diagnostics/diagnostics.h"
 
-int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Diffusion_info *diffusion_info, Config_info *config_info, int no_step_rk)
+int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_step_rk)
 {
 	// Here, the gaseous flux density is prepared for the generalized Coriolis term.
 	#pragma omp parallel for
@@ -46,7 +46,7 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
     			recov_hor_ver_pri(state -> velocity_gas, layer_index, h_index - NO_OF_SCALARS_H, &vertical_velocity, grid);
     			metric_term = -vertical_velocity*state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
     			hor_non_trad_cori_term = -vertical_velocity*dualgrid -> f_vec[2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
-        		state_tendency -> velocity_gas[i] = forcings -> pressure_gradient_acc[i] + forcings -> pot_vort_tend[i] - grid -> gravity_m[i] - forcings -> e_kin_h_grad[i] + hor_non_trad_cori_term + metric_term + diffusion_info -> friction_acc[i];
+        		state_tendency -> velocity_gas[i] = forcings -> pressure_gradient_acc[i] + forcings -> pot_vort_tend[i] - grid -> gravity_m[i] - forcings -> e_kin_h_grad[i] + hor_non_trad_cori_term + metric_term + irreversible_quantities -> friction_acc[i];
     		}
         	if (h_index < NO_OF_SCALARS_H)
         	{
@@ -67,7 +67,7 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
 					c_h_p = 0.5*(spec_heat_cap_diagnostics_p(state, (layer_index - 1)*NO_OF_SCALARS_H + h_index)
 					+ spec_heat_cap_diagnostics_p(state, layer_index*NO_OF_SCALARS_H + h_index));
 				}
-        		state_tendency -> velocity_gas[i] = forcings -> pot_vort_tend[i] - forcings -> e_kin_h_grad[i] - grid -> gravity_m[i] + r_h/c_h_p*forcings -> pressure_gradient_acc[i] + diffusion_info -> friction_acc[i];
+        		state_tendency -> velocity_gas[i] = forcings -> pot_vort_tend[i] - forcings -> e_kin_h_grad[i] - grid -> gravity_m[i] + r_h/c_h_p*forcings -> pressure_gradient_acc[i] + irreversible_quantities -> friction_acc[i];
     		}
         }
     }
