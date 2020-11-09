@@ -115,21 +115,6 @@ int integrate_generalized_densities(State *state_old, State *state_new, Interpol
 		{
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
-				diagnostics -> scalar_field_placeholder[j] = state_old -> mass_densities[i*NO_OF_SCALARS + j];
-			}
-		}
-		else
-		{
-			for (int j = 0; j < NO_OF_SCALARS; ++j)
-			{
-				diagnostics -> scalar_field_placeholder[j] = state_new -> mass_densities[i*NO_OF_SCALARS + j];
-			}
-		}
-	    scalar_times_vector(diagnostics -> scalar_field_placeholder, state_new -> velocity_gas, diagnostics -> flux_density, grid, 0);
-		if (no_rk_step == 0)
-		{
-			for (int j = 0; j < NO_OF_SCALARS; ++j)
-			{
 				if (state_old -> mass_densities[i*NO_OF_SCALARS + j] != 0)
 				{
 					diagnostics -> scalar_field_placeholder[j] = state_old -> entropy_densities[i*NO_OF_SCALARS + j]/state_old -> mass_densities[i*NO_OF_SCALARS + j];
