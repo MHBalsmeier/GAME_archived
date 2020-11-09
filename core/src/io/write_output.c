@@ -856,7 +856,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     Scalar_field *pressure = calloc(1, sizeof(Scalar_field));
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-    	(*rh)[i] = 100*rel_humidity(state_write_out -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], state_write_out -> temperature_gas[i]);
+    	(*rh)[i] = 100*rel_humidity(state_write_out -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i], state_write_out -> temperature_gas[i]);
     	(*pressure)[i] = density_gas(state_write_out, i)*gas_constant_diagnostics(state_write_out, i)*state_write_out -> temperature_gas[i];
     }
 	// Pressure level output.

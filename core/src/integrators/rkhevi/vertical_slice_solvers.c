@@ -494,9 +494,13 @@ int thomas_algorithm(double a_vector[], double b_vector[], double c_vector[], do
 int sign(double x)
 {
 	if (x > 0)
+	{
 		return 1;
+	}
 	if (x < 0)
+	{
 		return -1;
+	}
 	return 0;
 }
 

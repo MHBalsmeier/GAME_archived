@@ -6,7 +6,7 @@
 game_home_dir=/home/max/compiled/game_dev # the home directory of GAME
 run_id=ullrich_dry_irrev # the run id which you want to plot
 output_dir=$game_home_dir/output/$run_id # the directory where the grib files are stored
-fig_save_path=/home/max/figs/game_output/$run_id # the directory to which the figures will be saved
+fig_save_path=/home/max/figs/game_output # the directory to which the figures will be saved
 plot_mass_dry_integral=1 # set this to one if you want to plot the dry mass of the atmospheric domain
 plot_entropy_gas_integral=1 # set this to one if you want to plot the entropy of the atmospheric domain
 plot_energy_integral=1 # set this to one if you want to plot the energy forms of the atmospheric domain

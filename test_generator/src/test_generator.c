@@ -65,13 +65,21 @@ int main(int argc, char *argv[])
    	// determining the orography ID as a function of the test ID
 	int ORO_ID;
 	if (TEST_ID == 0 || TEST_ID == 8 || TEST_ID == 9)
+	{
 		ORO_ID = 0;
+	}
 	if (TEST_ID == 1)
+	{
 		ORO_ID = 1;
+	}
 	if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
+	{
 		ORO_ID = 2;
+	}
 	if (TEST_ID == 6 || TEST_ID == 7)
+	{
 		ORO_ID = 3;
+	}
     double *direction = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *latitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
     double *longitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -312,7 +320,9 @@ int main(int argc, char *argv[])
             lon = longitude_scalar[j];
             z_height = z_vector[j + i*NO_OF_VECTORS_PER_LAYER];
             if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 8 || TEST_ID == 9)
+            {
                 wind[i*NO_OF_VECTORS_PER_LAYER + j] = 0;
+            }
         }
     }
     free(z_vector);

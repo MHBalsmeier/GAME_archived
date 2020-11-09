@@ -61,7 +61,6 @@ int set_init_data(char FILE_NAME[], State *init_state)
     if ((retval = nc_close(ncid)))
         NCERR(retval);
     
-    double particle_density;
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         init_state -> temperature_gas[i] = temperature_gas[i];
@@ -90,10 +89,6 @@ int set_init_data(char FILE_NAME[], State *init_state)
         	printf("Aborting.\n");
         	exit(1);
         }
-        if (init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] < 0)
-        {
-        	init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = 0;
-        }
         init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = water_vapour_density[i];
         if (init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] < 0)
         {
@@ -101,40 +96,38 @@ int set_init_data(char FILE_NAME[], State *init_state)
         	printf("Aborting.\n");
         	exit(1);
         }
-        if (init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] < 0)
-        {
-        	init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = 0;
-        }
 	}
 	
+    double particle_density;
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		init_state -> entropy_densities[i] = 0;
-		init_state -> entropy_densities[NO_OF_SCALARS + i] = 0;
-		
-		particle_density = init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]/mean_particle_masses_gas(0);
-		// This is the Sackur-Tetrode equation.
-	    init_state -> entropy_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] =
-	    K_B*particle_density*3.0/2*log(entropy_constants_gas(0))
-	    + K_B*particle_density*log(1/particle_density)
-	    + K_B*particle_density*3.0/2*log(mean_particle_masses_gas(0)*spec_heat_capacities_v_gas(0)*init_state -> temperature_gas[i]);
-	    
-		particle_density = init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i]/mean_particle_masses_gas(1);
-		// This is the Sackur-Tetrode equation.
-		if (particle_density == 0)
+		for (int j = 0; j < NO_OF_CONSTITUENTS; ++j)
 		{
-			init_state -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = 0;
-		}
-		else
-		{
-		    init_state -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] =
-		    K_B*particle_density*3.0/2*log(entropy_constants_gas(1))
-		    + K_B*particle_density*log(1/particle_density)
-		    + K_B*particle_density*3.0/2*log(mean_particle_masses_gas(1)*spec_heat_capacities_v_gas(1)*init_state -> temperature_gas[i]);
-        }
-        
-        init_state -> condensed_density_temperatures[i] = solid_water_density[i]*solid_water_temperature[i];
-        init_state -> condensed_density_temperatures[NO_OF_SCALARS + i] = liquid_water_density[i]*liquid_water_temperature[i];
+			if (j < NO_OF_CONDENSED_CONSTITUENTS)
+			{
+				init_state -> entropy_densities[i] = 0;
+				init_state -> entropy_densities[NO_OF_SCALARS + i] = 0;
+			}
+			else
+			{				
+				particle_density = init_state -> mass_densities[j*NO_OF_SCALARS + i]/mean_particle_masses_gas(j - NO_OF_CONDENSED_CONSTITUENTS);
+				// This is the Sackur-Tetrode equation.
+				if (particle_density == 0)
+				{
+					init_state -> entropy_densities[j*NO_OF_SCALARS + i] = 0;
+				}
+				else
+				{
+					init_state -> entropy_densities[j*NO_OF_SCALARS + i] =
+					K_B*particle_density*3.0/2*log(entropy_constants_gas(j - NO_OF_CONDENSED_CONSTITUENTS))
+					+ K_B*particle_density*log(1/particle_density)
+					+ K_B*particle_density*3.0/2*log(mean_particle_masses_gas(j - NO_OF_CONDENSED_CONSTITUENTS)
+					*spec_heat_capacities_v_gas(j - NO_OF_CONDENSED_CONSTITUENTS)*init_state -> temperature_gas[i]);
+		    	}
+		    }
+	    }
+	    init_state -> condensed_density_temperatures[i] = solid_water_density[i]*solid_water_temperature[i];
+	    init_state -> condensed_density_temperatures[NO_OF_SCALARS + i] = liquid_water_density[i]*liquid_water_temperature[i];
 	}
     
     for (int i = 0; i < NO_OF_VECTORS; ++i)

@@ -128,13 +128,21 @@ int main(int argc, char *argv[])
     }
     // This sets the ORO_ID (orography ID) as a function of the IDEAL_INPUT_ID.
 	if (IDEAL_INPUT_ID == 0 || IDEAL_INPUT_ID == 8 || IDEAL_INPUT_ID == 9)
+    {
 		ORO_ID = 0;
+    }
 	if (IDEAL_INPUT_ID == 1)
+    {
 		ORO_ID = 1;
+    }
 	if (IDEAL_INPUT_ID == 2 || IDEAL_INPUT_ID == 3 || IDEAL_INPUT_ID == 4 || IDEAL_INPUT_ID == 5)
+    {
 		ORO_ID = 2;
+    }
 	if (IDEAL_INPUT_ID == 6 || IDEAL_INPUT_ID == 7)
+    {
 		ORO_ID = 3;
+    }
 	// Determining the name of the grid file from the RES_ID, NO_OF_LAYERS and so on.
     char GEO_PROP_FILE_PRE[200];
 	sprintf(GEO_PROP_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, toa, ORO_ID, NO_OF_ORO_LAYERS);
