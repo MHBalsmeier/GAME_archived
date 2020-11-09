@@ -71,14 +71,7 @@ int add_f_to_rel_vort(Curl_field rel_vort, Curl_field out_field, Dualgrid *dualg
     {
         layer_index = i/(2*NO_OF_VECTORS_H);
         h_index = i - layer_index*2*NO_OF_VECTORS_H;
-        if (h_index >= NO_OF_VECTORS_H)
-        {
-       		out_field[i] = rel_vort[i] + dualgrid -> f_vec[h_index];
-        }
-        else
-        {
-   			out_field[i] = rel_vort[i] + dualgrid -> f_vec[h_index];
-        }
+   		out_field[i] = rel_vort[i] + dualgrid -> f_vec[h_index];
     }
     return 0;
 }

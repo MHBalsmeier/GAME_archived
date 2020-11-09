@@ -21,13 +21,19 @@ int set_f_vec(double latitude_vector[], double direction[], double direction_dua
     {
     	// horizontal component at dual vector points
         if (i < NO_OF_VECTORS_H)
+        {
         	f_vec[i] = 2*OMEGA*cos(latitude_vector[i])*sin(direction_dual[i]);
+    	}
         // vertical component at primal vector points
         else if (i < 2*NO_OF_VECTORS_H)
+        {
         	f_vec[i] = 2*OMEGA*sin(latitude_vector[i - NO_OF_VECTORS_H]);
+    	}
     	// preparation of horizontal non-traditional Coriolis term
         else
+        {
         	f_vec[i] = 2*OMEGA*cos(latitude_vector[i - 2*NO_OF_VECTORS_H])*cos(direction[i - 2*NO_OF_VECTORS_H]);
+    	}
     }
  	return 0;   
 }
@@ -36,9 +42,13 @@ int find_angle_change(double angle_0, double angle_1, double *result)
 {
     double result_pre = angle_1 - angle_0;
     if (result_pre > M_PI)
-        result_pre = result_pre - 2*M_PI;
+    {
+		result_pre = result_pre - 2*M_PI;
+	}
     if (result_pre < -M_PI)
+    {
         result_pre = result_pre + 2*M_PI;
+	}
     *result = result_pre;
     return 0;
 }

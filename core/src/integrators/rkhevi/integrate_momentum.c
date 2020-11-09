@@ -38,7 +38,9 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
     	layer_index = i/NO_OF_VECTORS_PER_LAYER;
     	h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
         if (i < NO_OF_SCALARS_H || i >= NO_OF_VECTORS - NO_OF_SCALARS_H)
+        {
             state_tendency -> velocity_gas[i] = 0;
+        }
         else
         {
     		if (h_index >= NO_OF_SCALARS_H)
