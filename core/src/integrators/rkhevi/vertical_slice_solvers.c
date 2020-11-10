@@ -375,12 +375,10 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 			a_vector[2*j] = delta_t*c_g_v/delta_z - delta_t*c_g_v/c_g_p*0.5*vertical_entropy_gradient[j];
 			delta_z = grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 2)*NO_OF_VECTORS_PER_LAYER + i];
 			a_vector[2*j + 1] = delta_t*((R_g/c_g_v - 1)*state_old -> temperature_gas[i + (j + 1)*NO_OF_SCALARS_H] + temp_interface_values[j])/delta_z;
-			a_vector[2*j + 1] = delta_t*((R_g/c_g_v - 0)*state_old -> temperature_gas[i + (j + 1)*NO_OF_SCALARS_H] + 0*temp_interface_values[j])/delta_z;
 			
 			// determining the elements of c_vector
 			delta_z = grid -> z_vector[j*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 			c_vector[2*j] = -delta_t*((R_g/c_g_v - 1)*state_old -> temperature_gas[i + j*NO_OF_SCALARS_H] + temp_interface_values[j])/delta_z;
-			c_vector[2*j] = -delta_t*((R_g/c_g_v - 0)*state_old -> temperature_gas[i + j*NO_OF_SCALARS_H] + 0*temp_interface_values[j])/delta_z;
 			delta_z = grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i];
 			c_vector[2*j + 1] = -delta_t*c_g_v/delta_z - delta_t*c_g_v/c_g_p*0.5*vertical_entropy_gradient[j];
 		}
