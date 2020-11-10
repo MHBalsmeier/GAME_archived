@@ -19,7 +19,6 @@ int thomas_algorithm(double [], double [], double [], double [], double [], doub
 int sign(double);
 int three_band_solver_ver_hor_vel_adv(State *, State *, State *, double, Grid *);
 int three_band_solver_ver_ver_vel_adv(State *, State *, State *, double, Grid *);
-int three_band_solver_ver_gen_density(Diagnostics *diagnostics, double, Grid *);
 
 int three_band_solver_ver_vel_adv(State *state_old, State *state_new, State *state_tendency, double delta_t, Grid *grid)
 {
@@ -30,102 +29,128 @@ int three_band_solver_ver_vel_adv(State *state_old, State *state_new, State *sta
 
 int three_band_solver_gen_densitites(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, double delta_t, Grid *grid)
 {
-	// Vertical constituent advection with 3-band matrices.
-	int layer_index, h_index;
+	// Vertical constituent advection with 3-band matrices (Euler implicit).
+	// procedure derived in https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
+	// for meanings of these vectors look into the definition of the function thomas_algorithm
+	double a_vector[NO_OF_LAYERS - 1];
+	double b_vector[NO_OF_LAYERS];
+	double c_vector[NO_OF_LAYERS - 1];
+	double d_vector[NO_OF_LAYERS];
+	double c_prime_vector[NO_OF_LAYERS - 1];
+	double d_prime_vector[NO_OF_LAYERS];
+	double vertical_flux_vector[NO_OF_LAYERS - 1];
+	double solution_vector[NO_OF_LAYERS];
 	double density_gas_value;
-	for (int k = 0; k < NO_OF_CONSTITUENTS; ++k)
+	int no_of_relevant_constituents;
+	// mass densities, entropy densities, density x temperatures
+	for (int quantity_id = 0; quantity_id < 3; ++quantity_id)
 	{
-		// The velocity field.
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_VECTORS; ++i)
+		// all constituents have a mass density
+		if (quantity_id == 0)
 		{
-			layer_index = i/NO_OF_VECTORS_PER_LAYER;
-			h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-			diagnostics -> velocity_gen[i] = state_new -> velocity_gas[i];
-			if (h_index < NO_OF_SCALARS_H && k < NO_OF_CONDENSED_CONSTITUENTS)
-			{
-				if (layer_index == 0)
-				{
-					density_gas_value = density_gas(state_old, layer_index*NO_OF_SCALARS_H + h_index);
-				}
-				else if (layer_index == NO_OF_LAYERS)
-				{
-					density_gas_value = density_gas(state_old, (layer_index - 1)*NO_OF_SCALARS_H + h_index);
-				}
-				else
-				{
-					density_gas_value = 0.5*(density_gas(state_old, (layer_index - 1)*NO_OF_SCALARS_H + h_index) + density_gas(state_old, layer_index*NO_OF_SCALARS_H + h_index));
-				}
-				
-				// The solid case.
-				if (k < NO_OF_SOLID_CONSTITUENTS)
-				{
-					diagnostics -> velocity_gen[i] -= ret_sink_velocity(0, 0.001, density_gas_value);
-				}
-				// The liquid case.
-				else
-				{
-					diagnostics -> velocity_gen[i] -= ret_sink_velocity(1, 0.001, density_gas_value);
-				}
-			}
+			no_of_relevant_constituents = NO_OF_CONSTITUENTS;
 		}
-		
-		// Mass densities.
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_SCALARS; ++i)
+		// all constituents have an entropy density
+		if (quantity_id == 1)
 		{
-			diagnostics -> scalar_field_placeholder[i] = state_old -> mass_densities[k*NO_OF_SCALARS + i];
-			diagnostics -> density_gen_explicit_tendency[i] = state_tendency -> mass_densities[k*NO_OF_SCALARS + i];
+			no_of_relevant_constituents = NO_OF_CONSTITUENTS;
 		}
-		three_band_solver_ver_gen_density(diagnostics, delta_t, grid);
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_SCALARS; ++i)
+		// only the condensed constituents have a density x temperature field
+		if (quantity_id == 2)
 		{
-			state_new -> mass_densities[k*NO_OF_SCALARS + i] = diagnostics -> scalar_field_placeholder[i];
-			// limiter
-			if (state_new -> mass_densities[k*NO_OF_SCALARS + i] < 0)
-			{
-				state_new -> mass_densities[k*NO_OF_SCALARS + i] = 0;
-			}
+			no_of_relevant_constituents = NO_OF_CONDENSED_CONSTITUENTS;
 		}
-		
-		// Entropy densities.
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_SCALARS; ++i)
+		// loop over all relevant constituents
+		for (int k = 0; k < no_of_relevant_constituents; ++k)
 		{
-			diagnostics -> scalar_field_placeholder[i] = state_old -> entropy_densities[k*NO_OF_SCALARS + i];
-			diagnostics -> density_gen_explicit_tendency[i] = state_tendency -> entropy_densities[k*NO_OF_SCALARS + i];
-		}
-		three_band_solver_ver_gen_density(diagnostics, delta_t, grid);
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_SCALARS; ++i)
-		{
-			state_new -> entropy_densities[k*NO_OF_SCALARS + i] = diagnostics -> scalar_field_placeholder[i];
-			// limiter
-			if (state_new -> entropy_densities[k*NO_OF_SCALARS + i] < 0)
+			// Mass densities.
+			double area;
+			int j;
+			#pragma omp parallel for private(area, j)
+			for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 			{
-				state_new -> entropy_densities[k*NO_OF_SCALARS + i] = 0;
-			}
-		}
-		
-		// Internal energy densities.
-		if (k < NO_OF_CONDENSED_CONSTITUENTS)
-		{
-			#pragma omp parallel for
-			for (int i = 0; i < NO_OF_SCALARS; ++i)
-			{
-				diagnostics -> scalar_field_placeholder[i] = state_old -> condensed_density_temperatures[k*NO_OF_SCALARS + i];
-				diagnostics -> density_gen_explicit_tendency[i] = state_tendency -> condensed_density_temperatures[k*NO_OF_SCALARS + i];
-			}
-			three_band_solver_ver_gen_density(diagnostics, delta_t, grid);
-			#pragma omp parallel for
-			for (int i = 0; i < NO_OF_SCALARS; ++i)
-			{
-				state_new -> condensed_density_temperatures[k*NO_OF_SCALARS + i] = diagnostics -> scalar_field_placeholder[i];
-				// limiter
-				if (state_new -> condensed_density_temperatures[k*NO_OF_SCALARS + i] < 0)
+				// diagnozing the vertical flux
+				for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 				{
-					state_new -> condensed_density_temperatures[k*NO_OF_SCALARS + i] = 0;
+					vertical_flux_vector[j] = state_new -> velocity_gas[i];
+					if (k < NO_OF_CONDENSED_CONSTITUENTS)
+					{
+						// determining the density of the gas
+						density_gas_value = 0.5*(density_gas(state_old, j*NO_OF_SCALARS_H + i) + density_gas(state_old, (j + 1)*NO_OF_SCALARS_H + i));
+						
+						// The solid case.
+						if (k < NO_OF_SOLID_CONSTITUENTS)
+						{
+							diagnostics -> velocity_gen[i] -= ret_sink_velocity(0, 0.001, density_gas_value);
+						}
+						// The liquid case.
+						else
+						{
+							diagnostics -> velocity_gen[i] -= ret_sink_velocity(1, 0.001, density_gas_value);
+						}
+					}
+					area = grid -> area[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
+					vertical_flux_vector[j] = area*vertical_flux_vector[j];
+				}
+				// filling up the original vectors
+				for (j = 0; j < NO_OF_LAYERS - 1; ++j)
+				{
+					a_vector[j] = delta_t/(2*grid -> volume[i + (j + 1)*NO_OF_SCALARS_H])*vertical_flux_vector[j];
+					c_vector[j] = -delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[j];
+				}
+				for (j = 0; j < NO_OF_LAYERS; ++j)
+				{
+					if (j == 0)
+					{
+						b_vector[j] = 1 - delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[0];
+					}
+					else if (j == NO_OF_LAYERS - 1)
+					{
+						b_vector[j] = 1 + delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[j - 1];
+					}
+					else
+					{
+						b_vector[j] = 1 + delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*(vertical_flux_vector[j - 1] - vertical_flux_vector[j]);
+					}
+					// the explicit component
+					if (quantity_id == 0)
+					{
+						d_vector[j] =
+						state_old -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
+						+ delta_t*state_tendency -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+					}
+					if (quantity_id == 1)
+					{
+						d_vector[j] =
+						state_old -> entropy_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
+						+ delta_t*state_tendency -> entropy_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+					}
+					if (quantity_id == 2)
+					{
+						d_vector[j] =
+						state_old -> condensed_density_temperatures[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
+						+ delta_t*state_tendency -> condensed_density_temperatures[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+					}
+				}
+				thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, NO_OF_LAYERS);
+				for (j = 0; j < NO_OF_LAYERS; ++j)
+				{
+					if (solution_vector[j] < 0)
+					{
+						solution_vector[j] = 0;
+					}
+					if (quantity_id == 0)
+					{
+						state_new -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = solution_vector[j];
+					}
+					if (quantity_id == 1)
+					{
+						state_new -> entropy_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = solution_vector[j];
+					}
+					if (quantity_id == 2)
+					{
+						state_new -> condensed_density_temperatures[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = solution_vector[j];
+					}
 				}
 			}
 		}
@@ -407,64 +432,6 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 				damping_coeff = damping_coeff_max*pow(sin(0.5*M_PI*z_above_damping/(grid -> z_vector[0] - damping_start_height)), 2);
 			}
 			state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] = solution_vector[2*j + 1]/(1 + delta_t*damping_coeff);
-		}
-	}
-	return 0;
-}
-
-int three_band_solver_ver_gen_density(Diagnostics *diagnostics, double delta_t, Grid *grid)
-{
-	/*
-	Implicit vertical advection of generalized densities (Euler).
-	procedure derived in https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
-	*/
-	double area;
-	int j;
-	#pragma omp parallel for private(area, j)
-	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-	{
-		// for meanings of these vectors look into the definition of the function thomas_algorithm
-		double a_vector[NO_OF_LAYERS - 1];
-		double b_vector[NO_OF_LAYERS];
-		double c_vector[NO_OF_LAYERS - 1];
-		double d_vector[NO_OF_LAYERS];
-		double c_prime_vector[NO_OF_LAYERS - 1];
-		double d_prime_vector[NO_OF_LAYERS];
-		double vertical_flux_vector[NO_OF_LAYERS - 1];
-		double solution_vector[NO_OF_LAYERS];
-		// diagnozing the vertical flux
-		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
-		{
-			vertical_flux_vector[j] = diagnostics -> velocity_gen[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
-			area = grid -> area[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
-			vertical_flux_vector[j] = area*vertical_flux_vector[j];
-		}
-		// filling up the original vectors
-		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
-		{
-			a_vector[j] = delta_t/(2*grid -> volume[i + (j + 1)*NO_OF_SCALARS_H])*vertical_flux_vector[j];
-			c_vector[j] = -delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[j];
-		}
-		for (j = 0; j < NO_OF_LAYERS; ++j)
-		{
-			if (j == 0)
-			{
-				b_vector[j] = 1 - delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[0];
-			}
-			else if (j == NO_OF_LAYERS - 1)
-			{
-				b_vector[j] = 1 + delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*vertical_flux_vector[j - 1];
-			}
-			else
-			{
-				b_vector[j] = 1 + delta_t/(2*grid -> volume[i + j*NO_OF_SCALARS_H])*(vertical_flux_vector[j - 1] - vertical_flux_vector[j]);
-			}
-			d_vector[j] = diagnostics -> scalar_field_placeholder[j*NO_OF_SCALARS_H + i] + delta_t*diagnostics -> density_gen_explicit_tendency[j*NO_OF_SCALARS_H + i];
-		}
-		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, NO_OF_LAYERS);
-		for (j = 0; j < NO_OF_LAYERS; ++j)
-		{
-			diagnostics -> scalar_field_placeholder[j*NO_OF_SCALARS_H + i] = solution_vector[j];
 		}
 	}
 	return 0;
