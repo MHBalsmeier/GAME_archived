@@ -99,11 +99,21 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	
 	// 4.) Here, the pressure gradient acceleration is added up.
 	// --------------------------------------------------------------------------------
+	int layer_index, h_index;
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
-		forcings -> pressure_gradient_acc[i] = 
-		old_hor_grad_weight*(-interpolation -> pressure_gradient_0_old_m[i] + interpolation -> pressure_gradient_1_old[i])
-		+ new_hor_grad_weight*(-diagnostics -> pressure_gradient_0_m[i] + diagnostics -> pressure_gradient_1[i]);
+		layer_index = i/NO_OF_VECTORS_PER_LAYER;
+		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
+		if (h_index >= NO_OF_SCALARS_H)
+		{
+			forcings -> pressure_gradient_acc[i] = 
+			old_hor_grad_weight*(-interpolation -> pressure_gradient_0_old_m[i] + interpolation -> pressure_gradient_1_old[i])
+			+ new_hor_grad_weight*(-diagnostics -> pressure_gradient_0_m[i] + diagnostics -> pressure_gradient_1[i]);
+		}
+		else
+		{
+			forcings -> pressure_gradient_acc[i] = -diagnostics -> pressure_gradient_0_m[i] + diagnostics -> pressure_gradient_1[i];
+		}
 	}
 	
 	// 5.) The pressure gradient has to get a deceleration factor due to condensates.

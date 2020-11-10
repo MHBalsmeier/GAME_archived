@@ -57,6 +57,7 @@ const double TEMP_GRADIENT_INV_STANDARD = 0.1/100;
 int find_pressure_value(double, double, double *);
 double sackur_tetrode(double, double);
 double solve_specific_entropy_for_density(double, double);
+double spec_entropy_from_pot_temp(double, double);
 
 int main(int argc, char *argv[])
 {
@@ -253,7 +254,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-        	lower_entropy_value = sackur_tetrode(rho[i + NO_OF_SCALARS_H], temperature[i + NO_OF_SCALARS_H]);
+        	lower_entropy_value = spec_entropy_from_pot_temp(rho[i + NO_OF_SCALARS_H], temperature[i + NO_OF_SCALARS_H]);
         	temperature_mean = 0.5*(temperature[i] + temperature[i + NO_OF_SCALARS_H]);
         	delta_temperature = temperature[i] - temperature[i + NO_OF_SCALARS_H];
         	delta_gravity_potential = gravity_potential[i] - gravity_potential[i + NO_OF_SCALARS_H];
@@ -445,13 +446,26 @@ double sackur_tetrode(double mass_density, double temperature)
     return result;
 }
 
+double spec_entropy_from_pot_temp(double mass_density, double temperature)
+{
+	double pressure = mass_density*R_D*temperature;
+	double pot_temp = temperature*pow(P_0/pressure, R_D/C_D_P);
+	double result;
+	result = C_D_P*log(pot_temp);
+	return result;
+}
+
 double solve_specific_entropy_for_density(double specific_entropy, double temperature)
 {
 	// returns the density as a function of the specific entropy and the temperature
+	/*
+	old version, using Sackur-Tetrode equation
 	double mean_particle_mass = 0.004810e-23;
 	double entropy_constant = 2429487178047751925300627872548148580712448.000000;
     double particle_density = exp(-mean_particle_mass*specific_entropy/K_B)*pow(entropy_constant, 1.5)*pow(mean_particle_mass*C_D_V*temperature, 1.5);
     double result = particle_density*mean_particle_mass;
+    */
+    double result = P_0/R_D*pow(temperature, C_D_V/R_D)*exp(-specific_entropy/R_D);
     return result;
 }
 

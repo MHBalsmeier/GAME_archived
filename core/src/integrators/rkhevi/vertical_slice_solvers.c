@@ -22,6 +22,7 @@ int three_band_solver_ver_ver_vel_adv(State *, State *, State *, double, Grid *)
 
 int three_band_solver_ver_vel_adv(State *state_old, State *state_new, State *state_tendency, double delta_t, Grid *grid)
 {
+	// The implicit solver for the vertical velocity advection.
 	three_band_solver_ver_hor_vel_adv(state_old, state_new, state_tendency, delta_t, grid);
 	three_band_solver_ver_ver_vel_adv(state_old, state_new, state_tendency, delta_t, grid);
 	return 0;
@@ -72,7 +73,8 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 				// diagnozing the vertical flux
 				for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 				{
-					vertical_flux_vector[j] = state_new -> velocity_gas[i];
+					vertical_flux_vector[j] = state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
+					// For condensed contituents, a sink velocity must be added.
 					if (k < NO_OF_CONDENSED_CONSTITUENTS)
 					{
 						// determining the density of the gas
@@ -81,12 +83,12 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						// The solid case.
 						if (k < NO_OF_SOLID_CONSTITUENTS)
 						{
-							diagnostics -> velocity_gen[i] -= ret_sink_velocity(0, 0.001, density_gas_value);
+							vertical_flux_vector[j] -= ret_sink_velocity(0, 0.001, density_gas_value);
 						}
 						// The liquid case.
 						else
 						{
-							diagnostics -> velocity_gen[i] -= ret_sink_velocity(1, 0.001, density_gas_value);
+							vertical_flux_vector[j] -= ret_sink_velocity(1, 0.001, density_gas_value);
 						}
 					}
 					area = grid -> area[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
@@ -135,6 +137,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 				thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, NO_OF_LAYERS);
 				for (j = 0; j < NO_OF_LAYERS; ++j)
 				{
+					// limiter: none of the densities may be negative
 					if (solution_vector[j] < 0)
 					{
 						solution_vector[j] = 0;

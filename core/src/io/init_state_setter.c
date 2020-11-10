@@ -98,7 +98,7 @@ int set_init_data(char FILE_NAME[], State *init_state)
         }
 	}
 	
-    double particle_density;
+    double pressure, pot_temp, specific_entropy;
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		for (int j = 0; j < NO_OF_CONSTITUENTS; ++j)
@@ -109,20 +109,17 @@ int set_init_data(char FILE_NAME[], State *init_state)
 				init_state -> entropy_densities[NO_OF_SCALARS + i] = 0;
 			}
 			else
-			{				
-				particle_density = init_state -> mass_densities[j*NO_OF_SCALARS + i]/mean_particle_masses_gas(j - NO_OF_CONDENSED_CONSTITUENTS);
-				// This is the Sackur-Tetrode equation.
-				if (particle_density == 0)
+			{
+				if (init_state -> mass_densities[j*NO_OF_SCALARS + i] == 0)
 				{
 					init_state -> entropy_densities[j*NO_OF_SCALARS + i] = 0;
 				}
 				else
 				{
-					init_state -> entropy_densities[j*NO_OF_SCALARS + i] =
-					K_B*particle_density*3.0/2*log(entropy_constants_gas(j - NO_OF_CONDENSED_CONSTITUENTS))
-					+ K_B*particle_density*log(1/particle_density)
-					+ K_B*particle_density*3.0/2*log(mean_particle_masses_gas(j - NO_OF_CONDENSED_CONSTITUENTS)
-					*spec_heat_capacities_v_gas(j - NO_OF_CONDENSED_CONSTITUENTS)*init_state -> temperature_gas[i]);
+					pressure = init_state -> mass_densities[j*NO_OF_SCALARS + i]*specific_gas_constants(j - NO_OF_CONDENSED_CONSTITUENTS)*temperature_gas[i];
+					pot_temp = temperature_gas[i]*pow(P_0/pressure, specific_gas_constants(j - NO_OF_CONDENSED_CONSTITUENTS)/spec_heat_capacities_p_gas(j - NO_OF_CONDENSED_CONSTITUENTS));
+					specific_entropy = spec_heat_capacities_p_gas(j - NO_OF_CONDENSED_CONSTITUENTS)*log(pot_temp);
+					init_state -> entropy_densities[j*NO_OF_SCALARS + i] = init_state -> mass_densities[j*NO_OF_SCALARS + i]*specific_entropy;
 		    	}
 		    }
 	    }
