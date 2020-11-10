@@ -41,7 +41,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 	double vertical_flux_vector[NO_OF_LAYERS - 1];
 	double solution_vector[NO_OF_LAYERS];
 	double density_gas_value;
-	int no_of_relevant_constituents;
+	int no_of_relevant_constituents = 0;
 	// mass densities, entropy densities, density x temperatures
 	for (int quantity_id = 0; quantity_id < 3; ++quantity_id)
 	{
