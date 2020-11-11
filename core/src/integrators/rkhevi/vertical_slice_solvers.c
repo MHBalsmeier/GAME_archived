@@ -354,12 +354,12 @@ int three_band_solver_ver_ver_vel_adv(State *state_old, State *state_new, State 
 
 int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, double delta_t, Grid *grid)
 {
-	double delta_z, upper_volume, lower_volume, total_volume, damping_coeff, damping_coeff_max, damping_start_height, z_above_damping, damping_start_height_over_toa, weighting_factor;
+	double delta_z, upper_volume, lower_volume, total_volume, damping_coeff, damping_coeff_max, damping_start_height, z_above_damping, damping_start_height_over_toa;
 	// This is for Klemp (2008).
 	get_damping_layer_properties(&damping_start_height_over_toa, &damping_coeff_max);
 	damping_start_height = damping_start_height_over_toa*grid -> z_vector[0];
 	int upper_index, lower_index, j, gaseous_constituent_id;
-	#pragma omp parallel for private(upper_index, lower_index, delta_z, upper_volume, lower_volume, total_volume, damping_coeff, z_above_damping, j, gaseous_constituent_id, weighting_factor)
+	#pragma omp parallel for private(upper_index, lower_index, delta_z, upper_volume, lower_volume, total_volume, damping_coeff, z_above_damping, j, gaseous_constituent_id)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// for meanings of these vectors look into the definition of the function thomas_algorithm
@@ -374,7 +374,7 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 		double lower_weights_vector[NO_OF_LAYERS - 1];
 		double vertical_entropy_vector[NO_OF_LAYERS];
 		double vertical_entropy_gradient_component[NO_OF_LAYERS - 1];
-		double vertical_entropy_gradient[NO_OF_LAYERS - 1];
+		double vertical_entropy_gradient[NO_OF_GASEOUS_CONSTITUENTS*(NO_OF_LAYERS - 1)];
 		double temp_interface_values[NO_OF_LAYERS - 1];
 		double c_g_v_vector[NO_OF_LAYERS];
 		double c_g_p_vector[NO_OF_LAYERS];
@@ -404,7 +404,10 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 			c_g_v_interface_values[j] = upper_weights_vector[j]*c_g_v_vector[j] +
 			lower_weights_vector[j]*c_g_v_vector[j + 1];
 			// initializing vertical_entropy_gradient with zeros
-			vertical_entropy_gradient[j] = 0;
+			for (gaseous_constituent_id = 0; gaseous_constituent_id < NO_OF_GASEOUS_CONSTITUENTS; ++gaseous_constituent_id)
+			{
+				vertical_entropy_gradient[gaseous_constituent_id*(NO_OF_LAYERS - 1) + j] = 0;
+			}
 		}
 		// determining the specific entropy gradient
 		// loop over all gaseous constituents
@@ -428,10 +431,7 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 			// adding to the density weighted sum of all specific entropy gradients
 			for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 			{
-				weighting_factor =
-				upper_weights_vector[j]*state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + gaseous_constituent_id)*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H]/density_gas_vector[j] +
-				lower_weights_vector[j]*state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + gaseous_constituent_id)*NO_OF_SCALARS + i + (j + 1)*NO_OF_SCALARS_H]/density_gas_vector[j + 1];
-				vertical_entropy_gradient[j] += weighting_factor*vertical_entropy_gradient_component[j];
+				vertical_entropy_gradient[gaseous_constituent_id*(NO_OF_LAYERS - 1) + j] = vertical_entropy_gradient_component[j];
 			}
 		}
 		// filling up the original vectors
@@ -439,7 +439,14 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 		{			
 			// determining the elements of a_vector
 			delta_z = grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i];
-			a_vector[2*j] = delta_t*c_g_v_interface_values[j]/delta_z - delta_t*upper_weights_vector[j]*c_g_v_vector[j]/c_g_p_vector[j]*vertical_entropy_gradient[j];
+			a_vector[2*j] = delta_t*c_g_v_interface_values[j]/delta_z;
+			for (gaseous_constituent_id = 0; gaseous_constituent_id < NO_OF_GASEOUS_CONSTITUENTS; ++gaseous_constituent_id)
+			{
+				a_vector[2*j] +=
+				- delta_t*upper_weights_vector[j]*c_g_v_vector[j]/c_g_p_vector[j]
+				*state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + gaseous_constituent_id)*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H]/density_gas_vector[j]
+				*vertical_entropy_gradient[gaseous_constituent_id*(NO_OF_LAYERS - 1) + j];
+			}
 			delta_z = grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 2)*NO_OF_VECTORS_PER_LAYER + i];
 			a_vector[2*j + 1] = delta_t*((r_g_vector[j]/c_g_v_vector[j] - 1)*state_old -> temperature_gas[i + (j + 1)*NO_OF_SCALARS_H] + temp_interface_values[j])/delta_z;
 			
@@ -447,7 +454,14 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 			delta_z = grid -> z_vector[j*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 			c_vector[2*j] = -delta_t*((r_g_vector[j]/c_g_v_vector[j] - 1)*state_old -> temperature_gas[i + j*NO_OF_SCALARS_H] + temp_interface_values[j])/delta_z;
 			delta_z = grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i];
-			c_vector[2*j + 1] = -delta_t*c_g_v_interface_values[j]/delta_z - delta_t*lower_weights_vector[j]*c_g_v_vector[j]/c_g_p_vector[j]*vertical_entropy_gradient[j];
+			c_vector[2*j + 1] = -delta_t*c_g_v_interface_values[j]/delta_z;
+			for (gaseous_constituent_id = 0; gaseous_constituent_id < NO_OF_GASEOUS_CONSTITUENTS; ++gaseous_constituent_id)
+			{
+				c_vector[2*j + 1] +=
+				- delta_t*lower_weights_vector[j]*c_g_v_vector[j + 1]/c_g_p_vector[j + 1]
+				*state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + gaseous_constituent_id)*NO_OF_SCALARS + i + (j + 1)*NO_OF_SCALARS_H]/density_gas_vector[j + 1]
+				*vertical_entropy_gradient[gaseous_constituent_id*(NO_OF_LAYERS - 1) + j];
+			}
 		}
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
