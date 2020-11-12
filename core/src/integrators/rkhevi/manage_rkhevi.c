@@ -19,6 +19,8 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolate_info *interpol
 	double delta_t_rk;
 	for (int i = 0; i < 3; ++i)
 	{
+		// At i == 0, it is state_new == state_old.
+		
 		// 1.) Setting up the phase transitions configuration.
 		// ----------------------------------------------------------------------------
 		// If constituents are on, phase transitions are only updated at the third step.
@@ -31,23 +33,17 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolate_info *interpol
 		
 		// 2.) Explicit component of the momentum equation.
 		// ----------------------------------------------------------------------------
-		if (i == 0)
-		{
-			forward_tendencies(state_old, state_tendency, grid, dualgrid, diagnostics, forcings, interpolation, irreversible_quantities, config_info, i);
-		}
-		else
-		{
-			forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, interpolation, irreversible_quantities, config_info, i);
-		}
+		forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, interpolation, irreversible_quantities, config_info, i);
 		
-		// 3.) Vertical advection of momentum.
-		// ----------------------------------------------------------------------------
-		three_band_solver_ver_vel_adv(state_old, state_new, state_tendency, delta_t_rk, grid);
+		// 3.) Vertical advection of horizontal momentum.
+		// ---------------------------------------------------------------------------
+		three_band_solver_ver_hor_vel_adv(state_old, state_new, state_tendency, delta_t, grid);
+		
 		// Horizontal velocity can be considered to be updated from now on.
 		
 		// 4.) Explicit component of the generalized density equations.
 		// ----------------------------------------------------------------------------
-		backward_tendencies(state_old, state_new, interpolation, state_tendency, grid, dualgrid, delta_t_rk, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i);
+		backward_tendencies(state_new, interpolation, state_tendency, grid, dualgrid, delta_t_rk, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i);
 		// determining the explicit component of the new temperature
 		
 		// 5.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies.
@@ -59,11 +55,15 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolate_info *interpol
 		three_band_solver_ver_sound_waves(state_old, state_new, state_tendency, diagnostics, delta_t_rk, grid);
 		// Vertical velocity can be seen as updated from now on.
 		
-		// 7.) Solving the implicit component of the generalized density equaitons.
+		// 7.) Vertical advection of vertical momentum.
+		// ---------------------------------------------------------------------------
+		three_band_solver_ver_ver_vel_adv(state_old, state_new, state_tendency, delta_t, grid);
+		
+		// 8.) Solving the implicit component of the generalized density equaitons.
 		// ----------------------------------------------------------------------------
 		three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, delta_t_rk, grid);
 		
-		// 8.) Diagnozing the temperature at the new time step.
+		// 9.) Diagnozing the temperature at the new time step. (comment it out if you want the sound wave solver to have the final say on the temperature values)
 		// ----------------------------------------------------------------------------
 		temperature_diagnostics(state_old, state_new);
     }

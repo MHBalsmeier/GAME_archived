@@ -352,13 +352,21 @@ int main(int argc, char *argv[])
     first_time = clock();
     State *state_new = calloc(1, sizeof(State));
     if (write_out_dry_mass_integral == 1)
+    {
 		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 0);
+	}
     if (write_out_entropy_integral == 1)
+    {
 		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 1);
+	}
     if (write_out_energy_integral == 1)
+    {
 		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 2);
+	}
     if (write_out_linearized_entropy_integral == 1)
+    {
 		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
+	}
 	Scalar_field *radiation_tendency = calloc(1, sizeof(Scalar_field));
     if (config_info -> rad_on == 1)
     {
@@ -381,13 +389,21 @@ int main(int argc, char *argv[])
     manage_rkhevi(state_old, state_new, interpolation, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
     counter += 1;
     if (write_out_dry_mass_integral == 1)
+    {
 		write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 0);
+	}
     if (write_out_entropy_integral == 1)
+    {
 		write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 1);
+	}
     if (write_out_energy_integral == 1)
+    {
 		write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 2);
+	}
     if (write_out_linearized_entropy_integral == 1)
+    {
 		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
+	}
 	time_step_counter += 1;
     State *state_write = calloc(1, sizeof(State));
     double speed;
@@ -454,7 +470,9 @@ int main(int argc, char *argv[])
             	second_write_out_bool = 0;
         	}
             else
+            {
             	speed = CLOCKS_PER_SEC*WRITE_OUT_INTERVAL/((double) second_time - first_time);
+        	}
             printf("current speed: %lf\n", speed);
             first_time = clock();
             printf("run progress: %f h\n", (t_0 + delta_t - t_init)/SECONDS_PER_HOUR);

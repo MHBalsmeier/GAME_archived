@@ -7,8 +7,8 @@ Github repository: https://github.com/MHBalsmeier/game
 In this file, the model run and I/O configurations can be set, which are not accessible via the run script.
 */
 
-#include "../../shared/shared.h"
 #include "atmostracers.h"
+#include "settings.h"
 
 int get_gas_contituents_ids(int);
 
@@ -35,6 +35,30 @@ int get_gas_contituents_ids(int gas_constituent_id)
 		result = 1;
 	}
 	return result;
+}
+
+double get_expl_pgrad_weight()
+{
+	double expl_pgrad_weight = specific_gas_constants(0)/spec_heat_capacities_p_gas(0);
+	return expl_pgrad_weight;
+}
+
+double get_impl_velocity_div_weight()
+{
+	double impl_velocity_div_weight = 1;
+	return impl_velocity_div_weight;
+}
+
+double get_impl_w_vadv_weight()
+{
+	double impl_w_vadv_weight = 0.5;
+	return impl_w_vadv_weight;
+}
+
+double get_impl_u_vadv_weight()
+{
+	double impl_u_vadv_weight = 0.5;
+	return impl_u_vadv_weight;
 }
 
 // input and output
