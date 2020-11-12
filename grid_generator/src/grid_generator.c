@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
     printf(GREEN "finished.\n" RESET);
     // more advanced stuff: tangential vector reconstruction and kinetic energy
     printf("Calculating kinetic energy indices and weights and related things ... ");
-	calc_kinetic_energy_and_related(latitude_scalar, longitude_scalar, e_kin_weights, volume, to_index, from_index, area_dual_pre, area, z_scalar, z_vector, adjacent_vector_indices_h, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, to_index_dual, from_index_dual, z_vector_dual, volume_ratios, recov_primal2dual_weights);
+	calc_kinetic_energy_and_related(e_kin_weights, normal_distance, volume, to_index, from_index, area, z_scalar, z_vector, adjacent_vector_indices_h, volume_ratios, recov_primal2dual_weights);
     set_recov_ver(adjacent_vector_indices_h, direction, direction_dual, latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, from_index_dual, to_index_dual, pent_hex_face_unity_sphere, recov_ver_weight, ORTH_CRITERION_DEG, normal_distance, z_vector, z_vector_dual, TOA);
     printf(GREEN "finished.\n" RESET);
     // modified TRSK

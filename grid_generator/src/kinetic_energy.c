@@ -12,11 +12,11 @@ In this file, the kinetic energy indices and weights are computed.
 #include "enum.h"
 #include "grid_generator.h"
 
-int calc_kinetic_energy_and_related(double latitude_scalar[], double longitude_scalar[], double e_kin_weights[], double volume[], int to_index[], int from_index[], double area_dual_pre[], double area[], double z_scalar[], double z_vector[], int adjacent_vector_indices_h[], double latitude_vector[], double longitude_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], int to_index_dual[], int from_index_dual[], double z_vector_dual[], double volume_ratios[], double recov_primal2dual_weights[])
+int calc_kinetic_energy_and_related(double e_kin_weights[], double normal_distance[], double volume[], int to_index[], int from_index[], double area[], double z_scalar[], double z_vector[], int adjacent_vector_indices_h[], double volume_ratios[], double recov_primal2dual_weights[])
 {
 	int layer_index, h_index;
-	double z_value_0, z_value_1, z_value_2, z_triangle_mean, triangle_face_0, triangle_face_1, delta_z, weights_sum, weights_rescale, partial_volume;
-	#pragma omp parallel for private(layer_index, h_index, z_value_0, z_value_1, z_value_2, z_triangle_mean, triangle_face_0, triangle_face_1, delta_z, weights_sum, weights_rescale, partial_volume)
+	double delta_z, weights_sum, partial_volume;
+	#pragma omp parallel for private(layer_index, h_index, delta_z, weights_sum, partial_volume)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		layer_index = i/NO_OF_SCALARS_H;
@@ -26,21 +26,9 @@ int calc_kinetic_energy_and_related(double latitude_scalar[], double longitude_s
 		{
 			if (j < 5 || h_index >= NO_OF_PENTAGONS)
 			{
-				calc_triangle_face(latitude_scalar[h_index], longitude_scalar[h_index], latitude_vector[adjacent_vector_indices_h[6*h_index + j]], longitude_vector[adjacent_vector_indices_h[6*h_index + j]], latitude_scalar_dual[from_index_dual[adjacent_vector_indices_h[6*h_index + j]]], longitude_scalar_dual[from_index_dual[adjacent_vector_indices_h[6*h_index + j]]], &triangle_face_0);
-				z_value_0 = z_scalar[i];
-				z_value_1 = z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]];
-				z_value_2 = z_vector_dual[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + from_index_dual[adjacent_vector_indices_h[6*h_index + j]]];
-				z_triangle_mean = 1.0/3*(z_value_0 + z_value_1 + z_value_2);
-				triangle_face_0 = triangle_face_0*pow(RADIUS + z_triangle_mean, 2);
-				calc_triangle_face(latitude_scalar[h_index], longitude_scalar[h_index], latitude_vector[adjacent_vector_indices_h[6*h_index + j]], longitude_vector[adjacent_vector_indices_h[6*h_index + j]], latitude_scalar_dual[to_index_dual[adjacent_vector_indices_h[6*h_index + j]]], longitude_scalar_dual[to_index_dual[adjacent_vector_indices_h[6*h_index + j]]], &triangle_face_1);
-				z_value_0 = z_scalar[i];
-				z_value_1 = z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]];
-				z_value_2 = z_vector_dual[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + to_index_dual[adjacent_vector_indices_h[6*h_index + j]]];
-				z_triangle_mean = 1.0/3*(z_value_0 + z_value_1 + z_value_2);
-				triangle_face_1 = triangle_face_1*pow(RADIUS + z_triangle_mean, 2);
-				delta_z = z_vector_dual[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]] - z_vector_dual[(layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]];
-				e_kin_weights[8*i + j] = (triangle_face_0 + triangle_face_1)*delta_z;
-				e_kin_weights[8*i + j] = e_kin_weights[8*i + j]/volume[i];
+				e_kin_weights[8*i + j] = area[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]];
+				e_kin_weights[8*i + j] = e_kin_weights[8*i + j]*normal_distance[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]];
+				e_kin_weights[8*i + j] = e_kin_weights[8*i + j]/(4*volume[i]);
 				weights_sum += e_kin_weights[8*i + j];
 			}
 			else
@@ -48,51 +36,39 @@ int calc_kinetic_energy_and_related(double latitude_scalar[], double longitude_s
 				e_kin_weights[8*i + j] = 0;
 			}
 		}
-		weights_rescale = 1/weights_sum;
-		if (fabs(weights_rescale - 1) > 0.2)
+		if (fabs(weights_sum - 1) > 0.2)
 		{
-			printf("Error in e_kin_weights, position 0. Weights rescale is %lf.\n", weights_rescale);
+			printf("Error in e_kin_weights, position 0. Weights sum is %lf, should be closer to one.\n", weights_sum);
 			exit(1);
-		}
-		for (int j = 0; j < 6; ++j)
-		{
-			e_kin_weights[8*i + j] = weights_rescale*e_kin_weights[8*i + j];
 		}
 		// upper w, only needed only for diagnostics
 		partial_volume = find_volume(area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]*pow((RADIUS + z_scalar[i])/(RADIUS + z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]), 2), RADIUS + z_scalar[i], RADIUS + z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]);
-		e_kin_weights[8*i + 6] = 0.5*partial_volume/volume[i];
 		volume_ratios[2*i + 0] = partial_volume/volume[i];
+		if (layer_index == 0)
+		{
+			delta_z = 2*(z_vector[h_index] - z_scalar[i]);
+		}
+		else
+		{
+			delta_z = z_scalar[i - NO_OF_SCALARS_H] - z_scalar[i];
+		}
+		e_kin_weights[8*i + 6] = area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]*delta_z/(4*volume[i]);
 		// lower w, only needed only for diagnostics
 		partial_volume = find_volume(area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER], RADIUS + z_vector[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER], RADIUS + z_scalar[i]);
-		e_kin_weights[8*i + 7] = 0.5*partial_volume/volume[i];
 		volume_ratios[2*i + 1] = partial_volume/volume[i];
-		if (fabs(volume_ratios[2*i + 0] + volume_ratios[2*i + 1] - 1) > 1e-10)
+		if (layer_index == NO_OF_LAYERS - 1)
 		{
-			printf("Problem with volume ratios, volume ratio sum is %lf.\n", volume_ratios[2*i + 0] + volume_ratios[2*i + 1]);
-			exit(1);
+			delta_z = 2*(z_scalar[i] - z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + h_index]);
 		}
-	}
-	double check_sum;
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
-	{
-		check_sum = 0;
-		for (int j = 0; j < 8; ++j)
+		else
 		{
-			check_sum += e_kin_weights[8*i + j];
-			if (e_kin_weights[8*i + j] < 0)
-			{
-				printf("Error in e_kin_weights, position 1.\n");
-				exit(1);
-			}
-		}    	
-		if (fabs(check_sum - 1.5) > 1e-10)
-		{
-			printf("Error in e_kin_weights, position 1. Weights check sum is %lf.\n", check_sum);
-			exit(1);
+			delta_z = z_scalar[i] - z_scalar[i + NO_OF_SCALARS_H];
 		}
+		e_kin_weights[8*i + 7] = area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER]*delta_z/(4*volume[i]);
 	}
 	int e_kin_h_index_0, e_kin_h_index_1;
-	double total_volume, upper_volume, lower_volume, upper_volume_0, lower_volume_0, upper_volume_1, lower_volume_1;
+	double total_volume, upper_volume, lower_volume, upper_volume_0, lower_volume_0, upper_volume_1, lower_volume_1, check_sum;
+	#pragma omp parallel for private(layer_index, e_kin_h_index_0, e_kin_h_index_1, total_volume, upper_volume, lower_volume, upper_volume_0, lower_volume_0, upper_volume_1, lower_volume_1, check_sum)
 	for (int i = 0; i < NO_OF_DUAL_H_VECTORS; ++i)
 	{
 		layer_index = i/NO_OF_VECTORS_H;

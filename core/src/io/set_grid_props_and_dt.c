@@ -282,13 +282,10 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
 		{
            grid -> e_kin_weights[8*i + j] = e_kin_weights[8*i + j];
            if (grid -> e_kin_weights[8*i + j] > 0.3 || grid -> e_kin_weights[8*i + j] < 0)
+           {
            	   grid_check_failed();
-           check_sum += grid -> e_kin_weights[8*i + j];
+       	   }
        	}
-       	if (fabs(check_sum - 1.5) > 1e-10)
-       	{
-			grid_check_failed();
-   	   	}
    	   	check_sum = 0;
    	   	for (int j = 0; j < 2; ++j)
    	   	{
