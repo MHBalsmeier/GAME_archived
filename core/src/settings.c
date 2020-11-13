@@ -49,12 +49,6 @@ double get_impl_vert_compression_weight()
 	return impl_vert_compression_weight;
 }
 
-double get_impl_t_adv_weight()
-{
-	double impl_t_adv_weight = 1;
-	return impl_t_adv_weight;
-}
-
 double get_impl_w_vadv_weight()
 {
 	double impl_w_vadv_weight = 0.5;

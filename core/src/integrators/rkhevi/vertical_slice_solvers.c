@@ -19,7 +19,7 @@ int thomas_algorithm(double [], double [], double [], double [], double [], doub
 int lu_5band_solver(double [], double [], double [], double [], double [], double [], double [], int);
 int sign(double);
 
-int three_band_solver_ver_hor_vel_adv(State *state_old, State *state_new, State *state_tendency, double delta_t, Grid *grid)
+int three_band_solver_ver_hor_vel_adv(State *state_old, State *state_tendency, State *state_new, double delta_t, Grid *grid)
 {
 	/*
 	Semi-implicit vertical advection of vertical momentum (Crank-Nicolson with variable implicit weight).
@@ -122,7 +122,7 @@ int three_band_solver_ver_hor_vel_adv(State *state_old, State *state_new, State 
 	return 0;
 }
 
-int three_band_solver_ver_sound_waves(State *state_new, Diagnostics *diagnostics, Interpolation_info *interpolation_info, double delta_t, Grid *grid)
+int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, State *state_new, Diagnostics *diagnostics, double delta_t, Grid *grid)
 {
 	double delta_z, upper_volume, lower_volume, total_volume, damping_coeff, damping_coeff_max, damping_start_height, z_above_damping, damping_start_height_over_toa;
 	// This is for Klemp (2008).
@@ -164,20 +164,20 @@ int three_band_solver_ver_sound_waves(State *state_new, Diagnostics *diagnostics
 			if (j == 0)
 			{
 				vertical_velocity_divergence[j] =
-				-grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*interpolation_info -> velocity_gas_prior_rk[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]
+				-grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*state_new -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]
 				/grid -> volume[i + j*NO_OF_SCALARS_H];
 			}
 			else if (j == NO_OF_LAYERS - 1)
 			{
 				vertical_velocity_divergence[j] = 
-				grid -> area[i + j*NO_OF_VECTORS_PER_LAYER]*interpolation_info -> velocity_gas_prior_rk[i + j*NO_OF_VECTORS_PER_LAYER]
+				grid -> area[i + j*NO_OF_VECTORS_PER_LAYER]*state_new -> velocity_gas[i + j*NO_OF_VECTORS_PER_LAYER]
 				/grid -> volume[i + j*NO_OF_SCALARS_H];
 			}
 			else
 			{
 				vertical_velocity_divergence[j] = (
-				grid -> area[i + j*NO_OF_VECTORS_PER_LAYER]*interpolation_info -> velocity_gas_prior_rk[i + j*NO_OF_VECTORS_PER_LAYER]
-				- grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*interpolation_info -> velocity_gas_prior_rk[i + (j + 1)*NO_OF_VECTORS_PER_LAYER])
+				grid -> area[i + j*NO_OF_VECTORS_PER_LAYER]*state_new -> velocity_gas[i + j*NO_OF_VECTORS_PER_LAYER]
+				- grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*state_new -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER])
 				/grid -> volume[i + j*NO_OF_SCALARS_H];
 			}
 		}
@@ -271,7 +271,7 @@ int three_band_solver_ver_sound_waves(State *state_new, Diagnostics *diagnostics
 			b_vector[2*j] = 1 + delta_t*(1 - impl_vert_compression_weight)*r_g_vector[j]/c_g_v_vector[j]*vertical_velocity_divergence[j];
 			b_vector[2*j + 1] = 1;
 			d_vector[2*j] = diagnostics -> temperature_gas_explicit[j*NO_OF_SCALARS_H + i];
-			d_vector[2*j + 1] = state_new -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
+			d_vector[2*j + 1] = state_old -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] + delta_t*state_tendency -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
 		}
 		b_vector[2*NO_OF_LAYERS - 2] =  1 + delta_t*(1 - impl_vert_compression_weight)*r_g_vector[NO_OF_LAYERS - 1]/c_g_v_vector[NO_OF_LAYERS - 1]*vertical_velocity_divergence[NO_OF_LAYERS - 1];
 		d_vector[2*NO_OF_LAYERS - 2] = diagnostics -> temperature_gas_explicit[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
@@ -292,7 +292,7 @@ int three_band_solver_ver_sound_waves(State *state_new, Diagnostics *diagnostics
 			}
 			state_new -> temperature_gas[j*NO_OF_SCALARS_H + i] = solution_vector[2*j];
 			state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] = solution_vector[2*j + 1]/(1 + delta_t*damping_coeff);
-			interpolation_info -> velocity_gas_prior_rk[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] = state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
+			state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] = state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 		}
 		state_new -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] = solution_vector[2*(NO_OF_LAYERS - 1)];
 	}

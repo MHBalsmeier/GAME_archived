@@ -153,7 +153,6 @@ int rad_update;
 typedef struct interpolation_info {
 Vector_field pressure_gradient_0_old_m;
 Vector_field pressure_gradient_1_old;
-Vector_field velocity_gas_prior_rk;
 } Interpolation_info;
 
 // Contains everything on turbulence parametrizations as well as constituent-related quantities.

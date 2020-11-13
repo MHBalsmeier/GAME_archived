@@ -382,11 +382,6 @@ int main(int argc, char *argv[])
     int counter = 0;
     State *state_tendency = calloc(1, sizeof(State));
     Interpolation_info *interpolation_info = calloc(1, sizeof(Interpolation_info));
-    #pragma omp parallel for
-    for (int i = 0; i < NO_OF_VECTORS; ++i)
-    {
-    	interpolation_info -> velocity_gas_prior_rk[i] = state_old -> velocity_gas[i];
-    }
     Irreversible_quantities *diffusion = calloc(1, sizeof(Irreversible_quantities));
     config_info -> rad_update = 1;
     linear_combine_two_states(state_old, state_old, state_new, 1, 0);

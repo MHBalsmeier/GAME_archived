@@ -38,7 +38,7 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolation_info *interp
 		
 		// 3.) Vertical advection of horizontal momentum.
 		// ---------------------------------------------------------------------------
-		three_band_solver_ver_hor_vel_adv(state_old, state_new, state_tendency, delta_t, grid);
+		three_band_solver_ver_hor_vel_adv(state_old, state_tendency, state_new, delta_t, grid);
 		
 		// Horizontal velocity can be considered to be updated from now on.
 		
@@ -53,7 +53,7 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolation_info *interp
 
 		// 6.) Vertical sound wave solver.
 		// ----------------------------------------------------------------------------
-		three_band_solver_ver_sound_waves(state_new, diagnostics, interpolation_info, delta_t_rk, grid);
+		three_band_solver_ver_sound_waves(state_old, state_tendency, state_new, diagnostics, delta_t_rk, grid);
 		// Vertical velocity can be seen as updated from now on.
 		
 		// 7.) Solving the implicit component of the generalized density equaitons.
