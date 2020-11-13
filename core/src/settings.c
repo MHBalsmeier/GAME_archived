@@ -51,7 +51,7 @@ double get_impl_vert_compression_weight()
 
 double get_impl_w_vadv_weight()
 {
-	double impl_w_vadv_weight = 0.5;
+	double impl_w_vadv_weight = 0.0;
 	return impl_w_vadv_weight;
 }
 

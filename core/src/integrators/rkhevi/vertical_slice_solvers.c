@@ -15,8 +15,9 @@ This file contains the implicit vertical solvers.
 #include "../../spatial_operators/spatial_operators.h"
 #include "atmostracers.h"
 
-int thomas_algorithm(double [], double [], double [], double [], double [], double [], double [], int);
-int lu_5band_solver(double [], double [], double [], double [], double [], double [], double [], int);
+int thomas_algorithm(double [], double [], double [], double [], double []);
+int thomas_algorithm_long(double [], double [], double [], double [], double []);
+int lu_5band_solver(double [], double [], double [], double [], double [], double [], double []);
 int sign(double);
 
 int three_band_solver_ver_hor_vel_adv(State *state_old, State *state_tendency, State *state_new, double delta_t, Grid *grid)
@@ -37,8 +38,6 @@ int three_band_solver_ver_hor_vel_adv(State *state_old, State *state_tendency, S
 		double b_vector[NO_OF_LAYERS];
 		double c_vector[NO_OF_LAYERS - 1];
 		double d_vector[NO_OF_LAYERS];
-		double c_prime_vector[NO_OF_LAYERS - 1];
-		double d_prime_vector[NO_OF_LAYERS];
 		double vertical_velocity[NO_OF_LAYERS];
 		double solution_vector[NO_OF_LAYERS];
 		// diagnozing the vertical velocity
@@ -112,7 +111,7 @@ int three_band_solver_ver_hor_vel_adv(State *state_old, State *state_tendency, S
 			c_vector[j] = -impl_u_vadv_weight*vertical_velocity[j]*delta_t/(2*delta_z);
 		}
 		// calling the algorithm to solve the system of linear equations
-		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, NO_OF_LAYERS);
+		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, solution_vector);
 		// writing the solution into the new state
 		for (j = 0; j < NO_OF_LAYERS; ++j)
 		{
@@ -131,6 +130,7 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 	int upper_index, lower_index, j, gaseous_constituent_id;
 	double impl_pgrad_weight = 1 - get_expl_pgrad_weight();
 	double impl_vert_compression_weight = get_impl_vert_compression_weight();
+	double impl_w_vadv_weight = get_impl_w_vadv_weight();
 	#pragma omp parallel for private(upper_index, lower_index, delta_z, upper_volume, lower_volume, total_volume, damping_coeff, z_above_damping, j, gaseous_constituent_id)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
@@ -259,10 +259,14 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 		{
 			// determining the elements of l_vector
 			l_vector[2*j] = 0;
-			l_vector[2*j + 1] = 0;
+			l_vector[2*j + 1] = impl_w_vadv_weight
+			*state_new -> velocity_gas[i + (j + 2)*NO_OF_VECTORS_PER_LAYER]/
+			(grid -> z_vector[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[i + (j + 3)*NO_OF_VECTORS_PER_LAYER]);
 			// determining the elements of u_vector
 			u_vector[2*j] = 0;
-			u_vector[2*j + 1] = 0;
+			u_vector[2*j + 1] = impl_w_vadv_weight
+			*state_new -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/
+			(grid -> z_vector[i + j*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[i + (j + 2)*NO_OF_VECTORS_PER_LAYER]);
 		}
 		l_vector[2*NO_OF_LAYERS - 4] = 0;
 		u_vector[2*NO_OF_LAYERS - 4] = 0;
@@ -271,12 +275,17 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 			b_vector[2*j] = 1 + delta_t*(1 - impl_vert_compression_weight)*r_g_vector[j]/c_g_v_vector[j]*vertical_velocity_divergence[j];
 			b_vector[2*j + 1] = 1;
 			d_vector[2*j] = diagnostics -> temperature_gas_explicit[j*NO_OF_SCALARS_H + i];
-			d_vector[2*j + 1] = state_old -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] + delta_t*state_tendency -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
+			delta_z = grid -> z_vector[j*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 2)*NO_OF_VECTORS_PER_LAYER + i];
+			d_vector[2*j + 1] =
+			state_old -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]
+			+ delta_t*state_tendency -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]
+			- delta_t*(1 - impl_w_vadv_weight)*state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]
+			*(state_new -> velocity_gas[j*NO_OF_VECTORS_PER_LAYER + i] - state_new -> velocity_gas[(j + 2)*NO_OF_VECTORS_PER_LAYER + i])/delta_z;
 		}
 		b_vector[2*NO_OF_LAYERS - 2] =  1 + delta_t*(1 - impl_vert_compression_weight)*r_g_vector[NO_OF_LAYERS - 1]/c_g_v_vector[NO_OF_LAYERS - 1]*vertical_velocity_divergence[NO_OF_LAYERS - 1];
 		d_vector[2*NO_OF_LAYERS - 2] = diagnostics -> temperature_gas_explicit[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		// calling the algorithm to solve the system of linear equations
-		lu_5band_solver(a_vector, b_vector, c_vector, d_vector, l_vector, u_vector, solution_vector, 2*NO_OF_LAYERS - 1);
+		lu_5band_solver(a_vector, b_vector, c_vector, l_vector, u_vector, d_vector, solution_vector);
 		// writing the result into the new state
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
@@ -292,7 +301,6 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 			}
 			state_new -> temperature_gas[j*NO_OF_SCALARS_H + i] = solution_vector[2*j];
 			state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] = solution_vector[2*j + 1]/(1 + delta_t*damping_coeff);
-			state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] = state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 		}
 		state_new -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] = solution_vector[2*(NO_OF_LAYERS - 1)];
 	}
@@ -308,8 +316,6 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 	double b_vector[NO_OF_LAYERS];
 	double c_vector[NO_OF_LAYERS - 1];
 	double d_vector[NO_OF_LAYERS];
-	double c_prime_vector[NO_OF_LAYERS - 1];
-	double d_prime_vector[NO_OF_LAYERS];
 	double vertical_flux_vector[NO_OF_LAYERS - 1];
 	double solution_vector[NO_OF_LAYERS];
 	double density_gas_value;
@@ -436,7 +442,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						+ delta_t*state_tendency -> condensed_density_temperatures[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
 					}
 				}
-				thomas_algorithm(a_vector, b_vector, c_vector, d_vector, c_prime_vector, d_prime_vector, solution_vector, NO_OF_LAYERS);
+				thomas_algorithm(a_vector, b_vector, c_vector, d_vector, solution_vector);
 				for (j = 0; j < NO_OF_LAYERS; ++j)
 				{
 					// limiter: none of the densities may be negative
@@ -464,9 +470,11 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 	return 0;
 }
 
-int thomas_algorithm(double a_vector[], double b_vector[], double c_vector[], double d_vector[], double c_prime_vector[], double d_prime_vector[], double solution_vector[], int solution_length)
+int thomas_algorithm(double a_vector[], double b_vector[], double c_vector[], double d_vector[], double solution_vector[])
 {
 	// https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm
+	double c_prime_vector[NO_OF_LAYERS - 1];
+	double d_prime_vector[NO_OF_LAYERS];
 	if (b_vector[0] != 0)
 	{
 		c_prime_vector[0] = c_vector[0]/b_vector[0];
@@ -475,7 +483,7 @@ int thomas_algorithm(double a_vector[], double b_vector[], double c_vector[], do
 	{
 		c_prime_vector[0] = 0;
 	}
-	for (int j = 1; j < solution_length - 1; ++j)
+	for (int j = 1; j < NO_OF_LAYERS - 1; ++j)
 	{
 		if (b_vector[j] - c_prime_vector[j - 1]*a_vector[j - 1] != 0)
 		{
@@ -494,7 +502,7 @@ int thomas_algorithm(double a_vector[], double b_vector[], double c_vector[], do
 	{
 		d_prime_vector[0] = 0;
 	}
-	for (int j = 1; j < solution_length; ++j)
+	for (int j = 1; j < NO_OF_LAYERS; ++j)
 	{
 		if (b_vector[j] - c_prime_vector[j - 1]*a_vector[j - 1] != 0)
 		{
@@ -505,20 +513,21 @@ int thomas_algorithm(double a_vector[], double b_vector[], double c_vector[], do
 			d_prime_vector[j] = 0;
 		}
 	}
-	solution_vector[solution_length - 1] = d_prime_vector[solution_length - 1];
-	for (int j = solution_length - 2; j >= 0; --j)
+	solution_vector[NO_OF_LAYERS - 1] = d_prime_vector[NO_OF_LAYERS - 1];
+	for (int j = NO_OF_LAYERS - 2; j >= 0; --j)
 	{
 		solution_vector[j] = d_prime_vector[j] - c_prime_vector[j]*solution_vector[j + 1];
 	}
 	return 0;
 }
 
-int lu_5band_solver(double a_vector[], double b_vector[], double c_vector[], double d_vector[], double c_prime_vector[], double d_prime_vector[], double solution_vector[], int solution_length)
+int lu_5band_solver(double a_vector[], double b_vector[], double c_vector[], double l_vector[], double u_vector[], double d_vector[], double solution_vector[])
 {
-	for (int j = solution_length - 1; j >= 0; --j)
+	for (int j = 2*NO_OF_LAYERS - 2; j >= 0; --j)
 	{
 		solution_vector[j] = 0;
 	}
+	thomas_algorithm_long(a_vector, b_vector, c_vector, d_vector, solution_vector);
 	return 0;
 }
 
@@ -531,6 +540,57 @@ int sign(double x)
 	if (x < 0)
 	{
 		return -1;
+	}
+	return 0;
+}
+
+int thomas_algorithm_long(double a_vector[], double b_vector[], double c_vector[], double d_vector[], double solution_vector[])
+{
+	// https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm
+	double c_prime_vector[2*NO_OF_LAYERS - 2];
+	double d_prime_vector[2*NO_OF_LAYERS - 1];
+	if (b_vector[0] != 0)
+	{
+		c_prime_vector[0] = c_vector[0]/b_vector[0];
+	}
+	else
+	{
+		c_prime_vector[0] = 0;
+	}
+	for (int j = 1; j < 2*NO_OF_LAYERS - 2; ++j)
+	{
+		if (b_vector[j] - c_prime_vector[j - 1]*a_vector[j - 1] != 0)
+		{
+			c_prime_vector[j] = c_vector[j]/(b_vector[j] - c_prime_vector[j - 1]*a_vector[j - 1]);
+		}
+		else
+		{
+			c_prime_vector[j] = 0;
+		}
+	}
+	if (b_vector[0] != 0)
+	{
+		d_prime_vector[0] = d_vector[0]/b_vector[0];
+	}
+	else
+	{
+		d_prime_vector[0] = 0;
+	}
+	for (int j = 1; j < 2*NO_OF_LAYERS - 1; ++j)
+	{
+		if (b_vector[j] - c_prime_vector[j - 1]*a_vector[j - 1] != 0)
+		{
+			d_prime_vector[j] = (d_vector[j] - d_prime_vector[j - 1]*a_vector[j - 1])/(b_vector[j] - c_prime_vector[j - 1]*a_vector[j - 1]);
+		}
+		else
+		{
+			d_prime_vector[j] = 0;
+		}
+	}
+	solution_vector[2*NO_OF_LAYERS - 2] = d_prime_vector[2*NO_OF_LAYERS - 2];
+	for (int j = 2*NO_OF_LAYERS - 3; j >= 0; --j)
+	{
+		solution_vector[j] = d_prime_vector[j] - c_prime_vector[j]*solution_vector[j + 1];
 	}
 	return 0;
 }
