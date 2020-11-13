@@ -10,7 +10,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdlib.h>
 #include <stdio.h>
 
-int manage_rkhevi(State *state_old, State *state_new, Interpolate_info *interpolation, Grid *grid, Dualgrid *dualgrid, Scalar_field radiation_tendency, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, double delta_t)
+int manage_rkhevi(State *state_old, State *state_new, Interpolation_info *interpolation_info, Grid *grid, Dualgrid *dualgrid, Scalar_field radiation_tendency, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, double delta_t)
 {
 	/*
 	Here, the RK3 scheme is implemented.
@@ -20,6 +20,7 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolate_info *interpol
 	for (int i = 0; i < 3; ++i)
 	{
 		// At i == 0, it is state_new == state_old.
+		// state_old remains unchanged the whole time
 		
 		// 1.) Setting up the phase transitions configuration.
 		// ----------------------------------------------------------------------------
@@ -33,7 +34,7 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolate_info *interpol
 		
 		// 2.) Explicit component of the momentum equation.
 		// ----------------------------------------------------------------------------
-		forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, interpolation, irreversible_quantities, config_info, i);
+		forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, interpolation_info, irreversible_quantities, config_info, i);
 		
 		// 3.) Vertical advection of horizontal momentum.
 		// ---------------------------------------------------------------------------
@@ -43,29 +44,21 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolate_info *interpol
 		
 		// 4.) Explicit component of the generalized density equations.
 		// ----------------------------------------------------------------------------
-		backward_tendencies(state_new, interpolation, state_tendency, grid, dualgrid, delta_t_rk, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i);
+		backward_tendencies(state_new, interpolation_info, state_tendency, grid, dualgrid, delta_t_rk, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i);
 		// determining the explicit component of the new temperature
 		
 		// 5.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies.
 		// ----------------------------------------------------------------------------
 		temperature_diagnostics_explicit(state_old, state_tendency, diagnostics, delta_t_rk);
-		
+
 		// 6.) Vertical sound wave solver.
 		// ----------------------------------------------------------------------------
-		three_band_solver_ver_sound_waves(state_old, state_new, state_tendency, diagnostics, delta_t_rk, grid);
+		three_band_solver_ver_sound_waves(state_new, diagnostics, interpolation_info, delta_t_rk, grid);
 		// Vertical velocity can be seen as updated from now on.
 		
-		// 7.) Vertical advection of vertical momentum.
-		// ---------------------------------------------------------------------------
-		three_band_solver_ver_ver_vel_adv(state_old, state_new, state_tendency, delta_t, grid);
-		
-		// 8.) Solving the implicit component of the generalized density equaitons.
+		// 7.) Solving the implicit component of the generalized density equaitons.
 		// ----------------------------------------------------------------------------
 		three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, delta_t_rk, grid);
-		
-		// 9.) Diagnozing the temperature at the new time step. (comment it out if you want the sound wave solver to have the final say on the temperature values)
-		// ----------------------------------------------------------------------------
-		temperature_diagnostics(state_old, state_new);
     }
     return 0;
 }

@@ -14,7 +14,7 @@ The vertical advection of horizontal momentum is organized here.
 
 double pressure_gradient_1_damping_factor(double);
 
-int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Interpolate_info *interpolation, Irreversible_quantities *irreversible_quantities, Config_info *config_info)
+int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Interpolation_info *interpolation, Irreversible_quantities *irreversible_quantities, Config_info *config_info)
 {
 	// 1.) The weights for the horizontal pressure gradient acceleration extrapolation.
 	// --------------------------------------------------------------------------------

@@ -35,50 +35,6 @@ int pot_temp_diagnostics_dry(State *state, Scalar_field pot_temp)
     return 0;
 }
 
-int temperature_diagnostics(State *state_old, State *state_new)
-{
-    double nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_gas_0, density_gas_1, delta_density_gas, delta_entropy_density, temperature_0, specific_entropy_gas_0, specific_entropy_gas_1, c_g_v, c_g_p, R_g;
-	#pragma omp parallel for private (nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_gas_0, density_gas_1, delta_density_gas, delta_entropy_density, temperature_0, specific_entropy_gas_0, specific_entropy_gas_1, c_g_v, c_g_p, R_g)
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
-    {
-    	// Difference of the mass densities of the gas phase.
-    	density_gas_0 = 0;
-    	density_gas_1 = 0;
-    	for (int j = 0; j < NO_OF_GASEOUS_CONSTITUENTS; ++j)
-    	{
-			density_gas_0 += state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
-			density_gas_1 += state_new -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
-		}
-    	delta_density_gas = density_gas_1 - density_gas_0;
-    	
-    	entropy_density_gas_0 = 0;
-    	entropy_density_gas_1 = 0;
-    	for (int j = 0; j < NO_OF_GASEOUS_CONSTITUENTS; ++j)
-    	{
-			entropy_density_gas_0 += state_old -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
-			entropy_density_gas_1 += state_new -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
-		}
-    	delta_entropy_density = entropy_density_gas_1 - entropy_density_gas_0;
-    	
-    	// Specific entropies of the gas phase of the two time steps.
-    	specific_entropy_gas_0 = entropy_density_gas_0/density_gas_0;
-    	specific_entropy_gas_1 = entropy_density_gas_1/density_gas_1;
-    	
-    	// The temperature of the gas phase of the old time step.
-    	temperature_0 = state_old -> temperature_gas[i];
-    	
-		// Determining the thermodynamic properties of the gas phase.
-    	c_g_v = spec_heat_cap_diagnostics_v(state_old, i);
-    	c_g_p = spec_heat_cap_diagnostics_p(state_old, i);
-    	R_g = gas_constant_diagnostics(state_old, i);
-    	
-    	nominator = c_g_v*density_gas_0*temperature_0 + (R_g*temperature_0 - R_g/c_g_p*specific_entropy_gas_0*temperature_0)*delta_density_gas + R_g/c_g_p*temperature_0*delta_entropy_density;
-    	denominator = c_g_v*density_gas_0 + c_g_v/c_g_p*specific_entropy_gas_1*delta_density_gas - c_g_v/c_g_p*delta_entropy_density;
-    	state_new -> temperature_gas[i] = nominator/denominator;
-    }
-    return 0;
-}
-
 int temperature_diagnostics_explicit(State *state_old, State *state_tendency, Diagnostics *diagnostics, double delta_t)
 {
     double nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_gas_0, density_gas_1, delta_density_gas, delta_entropy_density, temperature_0, specific_entropy_gas_0, specific_entropy_gas_1, c_g_v, c_g_p, R_g;

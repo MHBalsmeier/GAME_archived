@@ -150,10 +150,11 @@ int rad_update;
 } Config_info;
 
 // This is necessary for ensuring cancellation of energetically important terms, see Gassmann and Herzog.
-typedef struct interpolate_info {
+typedef struct interpolation_info {
 Vector_field pressure_gradient_0_old_m;
 Vector_field pressure_gradient_1_old;
-} Interpolate_info;
+Vector_field velocity_gas_prior_rk;
+} Interpolation_info;
 
 // Contains everything on turbulence parametrizations as well as constituent-related quantities.
 typedef struct irreversible_quantities {

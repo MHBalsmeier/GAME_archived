@@ -14,12 +14,12 @@ In this source file, the forward part of the integration is managed.
 #include "../../diagnostics/diagnostics.h"
 #include "../integrators.h"
 
-int forward_tendencies(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Interpolate_info *interpolation, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_step_rk)
+int forward_tendencies(State *current_state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Interpolation_info *interpolation_info, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_step_rk)
 {
 	// The calculation of the pressure gradient is only done at the first RK step.
 	if (no_step_rk == 0)
 	{
-		manage_pressure_gradient(current_state, grid, dualgrid, diagnostics, forcings, interpolation, irreversible_quantities, config_info);
+		manage_pressure_gradient(current_state, grid, dualgrid, diagnostics, forcings, interpolation_info, irreversible_quantities, config_info);
 	}
     if (no_step_rk == 2 && config_info -> momentum_diff == 1)
     {

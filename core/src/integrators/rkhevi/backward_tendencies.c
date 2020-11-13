@@ -8,7 +8,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include "../../spatial_operators/spatial_operators.h"
 #include "../../diagnostics/diagnostics.h"
 
-int backward_tendencies(State *state, Interpolate_info *interpolation, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_rk_step)
+int backward_tendencies(State *state, Interpolation_info *interpolation, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_rk_step)
 {
     // Radiation is updated here.
     if (config_info -> rad_update == 1)
