@@ -43,10 +43,16 @@ double get_expl_pgrad_weight()
 	return expl_pgrad_weight;
 }
 
-double get_impl_velocity_div_weight()
+double get_impl_vert_compression_weight()
 {
-	double impl_velocity_div_weight = 1;
-	return impl_velocity_div_weight;
+	double impl_vert_compression_weight = 1;
+	return impl_vert_compression_weight;
+}
+
+double get_impl_t_adv_weight()
+{
+	double impl_t_adv_weight = 1;
+	return impl_t_adv_weight;
 }
 
 double get_impl_w_vadv_weight()

@@ -10,10 +10,11 @@ Github repository: https://github.com/MHBalsmeier/game
 #define NO_OF_FLIGHT_LEVELS 7
 
 int get_damping_layer_properties(double *, double *);
-double get_impl_velocity_div_weight();
+double get_impl_vert_compression_weight();
 double get_expl_pgrad_weight();
 double get_impl_w_vadv_weight();
 double get_impl_u_vadv_weight();
+double get_impl_t_adv_weight();
 int ask_for_divergence_output(int *);
 double entropy_constants_gas(int);
 double mean_particle_masses_gas(int);
