@@ -76,7 +76,7 @@ int temperature_diagnostics_explicit(State *state_old, State *state_tendency, Di
     	
     	nominator = c_g_v*density_gas_0*temperature_0 + (R_g*temperature_0 - R_g/c_g_p*specific_entropy_gas_0*temperature_0)*delta_density_gas + R_g/c_g_p*temperature_0*delta_entropy_density;
     	denominator = c_g_v*density_gas_0 + c_g_v/c_g_p*specific_entropy_gas_1*delta_density_gas - c_g_v/c_g_p*delta_entropy_density;
-    	diagnostics -> temperature_gas_explicit[i] = nominator/denominator;
+		diagnostics -> temperature_gas_explicit[i] = nominator/denominator;
     }
     return 0;
 }

@@ -19,18 +19,24 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolation_info *interp
 	double delta_t_rk;
 	for (int i = 0; i < 3; ++i)
 	{
-		// At i == 0, it is state_new == state_old.
-		// state_old remains unchanged the whole time
+		/*
+		general remarks:
+		-------------------------------------------------------------------------------
+		At i == 0, it is state_new == state_old.
+		state_old remains unchanged the whole time.
+		*/
+		
+		// 0.) setting the time step of the RK substep
+		delta_t_rk = delta_t/(3 - i);
 		
 		// 1.) Setting up the phase transitions configuration.
 		// ----------------------------------------------------------------------------
-		// If constituents are on, phase transitions are only updated at the third step.
+		// phase transitions are only updated at the third step
 		config_info -> phase_transitions_on = 0;
 		if (i == 2)
 		{
 			config_info -> phase_transitions_on = 1;
 		}
-		delta_t_rk = delta_t/(3 - i);
 		
 		// 2.) Explicit component of the momentum equation.
 		// ----------------------------------------------------------------------------
@@ -47,7 +53,7 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolation_info *interp
 		backward_tendencies(state_new, interpolation_info, state_tendency, grid, dualgrid, delta_t_rk, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i);
 		// determining the explicit component of the new temperature
 		
-		// 5.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies.
+		// 5.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies (including diabatic forcings).
 		// ----------------------------------------------------------------------------
 		temperature_diagnostics_explicit(state_old, state_tendency, diagnostics, delta_t_rk);
 
