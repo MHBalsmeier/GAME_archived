@@ -25,13 +25,9 @@ For more specific details see handbook.
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 #define N_A (6.0221409e23)
 #define K_B (1.380649e-23)
-#define M_D 0.028964420
-#define R (N_A*K_B)
-#define R_D (R/M_D)
-#define P_0 100000.0
-#define OMEGA (7.292115e-5)
-#define C_D_P 1005.0
-#define C_D_V 717.942189
+
+const double P_0 = 100000.0;
+const double OMEGA = 7.292115e-5;
 
 // constants specifying the grid
 const double TOA = 30000;
@@ -61,6 +57,10 @@ double spec_entropy_from_pot_temp(double, double);
 
 int main(int argc, char *argv[])
 {
+	// some thermodynamical quantities
+	double R_D = specific_gas_constants_lookup(0);
+	double C_D_P = spec_heat_capacities_p_gas_lookup(0);
+	double C_D_V = spec_heat_capacities_v_gas_lookup(0);
 	int TEST_ID;
    	TEST_ID = strtod(argv[1], NULL);
    	// determining the orography ID as a function of the test ID
@@ -88,7 +88,9 @@ int main(int argc, char *argv[])
     double *longitude_vector = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *z_scalar = malloc(NO_OF_SCALARS*sizeof(double));
     double *z_vector = malloc(NO_OF_VECTORS*sizeof(double));
-    double *gravity_potential = malloc(NO_OF_VECTORS*sizeof(double));
+    double *gravity_potential = malloc(NO_OF_SCALARS*sizeof(double));
+    double *volume = malloc(NO_OF_SCALARS*sizeof(double));
+    double *volume_ratios = malloc(2*NO_OF_SCALARS*sizeof(double));
     int ncid_grid, retval;
     int GEO_PROP_FILE_LENGTH = 100;
     char *GEO_PROP_FILE_PRE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
@@ -100,7 +102,7 @@ int main(int argc, char *argv[])
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid_grid)))
         NCERR(retval);
     free(GEO_PROP_FILE);
-    int direction_id, latitude_scalar_id, longitude_scalar_id, latitude_vector_id, longitude_vector_id, z_scalar_id, z_vector_id, gravity_potential_id;
+    int direction_id, latitude_scalar_id, longitude_scalar_id, latitude_vector_id, longitude_vector_id, z_scalar_id, z_vector_id, gravity_potential_id, volume_id, volume_ratios_id;
     if ((retval = nc_inq_varid(ncid_grid, "direction", &direction_id)))
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid_grid, "latitude_scalar", &latitude_scalar_id)))
@@ -117,6 +119,10 @@ int main(int argc, char *argv[])
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid_grid, "gravity_potential", &gravity_potential_id)))
         NCERR(retval);
+    if ((retval = nc_inq_varid(ncid_grid, "volume", &volume_id)))
+        NCERR(retval);
+    if ((retval = nc_inq_varid(ncid_grid, "volume_ratios", &volume_ratios_id)))
+        NCERR(retval);
     if ((retval = nc_get_var_double(ncid_grid, direction_id, &direction[0])))
         NCERR(retval);
     if ((retval = nc_get_var_double(ncid_grid, latitude_scalar_id, &latitude_scalar[0])))
@@ -132,6 +138,10 @@ int main(int argc, char *argv[])
     if ((retval = nc_get_var_double(ncid_grid, z_vector_id, &z_vector[0])))
         NCERR(retval);
     if ((retval = nc_get_var_double(ncid_grid, gravity_potential_id, &gravity_potential[0])))
+        NCERR(retval);
+    if ((retval = nc_get_var_double(ncid_grid, volume_id, &volume[0])))
+        NCERR(retval);
+    if ((retval = nc_get_var_double(ncid_grid, volume_ratios_id, &volume_ratios[0])))
         NCERR(retval);
     if ((retval = nc_close(ncid_grid)))
         NCERR(retval);
@@ -243,7 +253,8 @@ int main(int argc, char *argv[])
         solid_water_temp[i] = temperature[i];
     }
     // density is determined out of the hydrostatic equation
-    double entropy_value, temperature_mean, delta_temperature, delta_gravity_potential, pot_temp_value, lower_entropy_value;
+    int lower_index, upper_index;
+    double entropy_value, temperature_mean, delta_temperature, delta_gravity_potential, pot_temp_value, lower_entropy_value, upper_weight, lower_weight, upper_volume, lower_volume, total_volume;
     for (int i = NO_OF_SCALARS - 1; i >= 0; --i)
     {
     	layer_index = i/NO_OF_SCALARS_H;
@@ -255,7 +266,14 @@ int main(int argc, char *argv[])
         else
         {
         	lower_entropy_value = spec_entropy_from_pot_temp(rho[i + NO_OF_SCALARS_H], temperature[i + NO_OF_SCALARS_H]);
-        	temperature_mean = 0.5*(temperature[i] + temperature[i + NO_OF_SCALARS_H]);
+            lower_index = i + NO_OF_SCALARS_H;
+            upper_index = i;
+            upper_volume = volume_ratios[2*upper_index + 1]*volume[upper_index];
+            lower_volume = volume_ratios[2*lower_index + 0]*volume[lower_index];
+            total_volume = upper_volume + lower_volume;
+            upper_weight = upper_volume/total_volume;
+            lower_weight = lower_volume/total_volume;
+        	temperature_mean = upper_weight*temperature[i] + lower_weight*temperature[i + NO_OF_SCALARS_H];
         	delta_temperature = temperature[i] - temperature[i + NO_OF_SCALARS_H];
         	delta_gravity_potential = gravity_potential[i] - gravity_potential[i + NO_OF_SCALARS_H];
         	entropy_value = lower_entropy_value + (delta_gravity_potential + C_D_P*delta_temperature)/temperature_mean;
@@ -332,6 +350,8 @@ int main(int argc, char *argv[])
     free(direction);
     free(latitude_vector);
     free(longitude_vector);
+    free(volume);
+    free(volume_ratios);
     int scalar_dimid, vector_dimid, temp_id, density_dry_id, wind_id, density_vapour_id, density_liquid_id, density_solid_id, temperature_liquid_id, temperature_solid_id, ncid;
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
         NCERR(retval);
@@ -438,6 +458,7 @@ double sackur_tetrode(double mass_density, double temperature)
 	double mean_particle_mass = 0.004810e-23;
 	double entropy_constant = 2429487178047751925300627872548148580712448.000000;
 	double particle_density = mass_density/mean_particle_mass;
+	double C_D_V = spec_heat_capacities_v_gas_lookup(0);
 	// returns the specific entropy as a function of the mass density and the temperature
 	double result;
     result = K_B*(3.0/2*log(entropy_constant)
@@ -448,6 +469,8 @@ double sackur_tetrode(double mass_density, double temperature)
 
 double spec_entropy_from_pot_temp(double mass_density, double temperature)
 {
+	double R_D = specific_gas_constants_lookup(0);
+	double C_D_P = spec_heat_capacities_p_gas_lookup(0);
 	double pressure = mass_density*R_D*temperature;
 	double pot_temp = temperature*pow(P_0/pressure, R_D/C_D_P);
 	double result;
@@ -457,6 +480,8 @@ double spec_entropy_from_pot_temp(double mass_density, double temperature)
 
 double solve_specific_entropy_for_density(double specific_entropy, double temperature)
 {
+	double R_D = specific_gas_constants_lookup(0);
+	double C_D_V = spec_heat_capacities_v_gas_lookup(0);
 	// returns the density as a function of the specific entropy and the temperature
 	/*
 	old version, using Sackur-Tetrode equation
