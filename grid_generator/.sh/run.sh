@@ -30,10 +30,11 @@ echo ""
 if [ $valgrind_check -eq 0 ]
 then
 mpirun -np $number_of_cpus ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file
-fi
+else
 if [ $valgrind_check -eq 1 ]
 then
 valgrind ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file
+fi
 fi
 if [ $? -ne 0 ]
 then

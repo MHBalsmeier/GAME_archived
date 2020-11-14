@@ -16,6 +16,9 @@ Github repository: https://github.com/MHBalsmeier/game
 #define UNIT "Z_SURFACE"
 #define P_0 100000.0
 
+const double MOUNTAIN_HEIGHT = 10e3;
+const double MOUNTAIN_FWHM = 1000e3;
+
 int main(int argc, char *argv[])
 {	
 	int OUTPUT_FILE_LENGTH = 100;
@@ -102,7 +105,7 @@ int main(int argc, char *argv[])
     	lon_index = i - lat_index*no_of_lon_points;
     	z_in_vector[i] = z_input[lat_index][lon_index];
     }
-    double weights_sum;
+    double weights_sum, sigma_mountain;
     int j;
 	#pragma omp parallel for private(j, distance, latitude, lat_index, lon_index, weights_sum)
 	for (i = 0; i < NO_OF_SCALARS_H; ++i)
@@ -112,8 +115,9 @@ int main(int argc, char *argv[])
 		double weights_vector[4];
 		if (ORO_ID == 1)
 		{
+			sigma_mountain = MOUNTAIN_FWHM/pow(8*log(2), 0.5);
             distance = calculate_distance_h(latitude_scalar[i], longitude_scalar[i], 0, 0, RADIUS);
-			oro[i] = 10e3*exp(-pow(distance/100e3, 2));
+			oro[i] = MOUNTAIN_HEIGHT*exp(-pow(distance, 2)/(2*pow(sigma_mountain, 2)));
 		}
 		if (ORO_ID == 2)
 		{

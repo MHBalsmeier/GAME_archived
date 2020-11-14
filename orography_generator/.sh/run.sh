@@ -8,10 +8,11 @@ echo "Copyright (C) 2020 The GAME development team."
 if [ $valgrind_check -eq 0 ]
 then
 mpirun -np $number_of_cpus ./orography_generator $oro_id
-fi
+else
 if [ $valgrind_check -eq 1 ]
 then
 valgrind ./orography_generator $oro_id
+fi
 fi
 if [ $? -ne 0 ]
 then
