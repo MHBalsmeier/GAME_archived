@@ -64,7 +64,6 @@ if short_name == "pt":
 if short_name == "prmsl":
 	variable_name = "MSLP / hPa";
 	rescale = 0.01;
-	shift = -1000;
 	unit_string = "hPa";
 	show_level_on = 0;
 	contourf_plot = 0;
