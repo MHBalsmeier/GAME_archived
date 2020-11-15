@@ -16,7 +16,6 @@ This file contains the implicit vertical solvers.
 #include "atmostracers.h"
 
 int thomas_algorithm(double [], double [], double [], double [], double []);
-int thomas_algorithm_long(double [], double [], double [], double [], double []);
 int lu_5band_solver(double [], double [], double [], double [], double [], double [], double []);
 int sign(double);
 
@@ -579,57 +578,6 @@ int sign(double x)
 	if (x < 0)
 	{
 		return -1;
-	}
-	return 0;
-}
-
-int thomas_algorithm_long(double a_vector[], double b_vector[], double c_vector[], double d_vector[], double solution_vector[])
-{
-	// https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm
-	double c_prime_vector[2*NO_OF_LAYERS - 2];
-	double d_prime_vector[2*NO_OF_LAYERS - 1];
-	if (b_vector[0] != 0)
-	{
-		c_prime_vector[0] = c_vector[0]/b_vector[0];
-	}
-	else
-	{
-		c_prime_vector[0] = 0;
-	}
-	for (int j = 1; j < 2*NO_OF_LAYERS - 2; ++j)
-	{
-		if (b_vector[j] - c_prime_vector[j - 1]*a_vector[j - 1] != 0)
-		{
-			c_prime_vector[j] = c_vector[j]/(b_vector[j] - c_prime_vector[j - 1]*a_vector[j - 1]);
-		}
-		else
-		{
-			c_prime_vector[j] = 0;
-		}
-	}
-	if (b_vector[0] != 0)
-	{
-		d_prime_vector[0] = d_vector[0]/b_vector[0];
-	}
-	else
-	{
-		d_prime_vector[0] = 0;
-	}
-	for (int j = 1; j < 2*NO_OF_LAYERS - 1; ++j)
-	{
-		if (b_vector[j] - c_prime_vector[j - 1]*a_vector[j - 1] != 0)
-		{
-			d_prime_vector[j] = (d_vector[j] - d_prime_vector[j - 1]*a_vector[j - 1])/(b_vector[j] - c_prime_vector[j - 1]*a_vector[j - 1]);
-		}
-		else
-		{
-			d_prime_vector[j] = 0;
-		}
-	}
-	solution_vector[2*NO_OF_LAYERS - 2] = d_prime_vector[2*NO_OF_LAYERS - 2];
-	for (int j = 2*NO_OF_LAYERS - 3; j >= 0; --j)
-	{
-		solution_vector[j] = d_prime_vector[j] - c_prime_vector[j]*solution_vector[j + 1];
 	}
 	return 0;
 }
