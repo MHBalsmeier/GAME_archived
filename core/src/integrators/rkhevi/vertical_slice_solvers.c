@@ -502,11 +502,71 @@ int thomas_algorithm(double a_vector[], double b_vector[], double c_vector[], do
 
 int lu_5band_solver(double a_vector[], double b_vector[], double c_vector[], double l_vector[], double u_vector[], double d_vector[], double solution_vector[])
 {
-	for (int j = 2*NO_OF_LAYERS - 2; j >= 0; --j)
+	// Here the system of linear equations Ax = d is solved, using the LU decomposition.
+	// We reformulate this problem to LUx = d with a lower triangular matrix L and an upper triangular matrix U.
+	// Determining the vectors l_1_vector and l_2_vector, which make up the matrix L.
+	int solution_length = 2*NO_OF_LAYERS - 1;
+	double a_vector_mod[2*NO_OF_LAYERS - 2];
+	double b_vector_mod[2*NO_OF_LAYERS - 1];
+	double c_vector_mod[2*NO_OF_LAYERS - 2];
+	for (int i = 0; i < solution_length; ++i)
 	{
-		solution_vector[j] = 0;
+		b_vector_mod[i] = b_vector[i];
 	}
-	thomas_algorithm_long(a_vector, b_vector, c_vector, d_vector, solution_vector);
+	for (int i = 0; i < solution_length - 1; ++i)
+	{
+		a_vector_mod[i] = a_vector[i];
+		c_vector_mod[i] = c_vector[i];
+	}
+	double l_1_vector[2*NO_OF_LAYERS - 2];
+	double l_2_vector[2*NO_OF_LAYERS - 3];
+	for (int i = 0; i < solution_length - 2; ++i)
+	{
+		l_1_vector[i] = a_vector_mod[i]/b_vector_mod[i];
+		b_vector_mod[i + 1] += -c_vector_mod[i]*l_1_vector[i];
+		c_vector_mod[i + 1] += -u_vector[i]*l_1_vector[i];
+		l_2_vector[i] = l_vector[i]/b_vector_mod[i];
+		a_vector_mod[i + 1] += -c_vector[i]*l_2_vector[i];
+		b_vector_mod[i + 2] += -u_vector[i]*l_2_vector[i];
+		if (i < solution_length - 3)
+		{
+			c_vector_mod[i + 2] += -u_vector[i + 1]*l_2_vector[i];
+		}
+	}
+	l_1_vector[solution_length - 2] = a_vector_mod[solution_length - 2]/b_vector_mod[solution_length - 2];
+	
+	// Solving Ly = d.
+	double y_vector[2*NO_OF_LAYERS - 1];
+	y_vector[0] = d_vector[0];
+	y_vector[1] = d_vector[1] - l_1_vector[0]*y_vector[0];
+	for (int i = 2; i < solution_length; ++i)
+	{
+		y_vector[i] = d_vector[i] - l_1_vector[i - 1]*y_vector[i - 1] - l_2_vector[i - 2]*y_vector[i - 2];
+	}
+	
+	// It is L^{-1}A = R:
+	double r_0_vector[2*NO_OF_LAYERS - 1];
+	double r_1_vector[2*NO_OF_LAYERS - 2];
+	r_0_vector[0] = b_vector[0];
+	r_1_vector[0] = c_vector[0];
+	r_0_vector[1] = -l_1_vector[0]*c_vector[0] + b_vector[1];
+	for (int i = 2; i < solution_length; ++i)
+	{
+		r_0_vector[i] = -l_2_vector[i - 2]*u_vector[i - 2] - l_1_vector[i - 1]*c_vector[i - 1] + b_vector[i];
+	}
+	r_1_vector[1] = -l_1_vector[0]*u_vector[0] + c_vector[1];
+	for (int i = 2; i < solution_length - 1; ++i)
+	{
+		r_1_vector[i] = -l_1_vector[i - 1]*u_vector[i - 1] + c_vector[i];
+	}
+	
+	// Solving Rx = y.
+	solution_vector[solution_length - 1] = y_vector[solution_length - 1]/r_0_vector[solution_length - 1];
+	solution_vector[solution_length - 2] = (y_vector[solution_length - 2] - r_1_vector[solution_length - 2]*solution_vector[solution_length - 1])/r_0_vector[solution_length - 2];
+	for (int i = solution_length - 3; i >= 0; --i)
+	{
+		solution_vector[i] = (y_vector[i] - r_1_vector[i]*solution_vector[i + 1] - u_vector[i]*solution_vector[i + 2])/r_0_vector[i];
+	}
 	return 0;
 }
 
