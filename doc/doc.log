@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.9.3)  24 OCT 2020 22:27
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.9.3)  15 NOV 2020 22:36
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1033,14 +1033,14 @@ Chapter 10.
 [13
 
 ]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 179.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 192.
  [14
 
 ]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 179.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 192.
  (./doc.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 179.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 179.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 192.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 192.
 Package rerunfilecheck Info: File `doc.out' has not changed.
 (rerunfilecheck)             Checksum: 1D9CAED952E1942368576E3673BD6B67;1594.
 Package logreq Info: Writing requests to 'doc.run.xml'.
@@ -1048,25 +1048,27 @@ Package logreq Info: Writing requests to 'doc.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 15155 strings out of 481239
- 255817 string characters out of 5920378
- 918296 words of memory out of 5000000
- 30123 multiletter control sequences out of 15000+600000
- 590008 words of font info for 103 fonts, out of 8000000 for 9000
+ 15159 strings out of 481239
+ 255825 string characters out of 5920378
+ 918269 words of memory out of 5000000
+ 30122 multiletter control sequences out of 15000+600000
+ 591357 words of font info for 106 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  38i,11n,45p,1920b,1270s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}{/usr/share/texmf/
 fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/share/texlive/texmf-dist/fonts/t
-ype1/public/fourier/fourier-ms.pfb></usr/share/texmf/fonts/type1/public/cm-supe
-r/sftc1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1000.pfb></usr
-/share/texmf/fonts/type1/public/cm-super/sftt1200.pfb></usr/share/texmf/fonts/t
-ype1/public/cm-super/sftt1728.pfb></usr/share/texlive/texmf-dist/fonts/type1/ur
-w/ncntrsbk/uncb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/u
-ncr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncri8a.pfb>
-Output written on doc.pdf (15 pages, 155370 bytes).
+ype1/public/fourier/fourier-mex.pfb></usr/share/texlive/texmf-dist/fonts/type1/
+public/fourier/fourier-mlit.pfb></usr/share/texlive/texmf-dist/fonts/type1/publ
+ic/fourier/fourier-ms.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftc100
+0.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1000.pfb></usr/share/te
+xmf/fonts/type1/public/cm-super/sftt1200.pfb></usr/share/texmf/fonts/type1/publ
+ic/cm-super/sftt1728.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsb
+k/uncb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncr8a.pfb
+></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncri8a.pfb>
+Output written on doc.pdf (15 pages, 161927 bytes).
 PDF statistics:
- 336 PDF objects out of 1000 (max. 8388607)
- 289 compressed objects within 3 object streams
- 52 named destinations out of 1000 (max. 500000)
+ 346 PDF objects out of 1000 (max. 8388607)
+ 297 compressed objects within 3 object streams
+ 54 named destinations out of 1000 (max. 500000)
  187 words of extra memory for PDF output out of 10000 (max. 10000000)
 

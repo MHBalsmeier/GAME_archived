@@ -151,6 +151,19 @@ The orography generator resides in the directory \texttt{orography\_generator} a
 \chapter{Test generator}
 \label{sec:test_generator}
 
+The so-called \textit{full width at half maximum (FWHM)} is the width of a peak at half its maximum height. For a normal distribution, one finds
+%
+\begin{align}
+\exp\left(-\frac{x_0^2}{2\sigma^2}\right) = \frac{1}{2} = 2^{-1}\Leftrightarrow -\frac{x_0^2}{2\sigma^2} = -\ln\left(2\right)\nonumber\\
+\Leftrightarrow x_0^2 = 2\sigma^2\ln\left(2\right)\Leftrightarrow x_0 = \sigma\sqrt{2\ln\left(2\right)}.
+\end{align}
+%
+This implies
+%
+\begin{align}
+\text{FWHM} = 2x_0 = \sigma\sqrt{8\ln\left(2\right)} \Rightarrow \sigma = \frac{\text{FWHM}}{\sqrt{8\ln\left(2\right)}}.
+\end{align}
+
 \chapter{Spatial operators}
 \label{sec:spatial_operators}
 
