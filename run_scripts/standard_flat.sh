@@ -8,7 +8,7 @@ game_home_dir=/home/max/compiled/game_dev # the root directory of your GAME inst
 operator=MHB # the ID of the person / group / institution running the model
 ideal_input_id=0 # specifies which test scenario to run
 run_id=standard_flat # run_id must only be set if ideal_input_id != -1 (otherwise it is chosen automatically)
-run_span=43200 # how long the model is supposed to run
+run_span=777600 # how long the model is supposed to run
 valgrind_check=0 # set this to 1, if you want to check the code with Valgrind
 
 # grid properties
@@ -18,7 +18,7 @@ toa=30000 # top of atmosphere
 orography_layers=17 # number of layers following the orography
 
 # "physics" configuration
-cfl_margin=0.25 # The time step will be calculated as follows (delta t) = (delta t from CFL)*(1 - cfl_margin). 0.25 can be considered a safe standard value.
+cfl_margin=0.3 # The time step will be calculated as follows (delta t) = (delta t from CFL)*(1 - cfl_margin). 0.3 can be considered a safe standard value.
 mass_dry_diff_h=0 # turn on if you want horizontal dry mass diffusion
 mass_dry_diff_v=0 # turn on if you want vetical dry mass diffusion
 temperature_diff_h=0 # turn on if you want horizontal temperature diffusion

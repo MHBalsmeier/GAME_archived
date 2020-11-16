@@ -129,6 +129,7 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 	int upper_index, lower_index, j, gaseous_constituent_id;
 	double impl_pgrad_weight = 1 - get_expl_pgrad_weight();
 	double impl_w_vadv_weight = get_impl_w_vadv_weight();
+	double t_vadv_parameter = get_t_vadv_parameter();
 	#pragma omp parallel for private(upper_index, lower_index, delta_z, upper_volume, lower_volume, total_volume, damping_coeff, z_above_damping, j, gaseous_constituent_id)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
@@ -217,11 +218,11 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 				*state_new -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + gaseous_constituent_id)*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H]/density_gas_vector[j]
 				*vertical_entropy_gradient[gaseous_constituent_id*(NO_OF_LAYERS - 1) + j];
 			}
-			a_vector[2*j + 1] = delta_t*((r_g_vector[j]/c_g_v_vector[j] - 1)*state_new -> temperature_gas[i + (j + 1)*NO_OF_SCALARS_H] + temp_interface_values[j])*
+			a_vector[2*j + 1] = delta_t*((r_g_vector[j]/c_g_v_vector[j] - t_vadv_parameter)*state_new -> temperature_gas[i + (j + 1)*NO_OF_SCALARS_H] + t_vadv_parameter*temp_interface_values[j])*
 			grid -> area[i + j*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H];
 			
 			// determining the elements of c_vector
-			c_vector[2*j] = -delta_t*((r_g_vector[j]/c_g_v_vector[j] - 1)*state_new -> temperature_gas[i + j*NO_OF_SCALARS_H] + temp_interface_values[j])*
+			c_vector[2*j] = -delta_t*((r_g_vector[j]/c_g_v_vector[j] - t_vadv_parameter)*state_new -> temperature_gas[i + j*NO_OF_SCALARS_H] + t_vadv_parameter*temp_interface_values[j])*
 			grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + j*NO_OF_SCALARS_H];
 			delta_z = grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i];
 			c_vector[2*j + 1] = -delta_t*impl_pgrad_weight*c_g_p_interface_values[j]/delta_z;
@@ -236,21 +237,40 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 		for (int j = 0; j < NO_OF_LAYERS - 2; ++j)
 		{
 			// determining the elements of l_vector
-			l_vector[2*j] = 0;
+			l_vector[2*j] = delta_t*(1 - t_vadv_parameter)*upper_weights_vector[j]*state_new -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]
+			*grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H];
 			l_vector[2*j + 1] = impl_w_vadv_weight
 			*state_new -> velocity_gas[i + (j + 2)*NO_OF_VECTORS_PER_LAYER]/
 			(grid -> z_vector[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[i + (j + 3)*NO_OF_VECTORS_PER_LAYER]);
 			// determining the elements of u_vector
-			u_vector[2*j] = 0;
+			u_vector[2*j] = -delta_t*(1 - t_vadv_parameter)*lower_weights_vector[j]*state_new -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]
+			*grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + j*NO_OF_SCALARS_H];
 			u_vector[2*j + 1] = impl_w_vadv_weight
 			*state_new -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/
 			(grid -> z_vector[i + j*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[i + (j + 2)*NO_OF_VECTORS_PER_LAYER]);
 		}
-		l_vector[2*NO_OF_LAYERS - 4] = 0;
-		u_vector[2*NO_OF_LAYERS - 4] = 0;
+		l_vector[2*NO_OF_LAYERS - 4] = delta_t*(1 - t_vadv_parameter)*upper_weights_vector[NO_OF_LAYERS - 2]*state_new -> velocity_gas[i + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER]
+		*grid -> area[i + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
+		u_vector[2*NO_OF_LAYERS - 4] = -delta_t*(1 - t_vadv_parameter)*lower_weights_vector[NO_OF_LAYERS - 2]*state_new -> velocity_gas[i + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER]
+		*grid -> area[i + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + (NO_OF_LAYERS - 2)*NO_OF_SCALARS_H];
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
-			b_vector[2*j] = 1;
+			if (j == 0)
+			{
+				b_vector[2*j] = 1 - delta_t*(1 - t_vadv_parameter)
+				*(
+				// this term vanishes here
+				//grid -> area[i + j*NO_OF_VECTORS_PER_LAYER]*state_new -> velocity_gas[i + j*NO_OF_VECTORS_PER_LAYER]*(1 - lower_weights_vector[j - 1])
+				- grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*state_new -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*(1 - upper_weights_vector[j]))
+				/grid -> volume[i + j*NO_OF_SCALARS_H];
+			}
+			else
+			{
+				b_vector[2*j] = 1 - delta_t*(1 - t_vadv_parameter)
+				*(grid -> area[i + j*NO_OF_VECTORS_PER_LAYER]*state_new -> velocity_gas[i + j*NO_OF_VECTORS_PER_LAYER]*(1 - lower_weights_vector[j - 1])
+				- grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*state_new -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*(1 - upper_weights_vector[j]))
+				/grid -> volume[i + j*NO_OF_SCALARS_H];
+			}
 			b_vector[2*j + 1] = 1;
 			d_vector[2*j] = diagnostics -> temperature_gas_explicit[j*NO_OF_SCALARS_H + i];
 			delta_z = grid -> z_vector[j*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 2)*NO_OF_VECTORS_PER_LAYER + i];
@@ -260,7 +280,11 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 			- delta_t*(1 - impl_w_vadv_weight)*state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]
 			*(state_new -> velocity_gas[j*NO_OF_VECTORS_PER_LAYER + i] - state_new -> velocity_gas[(j + 2)*NO_OF_VECTORS_PER_LAYER + i])/delta_z;
 		}
-		b_vector[2*NO_OF_LAYERS - 2] =  1;
+		b_vector[2*NO_OF_LAYERS - 2] =  1 - delta_t*(1 - t_vadv_parameter)
+		*(grid -> area[i + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER]*state_new -> velocity_gas[i + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER]*(1 - lower_weights_vector[NO_OF_LAYERS - 2])
+		// the second term vanishes here
+		)
+		/grid -> volume[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
 		d_vector[2*NO_OF_LAYERS - 2] = diagnostics -> temperature_gas_explicit[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		// calling the algorithm to solve the system of linear equations
 		lu_5band_solver(a_vector, b_vector, c_vector, l_vector, u_vector, d_vector, solution_vector);

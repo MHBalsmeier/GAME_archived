@@ -13,6 +13,7 @@ int get_damping_layer_properties(double *, double *);
 double get_expl_pgrad_weight();
 double get_impl_w_vadv_weight();
 double get_impl_u_vadv_weight();
+double get_t_vadv_parameter();
 int ask_for_divergence_output(int *);
 double entropy_constants_gas(int);
 double mean_particle_masses_gas(int);

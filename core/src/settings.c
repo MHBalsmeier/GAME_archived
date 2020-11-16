@@ -45,7 +45,7 @@ double get_expl_pgrad_weight()
 
 double get_impl_w_vadv_weight()
 {
-	double impl_w_vadv_weight = 0.5;
+	double impl_w_vadv_weight = 0.0;
 	return impl_w_vadv_weight;
 }
 
@@ -53,6 +53,12 @@ double get_impl_u_vadv_weight()
 {
 	double impl_u_vadv_weight = 0.5;
 	return impl_u_vadv_weight;
+}
+
+double get_t_vadv_parameter()
+{
+	double t_vadv_parameter = 1.0;
+	return t_vadv_parameter;
 }
 
 // input and output
