@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 	{
 		ORO_ID = 2;
 	}
-	if (TEST_ID == 6 || TEST_ID == 7)
+	if (TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 10 || TEST_ID == 11)
 	{
 		ORO_ID = 3;
 	}
@@ -237,12 +237,12 @@ int main(int argc, char *argv[])
             }
         }
         // dry Ullrich test
-        if (TEST_ID == 8)
+        if (TEST_ID == 8 || TEST_ID == 10)
         {
         	baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i], &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
         }
         // moist Ullrich test
-        if (TEST_ID == 9)
+        if (TEST_ID == 9 || TEST_ID == 11)
         {
         	baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i], &dummy_2, &dummy_3, &dummy_4, &total_density, &specific_humidity);
         	water_vapour_density[i] = total_density*specific_humidity;
@@ -317,13 +317,13 @@ int main(int argc, char *argv[])
                 wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(direction[j]);
             }
             // dry Ullrich test
-            if (TEST_ID == 8)
+            if (TEST_ID == 8 || TEST_ID == 10)
             {
         		baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
                 wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(direction[j]) + v*sin(direction[j]);
             }
             // moist Ullrich test
-            if (TEST_ID == 9)
+            if (TEST_ID == 9 || TEST_ID == 11)
             {
         		baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
                 wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(direction[j]) + v*sin(direction[j]);
