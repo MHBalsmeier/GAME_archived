@@ -18,7 +18,7 @@ toa=30000 # top of atmosphere
 orography_layers=17 # number of layers following the orography
 
 # "physics" configuration
-cfl_margin=0.3 # The time step will be calculated as follows (delta t) = (delta t from CFL)*(1 - cfl_margin). 0.3 can be considered a safe standard value.
+cfl_margin=0.25 # The time step will be calculated as follows (delta t) = (delta t from CFL)*(1 - cfl_margin). 0.25 can be considered a safe standard value.
 mass_dry_diff_h=0 # turn on if you want horizontal dry mass diffusion
 mass_dry_diff_v=0 # turn on if you want vetical dry mass diffusion
 temperature_diff_h=0 # turn on if you want horizontal temperature diffusion
