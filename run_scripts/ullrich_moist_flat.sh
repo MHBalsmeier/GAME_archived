@@ -6,7 +6,7 @@
 # basic run properties
 game_home_dir=/home/max/compiled/game_dev # the root directory of your GAME instance
 operator=MHB # the ID of the person / group / institution running the model
-ideal_input_id=10 # specifies which test scenario to run
+ideal_input_id=9 # specifies which test scenario to run
 run_id=ullrich_moist_flat # run_id must only be set if ideal_input_id != -1 (otherwise it is chosen automatically)
 run_span=777600 # how long the model is supposed to run
 valgrind_check=0 # set this to 1, if you want to check the code with Valgrind
