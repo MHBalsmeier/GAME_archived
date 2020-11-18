@@ -18,10 +18,7 @@ Steps to reproduce the behavior:
 4. Input file of the orography generator, which has been used to produce the model grid.
 5. Description of how the input file was created.
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
-
 **Plots**
 If applicable, add plots to help explain your problem.
 
-**OS**
+**OS** Which OS do you use?
