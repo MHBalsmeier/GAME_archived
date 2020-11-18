@@ -14,7 +14,7 @@ A clear and concise description of what the bug is.
 Steps to reproduce the behavior:
 1. Version number of the code used.
 2. Input file of the model run.
-3. Input file of the grid generator, which has been used to produce the model grid..
+3. Input file of the grid generator, which has been used to produce the model grid.
 4. Input file of the orography generator, which has been used to produce the model grid.
 5. Description of how the input file was created.
 
@@ -22,7 +22,6 @@ Steps to reproduce the behavior:
 A clear and concise description of what you expected to happen.
 
 **Plots**
-If applicable, add screenshots to help explain your problem.
+If applicable, add plots to help explain your problem.
 
-**Platform:**
- - OS:
+**OS**
