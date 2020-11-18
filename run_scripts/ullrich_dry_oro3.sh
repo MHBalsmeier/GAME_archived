@@ -6,8 +6,8 @@
 # basic run properties
 game_home_dir=/home/max/compiled/game_dev # the root directory of your GAME instance
 operator=MHB # the ID of the person / group / institution running the model
-ideal_input_id=9 # specifies which test scenario to run
-run_id=ullrich_moist # run_id must only be set if ideal_input_id != -1 (otherwise it is chosen automatically)
+ideal_input_id=10 # specifies which test scenario to run
+run_id=ullrich_dry_oro3 # run_id must only be set if ideal_input_id != -1 (otherwise it is chosen automatically)
 run_span=777600 # how long the model is supposed to run
 valgrind_check=0 # set this to 1, if you want to check the code with Valgrind
 
@@ -21,9 +21,9 @@ orography_layers=17 # number of layers following the orography
 cfl_margin=0.25 # The time step will be calculated as follows (delta t) = (delta t from CFL)*(1 - cfl_margin). 0.25 can be considered a safe standard value.
 mass_dry_diff_h=0 # turn on if you want horizontal dry mass diffusion
 mass_dry_diff_v=0 # turn on if you want vetical dry mass diffusion
-temperature_diff_h=1 # turn on if you want horizontal temperature diffusion
-temperature_diff_v=1 # turn on if you want vetical temperature diffusion
-momentum_diff=1 # turn on if you want momentum diffusion
+temperature_diff_h=0 # turn on if you want horizontal temperature diffusion
+temperature_diff_v=0 # turn on if you want vetical temperature diffusion
+momentum_diff=0 # turn on if you want momentum diffusion
 rad_on=0 # turn on if you want radiation
 radiation_delta_t=3600 # every how many seconds the radiation fluxes wil be updated
 
