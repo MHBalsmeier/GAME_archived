@@ -63,9 +63,8 @@ ${RTERRTMGPDIR}/rte/kernels/mo_optical_props_kernels.F90
 ${RTERRTMGPDIR}/rte/kernels/mo_rte_solver_kernels.F90
 )
 find_package(OpenMP)
-SET(CMAKE_C_FLAGS "-Wall ${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS} -O3 -Wall")
+SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS} -O3")
 target_link_libraries(game eccodes m netcdf geos95 atmostracers)
 install(TARGETS game DESTINATION core)
 install(FILES run.sh DESTINATION core)
