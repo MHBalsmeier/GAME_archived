@@ -368,24 +368,14 @@ int main(int argc, char *argv[])
 		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
 	}
 	Scalar_field *radiation_tendency = calloc(1, sizeof(Scalar_field));
-    if (config_info -> rad_on == 1)
-    {
-    	// first radiation calculation goes here
-    	;
-    }
-    else
-    {
-    	for (int i = 0; i < NO_OF_SCALARS; ++i)
-    		(*radiation_tendency)[i] = 0;
-    }
 	time_step_counter += 1;
     int counter = 0;
     State *state_tendency = calloc(1, sizeof(State));
     Interpolation_info *interpolation_info = calloc(1, sizeof(Interpolation_info));
     Irreversible_quantities *diffusion = calloc(1, sizeof(Irreversible_quantities));
-    config_info -> rad_update = 1;
     linear_combine_two_states(state_old, state_old, state_new, 1, 0);
     config_info -> totally_first_step_bool = 1;
+    config_info -> rad_update = 1;
     manage_rkhevi(state_old, state_new, interpolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
     counter += 1;
     if (write_out_dry_mass_integral == 1)
@@ -407,7 +397,6 @@ int main(int argc, char *argv[])
 	time_step_counter += 1;
     State *state_write = calloc(1, sizeof(State));
     double speed;
-    config_info -> rad_update = 0;
     double t_rad_update = t_0 + radiation_delta_t;
     int wind_10_m_step_counter = 0;
     int second_write_out_bool = 1;

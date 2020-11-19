@@ -12,11 +12,10 @@ Github repository: https://github.com/MHBalsmeier/game
 int backward_tendencies(State *state, Interpolation_info *interpolation, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_rk_step)
 {
     // Radiation is updated here.
-    if (config_info -> rad_update == 1 && no_rk_step == 0)
+    if (config_info -> rad_on == 1 && config_info -> rad_update == 1 && no_rk_step == 0)
     {
     	printf("Starting update of radiative fluxes ...\n");
-    	// radiation will go here
-        ;
+		calc_radiative_flux_convergence();
     	printf("Update of radiative fluxes completed.\n");
     }
     

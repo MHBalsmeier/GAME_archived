@@ -74,6 +74,7 @@ Everything is easy and quick to install.
 * [atmostracers](https://github.com/MHBalsmeier/atmostracers)
 * OpenMPI (Ubuntu: sudo apt-get install mpich)
 * clone the DCMIP2016 repository: git clone https://github.com/ClimateGlobalChange/DCMIP2016.git
+* clone the RTE+RRTMGP repository: git clone https://github.com/earth-system-radiation/rte-rrtmgp
 
 #### For using the plotting routines
 
@@ -94,7 +95,7 @@ The following packages are additionally required if you want to make use of the 
 
 ### Build and install
 
-In the shell scripts controlling the build process (residing in the directory build\_scripts) change the variable aim\_dir to a place of your choice, then run the scripts. The files with the suffix \_dev are meant to install to a location where new versions can be tested. You also need to install the run scripts in order to have the run scripts of the model where they belong. Install the plotting routines if you want to make use of them.
+In the file core/CMakeLists.txt change the variable RTERRTMGPDIR to the directory of RTE+RRTMGP. In the shell scripts controlling the build process (residing in the directory build\_scripts) change the variable aim\_dir to a place of your choice, then run the scripts. The files with the suffix \_dev are meant to install to a location where new versions can be tested. You also need to install the run scripts in order to have the run scripts of the model where they belong. Install the plotting routines if you want to make use of them.
 
 ## Fundamental literature
 
