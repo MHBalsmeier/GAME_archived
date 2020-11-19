@@ -8,6 +8,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include "../../spatial_operators/spatial_operators.h"
 #include "../../diagnostics/diagnostics.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 int backward_tendencies(State *state, Interpolation_info *interpolation, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_rk_step)
 {
@@ -15,10 +16,11 @@ int backward_tendencies(State *state, Interpolation_info *interpolation, State *
     if (config_info -> rad_on == 1 && config_info -> rad_update == 1 && no_rk_step == 0)
     {
     	printf("Starting update of radiative fluxes ...\n");
-		calc_radiative_flux_convergence();
+    	int no_of_scalars = NO_OF_SCALARS;
+    	int no_of_constituents = NO_OF_CONSTITUENTS;
+		calc_radiative_flux_convergence(state -> mass_densities, state -> temperature_gas, radiation_tendency, &no_of_scalars, &no_of_constituents);
     	printf("Update of radiative fluxes completed.\n");
     }
-    
     // Temperature diffusion gets updated here, but only at the last RK step and if heat conduction is switched on.
     if (no_rk_step == 2 && (config_info -> temperature_diff_h == 1 || config_info -> temperature_diff_v == 1))
     {
