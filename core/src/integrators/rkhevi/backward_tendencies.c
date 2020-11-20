@@ -16,6 +16,7 @@ int backward_tendencies(State *state, Interpolation_info *interpolation, State *
     if (config_info -> rad_on == 1 && config_info -> rad_update == 1 && no_rk_step == 0)
     {
     	printf("Starting update of radiative fluxes ...\n");
+    	// Fortran needs pointers, this is why this is necessary
     	int no_of_scalars = NO_OF_SCALARS;
     	int no_of_constituents = NO_OF_CONSTITUENTS;
     	int no_of_layers = NO_OF_LAYERS;
@@ -24,7 +25,7 @@ int backward_tendencies(State *state, Interpolation_info *interpolation, State *
     	printf("Update of radiative fluxes completed.\n");
     }
     // Temperature diffusion gets updated here, but only at the last RK step and if heat conduction is switched on.
-    if (no_rk_step == 2 && (config_info -> temperature_diff_h == 1 || config_info -> temperature_diff_v == 1))
+    if (no_rk_step == 0 && (config_info -> temperature_diff_h == 1 || config_info -> temperature_diff_v == 1))
     {
     	// Now we need to calculate the scalar diffusion coefficients.
         calc_temp_diffusion_coeffs(state, config_info, irreversible_quantities -> scalar_diffusion_coeff_numerical_h, irreversible_quantities -> scalar_diffusion_coeff_numerical_v);

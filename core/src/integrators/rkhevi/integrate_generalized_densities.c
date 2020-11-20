@@ -21,10 +21,10 @@ int integrate_generalized_densities(State *state, Interpolation_info *interpolat
     double c_v_cond, density_gas_value;
     
 	/*
-	phase transitions are on only at the third RK step
+	phase transitions are on only at the first RK step
 	only then, they are also updated
 	*/
-	if (config_info -> phase_transitions_on == 1 && NO_OF_CONSTITUENTS == 4)
+	if (no_rk_step == 0 && NO_OF_CONSTITUENTS == 4)
 	{
 	    calc_h2otracers_source_rates(irreversible_quantities -> constituent_mass_source_rates, irreversible_quantities -> constituent_heat_source_rates, state -> mass_densities, state -> condensed_density_temperatures, state -> temperature_gas, NO_OF_SCALARS, delta_t);
 	}
@@ -32,20 +32,10 @@ int integrate_generalized_densities(State *state, Interpolation_info *interpolat
 	for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
 	{
 		// Separating the density of the constituent at hand.
-		if (no_rk_step == 0)
+		for (int j = 0; j < NO_OF_SCALARS; ++j)
 		{
-			for (int j = 0; j < NO_OF_SCALARS; ++j)
-			{
-			    diagnostics -> scalar_field_placeholder[j] = state -> mass_densities[i*NO_OF_SCALARS + j];
-		    }
-        }
-		else
-		{
-			for (int j = 0; j < NO_OF_SCALARS; ++j)
-			{
-			    diagnostics -> scalar_field_placeholder[j] = state -> mass_densities[i*NO_OF_SCALARS + j];
-		    }
-        }
+		    diagnostics -> scalar_field_placeholder[j] = state -> mass_densities[i*NO_OF_SCALARS + j];
+	    }
         
         // This is the mass advection, which needs to be carried out for all constituents.
         // -------------------------------------------------------------------------------
@@ -101,42 +91,24 @@ int integrate_generalized_densities(State *state, Interpolation_info *interpolat
         divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
 		{
-		    state_tendency -> mass_densities[i*NO_OF_SCALARS + j] = 
-		    // the advection
+		    state_tendency -> mass_densities[i*NO_OF_SCALARS + j] =
+			// the advection
 		    -diagnostics -> flux_density_divv[j]
 		    // the phase transition rates
-		    + config_info -> phase_transitions_on*irreversible_quantities -> constituent_mass_source_rates[i*NO_OF_SCALARS + j];
+		    + irreversible_quantities -> constituent_mass_source_rates[i*NO_OF_SCALARS + j];
 	    }
-        
 		// Explicit entropy integrations
 		// -----------------------------
-		// Determining the entropy density of the constituent at hand.
-		if (no_rk_step == 0)
+		// Determining the specific entropy of the constituent at hand.
+		for (int j = 0; j < NO_OF_SCALARS; ++j)
 		{
-			for (int j = 0; j < NO_OF_SCALARS; ++j)
+			if (state -> mass_densities[i*NO_OF_SCALARS + j] != 0)
 			{
-				if (state -> mass_densities[i*NO_OF_SCALARS + j] != 0)
-				{
-					diagnostics -> scalar_field_placeholder[j] = state -> entropy_densities[i*NO_OF_SCALARS + j]/state -> mass_densities[i*NO_OF_SCALARS + j];
-				}
-				else
-				{
-					diagnostics -> scalar_field_placeholder[j] = 0;
-				}
+				diagnostics -> scalar_field_placeholder[j] = state -> entropy_densities[i*NO_OF_SCALARS + j]/state -> mass_densities[i*NO_OF_SCALARS + j];
 			}
-		}
-		else
-		{
-			for (int j = 0; j < NO_OF_SCALARS; ++j)
+			else
 			{
-				if (state -> mass_densities[i*NO_OF_SCALARS + j] != 0)
-				{
-					diagnostics -> scalar_field_placeholder[j] = state -> entropy_densities[i*NO_OF_SCALARS + j]/state -> mass_densities[i*NO_OF_SCALARS + j];
-				}
-				else
-				{
-					diagnostics -> scalar_field_placeholder[j] = 0;
-				}
+				diagnostics -> scalar_field_placeholder[j] = 0;
 			}
 		}
 	    scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid, 0);
@@ -153,20 +125,10 @@ int integrate_generalized_densities(State *state, Interpolation_info *interpolat
 		// This is the integration of the "density x temperature" fields. It only needs to be done for condensed constituents.
 		if (i < NO_OF_CONDENSED_CONSTITUENTS)
 		{
-			if (no_rk_step == 0)
+			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
-				for (int j = 0; j < NO_OF_SCALARS; ++j)
-				{
-					diagnostics -> scalar_field_placeholder[j] = state -> condensed_density_temperatures[i*NO_OF_SCALARS + j];
-				}
+				diagnostics -> scalar_field_placeholder[j] = state -> condensed_density_temperatures[i*NO_OF_SCALARS + j];
 			}
-			else
-			{
-				for (int j = 0; j < NO_OF_SCALARS; ++j)
-				{
-					diagnostics -> scalar_field_placeholder[j] = state -> condensed_density_temperatures[i*NO_OF_SCALARS + j];
-				}
-			}		
 			// The constituent velocity has already been calculated.
 		    scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> velocity_gen, diagnostics -> flux_density, grid, 0);
 		    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
@@ -177,11 +139,10 @@ int integrate_generalized_densities(State *state, Interpolation_info *interpolat
 			    // the advection
 			    -diagnostics -> flux_density_divv[j]
 			    // the source terms
-			    + state -> mass_densities[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state, j))*(irreversible_quantities -> temperature_diffusion_heating[j] + irreversible_quantities -> heating_diss[j] + radiation_tendency[j]) + 1/c_v_cond*config_info -> phase_transitions_on*irreversible_quantities -> constituent_heat_source_rates[i*NO_OF_SCALARS + j] + diagnostics -> scalar_field_placeholder[j]*config_info -> phase_transitions_on*(irreversible_quantities -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]);
+			    + state -> mass_densities[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state, j))*(irreversible_quantities -> temperature_diffusion_heating[j] + irreversible_quantities -> heating_diss[j] + radiation_tendency[j]) + 1/c_v_cond*irreversible_quantities -> constituent_heat_source_rates[i*NO_OF_SCALARS + j] + diagnostics -> scalar_field_placeholder[j]*(irreversible_quantities -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]);
 			}
 		}
 	}
-	
 	return 0;
 }
 

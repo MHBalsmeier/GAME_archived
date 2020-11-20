@@ -146,7 +146,6 @@ int mass_diff_v;
 int temperature_diff_h;
 int temperature_diff_v;
 int momentum_diff;
-int phase_transitions_on;
 int rad_on;
 int rad_update;
 } Config_info;

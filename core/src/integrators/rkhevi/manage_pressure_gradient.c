@@ -130,7 +130,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 
 double pressure_gradient_1_damping_factor(double density_value)
 {
-	double safe_density = 1e-8;
+	double safe_density = 1e-10;
 	double result;
 	result = density_value/safe_density;
 	if (result > 1)

@@ -26,17 +26,8 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolation_info *interp
 		state_old remains unchanged the whole time.
 		*/
 		
-		// 0.) setting the time step of the RK substep
+		// 1.) setting the time step of the RK substep
 		delta_t_rk = delta_t/(3 - i);
-		
-		// 1.) Setting up the phase transitions configuration.
-		// ----------------------------------------------------------------------------
-		// phase transitions are only updated at the third step
-		config_info -> phase_transitions_on = 0;
-		if (i == 2)
-		{
-			config_info -> phase_transitions_on = 1;
-		}
 		
 		// 2.) Explicit component of the momentum equation.
 		// ----------------------------------------------------------------------------
