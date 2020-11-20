@@ -145,7 +145,9 @@ int integrate_generalized_densities(State *state, Interpolation_info *interpolat
 		{
 			state_tendency -> entropy_densities[i*NO_OF_SCALARS + j] = 
 			// the advection
-			-diagnostics -> flux_density_divv[j];
+			-diagnostics -> flux_density_divv[j]
+			// the heating rates
+			 + state -> mass_densities[i*NO_OF_SCALARS + j]/density_total(state, j)*radiation_tendency[j]/state -> temperature_gas[j];
 	    }
     
 		// This is the integration of the "density x temperature" fields. It only needs to be done for condensed constituents.

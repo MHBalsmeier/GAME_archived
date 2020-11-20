@@ -18,7 +18,8 @@ int backward_tendencies(State *state, Interpolation_info *interpolation, State *
     	printf("Starting update of radiative fluxes ...\n");
     	int no_of_scalars = NO_OF_SCALARS;
     	int no_of_constituents = NO_OF_CONSTITUENTS;
-		calc_radiative_flux_convergence(state -> mass_densities, state -> temperature_gas, radiation_tendency, &no_of_scalars, &no_of_constituents);
+    	int no_of_layers = NO_OF_LAYERS;
+		calc_radiative_flux_convergence(state -> mass_densities, state -> temperature_gas, radiation_tendency, &no_of_scalars, &no_of_layers, &no_of_constituents);
     	printf("Update of radiative fluxes completed.\n");
     }
     // Temperature diffusion gets updated here, but only at the last RK step and if heat conduction is switched on.
