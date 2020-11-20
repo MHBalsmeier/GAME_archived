@@ -61,6 +61,8 @@ ${RTERRTMGPDIR}/rte/mo_rte_util_array.F90
 ${RTERRTMGPDIR}/rte/kernels/mo_fluxes_broadband_kernels.F90
 ${RTERRTMGPDIR}/rte/kernels/mo_optical_props_kernels.F90
 ${RTERRTMGPDIR}/rte/kernels/mo_rte_solver_kernels.F90
+${RTERRTMGPDIR}/extensions/mo_fluxes_byband.F90
+${RTERRTMGPDIR}/extensions/mo_fluxes_byband_kernels.F90
 )
 find_package(OpenMP)
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS} -O3 -Wall")
