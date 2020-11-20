@@ -10,7 +10,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdlib.h>
 #include <stdio.h>
 
-int manage_rkhevi(State *state_old, State *state_new, Interpolation_info *interpolation_info, Grid *grid, Dualgrid *dualgrid, Scalar_field radiation_tendency, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, double delta_t)
+int manage_rkhevi(State *state_old, State *state_new, Interpolation_info *interpolation_info, Grid *grid, Dualgrid *dualgrid, Scalar_field radiation_tendency, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, double delta_t, double time_coordinate)
 {
 	/*
 	Here, the RK3 scheme is implemented.
@@ -50,7 +50,7 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolation_info *interp
 		
 		// 4.) Explicit component of the generalized density equations.
 		// ----------------------------------------------------------------------------
-		backward_tendencies(state_new, interpolation_info, state_tendency, grid, dualgrid, delta_t_rk, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i);
+		backward_tendencies(state_new, interpolation_info, state_tendency, grid, dualgrid, delta_t_rk, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, time_coordinate);
 		// determining the explicit component of the new temperature
 		
 		// 5.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies (including diabatic forcings).

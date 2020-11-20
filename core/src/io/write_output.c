@@ -48,7 +48,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	
 	// Time stuff.
     time_t t_init_t = (time_t) t_init;
-    struct tm *p_init_time = localtime(&t_init_t);
+    // t_init is in UTC
+    struct tm *p_init_time = gmtime(&t_init_t);
     int init_year = p_init_time -> tm_year;
     int init_month = p_init_time -> tm_mon;
     int init_day = p_init_time -> tm_mday;

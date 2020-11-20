@@ -10,7 +10,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdio.h>
 #include <stdlib.h>
 
-int backward_tendencies(State *state, Interpolation_info *interpolation, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_rk_step)
+int backward_tendencies(State *state, Interpolation_info *interpolation, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_rk_step, double time_coordinate)
 {
     // Radiation is updated here.
     if (config_info -> rad_on == 1 && config_info -> rad_update == 1 && no_rk_step == 0)
@@ -20,7 +20,7 @@ int backward_tendencies(State *state, Interpolation_info *interpolation, State *
     	int no_of_constituents = NO_OF_CONSTITUENTS;
     	int no_of_layers = NO_OF_LAYERS;
 		calc_radiative_flux_convergence(grid -> latitude_scalar, grid -> longitude_scalar,
-		state -> mass_densities, state -> temperature_gas, radiation_tendency, &no_of_scalars, &no_of_layers, &no_of_constituents);
+		state -> mass_densities, state -> temperature_gas, radiation_tendency, &no_of_scalars, &no_of_layers, &no_of_constituents, &time_coordinate);
     	printf("Update of radiative fluxes completed.\n");
     }
     // Temperature diffusion gets updated here, but only at the last RK step and if heat conduction is switched on.

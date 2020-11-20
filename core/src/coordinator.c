@@ -164,8 +164,7 @@ int main(int argc, char *argv[])
     strcpy(INIT_STATE_FILE, INIT_STATE_FILE_PRE);
     
     /*
-    determining the time stamp of the initialization
-    This will be in the time zone of the machine, which is not a problem, since the offset is added here and substracted when the output is written.
+    determining the Unix time stamp of the initialization (UTC)
     */
     struct tm init_t;
     init_t.tm_year = year - 1900;
@@ -174,9 +173,11 @@ int main(int argc, char *argv[])
     init_t.tm_hour = hour;
     init_t.tm_min = 0;
     init_t.tm_sec = 0;
-    init_t.tm_isdst = -1;
+    // turning off DST
+    init_t.tm_isdst = 0;
     time_t init_time = mktime(&init_t);
-    double t_init = (double) init_time;
+    // converting to double in UTC
+    double t_init = (double) init_time + init_t.tm_gmtoff;
     
     // Giving the user some information on the run to about to be executed.
     char *stars  = malloc(83*sizeof(char));
@@ -376,7 +377,7 @@ int main(int argc, char *argv[])
     linear_combine_two_states(state_old, state_old, state_new, 1, 0);
     config_info -> totally_first_step_bool = 1;
     config_info -> rad_update = 1;
-    manage_rkhevi(state_old, state_new, interpolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
+    manage_rkhevi(state_old, state_new, interpolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t, t_0);
     counter += 1;
     if (write_out_dry_mass_integral == 1)
     {
@@ -415,7 +416,7 @@ int main(int argc, char *argv[])
         {
         	config_info -> rad_update = 0;
     	}
-        manage_rkhevi(state_old, state_new, interpolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t);
+        manage_rkhevi(state_old, state_new, interpolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t, t_0);
 		if (write_out_dry_mass_integral == 1)
         {
 			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 0);

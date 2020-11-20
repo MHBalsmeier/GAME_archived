@@ -24,12 +24,13 @@ module radiation
   
   subroutine calc_radiative_flux_convergence(latitude_scalar, longitude_scalar, &
   mass_densities, temperature_gas, radiation_tendency, &
-  no_of_scalars, no_of_layers, no_of_constituents) &
+  no_of_scalars, no_of_layers, no_of_constituents, time_coord) &
   bind(c, name = "calc_radiative_flux_convergence")
     
     integer, intent(in)              ::                    no_of_scalars
     integer, intent(in)              ::                    no_of_layers
     integer, intent(in)              ::                    no_of_constituents
+    real(8)                          :: time_coord
     real(8), intent(in)              :: latitude_scalar    (no_of_scalars/no_of_layers)
     real(8), intent(in)              :: longitude_scalar   (no_of_scalars/no_of_layers)
     real(8), intent(in)              :: mass_densities    &
@@ -41,14 +42,13 @@ module radiation
     ! solar zenith angle
     real(8)	                         :: mu_0(no_of_scalars/no_of_layers)
     integer                          :: ji, no_of_scalars_h
-    real(8)                          :: time
     
     ! the number of scalars on every layer
     no_of_scalars_h = no_of_scalars/no_of_layers
     
     ! calculating the zenith angle
     do ji=1,no_of_scalars_h
-      mu_0(ji) = coszenith(latitude_scalar(ji), longitude_scalar(ji), time)
+      mu_0(ji) = coszenith(latitude_scalar(ji), longitude_scalar(ji), time_coord)
     enddo
     
     ! the result
@@ -89,14 +89,16 @@ module radiation
     ! around itself and at an angle phi_0_earth_around_sun around the sun.
     real(8)                          :: phi_0_earth_around_sun
     real(8)                          :: phi_0_earth_rotation
-    real(8)                          :: trans_earth2sun         (3, 3)
+    real(8)                          :: trans_earth2sun         (3,3)
     
     omega                  = 7.292115d-5
     omega_rev              = 1.99099d-7
     obliquity              = 0.409092592843564
     
-    
-    t_0                    = 0.
+    ! refer to https://www.esrl.noaa.gov/gmd/grad/solcalc/azel.html
+    ! Unix time coordinate of 2019-Dec-20, 12:00 UTC
+    t_0                    = 1576843200.0
+    ! this is a winter solstice
     phi_0_earth_around_sun = 0.
     phi_0_earth_rotation   = 0.
     
