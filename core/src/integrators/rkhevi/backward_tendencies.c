@@ -23,7 +23,7 @@ int backward_tendencies(State *state, Interpolation_info *interpolation, State *
     	int no_of_constituents = NO_OF_CONSTITUENTS;
     	int no_of_condensed_constituents = NO_OF_CONDENSED_CONSTITUENTS;
     	int no_of_layers = NO_OF_LAYERS;
-		calc_radiative_flux_convergence(grid -> latitude_scalar, grid -> longitude_scalar, grid -> volume, grid -> area,
+		calc_radiative_flux_convergence(grid -> latitude_scalar, grid -> longitude_scalar, grid -> z_scalar, grid -> z_vector,
 		state -> mass_densities, state -> temperature_gas, radiation_tendency, &no_of_scalars, &no_of_vectors, &no_of_vectors_per_layer, &no_of_layers, &no_of_constituents, 
 		&no_of_condensed_constituents, &time_coordinate);
     	printf("Update of radiative fluxes completed.\n");

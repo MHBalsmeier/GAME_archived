@@ -85,7 +85,7 @@ module radiation
   end subroutine radiation_init
   
   subroutine calc_radiative_flux_convergence(latitude_scalar, longitude_scalar, &
-  volume, area, &
+  z_scalar, z_vector, &
   mass_densities, temperature_gas, radiation_tendency, &
   no_of_scalars, no_of_vectors, no_of_vectors_per_layer, &
   no_of_layers, no_of_constituents, no_of_condensed_constituents, &
@@ -101,8 +101,8 @@ module radiation
     real(8)                          :: time_coord
     real(8), intent(in)              :: latitude_scalar    (no_of_scalars/no_of_layers)
     real(8), intent(in)              :: longitude_scalar   (no_of_scalars/no_of_layers)
-    real(8), intent(in)              :: volume             (no_of_scalars)
-    real(8), intent(in)              :: area               (no_of_scalars)
+    real(8), intent(in)              :: z_scalar           (no_of_scalars)
+    real(8), intent(in)              :: z_vector           (no_of_scalars)
     real(8), intent(in)              :: mass_densities    &
     (no_of_constituents*no_of_scalars)
     real(8), intent(in)              :: temperature_gas   (no_of_scalars)
@@ -155,6 +155,8 @@ module radiation
     ! cloud optical properties
     type(ty_optical_props_2str)      :: cloud_optics_sw
     type(ty_optical_props_1scl)      :: cloud_optics_lw
+    ! scale height of the atmosphere
+    real(8), parameter               :: scale_height = 8.e3_wp
     
     ! calculation of the number of columns
     no_of_scalars_h =  no_of_scalars/no_of_layers
@@ -162,9 +164,10 @@ module radiation
     ! set the surface emissivity (a longwave property) to a standard value
     surface_emissivity(:,:) =  0.95_wp
     
-    ! set the surface albedos to 0.07 (this is close to the values of water)
-    albedo_dir        (:,:) =  0.07_wp
-    albedo_dif        (:,:) =  0.07_wp
+    ! setting the surface albedos to 0.12 (compare Zdunkowski, Trautmann & Bott:
+    ! Radiation in the Atmosphere, 2007, p. 444)
+    albedo_dir        (:,:) =  0.12_wp
+    albedo_dif        (:,:) =  0.12_wp
     
     ! reformatting the thermodynamical state for RTE+RRTMGP
     do ji = 1,no_of_scalars_h
@@ -198,13 +201,40 @@ module radiation
     ! the properties at cell interfaces
     do ji = 1,no_of_scalars_h
       do jk = 1,no_of_layers+1
+        ! values at TOA
         if (jk == 1) then
-          temperature_interface_rad(ji,jk) =  temperature_rad(ji,jk)
-          pressure_interface_rad   (ji,jk) =  pressure_rad   (ji,jk)
+          ! temperature at TOA (linear extrapolation)
+          ! the value in the highest layer
+          temperature_interface_rad(ji,jk) = temperature_rad(ji,jk) &
+          ! the gradient
+          ! delta T
+          + (temperature_rad(ji,jk) - temperature_rad(ji,jk+1))/     &
+          ! delta z
+          (z_scalar(ji+(jk-1)*no_of_scalars_h)-z_scalar(ji+jk*no_of_scalars_h)) &
+          ! times delta_z
+          *(z_vector(ji)-z_scalar(ji+(jk-1)*no_of_scalars_h))
+          ! pressure at TOA
+          ! here, the barometric height formula is used
+          pressure_interface_rad   (ji,jk) =  pressure_rad   (ji,jk) &
+          *EXP(-(z_vector(ji)-z_scalar(ji+(jk-1)*no_of_scalars_h))/scale_height)
+        ! values at the surface
         elseif (jk == no_of_layers+1) then
-          temperature_interface_rad(ji,jk) =  temperature_rad(ji,jk-1)
-          pressure_interface_rad   (ji,jk) =  pressure_rad   (ji,jk-1)
+          ! temperature at the surface (linear extrapolation)
+          ! the value in the lowest layer
+          temperature_interface_rad(ji,jk) =  temperature_rad(ji,jk-1) &
+          ! the gradient
+          ! delta T
+          + (temperature_rad(ji,jk-2) - temperature_rad(ji,jk-1))/     &
+          ! delta z
+          (z_scalar(ji+(jk-3)*no_of_scalars_h)-z_scalar(ji+(jk-2)*no_of_scalars_h)) &
+          ! delta z
+          *(z_vector(no_of_layers*no_of_vectors_per_layer+ji)-z_scalar(ji+(jk-2)*no_of_scalars_h))
+          ! surface pressure
+          pressure_interface_rad   (ji,jk) =  pressure_rad   (ji,jk-1) &
+          *EXP(-(z_vector(no_of_layers*no_of_vectors_per_layer+ji) &
+          -z_scalar(ji+(jk-2)*no_of_scalars_h))/scale_height)
         else
+          ! just the arithmetic mean
           temperature_interface_rad(ji,jk) =  0.5*(temperature_rad(ji,jk-1)+temperature_rad(ji,jk))
           pressure_interface_rad   (ji,jk) =  0.5*(pressure_rad   (ji,jk-1)+pressure_rad   (ji,jk))
         endif
@@ -239,18 +269,19 @@ module radiation
     end do
     
     ! setting the volume mixing ratios of the gases for the short wave calculation
-    call set_vol_mix_ratios(.TRUE., no_of_day_points, no_of_scalars_h, no_of_layers)
+    call set_vol_mix_ratios(mass_densities, .TRUE., no_of_day_points, no_of_scalars_h, &
+    no_of_layers, no_of_scalars, no_of_condensed_constituents)
     
     ! setting the short wave optical properties of clouds
     call handle_error(cloud_optics_sw%alloc_2str(no_of_day_points, no_of_layers, k_dist_sw, &
     name = "shortwave cloud optics"))
     cloud_optics_sw%tau =  0
-    cloud_optics_sw%ssa =  1
+    cloud_optics_sw%ssa = 1
     cloud_optics_sw%g  = 0
     
     ! initializing the short wave fluxes
     call init_fluxes(fluxes_clearsky_day, no_of_day_points, no_of_layers+1, no_of_sw_bands)
-    call init_fluxes(fluxes_allsky_day, no_of_day_points, no_of_layers+1, no_of_sw_bands)
+    call init_fluxes(fluxes_allsky_day,   no_of_day_points, no_of_layers+1, no_of_sw_bands)
     
     ! calculate shortwave radiative fluxes (only the day points are handed over
     ! for efficiency)
@@ -269,18 +300,19 @@ module radiation
     ! clear sky
     call calc_power_density(.TRUE., no_of_scalars, no_of_vectors, &
     no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
-    fluxes_clearsky_day, volume, area, radiation_tendency)
+    fluxes_clearsky_day, z_vector, radiation_tendency)
     ! all sky
     call calc_power_density(.TRUE., no_of_scalars, no_of_vectors, &
     no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
-    fluxes_allsky_day, volume, area, radiation_tendency)
+    fluxes_allsky_day, z_vector, radiation_tendency)
     
     ! freeing the short wave fluxes
     call free_fluxes(fluxes_clearsky_day)
     call free_fluxes(fluxes_allsky_day)
     
     ! setting the volume mixing ratios of the gases for the long wave calculation
-    call set_vol_mix_ratios(.FALSE., no_of_day_points, no_of_scalars_h, no_of_layers)
+    call set_vol_mix_ratios(mass_densities, .FALSE., no_of_day_points, no_of_scalars_h, &
+    no_of_layers, no_of_scalars, no_of_condensed_constituents)
     
     ! setting the long wave cloud optical properties
     call handle_error(cloud_optics_lw%alloc_1scl(no_of_scalars_h, no_of_layers, k_dist_lw, &
@@ -289,7 +321,8 @@ module radiation
     
     ! initializing the long wave fluxes
     call init_fluxes(fluxes_clearsky, no_of_scalars_h, no_of_layers+1, no_of_lw_bands)
-    call init_fluxes(fluxes_allsky, no_of_scalars_h, no_of_layers+1, no_of_lw_bands)
+    call init_fluxes(fluxes_allsky,   no_of_scalars_h, no_of_layers+1, no_of_lw_bands)
+    
     ! calculate longwave radiative fluxes
     call handle_error(rte_lw(k_dist_lw, gas_concentrations, pressure_rad(:,:), &
     temperature_rad(:,:), pressure_interface_rad(:,:), temperature_interface_rad(:,no_of_layers+1), &
@@ -300,11 +333,11 @@ module radiation
     ! clear sky
     call calc_power_density(.FALSE., no_of_scalars, no_of_vectors, &
     no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
-    fluxes_clearsky, volume, area, radiation_tendency)
+    fluxes_clearsky, z_vector, radiation_tendency)
     ! all sky
     call calc_power_density(.FALSE., no_of_scalars, no_of_vectors, &
     no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
-    fluxes_allsky, volume, area, radiation_tendency)
+    fluxes_allsky, z_vector, radiation_tendency)
     
     ! freeing the long wave fluxes
     call free_fluxes(fluxes_clearsky)
@@ -317,7 +350,7 @@ module radiation
     
   subroutine calc_power_density(day_only, no_of_scalars, no_of_vectors, &
   no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
-  fluxes, volume, area, radiation_tendency)
+  fluxes, z_vector, radiation_tendency)
   
     ! this is essentially the negative vertical divergence operator
     
@@ -331,8 +364,7 @@ module radiation
     integer, intent(in)              :: no_of_day_points
     integer, intent(in)              :: day_indices(no_of_day_points)
     type(ty_fluxes_byband), intent(in):: fluxes
-    real(8), intent(in)              :: volume(no_of_scalars)
-    real(8), intent(in)              :: area(no_of_vectors)
+    real(8), intent(in)              :: z_vector(no_of_vectors)
     real(8), intent(inout)           :: radiation_tendency(no_of_scalars)
   
     ! local variables
@@ -364,14 +396,14 @@ module radiation
         ! this is a sum of four fluxes
         ( &
         ! upward flux (going in)
-        fluxes%flux_up  (j_column,ji+1)*area((ji    *no_of_vectors_per_layer)+jk) &
+        fluxes%flux_up  (j_column,ji+1) &
         ! upward flux (going out)
-        - fluxes%flux_up(j_column,ji  )*area(((ji-1)*no_of_vectors_per_layer)+jk) &
+        - fluxes%flux_up(j_column,ji  ) &
         ! downward flux (going in)
-        + fluxes%flux_dn(j_column,ji)  *area(((ji-1)*no_of_vectors_per_layer)+jk) &
+        + fluxes%flux_dn(j_column,ji)   &
         ! downward flux (going out)
-        - fluxes%flux_dn(j_column,ji+1)*area((ji    *no_of_vectors_per_layer)+jk) &
-        )/volume((ji-1)*no_of_scalars_h+jk)
+        - fluxes%flux_dn(j_column,ji+1) &
+        )/(z_vector((ji-1)*no_of_vectors_per_layer+jk) - z_vector(ji*no_of_vectors_per_layer+jk))
       enddo
     enddo
   
@@ -447,9 +479,9 @@ module radiation
     ! transforming the normal vector of the place to solar coordinates
     normal_vector_rel2_sun     = matmul(trans_earth2sun, normal_vector_rel2_earth)
     
-    sun_2_earth             (1) =  cos(omega_rev*t_transformed + phi_0_earth_around_sun)
-    sun_2_earth             (2) =  sin(omega_rev*t_transformed + phi_0_earth_around_sun)
-    sun_2_earth             (3) =  0
+    sun_2_earth             (1) = cos(omega_rev*t_transformed + phi_0_earth_around_sun)
+    sun_2_earth             (2) = sin(omega_rev*t_transformed + phi_0_earth_around_sun)
+    sun_2_earth             (3) = 0
     
     ! the result
     coszenith =  DOT_PRODUCT(normal_vector_rel2_earth, -sun_2_earth)
@@ -461,12 +493,16 @@ module radiation
   
   end function coszenith
   
-  subroutine set_vol_mix_ratios(sw_bool, no_of_day_points, no_of_scalars_h, no_of_layers)
+  subroutine set_vol_mix_ratios(mass_densities, sw_bool, no_of_day_points, no_of_scalars_h, &
+  no_of_layers, no_of_scalars, no_of_condensed_constituents)
     
+    real(8), intent(in)              :: mass_densities(:)
     logical, intent(in)              :: sw_bool
     integer, intent(in)              :: no_of_day_points
     integer, intent(in)              :: no_of_scalars_h
     integer, intent(in)              :: no_of_layers
+    integer, intent(in)              :: no_of_scalars
+    integer, intent(in)              :: no_of_condensed_constituents
     
     ! computes volume mixing ratios
     ! the volume mixing ratio of a gas
@@ -474,7 +510,7 @@ module radiation
     ! local variables
     real(8)                          :: molar_fraction_value
     ! loop index
-    integer                          :: ji
+    integer                          :: ji,jk,jl
     
     ! setting the volume mixing ratios of the gases for the long wave calculation
     do ji = 1,size(active_gases)
@@ -499,6 +535,19 @@ module radiation
         case("co")
           molar_fraction_value = molar_fraction_in_dry_air(9)
           vol_mix_ratio(:,:) = molar_fraction_value/(1._wp - molar_fraction_value)
+        case("n2o")
+          molar_fraction_value = molar_fraction_in_dry_air(11)
+          vol_mix_ratio(:,:) = molar_fraction_value/(1._wp - molar_fraction_value)
+        case("h2o")
+          do jk=1,no_of_scalars_h
+            do jl=1,no_of_layers
+              vol_mix_ratio(jk,jl) = & 
+              mass_densities((no_of_condensed_constituents+1)*no_of_scalars+jk+(jl-1)*no_of_scalars_h) &
+              *specific_gas_constants(1)/ &
+              (mass_densities(no_of_condensed_constituents*no_of_scalars+jk+(jl-1)*no_of_scalars_h) &
+              *specific_gas_constants(0))
+            enddo
+          enddo
       end select
       if (sw_bool) then
         call handle_error(gas_concentrations_sw%set_vmr(gases_lowercase(ji), vol_mix_ratio(1:no_of_day_points,:)))
