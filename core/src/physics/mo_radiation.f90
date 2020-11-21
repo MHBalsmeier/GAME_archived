@@ -126,10 +126,16 @@ module radiation
     type(ty_fluxes_byband)           :: fluxes_allsky, fluxes_allsky_day
     real(8)                          :: surface_emissivity(no_of_lw_bands, no_of_scalars/no_of_layers)
     ! surface albedo for direct radiation
-    real(8)                          :: albedo_dir        (no_of_lw_bands, no_of_scalars/no_of_layers)
+    real(8)                          :: albedo_dir        (no_of_sw_bands, no_of_scalars/no_of_layers)
     ! surface albedo for diffusive radiation
-    real(8)                          :: albedo_dif        (no_of_lw_bands, no_of_scalars/no_of_layers)
-    ! temperature at cells
+    real(8)                          :: albedo_dif        (no_of_sw_bands, no_of_scalars/no_of_layers)
+    ! surface albedo for direct radiation (day points only)
+    real(8)                          :: albedo_dir_day    (no_of_sw_bands, no_of_scalars/no_of_layers)
+    ! surface albedo for diffusive radiation (day points only)
+    real(8)                          :: albedo_dif_day    (no_of_sw_bands, no_of_scalars/no_of_layers)
+    ! solar zenith angle (day points only)
+    real(8)	                         :: mu_0_day(no_of_scalars/no_of_layers)
+    ! number of points where it is day
     real(8)                          :: temperature_rad           (no_of_scalars/no_of_layers, no_of_layers)
     ! pressure at cells
     real(8)                          :: pressure_rad              (no_of_scalars/no_of_layers, no_of_layers)
@@ -144,7 +150,7 @@ module radiation
     ! pressure at cell interfaces restricted to day points
     real(8)                          :: pressure_interface_rad_day(no_of_scalars/no_of_layers, no_of_layers+1)
     ! the volume mixing ratio of a gas
-    real(8)                          :: vol_mix_ratio             (no_of_scalars/no_of_layers, no_of_layers+1)
+    real(8)                          :: vol_mix_ratio             (no_of_scalars/no_of_layers, no_of_layers)
     ! cloud optical properties
     type(ty_optical_props_2str)      :: cloud_optics_sw
     type(ty_optical_props_1scl)      :: cloud_optics_lw
@@ -169,6 +175,25 @@ module radiation
         + (jk-1)*no_of_scalars_h+ji)*temperature_rad(ji,jk)
       enddo
     enddo
+    
+    ! moving the temperature into the allowed area
+    do ji=1,no_of_scalars_h
+      do jk=1,no_of_layers
+        if (temperature_rad(ji,jk) > k_dist_lw%get_temp_max()) then
+          temperature_rad(ji,jk)=k_dist_lw%get_temp_max()
+        endif
+        if (temperature_rad(ji,jk) < k_dist_lw%get_temp_min()) then
+          temperature_rad(ji,jk)=k_dist_lw%get_temp_min()
+        endif
+        if (temperature_rad(ji,jk) > k_dist_sw%get_temp_max()) then
+          temperature_rad(ji,jk)=k_dist_sw%get_temp_max()
+        endif
+        if (temperature_rad(ji,jk) < k_dist_sw%get_temp_min()) then
+          temperature_rad(ji,jk)=k_dist_sw%get_temp_min()
+        endif
+      enddo
+    enddo
+    
     ! the properties at cell interfaces
     do ji=1,no_of_scalars_h
       do jk=1,no_of_layers+1
@@ -207,6 +232,9 @@ module radiation
       temperature_rad_day(j_day,:)        = temperature_rad(day_indices(j_day),:)
       pressure_rad_day(j_day,:)           = pressure_rad(day_indices(j_day),:)
       pressure_interface_rad_day(j_day,:) = pressure_interface_rad(day_indices(j_day),:)
+      mu_0_day(j_day)                     = mu_0(day_indices(j_day)) 
+      albedo_dir_day(:,j_day)             = albedo_dir(:,day_indices(j_day))  
+      albedo_dif_day(:,j_day)             = albedo_dif(:,day_indices(j_day))   
     end do
     
     ! setting the volume mixing ratios of the gases for the short wave calculation
@@ -220,20 +248,27 @@ module radiation
           vol_mix_ratio(:,:)=0.2_wp
       end select
       call handle_error(gas_concentrations_sw%set_vmr(gases_lowercase(ji), vol_mix_ratio &
-      (1:no_of_day_points,1:no_of_layers+1)))
+      (1:no_of_day_points,:)))
     enddo
-   
+    
+    ! setting the short wave optical properties of clouds
+    call handle_error(cloud_optics_sw%alloc_2str(no_of_day_points, no_of_layers, k_dist_sw, &
+    name='shortwave cloud optics'))
+    cloud_optics_sw%tau = 0
+    cloud_optics_sw%ssa = 1
+    cloud_optics_sw%g   = 0
+    
     ! initializing the short wave fluxes
     call init_fluxes(fluxes_clearsky_day, no_of_day_points, no_of_layers+1, no_of_sw_bands)
     call init_fluxes(fluxes_allsky_day, no_of_day_points, no_of_layers+1, no_of_sw_bands)
     
     ! calculate shortwave radiative fluxes (only the day points are handed over
     ! for efficiency)
-    write(*,*) "a"
-    call handle_error(rte_sw(k_dist_sw, gas_concentrations_sw, pressure_rad_day, &
-    temperature_rad_day, pressure_interface_rad_day, &
-    mu_0, albedo_dir, albedo_dif, cloud_optics_sw, fluxes_allsky_day, fluxes_clearsky_day))
-    write(*,*) "a"
+    call handle_error(rte_sw(k_dist_sw, gas_concentrations_sw, pressure_rad_day(1:no_of_day_points,:), &
+    temperature_rad_day(1:no_of_day_points,:), pressure_interface_rad_day(1:no_of_day_points,:), &
+    mu_0_day(1:no_of_day_points), albedo_dir_day(:,1:no_of_day_points), &
+    albedo_dif_day(:,1:no_of_day_points), cloud_optics_sw, &
+    fluxes_allsky_day, fluxes_clearsky_day))
     
     ! clearing the radiation tendency
     do ji=1,no_of_scalars
@@ -263,20 +298,22 @@ module radiation
         case('o2')
           vol_mix_ratio(:,:)=0.2_wp
       end select
-      call handle_error(gas_concentrations%set_vmr(gases_lowercase(ji), vol_mix_ratio &
-      (1:no_of_scalars_h,1:no_of_layers+1)))
+      call handle_error(gas_concentrations%set_vmr(gases_lowercase(ji), vol_mix_ratio(:,:)))
     enddo
+    
+    ! setting the long wave cloud optical properties
+    call handle_error(cloud_optics_lw%alloc_1scl(no_of_scalars_h, no_of_layers, k_dist_lw, &
+    name='longwave cloud optics'))
+    cloud_optics_lw%tau=0.0
     
     ! initializing the long wave fluxes
     call init_fluxes(fluxes_clearsky, no_of_scalars_h, no_of_layers+1, no_of_lw_bands)
     call init_fluxes(fluxes_allsky, no_of_scalars_h, no_of_layers+1, no_of_lw_bands)
     ! calculate longwave radiative fluxes
-    write(*,*) "a"
-    call handle_error(rte_lw(k_dist_lw, gas_concentrations, pressure_rad, &
-    temperature_rad, pressure_interface_rad, temperature_interface_rad(:,no_of_layers+1), &
+    call handle_error(rte_lw(k_dist_lw, gas_concentrations, pressure_rad(:,:), &
+    temperature_rad(:,:), pressure_interface_rad(:,:), temperature_interface_rad(:,no_of_layers+1), &
     surface_emissivity(:,:), cloud_optics_lw, fluxes_allsky, fluxes_clearsky, &
     t_lev=temperature_interface_rad(:,:)))
-    write(*,*) "a"
    
     ! add long wave result (in Wm^-3)
     ! clear sky
@@ -291,6 +328,9 @@ module radiation
     ! freeing the long wave fluxes
     call free_fluxes(fluxes_clearsky)
     call free_fluxes(fluxes_allsky)
+    
+    write(*,*) "maximum of radiative power density: ", MAXVAL(radiation_tendency)
+    write(*,*) "minimum of radiative power density: ", MINVAL(radiation_tendency)
     
   end subroutine calc_radiative_flux_convergence
     

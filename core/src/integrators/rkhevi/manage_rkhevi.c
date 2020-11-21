@@ -7,11 +7,20 @@ Github repository: https://github.com/MHBalsmeier/game
 #include "../../spatial_operators/spatial_operators.h"
 #include "../integrators.h"
 #include "../../diagnostics/diagnostics.h"
+#include <geos95.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 int manage_rkhevi(State *state_old, State *state_new, Interpolation_info *interpolation_info, Grid *grid, Dualgrid *dualgrid, Scalar_field radiation_tendency, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, double delta_t, double time_coordinate)
 {
+    int max_index = find_max_index(state_old -> velocity_gas, NO_OF_VECTORS);
+    int min_index = find_min_index(state_old -> velocity_gas, NO_OF_VECTORS);
+    double velocity_max = fabs(state_old -> velocity_gas[max_index]);
+    if (fabs(state_old -> velocity_gas[min_index]) > velocity_max)
+    {
+    	velocity_max = fabs(state_old -> velocity_gas[min_index]);
+    }
+    printf("Maximum velocity: %lf\n", velocity_max);
 	/*
 	Here, the RK3 scheme is implemented.
 	If radiation is updated, it is done at the first step.
@@ -57,6 +66,7 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolation_info *interp
 		// ----------------------------------------------------------------------------
 		three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, delta_t_rk, grid);
     }
+    
     return 0;
 }
 
