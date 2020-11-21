@@ -5,7 +5,9 @@ module radiation
   
   use iso_c_binding,
   use mo_rte_kind,           only: wp
+  use mo_rrtmgp_util_string, only: lower_case
   use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
+  use mo_load_coefficients,  only: load_and_init
   use mo_gas_concentrations, only: ty_gas_concs
   use mo_fluxes_byband,      only: ty_fluxes_byband
   use mo_rte_sw,             only: rte_sw
@@ -21,6 +23,8 @@ module radiation
   integer                            :: no_of_sw_g_points
   ! the number of g points is the long wave region
   integer                            :: no_of_lw_g_points
+  ! the gas concentrations
+  type(ty_gas_concs)               :: gas_concentrations
   
   type(ty_gas_optics_rrtmgp) :: k_dist_sw, k_dist_lw
 
@@ -29,9 +33,42 @@ module radiation
       'CO ', 'CH4', 'O2 ', 'N2 ' &
    /)
   
-  character(len=128) :: rrtmgp_coefficients_file_sw, rrtmgp_coefficients_file_lw
-  
+  character(len=*), parameter      :: rrtmgp_coefficients_file_sw = &
+  ! insert the path of the short wave data file here
+  '/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-sw-g224-2018-12-04.nc'
+  character(len=*), parameter      :: rrtmgp_coefficients_file_lw = &
+  ! insert the path of the long wave data file here
+  '/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-lw-g256-2018-12-04.nc'
+    
   contains
+  
+  subroutine radiation_init() &
+  bind(c, name = "radiation_init")
+    
+    ! This is called only once, in the beginning.
+    
+    ! local variables
+    ! loop index
+    integer                          :: ji
+    ! the gases in lowercase
+    character(len=32), dimension(size(active_gases)) :: gases_lowercase
+    
+    no_of_sw_g_points = k_dist_sw%get_ngpt()
+    no_of_lw_g_points = k_dist_lw%get_ngpt()
+    
+    ! formatting the gas names
+    do ji = 1,size(active_gases)
+      gases_lowercase(ji) = trim(lower_case(active_gases(ji)))
+    end do
+    ! here, gas concentrations is just for holding the names of the gases
+    call handle_error(gas_concentrations%init(gases_lowercase))
+    
+    ! loading the short wave radiation properties
+    call load_and_init(k_dist_sw, rrtmgp_coefficients_file_sw, gas_concentrations)
+    ! loading the long wave radiation properties
+    call load_and_init(k_dist_lw, rrtmgp_coefficients_file_lw, gas_concentrations)
+    
+  end subroutine radiation_init
   
   subroutine calc_radiative_flux_convergence(latitude_scalar, longitude_scalar, &
   mass_densities, temperature_gas, radiation_tendency, &
@@ -52,10 +89,6 @@ module radiation
     ! local variables
     ! solar zenith angle
     real(8)	                         :: mu_0(no_of_scalars/no_of_layers)
-    ! the gas concentrations
-    type(ty_gas_concs)               :: gas_concentrations
-    ! number of scalars per layer (number of columns)
-    integer                          :: no_of_scalars_h
     ! number of points where it is day
     integer                          :: no_day_points
     ! number of points where it is night
@@ -66,10 +99,14 @@ module radiation
     integer                          :: day_indices(no_of_scalars/no_of_layers)
     ! the indices of columns where it is night
     integer                          :: night_indices(no_of_scalars/no_of_layers)
+    ! number of scalars per layer (number of columns)
+    integer                          :: no_of_scalars_h
     ! the resulting clear sky fluxes
     type(ty_fluxes_byband)           :: fluxes_clearsky_day
     real(8)                          :: surface_emissivity(no_of_lw_bands, no_of_scalars/no_of_layers)
+    ! surface albedo for direct radiation
     real(8)                          :: albedo_dir        (no_of_lw_bands, no_of_scalars/no_of_layers)
+    ! surface albedo for diffusive radiation
     real(8)                          :: albedo_dif        (no_of_lw_bands, no_of_scalars/no_of_layers)
     
     ! calculation of the number of columns
@@ -99,14 +136,11 @@ module radiation
     no_day_points   = j_day
     no_night_points = j_night
     
-    no_of_sw_g_points = k_dist_sw%get_ngpt()
-    no_of_lw_g_points = k_dist_lw%get_ngpt()
-    
     ! calculate shorwave radiative fluxes
-    ! rte_sw(k_dist_sw, gas_concentrations, albedo_dir, albedo_dif, mu_0)
+    ! rte_sw(k_dist_sw, gas_concentrations, albedo_dir, albedo_dif, mu_0, fluxes_clearsky_day)
     
     ! calculate longwave radiative fluxes
-    ! rte_lw(k_dist_lw, gas_concentrations, surface_emissivity(:,:))
+    ! rte_lw(k_dist_lw, gas_concentrations, surface_emissivity(:,:), fluxes_clearsky_day)
     
     ! the result
     do ji=1,no_of_scalars
@@ -198,6 +232,16 @@ module radiation
     endif
   
   end function coszenith
+  
+  subroutine handle_error(error_message)
+  
+    character(len=*), intent(in) :: error_message
+    
+    if (len(trim(error_message)) > 0) then
+      write(*,*) error_message
+    endif
+  
+  end subroutine handle_error
 
 end module radiation
 

@@ -10,6 +10,7 @@ project(game VERSION ${version})
 set(CMAKE_C_COMPILER mpicc)
 set(CMAKE_Fortran_COMPILER mpifort)
 enable_language(Fortran)
+                 # insert the root directory of RTE+RRTMGP here
 set(RTERRTMGPDIR /home/max/code/rte-rrtmgp)
 add_executable(
 game
@@ -63,11 +64,19 @@ ${RTERRTMGPDIR}/rte/kernels/mo_optical_props_kernels.F90
 ${RTERRTMGPDIR}/rte/kernels/mo_rte_solver_kernels.F90
 ${RTERRTMGPDIR}/extensions/mo_fluxes_byband.F90
 ${RTERRTMGPDIR}/extensions/mo_fluxes_byband_kernels.F90
+${RTERRTMGPDIR}/examples/mo_load_coefficients.F90
+${RTERRTMGPDIR}/examples/mo_simple_netcdf.F90
 )
 find_package(OpenMP)
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS} -O3 -Wall")
-SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS} -O3")
-target_link_libraries(game eccodes m netcdf geos95 atmostracers)
+SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS} -lgfortran -O3")
+                                                # insert output of 'nf-config --fflags --flibs' here
+SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -I/usr/include -L/usr/lib/x86_64-linux-gnu -lnetcdff -Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now -lnetcdf -lnetcdf -ldl -lm")
+target_link_libraries(game eccodes m netcdf netcdff geos95 atmostracers)
 install(TARGETS game DESTINATION core)
 install(FILES run.sh DESTINATION core)
 enable_testing()
+
+
+
+

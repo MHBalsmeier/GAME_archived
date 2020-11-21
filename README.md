@@ -68,7 +68,7 @@ It is recommended to run the model on Linux. We will not help people who have pr
 Everything is easy and quick to install.
 
 * [geos95](https://github.com/MHBalsmeier/geos95)
-* netcdf library (Ubuntu: sudo apt-get libnetcdf-dev)
+* netcdf library (Ubuntu: sudo apt-get libnetcdf-dev, sudo apt-get libnetcdff-dev)
 * eccodes library (installation manual: https://mhbalsmeier.github.io/tutorials/eccodes_on_ubuntu.html)
 * CMake (Ubuntu: sudo apt-get install cmake)
 * [atmostracers](https://github.com/MHBalsmeier/atmostracers)
@@ -95,7 +95,9 @@ The following packages are additionally required if you want to make use of the 
 
 ### Build and install
 
-In the file core/CMakeLists.txt change the variable RTERRTMGPDIR to the directory of RTE+RRTMGP. In the shell scripts controlling the build process (residing in the directory build\_scripts) change the variable aim\_dir to a place of your choice, then run the scripts. The files with the suffix \_dev are meant to install to a location where new versions can be tested. You also need to install the run scripts in order to have the run scripts of the model where they belong. Install the plotting routines if you want to make use of them.
+Modify the file core/CMakeLists.txt (read the comments). If you want to use radiation, modify rrtmgp_coefficients_file_sw and rrtmgp_coefficients_file_lw in the file core/src/physics/mo_radiation.f90.
+
+In the shell scripts controlling the build process (residing in the directory build\_scripts) change the variable aim\_dir to a place of your choice, then run the scripts. The files with the suffix \_dev are meant to install to a location where new versions can be tested. You also need to install the run scripts in order to have the run scripts of the model where they belong. Install the plotting routines if you want to make use of them.
 
 ## Fundamental literature
 
