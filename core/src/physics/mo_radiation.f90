@@ -24,9 +24,9 @@ module radiation
   ! the number of g points is the long wave region
   integer                            :: no_of_lw_g_points
   ! the gas concentrations
-  type(ty_gas_concs)               :: gas_concentrations
+  type(ty_gas_concs)                 :: gas_concentrations
   
-  type(ty_gas_optics_rrtmgp) :: k_dist_sw, k_dist_lw
+  type(ty_gas_optics_rrtmgp)         :: k_dist_sw, k_dist_lw
 
   character(len=3), dimension(8) :: active_gases = (/ &
       'H2O', 'CO2', 'O3 ', 'N2O', &
@@ -34,11 +34,18 @@ module radiation
    /)
   
   character(len=*), parameter      :: rrtmgp_coefficients_file_sw = &
-  ! insert the path of the short wave data file here
+  ! insert the name of the short wave data file here
   '/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-sw-g224-2018-12-04.nc'
   character(len=*), parameter      :: rrtmgp_coefficients_file_lw = &
-  ! insert the path of the long wave data file here
+  ! insert the name of the long wave data file here
   '/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-lw-g256-2018-12-04.nc'
+  
+  ! interface to C function
+  interface
+    real(8) function specific_gas_constants(gas_number) bind(c, name = "specific_gas_constants")
+      integer :: gas_number
+    end function specific_gas_constants
+  end interface
     
   contains
   
@@ -71,16 +78,24 @@ module radiation
   end subroutine radiation_init
   
   subroutine calc_radiative_flux_convergence(latitude_scalar, longitude_scalar, &
+  volume, area, &
   mass_densities, temperature_gas, radiation_tendency, &
-  no_of_scalars, no_of_layers, no_of_constituents, time_coord) &
+  no_of_scalars, no_of_vectors, no_of_vectors_per_layer, &
+  no_of_layers, no_of_constituents, no_of_condensed_constituents, &
+  time_coord) &
   bind(c, name = "calc_radiative_flux_convergence")
     
     integer, intent(in)              ::                    no_of_scalars
+    integer, intent(in)              ::                    no_of_vectors
+    integer, intent(in)              ::                    no_of_vectors_per_layer
     integer, intent(in)              ::                    no_of_layers
     integer, intent(in)              ::                    no_of_constituents
+    integer, intent(in)              ::                    no_of_condensed_constituents
     real(8)                          :: time_coord
     real(8), intent(in)              :: latitude_scalar    (no_of_scalars/no_of_layers)
     real(8), intent(in)              :: longitude_scalar   (no_of_scalars/no_of_layers)
+    real(8), intent(in)              :: volume             (no_of_scalars)
+    real(8), intent(in)              :: area               (no_of_scalars)
     real(8), intent(in)              :: mass_densities    &
     (no_of_constituents*no_of_scalars)
     real(8), intent(in)              :: temperature_gas   (no_of_scalars)
@@ -90,11 +105,11 @@ module radiation
     ! solar zenith angle
     real(8)	                         :: mu_0(no_of_scalars/no_of_layers)
     ! number of points where it is day
-    integer                          :: no_day_points
+    integer                          :: no_of_day_points
     ! number of points where it is night
-    integer                          :: no_night_points
+    integer                          :: no_of_night_points
     ! loop indices
-    integer                          :: ji, j_day, j_night
+    integer                          :: ji, j_day, j_night, jk
     ! the indices of columns where it is day
     integer                          :: day_indices(no_of_scalars/no_of_layers)
     ! the indices of columns where it is night
@@ -102,22 +117,62 @@ module radiation
     ! number of scalars per layer (number of columns)
     integer                          :: no_of_scalars_h
     ! the resulting clear sky fluxes
-    type(ty_fluxes_byband)           :: fluxes_clearsky_day
+    type(ty_fluxes_byband)           :: fluxes_clearsky, fluxes_clearsky_day
     real(8)                          :: surface_emissivity(no_of_lw_bands, no_of_scalars/no_of_layers)
     ! surface albedo for direct radiation
     real(8)                          :: albedo_dir        (no_of_lw_bands, no_of_scalars/no_of_layers)
     ! surface albedo for diffusive radiation
     real(8)                          :: albedo_dif        (no_of_lw_bands, no_of_scalars/no_of_layers)
+    ! temperature at cells
+    real(8)                          :: temperature_rad           (no_of_scalars/no_of_layers, no_of_layers)
+    ! pressure at cells
+    real(8)                          :: pressure_rad              (no_of_scalars/no_of_layers, no_of_layers)
+    ! pressure at cell interfaces
+    real(8)                          :: pressure_interface_rad    (no_of_scalars/no_of_layers, no_of_layers+1)
+    ! temperature at cell interfaces
+    real(8)                          :: temperature_interface_rad (no_of_scalars/no_of_layers, no_of_layers+1)
+    ! temperature at cells restricted to day points
+    real(8)                          :: temperature_rad_day       (no_of_scalars/no_of_layers, no_of_layers)
+    ! pressure at cells restricted to day points
+    real(8)                          :: pressure_rad_day          (no_of_scalars/no_of_layers, no_of_layers)
+    ! pressure at cell interfaces restricted to day points
+    real(8)                          :: pressure_interface_rad_day(no_of_scalars/no_of_layers, no_of_layers+1)
     
     ! calculation of the number of columns
     no_of_scalars_h = no_of_scalars/no_of_layers
     
-    ! set the surface emissivity to one
+    ! set the surface emissivity (a longwave property) to one
     surface_emissivity(:,:) = 1.
     
     ! set the surface albedos to 0.5
     albedo_dir        (:,:) = 0.5
     albedo_dif        (:,:) = 0.5
+    
+    ! reformatting the thermodynamical state for RTE+RRTMGP
+    do ji=1,no_of_scalars_h
+      do jk=1,no_of_layers
+        temperature_rad(ji,jk) = temperature_gas((jk-1)*no_of_scalars_h+ji)
+        ! the pressure is diagnozed here, using the equation of state for ideal gases
+        pressure_rad(ji,jk)    = specific_gas_constants(0) &
+        *mass_densities(no_of_condensed_constituents*no_of_scalars &
+        + (jk-1)*no_of_scalars_h+ji)*temperature_rad(ji,jk)
+      enddo
+    enddo
+    ! the properties at cell interfaces
+    do ji=1,no_of_scalars_h
+      do jk=1,no_of_layers+1
+        if (jk==1) then
+          temperature_interface_rad(ji,jk) = temperature_rad(ji,jk)
+          pressure_interface_rad   (ji,jk) = pressure_rad   (ji,jk)
+        elseif (jk==no_of_layers+1) then
+          temperature_interface_rad(ji,jk) = temperature_rad(ji,jk-1)
+          pressure_interface_rad   (ji,jk) = pressure_rad   (ji,jk-1)
+        else
+          temperature_interface_rad(ji,jk) = 0.5*(temperature_rad(ji,jk-1)+temperature_rad(ji,jk))
+          pressure_interface_rad   (ji,jk) = 0.5*(pressure_rad   (ji,jk-1)+pressure_rad   (ji,jk))
+        endif
+      enddo
+    enddo
     
     ! calculating the zenith angle, and counting day and night points
     j_day = 0
@@ -133,21 +188,117 @@ module radiation
       endif
     enddo
     
-    no_day_points   = j_day
-    no_night_points = j_night
+    no_of_day_points   = j_day
+    no_of_night_points = j_night
     
-    ! calculate shorwave radiative fluxes
-    ! rte_sw(k_dist_sw, gas_concentrations, albedo_dir, albedo_dif, mu_0, fluxes_clearsky_day)
+    ! filling up the arrays restricted to day points
+    do j_day = 1,no_of_day_points
+      temperature_rad_day(j_day,:)        = temperature_rad(day_indices(j_day),:)
+      pressure_rad_day(j_day,:)           = pressure_rad(day_indices(j_day),:)
+      pressure_interface_rad_day(j_day,:) = pressure_interface_rad(day_indices(j_day),:)
+    end do
+   
+    ! initializing the short wave fluxes
+    call init_fluxes(fluxes_clearsky_day, no_of_day_points, no_of_layers+1, no_of_sw_bands)
     
-    ! calculate longwave radiative fluxes
-    ! rte_lw(k_dist_lw, gas_concentrations, surface_emissivity(:,:), fluxes_clearsky_day)
+    ! calculate shortwave radiative fluxes (only the day points are handed over
+    ! for efficiency)
+    ! rte_sw(k_dist_sw, gas_concentrations, pressure_rad_day,
+    ! tempertature_rad_day, pressure_interface_rad_day,
+    ! .TRUE., mu_0, albedo_dir, albedo_dif, fluxes_clearsky_day)
     
-    ! the result
+    ! clear the radiation tendency
     do ji=1,no_of_scalars
-      radiation_tendency(ji) = 0.000
+      radiation_tendency(ji)=0.
     enddo
     
+    ! short wave result (in Wm^-3)
+    call calc_power_density(.TRUE., no_of_scalars, no_of_vectors, &
+    no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
+    fluxes_clearsky_day, volume, area, radiation_tendency)
+    
+    ! freeing the short wave fluxes
+    call free_fluxes(fluxes_clearsky_day)
+    
+    ! initializing the long wave fluxes
+    call init_fluxes(fluxes_clearsky, no_of_scalars_h, no_of_layers+1, no_of_lw_bands)
+    
+    ! calculate longwave radiative fluxes
+    ! rte_lw(k_dist_lw, .TRUE., gas_concentrations, pressure_rad,
+    ! temperature_rad, pressure_interface_rad, temperature_interface_rad,
+    ! surface_emissivity(:,:), fluxes_clearsky)
+   
+    ! add long wave result (in Wm^-3)
+    call calc_power_density(.FALSE., no_of_scalars, no_of_vectors, &
+    no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
+    fluxes_clearsky, volume, area, radiation_tendency)
+    
+    ! freeing the long wave fluxes
+    call free_fluxes(fluxes_clearsky)
+    
   end subroutine calc_radiative_flux_convergence
+    
+  subroutine calc_power_density(day_only, no_of_scalars, no_of_vectors, &
+  no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
+  fluxes, volume, area, radiation_tendency)
+  
+    ! this is essentially the negative vertical divergence operator
+    
+    ! true for short wave calculations (for efficiency)
+    logical, intent(in)              :: day_only
+    integer, intent(in)              :: no_of_scalars
+    integer, intent(in)              :: no_of_vectors
+    integer, intent(in)              :: no_of_layers
+    integer, intent(in)              :: no_of_scalars_h
+    integer, intent(in)              :: no_of_vectors_per_layer
+    integer, intent(in)              :: no_of_day_points
+    integer, intent(in)              :: day_indices(no_of_day_points)
+    type(ty_fluxes_byband), intent(in):: fluxes
+    real(8), intent(in)              :: volume(no_of_scalars)
+    real(8), intent(in)              :: area(no_of_vectors)
+    real(8), intent(inout)           :: radiation_tendency(no_of_scalars)
+  
+    ! local variables
+    ! the layer index
+    integer                          :: ji
+    ! the index of the relevant column
+    integer                          :: j_column
+    ! the horizontal index
+    integer                          :: jk
+    ! the number of columns taken into account
+    integer                          :: no_of_relevant_columns
+    
+    if (day_only) then
+      no_of_relevant_columns=size(day_indices)
+    else
+      no_of_relevant_columns=no_of_scalars_h
+    endif
+  
+  
+    do ji=1,no_of_layers
+      do j_column=1,no_of_relevant_columns
+        if (day_only) then
+          jk=day_indices(j_column)
+        else
+          jk=j_column
+        endif
+        radiation_tendency((ji-1)*no_of_scalars_h+jk) = &
+        radiation_tendency((ji-1)*no_of_scalars_h+jk) +&
+        ! this is a sum of four fluxes
+        ( &
+        ! upward flux (going in)
+        fluxes%flux_up  (j_column,ji+1)*area((ji    *no_of_vectors_per_layer)+jk) &
+        ! upward flux (going out)
+        - fluxes%flux_up(j_column,ji  )*area(((ji-1)*no_of_vectors_per_layer)+jk) &
+        ! downward flux (going in)
+        + fluxes%flux_dn(j_column,ji)  *area(((ji-1)*no_of_vectors_per_layer)+jk) &
+        ! downward flux (going out)
+        - fluxes%flux_dn(j_column,ji+1)*area((ji    *no_of_vectors_per_layer)+jk) &
+        )/volume((ji-1)*no_of_scalars_h+jk)
+      enddo
+    enddo
+  
+  end subroutine calc_power_density
   
   real(8) function coszenith(lat, lon, t)
   
@@ -232,6 +383,67 @@ module radiation
     endif
   
   end function coszenith
+  
+  subroutine init_fluxes(fluxes, n_hor, n_vert, n_bands)
+  
+    ! initializing a flux object
+    ! the fluxes to initialize
+    type(ty_fluxes_byband), intent(inout) :: fluxes
+    ! the number of columns
+    integer, intent(in)                   :: n_hor
+    ! the number of levels
+    integer, intent(in)                   :: n_vert
+    ! the number of bads
+    integer, intent(in)                   :: n_bands
+ 	
+ 	! broad band fluxes
+    allocate(fluxes%flux_up (n_hor, n_vert))
+    allocate(fluxes%flux_dn (n_hor, n_vert))
+    allocate(fluxes%flux_net(n_hor, n_vert))
+  
+ 	! band-by-band fluxes
+    allocate(fluxes%bnd_flux_up (n_hor, n_vert, n_bands))
+    allocate(fluxes%bnd_flux_dn (n_hor, n_vert, n_bands))
+    allocate(fluxes%bnd_flux_net(n_hor, n_vert, n_bands))
+    
+    call reset_fluxes(fluxes)
+    
+  end subroutine init_fluxes
+  
+  subroutine reset_fluxes(fluxes)
+
+    type(ty_fluxes_byband), intent(inout) :: fluxes
+
+    ! reset broadband fluxes
+    fluxes%flux_up(:,:) = 0._wp
+    fluxes%flux_dn(:,:) = 0._wp
+    fluxes%flux_net(:,:) = 0._wp
+    if (associated(fluxes%flux_dn_dir)) fluxes%flux_dn_dir(:,:) = 0._wp
+
+    ! reset band-by-band fluxes
+    fluxes%bnd_flux_up(:,:,:) = 0._wp
+    fluxes%bnd_flux_dn(:,:,:) = 0._wp
+    fluxes%bnd_flux_net(:,:,:) = 0._wp
+    if (associated(fluxes%bnd_flux_dn_dir)) fluxes%bnd_flux_dn_dir(:,:,:) = 0._wp
+
+  end subroutine reset_fluxes
+  
+  subroutine free_fluxes(fluxes)
+  
+    ! freeing a flux object
+    ! the fluxes to free
+    type(ty_fluxes_byband), intent(inout) :: fluxes
+    
+    if (associated(fluxes%flux_up)) deallocate(fluxes%flux_up)
+    if (associated(fluxes%flux_dn)) deallocate(fluxes%flux_dn)
+    if (associated(fluxes%flux_net)) deallocate(fluxes%flux_net)
+    if (associated(fluxes%flux_dn_dir)) deallocate(fluxes%flux_dn_dir)
+    if (associated(fluxes%bnd_flux_up)) deallocate(fluxes%bnd_flux_up)
+    if (associated(fluxes%bnd_flux_dn)) deallocate(fluxes%bnd_flux_dn)
+    if (associated(fluxes%bnd_flux_net)) deallocate(fluxes%bnd_flux_net)
+    if (associated(fluxes%bnd_flux_dn_dir)) deallocate(fluxes%bnd_flux_dn_dir)
+  
+  end subroutine free_fluxes
   
   subroutine handle_error(error_message)
   

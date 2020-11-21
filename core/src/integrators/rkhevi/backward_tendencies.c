@@ -18,10 +18,14 @@ int backward_tendencies(State *state, Interpolation_info *interpolation, State *
     	printf("Starting update of radiative fluxes ...\n");
     	// Fortran needs pointers, this is why this is necessary
     	int no_of_scalars = NO_OF_SCALARS;
+    	int no_of_vectors = NO_OF_VECTORS;
+    	int no_of_vectors_per_layer = NO_OF_VECTORS_PER_LAYER;
     	int no_of_constituents = NO_OF_CONSTITUENTS;
+    	int no_of_condensed_constituents = NO_OF_CONDENSED_CONSTITUENTS;
     	int no_of_layers = NO_OF_LAYERS;
-		calc_radiative_flux_convergence(grid -> latitude_scalar, grid -> longitude_scalar,
-		state -> mass_densities, state -> temperature_gas, radiation_tendency, &no_of_scalars, &no_of_layers, &no_of_constituents, &time_coordinate);
+		calc_radiative_flux_convergence(grid -> latitude_scalar, grid -> longitude_scalar, grid -> volume, grid -> area,
+		state -> mass_densities, state -> temperature_gas, radiation_tendency, &no_of_scalars, &no_of_vectors, &no_of_vectors_per_layer, &no_of_layers, &no_of_constituents, 
+		&no_of_condensed_constituents, &time_coordinate);
     	printf("Update of radiative fluxes completed.\n");
     }
     // Temperature diffusion gets updated here, but only at the last RK step and if heat conduction is switched on.
