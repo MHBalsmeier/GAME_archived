@@ -10,8 +10,10 @@ module radiation
   use mo_load_coefficients,  only: load_and_init
   use mo_gas_concentrations, only: ty_gas_concs
   use mo_fluxes_byband,      only: ty_fluxes_byband
-  use mo_rte_sw,             only: rte_sw
-  use mo_rte_lw,             only: rte_lw
+  use mo_rrtmgp_clr_all_sky, only: rte_sw
+  use mo_rrtmgp_clr_all_sky, only: rte_lw
+  use mo_optical_props,      only: ty_optical_props_2str, &
+                                   ty_optical_props_1scl
   
   implicit none
   
@@ -23,14 +25,15 @@ module radiation
   integer                            :: no_of_sw_g_points
   ! the number of g points is the long wave region
   integer                            :: no_of_lw_g_points
-  ! the gas concentrations
+  ! the gas concentrations (object holding all information on the composition
+  ! of the gas phase)
+  type(ty_gas_concs)                 :: gas_concentrations_sw
   type(ty_gas_concs)                 :: gas_concentrations
   
   type(ty_gas_optics_rrtmgp)         :: k_dist_sw, k_dist_lw
 
-  character(len=3), dimension(8) :: active_gases = (/ &
-      'H2O', 'CO2', 'O3 ', 'N2O', &
-      'CO ', 'CH4', 'O2 ', 'N2 ' &
+  character(len=3), dimension(7) :: active_gases = (/ &
+   'N2 ', 'O2 ', 'CH4', 'O3 ', 'CO2', 'H2O', 'N2O' &
    /)
   
   character(len=*), parameter      :: rrtmgp_coefficients_file_sw = &
@@ -39,6 +42,8 @@ module radiation
   character(len=*), parameter      :: rrtmgp_coefficients_file_lw = &
   ! insert the name of the long wave data file here
   '/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-lw-g256-2018-12-04.nc'
+  ! the gases in lowercase
+  character(len=32), dimension(size(active_gases)) :: gases_lowercase
   
   ! interface to C function
   interface
@@ -57,8 +62,6 @@ module radiation
     ! local variables
     ! loop index
     integer                          :: ji
-    ! the gases in lowercase
-    character(len=32), dimension(size(active_gases)) :: gases_lowercase
     
     no_of_sw_g_points = k_dist_sw%get_ngpt()
     no_of_lw_g_points = k_dist_lw%get_ngpt()
@@ -67,11 +70,12 @@ module radiation
     do ji = 1,size(active_gases)
       gases_lowercase(ji) = trim(lower_case(active_gases(ji)))
     end do
-    ! here, gas concentrations is just for holding the names of the gases
+    ! here, the names of the gases are written to the gas_concentrations object
+    call handle_error(gas_concentrations_sw%init(gases_lowercase))
     call handle_error(gas_concentrations%init(gases_lowercase))
     
     ! loading the short wave radiation properties
-    call load_and_init(k_dist_sw, rrtmgp_coefficients_file_sw, gas_concentrations)
+    call load_and_init(k_dist_sw, rrtmgp_coefficients_file_sw, gas_concentrations_sw)
     ! loading the long wave radiation properties
     call load_and_init(k_dist_lw, rrtmgp_coefficients_file_lw, gas_concentrations)
     
@@ -118,6 +122,8 @@ module radiation
     integer                          :: no_of_scalars_h
     ! the resulting clear sky fluxes
     type(ty_fluxes_byband)           :: fluxes_clearsky, fluxes_clearsky_day
+    ! the resulting all sky fluxes
+    type(ty_fluxes_byband)           :: fluxes_allsky, fluxes_allsky_day
     real(8)                          :: surface_emissivity(no_of_lw_bands, no_of_scalars/no_of_layers)
     ! surface albedo for direct radiation
     real(8)                          :: albedo_dir        (no_of_lw_bands, no_of_scalars/no_of_layers)
@@ -137,16 +143,21 @@ module radiation
     real(8)                          :: pressure_rad_day          (no_of_scalars/no_of_layers, no_of_layers)
     ! pressure at cell interfaces restricted to day points
     real(8)                          :: pressure_interface_rad_day(no_of_scalars/no_of_layers, no_of_layers+1)
+    ! the volume mixing ratio of a gas
+    real(8)                          :: vol_mix_ratio             (no_of_scalars/no_of_layers, no_of_layers+1)
+    ! cloud optical properties
+    type(ty_optical_props_2str)      :: cloud_optics_sw
+    type(ty_optical_props_1scl)      :: cloud_optics_lw
     
     ! calculation of the number of columns
     no_of_scalars_h = no_of_scalars/no_of_layers
     
     ! set the surface emissivity (a longwave property) to one
-    surface_emissivity(:,:) = 1.
+    surface_emissivity(:,:) = 1._wp
     
     ! set the surface albedos to 0.5
-    albedo_dir        (:,:) = 0.5
-    albedo_dif        (:,:) = 0.5
+    albedo_dir        (:,:) = 0.5_wp
+    albedo_dif        (:,:) = 0.5_wp
     
     ! reformatting the thermodynamical state for RTE+RRTMGP
     do ji=1,no_of_scalars_h
@@ -197,44 +208,89 @@ module radiation
       pressure_rad_day(j_day,:)           = pressure_rad(day_indices(j_day),:)
       pressure_interface_rad_day(j_day,:) = pressure_interface_rad(day_indices(j_day),:)
     end do
+    
+    ! setting the volume mixing ratios of the gases for the short wave calculation
+    do ji=1,size(active_gases)
+      ! the default
+      vol_mix_ratio(:,:)=0.0_wp
+      select case (gases_lowercase(ji))
+        case('n2')
+          vol_mix_ratio(:,:)=0.8_wp
+        case('o2')
+          vol_mix_ratio(:,:)=0.2_wp
+      end select
+      call handle_error(gas_concentrations_sw%set_vmr(gases_lowercase(ji), vol_mix_ratio &
+      (1:no_of_day_points,1:no_of_layers+1)))
+    enddo
    
     ! initializing the short wave fluxes
     call init_fluxes(fluxes_clearsky_day, no_of_day_points, no_of_layers+1, no_of_sw_bands)
+    call init_fluxes(fluxes_allsky_day, no_of_day_points, no_of_layers+1, no_of_sw_bands)
     
     ! calculate shortwave radiative fluxes (only the day points are handed over
     ! for efficiency)
-    ! rte_sw(k_dist_sw, gas_concentrations, pressure_rad_day,
-    ! tempertature_rad_day, pressure_interface_rad_day,
-    ! .TRUE., mu_0, albedo_dir, albedo_dif, fluxes_clearsky_day)
+    write(*,*) "a"
+    call handle_error(rte_sw(k_dist_sw, gas_concentrations_sw, pressure_rad_day, &
+    temperature_rad_day, pressure_interface_rad_day, &
+    mu_0, albedo_dir, albedo_dif, cloud_optics_sw, fluxes_allsky_day, fluxes_clearsky_day))
+    write(*,*) "a"
     
-    ! clear the radiation tendency
+    ! clearing the radiation tendency
     do ji=1,no_of_scalars
-      radiation_tendency(ji)=0.
+      radiation_tendency(ji)=0._wp
     enddo
-    
     ! short wave result (in Wm^-3)
+    ! clear sky
     call calc_power_density(.TRUE., no_of_scalars, no_of_vectors, &
     no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
     fluxes_clearsky_day, volume, area, radiation_tendency)
+    ! all sky
+    call calc_power_density(.TRUE., no_of_scalars, no_of_vectors, &
+    no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
+    fluxes_allsky_day, volume, area, radiation_tendency)
     
     ! freeing the short wave fluxes
     call free_fluxes(fluxes_clearsky_day)
+    call free_fluxes(fluxes_allsky_day)
+    
+    ! setting the volume mixing ratios of the gases for the long wave calculation
+    do ji=1,size(active_gases)
+      ! the default
+      vol_mix_ratio(:,:)=0.0_wp
+      select case (gases_lowercase(ji))
+        case('n2')
+          vol_mix_ratio(:,:)=0.8_wp
+        case('o2')
+          vol_mix_ratio(:,:)=0.2_wp
+      end select
+      call handle_error(gas_concentrations%set_vmr(gases_lowercase(ji), vol_mix_ratio &
+      (1:no_of_scalars_h,1:no_of_layers+1)))
+    enddo
     
     ! initializing the long wave fluxes
     call init_fluxes(fluxes_clearsky, no_of_scalars_h, no_of_layers+1, no_of_lw_bands)
-    
+    call init_fluxes(fluxes_allsky, no_of_scalars_h, no_of_layers+1, no_of_lw_bands)
     ! calculate longwave radiative fluxes
-    ! rte_lw(k_dist_lw, .TRUE., gas_concentrations, pressure_rad,
-    ! temperature_rad, pressure_interface_rad, temperature_interface_rad,
-    ! surface_emissivity(:,:), fluxes_clearsky)
+    write(*,*) "a"
+    call handle_error(rte_lw(k_dist_lw, gas_concentrations, pressure_rad, &
+    temperature_rad, pressure_interface_rad, temperature_interface_rad(:,no_of_layers+1), &
+    surface_emissivity(:,:), cloud_optics_lw, fluxes_allsky, fluxes_clearsky, &
+    t_lev=temperature_interface_rad(:,:)))
+    write(*,*) "a"
    
     ! add long wave result (in Wm^-3)
+    ! clear sky
     call calc_power_density(.FALSE., no_of_scalars, no_of_vectors, &
     no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
     fluxes_clearsky, volume, area, radiation_tendency)
+    ! all sky
+    call calc_power_density(.FALSE., no_of_scalars, no_of_vectors, &
+    no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
+    fluxes_allsky, volume, area, radiation_tendency)
     
     ! freeing the long wave fluxes
     call free_fluxes(fluxes_clearsky)
+    call free_fluxes(fluxes_allsky)
     
   end subroutine calc_radiative_flux_convergence
     

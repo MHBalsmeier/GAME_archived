@@ -66,6 +66,7 @@ ${RTERRTMGPDIR}/extensions/mo_fluxes_byband.F90
 ${RTERRTMGPDIR}/extensions/mo_fluxes_byband_kernels.F90
 ${RTERRTMGPDIR}/examples/mo_load_coefficients.F90
 ${RTERRTMGPDIR}/examples/mo_simple_netcdf.F90
+${RTERRTMGPDIR}/extensions/mo_rrtmgp_clr_all_sky.F90
 )
 find_package(OpenMP)
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS} -O3 -Wall")
