@@ -442,16 +442,16 @@ module radiation
     real(8)                          :: phi_0_earth_rotation
     real(8)                          :: trans_earth2sun         (3,3)
     
-    omega                 = 7.292115d-5
-    omega_rev             = 1.99099d-7
-    obliquity             = 0.409092592843564
+    omega                 = 7.292115e-5_wp
+    omega_rev             = 1.99099e-7_wp
+    obliquity             = 0.409092592843564_wp
     
     ! refer to https://www.esrl.noaa.gov/gmd/grad/solcalc/azel.html
     ! Unix time coordinate of 2019-Dec-20, 12:00 UTC
-    t_0                   = 1576843200.0
+    t_0                   = 1576843200.0_wp
     ! this is a winter solstice
-    phi_0_earth_around_sun =  0.
-    phi_0_earth_rotation  = 0.
+    phi_0_earth_around_sun = 0._wp
+    phi_0_earth_rotation  = 0._wp
     
     ! transformation of the time coordinate
     t_transformed =  t - t_0
@@ -477,14 +477,14 @@ module radiation
     trans_earth2sun(3,3) = cos(obliquity)
     
     ! transforming the normal vector of the place to solar coordinates
-    normal_vector_rel2_sun     = matmul(trans_earth2sun, normal_vector_rel2_earth)
+    normal_vector_rel2_sun = matmul(trans_earth2sun, normal_vector_rel2_earth)
     
     sun_2_earth             (1) = cos(omega_rev*t_transformed + phi_0_earth_around_sun)
     sun_2_earth             (2) = sin(omega_rev*t_transformed + phi_0_earth_around_sun)
     sun_2_earth             (3) = 0
     
     ! the result
-    coszenith =  DOT_PRODUCT(normal_vector_rel2_earth, -sun_2_earth)
+    coszenith = DOT_PRODUCT(normal_vector_rel2_sun, -sun_2_earth)
     
     ! the night case
     if (coszenith < 0) then
