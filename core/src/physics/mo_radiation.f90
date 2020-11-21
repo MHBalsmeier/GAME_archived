@@ -18,9 +18,9 @@ module radiation
   implicit none
   
   ! the number of bands in the short wave region
-  integer, parameter                 :: no_of_sw_bands = 14
+  integer, parameter                 :: no_of_sw_bands =  14
   ! the number of bands in the long wave region
-  integer, parameter                 :: no_of_lw_bands = 16
+  integer, parameter                 :: no_of_lw_bands =  16
   ! the number of g points is the short wave region
   integer                            :: no_of_sw_g_points
   ! the number of g points is the long wave region
@@ -32,30 +32,33 @@ module radiation
   
   type(ty_gas_optics_rrtmgp)         :: k_dist_sw, k_dist_lw
 
-  character(len=3), dimension(7) :: active_gases = (/ &
-   'N2 ', 'O2 ', 'CH4', 'O3 ', 'CO2', 'H2O', 'N2O' &
+  character(len = 3), dimension(8) :: active_gases =  (/ &
+   "N2 ", "O2 ", "CH4", "O3 ", "CO2", "H2O", "N2O", "CO " &
    /)
   
-  character(len=*), parameter      :: rrtmgp_coefficients_file_sw = &
+  character(len = *), parameter      :: rrtmgp_coefficients_file_sw =  &
   ! insert the name of the short wave data file here
-  '/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-sw-g224-2018-12-04.nc'
-  character(len=*), parameter      :: rrtmgp_coefficients_file_lw = &
+  "/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-sw-g224-2018-12-04.nc"
+  character(len = *), parameter      :: rrtmgp_coefficients_file_lw =  &
   ! insert the name of the long wave data file here
-  '/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-lw-g256-2018-12-04.nc'
+  "/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-lw-g256-2018-12-04.nc"
   ! the gases in lowercase
-  character(len=32), dimension(size(active_gases)) :: gases_lowercase
+  character(len = 32), dimension(size(active_gases)) :: gases_lowercase
   
   ! interface to C function
   interface
-    real(8) function specific_gas_constants(gas_number) bind(c, name = "specific_gas_constants")
+    real(8) function specific_gas_constants(gas_number) bind(c, name =  "specific_gas_constants")
       integer :: gas_number
     end function specific_gas_constants
+    real(8) function molar_fraction_in_dry_air(gas_number) bind(c, name =  "molar_fraction_in_dry_air")
+      integer :: gas_number
+    end function molar_fraction_in_dry_air
   end interface
     
   contains
   
   subroutine radiation_init() &
-  bind(c, name = "radiation_init")
+  bind(c, name =  "radiation_init")
     
     ! This is called only once, in the beginning.
     
@@ -63,12 +66,12 @@ module radiation
     ! loop index
     integer                          :: ji
     
-    no_of_sw_g_points = k_dist_sw%get_ngpt()
-    no_of_lw_g_points = k_dist_lw%get_ngpt()
+    no_of_sw_g_points =  k_dist_sw%get_ngpt()
+    no_of_lw_g_points =  k_dist_lw%get_ngpt()
     
     ! formatting the gas names
-    do ji = 1,size(active_gases)
-      gases_lowercase(ji) = trim(lower_case(active_gases(ji)))
+    do ji =  1,size(active_gases)
+      gases_lowercase(ji) =  trim(lower_case(active_gases(ji)))
     end do
     ! here, the names of the gases are written to the gas_concentrations object
     call handle_error(gas_concentrations_sw%init(gases_lowercase))
@@ -87,7 +90,7 @@ module radiation
   no_of_scalars, no_of_vectors, no_of_vectors_per_layer, &
   no_of_layers, no_of_constituents, no_of_condensed_constituents, &
   time_coord) &
-  bind(c, name = "calc_radiative_flux_convergence")
+  bind(c, name =  "calc_radiative_flux_convergence")
     
     integer, intent(in)              ::                    no_of_scalars
     integer, intent(in)              ::                    no_of_vectors
@@ -149,114 +152,101 @@ module radiation
     real(8)                          :: pressure_rad_day          (no_of_scalars/no_of_layers, no_of_layers)
     ! pressure at cell interfaces restricted to day points
     real(8)                          :: pressure_interface_rad_day(no_of_scalars/no_of_layers, no_of_layers+1)
-    ! the volume mixing ratio of a gas
-    real(8)                          :: vol_mix_ratio             (no_of_scalars/no_of_layers, no_of_layers)
     ! cloud optical properties
     type(ty_optical_props_2str)      :: cloud_optics_sw
     type(ty_optical_props_1scl)      :: cloud_optics_lw
     
     ! calculation of the number of columns
-    no_of_scalars_h = no_of_scalars/no_of_layers
+    no_of_scalars_h =  no_of_scalars/no_of_layers
     
-    ! set the surface emissivity (a longwave property) to one
-    surface_emissivity(:,:) = 1._wp
+    ! set the surface emissivity (a longwave property) to a standard value
+    surface_emissivity(:,:) =  0.95_wp
     
-    ! set the surface albedos to 0.5
-    albedo_dir        (:,:) = 0.5_wp
-    albedo_dif        (:,:) = 0.5_wp
+    ! set the surface albedos to 0.07 (this is close to the values of water)
+    albedo_dir        (:,:) =  0.07_wp
+    albedo_dif        (:,:) =  0.07_wp
     
     ! reformatting the thermodynamical state for RTE+RRTMGP
-    do ji=1,no_of_scalars_h
-      do jk=1,no_of_layers
-        temperature_rad(ji,jk) = temperature_gas((jk-1)*no_of_scalars_h+ji)
+    do ji = 1,no_of_scalars_h
+      do jk = 1,no_of_layers
+        temperature_rad(ji,jk) =  temperature_gas((jk-1)*no_of_scalars_h+ji)
         ! the pressure is diagnozed here, using the equation of state for ideal gases
-        pressure_rad(ji,jk)    = specific_gas_constants(0) &
+        pressure_rad(ji,jk)   = specific_gas_constants(0) &
         *mass_densities(no_of_condensed_constituents*no_of_scalars &
         + (jk-1)*no_of_scalars_h+ji)*temperature_rad(ji,jk)
       enddo
     enddo
     
     ! moving the temperature into the allowed area
-    do ji=1,no_of_scalars_h
-      do jk=1,no_of_layers
+    do ji = 1,no_of_scalars_h
+      do jk = 1,no_of_layers
         if (temperature_rad(ji,jk) > k_dist_lw%get_temp_max()) then
-          temperature_rad(ji,jk)=k_dist_lw%get_temp_max()
+          temperature_rad(ji,jk) = k_dist_lw%get_temp_max()
         endif
         if (temperature_rad(ji,jk) < k_dist_lw%get_temp_min()) then
-          temperature_rad(ji,jk)=k_dist_lw%get_temp_min()
+          temperature_rad(ji,jk) = k_dist_lw%get_temp_min()
         endif
         if (temperature_rad(ji,jk) > k_dist_sw%get_temp_max()) then
-          temperature_rad(ji,jk)=k_dist_sw%get_temp_max()
+          temperature_rad(ji,jk) = k_dist_sw%get_temp_max()
         endif
         if (temperature_rad(ji,jk) < k_dist_sw%get_temp_min()) then
-          temperature_rad(ji,jk)=k_dist_sw%get_temp_min()
+          temperature_rad(ji,jk) = k_dist_sw%get_temp_min()
         endif
       enddo
     enddo
     
     ! the properties at cell interfaces
-    do ji=1,no_of_scalars_h
-      do jk=1,no_of_layers+1
-        if (jk==1) then
-          temperature_interface_rad(ji,jk) = temperature_rad(ji,jk)
-          pressure_interface_rad   (ji,jk) = pressure_rad   (ji,jk)
-        elseif (jk==no_of_layers+1) then
-          temperature_interface_rad(ji,jk) = temperature_rad(ji,jk-1)
-          pressure_interface_rad   (ji,jk) = pressure_rad   (ji,jk-1)
+    do ji = 1,no_of_scalars_h
+      do jk = 1,no_of_layers+1
+        if (jk == 1) then
+          temperature_interface_rad(ji,jk) =  temperature_rad(ji,jk)
+          pressure_interface_rad   (ji,jk) =  pressure_rad   (ji,jk)
+        elseif (jk == no_of_layers+1) then
+          temperature_interface_rad(ji,jk) =  temperature_rad(ji,jk-1)
+          pressure_interface_rad   (ji,jk) =  pressure_rad   (ji,jk-1)
         else
-          temperature_interface_rad(ji,jk) = 0.5*(temperature_rad(ji,jk-1)+temperature_rad(ji,jk))
-          pressure_interface_rad   (ji,jk) = 0.5*(pressure_rad   (ji,jk-1)+pressure_rad   (ji,jk))
+          temperature_interface_rad(ji,jk) =  0.5*(temperature_rad(ji,jk-1)+temperature_rad(ji,jk))
+          pressure_interface_rad   (ji,jk) =  0.5*(pressure_rad   (ji,jk-1)+pressure_rad   (ji,jk))
         endif
       enddo
     enddo
     
     ! calculating the zenith angle, and counting day and night points
-    j_day = 0
-    j_night = 0
-    do ji=1,no_of_scalars_h
-      mu_0(ji) = coszenith(latitude_scalar(ji), longitude_scalar(ji), time_coord)
+    j_day =  0
+    j_night =  0
+    do ji = 1,no_of_scalars_h
+      mu_0(ji) =  coszenith(latitude_scalar(ji), longitude_scalar(ji), time_coord)
       if (mu_0(ji) > 0) then
-        j_day   = j_day + 1
-        day_indices(j_day)     = ji
+        j_day  = j_day + 1
+        day_indices(j_day)    = ji
       else
-        j_night = j_night + 1
-        night_indices(j_night) = ji
+        j_night =  j_night + 1
+        night_indices(j_night) =  ji
       endif
     enddo
     
-    no_of_day_points   = j_day
+    no_of_day_points = j_day
     no_of_night_points = j_night
     
     ! filling up the arrays restricted to day points
-    do j_day = 1,no_of_day_points
-      temperature_rad_day(j_day,:)        = temperature_rad(day_indices(j_day),:)
-      pressure_rad_day(j_day,:)           = pressure_rad(day_indices(j_day),:)
-      pressure_interface_rad_day(j_day,:) = pressure_interface_rad(day_indices(j_day),:)
-      mu_0_day(j_day)                     = mu_0(day_indices(j_day)) 
-      albedo_dir_day(:,j_day)             = albedo_dir(:,day_indices(j_day))  
-      albedo_dif_day(:,j_day)             = albedo_dif(:,day_indices(j_day))   
+    do j_day =  1,no_of_day_points
+      temperature_rad_day(j_day,:)       = temperature_rad(day_indices(j_day),:)
+      pressure_rad_day(j_day,:)          = pressure_rad(day_indices(j_day),:)
+      pressure_interface_rad_day(j_day,:)= pressure_interface_rad(day_indices(j_day),:)
+      mu_0_day(j_day)                    = mu_0(day_indices(j_day)) 
+      albedo_dir_day(:,j_day)            = albedo_dir(:,day_indices(j_day))  
+      albedo_dif_day(:,j_day)            = albedo_dif(:,day_indices(j_day))   
     end do
     
     ! setting the volume mixing ratios of the gases for the short wave calculation
-    do ji=1,size(active_gases)
-      ! the default
-      vol_mix_ratio(:,:)=0.0_wp
-      select case (gases_lowercase(ji))
-        case('n2')
-          vol_mix_ratio(:,:)=0.8_wp
-        case('o2')
-          vol_mix_ratio(:,:)=0.2_wp
-      end select
-      call handle_error(gas_concentrations_sw%set_vmr(gases_lowercase(ji), vol_mix_ratio &
-      (1:no_of_day_points,:)))
-    enddo
+    call set_vol_mix_ratios(.TRUE., no_of_day_points, no_of_scalars_h, no_of_layers)
     
     ! setting the short wave optical properties of clouds
     call handle_error(cloud_optics_sw%alloc_2str(no_of_day_points, no_of_layers, k_dist_sw, &
-    name='shortwave cloud optics'))
-    cloud_optics_sw%tau = 0
-    cloud_optics_sw%ssa = 1
-    cloud_optics_sw%g   = 0
+    name = "shortwave cloud optics"))
+    cloud_optics_sw%tau =  0
+    cloud_optics_sw%ssa =  1
+    cloud_optics_sw%g  = 0
     
     ! initializing the short wave fluxes
     call init_fluxes(fluxes_clearsky_day, no_of_day_points, no_of_layers+1, no_of_sw_bands)
@@ -271,9 +261,10 @@ module radiation
     fluxes_allsky_day, fluxes_clearsky_day))
     
     ! clearing the radiation tendency
-    do ji=1,no_of_scalars
-      radiation_tendency(ji)=0._wp
+    do ji = 1,no_of_scalars
+      radiation_tendency(ji) = 0._wp
     enddo
+    
     ! short wave result (in Wm^-3)
     ! clear sky
     call calc_power_density(.TRUE., no_of_scalars, no_of_vectors, &
@@ -289,22 +280,12 @@ module radiation
     call free_fluxes(fluxes_allsky_day)
     
     ! setting the volume mixing ratios of the gases for the long wave calculation
-    do ji=1,size(active_gases)
-      ! the default
-      vol_mix_ratio(:,:)=0.0_wp
-      select case (gases_lowercase(ji))
-        case('n2')
-          vol_mix_ratio(:,:)=0.8_wp
-        case('o2')
-          vol_mix_ratio(:,:)=0.2_wp
-      end select
-      call handle_error(gas_concentrations%set_vmr(gases_lowercase(ji), vol_mix_ratio(:,:)))
-    enddo
+    call set_vol_mix_ratios(.FALSE., no_of_day_points, no_of_scalars_h, no_of_layers)
     
     ! setting the long wave cloud optical properties
     call handle_error(cloud_optics_lw%alloc_1scl(no_of_scalars_h, no_of_layers, k_dist_lw, &
-    name='longwave cloud optics'))
-    cloud_optics_lw%tau=0.0
+    name = "longwave cloud optics"))
+    cloud_optics_lw%tau = 0.0
     
     ! initializing the long wave fluxes
     call init_fluxes(fluxes_clearsky, no_of_scalars_h, no_of_layers+1, no_of_lw_bands)
@@ -313,7 +294,7 @@ module radiation
     call handle_error(rte_lw(k_dist_lw, gas_concentrations, pressure_rad(:,:), &
     temperature_rad(:,:), pressure_interface_rad(:,:), temperature_interface_rad(:,no_of_layers+1), &
     surface_emissivity(:,:), cloud_optics_lw, fluxes_allsky, fluxes_clearsky, &
-    t_lev=temperature_interface_rad(:,:)))
+    t_lev = temperature_interface_rad(:,:)))
    
     ! add long wave result (in Wm^-3)
     ! clear sky
@@ -365,20 +346,20 @@ module radiation
     integer                          :: no_of_relevant_columns
     
     if (day_only) then
-      no_of_relevant_columns=size(day_indices)
+      no_of_relevant_columns = size(day_indices)
     else
-      no_of_relevant_columns=no_of_scalars_h
+      no_of_relevant_columns = no_of_scalars_h
     endif
   
   
-    do ji=1,no_of_layers
-      do j_column=1,no_of_relevant_columns
+    do ji = 1,no_of_layers
+      do j_column = 1,no_of_relevant_columns
         if (day_only) then
-          jk=day_indices(j_column)
+          jk = day_indices(j_column)
         else
-          jk=j_column
+          jk = j_column
         endif
-        radiation_tendency((ji-1)*no_of_scalars_h+jk) = &
+        radiation_tendency((ji-1)*no_of_scalars_h+jk) =  &
         radiation_tendency((ji-1)*no_of_scalars_h+jk) +&
         ! this is a sum of four fluxes
         ( &
@@ -411,7 +392,7 @@ module radiation
     real(8)                          :: normal_vector_rel2_earth(3)
     real(8)                          :: normal_vector_rel2_sun  (3)
     real(8)                          :: sun_2_earth             (3)
-    ! obliquity of the earth's axis
+    ! obliquity of the earth"s axis
     real(8)                          :: obliquity
     ! rotation speed of the earth
     real(8)                          :: omega
@@ -429,26 +410,26 @@ module radiation
     real(8)                          :: phi_0_earth_rotation
     real(8)                          :: trans_earth2sun         (3,3)
     
-    omega                  = 7.292115d-5
-    omega_rev              = 1.99099d-7
-    obliquity              = 0.409092592843564
+    omega                 = 7.292115d-5
+    omega_rev             = 1.99099d-7
+    obliquity             = 0.409092592843564
     
     ! refer to https://www.esrl.noaa.gov/gmd/grad/solcalc/azel.html
     ! Unix time coordinate of 2019-Dec-20, 12:00 UTC
-    t_0                    = 1576843200.0
+    t_0                   = 1576843200.0
     ! this is a winter solstice
-    phi_0_earth_around_sun = 0.
-    phi_0_earth_rotation   = 0.
+    phi_0_earth_around_sun =  0.
+    phi_0_earth_rotation  = 0.
     
     ! transformation of the time coordinate
-    t_transformed = t - t_0
+    t_transformed =  t - t_0
     
-    rot_angle = omega*t_transformed - phi_0_earth_rotation
+    rot_angle =  omega*t_transformed - phi_0_earth_rotation
     
     ! the normal vector of the place we look at in earth fixed coordinates
-    normal_vector_rel2_earth(1) = cos(lat)*cos(lon)
-    normal_vector_rel2_earth(2) = cos(lat)*sin(lon)
-    normal_vector_rel2_earth(3) = sin(lat)
+    normal_vector_rel2_earth(1) =  cos(lat)*cos(lon)
+    normal_vector_rel2_earth(2) =  cos(lat)*sin(lon)
+    normal_vector_rel2_earth(3) =  sin(lat)
     
     ! the x vector of the earth fixed coordinate system in solar coordinates
     trans_earth2sun(1,1) = -cos(rot_angle)*cos(obliquity)
@@ -464,21 +445,69 @@ module radiation
     trans_earth2sun(3,3) = cos(obliquity)
     
     ! transforming the normal vector of the place to solar coordinates
-    normal_vector_rel2_sun      = matmul(trans_earth2sun, normal_vector_rel2_earth)
+    normal_vector_rel2_sun     = matmul(trans_earth2sun, normal_vector_rel2_earth)
     
-    sun_2_earth             (1) = cos(omega_rev*t_transformed + phi_0_earth_around_sun)
-    sun_2_earth             (2) = sin(omega_rev*t_transformed + phi_0_earth_around_sun)
-    sun_2_earth             (3) = 0
+    sun_2_earth             (1) =  cos(omega_rev*t_transformed + phi_0_earth_around_sun)
+    sun_2_earth             (2) =  sin(omega_rev*t_transformed + phi_0_earth_around_sun)
+    sun_2_earth             (3) =  0
     
     ! the result
-    coszenith = DOT_PRODUCT(normal_vector_rel2_earth, -sun_2_earth)
+    coszenith =  DOT_PRODUCT(normal_vector_rel2_earth, -sun_2_earth)
     
     ! the night case
     if (coszenith < 0) then
-      coszenith = 0
+      coszenith =  0
     endif
   
   end function coszenith
+  
+  subroutine set_vol_mix_ratios(sw_bool, no_of_day_points, no_of_scalars_h, no_of_layers)
+    
+    logical, intent(in)              :: sw_bool
+    integer, intent(in)              :: no_of_day_points
+    integer, intent(in)              :: no_of_scalars_h
+    integer, intent(in)              :: no_of_layers
+    
+    ! computes volume mixing ratios
+    ! the volume mixing ratio of a gas
+    real(8)                          :: vol_mix_ratio(no_of_scalars_h, no_of_layers)
+    ! local variables
+    real(8)                          :: molar_fraction_value
+    ! loop index
+    integer                          :: ji
+    
+    ! setting the volume mixing ratios of the gases for the long wave calculation
+    do ji = 1,size(active_gases)
+      ! the default
+      vol_mix_ratio(:,:) = 0.0_wp
+      select case (gases_lowercase(ji))
+        case("n2")
+          molar_fraction_value = molar_fraction_in_dry_air(2)
+          vol_mix_ratio(:,:) = molar_fraction_value/(1._wp - molar_fraction_value)
+        case("o2")
+          molar_fraction_value = molar_fraction_in_dry_air(3)
+          vol_mix_ratio(:,:) = molar_fraction_value/(1._wp - molar_fraction_value)
+        case("ch4")
+          molar_fraction_value = molar_fraction_in_dry_air(8)
+          vol_mix_ratio(:,:) = molar_fraction_value/(1._wp - molar_fraction_value)
+        case("o3")
+          molar_fraction_value = molar_fraction_in_dry_air(10)
+          vol_mix_ratio(:,:) = molar_fraction_value/(1._wp - molar_fraction_value)
+        case("co2")
+          molar_fraction_value = molar_fraction_in_dry_air(5)
+          vol_mix_ratio(:,:) = molar_fraction_value/(1._wp - molar_fraction_value)
+        case("co")
+          molar_fraction_value = molar_fraction_in_dry_air(9)
+          vol_mix_ratio(:,:) = molar_fraction_value/(1._wp - molar_fraction_value)
+      end select
+      if (sw_bool) then
+        call handle_error(gas_concentrations_sw%set_vmr(gases_lowercase(ji), vol_mix_ratio(1:no_of_day_points,:)))
+      else
+        call handle_error(gas_concentrations%set_vmr(gases_lowercase(ji), vol_mix_ratio(:,:)))
+      endif
+    enddo
+  
+  end subroutine set_vol_mix_ratios
   
   subroutine init_fluxes(fluxes, n_hor, n_vert, n_bands)
   
@@ -511,16 +540,16 @@ module radiation
     type(ty_fluxes_byband), intent(inout) :: fluxes
 
     ! reset broadband fluxes
-    fluxes%flux_up(:,:) = 0._wp
-    fluxes%flux_dn(:,:) = 0._wp
-    fluxes%flux_net(:,:) = 0._wp
-    if (associated(fluxes%flux_dn_dir)) fluxes%flux_dn_dir(:,:) = 0._wp
+    fluxes%flux_up(:,:) =  0._wp
+    fluxes%flux_dn(:,:) =  0._wp
+    fluxes%flux_net(:,:) =  0._wp
+    if (associated(fluxes%flux_dn_dir)) fluxes%flux_dn_dir(:,:) =  0._wp
 
     ! reset band-by-band fluxes
-    fluxes%bnd_flux_up(:,:,:) = 0._wp
-    fluxes%bnd_flux_dn(:,:,:) = 0._wp
-    fluxes%bnd_flux_net(:,:,:) = 0._wp
-    if (associated(fluxes%bnd_flux_dn_dir)) fluxes%bnd_flux_dn_dir(:,:,:) = 0._wp
+    fluxes%bnd_flux_up(:,:,:) =  0._wp
+    fluxes%bnd_flux_dn(:,:,:) =  0._wp
+    fluxes%bnd_flux_net(:,:,:) =  0._wp
+    if (associated(fluxes%bnd_flux_dn_dir)) fluxes%bnd_flux_dn_dir(:,:,:) =  0._wp
 
   end subroutine reset_fluxes
   
@@ -543,7 +572,7 @@ module radiation
   
   subroutine handle_error(error_message)
   
-    character(len=*), intent(in) :: error_message
+    character(len = *), intent(in) :: error_message
     
     if (len(trim(error_message)) > 0) then
       write(*,*) error_message
