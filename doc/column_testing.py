@@ -175,8 +175,9 @@ for i in range(no_of_steps):
 			else:
 				delta_w = w_old[j - 1] - w_old[j + 1];
 				delta_z = z_level[j - 1] - z_level[j + 1];
+				T_int = 0.5*(T_old[j - 1] + T_old[j]);
 				d_vector[2*j] = w_old[j] - adv*delta_t*delta_w/delta_z - delta_t*c_p*(1 - impl_p_grad_weight)*(T_old[j - 1] - T_old[j])/(z_layer[j - 1] - z_layer[j])
-				+ delta_t*c_p*(entropy_density_old[j - 1]/rho_old[j - 1] - entropy_density_old[j]/rho_old[j])/(z_layer[j - 1] - z_layer[j]);
+				+ delta_t*T_int*(entropy_density_old[j - 1]/rho_old[j - 1] - entropy_density_old[j]/rho_old[j])/(z_layer[j - 1] - z_layer[j]);
 			# explicit component of temperature
 			d_vector[2*j + 1] = T_old[j];
 		b_vector[solution_length - 1] = 1;
