@@ -21,33 +21,40 @@ TOA = 30e3;
 # number of layers
 no_of_layers = 10000;
 # background T
-T_0 = 273.15;
+T_surf = 273.15 + 18;
 # time step
-delta_t = 1;
+delta_t = 1e-3;
 # number of steps you want to integrate
-no_of_steps = 8;
+no_of_steps = 1;
 #name of the time integration scheme
 time_integration = "Euler explicit";
 time_integration = "implicit";
 # turn avection on or off
 adv = 0;
 # turn gravity on or off
-grav_switch = 0;
+grav_switch = 1;
 # initial surface pressure
 p_surf = 101325;
 # characteristics of the vertical velocity perturbation
 amp_pert = 1;
 z_pert = TOA/2;
 sigma_pert = TOA/10;
-impl_p_grad_weight = c_v/c_p;
+# switch the perturbation on or off
+perturb_on = 0;
+impl_p_grad_weight = 0;
 # mass advection
 mass_adv = 0;
 # entropy switch
-entropy_switch = 1;
+entropy_switch = 0;
+# tropopause height
+tropopause = 13e3;
+# lapse rate
+lapse_rate = -0.0065;
 
 ### END OF INPUT SECTION
 
 P_0 = 100000;
+scale_height = 8e3;
 
 def thomas_algorithm(a_vector, b_vector, c_vector, d_vector, solution_length):
 	# https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm
@@ -65,7 +72,18 @@ def thomas_algorithm(a_vector, b_vector, c_vector, d_vector, solution_length):
 		solution_vector[j] = d_prime_vector[j] - c_prime_vector[j]*solution_vector[j + 1];
 	return solution_vector;
 
-c_s = math.sqrt(kappa*R_d*T_0);
+def spec_entropy_from_temp(mass_density, temperature):
+	pressure = mass_density*R_d*temperature;
+	pot_temp = temperature*math.pow(P_0/pressure, R_d/c_p);
+	result = c_p*math.log(pot_temp);
+	return result;
+
+def solve_specific_entropy_for_density(specific_entropy, temperature):
+	# returns the density as a function of the specific entropy and the temperature
+	result = P_0/R_d*math.pow(temperature, c_v/R_d)*math.exp(-specific_entropy/R_d);
+	return result;
+
+c_s = math.sqrt(kappa*R_d*T_surf);
 
 courant_number = c_s/(TOA/no_of_layers/delta_t);
 
@@ -85,34 +103,50 @@ for i in range(no_of_layers):
 for i in range(no_of_layers - 1):
 	z_level[i + 1] = 0.5*(z_layer[i] + z_layer[i + 1]);
 
+p_lowest_layer = p_surf*math.exp(-z_layer[no_of_layers - 1]/scale_height);
+
 # the state variables
-T_old = np.zeros([no_of_layers]);
+rho_old = np.zeros([no_of_layers]);
+entropy_density_old = np.zeros([no_of_layers]);
 w_old = np.zeros([no_of_levels]);
-rho_old = np.zeros([no_of_levels]);
-entropy_density_old = np.zeros([no_of_levels]);
-T_new = np.zeros([no_of_layers]);
+T_old = np.zeros([no_of_layers]);
+rho_new = np.zeros([no_of_layers]);
+entropy_density_new = np.zeros([no_of_layers]);
 w_new = np.zeros([no_of_levels]);
-rho_new = np.zeros([no_of_levels]);
-entropy_density_new = np.zeros([no_of_levels]);
+T_new = np.zeros([no_of_layers]);
 
 # initializing the T field
 for i in range(no_of_layers):
-	T_old[i] = T_0;
+	if (z_layer[i] < tropopause):
+		T_old[i] = T_surf + z_layer[i]*lapse_rate;
+	else:
+		T_old[i] = T_surf + tropopause*lapse_rate;
+# initializing the entropy and mass density fields
+for i in range(no_of_layers - 1, -1, -1):
+	if i == no_of_layers - 1:
+		rho_old[i] = p_lowest_layer/(R_d*T_old[i]);
+		entropy_value = spec_entropy_from_temp(rho_old[i], T_old[i]);
+	else:
+		lower_entropy_value = spec_entropy_from_temp(rho_old[i + 1], T_old[i + 1]);
+		temperature_mean = 0.5*(T_old[i] + T_old[i + 1]);
+		delta_temperature = T_old[i] - T_old[i + 1];
+		delta_gravity_potential = g*(z_layer[i] - z_layer[i + 1]);
+		entropy_value = lower_entropy_value + (delta_gravity_potential + c_p*delta_temperature)/temperature_mean;
+		rho_old[i] = solve_specific_entropy_for_density(entropy_value, T_old[i]);
+	entropy_density_old[i] = rho_old[i]*entropy_value;
+# the new time step values
+for i in range(no_of_layers):
 	T_new[i] = T_old[i];
+	entropy_density_new[i] = entropy_density_old[i];
+	rho_new[i] = rho_old[i];
 # initializing the velocity field
 for i in range(no_of_levels):
-	if i != 0 and i != no_of_levels - 1:
-		w_old[i] = amp_pert*math.exp(-(z_level[i] - z_pert)**2/(2*sigma_pert**2));
+	if perturb_on == 1:
+		if i != 0 and i != no_of_levels - 1:
+			w_old[i] = amp_pert*math.exp(-(z_level[i] - z_pert)**2/(2*sigma_pert**2));
+	else:
+		w_old[i] = 0;
 	w_new[i] = w_old[i];
-# initializing the density field
-for i in range(no_of_layers):
-	rho_old[i] = p_surf/(R_d*T_old[i]);
-	rho_new[i] = rho_old[i];
-# initializing the entropy density field
-for i in range(no_of_layers):
-	pot_temp = T_old[i]*math.pow(P_0/p_surf, R_d/c_p);
-	entropy_density_old[i] = c_p*rho_old[i]*math.log(pot_temp);
-	entropy_density_new[i] = entropy_density_old[i];
 
 # loop over all time steps
 e_int = np.zeros([no_of_steps]);
@@ -126,7 +160,9 @@ for i in range(no_of_steps):
 			T_new[j] = T_old[j] - delta_t*R_d/c_v*T_old[j]*div_w;
 		for j in np.arange(1, no_of_levels - 1):
 			grad_T = (T_old[j - 1] - T_old[j])/(z_layer[j - 1] - z_layer[j]);
-			w_new[j] = w_old[j] - delta_t*c_p*grad_T;
+			grad_s = (entropy_density_old[j - 1]/rho_old[j - 1] - entropy_density_old[j]/rho_old[j])/(z_layer[j - 1] - z_layer[j]);
+			T_int = 0.5*(T_old[j - 1] + T_old[j]);
+			w_new[j] = w_old[j] - delta_t*c_p*grad_T + delta_t*T_int*grad_s - delta_t*grav_switch*g;
 		for j in range(no_of_layers):
 			T_old[j] = T_new[j];
 		for j in range(no_of_levels):
@@ -171,13 +207,13 @@ for i in range(no_of_steps):
 			b_vector[2*j + 1] = 1;
 			# explicit component of vertical velocity
 			if j == 0:
-				d_vector[2*j] = 0;
+				d_vector[2*j] = w_old[j];
 			else:
 				delta_w = w_old[j - 1] - w_old[j + 1];
 				delta_z = z_level[j - 1] - z_level[j + 1];
 				T_int = 0.5*(T_old[j - 1] + T_old[j]);
 				d_vector[2*j] = w_old[j] - adv*delta_t*delta_w/delta_z - delta_t*c_p*(1 - impl_p_grad_weight)*(T_old[j - 1] - T_old[j])/(z_layer[j - 1] - z_layer[j])
-				+ delta_t*T_int*(entropy_density_old[j - 1]/rho_old[j - 1] - entropy_density_old[j]/rho_old[j])/(z_layer[j - 1] - z_layer[j]);
+				+ entropy_switch*delta_t*T_int*(entropy_density_old[j - 1]/rho_old[j - 1] - entropy_density_old[j]/rho_old[j])/(z_layer[j - 1] - z_layer[j]) - delta_t*grav_switch*g;
 			# explicit component of temperature
 			d_vector[2*j + 1] = T_old[j];
 		b_vector[solution_length - 1] = 1;
@@ -228,7 +264,7 @@ for i in range(no_of_steps):
 		T_old[j] = T_new[j];
 	for j in range(no_of_levels):
 		w_old[j] = w_new[j];
-	for j in range(no_of_levels):
+	for j in range(no_of_layers):
 		rho_old[j] = rho_new[j];
 
 # vertical velocity plot
@@ -244,12 +280,13 @@ plt.ylim([np.min(z_rescale*z_level), np.max(z_rescale*z_level)]);
 plt.show();
 
 # temperature
+t_span = np.max(T_new) - np.min(T_new);
 fig = plt.figure();
 plt.title("Temperature (last time step)");
 plt.ylabel("Height / km");
 plt.xlabel("Temperature / ° C");
 plt.plot(T_new - 273.15, z_rescale*z_layer);
-plt.xlim([np.min(T_new - 273.15) - 1, np.max(T_new - 273.15) + 1]);
+plt.xlim([np.min(T_new - 273.15) - 0.1*t_span, np.max(T_new - 273.15) + 0.1*t_span]);
 plt.ylim([np.min(z_rescale*z_layer), np.max(z_rescale*z_layer)]);
 plt.show();
 

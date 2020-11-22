@@ -53,7 +53,7 @@ const double TEMP_GRADIENT_INV_STANDARD = 0.1/100;
 int find_pressure_value(double, double, double *);
 double sackur_tetrode(double, double);
 double solve_specific_entropy_for_density(double, double);
-double spec_entropy_from_pot_temp(double, double);
+double spec_entropy_from_temp(double, double);
 
 int main(int argc, char *argv[])
 {
@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-        	lower_entropy_value = spec_entropy_from_pot_temp(rho[i + NO_OF_SCALARS_H], temperature[i + NO_OF_SCALARS_H]);
+        	lower_entropy_value = spec_entropy_from_temp(rho[i + NO_OF_SCALARS_H], temperature[i + NO_OF_SCALARS_H]);
             lower_index = i + NO_OF_SCALARS_H;
             upper_index = i;
             upper_volume = volume_ratios[2*upper_index + 1]*volume[upper_index];
@@ -467,7 +467,7 @@ double sackur_tetrode(double mass_density, double temperature)
     return result;
 }
 
-double spec_entropy_from_pot_temp(double mass_density, double temperature)
+double spec_entropy_from_temp(double mass_density, double temperature)
 {
 	double R_D = specific_gas_constants_lookup(0);
 	double C_D_P = spec_heat_capacities_p_gas_lookup(0);
