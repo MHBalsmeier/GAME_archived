@@ -156,16 +156,19 @@ for i in range(no_of_steps):
 			T_new[j] = solution_vector[2*j + 1];
 		for j in range(no_of_levels):
 			w_new[j] = solution_vector[2*j];
-		for j in range(no_of_layers):
-			T_old[j] = T_new[j];
-		for j in range(no_of_levels):
-			w_old[j] = w_new[j];
+	# diagnozing energies
 	for j in range(no_of_layers):	
 		e_int[i] = e_int[i] + rho_old[j]*c_v*T_old[j];
 		e_pot[i] = e_pot[i] + grav_switch*rho_old[j]*g*z_layers[j];
 		e_kin[i] = e_kin[i] + 0.5*rho_old[j]*(0.5*w_old[j]**2 + 0.5*w_old[j + 1]**2);
 	e_tot[i] = e_int[i] + e_kin[i] + e_pot[i];
-	
+	# necessary for time stepping
+	for j in range(no_of_layers):
+		T_old[j] = T_new[j];
+	for j in range(no_of_levels):
+		w_old[j] = w_new[j];
+
+# vertical velocity plot
 w_rescale = 100;
 z_rescale = 1e-3;
 fig = plt.figure();
@@ -177,6 +180,7 @@ plt.xlim([1.1*np.min(w_rescale*w_new), 1.1*np.max(w_rescale*w_new)]);
 plt.ylim([np.min(z_rescale*z_levels), np.max(z_rescale*z_levels)]);
 plt.show();
 
+# energy plot
 fig = plt.figure();
 plt.title("Energy evolution");
 plt.xlabel("time / s");
