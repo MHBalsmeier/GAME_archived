@@ -6,15 +6,15 @@ import matplotlib.pyplot as plt;
 # This is for testing vertical column solvers.
 
 # top of atmosphere
-TOA = 80e3;
+TOA = 30e3;
 # number of layers
-no_of_layers = 100;
+no_of_layers = 27;
 # background T
 T_0 = 273.15;
 # time step
-delta_t = 1000;
+delta_t = 350;
 # number of steps you want to integrate
-no_of_steps = 100;
+no_of_steps = 10;
 #name of the time integration scheme
 time_integration = "Euler explicit";
 time_integration = "implicit";
@@ -83,13 +83,11 @@ rho_new = np.zeros([no_of_levels]);
 # initializing the T field
 for i in range(no_of_layers):
 	T_old[i] = T_0;
-	# adding a small perurbation
-	if (i >= 50):
-		T_old[i] = T_old[i] + 100;
 	T_new[i] = T_old[i];
 # initializing the velocity field
 for i in range(no_of_levels):
-	w_old[i] = 0;
+	if i != 0 and i != no_of_levels - 1:
+		w_old[i] = 1;
 	w_new[i] = w_old[i];
 # initializing the density field
 for i in range(no_of_layers):
@@ -122,7 +120,11 @@ for i in range(no_of_steps):
 		for j in range(no_of_layers):
 			# this refers to the temperature
 			delta_z = z_levels[j] - z_levels[j + 1];
-			a_vector[2*j] = delta_t*R_d/c_v*T_old[j]/delta_z;
+			if j == 0:
+				T_int = T_old[j];
+			else:
+				T_int = T_old[j - 1] + T_old[j];
+			a_vector[2*j] = delta_t*((R_d/c_v - adv)*T_old[j] + adv*T_int)/delta_z;
 			# this refers to the vertical velocity
 			if j == no_of_layers - 1:
 				a_vector[2*j + 1] = 0;
@@ -137,14 +139,23 @@ for i in range(no_of_steps):
 				c_vector[2*j] = -delta_t*c_p/delta_z;
 			# this refers to the temperature
 			delta_z = z_levels[j] - z_levels[j + 1];
-			c_vector[2*j + 1] = -delta_t*R_d/c_v*T_old[j]/delta_z;
+			if j == no_of_layers - 1:
+				T_int = T_old[j];
+			else:
+				T_int = 0.5*(T_old[j] + T_old[j + 1]);
+			c_vector[2*j + 1] = -delta_t*((R_d/c_v - adv)*T_old[j] + adv*T_int)/delta_z;
 		for j in range(no_of_layers):
 			# vertical velocity
 			b_vector[2*j] = 1;
 			# temperature
 			b_vector[2*j + 1] = 1;
 			# explicit component of vertical velocity
-			d_vector[2*j] = w_old[j];
+			if j == 0:
+				d_vector[2*j] = 0;
+			else:
+				delta_w = w_old[j - 1] - w_old[j + 1];
+				delta_z = z_levels[j - 1] - z_levels[j + 1];
+				d_vector[2*j] = w_old[j] - adv*delta_t*delta_w/delta_z;
 			# explicit component of temperature
 			d_vector[2*j + 1] = T_old[j];
 		b_vector[solution_length - 1] = 1;
@@ -161,6 +172,7 @@ for i in range(no_of_steps):
 		e_int[i] = e_int[i] + rho_old[j]*c_v*T_old[j];
 		e_pot[i] = e_pot[i] + grav_switch*rho_old[j]*g*z_layers[j];
 		e_kin[i] = e_kin[i] + 0.5*rho_old[j]*(0.5*w_old[j]**2 + 0.5*w_old[j + 1]**2);
+	print(e_kin[i]);
 	e_tot[i] = e_int[i] + e_kin[i] + e_pot[i];
 	# necessary for time stepping
 	for j in range(no_of_layers):
@@ -185,9 +197,9 @@ fig = plt.figure();
 plt.title("Energy evolution");
 plt.xlabel("time / s");
 plt.ylabel("percentage change rel. to total init");
-plt.plot(delta_t*np.arange(0, no_of_steps), (e_int- e_int[0])/e_tot[0]);
-plt.plot(delta_t*np.arange(0, no_of_steps), (e_pot- e_pot[0])/e_tot[0]);
-plt.plot(delta_t*np.arange(0, no_of_steps), (e_kin- e_kin[0])/e_tot[0]);
+#plt.plot(delta_t*np.arange(0, no_of_steps), (e_int- e_int[0])/e_tot[0]);
+#plt.plot(delta_t*np.arange(0, no_of_steps), (e_pot- e_pot[0])/e_tot[0]);
+#plt.plot(delta_t*np.arange(0, no_of_steps), (e_kin- e_kin[0])/e_tot[0]);
 plt.plot(delta_t*np.arange(0, no_of_steps), (e_tot - e_tot[0])/e_tot[0]);
 plt.xlim([0, np.max(delta_t*np.arange(0, no_of_steps))]);
 plt.legend(["internal", "potential", "kinetic", "total"]);
