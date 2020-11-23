@@ -2,16 +2,6 @@
 This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/MHBalsmeier/game
 */
-/*
-Test states can be generated with this code. TEST_ID table:
-0:	standard atmosphere
-1:	standard atmosphere with Gaussian mountain
-2:	JW dry unperturbed
-3:	JW dry perturbed
-4:	JW moist unperturbed
-5:	JW moist perturbed
-For more specific details see handbook.
-*/
 
 #include <stdlib.h>
 #include "enum.h"
@@ -77,7 +67,7 @@ int main(int argc, char *argv[])
 	{
 		ORO_ID = 2;
 	}
-	if (TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 10 || TEST_ID == 11)
+	if (TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 10 || TEST_ID == 11 || TEST_ID == 12)
 	{
 		ORO_ID = 3;
 	}
@@ -192,7 +182,7 @@ int main(int argc, char *argv[])
         z_height = z_scalar[i];
         rel_humidity[i] = 0;
         // standard atmosphere
-        if (TEST_ID == 0 || TEST_ID == 1)
+        if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 12)
         {
             if (z_height < TROPO_HEIGHT_STANDARD)
             {
@@ -298,7 +288,7 @@ int main(int argc, char *argv[])
             lon = longitude_vector[j];
             z_height = z_vector[NO_OF_SCALARS_H + j + i*NO_OF_VECTORS_PER_LAYER];
             // standard atmosphere: no wind
-            if (TEST_ID == 0 || TEST_ID == 1)
+            if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 12)
             {
                 wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = 0;
             }
@@ -338,7 +328,7 @@ int main(int argc, char *argv[])
             lat = latitude_scalar[j];
             lon = longitude_scalar[j];
             z_height = z_vector[j + i*NO_OF_VECTORS_PER_LAYER];
-            if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 8 || TEST_ID == 9)
+            if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 8 || TEST_ID == 9 || TEST_ID == 10 || TEST_ID == 11 || TEST_ID == 12)
             {
                 wind[i*NO_OF_VECTORS_PER_LAYER + j] = 0;
             }

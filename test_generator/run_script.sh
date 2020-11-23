@@ -16,8 +16,9 @@
 # 9:	Ullrich test, moist, perturbed
 # 10:	Ullrich test, dry, perturbed, with oro_id = 3
 # 11:	Ullrich test, moist, perturbed, with oro_id = 3
+# 12:	standard atmosphere with oro_id = 3
 
-test_id=10
+test_id=12
 valgrind_check=0 # set this to 1, if you want to check the code with Valgrind
 number_of_cpus=1 # relevant only for MPI
 export OMP_NUM_THREADS=5 # relevant only for OMP
