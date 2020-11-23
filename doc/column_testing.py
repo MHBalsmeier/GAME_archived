@@ -1,4 +1,3 @@
-
 import numpy as np;
 import math;
 import matplotlib.pyplot as plt;
@@ -23,29 +22,35 @@ no_of_layers = 10000;
 # background T
 T_surf = 273.15 + 18;
 # time step
-delta_t = 1e-3;
+delta_t = 1;
 # number of steps you want to integrate
-no_of_steps = 1;
-#name of the time integration scheme
+no_of_steps = 40;
+# name of the time integration scheme
 time_integration = "Euler explicit";
 time_integration = "implicit";
 # turn avection on or off
-adv = 0;
+adv = 1;
 # turn gravity on or off
 grav_switch = 1;
 # initial surface pressure
 p_surf = 101325;
 # characteristics of the vertical velocity perturbation
-amp_pert = 1;
-z_pert = TOA/2;
-sigma_pert = TOA/10;
 # switch the perturbation on or off
-perturb_on = 0;
-impl_p_grad_weight = 0;
+perturb_on = 1;
+# amplitude
+amp_pert = 1;
+# center
+z_pert = TOA/2;
+# standard deviation
+sigma_pert = TOA/10;
+# implicit weight of the pressure gradient acceleration
+impl_p_grad_weight = c_v/c_p;
+# impl_p_grad_weight = 0;
+# impl_p_grad_weight = 1;
 # mass advection
-mass_adv = 0;
+mass_adv = 1;
 # entropy switch
-entropy_switch = 0;
+entropy_switch = 1;
 # tropopause height
 tropopause = 13e3;
 # lapse rate
@@ -53,6 +58,7 @@ lapse_rate = -0.0065;
 
 ### END OF INPUT SECTION
 
+# reference pressure for potential temperature calculation
 P_0 = 100000;
 scale_height = 8e3;
 
@@ -99,8 +105,8 @@ z_layer = np.zeros([no_of_layers]);
 for i in range(no_of_layers):
 	z_layer[i] = 0.5*(z_level[i] + z_level[i + 1]);
 
-# pracing the levels in the middle between the layers
-for i in range(no_of_layers - 1):
+# placing the levels in the middle between the layers
+for i in range(no_of_levels - 2):
 	z_level[i + 1] = 0.5*(z_layer[i] + z_layer[i + 1]);
 
 p_lowest_layer = p_surf*math.exp(-z_layer[no_of_layers - 1]/scale_height);
@@ -130,7 +136,7 @@ for i in range(no_of_layers - 1, -1, -1):
 		lower_entropy_value = spec_entropy_from_temp(rho_old[i + 1], T_old[i + 1]);
 		temperature_mean = 0.5*(T_old[i] + T_old[i + 1]);
 		delta_temperature = T_old[i] - T_old[i + 1];
-		delta_gravity_potential = g*(z_layer[i] - z_layer[i + 1]);
+		delta_gravity_potential = grav_switch*g*(z_layer[i] - z_layer[i + 1]);
 		entropy_value = lower_entropy_value + (delta_gravity_potential + c_p*delta_temperature)/temperature_mean;
 		rho_old[i] = solve_specific_entropy_for_density(entropy_value, T_old[i]);
 	entropy_density_old[i] = rho_old[i]*entropy_value;
@@ -148,11 +154,12 @@ for i in range(no_of_levels):
 		w_old[i] = 0;
 	w_new[i] = w_old[i];
 
-# loop over all time steps
+# energies
 e_int = np.zeros([no_of_steps]);
 e_kin = np.zeros([no_of_steps]);
 e_pot = np.zeros([no_of_steps]);
 e_tot = np.zeros([no_of_steps]);
+# loop over all time steps
 for i in range(no_of_steps):
 	if (time_integration == "Euler explicit"):
 		for j in range(no_of_layers):
@@ -162,11 +169,7 @@ for i in range(no_of_steps):
 			grad_T = (T_old[j - 1] - T_old[j])/(z_layer[j - 1] - z_layer[j]);
 			grad_s = (entropy_density_old[j - 1]/rho_old[j - 1] - entropy_density_old[j]/rho_old[j])/(z_layer[j - 1] - z_layer[j]);
 			T_int = 0.5*(T_old[j - 1] + T_old[j]);
-			w_new[j] = w_old[j] - delta_t*c_p*grad_T + delta_t*T_int*grad_s - delta_t*grav_switch*g;
-		for j in range(no_of_layers):
-			T_old[j] = T_new[j];
-		for j in range(no_of_levels):
-			w_old[j] = w_new[j];
+			w_new[j] = w_old[j] + delta_t*(-c_p*grad_T + entropy_switch*T_int*grad_s - grav_switch*g);
 	if (time_integration == "implicit"):
 		solution_length = no_of_layers + no_of_levels;
 		a_vector = np.zeros([solution_length - 1]);
@@ -212,8 +215,8 @@ for i in range(no_of_steps):
 				delta_w = w_old[j - 1] - w_old[j + 1];
 				delta_z = z_level[j - 1] - z_level[j + 1];
 				T_int = 0.5*(T_old[j - 1] + T_old[j]);
-				d_vector[2*j] = w_old[j] - adv*delta_t*delta_w/delta_z - delta_t*c_p*(1 - impl_p_grad_weight)*(T_old[j - 1] - T_old[j])/(z_layer[j - 1] - z_layer[j])
-				+ entropy_switch*delta_t*T_int*(entropy_density_old[j - 1]/rho_old[j - 1] - entropy_density_old[j]/rho_old[j])/(z_layer[j - 1] - z_layer[j]) - delta_t*grav_switch*g;
+				d_vector[2*j] = w_old[j] + delta_t*(- adv*delta_w/delta_z - c_p*(1 - impl_p_grad_weight)*(T_old[j - 1] - T_old[j])/(z_layer[j - 1] - z_layer[j]) +
+				entropy_switch*T_int*(entropy_density_old[j - 1]/rho_old[j - 1] - entropy_density_old[j]/rho_old[j])/(z_layer[j - 1] - z_layer[j]) - grav_switch*g);
 			# explicit component of temperature
 			d_vector[2*j + 1] = T_old[j];
 		b_vector[solution_length - 1] = 1;
@@ -262,10 +265,10 @@ for i in range(no_of_steps):
 	# necessary for time stepping
 	for j in range(no_of_layers):
 		T_old[j] = T_new[j];
+		rho_old[j] = rho_new[j];
+		entropy_density_old[j] = entropy_density_new[j];
 	for j in range(no_of_levels):
 		w_old[j] = w_new[j];
-	for j in range(no_of_layers):
-		rho_old[j] = rho_new[j];
 
 # vertical velocity plot
 w_rescale = 100;
@@ -279,7 +282,7 @@ plt.xlim([1.1*np.min(w_rescale*w_new), 1.1*np.max(w_rescale*w_new)]);
 plt.ylim([np.min(z_rescale*z_level), np.max(z_rescale*z_level)]);
 plt.show();
 
-# temperature
+# temperature plot
 t_span = np.max(T_new) - np.min(T_new);
 fig = plt.figure();
 plt.title("Temperature (last time step)");
@@ -290,7 +293,7 @@ plt.xlim([np.min(T_new - 273.15) - 0.1*t_span, np.max(T_new - 273.15) + 0.1*t_sp
 plt.ylim([np.min(z_rescale*z_layer), np.max(z_rescale*z_layer)]);
 plt.show();
 
-# energy plot
+# energy plots
 fig = plt.figure();
 plt.title("Energy evolution");
 plt.xlabel("time / s");
