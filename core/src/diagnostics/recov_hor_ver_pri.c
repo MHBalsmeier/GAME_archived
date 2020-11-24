@@ -4,7 +4,7 @@ Github repository: https://github.com/MHBalsmeier/game
 */
 
 /*
-This function revocers vertical components of primal vectors at edges. Terrain following ccordinates are taken into account through vertical interpolation.
+This function recovers vertical components of primal vectors at edges. Terrain following ccordinates are taken into account through vertical interpolation.
 */
 
 #include "../enum_and_typedefs.h"
