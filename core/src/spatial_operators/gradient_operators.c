@@ -18,7 +18,9 @@ int grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
         if (h_index >= NO_OF_SCALARS_H)
+        {
             out_field[i] = (in_field[grid -> to_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H] - in_field[grid -> from_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H])/grid -> normal_distance[i];
+        }
         else
         {
             lower_index = h_index + layer_index*NO_OF_SCALARS_H;
@@ -60,7 +62,9 @@ int scalar_times_grad(Scalar_field in_field_for_prefactor, Scalar_field in_field
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
         if (h_index >= NO_OF_SCALARS_H)
+        {
             out_field[i] = (in_field_for_grad[grid -> to_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H] - in_field_for_grad[grid -> from_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H])/grid -> normal_distance[i];
+        }
         else
         {
             lower_index = h_index + layer_index*NO_OF_SCALARS_H;
