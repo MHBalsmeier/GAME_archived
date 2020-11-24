@@ -36,7 +36,8 @@ perturb_on = 1;
 # amplitude
 amp_pert = 1;
 # implicit weight of the pressure gradient acceleration
-impl_p_grad_weight = c_v/c_p;
+impl_p_grad_weight_t = 0.5;
+impl_p_grad_weight_s = 0.5;
 # mass advection
 mass_adv = 1;
 # entropy switch
@@ -171,13 +172,13 @@ for i in range(no_of_steps):
 			a_vector[2*j + 1] = 0;
 		else:
 			delta_z = z_layer[j] - z_layer[j + 1];
-			a_vector[2*j + 1] = delta_t*impl_p_grad_weight*c_p/delta_z;
+			a_vector[2*j + 1] = delta_t*(impl_p_grad_weight_t*c_p/delta_z - 0.5*impl_p_grad_weight_s*(entropy_density_new[j]/rho_new[j] - entropy_density_new[j + 1]/rho_new[j + 1])/delta_z);
 		# this refers to the vertical velocity
 		if j == 0:
 			c_vector[2*j] = 0;
 		else:
 			delta_z = z_layer[j - 1] - z_layer[j];
-			c_vector[2*j] = -delta_t*impl_p_grad_weight*c_p/delta_z;
+			c_vector[2*j] = -delta_t*(impl_p_grad_weight_t*c_p/delta_z + 0.5*impl_p_grad_weight_s*(entropy_density_new[j - 1]/rho_new[j - 1] - entropy_density_new[j]/rho_new[j])/delta_z);
 		# this refers to the temperature
 		delta_z = z_level[j] - z_level[j + 1];
 		if j == no_of_layers - 1:
@@ -197,8 +198,8 @@ for i in range(no_of_steps):
 			delta_w = w_old[j - 1] - w_old[j + 1];
 			delta_z = z_level[j - 1] - z_level[j + 1];
 			T_int = 0.5*(T_old[j - 1] + T_old[j]);
-			d_vector[2*j] = w_old[j] + delta_t*(-adv*delta_w/delta_z - c_p*(1 - impl_p_grad_weight)*(T_old[j - 1] - T_old[j])/(z_layer[j - 1] - z_layer[j]) +
-			entropy_switch*T_int*(entropy_density_old[j - 1]/rho_old[j - 1] - entropy_density_old[j]/rho_old[j])/(z_layer[j - 1] - z_layer[j]) - grav_switch*g);
+			d_vector[2*j] = w_old[j] + delta_t*(-adv*delta_w/delta_z - c_p*(1 - impl_p_grad_weight_t)*(T_old[j - 1] - T_old[j])/(z_layer[j - 1] - z_layer[j]) +
+			entropy_switch*(1 - impl_p_grad_weight_s)*T_int*(entropy_density_old[j - 1]/rho_old[j - 1] - entropy_density_old[j]/rho_old[j])/(z_layer[j - 1] - z_layer[j]) - grav_switch*g);
 		# explicit component of temperature
 		d_vector[2*j + 1] = T_old[j];
 	b_vector[solution_length - 1] = 1;
@@ -228,16 +229,27 @@ for i in range(no_of_steps):
 	if entropy_switch == 1:
 		for j in range(no_of_layers):
 			delta_z = z_level[j] - z_level[j + 1];
-			b_vector[j] = 1 + delta_t*0.5*(2 - adv)*(w_new[j] - w_new[j + 1])/delta_z;
+			if j == 0:
+				upper_density = rho_new[j];
+				lower_density = 0.5*(rho_new[j] + rho_new[j + 1]);
+				b_vector[j] = rho_new[j] + delta_t*0.5*(2 - adv)*(upper_density*w_new[j] - lower_density*w_new[j + 1])/delta_z;
+			if j == no_of_layers - 1:
+				upper_density = 0.5*(rho_new[j - 1] + rho_new[j]);
+				lower_density = rho_new[j];
+				b_vector[j] = rho_new[j] + delta_t*0.5*(2 - adv)*(upper_density*w_new[j] - lower_density*w_new[j + 1])/delta_z;
+			if j != 0 and j != no_of_layers - 1:
+				upper_density = 0.5*(rho_new[j - 1] + rho_new[j]);
+				lower_density = 0.5*(rho_new[j] + rho_new[j + 1]);
+				b_vector[j] = rho_new[j] + delta_t*0.5*(2 - adv)*(upper_density*w_new[j] - lower_density*w_new[j + 1])/delta_z;
 			d_vector[j] = entropy_density_old[j];
 		for j in range(no_of_layers - 1):
 			delta_z = z_level[j] - z_level[j + 1];
-			a_vector[j] = adv*delta_t*0.5*w_new[j + 1]/delta_z;
-			c_vector[j] = -adv*delta_t*0.5*w_new[j + 1]/delta_z;
+			a_vector[j] = adv*delta_t*0.5*w_new[j + 1]*0.5*(rho_new[j] + rho_new[j + 1])/delta_z;
+			c_vector[j] = -adv*delta_t*0.5*w_new[j + 1]*0.5*(rho_new[j] + rho_new[j + 1])/delta_z;
 		solution_vector = np.zeros([no_of_layers]);
 		solution_vector = thomas_algorithm(a_vector, b_vector, c_vector, d_vector, no_of_layers);
 		for j in range(no_of_layers):
-			entropy_density_new[j] = solution_vector[j];
+			entropy_density_new[j] = rho_new[j]*solution_vector[j];
 	# diagnozing energies
 	for j in range(no_of_layers):	
 		e_int[i] = e_int[i] + rho_old[j]*c_v*T_old[j];
