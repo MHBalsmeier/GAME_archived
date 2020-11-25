@@ -105,8 +105,7 @@ int set_init_data(char FILE_NAME[], State *init_state)
 		{
 			if (j < NO_OF_CONDENSED_CONSTITUENTS)
 			{
-				init_state -> entropy_densities[i] = 0;
-				init_state -> entropy_densities[NO_OF_SCALARS + i] = 0;
+				init_state -> entropy_densities[j*NO_OF_SCALARS + i] = 0;
 			}
 			else
 			{
@@ -120,14 +119,13 @@ int set_init_data(char FILE_NAME[], State *init_state)
 					pot_temp = temperature_gas[i]*pow(P_0/pressure, specific_gas_constants(j - NO_OF_CONDENSED_CONSTITUENTS)/spec_heat_capacities_p_gas(j - NO_OF_CONDENSED_CONSTITUENTS));
 					specific_entropy = spec_heat_capacities_p_gas(j - NO_OF_CONDENSED_CONSTITUENTS)*log(pot_temp);
 					init_state -> entropy_densities[j*NO_OF_SCALARS + i] = init_state -> mass_densities[j*NO_OF_SCALARS + i]*specific_entropy;
-		    	}
+				}
 		    }
 	    }
 	    init_state -> condensed_density_temperatures[i] = solid_water_density[i]*solid_water_temperature[i];
 	    init_state -> condensed_density_temperatures[NO_OF_SCALARS + i] = liquid_water_density[i]*liquid_water_temperature[i];
 	}
-    
-    for (int i = 0; i < NO_OF_VECTORS; ++i)
+	for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         init_state -> velocity_gas[i] = wind[i];
     }

@@ -76,6 +76,8 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
         		+ expl_pgrad_weight*forcings -> pressure_gradient_acc[i]
         		// momentum diffusion
         		+ irreversible_quantities -> friction_acc[i];
+        		if (fabs(state_tendency -> velocity_gas[i]) > 10)
+        			printf("%lf\n", diagnostics -> pressure_gradient_1_component_corr[i]);
     		}
         }
     }
