@@ -22,7 +22,7 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
 	{
 		diagnostics -> scalar_field_placeholder[i] = density_gas(state, i);
 	}
-    scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid, 0);
+    scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
     // Now, the potential vorticity is evaluated.
     calc_pot_vort(state -> velocity_gas, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
     // Now, the generalized Coriolis term is evaluated.
@@ -33,7 +33,7 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
     // Now the explicit forces are added up.
     int layer_index, h_index;
     double metric_term, vertical_velocity, hor_non_trad_cori_term, expl_pgrad_weight;
-	expl_pgrad_weight = get_expl_pgrad_weight();
+	expl_pgrad_weight = 1 - get_impl_thermo_weight();
     #pragma omp parallel for private(layer_index, h_index, metric_term, vertical_velocity, hor_non_trad_cori_term)
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
@@ -50,11 +50,32 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
     			recov_hor_ver_pri(state -> velocity_gas, layer_index, h_index - NO_OF_SCALARS_H, &vertical_velocity, grid);
     			metric_term = -vertical_velocity*state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
     			hor_non_trad_cori_term = -vertical_velocity*dualgrid -> f_vec[2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
-        		state_tendency -> velocity_gas[i] = forcings -> pressure_gradient_acc[i] + forcings -> pot_vort_tend[i] - grid -> gravity_m[i] - forcings -> e_kin_h_grad[i] + hor_non_trad_cori_term + metric_term + irreversible_quantities -> friction_acc[i];
+        		state_tendency -> velocity_gas[i] =
+        		forcings -> pressure_gradient_acc[i]
+        		// generalized Coriolis term
+        		+ forcings -> pot_vort_tend[i]
+        		// gravity
+        		- grid -> gravity_m[i]
+        		// horizontal kinetic energy term
+        		- forcings -> e_kin_h_grad[i]
+        		+ hor_non_trad_cori_term
+        		+ metric_term
+        		// momentum diffusion
+        		+ irreversible_quantities -> friction_acc[i];
     		}
         	if (h_index < NO_OF_SCALARS_H)
         	{
-        		state_tendency -> velocity_gas[i] = forcings -> pot_vort_tend[i] - forcings -> e_kin_h_grad[i] - grid -> gravity_m[i] + expl_pgrad_weight*forcings -> pressure_gradient_acc[i] + irreversible_quantities -> friction_acc[i];
+        		state_tendency -> velocity_gas[i] =
+        		// generalized Coriolis term
+        		forcings -> pot_vort_tend[i]
+        		// horizontal kinetic energy term
+        		- forcings -> e_kin_h_grad[i]
+        		// gravity
+        		- grid -> gravity_m[i]
+        		// explicit part of the pressure gradient acceleration
+        		+ expl_pgrad_weight*forcings -> pressure_gradient_acc[i]
+        		// momentum diffusion
+        		+ irreversible_quantities -> friction_acc[i];
     		}
         }
     }

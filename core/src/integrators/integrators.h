@@ -13,4 +13,5 @@ int three_band_solver_ver_sound_waves(State *, State *, State *, Diagnostics *, 
 int manage_rkhevi(State *, State *, Interpolation_info *, Grid *, Dualgrid *, Scalar_field, State *, Diagnostics *, Forcings *, Irreversible_quantities *, Config_info *, double, double);
 int setup_interpolation(State *, Interpolation_info *);
 int update_interpolation(State *, State *, Interpolation_info *);
-int manage_pressure_gradient(State *, Grid *, Dualgrid *, Diagnostics *, Forcings *, Interpolation_info *, Irreversible_quantities *, Config_info *);
+int manage_pressure_gradient(State *, Grid *, Dualgrid *, Diagnostics *, Forcings *, Interpolation_info *, Irreversible_quantities *, Config_info *, int);
+int update_vertical_pressure_gradient(State *, Grid *, Dualgrid *, Diagnostics *, Forcings *, Interpolation_info *, Irreversible_quantities *, Config_info *);

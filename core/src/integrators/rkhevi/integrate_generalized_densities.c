@@ -81,12 +81,12 @@ int integrate_generalized_densities(State *state, Interpolation_info *interpolat
 	            	diagnostics -> velocity_gen[j] = state -> velocity_gas[j];
             	}
 	        }
-        	scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> velocity_gen, diagnostics -> flux_density, grid, 0);
+        	scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> velocity_gen, diagnostics -> flux_density, grid);
     	}
     	// This is not the case for gaseous constituents.
     	else
     	{
-        	scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid, 0);
+        	scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
     	}
         divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
@@ -111,7 +111,7 @@ int integrate_generalized_densities(State *state, Interpolation_info *interpolat
 				diagnostics -> scalar_field_placeholder[j] = 0;
 			}
 		}
-	    scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid, 0);
+	    scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
 	    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
 		{
@@ -130,7 +130,7 @@ int integrate_generalized_densities(State *state, Interpolation_info *interpolat
 				diagnostics -> scalar_field_placeholder[j] = state -> condensed_density_temperatures[i*NO_OF_SCALARS + j];
 			}
 			// The constituent velocity has already been calculated.
-		    scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> velocity_gen, diagnostics -> flux_density, grid, 0);
+		    scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> velocity_gen, diagnostics -> flux_density, grid);
 		    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{

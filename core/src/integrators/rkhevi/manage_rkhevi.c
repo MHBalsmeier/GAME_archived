@@ -66,7 +66,6 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolation_info *interp
 		// ----------------------------------------------------------------------------
 		three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, delta_t_rk, grid);
     }
-    
     return 0;
 }
 

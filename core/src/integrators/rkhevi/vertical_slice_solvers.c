@@ -127,7 +127,7 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 	get_damping_layer_properties(&damping_start_height_over_toa, &damping_coeff_max);
 	damping_start_height = damping_start_height_over_toa*grid -> z_vector[0];
 	int upper_index, lower_index, j, gaseous_constituent_id;
-	double impl_pgrad_weight = 1 - get_expl_pgrad_weight();
+	double impl_pgrad_weight = get_impl_thermo_weight();
 	double impl_w_vadv_weight = get_impl_w_vadv_weight();
 	double t_vadv_parameter = get_t_vadv_parameter();
 	#pragma omp parallel for private(upper_index, lower_index, delta_z, upper_volume, lower_volume, total_volume, damping_coeff, z_above_damping, j, gaseous_constituent_id)
@@ -276,7 +276,9 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 			delta_z = grid -> z_vector[j*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 2)*NO_OF_VECTORS_PER_LAYER + i];
 			d_vector[2*j + 1] =
 			state_old -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]
+			// explicit tendency
 			+ delta_t*state_tendency -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]
+			// vertical advection
 			- delta_t*(1 - impl_w_vadv_weight)*state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]
 			*(state_new -> velocity_gas[j*NO_OF_VECTORS_PER_LAYER + i] - state_new -> velocity_gas[(j + 2)*NO_OF_VECTORS_PER_LAYER + i])/delta_z;
 		}

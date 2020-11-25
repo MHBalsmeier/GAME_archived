@@ -19,8 +19,13 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
     calc_divv_term_viscosity_eff(state, config_info, diffusion -> divv_term_viscosity_eff);
     calc_curl_term_viscosity_eff(state, config_info, diffusion -> curl_term_viscosity_eff);
     // Multiplying the values of the differential operators by the effective viscosities.
-	scalar_times_vector(diffusion -> divv_term_viscosity_eff, diffusion -> friction_acc, diffusion -> friction_acc, grid, 0);
-	scalar_times_vector(diffusion -> curl_term_viscosity_eff, diagnostics -> curl_of_vorticity_m, diffusion -> friction_acc, grid, 1);
+	scalar_times_vector(diffusion -> divv_term_viscosity_eff, diffusion -> friction_acc, diffusion -> friction_acc, grid);
+	scalar_times_vector(diffusion -> curl_term_viscosity_eff, diagnostics -> curl_of_vorticity_m, diagnostics -> curl_of_vorticity_m, grid);
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_VECTORS; ++i)
+	{
+		diffusion -> friction_acc[i] += diagnostics -> curl_of_vorticity_m[i];
+	}
 	// dissipation remains to be implemented
 	return 0;
 }

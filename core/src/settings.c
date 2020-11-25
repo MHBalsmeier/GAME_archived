@@ -37,10 +37,11 @@ int get_gas_contituents_ids(int gas_constituent_id)
 	return result;
 }
 
-double get_expl_pgrad_weight()
+double get_impl_thermo_weight()
 {
-	double expl_pgrad_weight = specific_gas_constants(0)/spec_heat_capacities_p_gas(0);
-	return expl_pgrad_weight;
+	double impl_thermo_weight;
+	impl_thermo_weight = spec_heat_capacities_v_gas(0)/spec_heat_capacities_p_gas(0);
+	return impl_thermo_weight;
 }
 
 double get_impl_w_vadv_weight()
