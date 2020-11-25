@@ -84,13 +84,14 @@ int calc_divv_term_viscosity_eff(State *state, Config_info *config_info, Scalar_
 	double mean_particle_mass = mean_particle_masses_gas(0);
 	double eff_particle_radius = 130e-12;
 	double divv_term_viscosity_eff_value;
+	double upturning_for_scale = 1e6;
 	#pragma omp parallel for private(divv_term_viscosity_eff_value)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &divv_term_viscosity_eff_value);
 		// homogeneous for now
 		calc_diffusion_coeff(273.15, mean_particle_mass, 1, eff_particle_radius, &divv_term_viscosity_eff_value);
-		divv_term_viscosity_eff[i] = 7.0/3*1e5*divv_term_viscosity_eff_value;
+		divv_term_viscosity_eff[i] = 7.0/3*upturning_for_scale*divv_term_viscosity_eff_value;
 	}
 	return 0;
 }
@@ -100,13 +101,14 @@ int calc_curl_term_viscosity_eff(State *state, Config_info *config_info, Scalar_
 	double mean_particle_mass = mean_particle_masses_gas(0);
 	double eff_particle_radius = 130e-12;
 	double curl_term_viscosity_eff_value;
+	double upturning_for_scale = 1e6;
 	#pragma omp parallel for private(curl_term_viscosity_eff_value)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &curl_term_viscosity_eff_value);
 		// homogeneous for now
 		calc_diffusion_coeff(273.15, mean_particle_mass, 1, eff_particle_radius, &curl_term_viscosity_eff_value);
-		curl_term_viscosity_eff[i] = 1e5*curl_term_viscosity_eff_value;
+		curl_term_viscosity_eff[i] = upturning_for_scale*curl_term_viscosity_eff_value;
 	}
 	return 0;
 }
