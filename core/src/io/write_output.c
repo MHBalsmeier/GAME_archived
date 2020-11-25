@@ -99,13 +99,12 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			surface_p[i] = pressure_value/surface_p_factor;
 			
 			// Now the aim is to calculate the 2 m temperature.
-		    delta_z_temp = 2 - grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
+		    delta_z_temp = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i] + 2 - grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
 		    temp_upper = state_write_out -> temperature_gas[(NO_OF_LAYERS - 2)*NO_OF_SCALARS_H + i];
 		    temp_lower = temp_lowest_layer;
 		    temperature_gradient = (temp_upper - temp_lower)/(grid -> z_scalar[i + (NO_OF_LAYERS - 2)*NO_OF_SCALARS_H] - grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]);
-		    
-		    // Finally the temperature in 2 m height AGL can be obtained via linear extrapolation.
 		    t2[i] = temp_lowest_layer + delta_z_temp*temperature_gradient;
+		    
 		    z_height = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i];
 		    cape[i] = 0;
 		    density_v = state_write_out -> mass_densities[3*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
