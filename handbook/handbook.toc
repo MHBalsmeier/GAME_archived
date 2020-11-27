@@ -14,8 +14,14 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {chapter}{\numberline {3}Running the model}{5}{chapter.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Grid generation procedure}{6}{chapter.4}%
+\contentsline {chapter}{\numberline {4}Grid generation}{6}{chapter.4}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Generating a new orography file}{7}{chapter.5}%
+\contentsline {section}{\numberline {4.1}Horizontal grid properties}{6}{section.4.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {6}Generating a new test state file}{8}{chapter.6}%
+\contentsline {section}{\numberline {4.2}Vertical grid properties}{6}{section.4.2}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {4.3}How to generate a grid}{6}{section.4.3}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {5}Generating a new orography file}{8}{chapter.5}%
+\defcounter {refsection}{0}\relax 
+\contentsline {chapter}{\numberline {6}Generating a new test state file}{9}{chapter.6}%
