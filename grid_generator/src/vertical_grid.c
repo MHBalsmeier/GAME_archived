@@ -9,27 +9,107 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdio.h>
 #include "geos95.h"
 
-int determine_z_scalar(double z_scalar[], double z_vertical_vector_pre[], double z_surface[], double z_oro_off, double TOA)
+int determine_z_scalar(double z_scalar[], double z_vertical_vector_pre[], double z_surface[], double z_oro_off, double TOA, double stretching_parameter)
 {
 	int layer_index, h_index;
+	// the heights are defined according to z_k = A_k + B_k*z_surface with A_0 = TOA, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
+	double A, B, sigma_z, z_rel;
+	double upper_thickness, lower_thickness, thickness_ratio;
+	upper_thickness = 1 - pow(1 - 1.0/NO_OF_LAYERS, stretching_parameter);
+	lower_thickness = pow(1.0/NO_OF_LAYERS, stretching_parameter);
+	thickness_ratio = upper_thickness/lower_thickness;
+	printf("ratio of thicknesses of uppermost and lowermost layer: %lf\n", thickness_ratio);
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         layer_index = i/NO_OF_SCALARS_H;
 		h_index = i - layer_index*NO_OF_SCALARS_H;
 		for (int j = 0; j < NO_OF_LAYERS + 1; ++j)
 		{
+			z_rel = 1 - (j + 0.0)/NO_OF_LAYERS; // z/TOA
+			sigma_z = pow(z_rel, stretching_parameter);
+			A = sigma_z*TOA; // the height without orography
+			// B corrects for orography
 			if (j >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
-				z_vertical_vector_pre[j] = z_surface[h_index] + (z_oro_off - z_surface[h_index])/NO_OF_ORO_LAYERS*(NO_OF_LAYERS - j);
+			{
+				B = (j - (NO_OF_LAYERS - NO_OF_ORO_LAYERS) + 0.0)/NO_OF_ORO_LAYERS;
+			}
 			else
-				z_vertical_vector_pre[j] = TOA - (TOA - z_oro_off)/(NO_OF_LAYERS - NO_OF_ORO_LAYERS)*j;
+			{
+				B = 0;
+			}
+			z_vertical_vector_pre[j] = A + B*z_surface[h_index];
 		}
+		// placing the scalar points in the middle between the pre values of the adjacent levels
 		z_scalar[i] = 0.5*(z_vertical_vector_pre[layer_index] + z_vertical_vector_pre[layer_index + 1]);
-        if (z_scalar[i] <= 0)
+    }
+    return 0;
+}
+
+int set_z_vector_and_normal_distance(double z_vector[], double z_surface[], double z_scalar[], double normal_distance[], double latitude_scalar[], double longitude_scalar[], int from_index[], int to_index[], double TOA)
+{
+	int layer_index, h_index, upper_index, lower_index;
+    for (int i = 0; i < NO_OF_VECTORS; ++i)
+    {
+        layer_index = i/NO_OF_VECTORS_PER_LAYER;
+        h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
+        // horizontal grid points
+        if (h_index >= NO_OF_SCALARS_H)
+        {
+        	// placing the vector vertically in the middle between the two adjacent scalar points
+            z_vector[i] = 0.5*(z_scalar[layer_index*NO_OF_SCALARS_H + to_index[h_index - NO_OF_SCALARS_H]] + z_scalar[layer_index*NO_OF_SCALARS_H + from_index[h_index - NO_OF_SCALARS_H]]);
+            // calculating the horizontal distance
+            normal_distance[i] = calculate_distance_h(latitude_scalar[from_index[h_index - NO_OF_SCALARS_H]], longitude_scalar[from_index[h_index - NO_OF_SCALARS_H]], latitude_scalar[to_index[h_index - NO_OF_SCALARS_H]], longitude_scalar[to_index[h_index - NO_OF_SCALARS_H]], RADIUS + z_vector[i]);
+        }
+        else
+        {
+            upper_index = h_index + (layer_index - 1)*NO_OF_SCALARS_H;
+            lower_index = h_index + layer_index*NO_OF_SCALARS_H;
+            if (layer_index == 0)
+			{
+            	z_vector[i] = TOA;
+                normal_distance[i] = TOA - z_scalar[lower_index];
+			}
+            else if (layer_index == NO_OF_LAYERS)
+			{
+				z_vector[i] = z_surface[h_index];
+                normal_distance[i] = z_scalar[upper_index] - z_surface[h_index];
+			}
+            else
+			{
+				// placing the vertical vector in the middle between the two adjacent scalar points
+                normal_distance[i] = z_scalar[upper_index] - z_scalar[lower_index];
+				z_vector[i] = z_scalar[lower_index] + 0.5*normal_distance[i];
+			}
+			// error checking: the vertical vectors in the lowest level lay on the surface, not below it
+            if (z_vector[i] < z_surface[h_index])
+			{
+                printf("z_vector lays below surface.\n");
+				exit(1);
+			}
+        }
+    }
+    for (int i = 0; i < NO_OF_VECTORS; ++i)
+    {
+        if (normal_distance[i] <= 0)
 		{
-            printf("z_scalar contains a non-positive value.\n");
+            printf("normal_distance contains a non-positive value.\n");
 			exit(1);
 		}
     }
+	double check_sum;
+	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+	{
+		check_sum = 0;
+		for (int j = 0; j < NO_OF_LEVELS; ++j)
+		{
+			check_sum += normal_distance[i + j*NO_OF_VECTORS_PER_LAYER];
+		}
+		if (fabs(check_sum/(TOA - z_surface[i]) - 1) > 1e-15)
+		{
+			printf("Problem 0 with vertical grid structure.\n");
+			exit(1);
+		}
+	}
     return 0;
 }
 
@@ -183,8 +263,12 @@ int modify_area_dual(double area_dual[], double z_vector[], int from_index_dual[
     {
     	layer_index = i/(2*NO_OF_VECTORS_H);
     	h_index = i - layer_index*2*NO_OF_VECTORS_H;
+    	// these are the vertical areas
     	if (h_index < NO_OF_VECTORS_H)
+    	{
     		area_dual[i] = area_dual_pre[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + h_index];
+		}
+		// these are the horizontal areas (calculation of rhombus areas)
     	else
     	{
     		primal_vector_index = NO_OF_SCALARS_H + h_index - NO_OF_VECTORS_H + layer_index*NO_OF_VECTORS_PER_LAYER;
@@ -222,34 +306,20 @@ int modify_area_dual(double area_dual[], double z_vector[], int from_index_dual[
     	printf("Problem with rhombus areas.\n");
     	exit(1);
     }
-    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-    {
-    	area_ratio = area_dual[i]/area_dual[i + 2*NO_OF_VECTORS_H];
-    	if (fabs(area_ratio - 0.5) > 0.0001)
-    	{
-    		printf("Unrealistic value in area_ratio of area_dual, position 0.\n");
-    		exit(1);
-    	}
-    }
-    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-    {
-    	area_ratio = area_dual[i + (NO_OF_LAYERS - 1)*2*NO_OF_VECTORS_H]/area_dual[i + (NO_OF_LAYERS - 1)*2*NO_OF_VECTORS_H + 2*NO_OF_VECTORS_H];
-    	if (fabs(area_ratio - 2) > 0.001)
-    	{
-    		printf("Unrealistic value in area_ratio of area_dual, position 1.\n");
-    		exit(1);
-    	}
-    }
     double area_sum, mean_z;
     for (int i = 0; i < NO_OF_LAYERS; ++i)
     {
     	mean_z = 0;
     	for (int j = 0; j < NO_OF_VECTORS_H; ++j)
+    	{
     		mean_z += z_vector[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j];
+		}
     	mean_z = mean_z/NO_OF_VECTORS_H;
     	area_sum = 0;
     	for (int j = 0; j < NO_OF_VECTORS_H; ++j)
+    	{
     		area_sum += 1.0/3*area_dual[NO_OF_VECTORS_H + i*2*NO_OF_VECTORS_H + j];
+		}
     	check_area = 4*M_PI*pow(RADIUS + mean_z, 2);
     	area_ratio = check_area/area_sum;
     	if (fabs(area_ratio - 1) > 0.00001)
@@ -262,80 +332,12 @@ int modify_area_dual(double area_dual[], double z_vector[], int from_index_dual[
 }
 
 int set_gravity_potential(double z_scalar[], double gravity_potential[], double GRAVITY_MEAN_SFC_ABS)
-{	
+{
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	gravity_potential[i] = -GRAVITY_MEAN_SFC_ABS*(RADIUS*RADIUS/(RADIUS + z_scalar[i]) - RADIUS);
     }
 	return 0;
-}
-
-int set_z_vector_and_normal_distance(double z_vector[], double z_surface[], double z_scalar[], double normal_distance[], double latitude_scalar[], double longitude_scalar[], int from_index[], int to_index[], double TOA)
-{
-	int layer_index, h_index, upper_index, lower_index;
-    for (int i = 0; i < NO_OF_VECTORS; ++i)
-    {
-        layer_index = i/NO_OF_VECTORS_PER_LAYER;
-        h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-        if (h_index >= NO_OF_SCALARS_H)
-        {
-            z_vector[i] = 0.5*(z_scalar[layer_index*NO_OF_SCALARS_H + to_index[h_index - NO_OF_SCALARS_H]] + z_scalar[layer_index*NO_OF_SCALARS_H + from_index[h_index - NO_OF_SCALARS_H]]);
-            if (z_vector[i] <= 0)
-			{
-                printf("z_vector contains a non-positive value at a horizontal grid point.\n");
-				exit(1);
-			}
-            normal_distance[i] = calculate_distance_h(latitude_scalar[from_index[h_index - NO_OF_SCALARS_H]], longitude_scalar[from_index[h_index - NO_OF_SCALARS_H]], latitude_scalar[to_index[h_index - NO_OF_SCALARS_H]], longitude_scalar[to_index[h_index - NO_OF_SCALARS_H]], RADIUS + z_vector[i]);
-        }
-        else
-        {
-            upper_index = h_index + (layer_index - 1)*NO_OF_SCALARS_H;
-            lower_index = h_index + layer_index*NO_OF_SCALARS_H;
-            if (layer_index == 0)
-			{
-            	z_vector[i] = TOA;
-                normal_distance[i] = TOA - z_scalar[lower_index];
-			}
-            else if (layer_index == NO_OF_LAYERS)
-			{
-				z_vector[i] = z_surface[h_index];
-                normal_distance[i] = z_scalar[upper_index] - z_surface[h_index];
-			}
-            else
-			{
-                normal_distance[i] = z_scalar[upper_index] - z_scalar[lower_index];
-				z_vector[i] = z_scalar[lower_index] + 0.5*normal_distance[i];
-			}
-            if (z_vector[i] < z_surface[h_index])
-			{
-                printf("z_vector lays below surface.\n");
-				exit(1);
-			}
-        }
-    }
-    for (int i = 0; i < NO_OF_VECTORS; ++i)
-    {
-        if (normal_distance[i] <= 0)
-		{
-            printf("normal_distance contains a non-positive value.\n");
-			exit(1);
-		}
-    }
-	double check_sum;
-	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-	{
-		check_sum = 0;
-		for (int j = 0; j < NO_OF_LEVELS; ++j)
-		{
-			check_sum += normal_distance[i + j*NO_OF_VECTORS_PER_LAYER];
-		}
-		if (fabs(check_sum/(TOA - z_surface[i]) - 1) > 1e-15)
-		{
-			printf("Problem 0 with vertical grid structure.\n");
-			exit(1);
-		}
-	}
-    return 0;
 }
 
 int map_area_to_sphere(double area[], double z_vector[], double pent_hex_face_unity_sphere[])

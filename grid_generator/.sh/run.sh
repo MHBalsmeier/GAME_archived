@@ -3,7 +3,7 @@
 # This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 # Github repository: https://github.com/MHBalsmeier/game
 
-
+# verbosity
 echo "***** GRID FILE CREATION *****"
 echo "Copyright (C) 2020 The GAME development team."
 echo ""
@@ -24,16 +24,19 @@ echo "Aborting."
 fi
 echo "Horizontal coordinates of the generating points (the scalar points in terms of the model) will be read from file $scalar_h_coords_file."
 fi
+echo "stretching parameter: "$stretching_parameter
+# end verbosity
+
 echo ""
 echo "********** Calling the GAME grid generator **********"
 echo ""
 if [ $valgrind_check -eq 0 ]
 then
-mpirun -np $number_of_cpus ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file
+mpirun -np $number_of_cpus ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter
 else
 if [ $valgrind_check -eq 1 ]
 then
-valgrind ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file
+valgrind ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter
 fi
 fi
 if [ $? -ne 0 ]

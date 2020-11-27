@@ -60,6 +60,8 @@ int main(int argc, char *argv[])
     int len = strlen(argv[5]);
     char *SCALAR_H_FILE = malloc((len + 1)*sizeof(char));
     strcpy(SCALAR_H_FILE, argv[5]);
+    double stretching_parameter;
+   	stretching_parameter = strtof(argv[6], NULL);
     
     // Checking wether the RES_ID of the SCALAR_H_FILE corresponds to the RES_ID in enum.h.
     char res_id_as_string[2];
@@ -82,17 +84,25 @@ int main(int argc, char *argv[])
     	exit(1);
     }
     
+    // cechking wether the stretching parameter is in a valid range
+    if (stretching_parameter < 1)
+    {
+    	printf("stretching_parameter must be >= 1.\n");
+    	printf("Aborting.\n");
+    	exit(1);
+    }
+    
 	if (NO_OF_ORO_LAYERS >= NO_OF_LAYERS)
 	{
 		printf("It is NO_OF_ORO_LAYERS >= NO_OF_LAYERS.\n");
 		exit(1);
 	}
-    char OUTPUT_FILE_PRE[200];
-    char STATISTICS_FILE_PRE[200];
-    if (OPTIMIZE_BOOL == 1)
-    {
-    	sprintf(OUTPUT_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
-    	sprintf(STATISTICS_FILE_PRE, "statistics/B%dL%dT%d_O%d_OL%d_SCVT.txt", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
+		char OUTPUT_FILE_PRE[200];
+		char STATISTICS_FILE_PRE[200];
+		if (OPTIMIZE_BOOL == 1)
+		{
+			sprintf(OUTPUT_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
+			sprintf(STATISTICS_FILE_PRE, "statistics/B%dL%dT%d_O%d_OL%d_SCVT.txt", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
 	}
 	else
 	{
@@ -224,7 +234,7 @@ int main(int argc, char *argv[])
 	// building the vertical grid
    	double z_oro_off = TOA*(NO_OF_ORO_LAYERS + 0.0)/NO_OF_LAYERS;
 	double z_vertical_vector_pre[NO_OF_LAYERS + 1];
-	determine_z_scalar(z_scalar, z_vertical_vector_pre, z_surface, z_oro_off, TOA);
+	determine_z_scalar(z_scalar, z_vertical_vector_pre, z_surface, z_oro_off, TOA, stretching_parameter);
 	set_z_vector_and_normal_distance(z_vector, z_surface, z_scalar, normal_distance, latitude_scalar, longitude_scalar, from_index, to_index, TOA);
 	printf("Mapping horizontal areas from unit sphere to model levels ... ");
 	map_area_to_sphere(area, z_vector, pent_hex_face_unity_sphere);
@@ -268,7 +278,7 @@ int main(int argc, char *argv[])
     printf(GREEN "finished.\n" RESET);
     // A statistics file is created to compare the fundamental statistical properties of the grid with the literature.
 	write_statistics_file(pent_hex_face_unity_sphere, normal_distance, normal_distance_dual, STATISTICS_FILE);
-    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_modified_weights_id, recov_ver_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_10, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_8_dimid, slope_id, scalar_2_dimid, volume_ratios_id, recov_primal2dual_weights_id, vector_h_dual_dimid_2, density_to_rhombus_indices_id, density_to_rhombus_weights_id, vorticity_indices_pre_id, ncid_g_prop;
+    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_modified_weights_id, recov_ver_weight_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_10, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, e_kin_weights_id, scalar_8_dimid, slope_id, scalar_2_dimid, volume_ratios_id, recov_primal2dual_weights_id, vector_h_dual_dimid_2, density_to_rhombus_indices_id, density_to_rhombus_weights_id, vorticity_indices_pre_id, ncid_g_prop, single_double_dimid, stretching_parameter_id;
     printf("Starting to write to output file ... ");
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
@@ -303,6 +313,10 @@ int main(int argc, char *argv[])
     if ((retval = nc_def_dim(ncid_g_prop, "vector_index_dual_area", NO_OF_DUAL_H_VECTORS + NO_OF_H_VECTORS, &vector_dual_area_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_index_h_2_dual", 2*NO_OF_DUAL_H_VECTORS, &vector_h_dual_dimid_2)))
+        ERR(retval);
+    if ((retval = nc_def_dim(ncid_g_prop, "single_double_dimid_index", 1, &single_double_dimid)))
+        ERR(retval);
+    if ((retval = nc_def_var(ncid_g_prop, "stretching_parameter", NC_DOUBLE, 1, &single_double_dimid, &stretching_parameter_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "latitude_scalar", NC_DOUBLE, 1, &scalar_h_dimid, &latitude_scalar_id)))
         ERR(retval);
@@ -405,6 +419,8 @@ int main(int argc, char *argv[])
     if ((retval = nc_def_var(ncid_g_prop, "density_to_rhombus_indices", NC_INT, 1, &vector_h_dimid_4, &density_to_rhombus_indices_id)))
         ERR(retval);
     if ((retval = nc_enddef(ncid_g_prop)))
+        ERR(retval);
+    if ((retval = nc_put_var_double(ncid_g_prop, stretching_parameter_id, &stretching_parameter)))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, latitude_scalar_id, &latitude_scalar[0])))
         ERR(retval);
