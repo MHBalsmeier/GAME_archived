@@ -15,7 +15,7 @@ valgrind_check=0 # set this to 1, if you want to check the code with Valgrind
 res_id=5 # resolution ID (number of bisections of basic icosahedral triangles)
 number_of_layers=26
 toa=30000 # top of atmosphere
-orography_layers=17 # number of layers following the orography
+orography_layers=23 # number of layers following the orography
 
 # "physics" configuration
 cfl_margin=0.25 # The time step will be calculated as follows (delta t) = (delta t from CFL)*(1 - cfl_margin). 0.25 can be considered a safe standard value.

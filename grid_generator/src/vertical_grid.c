@@ -13,12 +13,7 @@ int determine_z_scalar(double z_scalar[], double z_vertical_vector_pre[], double
 {
 	int layer_index, h_index;
 	// the heights are defined according to z_k = A_k + B_k*z_surface with A_0 = TOA, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
-	double A, B, sigma_z, z_rel;
-	double upper_thickness, lower_thickness, thickness_ratio;
-	upper_thickness = 1 - pow(1 - 1.0/NO_OF_LAYERS, stretching_parameter);
-	lower_thickness = pow(1.0/NO_OF_LAYERS, stretching_parameter);
-	thickness_ratio = upper_thickness/lower_thickness;
-	printf("ratio of thicknesses of uppermost and lowermost layer: %lf\n", thickness_ratio);
+	double A, B, sigma_z, z_rel, max_oro;
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         layer_index = i/NO_OF_SCALARS_H;
@@ -39,6 +34,16 @@ int determine_z_scalar(double z_scalar[], double z_vertical_vector_pre[], double
 			}
 			z_vertical_vector_pre[j] = A + B*z_surface[h_index];
 		}
+		if (i == 0)
+		{
+			max_oro = z_surface[find_max_index(z_surface, NO_OF_SCALARS_H)];
+			if (max_oro > z_vertical_vector_pre[NO_OF_LAYERS - NO_OF_ORO_LAYERS])
+			{
+				printf("Maximum of orography larger than height of lowest flat level.\n");
+				printf("Aborting.\n");
+				exit(1);
+			}
+		}
 		// placing the scalar points in the middle between the pre values of the adjacent levels
 		z_scalar[i] = 0.5*(z_vertical_vector_pre[layer_index] + z_vertical_vector_pre[layer_index + 1]);
     }
@@ -48,6 +53,7 @@ int determine_z_scalar(double z_scalar[], double z_vertical_vector_pre[], double
 int set_z_vector_and_normal_distance(double z_vector[], double z_surface[], double z_scalar[], double normal_distance[], double latitude_scalar[], double longitude_scalar[], int from_index[], int to_index[], double TOA)
 {
 	int layer_index, h_index, upper_index, lower_index;
+	double *lowest_thicknesses = malloc(NO_OF_SCALARS_H*sizeof(double));
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
@@ -73,6 +79,7 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_surface[], doub
 			{
 				z_vector[i] = z_surface[h_index];
                 normal_distance[i] = z_scalar[upper_index] - z_surface[h_index];
+                lowest_thicknesses[h_index] = z_vector[i - NO_OF_VECTORS_PER_LAYER] - z_vector[i];
 			}
             else
 			{
@@ -110,6 +117,12 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_surface[], doub
 			exit(1);
 		}
 	}
+	double max_thick, min_thick, thick_rel;
+	min_thick = lowest_thicknesses[find_min_index(lowest_thicknesses, NO_OF_SCALARS_H)];
+	max_thick = z_vector[0] - z_vector[NO_OF_VECTORS_PER_LAYER];
+	thick_rel = max_thick/min_thick;
+	printf("ratio of maximum to minimum layer thickness (including orography): %lf\n", thick_rel);
+	free(lowest_thicknesses);
     return 0;
 }
 

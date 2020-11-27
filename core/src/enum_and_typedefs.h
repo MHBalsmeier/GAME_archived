@@ -20,7 +20,7 @@ RES_ID = 5,
 // This has to conform with the grid file and the initialization state file.
 NO_OF_LAYERS = 26,
 // The number of layers affected by orography. This also has to conform with the grid file and the initialization state file.
-NO_OF_ORO_LAYERS = 17,
+NO_OF_ORO_LAYERS = 23,
 NO_OF_SOLID_CONSTITUENTS = 1,
 NO_OF_LIQUID_CONSTITUENTS = 1,
 NO_OF_GASEOUS_CONSTITUENTS = 2,

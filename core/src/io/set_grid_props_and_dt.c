@@ -10,9 +10,6 @@ Github repository: https://github.com/MHBalsmeier/game
 #include "../spatial_operators/spatial_operators.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
-
-void grid_check_failed();
-
 int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
 {
     double *normal_distance = malloc(NO_OF_VECTORS*sizeof(double));
@@ -199,208 +196,91 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
                 {
                 	grid -> adjacent_vector_indices_h[6*i + j] = 0;
             	}
-            	else
-            	{
-                	grid_check_failed();
-            	}
             }
             grid -> adjacent_signs_h[6*i + j] = adjacent_signs_h[6*i + j];
-            if (grid -> adjacent_signs_h[6*i + j] != -1 && grid -> adjacent_signs_h[6*i + j] != 1)
-            {
-            	if (i >= NO_OF_PENTAGONS || j != 5 || grid -> adjacent_signs_h[6*i + j] != 0)
-            	{
-               		grid_check_failed(); 	
-            	}
-        	}
         }
         grid -> latitude_scalar[i] = latitude_scalar[i];
-        if (fabs(grid -> latitude_scalar[i]) > M_PI/2)
-        {
-        	grid_check_failed();
-        }
         grid -> longitude_scalar[i] = longitude_scalar[i];
-        if (grid -> longitude_scalar[i] < -2*M_PI || grid -> longitude_scalar[i] > 2*M_PI)
-        {
-        	grid_check_failed();
-        }
     }
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         for (int j = 0; j < 4; ++j)
         {
             dualgrid -> vorticity_indices[4*i + j] = vorticity_indices[4*i +j];
-            if (dualgrid -> vorticity_indices[4*i + j] >= NO_OF_VECTORS_H)
-            {
-                grid_check_failed();
-            }
             dualgrid -> vorticity_signs[4*i + j] = vorticity_signs[4*i + j];
-            if (dualgrid -> vorticity_signs[4*i + j] != -1 && dualgrid -> vorticity_signs[4*i + j] != 1)
-            {
-                grid_check_failed();
-            }
             dualgrid -> h_curl_indices[4*i + j] = h_curl_indices[4*i + j];
-            if (dualgrid -> h_curl_indices[4*i + j] >= 2*NO_OF_VECTORS_H + NO_OF_SCALARS_H || dualgrid -> h_curl_indices[4*i + j] < 0)
-            {
-                grid_check_failed();
-            }
             dualgrid -> h_curl_signs[4*i + j] = h_curl_signs[4*i + j];
-            if (dualgrid -> h_curl_signs[4*i + j] != -1 && dualgrid -> h_curl_signs[4*i + j] != 1)
-                grid_check_failed();
             grid -> density_to_rhombus_indices[4*i + j] = density_to_rhombus_indices[4*i + j];
-            if (grid -> density_to_rhombus_indices[4*i + j] < 0 && grid -> density_to_rhombus_indices[4*i + j] >= NO_OF_VECTORS_H)
-                grid_check_failed();
             grid -> density_to_rhombus_weights[4*i + j] = density_to_rhombus_weights[4*i + j];
-            if (grid -> density_to_rhombus_weights[4*i + j] < 0 && grid -> density_to_rhombus_weights[4*i + j] >= 1)
-                grid_check_failed();
         }
         grid -> to_index[i] = to_index[i];
-        if (grid -> to_index[i] >= NO_OF_SCALARS_H || grid -> to_index[i] < 0)
-            grid_check_failed();
         grid -> from_index[i] = from_index[i];
-        if (grid -> from_index[i] >= NO_OF_SCALARS_H || grid -> from_index[i] < 0)
-            grid_check_failed();
         grid -> direction[i] = direction[i];
-        if (fabs(grid -> direction[i]) >= 1.0001*M_PI)
-            grid_check_failed();
         dualgrid -> from_index[i] = from_index[i];
-        if (dualgrid -> from_index[i] < 0 || dualgrid -> from_index[i] >= NO_OF_DUAL_SCALARS_H)
-        	grid_check_failed();
         dualgrid -> to_index[i] = to_index[i];
-        if (dualgrid -> to_index[i] < 0 || dualgrid -> to_index[i] >= NO_OF_DUAL_SCALARS_H)
-        	grid_check_failed();
         for (int j = 0; j < 10; ++j)
         {
             grid -> trsk_modified_velocity_indices[10*i + j] = trsk_modified_velocity_indices[10*i + j];
-            if (grid -> trsk_modified_velocity_indices[10*i + j] >= NO_OF_VECTORS_H || grid -> trsk_modified_velocity_indices[10*i + j] < 0)
-                grid_check_failed();
             grid -> trsk_modified_curl_indices[10*i + j] = trsk_modified_curl_indices[10*i + j];
-            if (grid -> trsk_modified_curl_indices[10*i + j] >= NO_OF_VECTORS_H|| grid -> trsk_modified_curl_indices[10*i + j] < 0)
-                grid_check_failed();
             grid -> trsk_modified_weights[10*i + j] = trsk_modified_weights[10*i + j];
-            if (fabs(grid -> trsk_modified_weights[10*i + j]) >= 0.30)
-                grid_check_failed();
 		}
         for (int j = 0; j < 3; ++j)
         {
 		    dualgrid -> f_vec[3*i + j] = f_vec[3*i + j];
-		    if (fabs(dualgrid -> f_vec[3*i + j]) > 2*OMEGA)
-		        grid_check_failed();
         }
     }
-    double check_sum = 0;
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         grid -> volume[i] = volume[i];
-        if (grid -> volume[i] <= 0)
-        {
-            grid_check_failed();   
-      	}
         grid -> z_scalar[i] = z_scalar[i];
-        if (grid -> z_scalar[i] <= 0)
-        {
-            grid_check_failed();   
-      	}
        	grid -> gravity_potential[i] = gravity_potential[i];
-       	if (grid -> gravity_potential[i] <= 0)
-        {
-            grid_check_failed();   
-      	}
-        if (grid -> z_scalar[i] <= 0)
-        {
-            grid_check_failed();   
-  		}
-       	check_sum = 0;
        	for (int j = 0; j < 8; ++j)
 		{
            grid -> e_kin_weights[8*i + j] = e_kin_weights[8*i + j];
-           if (grid -> e_kin_weights[8*i + j] > 0.3 || grid -> e_kin_weights[8*i + j] < 0)
-           {
-           	   grid_check_failed();
-       	   }
        	}
-   	   	check_sum = 0;
    	   	for (int j = 0; j < 2; ++j)
    	   	{
    	   		grid -> volume_ratios[2*i + j] = volume_ratios[2*i + j];
-   			check_sum += grid -> volume_ratios[2*i + j];
    	   	}
-   		if (fabs(check_sum - 1) > 1e-10)
-   		{
-   			grid_check_failed();
-   		}
     }
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         grid -> normal_distance[i] = normal_distance[i];
-        if (grid -> normal_distance[i] <= 0)
-        {
-        	grid_check_failed();
-        }
         grid -> area[i] = area[i];
-        if (grid -> area[i] <= 0)
-        {
-            grid_check_failed();
-        }
         grid -> z_vector[i] = z_vector[i];
-        if (grid -> z_vector[i] < -600)
-        {
-            grid_check_failed();
-        }
         grid -> slope[i] = slope[i];
-        if (fabs(grid -> slope[i]) > 1)
-        {
-        	grid_check_failed();
-        }
     }
     for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
     {
         dualgrid -> normal_distance[i] = normal_distance_dual[i];
-        if (dualgrid -> normal_distance[i] <= 0)
-        	grid_check_failed();
     }
     for (int i = 0; i < NO_OF_LEVELS*NO_OF_SCALARS_H; ++i)
     {
         for (int j = 0; j < 6; ++j)
         {
             grid -> recov_ver_weight[6*i + j] = recov_ver_weight[6*i + j];
-            if (fabs(grid -> recov_ver_weight[6*i + j]) >= 1.0001)
-                grid_check_failed();
         }
     }
     for (int i = 0; i < NO_OF_DUAL_H_VECTORS + NO_OF_H_VECTORS; ++i)
     {
         dualgrid -> area[i] = area_dual[i];
-        if (dualgrid -> area[i] <= 0)
-            grid_check_failed();
     }
     for (int i = 0; i < NO_OF_DUAL_H_VECTORS; ++i)
     {
-    	check_sum = 0;
     	for (int j = 0; j < 2; ++j)
     	{
     		grid -> recov_primal2dual_weights[2*i + j] = recov_primal2dual_weights[2*i + j];
-    		check_sum += grid -> recov_primal2dual_weights[2*i + j];
-    		if (grid -> recov_primal2dual_weights[2*i + j] < 0 || grid -> recov_primal2dual_weights[2*i + j] >= 1)
-    		{
-    			grid_check_failed();
-    		}
     	}
-		if (fabs(check_sum - 1) > 1e-10 && i >= NO_OF_VECTORS_H && i < NO_OF_DUAL_H_VECTORS - NO_OF_VECTORS_H)
-		{
-			grid_check_failed();
-		}
     }
     for (int i = 0; i < NO_OF_DUAL_SCALARS_H; ++i)
     {
     	for (int j = 0; j < 3; ++j)
     	{
 		    dualgrid -> adjacent_vector_indices_h[3*i + j] = adjacent_vector_indices_dual_h[3*i + j];
-		    if (dualgrid -> adjacent_vector_indices_h[3*i + j] < 0 || dualgrid -> adjacent_vector_indices_h[3*i + j] >= NO_OF_VECTORS_H)
-		        grid_check_failed();
         }
     }
     grad(grid -> gravity_potential, grid -> gravity_m, grid);
-    printf("passed\n");
+    printf("completed\n");
     free(latitude_scalar);
     free(longitude_scalar);
     free(normal_distance_dual);
@@ -467,11 +347,5 @@ int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid)
     return 1;
 }
 
-
-void grid_check_failed()
-{
-    printf("failed\n");
-    exit(1);
-}
 
 

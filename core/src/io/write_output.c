@@ -213,10 +213,14 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				wind_speed_10_m_mean += 1.0/min_no_of_output_steps*wind_10_m_speed[j*NO_OF_VECTORS_H + i];
 			}
 			standard_deviation = calc_std_dev(vector_for_std_deviation, min_no_of_output_steps);
-			if (t_write != t_init)
+			if (t_write != t_init && min_no_of_output_steps >= 10)
+			{
 				wind_10_m_gusts_speed[i] = wind_speed_10_m_mean + gusts_parameter*standard_deviation;
+			}
 			else
+			{
 				wind_10_m_gusts_speed[i] = (1 + 0.2)*wind_speed_10_m_mean;
+			}
 		}
 		free(pot_temperature);
 		
