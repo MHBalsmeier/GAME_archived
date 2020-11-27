@@ -25,7 +25,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     double *volume_ratios = malloc(2*NO_OF_SCALARS*sizeof(double));
     double *inner_product_weights = malloc(8*NO_OF_SCALARS*sizeof(double));
     double *slope = malloc(NO_OF_VECTORS*sizeof(double));
-    double *recov_primal2dual_weights = malloc(2*NO_OF_DUAL_H_VECTORS*sizeof(double));
+    double *remap_horpri2hordual_vector_weights = malloc(2*NO_OF_DUAL_H_VECTORS*sizeof(double));
     double *density_to_rhombus_weights = malloc(4*NO_OF_VECTORS_H*sizeof(double));
     double *normal_distance_dual = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
     double *latitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -45,7 +45,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     int *h_curl_signs = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int *density_to_rhombus_indices = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int ncid, retval;
-    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_modified_weights_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, direction_id, gravity_potential_id, inner_product_weights_id, slope_id, volume_ratios_id, recov_primal2dual_weights_id, density_to_rhombus_weights_id, density_to_rhombus_indices_id, normal_distance_dual_id, adjacent_vector_indices_dual_h_id, latitude_scalar_id, longitude_scalar_id, stretching_parameter_id;
+    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_modified_weights_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, direction_id, gravity_potential_id, inner_product_weights_id, slope_id, volume_ratios_id, remap_horpri2hordual_vector_weights_id, density_to_rhombus_weights_id, density_to_rhombus_indices_id, normal_distance_dual_id, adjacent_vector_indices_dual_h_id, latitude_scalar_id, longitude_scalar_id, stretching_parameter_id;
     double stretching_parameter;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
@@ -103,7 +103,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "slope", &slope_id)))
         ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "recov_primal2dual_weights", &recov_primal2dual_weights_id)))
+    if ((retval = nc_inq_varid(ncid, "recov_primal2dual_weights", &remap_horpri2hordual_vector_weights_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "density_to_rhombus_weights", &density_to_rhombus_weights_id)))
         ERR(retval);
@@ -144,7 +144,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, f_vec_id, &f_vec[0])))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, recov_primal2dual_weights_id, &recov_primal2dual_weights[0])))
+    if ((retval = nc_get_var_double(ncid, remap_horpri2hordual_vector_weights_id, &remap_horpri2hordual_vector_weights[0])))
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, density_to_rhombus_weights_id, &density_to_rhombus_weights[0])))
         ERR(retval);
@@ -257,7 +257,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     {
     	for (int j = 0; j < 2; ++j)
     	{
-    		grid -> recov_primal2dual_weights[2*i + j] = recov_primal2dual_weights[2*i + j];
+    		grid -> remap_horpri2hordual_vector_weights[2*i + j] = remap_horpri2hordual_vector_weights[2*i + j];
     	}
     }
     for (int i = 0; i < NO_OF_DUAL_SCALARS_H; ++i)
@@ -274,7 +274,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     free(normal_distance_dual);
     free(density_to_rhombus_indices);
     free(density_to_rhombus_weights);
-    free(recov_primal2dual_weights);
+    free(remap_horpri2hordual_vector_weights);
     free(volume_ratios);
     free(slope);
     free(inner_product_weights);

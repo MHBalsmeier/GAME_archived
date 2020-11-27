@@ -77,7 +77,7 @@ int grad_oro_corr(Vector_field cov_to_con_gradient_field, Grid *grid)
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
         if (h_index >= NO_OF_SCALARS_H && layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
         {
-        	recov_hor_ver_pri(cov_to_con_gradient_field, layer_index, h_index - NO_OF_SCALARS_H, &vertical_gradient, grid);
+        	remap_verpri2horpri_vector(cov_to_con_gradient_field, layer_index, h_index - NO_OF_SCALARS_H, &vertical_gradient, grid);
             cov_to_con_gradient_field[i] += -grid -> slope[i]*vertical_gradient;
         }
     }
@@ -96,7 +96,7 @@ int grad_oro_corr_no_add(Vector_field cov_to_con_gradient_field, Grid *grid)
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
         if (h_index >= NO_OF_SCALARS_H && layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
         {
-        	recov_hor_ver_pri(cov_to_con_gradient_field, layer_index, h_index - NO_OF_SCALARS_H, &vertical_gradient, grid);
+        	remap_verpri2horpri_vector(cov_to_con_gradient_field, layer_index, h_index - NO_OF_SCALARS_H, &vertical_gradient, grid);
             cov_to_con_gradient_field[i] = -grid -> slope[i]*vertical_gradient;
         }
     }

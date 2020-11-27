@@ -26,7 +26,7 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
     // Now, the potential vorticity is evaluated.
     calc_pot_vort(state -> velocity_gas, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
     // Now, the generalized Coriolis term is evaluated.
-    coriolis_gen(diagnostics -> flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid);
+    vorticity_flux(diagnostics -> flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid);
     // Horizontal kinetic energy is prepared for the gradient term of the Lamb transformation.
     kinetic_energy(state -> velocity_gas, diagnostics -> e_kin_h, grid, 0);
     grad(diagnostics -> e_kin_h, forcings -> e_kin_h_grad, grid);
@@ -47,7 +47,7 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
         {
     		if (h_index >= NO_OF_SCALARS_H)
     		{
-    			recov_hor_ver_pri(state -> velocity_gas, layer_index, h_index - NO_OF_SCALARS_H, &vertical_velocity, grid);
+    			remap_verpri2horpri_vector(state -> velocity_gas, layer_index, h_index - NO_OF_SCALARS_H, &vertical_velocity, grid);
     			metric_term = -vertical_velocity*state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
     			hor_non_trad_cori_term = -vertical_velocity*dualgrid -> f_vec[2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
         		state_tendency -> velocity_gas[i] =

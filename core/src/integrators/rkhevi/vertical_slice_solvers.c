@@ -42,7 +42,7 @@ int three_band_solver_ver_hor_vel_adv(State *state_old, State *state_tendency, S
 		// diagnozing the vertical velocity
 		for (j = 0; j < NO_OF_LAYERS; ++j)
 		{
-			recov_hor_ver_pri(state_new -> velocity_gas, j, i, &vertical_velocity[j], grid);
+			remap_verpri2horpri_vector(state_new -> velocity_gas, j, i, &vertical_velocity[j], grid);
 		}
 		// filling up b vector and d vector
 		for (j = 0; j < NO_OF_LAYERS; ++j)

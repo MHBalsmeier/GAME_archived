@@ -8,7 +8,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdlib.h>
 #include <stdio.h>
 
-int coriolis_gen(Vector_field a_field, Curl_field b_field, Vector_field out_field, Grid *grid)
+int vorticity_flux(Vector_field a_field, Curl_field b_field, Vector_field out_field, Grid *grid)
 {
     int layer_index, h_index;
 	#pragma omp parallel for private(layer_index, h_index)
@@ -18,11 +18,11 @@ int coriolis_gen(Vector_field a_field, Curl_field b_field, Vector_field out_fiel
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
         if (h_index >= NO_OF_SCALARS_H)
         {
-            trsk_modified(a_field, b_field, layer_index, h_index - NO_OF_SCALARS_H, &out_field[i], grid);
+            vorticity_flux_horizontal(a_field, b_field, layer_index, h_index - NO_OF_SCALARS_H, &out_field[i], grid);
         }
         else
         {    
-			vertical_coriolis_gen(a_field, b_field, layer_index, h_index, &out_field[i], grid);
+			vorticity_flux_vertical(a_field, b_field, layer_index, h_index, &out_field[i], grid);
         }
     }
     return 0;

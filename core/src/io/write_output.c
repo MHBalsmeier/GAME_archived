@@ -845,7 +845,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		layer_index = i/NO_OF_VECTORS_H;
 		h_index = i - layer_index*NO_OF_VECTORS_H;
         wind_0 = state_write_out -> velocity_gas[h_index + layer_index*NO_OF_VECTORS_H + (layer_index + 1)*NO_OF_SCALARS_H];
-        recov_hor_par_pri(state_write_out -> velocity_gas, layer_index, h_index, &wind_1, grid);
+        tangential_wind(state_write_out -> velocity_gas, layer_index, h_index, &wind_1, grid);
         passive_turn(wind_0, wind_1, -grid -> direction[h_index], &wind_u_value, &wind_v_value);
         wind_u[i] = wind_u_value;
         wind_v[i] = wind_v_value;

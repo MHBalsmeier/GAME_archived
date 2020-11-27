@@ -28,7 +28,7 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
         }
         else if (layer_index == NO_OF_LAYERS - 1)
         {
-			vertical_contravariant_normalized_h(in_field, layer_index, h_index, grid, &contra_upper);
+			vertical_contravariant(in_field, layer_index, h_index, grid, &contra_upper);
 			comp_v = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
         }
         else
@@ -36,12 +36,12 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
             contra_upper = 0;
             if (layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
             {
-                vertical_contravariant_normalized_h(in_field, layer_index, h_index, grid, &contra_upper);
+                vertical_contravariant(in_field, layer_index, h_index, grid, &contra_upper);
             }
             contra_lower = 0;
             if (layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS - 1)
             {
-                vertical_contravariant_normalized_h(in_field, layer_index + 1, h_index, grid, &contra_lower);
+                vertical_contravariant(in_field, layer_index + 1, h_index, grid, &contra_lower);
             }
             comp_v = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - contra_lower*grid -> area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
         }
@@ -65,7 +65,7 @@ int add_vertical_divv(Vector_field in_field, Scalar_field out_field, Grid *grid)
         if (layer_index == 0)
         {
         	contra_upper = 0;
-            	contra_lower = in_field[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
+        	contra_lower = in_field[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
         }
         else
         {
