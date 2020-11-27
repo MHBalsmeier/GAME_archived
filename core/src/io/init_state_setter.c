@@ -12,7 +12,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <netcdf.h>
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 
-int set_init_data(char FILE_NAME[], State *init_state)
+int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 {
     double *density_dry = malloc(NO_OF_SCALARS*sizeof(double));
     double *temperature_gas = malloc(NO_OF_SCALARS*sizeof(double));
@@ -25,7 +25,8 @@ int set_init_data(char FILE_NAME[], State *init_state)
     int retval, ncid;
     if ((retval = nc_open(FILE_NAME, NC_NOWRITE, &ncid)))
         NCERR(retval);
-    int temperature_gas_id, density_dry_id, wind_id, density_vapour_id, density_liquid_id, density_solid_id, temperature_liquid_id, temperature_solid_id;
+    int temperature_gas_id, density_dry_id, wind_id, density_vapour_id, density_liquid_id, density_solid_id, temperature_liquid_id, temperature_solid_id, stretching_parameter_id;
+    double stretching_parameter;
     if ((retval = nc_inq_varid(ncid, "density_dry", &density_dry_id)))
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "temperature_gas",&temperature_gas_id)))
@@ -41,6 +42,10 @@ int set_init_data(char FILE_NAME[], State *init_state)
     if ((retval = nc_inq_varid(ncid, "temperature_liquid", &temperature_liquid_id)))
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "temperature_solid", &temperature_solid_id)))
+        NCERR(retval);
+    if ((retval = nc_inq_varid(ncid, "stretching_parameter", &stretching_parameter_id)))
+        NCERR(retval);
+    if ((retval = nc_get_var_double(ncid, stretching_parameter_id, &stretching_parameter)))
         NCERR(retval);
     if ((retval = nc_get_var_double(ncid, temperature_gas_id, &temperature_gas[0])))
         NCERR(retval);    
@@ -60,6 +65,14 @@ int set_init_data(char FILE_NAME[], State *init_state)
         NCERR(retval);
     if ((retval = nc_close(ncid)))
         NCERR(retval);
+    
+    // checking wether the stretching parameters of the grid used for creating the input file and the grid file read in do conform
+    if (grid -> stretching_parameter != stretching_parameter)
+    {
+    	printf("Stretching parameters of grid and input file do not conform.\n");
+    	printf("Aborting.\n");
+    	exit(1);
+    }
     
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {

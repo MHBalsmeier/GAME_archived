@@ -330,7 +330,7 @@ int main(int argc, char *argv[])
     printf("It begins.\n");
     printf("%s", stars);
     State *state_old = calloc(1, sizeof(State));
-    set_init_data(INIT_STATE_FILE, state_old);
+    set_init_data(INIT_STATE_FILE, state_old, grid);
     int min_no_of_output_steps = 600/delta_t;
     double *wind_h_lowest_layer_array = calloc(1, min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
     double t_write = t_init;
