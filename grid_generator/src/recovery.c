@@ -372,64 +372,6 @@ int calc_coriolis_weights(int from_index_dual[], int to_index_dual[], int trsk_m
 	return 0;
 }
 
-int set_recov_ver(int adjacent_vector_indices_h[], double direction[], double direction_dual[], double latitude_scalar[], double longitude_scalar[], double latitude_scalar_dual[], double longitude_scalar_dual[], int from_index_dual[], int to_index_dual[], double pent_hex_face_unity_sphere[], double recov_ver_weight[], double ORTH_CRITERION_DEG, double normal_distance[], double z_vector[], double z_vector_dual[], double TOA)
-{
-	int no_of_edges, sign, h_index, layer_index;
-	double triangle_area, check_sum_pre, check_sum, direction_change, delta_z_at_cell, delta_z_at_edge;
-	for (int i = 0; i < NO_OF_LEVELS*NO_OF_SCALARS_H; ++i)
-	{
-		layer_index = i/NO_OF_SCALARS_H;
-		h_index = i - layer_index*NO_OF_SCALARS_H;
-		delta_z_at_cell = normal_distance[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
-		no_of_edges = 6;
-		if (h_index < NO_OF_PENTAGONS)
-		{
-			no_of_edges = 5;
-			recov_ver_weight[6*i + 5] = 0;
-	    }
-	    check_sum_pre = 0;
-		for (int j = 0; j < no_of_edges; ++j)
-		{
-			calc_triangle_face(latitude_scalar[h_index], longitude_scalar[h_index], latitude_scalar_dual[from_index_dual[adjacent_vector_indices_h[6*h_index + j]]], longitude_scalar_dual[from_index_dual[adjacent_vector_indices_h[6*h_index + j]]], latitude_scalar_dual[to_index_dual[adjacent_vector_indices_h[6*h_index + j]]], longitude_scalar_dual[to_index_dual[adjacent_vector_indices_h[6*h_index + j]]], &triangle_area);
-			sign = 1;
-            find_angle_change(direction[adjacent_vector_indices_h[6*h_index + j]], direction_dual[adjacent_vector_indices_h[6*h_index + j]], &direction_change);
-            if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
-                sign = -1;
-            if (layer_index == 0)
-            {
-            	delta_z_at_edge = TOA - z_vector[NO_OF_SCALARS_H + adjacent_vector_indices_h[6*h_index + j]];
-            }
-            else if (layer_index == NO_OF_LAYERS)
-            {
-            	delta_z_at_edge = z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]] - z_vector_dual[NO_OF_DUAL_VECTORS - NO_OF_VECTORS_H + adjacent_vector_indices_h[6*h_index + j]];
-            }
-            else
-            {
-            	delta_z_at_edge = z_vector[NO_OF_SCALARS_H + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]] - z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]];
-            }
-		    recov_ver_weight[6*i + j] = 2*sign*triangle_area*delta_z_at_edge/(pent_hex_face_unity_sphere[h_index]*delta_z_at_cell);
-		    check_sum_pre += fabs(recov_ver_weight[6*i + j]);
-		}
-		if (fabs(check_sum_pre - 2) > 0.4)
-		{
-			printf("Problem with recov_ver_weight, check_sum_pre is %lf.\n", check_sum_pre);
-			exit(1);
-		}
-		check_sum = 0;
-		for (int j = 0; j < no_of_edges; ++j)
-		{
-		    recov_ver_weight[6*i + j] = 2/check_sum_pre*recov_ver_weight[6*i + j];
-		    check_sum += fabs(recov_ver_weight[6*i + j]);
-		}
-		if (fabs(check_sum - 2) > 1e-10)
-		{
-			printf("Problem with recov_ver_weight, check_sum is %lf.\n", check_sum);
-			exit(1);
-		}
-	}
-	return 0;
-}
-
 int set_vertical_vorticity_stuff(int vorticity_indices_pre[], int vorticity_signs_pre[], int from_index_dual[], int to_index_dual[], int vorticity_indices[], int vorticity_signs[], int density_to_rhombus_indices[], int from_index[], int to_index[], double area_dual[], double z_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], double density_to_rhombus_weights[], double latitude_vector[], double longitude_vector[], double latitude_scalar[], double longitude_scalar[])
 {
 	int counter;

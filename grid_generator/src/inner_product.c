@@ -3,7 +3,7 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/MHBalsmeier/game
 */
 /*
-In this file, the kinetic energy indices and weights are computed.
+In this file, the inner product weights are computed.
 */
 
 #include <stdlib.h>
@@ -12,7 +12,7 @@ In this file, the kinetic energy indices and weights are computed.
 #include "enum.h"
 #include "grid_generator.h"
 
-int calc_kinetic_energy_and_related(double e_kin_weights[], double normal_distance[], double volume[], int to_index[], int from_index[], double area[], double z_scalar[], double z_vector[], int adjacent_vector_indices_h[], double volume_ratios[], double recov_primal2dual_weights[])
+int calc_inner_product_and_related(double inner_product_weights[], double normal_distance[], double volume[], int to_index[], int from_index[], double area[], double z_scalar[], double z_vector[], int adjacent_vector_indices_h[], double volume_ratios[], double recov_primal2dual_weights[])
 {
 	int layer_index, h_index;
 	double delta_z, weights_sum, partial_volume;
@@ -26,19 +26,19 @@ int calc_kinetic_energy_and_related(double e_kin_weights[], double normal_distan
 		{
 			if (j < 5 || h_index >= NO_OF_PENTAGONS)
 			{
-				e_kin_weights[8*i + j] = area[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]];
-				e_kin_weights[8*i + j] = e_kin_weights[8*i + j]*normal_distance[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]];
-				e_kin_weights[8*i + j] = e_kin_weights[8*i + j]/(4*volume[i]);
-				weights_sum += e_kin_weights[8*i + j];
+				inner_product_weights[8*i + j] = area[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]];
+				inner_product_weights[8*i + j] = inner_product_weights[8*i + j]*normal_distance[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]];
+				inner_product_weights[8*i + j] = inner_product_weights[8*i + j]/(2*volume[i]);
+				weights_sum += inner_product_weights[8*i + j];
 			}
 			else
 			{
-				e_kin_weights[8*i + j] = 0;
+				inner_product_weights[8*i + j] = 0;
 			}
 		}
-		if (fabs(weights_sum - 1) > 0.2)
+		if (fabs(weights_sum - 2) > 0.4)
 		{
-			printf("Error in e_kin_weights, position 0. Weights sum is %lf, should be closer to one.\n", weights_sum);
+			printf("Error in inner_product_weights, position 0. Weights sum is %lf, should be closer to two.\n", weights_sum);
 			exit(1);
 		}
 		// upper w, only needed only for diagnostics
@@ -52,7 +52,7 @@ int calc_kinetic_energy_and_related(double e_kin_weights[], double normal_distan
 		{
 			delta_z = z_scalar[i - NO_OF_SCALARS_H] - z_scalar[i];
 		}
-		e_kin_weights[8*i + 6] = area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]*delta_z/(4*volume[i]);
+		inner_product_weights[8*i + 6] = area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]*delta_z/(2*volume[i]);
 		// lower w, only needed only for diagnostics
 		partial_volume = find_volume(area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER], RADIUS + z_vector[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER], RADIUS + z_scalar[i]);
 		volume_ratios[2*i + 1] = partial_volume/volume[i];
@@ -64,7 +64,7 @@ int calc_kinetic_energy_and_related(double e_kin_weights[], double normal_distan
 		{
 			delta_z = z_scalar[i] - z_scalar[i + NO_OF_SCALARS_H];
 		}
-		e_kin_weights[8*i + 7] = area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER]*delta_z/(4*volume[i]);
+		inner_product_weights[8*i + 7] = area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER]*delta_z/(2*volume[i]);
 	}
 	int e_kin_h_index_0, e_kin_h_index_1;
 	double total_volume, upper_volume, lower_volume, upper_volume_0, lower_volume_0, upper_volume_1, lower_volume_1, check_sum;
@@ -98,10 +98,10 @@ int calc_kinetic_energy_and_related(double e_kin_weights[], double normal_distan
 				printf("Index error in calculating recov_primal2dual.\n");
 				exit(1);
 			}
-			upper_volume_0 = e_kin_weights[8*((layer_index - 1)*NO_OF_SCALARS_H + from_index[h_index]) + e_kin_h_index_0]*upper_volume_0;
-			upper_volume_1 = e_kin_weights[8*((layer_index - 1)*NO_OF_SCALARS_H + to_index[h_index]) + e_kin_h_index_1]*upper_volume_1;
-			lower_volume_0 = e_kin_weights[8*(layer_index*NO_OF_SCALARS_H + from_index[h_index]) + e_kin_h_index_0]*lower_volume_0;
-			lower_volume_1 = e_kin_weights[8*(layer_index*NO_OF_SCALARS_H + to_index[h_index]) + e_kin_h_index_1]*lower_volume_1;
+			upper_volume_0 = inner_product_weights[8*((layer_index - 1)*NO_OF_SCALARS_H + from_index[h_index]) + e_kin_h_index_0]*upper_volume_0;
+			upper_volume_1 = inner_product_weights[8*((layer_index - 1)*NO_OF_SCALARS_H + to_index[h_index]) + e_kin_h_index_1]*upper_volume_1;
+			lower_volume_0 = inner_product_weights[8*(layer_index*NO_OF_SCALARS_H + from_index[h_index]) + e_kin_h_index_0]*lower_volume_0;
+			lower_volume_1 = inner_product_weights[8*(layer_index*NO_OF_SCALARS_H + to_index[h_index]) + e_kin_h_index_1]*lower_volume_1;
 			upper_volume = upper_volume_0 + upper_volume_1;
 			lower_volume = lower_volume_0 + lower_volume_1;
 			total_volume = upper_volume + lower_volume;
