@@ -23,7 +23,8 @@ src/integrators/rkhevi/integrate_momentum.c
 src/integrators/rkhevi/backward_tendencies.c
 src/integrators/rkhevi/integrate_generalized_densities.c
 src/integrators/rkhevi/vertical_slice_solvers.c
-src/spatial_operators/coriolis_gen.c src/spatial_operators/vorticities.c
+src/spatial_operators/vorticity_flux.c
+src/spatial_operators/vorticities.c
 src/spatial_operators/momentum_diff_diss.c
 src/spatial_operators/scalar_times_scalar.c
 src/spatial_operators/divergences.c
