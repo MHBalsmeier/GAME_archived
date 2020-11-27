@@ -24,7 +24,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     double *direction = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *gravity_potential = malloc(NO_OF_SCALARS*sizeof(double));
     double *volume_ratios = malloc(2*NO_OF_SCALARS*sizeof(double));
-    double *e_kin_weights = malloc(8*NO_OF_SCALARS*sizeof(double));
+    double *inner_product_weights = malloc(8*NO_OF_SCALARS*sizeof(double));
     double *slope = malloc(NO_OF_VECTORS*sizeof(double));
     double *recov_primal2dual_weights = malloc(2*NO_OF_DUAL_H_VECTORS*sizeof(double));
     double *density_to_rhombus_weights = malloc(4*NO_OF_VECTORS_H*sizeof(double));
@@ -46,7 +46,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     int *h_curl_signs = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int *density_to_rhombus_indices = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int ncid, retval;
-    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_modified_weights_id, recov_ver_weight_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, direction_id, gravity_potential_id, e_kin_weights_id, slope_id, volume_ratios_id, recov_primal2dual_weights_id, density_to_rhombus_weights_id, density_to_rhombus_indices_id, normal_distance_dual_id, adjacent_vector_indices_dual_h_id, latitude_scalar_id, longitude_scalar_id, stretching_parameter_id;
+    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_modified_weights_id, recov_ver_weight_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, direction_id, gravity_potential_id, inner_product_weights_id, slope_id, volume_ratios_id, recov_primal2dual_weights_id, density_to_rhombus_weights_id, density_to_rhombus_indices_id, normal_distance_dual_id, adjacent_vector_indices_dual_h_id, latitude_scalar_id, longitude_scalar_id, stretching_parameter_id;
     double stretching_parameter;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
@@ -102,7 +102,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "h_curl_signs", &h_curl_signs_id)))
         ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "e_kin_weights", &e_kin_weights_id)))
+    if ((retval = nc_inq_varid(ncid, "e_kin_weights", &inner_product_weights_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "slope", &slope_id)))
         ERR(retval);
@@ -123,7 +123,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     grid -> stretching_parameter = stretching_parameter;
     if ((retval = nc_get_var_double(ncid, normal_distance_id, &normal_distance[0])))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, e_kin_weights_id, &e_kin_weights[0])))
+    if ((retval = nc_get_var_double(ncid, inner_product_weights_id, &inner_product_weights[0])))
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, volume_id, &volume[0])))
         ERR(retval);
@@ -236,7 +236,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
        	grid -> gravity_potential[i] = gravity_potential[i];
        	for (int j = 0; j < 8; ++j)
 		{
-           grid -> e_kin_weights[8*i + j] = e_kin_weights[8*i + j];
+           grid -> inner_product_weights[8*i + j] = 2*inner_product_weights[8*i + j];
        	}
    	   	for (int j = 0; j < 2; ++j)
    	   	{
@@ -289,7 +289,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     free(recov_primal2dual_weights);
     free(volume_ratios);
     free(slope);
-    free(e_kin_weights);
+    free(inner_product_weights);
     free(gravity_potential);
     free(direction);
     free(normal_distance);

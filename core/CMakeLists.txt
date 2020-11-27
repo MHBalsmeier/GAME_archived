@@ -29,7 +29,7 @@ src/spatial_operators/scalar_times_scalar.c
 src/spatial_operators/divergences.c
 src/spatial_operators/scalar_times_vector.c
 src/spatial_operators/gradient_operators.c
-src/spatial_operators/kinetic_energy.c
+src/spatial_operators/inner_product.c
 src/diagnostics/thermodynamic_diagnostics.c
 src/diagnostics/vertical_coriolis_gen.c
 src/diagnostics/trsk_modified.c

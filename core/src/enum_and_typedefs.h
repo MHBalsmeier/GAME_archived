@@ -79,7 +79,7 @@ int density_to_rhombus_indices[4*NO_OF_VECTORS_H];
 double latitude_scalar[NO_OF_SCALARS_H];
 double longitude_scalar[NO_OF_SCALARS_H];
 double volume_ratios[2*NO_OF_SCALARS];
-double e_kin_weights[8*NO_OF_SCALARS];
+double inner_product_weights[8*NO_OF_SCALARS];
 double direction[NO_OF_VECTORS_H];
 double density_to_rhombus_weights[4*NO_OF_VECTORS_H];
 double trsk_modified_weights[10*NO_OF_VECTORS_H];
