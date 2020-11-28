@@ -8,7 +8,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdlib.h>
 #include <stdio.h>
 
-int vorticity_flux(Vector_field a_field, Curl_field b_field, Vector_field out_field, Grid *grid)
+int vorticity_flux(Vector_field a_field, Curl_field b_field, Vector_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
     int layer_index, h_index;
 	#pragma omp parallel for private(layer_index, h_index)
@@ -22,7 +22,7 @@ int vorticity_flux(Vector_field a_field, Curl_field b_field, Vector_field out_fi
         }
         else
         {    
-			vorticity_flux_vertical(a_field, b_field, layer_index, h_index, &out_field[i], grid);
+			vorticity_flux_vertical(a_field, b_field, layer_index, h_index, &out_field[i], grid, dualgrid);
         }
     }
     return 0;

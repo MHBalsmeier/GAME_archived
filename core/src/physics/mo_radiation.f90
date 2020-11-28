@@ -424,7 +424,7 @@ module radiation
     real(8)                          :: normal_vector_rel2_earth(3)
     real(8)                          :: normal_vector_rel2_sun  (3)
     real(8)                          :: sun_2_earth             (3)
-    ! obliquity of the earth"s axis
+    ! obliquity of the earth's axis
     real(8)                          :: obliquity
     ! rotation speed of the earth
     real(8)                          :: omega

@@ -26,7 +26,7 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
     // Now, the potential vorticity is evaluated.
     calc_pot_vort(state -> velocity_gas, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
     // Now, the generalized Coriolis term is evaluated.
-    vorticity_flux(diagnostics -> flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid);
+    vorticity_flux(diagnostics -> flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid, dualgrid);
     // Horizontal kinetic energy is prepared for the gradient term of the Lamb transformation.
     kinetic_energy(state -> velocity_gas, diagnostics -> e_kin_h, grid, 0);
     grad(diagnostics -> e_kin_h, forcings -> e_kin_h_grad, grid);
@@ -76,8 +76,6 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
         		+ expl_pgrad_weight*forcings -> pressure_gradient_acc[i]
         		// momentum diffusion
         		+ irreversible_quantities -> friction_acc[i];
-        		if (fabs(state_tendency -> velocity_gas[i]) > 10)
-        			printf("%lf\n", diagnostics -> pressure_gradient_1_component_corr[i]);
     		}
         }
     }
