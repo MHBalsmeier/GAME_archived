@@ -39,93 +39,67 @@ int main(int argc, char *argv[])
     	exit(1);
     }
     free(WRITE_OUT_INTERVAL_PRE);
-    int res_id_input;
-    res_id_input = strtod(argv[3], NULL);
-    if (res_id_input != RES_ID)
-    {
-    	printf("You demanded res_id = %d in your input file, but the model has been compiled with RES_ID = %d.\n", res_id_input, RES_ID);
-    	printf("Recompile with RES_ID = %d or choose an executable which has been compiled with RES_ID = %d.\n", res_id_input, res_id_input);
-    	printf("Aborting.\n");
-    	exit(1);
-    }
-    int no_of_layers_input;
-	no_of_layers_input = strtod(argv[4], NULL);
-    if (no_of_layers_input != NO_OF_LAYERS)
-    {
-    	printf("You demanded no_of_layers = %d in your input file, but the model has been compiled with NO_OF_LAYERS = %d.\n", no_of_layers_input, NO_OF_LAYERS);
-    	printf("Recompile with NO_OF_LAYERS = %d or choose an executable which has been compiled with NO_OF_LAYERS = %d.\n", no_of_layers_input, no_of_layers_input);
-    	printf("Aborting.\n");
-    	exit(1);
-    }
-    double cfl_margin = strtof(argv[5], NULL);
+    double cfl_margin = strtof(argv[3], NULL);
     Config_info *config_info = calloc(1, sizeof(Config_info));
-    config_info -> momentum_diff = strtod(argv[6], NULL);
-    config_info -> rad_on = strtod(argv[7], NULL);
-    len = strlen(argv[8]);
+    config_info -> momentum_diff = strtod(argv[4], NULL);
+    config_info -> rad_on = strtod(argv[5], NULL);
+    len = strlen(argv[6]);
     char *OPERATOR = malloc((len + 1)*sizeof(char));
-    strcpy(OPERATOR, argv[8]);
+    strcpy(OPERATOR, argv[6]);
     int write_out_dry_mass_integral;
-    write_out_dry_mass_integral = strtod(argv[9], NULL);
+    write_out_dry_mass_integral = strtod(argv[7], NULL);
     int write_out_entropy_integral; 
-    write_out_entropy_integral = strtod(argv[10], NULL);
+    write_out_entropy_integral = strtod(argv[8], NULL);
     int write_out_energy_integral;
-    write_out_energy_integral = strtod(argv[11], NULL);
-    config_info -> temperature_diff_h = strtod(argv[12], NULL);
+    write_out_energy_integral = strtod(argv[9], NULL);
+    config_info -> temperature_diff_h = strtod(argv[10], NULL);
     double radiation_delta_t;
-    radiation_delta_t = strtof(argv[13], NULL);
+    radiation_delta_t = strtof(argv[11], NULL);
     int year;
-    year = strtod(argv[14], NULL);
+    year = strtod(argv[12], NULL);
     int month;
-    month = strtod(argv[15], NULL);
-    len = strlen(argv[15]);
+    month = strtod(argv[13], NULL);
+    len = strlen(argv[13]);
     char *month_string = malloc((len + 1)*sizeof(char));
-    strcpy(month_string, argv[15]);
+    strcpy(month_string, argv[13]);
     int day;
-    day = strtod(argv[16], NULL);
-    len = strlen(argv[16]);
+    day = strtod(argv[14], NULL);
+    len = strlen(argv[14]);
     char *day_string = malloc((len + 1)*sizeof(char));
-    strcpy(day_string, argv[16]);
+    strcpy(day_string, argv[14]);
     int hour;
-    hour = strtod(argv[17], NULL);
-    len = strlen(argv[17]);
+    hour = strtod(argv[15], NULL);
+    len = strlen(argv[15]);
     char *hour_string = malloc((len + 1)*sizeof(char));
-    strcpy(hour_string, argv[17]);
-    config_info -> temperature_diff_v = strtod(argv[18], NULL);
-    len = strlen(argv[19]);
+    strcpy(hour_string, argv[15]);
+    config_info -> temperature_diff_v = strtod(argv[16], NULL);
+    len = strlen(argv[17]);
     char *RUN_ID = malloc((len + 1)*sizeof(char));
-    strcpy(RUN_ID, argv[19]);
+    strcpy(RUN_ID, argv[17]);
     int write_out_linearized_entropy_integral;
-    write_out_linearized_entropy_integral = strtod(argv[20], NULL);
+    write_out_linearized_entropy_integral = strtod(argv[18], NULL);
     int toa;
-	toa = strtod(argv[21], NULL);
-    int no_of_oro_layers_input;
-	no_of_oro_layers_input = strtod(argv[22], NULL);
+	toa = strtod(argv[19], NULL);
 	int ORO_ID;
-	ORO_ID = strtod(argv[23], NULL);
+	ORO_ID = strtod(argv[20], NULL);
     int IDEAL_INPUT_ID;
-    IDEAL_INPUT_ID = strtod(argv[24], NULL);
-	config_info -> mass_diff_h = strtod(argv[25], NULL);
-	config_info -> mass_diff_v = strtod(argv[26], NULL);
+    IDEAL_INPUT_ID = strtod(argv[21], NULL);
+	config_info -> mass_diff_h = strtod(argv[22], NULL);
+	config_info -> mass_diff_v = strtod(argv[23], NULL);
     Io_config *io_config = calloc(1, sizeof(Io_config));
-	io_config -> grib_output_switch = strtod(argv[27], NULL);
-	io_config -> netcdf_output_switch = strtod(argv[28], NULL);
-	io_config -> pressure_level_output_switch = strtod(argv[29], NULL);
-	io_config -> flight_level_output_switch = strtod(argv[30], NULL);
-	io_config -> model_level_output_switch = strtod(argv[31], NULL);
-	io_config -> surface_output_switch = strtod(argv[32], NULL);
+	io_config -> grib_output_switch = strtod(argv[24], NULL);
+	io_config -> netcdf_output_switch = strtod(argv[25], NULL);
+	io_config -> pressure_level_output_switch = strtod(argv[26], NULL);
+	io_config -> flight_level_output_switch = strtod(argv[27], NULL);
+	io_config -> model_level_output_switch = strtod(argv[28], NULL);
+	io_config -> surface_output_switch = strtod(argv[29], NULL);
+	grid -> no_of_oro_layers = strtod(argv[30], NULL);
 	if (io_config -> grib_output_switch == 0 && io_config -> netcdf_output_switch == 0)
 	{
 		printf("Either grib_output_switch or netcdf_output_switch must be set to 1.\n");
     	printf("Aborting.\n");
 		exit(1);
 	}
-    if (no_of_oro_layers_input != NO_OF_ORO_LAYERS)
-    {
-    	printf("You demanded no_of_oro_layers = %d in your input file, but the model has been compiled with NO_OF_ORO_LAYERS = %d.\n", no_of_oro_layers_input, NO_OF_ORO_LAYERS);
-    	printf("Recompile with NO_OF_ORO_LAYERS = %d or choose an executable which has been compiled with NO_OF_ORO_LAYERS = %d.\n", no_of_oro_layers_input, no_of_oro_layers_input);
-    	printf("Aborting.\n");
-    	exit(1);
-    }
     // This sets the ORO_ID (orography ID) as a function of the IDEAL_INPUT_ID.
 	if (IDEAL_INPUT_ID == 0 || IDEAL_INPUT_ID == 8 || IDEAL_INPUT_ID == 9)
     {
@@ -145,7 +119,7 @@ int main(int argc, char *argv[])
     }
 	// Determining the name of the grid file from the RES_ID, NO_OF_LAYERS and so on.
     char GEO_PROP_FILE_PRE[200];
-	sprintf(GEO_PROP_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, toa, ORO_ID, NO_OF_ORO_LAYERS);
+	sprintf(GEO_PROP_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, toa, ORO_ID, grid -> no_of_oro_layers);
     char GEO_PROP_FILE[strlen(GEO_PROP_FILE_PRE) + 1];
     strcpy(GEO_PROP_FILE, GEO_PROP_FILE_PRE);
 	// Determining the name of the init state file from the IDEAL_INPUT_ID, RES_ID, NO_OF_LAYERS and so on.
@@ -153,12 +127,12 @@ int main(int argc, char *argv[])
     // The NWP case.
     if (IDEAL_INPUT_ID == -1)
     {
-    	sprintf(INIT_STATE_FILE_PRE, "input/%d%s%s%s_nwp_B%dL%dT%d_O%d_OL%d_SCVT.nc", year, month_string, day_string, hour_string, RES_ID, NO_OF_LAYERS, toa, ORO_ID, NO_OF_ORO_LAYERS);
+    	sprintf(INIT_STATE_FILE_PRE, "input/%d%s%s%s_nwp_B%dL%dT%d_O%d_OL%d_SCVT.nc", year, month_string, day_string, hour_string, RES_ID, NO_OF_LAYERS, toa, ORO_ID, grid -> no_of_oro_layers);
     }
     // The idealized input case.
     else
     {
-		sprintf(INIT_STATE_FILE_PRE, "input/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", IDEAL_INPUT_ID, RES_ID, NO_OF_LAYERS, toa, ORO_ID, NO_OF_ORO_LAYERS);
+		sprintf(INIT_STATE_FILE_PRE, "input/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", IDEAL_INPUT_ID, RES_ID, NO_OF_LAYERS, toa, ORO_ID, grid -> no_of_oro_layers);
     }
     char INIT_STATE_FILE[strlen(INIT_STATE_FILE_PRE) + 1];
     strcpy(INIT_STATE_FILE, INIT_STATE_FILE_PRE);
@@ -258,7 +232,7 @@ int main(int argc, char *argv[])
 	printf("%s", stars);
 	printf("model run configuration information:\n");
 	printf("number of layers: %d\n", NO_OF_LAYERS);
-	printf("number of layers following orography: %d\n", NO_OF_ORO_LAYERS);
+	printf("number of layers following orography: %d\n", grid -> no_of_oro_layers);
 	printf("number of scalar data points per layer: %d\n", NO_OF_SCALARS_H);
 	double surface = 4*M_PI*pow(RADIUS, 2);
 	double points_per_axis = pow(NO_OF_SCALARS_H, 0.5);

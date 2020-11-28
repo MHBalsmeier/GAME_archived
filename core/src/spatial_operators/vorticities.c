@@ -104,7 +104,7 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
 		    	velocity_value = velocity_field[index];
 		    	// length_rescale_factor corrects for terrain following coordinates
 		    	length_rescale_factor = 1;
-		        if (layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
+		        if (layer_index >= NO_OF_LAYERS - grid -> no_of_oro_layers)
 		        {
             		length_rescale_factor = (RADIUS + grid -> z_vector[edge_vector_index])/(RADIUS + grid -> z_vector[index]);
             		// In terrain following coordinates, a vertical interpolation onto the reference z coordinate must be made. Therefore, delta_z and vertical_gradient must be determined.
@@ -154,7 +154,7 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
                 dist_3 = grid -> normal_distance[index_3];
                 covar_0 = velocity_field[index_0];
                 covar_2 = velocity_field[index_2];
-                if (layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
+                if (layer_index >= NO_OF_LAYERS - grid -> no_of_oro_layers)
                 {
                     horizontal_covariant(velocity_field, layer_index, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_0);
                     horizontal_covariant(velocity_field, layer_index - 1, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_2);

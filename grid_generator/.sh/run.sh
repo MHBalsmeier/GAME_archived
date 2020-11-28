@@ -24,6 +24,7 @@ echo "Aborting."
 fi
 echo "Horizontal coordinates of the generating points (the scalar points in terms of the model) will be read from file $scalar_h_coords_file."
 fi
+echo "number of layers following orography: "$orography_layers
 echo "stretching parameter: "$stretching_parameter
 # end verbosity
 
@@ -32,11 +33,11 @@ echo "********** Calling the GAME grid generator **********"
 echo ""
 if [ $valgrind_check -eq 0 ]
 then
-mpirun -np $number_of_cpus ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter
+mpirun -np $number_of_cpus ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter $orography_layers
 else
 if [ $valgrind_check -eq 1 ]
 then
-valgrind ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter
+valgrind ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter $orography_layers
 fi
 fi
 if [ $? -ne 0 ]

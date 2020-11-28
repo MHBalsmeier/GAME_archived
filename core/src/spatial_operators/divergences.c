@@ -34,12 +34,12 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
         else
         {
             contra_upper = 0;
-            if (layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
+            if (layer_index >= NO_OF_LAYERS - grid -> no_of_oro_layers)
             {
                 vertical_contravariant(in_field, layer_index, h_index, grid, &contra_upper);
             }
             contra_lower = 0;
-            if (layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS - 1)
+            if (layer_index >= NO_OF_LAYERS - grid -> no_of_oro_layers - 1)
             {
                 vertical_contravariant(in_field, layer_index + 1, h_index, grid, &contra_lower);
             }

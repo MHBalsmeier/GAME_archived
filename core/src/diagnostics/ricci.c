@@ -21,9 +21,9 @@ int vertical_contravariant(Vector_field in_field, int layer_index, int h_index, 
 	{
 		no_of_edges = 5;
 	}
-    if (layer_index >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
+    if (layer_index >= NO_OF_LAYERS - grid -> no_of_oro_layers)
     {
-    	if (layer_index == NO_OF_LAYERS - NO_OF_ORO_LAYERS)
+    	if (layer_index == NO_OF_LAYERS - grid -> no_of_oro_layers)
     	{
 			for (int i = 0; i < no_of_edges; ++i)
 			{

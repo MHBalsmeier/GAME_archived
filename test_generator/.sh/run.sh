@@ -15,11 +15,11 @@ echo "***** TEST FILE CREATION *****"
 echo "Copyright (C) 2020 The GAME development team."
 if [ $valgrind_check -eq 0 ]
 then
-mpirun -np $number_of_cpus ./test_generator $test_id
+mpirun -np $number_of_cpus ./test_generator $test_id $orography_layers
 else
 if [ $valgrind_check -eq 1 ]
 then
-valgrind ./test_generator $test_id
+valgrind ./test_generator $test_id $orography_layers
 fi
 fi
 if [ $? -ne 0 ]

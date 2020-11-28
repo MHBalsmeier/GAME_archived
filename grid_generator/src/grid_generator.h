@@ -20,7 +20,7 @@ int build_icosahedron(double [], double [], int [][2], int [][3], int [][3], int
 int generate_horizontal_generators(double [], double [], double [], double [], double [], double [], double [], int [][3], int [][3], int [][3]);
 int calc_inner_product_and_related(double [], double [], double [], int [], int [], double [], double [], double [], int [], double [], double []);
 int calc_coriolis_weights(int [], int [], int [], double [], double [], int [], double [], double [], double [], double [], double [], double [], double [], double [], double [], int [], int [], int [], double [], double [], double, double [], double []);
-int determine_z_scalar(double [], double [], double [], double, double, double);
+int determine_z_scalar(double [], double [], double [], int, double, double);
 int set_f_vec(double [], double [], double [], double []);
 int set_orography(int, int, double []);
 int calc_cell_face_unity(double [], double [], double [], int [], int []);

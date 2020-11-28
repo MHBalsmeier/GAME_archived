@@ -9,7 +9,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdio.h>
 #include "geos95.h"
 
-int determine_z_scalar(double z_scalar[], double z_vertical_vector_pre[], double z_surface[], double z_oro_off, double TOA, double stretching_parameter)
+int determine_z_scalar(double z_scalar[], double z_vertical_vector_pre[], double z_surface[], int NO_OF_ORO_LAYERS, double TOA, double stretching_parameter)
 {
 	int layer_index, h_index;
 	// the heights are defined according to z_k = A_k + B_k*z_surface with A_0 = TOA, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1

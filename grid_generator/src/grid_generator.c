@@ -62,6 +62,7 @@ int main(int argc, char *argv[])
     strcpy(SCALAR_H_FILE, argv[5]);
     double stretching_parameter;
    	stretching_parameter = strtof(argv[6], NULL);
+   	const int NO_OF_ORO_LAYERS = strtod(argv[7], NULL);
     
     // Checking wether the RES_ID of the SCALAR_H_FILE corresponds to the RES_ID in enum.h.
     char res_id_as_string[2];
@@ -231,9 +232,8 @@ int main(int argc, char *argv[])
 	check_for_orthogonality(direction, direction_dual, ORTH_CRITERION_DEG);
 	calc_cell_face_unity(pent_hex_face_unity_sphere, latitude_scalar_dual, longitude_scalar_dual, adjacent_vector_indices_h, vorticity_indices_pre);
 	// building the vertical grid
-   	double z_oro_off = TOA*(NO_OF_ORO_LAYERS + 0.0)/NO_OF_LAYERS;
 	double z_vertical_vector_pre[NO_OF_LAYERS + 1];
-	determine_z_scalar(z_scalar, z_vertical_vector_pre, z_surface, z_oro_off, TOA, stretching_parameter);
+	determine_z_scalar(z_scalar, z_vertical_vector_pre, z_surface, NO_OF_ORO_LAYERS, TOA, stretching_parameter);
 	set_z_vector_and_normal_distance(z_vector, z_surface, z_scalar, normal_distance, latitude_scalar, longitude_scalar, from_index, to_index, TOA);
 	printf("Mapping horizontal areas from unit sphere to model levels ... ");
 	map_area_to_sphere(area, z_vector, pent_hex_face_unity_sphere);
