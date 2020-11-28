@@ -103,7 +103,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "slope", &slope_id)))
         ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "remap_horpri2hordual_weights", &remap_horpri2hordual_vector_weights_id)))
+    if ((retval = nc_inq_varid(ncid, "remap_horpri2hordual_vector_weights", &remap_horpri2hordual_vector_weights_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "density_to_rhombus_weights", &density_to_rhombus_weights_id)))
         ERR(retval);

@@ -12,7 +12,7 @@ In this file, the inner product weights are computed.
 #include "enum.h"
 #include "grid_generator.h"
 
-int calc_inner_product_and_related(double inner_product_weights[], double normal_distance[], double volume[], int to_index[], int from_index[], double area[], double z_scalar[], double z_vector[], int adjacent_vector_indices_h[], double volume_ratios[], double recov_primal2dual_weights[])
+int calc_inner_product_and_related(double inner_product_weights[], double normal_distance[], double volume[], int to_index[], int from_index[], double area[], double z_scalar[], double z_vector[], int adjacent_vector_indices_h[], double volume_ratios[], double remap_horpri2hordual_vector_weights[])
 {
 	int layer_index, h_index;
 	double delta_z, weights_sum, partial_volume;
@@ -35,11 +35,6 @@ int calc_inner_product_and_related(double inner_product_weights[], double normal
 			{
 				inner_product_weights[8*i + j] = 0;
 			}
-		}
-		if (fabs(weights_sum - 2) > 0.4)
-		{
-			printf("Error in inner_product_weights, position 0. Weights sum is %lf, should be closer to two.\n", weights_sum);
-			exit(1);
 		}
 		// upper w, only needed only for diagnostics
 		partial_volume = find_volume(area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]*pow((RADIUS + z_scalar[i])/(RADIUS + z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]), 2), RADIUS + z_scalar[i], RADIUS + z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]);
@@ -75,8 +70,8 @@ int calc_inner_product_and_related(double inner_product_weights[], double normal
 		h_index = i - layer_index*NO_OF_VECTORS_H;
 		if (layer_index == 0 || layer_index == NO_OF_LAYERS)
 		{
-			recov_primal2dual_weights[2*i + 0] = 0;
-			recov_primal2dual_weights[2*i + 1] = 0;
+			remap_horpri2hordual_vector_weights[2*i + 0] = 0;
+			remap_horpri2hordual_vector_weights[2*i + 1] = 0;
 		}
 		else
 		{
@@ -95,7 +90,7 @@ int calc_inner_product_and_related(double inner_product_weights[], double normal
 			}
 			if (e_kin_h_index_0 == -1 || e_kin_h_index_1 == -1)
 			{
-				printf("Index error in calculating recov_primal2dual.\n");
+				printf("Index error in calculating remap_horpri2hordual_vector_weights.\n");
 				exit(1);
 			}
 			upper_volume_0 = inner_product_weights[8*((layer_index - 1)*NO_OF_SCALARS_H + from_index[h_index]) + e_kin_h_index_0]*upper_volume_0;
@@ -105,12 +100,12 @@ int calc_inner_product_and_related(double inner_product_weights[], double normal
 			upper_volume = upper_volume_0 + upper_volume_1;
 			lower_volume = lower_volume_0 + lower_volume_1;
 			total_volume = upper_volume + lower_volume;
-			recov_primal2dual_weights[2*i + 0] = upper_volume/total_volume;
-			recov_primal2dual_weights[2*i + 1] = lower_volume/total_volume;
-			check_sum = recov_primal2dual_weights[2*i + 0] + recov_primal2dual_weights[2*i + 1];
+			remap_horpri2hordual_vector_weights[2*i + 0] = upper_volume/total_volume;
+			remap_horpri2hordual_vector_weights[2*i + 1] = lower_volume/total_volume;
+			check_sum = remap_horpri2hordual_vector_weights[2*i + 0] + remap_horpri2hordual_vector_weights[2*i + 1];
 			if (fabs(check_sum - 1) > 1e-10)
 			{
-				printf("Error in calculating recov_primal2dual. Check sum is %lf, should be 1.\n", check_sum);
+				printf("Error in calculating remap_horpri2hordual_vector_weights. Check sum is %lf, should be 1.\n", check_sum);
 				exit(1);
 			}
 		}

@@ -27,8 +27,8 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
 		{
-			interpolation -> pressure_gradient_0_old_m[i] = 0;
-			interpolation -> pressure_gradient_1_old[i] = 0;
+			interpolation -> pgrad_cpgradt_m_old[i] = 0;
+			interpolation -> pgrad_tgrads_old[i] = 0;
 		}
 	}
 	// This is the standard extrapolation.
@@ -38,18 +38,19 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		new_hor_grad_weight = 1 + get_impl_thermo_weight();
 	}
 	
-	// The horizontal covariant gradient is only updated at the zeroth RK step.
+	// The pressure gradient is only updated at the zeroth RK step.
 	if (no_rk_step == 0)
 	{
 		// Before calculating the new pressure gradient acceleration, the old one must be saved for extrapolation.
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
 		{
-			interpolation -> pressure_gradient_0_old_m[i] =
-			diagnostics -> pressure_gradient_0_m_cov[i] + diagnostics -> pressure_gradient_0_m_corr[i];
-			interpolation -> pressure_gradient_1_old[i] =
-			diagnostics -> pressure_gradient_1_cov[i] + diagnostics -> pressure_gradient_1_corr[i];
+			interpolation -> pgrad_cpgradt_m_old[i] =
+			diagnostics -> pgrad_cpgradt_m_cov_hor[i] + diagnostics -> pgrad_cpgradt_cov_ver_corr_hor_m[i];
+			interpolation -> pgrad_tgrads_old[i] =
+			diagnostics -> pgrad_tgrads_cov_hor[i] + diagnostics -> pgrad_tgrads_cov_ver_corr_hor[i];
 		}
+		
 		// 2.) The first pressure gradient term.
 		// --------------------------------------------------------------------------------
 		// Diagnozing c_g_p.
@@ -59,8 +60,8 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 			diagnostics -> c_g_p_field[i] = spec_heat_cap_diagnostics_p(state, i);
 		}
 		// Multiplying c_g_p with the temperature gradient.
-		grad_hor_cov(state -> temperature_gas, diagnostics -> pressure_gradient_0_m_cov, grid);
-		scalar_times_vector(diagnostics -> c_g_p_field, diagnostics -> pressure_gradient_0_m_cov, diagnostics -> pressure_gradient_0_m_cov, grid);
+		grad_hor_cov(state -> temperature_gas, diagnostics -> pgrad_cpgradt_m_cov_hor, grid);
+		scalar_times_vector(diagnostics -> c_g_p_field, diagnostics -> pgrad_cpgradt_m_cov_hor, diagnostics -> pgrad_cpgradt_m_cov_hor, grid);
 		
 		// 3.) The second pressure gradient term.
 		// --------------------------------------------------------------------------------
@@ -68,7 +69,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
 		{
-			diagnostics -> pressure_gradient_1_cov[i] = 0;
+			diagnostics -> pgrad_tgrads_cov_hor[i] = 0;
 		}
 		// Each constitutent of the gas phase gets an individual term.
 		for (int j = 0; j < NO_OF_GASEOUS_CONSTITUENTS; ++j)
@@ -99,7 +100,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 			#pragma omp parallel for
 			for (int i = 0; i < NO_OF_VECTORS; ++i)
 			{
-				diagnostics -> pressure_gradient_1_cov[i] += diagnostics -> pressure_gradient_1_component_cov[i];
+				diagnostics -> pgrad_tgrads_cov_hor[i] += diagnostics -> pressure_gradient_1_component_cov[i];
 			}
 		}
 	
@@ -112,16 +113,16 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 			diagnostics -> c_g_p_field[i] = spec_heat_cap_diagnostics_p(state, i);
 		}
 		// Multplying c_g_p with the temperature gradient.
-		grad_vert_cov(state -> temperature_gas, diagnostics -> pressure_gradient_0_m_corr, grid);
-		grad_oro_corr_no_add(diagnostics -> pressure_gradient_0_m_corr, grid);
-		scalar_times_vector(diagnostics -> c_g_p_field, diagnostics -> pressure_gradient_0_m_corr, diagnostics -> pressure_gradient_0_m_corr, grid);
+		grad_vert_cov(state -> temperature_gas, diagnostics -> pgrad_cpgradt_cov_ver_corr_hor_m, grid);
+		grad_oro_corr_no_add(diagnostics -> pgrad_cpgradt_cov_ver_corr_hor_m, grid);
+		scalar_times_vector(diagnostics -> c_g_p_field, diagnostics -> pgrad_cpgradt_cov_ver_corr_hor_m, diagnostics -> pgrad_cpgradt_cov_ver_corr_hor_m, grid);
 			
 		// 5.) The second pressure gradient term. (vertical part and terrain correction)
 		// --------------------------------------------------------------------------------
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
 		{
-			diagnostics -> pressure_gradient_1_corr[i] = 0;
+			diagnostics -> pgrad_tgrads_cov_ver_corr_hor[i] = 0;
 		}
 		// Each constitutent of the gas phase gets an individual term.
 		for (int j = 0; j < NO_OF_GASEOUS_CONSTITUENTS; ++j)
@@ -153,7 +154,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 			#pragma omp parallel for
 			for (int i = 0; i < NO_OF_VECTORS; ++i)
 			{
-				diagnostics -> pressure_gradient_1_corr[i] += diagnostics -> pressure_gradient_1_component_corr[i];
+				diagnostics -> pgrad_tgrads_cov_ver_corr_hor[i] += diagnostics -> pressure_gradient_1_component_corr[i];
 			}
 		}
 		
@@ -169,17 +170,17 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 			{
 				forcings -> pressure_gradient_acc[i] =
 				// the old time step convariant gradient
-				old_hor_grad_weight*(-interpolation -> pressure_gradient_0_old_m[i] + interpolation -> pressure_gradient_1_old[i])
+				old_hor_grad_weight*(-interpolation -> pgrad_cpgradt_m_old[i] + interpolation -> pgrad_tgrads_old[i])
 				// the new time step convariant gradient
-				+ new_hor_grad_weight*(-diagnostics -> pressure_gradient_0_m_cov[i] + diagnostics -> pressure_gradient_1_cov[i]
+				+ new_hor_grad_weight*(-diagnostics -> pgrad_cpgradt_m_cov_hor[i] + diagnostics -> pgrad_tgrads_cov_hor[i]
 				// the terrrain correction
-				- diagnostics -> pressure_gradient_0_m_corr[i] + diagnostics -> pressure_gradient_1_corr[i]);
+				- diagnostics -> pgrad_cpgradt_cov_ver_corr_hor_m[i] + diagnostics -> pgrad_tgrads_cov_ver_corr_hor[i]);
 			}
 			// vertical case
 			else
 			{
 				forcings -> pressure_gradient_acc[i] =
-				-diagnostics -> pressure_gradient_0_m_corr[i] + diagnostics -> pressure_gradient_1_corr[i];
+				-diagnostics -> pgrad_cpgradt_cov_ver_corr_hor_m[i] + diagnostics -> pgrad_tgrads_cov_ver_corr_hor[i];
 			}
 		}
 		
