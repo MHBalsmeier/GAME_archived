@@ -69,9 +69,8 @@ if short_name == "prmsl":
 	contourf_plot = 0;
 	surface_bool = 1;
 if short_name == "sp":
-	variable_name = "Surface pressure - 1000 hPa";
+	variable_name = "Surface pressure";
 	rescale = 0.01;
-	shift = -1000;
 	unit_string = "hPa";
 	show_level_on = 0;
 	surface_bool = 1;
