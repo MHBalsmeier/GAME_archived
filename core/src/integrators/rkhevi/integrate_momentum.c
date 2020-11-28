@@ -29,6 +29,7 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
     vorticity_flux(diagnostics -> flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid, dualgrid);
     // Horizontal kinetic energy is prepared for the gradient term of the Lamb transformation.
     kinetic_energy(state -> velocity_gas, diagnostics -> e_kin_h, grid, 0);
+    // taking the gradient of the horizontal kinetic energy
     grad(diagnostics -> e_kin_h, forcings -> e_kin_h_grad, grid);
     // Now the explicit forces are added up.
     int layer_index, h_index;
@@ -47,10 +48,14 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
         {
     		if (h_index >= NO_OF_SCALARS_H)
     		{
+    			// determining w at the edge
     			remap_verpri2horpri_vector(state -> velocity_gas, layer_index, h_index - NO_OF_SCALARS_H, &vertical_velocity, grid);
+    			// deep atmospehre metric term -w/r*v_h
     			metric_term = -vertical_velocity*state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
+    			// (-f_y*w*i)*n = -f_y*w*(i*n) = -f_y*w*cos(direction)
     			hor_non_trad_cori_term = -vertical_velocity*dualgrid -> f_vec[2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
         		state_tendency -> velocity_gas[i] =
+        		// full pressure gradient acceleration
         		forcings -> pressure_gradient_acc[i]
         		// generalized Coriolis term
         		+ forcings -> pot_vort_tend[i]
@@ -58,7 +63,9 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
         		- grid -> gravity_m[i]
         		// horizontal kinetic energy term
         		- forcings -> e_kin_h_grad[i]
+        		// the term that results from the horizontal Coriolis vector
         		+ hor_non_trad_cori_term
+        		// deep atmosphere metric term
         		+ metric_term
         		// momentum diffusion
         		+ irreversible_quantities -> friction_acc[i];
