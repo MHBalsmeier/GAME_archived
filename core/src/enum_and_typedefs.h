@@ -122,12 +122,12 @@ Curl_field pot_vort;
 Scalar_field c_g_v_field;
 Scalar_field c_g_p_field;
 Scalar_field e_kin_h;
-Vector_field pgrad_cpgradt_m_cov_hor;
-Vector_field pgrad_cpgradt_cov_ver_corr_hor_m;
+Vector_field cpgradt_m_cov_hor;
+Vector_field cpgradt_cov_ver_corr_hor_m;
 Vector_field pressure_gradient_1_component_cov;
 Vector_field pressure_gradient_1_component_corr;
-Vector_field pgrad_tgrads_cov_hor;
-Vector_field pgrad_tgrads_cov_ver_corr_hor;
+Vector_field tgrads_cov_hor;
+Vector_field tgrads_cov_ver_corr_hor;
 Scalar_field velocity_gas_divv;
 Vector_field curl_of_vorticity_m;
 Scalar_field scalar_field_placeholder;
@@ -155,8 +155,8 @@ int rad_update;
 
 // This is necessary for ensuring cancellation of energetically important terms, see Gassmann and Herzog.
 typedef struct interpolation_info {
-Vector_field pgrad_cpgradt_m_old;
-Vector_field pgrad_tgrads_old;
+Vector_field cpgradt_m_old;
+Vector_field tgrads_old;
 } Interpolation_info;
 
 // Contains everything on turbulence parametrizations as well as constituent-related quantities.
