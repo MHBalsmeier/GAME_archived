@@ -316,7 +316,7 @@ int main(int argc, char *argv[])
 	{
 		printf("Momentum diffusion is turned on.\n");
 	}
-	printf("reading grid data and checking ... ");
+	printf("reading grid data ... ");
     set_grid_properties(grid, dualgrid, GEO_PROP_FILE);
     double delta_t;
     calc_delta_t(cfl_margin, &delta_t, grid);
