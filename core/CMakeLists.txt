@@ -43,6 +43,7 @@ src/spatial_operators/linear_combine_two_states.c
 src/io/init_state_setter.c
 src/io/write_output.c
 src/io/set_grid_props_and_dt.c
+src/io/spatial_ops_for_output.c
 src/physics/mo_radiation.f90
 ${RTERRTMGPDIR}/rrtmgp/mo_gas_optics.F90
 ${RTERRTMGPDIR}/rrtmgp/mo_gas_optics_rrtmgp.F90

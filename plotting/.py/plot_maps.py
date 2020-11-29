@@ -102,6 +102,10 @@ if short_name == "vo":
 	variable_name = "Relative vorticity";
 	unit_string = "10^-5/s";
 	rescale = 1e5;
+if short_name == "pv":
+	variable_name = "Potential vorticity";
+	unit_string = "PVU";
+	rescale = 1e6;
 if short_name == "10u":
 	variable_name = "10 m zonal wind";
 	unit_string = "m/s";
