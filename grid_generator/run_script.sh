@@ -16,7 +16,8 @@ n_iterations=2000 # The number of iterations to be used for the optimization. On
 use_scalar_h_coords_file=1 # If this is set to one, the horizontal coordinates of the grid points will be read from the file specified in the next line.
 scalar_h_coords_file="grids/B5L26T30000_O0_OL17_SCVT.nc" # File used for reading horizontal coordinates of grid points, if use_scalar_h_coords_file == 1.
 stretching_parameter=1.0 # stretching parameter of the vertical grid, must be >= 1, 1: no stretching
-orography_layers=17 # number of layers following orography
+orography_layers=23 # number of layers following orography (only relevant if type_of_vertical_grid == 0)
+type_of_vertical_grid=1 # 0: terrain following coordinates, 1: block-like orography
 valgrind_check=0 # set this to 1, if you want to check the code with Valgrind
 number_of_cpus=1 # relevant only for MPI
 export OMP_NUM_THREADS=7 # relevant only for OMP

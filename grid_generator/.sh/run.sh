@@ -26,6 +26,7 @@ echo "Horizontal coordinates of the generating points (the scalar points in term
 fi
 echo "number of layers following orography: "$orography_layers
 echo "stretching parameter: "$stretching_parameter
+echo "type of vertical grid: "$type_of_vertical_grid
 # end verbosity
 
 echo ""
@@ -33,11 +34,11 @@ echo "********** Calling the GAME grid generator **********"
 echo ""
 if [ $valgrind_check -eq 0 ]
 then
-mpirun -np $number_of_cpus ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter $orography_layers
+mpirun -np $number_of_cpus ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter $orography_layers $type_of_vertical_grid
 else
 if [ $valgrind_check -eq 1 ]
 then
-valgrind ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter $orography_layers
+valgrind ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter $orography_layers $type_of_vertical_grid
 fi
 fi
 if [ $? -ne 0 ]

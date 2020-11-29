@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
     double stretching_parameter;
    	stretching_parameter = strtof(argv[6], NULL);
    	const int NO_OF_ORO_LAYERS = strtod(argv[7], NULL);
+   	const int VERT_GRID_TYPE = strtod(argv[8], NULL);
     
     // Checking wether the RES_ID of the SCALAR_H_FILE corresponds to the RES_ID in enum.h.
     char res_id_as_string[2];
@@ -179,6 +180,8 @@ int main(int argc, char *argv[])
     int *from_index = malloc(NO_OF_VECTORS_H*sizeof(int));
     int *trsk_modified_velocity_indices = calloc(10*NO_OF_VECTORS_H, sizeof(int));
     int *trsk_modified_curl_indices = calloc(10*NO_OF_VECTORS_H, sizeof(int));
+    int *no_of_shaded_points_scalar = calloc(NO_OF_SCALARS_H, sizeof(int));
+    int *no_of_shaded_points_vector = calloc(NO_OF_VECTORS_H, sizeof(int));
     int *adjacent_vector_indices_h = malloc(6*NO_OF_SCALARS_H*sizeof(int));
     int *vorticity_indices_pre = malloc(3*NO_OF_DUAL_SCALARS_H*sizeof(int));
     int *vorticity_indices = malloc(4*NO_OF_VECTORS_H*sizeof(int));
@@ -191,7 +194,6 @@ int main(int argc, char *argv[])
     int *h_curl_signs = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int *density_to_rhombus_indices = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     printf(GREEN "finished.\n" RESET);
-    int retval, z_surface_id;
     printf("Reading orography data ... ");
 	set_orography(RES_ID, ORO_ID, z_surface);
     printf(GREEN "finished.\n" RESET);
@@ -233,22 +235,27 @@ int main(int argc, char *argv[])
 	calc_cell_face_unity(pent_hex_face_unity_sphere, latitude_scalar_dual, longitude_scalar_dual, adjacent_vector_indices_h, vorticity_indices_pre);
 	// building the vertical grid
 	double z_vertical_vector_pre[NO_OF_LAYERS + 1];
-	determine_z_scalar(z_scalar, z_vertical_vector_pre, z_surface, NO_OF_ORO_LAYERS, TOA, stretching_parameter);
-	set_z_vector_and_normal_distance(z_vector, z_surface, z_scalar, normal_distance, latitude_scalar, longitude_scalar, from_index, to_index, TOA);
+	determine_z_scalar(z_scalar, z_vertical_vector_pre, z_surface, NO_OF_ORO_LAYERS, TOA, stretching_parameter, VERT_GRID_TYPE);
+	if (VERT_GRID_TYPE == 1)
+	{
+		set_scalar_shading_indices(z_scalar, z_surface, no_of_shaded_points_scalar);
+		set_vector_shading_indices(from_index, to_index, no_of_shaded_points_scalar, no_of_shaded_points_vector);
+	}
+	set_z_vector_and_normal_distance(z_vector, z_scalar, normal_distance, latitude_scalar, longitude_scalar, from_index, to_index, TOA, VERT_GRID_TYPE);
 	printf("Mapping horizontal areas from unit sphere to model levels ... ");
 	map_area_to_sphere(area, z_vector, pent_hex_face_unity_sphere);
     printf(GREEN "finished.\n" RESET);
     printf("Calculating grid box volumes ... ");
-	set_volume(volume, z_scalar_dual, z_vector, area, from_index, to_index, TOA, z_surface, vorticity_indices_pre);
+	set_volume(volume, z_scalar_dual, z_vector, area, from_index, to_index, TOA, vorticity_indices_pre);
     printf(GREEN "finished.\n" RESET);
 	printf("Determining vector z coordinates of the dual grid and distances of the dual grid ... ");
-	calc_z_vector_dual_and_normal_distance_dual(z_vector_dual, normal_distance_dual, z_scalar_dual, TOA, z_surface, from_index, to_index, z_vector, from_index_dual, to_index_dual, latitude_scalar_dual, longitude_scalar_dual, vorticity_indices_pre);
+	calc_z_vector_dual_and_normal_distance_dual(z_vector_dual, normal_distance_dual, z_scalar_dual, TOA, from_index, to_index, z_vector, from_index_dual, to_index_dual, latitude_scalar_dual, longitude_scalar_dual, vorticity_indices_pre);
     printf(GREEN "finished.\n" RESET);
     printf("Determining coordinate slopes ...");
     calc_slopes(z_scalar, from_index, to_index, normal_distance, slope);
     printf(GREEN "finished.\n" RESET);
     printf("Calculating dual areas, pre version ... ");
-	calc_area_dual_pre(area_dual_pre, z_vector_dual, normal_distance, z_vector, from_index, to_index, z_surface, triangle_face_unit_sphere, TOA);
+	calc_area_dual_pre(area_dual_pre, z_vector_dual, normal_distance, z_vector, from_index, to_index, triangle_face_unit_sphere, TOA);
     printf(GREEN "finished.\n" RESET);
     printf("Calculating vertical faces, pre version ... ");
 	calculate_vertical_faces(area, z_vector_dual, normal_distance_dual, TOA);
@@ -276,7 +283,7 @@ int main(int argc, char *argv[])
     printf(GREEN "finished.\n" RESET);
     // A statistics file is created to compare the fundamental statistical properties of the grid with the literature.
 	write_statistics_file(pent_hex_face_unity_sphere, normal_distance, normal_distance_dual, STATISTICS_FILE);
-    int latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_modified_weights_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_10, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, inner_product_weights_id, scalar_8_dimid, slope_id, scalar_2_dimid, volume_ratios_id, remap_horpri2hordual_vector_weights_id, vector_h_dual_dimid_2, density_to_rhombus_indices_id, density_to_rhombus_weights_id, vorticity_indices_pre_id, ncid_g_prop, single_double_dimid, stretching_parameter_id;
+    int retval, latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_modified_weights_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, vorticity_indices_id, h_curl_indices_id, trsk_modified_velocity_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, h_curl_signs_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_10, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, inner_product_weights_id, scalar_8_dimid, slope_id, scalar_2_dimid, volume_ratios_id, remap_horpri2hordual_vector_weights_id, vector_h_dual_dimid_2, density_to_rhombus_indices_id, density_to_rhombus_weights_id, vorticity_indices_pre_id, ncid_g_prop, single_double_dimid, stretching_parameter_id, no_of_shaded_points_vector_id, no_of_shaded_points_scalar_id;
     printf("Starting to write to output file ... ");
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
@@ -331,10 +338,6 @@ int main(int argc, char *argv[])
     if ((retval = nc_def_var(ncid_g_prop, "gravity_potential", NC_DOUBLE, 1, &scalar_dimid, &gravity_potential_id)))
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, gravity_potential_id, "units", strlen("m^2/s^2"), "m^2/s^2")))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "z_surface", NC_DOUBLE, 1, &scalar_h_dimid, &z_surface_id)))
-        ERR(retval);
-    if ((retval = nc_put_att_text(ncid_g_prop, z_surface_id, "units", strlen("m"), "m")))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "z_vector", NC_DOUBLE, 1, &vector_dimid, &z_vector_id)))
         ERR(retval);
@@ -414,7 +417,15 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "density_to_rhombus_indices", NC_INT, 1, &vector_h_dimid_4, &density_to_rhombus_indices_id)))
         ERR(retval);
+    if ((retval = nc_def_var(ncid_g_prop, "no_of_shaded_points_scalar", NC_INT, 1, &scalar_h_dimid, &no_of_shaded_points_scalar_id)))
+        ERR(retval);
+    if ((retval = nc_def_var(ncid_g_prop, "no_of_shaded_points_vector", NC_INT, 1, &vector_h_dimid, &no_of_shaded_points_vector_id)))
+        ERR(retval);
     if ((retval = nc_enddef(ncid_g_prop)))
+        ERR(retval);
+    if ((retval = nc_put_var_int(ncid_g_prop, no_of_shaded_points_scalar_id, &no_of_shaded_points_scalar[0])))
+        ERR(retval);
+    if ((retval = nc_put_var_int(ncid_g_prop, no_of_shaded_points_vector_id, &no_of_shaded_points_vector[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, stretching_parameter_id, &stretching_parameter)))
         ERR(retval);
@@ -429,8 +440,6 @@ int main(int argc, char *argv[])
     if ((retval = nc_put_var_double(ncid_g_prop, z_scalar_id, &z_scalar[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, gravity_potential_id, &gravity_potential[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, z_surface_id, &z_surface[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, z_vector_id, &z_vector[0])))
         ERR(retval);
@@ -498,6 +507,8 @@ int main(int argc, char *argv[])
         ERR(retval);
     printf(GREEN "finished.\n" RESET);
     free(SCALAR_H_FILE);
+    free(no_of_shaded_points_scalar);
+    free(no_of_shaded_points_vector);
     free(latitude_ico);
     free(longitude_ico);
     free(x_unity);
