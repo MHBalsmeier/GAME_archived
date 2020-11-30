@@ -91,7 +91,8 @@ int calc_divv_term_viscosity_eff(State *state, Config_info *config_info, Scalar_
 		calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &divv_term_viscosity_eff_value);
 		// homogeneous for now
 		calc_diffusion_coeff(273.15, mean_particle_mass, 1, eff_particle_radius, &divv_term_viscosity_eff_value);
-		divv_term_viscosity_eff[i] = 7.0/3*upturning_for_scale*divv_term_viscosity_eff_value;
+		// neglecting the volume viscosity for now
+		divv_term_viscosity_eff[i] = 4.0/3*upturning_for_scale*divv_term_viscosity_eff_value;
 	}
 	return 0;
 }

@@ -24,7 +24,7 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
         }
         if (layer_index == 0)
         {
-		comp_v = 0;
+			comp_v = 0;
         }
         else if (layer_index == NO_OF_LAYERS - 1)
         {
@@ -66,6 +66,11 @@ int add_vertical_divv(Vector_field in_field, Scalar_field out_field, Grid *grid)
         {
         	contra_upper = 0;
         	contra_lower = in_field[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
+        }
+        else if (layer_index == NO_OF_LAYERS - 1)
+        {
+            contra_upper = in_field[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
+            contra_lower = 0;
         }
         else
         {
