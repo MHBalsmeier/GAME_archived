@@ -48,7 +48,9 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
         else
         {
         	// horizontal case
-    		if (h_index >= NO_OF_SCALARS_H)
+    		if (h_index >= NO_OF_SCALARS_H
+        	// checking for shading
+        	&& NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_vector[h_index - NO_OF_SCALARS_H])
     		{
     			// determining w at the edge
     			remap_verpri2horpri_vector(state -> velocity_gas, layer_index, h_index - NO_OF_SCALARS_H, &vertical_velocity, grid);
@@ -73,7 +75,9 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
         		+ irreversible_quantities -> friction_acc[i];
     		}
     		// vertical case
-        	if (h_index < NO_OF_SCALARS_H)
+        	if (h_index < NO_OF_SCALARS_H
+        	// checking for shading
+        	&& NO_OF_LAYERS - layer_index > grid -> no_of_shaded_points_scalar[h_index])
         	{
         		state_tendency -> velocity_gas[i] =
         		// generalized Coriolis term
