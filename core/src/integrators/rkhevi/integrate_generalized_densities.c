@@ -91,11 +91,16 @@ int integrate_generalized_densities(State *state, Interpolation_info *interpolat
         divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
 		{
-		    state_tendency -> mass_densities[i*NO_OF_SCALARS + j] =
-			// the advection
-		    -diagnostics -> flux_density_divv[j]
-		    // the phase transition rates
-		    + irreversible_quantities -> constituent_mass_source_rates[i*NO_OF_SCALARS + j];
+			layer_index = j/NO_OF_SCALARS_H;
+			h_index = j - layer_index*NO_OF_SCALARS_H;
+			if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
+			{
+				state_tendency -> mass_densities[i*NO_OF_SCALARS + j] =
+				// the advection
+				-diagnostics -> flux_density_divv[j]
+				// the phase transition rates
+				+ irreversible_quantities -> constituent_mass_source_rates[i*NO_OF_SCALARS + j];
+		    }
 	    }
 		// Explicit entropy integrations
 		// -----------------------------
@@ -115,11 +120,16 @@ int integrate_generalized_densities(State *state, Interpolation_info *interpolat
 	    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
 		{
-			state_tendency -> entropy_densities[i*NO_OF_SCALARS + j] = 
-			// the advection
-			-diagnostics -> flux_density_divv[j]
-			// the heating rates
-			 + state -> mass_densities[i*NO_OF_SCALARS + j]/density_total(state, j)*radiation_tendency[j]/state -> temperature_gas[j];
+			layer_index = j/NO_OF_SCALARS_H;
+			h_index = j - layer_index*NO_OF_SCALARS_H;
+			if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
+			{
+				state_tendency -> entropy_densities[i*NO_OF_SCALARS + j] = 
+				// the advection
+				-diagnostics -> flux_density_divv[j]
+				// the heating rates
+				 + state -> mass_densities[i*NO_OF_SCALARS + j]/density_total(state, j)*radiation_tendency[j]/state -> temperature_gas[j];
+			 }
 	    }
     
 		// This is the integration of the "density x temperature" fields. It only needs to be done for condensed constituents.
@@ -134,12 +144,17 @@ int integrate_generalized_densities(State *state, Interpolation_info *interpolat
 		    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
-				c_v_cond = ret_c_v_cond(i, 0, state -> condensed_density_temperatures[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + state -> mass_densities[i*NO_OF_SCALARS + j]));
-			    state_tendency -> condensed_density_temperatures[i*NO_OF_SCALARS + j] =
-			    // the advection
-			    -diagnostics -> flux_density_divv[j]
-			    // the source terms
-			    + state -> mass_densities[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state, j))*(irreversible_quantities -> temperature_diffusion_heating[j] + irreversible_quantities -> heating_diss[j] + radiation_tendency[j]) + 1/c_v_cond*irreversible_quantities -> constituent_heat_source_rates[i*NO_OF_SCALARS + j] + diagnostics -> scalar_field_placeholder[j]*(irreversible_quantities -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]);
+				layer_index = j/NO_OF_SCALARS_H;
+				h_index = j - layer_index*NO_OF_SCALARS_H;
+				if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
+				{
+					c_v_cond = ret_c_v_cond(i, 0, state -> condensed_density_temperatures[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + state -> mass_densities[i*NO_OF_SCALARS + j]));
+					state_tendency -> condensed_density_temperatures[i*NO_OF_SCALARS + j] =
+					// the advection
+					-diagnostics -> flux_density_divv[j]
+					// the source terms
+					+ state -> mass_densities[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state, j))*(irreversible_quantities -> temperature_diffusion_heating[j] + irreversible_quantities -> heating_diss[j] + radiation_tendency[j]) + 1/c_v_cond*irreversible_quantities -> constituent_heat_source_rates[i*NO_OF_SCALARS + j] + diagnostics -> scalar_field_placeholder[j]*(irreversible_quantities -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]);
+				}
 			}
 		}
 	}
