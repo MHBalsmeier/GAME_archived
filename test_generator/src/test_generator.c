@@ -53,7 +53,12 @@ int main(int argc, char *argv[])
 	double C_D_V = spec_heat_capacities_v_gas_lookup(0);
 	int TEST_ID;
    	TEST_ID = strtod(argv[1], NULL);
-   	const int NO_OF_ORO_LAYERS = strtod(argv[2], NULL);
+   	int NO_OF_ORO_LAYERS = strtod(argv[2], NULL);
+   	const int VERT_GRID_TYPE = strtod(argv[3], NULL);
+   	if (VERT_GRID_TYPE == 1)
+   	{
+   		NO_OF_ORO_LAYERS = 0;
+   	}
    	// determining the orography ID as a function of the test ID
 	int ORO_ID;
 	if (TEST_ID == 0 || TEST_ID == 8 || TEST_ID == 9)

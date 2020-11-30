@@ -1,0 +1,7 @@
+Ratio of minimum to maximum area: 0.707165
+Shortest horizontal normal distance (highest layer): 200999.912257 m.
+Longest horizontal normal distance (highest layer): 255446.752025 m.
+Ratio of shortest to longest horizontal normal distance: 0.786856.
+Shortest horizontal normal distance dual (highest level): 93243.541467 m.
+Longest horizontal normal distance dual (highest level): 164793.519578 m.
+Ratio of shortest to longest dual horizontal normal distance: 0.565820.

@@ -13,7 +13,8 @@ valgrind_check=0 # set this to 1, if you want to check the code with Valgrind
 
 # grid properties
 toa=30000 # top of atmosphere
-orography_layers=23 # number of layers following orography
+type_of_vertical_grid=0 # 0: terrain following coordinates, 1: block-like orography
+orography_layers=23 # number of layers following orography (only relevent if type_of_vertical_grid == 0)
 
 # "physics" configuration
 cfl_margin=0.25 # The time step will be calculated as follows (delta t) = (delta t from CFL)*(1 - cfl_margin). 0.25 can be considered a safe standard value.

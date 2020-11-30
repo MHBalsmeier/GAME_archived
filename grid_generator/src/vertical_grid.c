@@ -35,7 +35,7 @@ int determine_z_scalar(double z_scalar[], double z_vertical_vector_pre[], double
 			}
 			z_vertical_vector_pre[j] = A + B*z_surface[h_index];
 		}
-		if (i == 0)
+		if (i == 0 && VERT_GRID_TYPE == 0)
 		{
 			max_oro = z_surface[find_max_index(z_surface, NO_OF_SCALARS_H)];
 			if (max_oro > z_vertical_vector_pre[NO_OF_LAYERS - NO_OF_ORO_LAYERS])

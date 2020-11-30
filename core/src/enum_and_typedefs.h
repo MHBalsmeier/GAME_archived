@@ -76,6 +76,8 @@ int to_index[NO_OF_VECTORS_H];
 int adjacent_vector_indices_h[6*NO_OF_SCALARS_H];
 int adjacent_signs_h[6*NO_OF_SCALARS_H];
 int density_to_rhombus_indices[4*NO_OF_VECTORS_H];
+int no_of_shaded_points_scalar[NO_OF_SCALARS_H];
+int no_of_shaded_points_vector[NO_OF_VECTORS_H];
 double latitude_scalar[NO_OF_SCALARS_H];
 double longitude_scalar[NO_OF_SCALARS_H];
 double volume_ratios[2*NO_OF_SCALARS];

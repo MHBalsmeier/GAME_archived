@@ -18,8 +18,9 @@
 # 11:	Ullrich test, moist, perturbed, with oro_id = 3
 # 12:	standard atmosphere with oro_id = 3
 
-test_id=1
-orography_layers=17 # number of layers following orography
+test_id=0
+type_of_vertical_grid=0 # 0: terrain following coordinates, 1: block-like orography
+orography_layers=23 # number of layers following orography (only relevant if type_of_vertical_grid == 0)
 valgrind_check=0 # set this to 1, if you want to check the code with Valgrind
 number_of_cpus=1 # relevant only for MPI
 export OMP_NUM_THREADS=5 # relevant only for OMP

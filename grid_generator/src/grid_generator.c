@@ -62,8 +62,12 @@ int main(int argc, char *argv[])
     strcpy(SCALAR_H_FILE, argv[5]);
     double stretching_parameter;
    	stretching_parameter = strtof(argv[6], NULL);
-   	const int NO_OF_ORO_LAYERS = strtod(argv[7], NULL);
+   	int NO_OF_ORO_LAYERS = strtod(argv[7], NULL);
    	const int VERT_GRID_TYPE = strtod(argv[8], NULL);
+   	if (VERT_GRID_TYPE == 1)
+   	{
+   		NO_OF_ORO_LAYERS = 0;
+   	}
     
     // Checking wether the RES_ID of the SCALAR_H_FILE corresponds to the RES_ID in enum.h.
     char res_id_as_string[2];

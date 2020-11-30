@@ -94,6 +94,12 @@ int main(int argc, char *argv[])
 	io_config -> model_level_output_switch = strtod(argv[28], NULL);
 	io_config -> surface_output_switch = strtod(argv[29], NULL);
 	grid -> no_of_oro_layers = strtod(argv[30], NULL);
+	int VERT_GRID_TYPE = strtod(argv[31], NULL);
+	// in the case of block-shaped mountains, no lowers follow the orography
+	if (VERT_GRID_TYPE == 1)
+	{
+		grid -> no_of_oro_layers = 0;
+	}
 	if (io_config -> grib_output_switch == 0 && io_config -> netcdf_output_switch == 0)
 	{
 		printf("Either grib_output_switch or netcdf_output_switch must be set to 1.\n");
@@ -232,7 +238,18 @@ int main(int argc, char *argv[])
 	printf("%s", stars);
 	printf("model run configuration information:\n");
 	printf("number of layers: %d\n", NO_OF_LAYERS);
-	printf("number of layers following orography: %d\n", grid -> no_of_oro_layers);
+	if (VERT_GRID_TYPE == 0)
+	{
+		printf("terrain handling: terrain following coordinates\n");
+	}
+	if (VERT_GRID_TYPE == 1)
+	{
+		printf("terrain handling: block structure\n");
+	}
+	if (VERT_GRID_TYPE == 0)
+	{
+		printf("number of layers following orography: %d\n", grid -> no_of_oro_layers);
+	}
 	printf("number of scalar data points per layer: %d\n", NO_OF_SCALARS_H);
 	double surface = 4*M_PI*pow(RADIUS, 2);
 	double points_per_axis = pow(NO_OF_SCALARS_H, 0.5);
