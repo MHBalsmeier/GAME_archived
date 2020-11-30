@@ -74,73 +74,104 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
     	exit(1);
     }
     
+    int layer_index, h_index;
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-        init_state -> temperature_gas[i] = temperature_gas[i];
+		layer_index = i/NO_OF_SCALARS_H;
+		h_index = i - layer_index*NO_OF_SCALARS_H;
+		if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
+		{
+        	init_state -> temperature_gas[i] = temperature_gas[i];
+    	}
     }
     
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-        init_state -> mass_densities[i] = solid_water_density[i];
-        if (init_state -> mass_densities[i] < 0)
-        {
-        	printf("Error: init_state -> mass_densities < 0 somewhere.\n");
-        	printf("Aborting.\n");
-        	exit(1);
-        }
-        init_state -> mass_densities[NO_OF_SCALARS + i] = liquid_water_density[i];
-        if (init_state -> mass_densities[NO_OF_SCALARS + i] < 0)
-        {
-        	printf("Error: init_state -> mass_densities < 0 somewhere.\n");
-        	printf("Aborting.\n");
-        	exit(1);
-        }
-        init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = density_dry[i];
-        if (init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] < 0)
-        {
-        	printf("Error: init_state -> mass_densities < 0 somewhere.\n");
-        	printf("Aborting.\n");
-        	exit(1);
-        }
-        init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = water_vapour_density[i];
-        if (init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] < 0)
-        {
-        	printf("Error: init_state -> mass_densities < 0 somewhere.\n");
-        	printf("Aborting.\n");
-        	exit(1);
-        }
+		layer_index = i/NO_OF_SCALARS_H;
+		h_index = i - layer_index*NO_OF_SCALARS_H;
+		if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
+		{
+		    init_state -> mass_densities[i] = solid_water_density[i];
+		    if (init_state -> mass_densities[i] < 0)
+		    {
+		    	printf("Error: init_state -> mass_densities < 0 somewhere.\n");
+		    	printf("Aborting.\n");
+		    	exit(1);
+		    }
+		    init_state -> mass_densities[NO_OF_SCALARS + i] = liquid_water_density[i];
+		    if (init_state -> mass_densities[NO_OF_SCALARS + i] < 0)
+		    {
+		    	printf("Error: init_state -> mass_densities < 0 somewhere.\n");
+		    	printf("Aborting.\n");
+		    	exit(1);
+		    }
+		    init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = density_dry[i];
+		    if (init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] < 0)
+		    {
+		    	printf("Error: init_state -> mass_densities < 0 somewhere.\n");
+		    	printf("Aborting.\n");
+		    	exit(1);
+		    }
+		    init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = water_vapour_density[i];
+		    if (init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] < 0)
+		    {
+		    	printf("Error: init_state -> mass_densities < 0 somewhere.\n");
+		    	printf("Aborting.\n");
+		    	exit(1);
+		    }
+	    }
 	}
 	
     double pressure, pot_temp, specific_entropy;
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		for (int j = 0; j < NO_OF_CONSTITUENTS; ++j)
+		layer_index = i/NO_OF_SCALARS_H;
+		h_index = i - layer_index*NO_OF_SCALARS_H;
+		if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 		{
-			if (j < NO_OF_CONDENSED_CONSTITUENTS)
+			for (int j = 0; j < NO_OF_CONSTITUENTS; ++j)
 			{
-				init_state -> entropy_densities[j*NO_OF_SCALARS + i] = 0;
-			}
-			else
-			{
-				if (init_state -> mass_densities[j*NO_OF_SCALARS + i] == 0)
+				if (j < NO_OF_CONDENSED_CONSTITUENTS)
 				{
 					init_state -> entropy_densities[j*NO_OF_SCALARS + i] = 0;
 				}
 				else
 				{
-					pressure = init_state -> mass_densities[j*NO_OF_SCALARS + i]*specific_gas_constants(j - NO_OF_CONDENSED_CONSTITUENTS)*temperature_gas[i];
-					pot_temp = temperature_gas[i]*pow(P_0/pressure, specific_gas_constants(j - NO_OF_CONDENSED_CONSTITUENTS)/spec_heat_capacities_p_gas(j - NO_OF_CONDENSED_CONSTITUENTS));
-					specific_entropy = spec_heat_capacities_p_gas(j - NO_OF_CONDENSED_CONSTITUENTS)*log(pot_temp);
-					init_state -> entropy_densities[j*NO_OF_SCALARS + i] = init_state -> mass_densities[j*NO_OF_SCALARS + i]*specific_entropy;
+					if (init_state -> mass_densities[j*NO_OF_SCALARS + i] == 0)
+					{
+						init_state -> entropy_densities[j*NO_OF_SCALARS + i] = 0;
+					}
+					else
+					{
+						pressure = init_state -> mass_densities[j*NO_OF_SCALARS + i]*specific_gas_constants(j - NO_OF_CONDENSED_CONSTITUENTS)*temperature_gas[i];
+						pot_temp = temperature_gas[i]*pow(P_0/pressure, specific_gas_constants(j - NO_OF_CONDENSED_CONSTITUENTS)/spec_heat_capacities_p_gas(j - NO_OF_CONDENSED_CONSTITUENTS));
+						specific_entropy = spec_heat_capacities_p_gas(j - NO_OF_CONDENSED_CONSTITUENTS)*log(pot_temp);
+						init_state -> entropy_densities[j*NO_OF_SCALARS + i] = init_state -> mass_densities[j*NO_OF_SCALARS + i]*specific_entropy;
+					}
 				}
-		    }
+			}
+			init_state -> condensed_density_temperatures[i] = solid_water_density[i]*solid_water_temperature[i];
+			init_state -> condensed_density_temperatures[NO_OF_SCALARS + i] = liquid_water_density[i]*liquid_water_temperature[i];
 	    }
-	    init_state -> condensed_density_temperatures[i] = solid_water_density[i]*solid_water_temperature[i];
-	    init_state -> condensed_density_temperatures[NO_OF_SCALARS + i] = liquid_water_density[i]*liquid_water_temperature[i];
 	}
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
-        init_state -> velocity_gas[i] = wind[i];
+    	layer_index = i/NO_OF_VECTORS_PER_LAYER;
+    	h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
+    	// the horizontal case
+		if (h_index >= NO_OF_SCALARS_H
+		// check for shading
+		&& NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_vector[h_index - NO_OF_SCALARS_H])
+		{
+        	init_state -> velocity_gas[i] = wind[i];
+    	}
+    	// the vertical case
+    	if (h_index < NO_OF_SCALARS_H
+    	// check for shading
+    	&& NO_OF_LAYERS - layer_index > grid -> no_of_shaded_points_scalar[h_index])
+        {
+        	init_state -> velocity_gas[i] = wind[i];
+    	}
     }
     free(density_dry);
     free(wind);
