@@ -266,6 +266,7 @@ int main(int argc, char *argv[])
 	printf("number of scalar data points: %d\n", NO_OF_SCALARS);
 	printf("number of vectors: %d\n", NO_OF_VECTORS);
 	printf("number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
+	printf("Runge Kutta order: %d\n", config_info -> rk_order);
 	if (config_info -> rad_on == 0)
 	{
 		printf("Radiation is turned off.\n");
