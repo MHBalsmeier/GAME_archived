@@ -22,11 +22,10 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolation_info *interp
     }
     printf("Maximum velocity: %lf\n", velocity_max);
 	/*
-	Here, the RK3 scheme is implemented.
-	If radiation is updated, it is done at the first step.
+	Loop over the RK substeps.
 	*/
 	double delta_t_rk;
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < config_info -> rk_order; ++i)
 	{
 		/*
 		general remarks:
@@ -36,7 +35,7 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolation_info *interp
 		*/
 		
 		// 1.) setting the time step of the RK substep
-		delta_t_rk = delta_t/(3 - i);
+		delta_t_rk = delta_t/(config_info -> rk_order - i);
 		
 		// 2.) Explicit component of the momentum equation.
 		// ----------------------------------------------------------------------------

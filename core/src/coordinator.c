@@ -95,6 +95,13 @@ int main(int argc, char *argv[])
 	io_config -> surface_output_switch = strtod(argv[29], NULL);
 	grid -> no_of_oro_layers = strtod(argv[30], NULL);
 	int VERT_GRID_TYPE = strtod(argv[31], NULL);
+	config_info -> rk_order = strtod(argv[32], NULL);
+	if (config_info -> rk_order < 2 || config_info -> rk_order > 4)
+	{
+		printf("The Runge-Kutta order must be between two and four.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
 	// in the case of block-shaped mountains, no lowers follow the orography
 	if (VERT_GRID_TYPE == 1)
 	{

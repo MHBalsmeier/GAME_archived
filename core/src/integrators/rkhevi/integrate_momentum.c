@@ -14,7 +14,7 @@ In this source file, the calculation of the explicit part of the momentum equati
 #include "atmostracers.h"
 #include "../../diagnostics/diagnostics.h"
 
-int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_step_rk)
+int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info)
 {
 	// Here, the gaseous flux density is prepared for the generalized Coriolis term.
 	#pragma omp parallel for

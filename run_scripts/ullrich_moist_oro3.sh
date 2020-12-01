@@ -16,8 +16,11 @@ toa=30000 # top of atmosphere
 type_of_vertical_grid=0 # 0: terrain following coordinates, 1: block-like orography
 orography_layers=23 # number of layers following orography (only relevent if type_of_vertical_grid == 0)
 
-# "physics" configuration
+# time stepping characteristics
+rk_order=3 # convergence order of the Runge-Kutta stepping
 cfl_margin=0.25 # The time step will be calculated as follows (delta t) = (delta t from CFL)*(1 - cfl_margin). 0.25 can be considered a safe standard value.
+
+# "physics" configuration
 mass_dry_diff_h=0 # turn on if you want horizontal dry mass diffusion
 mass_dry_diff_v=0 # turn on if you want vetical dry mass diffusion
 temperature_diff_h=1 # turn on if you want horizontal temperature diffusion
