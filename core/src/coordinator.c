@@ -96,9 +96,9 @@ int main(int argc, char *argv[])
 	grid -> no_of_oro_layers = strtod(argv[30], NULL);
 	int VERT_GRID_TYPE = strtod(argv[31], NULL);
 	config_info -> rk_order = strtod(argv[32], NULL);
-	if (config_info -> rk_order < 2 || config_info -> rk_order > 4)
+	if (config_info -> rk_order < 1)
 	{
-		printf("The Runge-Kutta order must be between two and four.\n");
+		printf("The Runge-Kutta order must be at least one.\n");
     	printf("Aborting.\n");
 		exit(1);
 	}
