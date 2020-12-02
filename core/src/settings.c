@@ -18,7 +18,7 @@ int get_damping_layer_properties(double *damping_start_height_over_toa, double *
 	// This is where the damping starts in relation to the TOA. 0.75, for example, means that the upper 25 % of the atmosphere are affected by Klemp damping.
 	*damping_start_height_over_toa = 0.75;
 	// The maximum damping coefficient (the damping coefficient increases towards the TOA).
-	*damping_coeff_max = 0.2;
+	*damping_coeff_max = 0.0;
 	return 0;
 }
 
@@ -46,7 +46,7 @@ double get_impl_thermo_weight()
 
 double get_impl_w_vadv_weight()
 {
-	double impl_w_vadv_weight = 0.0;
+	double impl_w_vadv_weight = 0.5;
 	return impl_w_vadv_weight;
 }
 

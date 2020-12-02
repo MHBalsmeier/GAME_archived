@@ -24,8 +24,8 @@ T_surf = 273.15 + 18;
 # time step
 delta_t = 1;
 # number of steps you want to integrate
-no_of_steps = 50;
-# turn avection on or off
+no_of_steps = 10;
+# turn advection on or off
 adv = 1;
 # turn gravity on or off
 grav_switch = 1;
@@ -36,8 +36,8 @@ perturb_on = 1;
 # amplitude
 amp_pert = 1;
 # implicit weight of the pressure gradient acceleration
-impl_p_grad_weight_t = 0.5;
-impl_p_grad_weight_s = 0.5;
+impl_p_grad_weight_t = c_v/c_p;
+impl_p_grad_weight_s = impl_p_grad_weight_t;
 # mass advection
 mass_adv = 1;
 # entropy switch
@@ -46,6 +46,7 @@ entropy_switch = 1;
 tropopause = 13e3;
 # lapse rate
 lapse_rate = -0.0065;
+savename_suffix = "cvcp";
 
 ### END OF INPUT SECTION
 
@@ -191,7 +192,7 @@ for i in range(no_of_steps):
 		b_vector[2*j] = 1;
 		# temperature
 		b_vector[2*j + 1] = 1;
-		# explicit component of vertical velocity
+		# explicit component of the vertical velocity
 		if j == 0:
 			d_vector[2*j] = w_old[j];
 		else:
@@ -200,7 +201,7 @@ for i in range(no_of_steps):
 			T_int = 0.5*(T_old[j - 1] + T_old[j]);
 			d_vector[2*j] = w_old[j] + delta_t*(-adv*delta_w/delta_z - c_p*(1 - impl_p_grad_weight_t)*(T_old[j - 1] - T_old[j])/(z_layer[j - 1] - z_layer[j]) +
 			entropy_switch*(1 - impl_p_grad_weight_s)*T_int*(entropy_density_old[j - 1]/rho_old[j - 1] - entropy_density_old[j]/rho_old[j])/(z_layer[j - 1] - z_layer[j]) - grav_switch*g);
-		# explicit component of temperature
+		# explicit component of the temperature
 		d_vector[2*j + 1] = T_old[j];
 	b_vector[solution_length - 1] = 1;
 	# explicit component of vertical velocity at the surface
@@ -296,9 +297,11 @@ plt.plot(delta_t*np.arange(0, no_of_steps), (e_int- e_int[0])/e_tot[0]);
 plt.plot(delta_t*np.arange(0, no_of_steps), (e_pot- e_pot[0])/e_tot[0]);
 plt.plot(delta_t*np.arange(0, no_of_steps), (e_kin- e_kin[0])/e_tot[0]);
 plt.plot(delta_t*np.arange(0, no_of_steps), (e_tot - e_tot[0])/e_tot[0]);
+plt.grid();
 plt.xlim([0, np.max(delta_t*np.arange(0, no_of_steps))]);
 plt.legend(["internal", "potential", "kinetic", "total"]);
 plt.show();
+fig.savefig("energy_" + savename_suffix);
 
 
 
