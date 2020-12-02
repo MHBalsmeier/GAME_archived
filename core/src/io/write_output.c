@@ -179,7 +179,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			wind_10_m_both_dir_array[2*j + 0] = wind_10_m_downscale_factor*wind_h_lowest_layer_array[j];
 			wind_tangential = 0;
 			for (int i = 0; i < 10; ++i)
-				wind_tangential += grid -> trsk_modified_weights[10*h_index + i]*wind_h_lowest_layer_array[time_step_10_m_wind*NO_OF_VECTORS_H + grid -> trsk_modified_velocity_indices[10*h_index + i]];
+				wind_tangential += grid -> trsk_weights[10*h_index + i]*wind_h_lowest_layer_array[time_step_10_m_wind*NO_OF_VECTORS_H + grid -> trsk_indices[10*h_index + i]];
 			wind_10_m_both_dir_array[2*j + 1] = wind_10_m_downscale_factor*wind_tangential;
 			wind_10_m_speed[j] = sqrt(pow(wind_10_m_both_dir_array[2*j + 0], 2) + pow(wind_10_m_both_dir_array[2*j + 1], 2));
 			if (time_step_10_m_wind == 0)

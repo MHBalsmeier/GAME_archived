@@ -17,7 +17,7 @@ int vorticity_flux_horizontal(Vector_field in_field_0, Curl_field in_field_1, in
 	{
 		for (int i = 0; i < 4; ++i)
 		{
-			*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> trsk_modified_curl_indices[10*h_index + i]];
+			*component += grid -> trsk_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_indices[10*h_index + i]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> trsk_modified_curl_indices[10*h_index + i]];
 		}
 	}
 	else
@@ -26,11 +26,11 @@ int vorticity_flux_horizontal(Vector_field in_field_0, Curl_field in_field_1, in
 		{
 			if (i == 2)
 			{
-	    		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*0.5*(in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> trsk_modified_curl_indices[10*h_index + i]] + in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + h_index]);
+	    		*component += grid -> trsk_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_indices[10*h_index + i]]*0.5*(in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> trsk_modified_curl_indices[10*h_index + i]] + in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + h_index]);
 	    	}
 	    	else
 	    	{
-	    		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> trsk_modified_curl_indices[10*h_index + i]];
+	    		*component += grid -> trsk_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_indices[10*h_index + i]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> trsk_modified_curl_indices[10*h_index + i]];
 	    	}
 		}
 	}
@@ -38,7 +38,7 @@ int vorticity_flux_horizontal(Vector_field in_field_0, Curl_field in_field_1, in
 	{
 		for (int i = 5; i < 9; ++i)
 		{
-			*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> trsk_modified_curl_indices[10*h_index + i]];
+			*component += grid -> trsk_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_indices[10*h_index + i]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> trsk_modified_curl_indices[10*h_index + i]];
 		}
 	}
 	else
@@ -47,11 +47,11 @@ int vorticity_flux_horizontal(Vector_field in_field_0, Curl_field in_field_1, in
 		{
 			if (i == 7)
 			{
-	    		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*0.5*(in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> trsk_modified_curl_indices[10*h_index + i]] + in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + h_index]);
+	    		*component += grid -> trsk_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_indices[10*h_index + i]]*0.5*(in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> trsk_modified_curl_indices[10*h_index + i]] + in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + h_index]);
 	    	}
 	    	else
 	    	{
-	    		*component += grid -> trsk_modified_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_modified_velocity_indices[10*h_index + i]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> trsk_modified_curl_indices[10*h_index + i]];
+	    		*component += grid -> trsk_weights[10*h_index + i]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_indices[10*h_index + i]]*in_field_1[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> trsk_modified_curl_indices[10*h_index + i]];
 	    	}
 		}
 	}
