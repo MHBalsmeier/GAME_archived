@@ -7,7 +7,7 @@ Github repository: https://github.com/MHBalsmeier/game
 In this file, remapping indices and weights are computed.
 */
 
-#include "grid_generator.h"
+#include "include.h"
 #include "enum.h"
 #include <stdlib.h>
 #include <stdio.h>

@@ -3,15 +3,16 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/MHBalsmeier/game
 */
 
-#include "grid_generator.h"
+#include "include.h"
 #include "enum.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include "geos95.h"
 
-int determine_z_scalar(double z_scalar[], double z_vertical_vector_pre[], double z_surface[], int NO_OF_ORO_LAYERS, double TOA, double stretching_parameter, int VERT_GRID_TYPE)
+int set_z_scalar(double z_scalar[], double z_surface[], int NO_OF_ORO_LAYERS, double TOA, double stretching_parameter, int VERT_GRID_TYPE)
 {
+	double z_vertical_vector_pre[NO_OF_LAYERS + 1];
 	int layer_index, h_index;
 	// the heights are defined according to z_k = A_k + B_k*z_surface with A_0 = TOA, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
 	double A, B, sigma_z, z_rel, max_oro;
@@ -297,7 +298,75 @@ int set_volume(double volume[], double z_scalar_dual[], double z_vector[], doubl
 	return 0;
 }
 
-int modify_area_dual(double area_dual[], double z_vector[], int from_index_dual[], int to_index_dual[], double area_dual_pre[], double z_vector_dual[])
+int set_area_dual_pre(double area_dual_pre[], double z_vector_dual[], double normal_distance[], double z_vector[], int from_index[], int to_index[], double triangle_face_unit_sphere[], double TOA)
+{
+	int layer_index, h_index, primal_vector_index;
+	double radius_0, radius_1, base_distance;
+    for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
+    {
+        layer_index = i/NO_OF_DUAL_VECTORS_PER_LAYER;
+        h_index = i - layer_index*NO_OF_DUAL_VECTORS_PER_LAYER;
+        if (h_index >= NO_OF_VECTORS_H)
+        {
+            area_dual_pre[i] = pow(RADIUS + z_vector_dual[i], 2)*triangle_face_unit_sphere[h_index - NO_OF_VECTORS_H];
+        }
+        else
+        {
+        	if (layer_index == 0)
+        	{
+		        primal_vector_index = NO_OF_SCALARS_H + h_index;
+		        radius_0 = RADIUS + z_vector[primal_vector_index];
+		        radius_1 = RADIUS + TOA;
+		        base_distance = normal_distance[primal_vector_index];
+        	}
+        	else if (layer_index == NO_OF_LAYERS)
+        	{
+		        primal_vector_index = NO_OF_SCALARS_H + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + h_index;
+		        radius_0 = RADIUS + 0.5*(z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + from_index[h_index]] + z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + to_index[h_index]]);
+		        radius_1 = RADIUS + z_vector[primal_vector_index];
+		        base_distance = normal_distance[primal_vector_index]*radius_0/radius_1;
+        	}
+        	else
+        	{
+		        primal_vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
+		        radius_0 = RADIUS + z_vector[primal_vector_index];
+		        radius_1 = RADIUS + z_vector[primal_vector_index - NO_OF_VECTORS_PER_LAYER];
+		        base_distance = normal_distance[primal_vector_index];
+        	}
+            area_dual_pre[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
+        }
+    }
+    for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
+    {
+        if (area_dual_pre[i] <= 0)
+		{
+            printf("area_dual_pre contains a non-positive value.\n");
+			exit(1);
+		}
+    }
+    double check_area, wished_result;
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+    {
+        radius_0 = RADIUS + 0.5*(z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + from_index[i]] + z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + to_index[i]]);
+        primal_vector_index = NO_OF_SCALARS_H + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i;
+        radius_1 = RADIUS + z_vector[primal_vector_index];
+        base_distance = normal_distance[primal_vector_index]*radius_0/radius_1;
+    	wished_result = calculate_vertical_face(base_distance, radius_0, RADIUS + TOA);
+    	check_area = 0;
+    	for (int j = 0; j < NO_OF_LEVELS; ++j)
+    	{
+    		check_area += area_dual_pre[i + j*NO_OF_DUAL_VECTORS_PER_LAYER];
+    	}
+    	if(fabs(check_area/wished_result - 1) > 1e-10)
+    	{
+    		printf("Error with dual vertical faces. Coefficient which should be zero has value %lf.\n", check_area/wished_result - 1);
+    		exit(1);
+    	}
+    }
+    return 0;
+}
+
+int set_area_dual(double area_dual[], double z_vector[], int from_index_dual[], int to_index_dual[], double area_dual_pre[], double z_vector_dual[])
 {
 	int layer_index, h_index, primal_vector_index, dual_vector_index;
     double area_0, area_1, area_rescale_factor, area_ratio;
@@ -336,6 +405,7 @@ int modify_area_dual(double area_dual[], double z_vector[], int from_index_dual[
 			exit(1);
 		}
     }
+    // Now come some additional checks.
     double check_area, earth_surface;
     check_area = 0;
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
@@ -435,6 +505,7 @@ int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double n
         if (normal_distance_dual[i] <= 0)
 		{
             printf("normal_distance_dual contains a non-positive value.\n");
+            printf("Aborting.\n");
 			exit(1);
 		}
 	}
@@ -452,81 +523,14 @@ int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double n
 		+ z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]])) - 1) > 1e-15)
 		{
 			printf("Problem 1 with vertical grid structure.\n");
+			printf("Aborting.\n");
 			exit(1);
 		}
 	}
 	return 0;
 }
 
-int calc_area_dual_pre(double area_dual_pre[], double z_vector_dual[], double normal_distance[], double z_vector[], int from_index[], int to_index[], double triangle_face_unit_sphere[], double TOA)
-{
-	int layer_index, h_index, primal_vector_index;
-	double radius_0, radius_1, base_distance;
-    for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
-    {
-        layer_index = i/NO_OF_DUAL_VECTORS_PER_LAYER;
-        h_index = i - layer_index*NO_OF_DUAL_VECTORS_PER_LAYER;
-        if (h_index >= NO_OF_VECTORS_H)
-        {
-            area_dual_pre[i] = pow(RADIUS + z_vector_dual[i], 2)*triangle_face_unit_sphere[h_index - NO_OF_VECTORS_H];
-        }
-        else
-        {
-        	if (layer_index == 0)
-        	{
-		        primal_vector_index = NO_OF_SCALARS_H + h_index;
-		        radius_0 = RADIUS + z_vector[primal_vector_index];
-		        radius_1 = RADIUS + TOA;
-		        base_distance = normal_distance[primal_vector_index];
-        	}
-        	else if (layer_index == NO_OF_LAYERS)
-        	{
-		        primal_vector_index = NO_OF_SCALARS_H + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + h_index;
-		        radius_0 = RADIUS + 0.5*(z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + from_index[h_index]] + z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + to_index[h_index]]);
-		        radius_1 = RADIUS + z_vector[primal_vector_index];
-		        base_distance = normal_distance[primal_vector_index]*radius_0/radius_1;
-        	}
-        	else
-        	{
-		        primal_vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
-		        radius_0 = RADIUS + z_vector[primal_vector_index];
-		        radius_1 = RADIUS + z_vector[primal_vector_index - NO_OF_VECTORS_PER_LAYER];
-		        base_distance = normal_distance[primal_vector_index];
-        	}
-            area_dual_pre[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
-        }
-    }
-    for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
-    {
-        if (area_dual_pre[i] <= 0)
-		{
-            printf("area_dual_pre contains a non-positive value.\n");
-			exit(1);
-		}
-    }
-    double check_area, wished_result;
-    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-    {
-        radius_0 = RADIUS + 0.5*(z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + from_index[i]] + z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + to_index[i]]);
-        primal_vector_index = NO_OF_SCALARS_H + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i;
-        radius_1 = RADIUS + z_vector[primal_vector_index];
-        base_distance = normal_distance[primal_vector_index]*radius_0/radius_1;
-    	wished_result = calculate_vertical_face(base_distance, radius_0, RADIUS + TOA);
-    	check_area = 0;
-    	for (int j = 0; j < NO_OF_LEVELS; ++j)
-    	{
-    		check_area += area_dual_pre[i + j*NO_OF_DUAL_VECTORS_PER_LAYER];
-    	}
-    	if(fabs(check_area/wished_result - 1) > 1e-10)
-    	{
-    		printf("Error with dual vertical faces. Coefficient which should be zero has value %lf.\n", check_area/wished_result - 1);
-    		exit(1);
-    	}
-    }
-    return 0;
-}
-
-int calc_slopes(double z_scalar[], int from_index[], int to_index[], double normal_distance[], double slope[])
+int slopes(double z_scalar[], int from_index[], int to_index[], double normal_distance[], double slope[])
 {
 	int layer_index, h_index;
 	double delta_x, delta_z;
@@ -545,7 +549,8 @@ int calc_slopes(double z_scalar[], int from_index[], int to_index[], double norm
 			slope[i] = delta_z/delta_x;
 			if (fabs(slope[i]) > 1)
 			{
-				printf("Problem in calc_slopes.\n");
+				printf("Problem in with slopes.\n");
+				printf("Aborting.\n");
 				exit(1);
 			}
 		}

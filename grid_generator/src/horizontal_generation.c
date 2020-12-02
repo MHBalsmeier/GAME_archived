@@ -8,7 +8,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <netcdf.h>
 #include "geos95.h"
 #include "enum.h"
-#include "grid_generator.h"
+#include "include.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 

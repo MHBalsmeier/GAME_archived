@@ -12,7 +12,7 @@ The grid generation procedure is manged from this file. Memory allocation and IO
 #include <netcdf.h>
 #include <string.h>
 #include <math.h>
-#include "grid_generator.h"
+#include "include.h"
 #include "enum.h"
 #include "geos95.h"
 #define ERRCODE 2
@@ -237,9 +237,9 @@ int main(int argc, char *argv[])
 	calc_vorticity_indices_pre(from_index_dual, to_index_dual, direction, direction_dual, vorticity_indices_pre, ORTH_CRITERION_DEG, vorticity_signs_pre);
 	check_for_orthogonality(direction, direction_dual, ORTH_CRITERION_DEG);
 	calc_cell_face_unity(pent_hex_face_unity_sphere, latitude_scalar_dual, longitude_scalar_dual, adjacent_vector_indices_h, vorticity_indices_pre);
+	
 	// building the vertical grid
-	double z_vertical_vector_pre[NO_OF_LAYERS + 1];
-	determine_z_scalar(z_scalar, z_vertical_vector_pre, z_surface, NO_OF_ORO_LAYERS, TOA, stretching_parameter, VERT_GRID_TYPE);
+	set_z_scalar(z_scalar, z_surface, NO_OF_ORO_LAYERS, TOA, stretching_parameter, VERT_GRID_TYPE);
 	if (VERT_GRID_TYPE == 1)
 	{
 		set_scalar_shading_indices(z_scalar, z_surface, no_of_shaded_points_scalar);
@@ -256,25 +256,28 @@ int main(int argc, char *argv[])
 	calc_z_vector_dual_and_normal_distance_dual(z_vector_dual, normal_distance_dual, z_scalar_dual, TOA, from_index, to_index, z_vector, from_index_dual, to_index_dual, latitude_scalar_dual, longitude_scalar_dual, vorticity_indices_pre);
     printf(GREEN "finished.\n" RESET);
     printf("Determining coordinate slopes ...");
-    calc_slopes(z_scalar, from_index, to_index, normal_distance, slope);
+    slopes(z_scalar, from_index, to_index, normal_distance, slope);
     printf(GREEN "finished.\n" RESET);
     printf("Calculating dual areas, pre version ... ");
-	calc_area_dual_pre(area_dual_pre, z_vector_dual, normal_distance, z_vector, from_index, to_index, triangle_face_unit_sphere, TOA);
+	set_area_dual_pre(area_dual_pre, z_vector_dual, normal_distance, z_vector, from_index, to_index, triangle_face_unit_sphere, TOA);
     printf(GREEN "finished.\n" RESET);
     printf("Calculating vertical faces, pre version ... ");
 	calculate_vertical_faces(area, z_vector_dual, normal_distance_dual, TOA);
     printf(GREEN "finished.\n" RESET);
     printf("Modifying dual areas for rhombus vorticity calculation ... ");
-	modify_area_dual(area_dual, z_vector, from_index_dual, to_index_dual, area_dual_pre, z_vector_dual);
+	set_area_dual(area_dual, z_vector, from_index_dual, to_index_dual, area_dual_pre, z_vector_dual);
     printf(GREEN "finished.\n" RESET);
+    
     // more advanced stuff: tangential vector reconstruction and inner product
     printf("Calculating inner product weights and related things ... ");
 	calc_inner_product_and_related(inner_product_weights, normal_distance, volume, to_index, from_index, area, z_scalar, z_vector, adjacent_vector_indices_h, volume_ratios, remap_horpri2hordual_vector_weights);
     printf(GREEN "finished.\n" RESET);
+    
     // modified TRSK
     printf("Calculating Coriolis indices and weights ... ");
 	coriolis(from_index_dual, to_index_dual, trsk_modified_curl_indices, normal_distance, normal_distance_dual, to_index, area, z_scalar, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, trsk_weights,  trsk_indices, from_index, adjacent_vector_indices_h, direction, direction_dual, ORTH_CRITERION_DEG, z_vector, z_vector_dual);
     printf(GREEN "finished.\n" RESET);
+    
     // setting indices related to the curl of a vector field
     printf("Setting horizontal curl indices ... ");
 	set_horizontal_curl_indices(direction_dual, direction, h_curl_indices, from_index, to_index, ORTH_CRITERION_DEG, h_curl_signs);
@@ -282,6 +285,8 @@ int main(int argc, char *argv[])
     printf("Setting vorticity indices and rhombus density interpolation indices and weights ... ");
 	set_vertical_vorticity_stuff(vorticity_indices_pre, vorticity_signs_pre, from_index_dual, to_index_dual, vorticity_indices, vorticity_signs, density_to_rhombus_indices, from_index, to_index, area_dual, z_vector, latitude_scalar_dual, longitude_scalar_dual, density_to_rhombus_weights, latitude_vector, longitude_vector, latitude_scalar, longitude_scalar);
     printf(GREEN "finished.\n" RESET);
+    
+    // gravity potential
     printf("Setting gravity potential ... ");
 	set_gravity_potential(z_scalar, gravity_potential, GRAVITY_MEAN_SFC_ABS);
     printf(GREEN "finished.\n" RESET);

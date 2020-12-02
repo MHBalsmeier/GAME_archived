@@ -8,7 +8,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "grid_generator.h"
+#include "include.h"
 #include "enum.h"
 #include "geos95.h"
 #define ERRCODE 2

@@ -3,7 +3,7 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/MHBalsmeier/game
 */
 
-#include "grid_generator.h"
+#include "include.h"
 #include "enum.h"
 #include <stdlib.h>
 #include <stdio.h>

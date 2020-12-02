@@ -20,7 +20,7 @@ int build_icosahedron(double [], double [], int [][2], int [][3], int [][3], int
 int generate_horizontal_generators(double [], double [], double [], double [], double [], double [], double [], int [][3], int [][3], int [][3]);
 int calc_inner_product_and_related(double [], double [], double [], int [], int [], double [], double [], double [], int [], double [], double []);
 int coriolis(int [], int [], int [], double [], double [], int [], double [], double [], double [], double [], double [], double [], double [], double [], double [], int [], int [], int [], double [], double [], double, double [], double []);
-int determine_z_scalar(double [], double [], double [], int, double, double, int);
+int set_z_scalar(double [], double [], int, double, double, int);
 int set_f_vec(double [], double [], double [], double []);
 int set_orography(int, int, double []);
 int calc_cell_face_unity(double [], double [], double [], int [], int []);
@@ -32,7 +32,7 @@ int set_scalar_h_dual_coords(double [], double [], double [], double [], int [][
 int set_z_scalar_dual(double [], double [], int [], int [], int [], double);
 int set_volume(double [], double [], double [], double [], int [], int [], double, int []);
 int calc_adjacent_vector_indices_h(int [], int [], int [], int []);
-int modify_area_dual(double [], double [], int [], int [], double [], double []);
+int set_area_dual(double [], double [], int [], int [], double [], double []);
 int set_horizontal_curl_indices(double [], double [], int [], int [], int [], double, int []);
 int set_vertical_vorticity_stuff(int [], int [], int [], int [], int [], int [], int [], int [], int [], double [], double [], double [], double [], double [], double [], double [], double [], double []);
 int set_dual_vector_h_doubles(double [], double [], double [], double [], int [], int [], double [], double []);
@@ -43,10 +43,10 @@ int calc_vorticity_indices_pre(int [], int [], double [], double [], int [], dou
 int set_z_vector_and_normal_distance(double [], double [], double [], double [], double [], int [], int [], double, int);
 int map_area_to_sphere(double [], double [], double []);
 int calc_z_vector_dual_and_normal_distance_dual(double [], double [], double [], double, int [], int [], double [], int [], int [], double [], double [], int []);
-int calc_area_dual_pre(double [], double [], double [], double [], int [], int [], double [], double);
+int set_area_dual_pre(double [], double [], double [], double [], int [], int [], double [], double);
 int optimize_to_scvt(double [], double [], double [], double [], int, int [][3], int [][3], int [][3], int [][2], int [], int [], int []);
 int read_horizontal_explicit(double [], double [], int [], int [], int [], int [], char []);
-int calc_slopes(double [], int [], int [], double [], double []);
+int slopes(double [], int [], int [], double [], double []);
 int write_statistics_file(double [], double [], double [], char []);
 int set_scalar_shading_indices(double [], double [], int []);
 int set_vector_shading_indices(int [], int [], int [], int []);

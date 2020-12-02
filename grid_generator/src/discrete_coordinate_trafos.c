@@ -3,7 +3,7 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/MHBalsmeier/game
 */
 
-#include "grid_generator.h"
+#include "include.h"
 #include "enum.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -70,66 +70,100 @@ int find_triangle_edge_points(int triangle_on_face_index, int face_index, int re
     if (coord_1 == 0)
     {
         if (face_edges_reverse[face_index][0] == 0)
+        {
             *point_0 = NO_OF_PENTAGONS + face_edges[face_index][0]*points_per_edge + coord_0;
+        }
         else
+        {
             *point_0 = NO_OF_PENTAGONS + (face_edges[face_index][0] + 1)*points_per_edge - 1 - coord_0;
+        }
     }
     else
         *point_0 = NO_OF_PENTAGONS + points_per_edge*NO_OF_EDGES + face_index*scalar_points_per_inner_face + triangle_on_face_index - points_per_edge;
     if (coord_0 == points_per_edge - 1 - coord_1)
     {
         if (face_edges_reverse[face_index][1] == 0)
+        {
             *point_1 = NO_OF_PENTAGONS + face_edges[face_index][1]*points_per_edge + coord_1;
+        }
         else
+        {
             *point_1 = NO_OF_PENTAGONS + (face_edges[face_index][1] + 1)*points_per_edge - 1 - coord_1;
+        }
     }
     else
         *point_1 = NO_OF_PENTAGONS + points_per_edge*NO_OF_EDGES + face_index*scalar_points_per_inner_face + triangle_on_face_index - coord_1;
     if (coord_0 == 0)
     {
         if (face_edges_reverse[face_index][2] == 0)
+        {
             *point_2 = NO_OF_PENTAGONS + (face_edges[face_index][2] + 1)*points_per_edge - 1 - coord_1;
+        }
         else
+        {
             *point_2 = NO_OF_PENTAGONS + face_edges[face_index][2]*points_per_edge + coord_1;
+        }
     }
     else
+	{
         *point_2 = NO_OF_PENTAGONS + points_per_edge*NO_OF_EDGES + face_index*scalar_points_per_inner_face + triangle_on_face_index - 1 - coord_1;
+    }
     if (coord_1 == 0)
     {
         if (coord_0 == 0)
+        {
             *point_3 = face_vertices[face_index][0];
+        }
         else
         {
             if (face_edges_reverse[face_index][0] == 0)
+        	{
                 *point_3 = *point_0 - 1;
+            }
             else
+        	{
                 *point_3 = *point_0 + 1;
+            }
         }
     }
     else if (coord_0 == 0)
     {
         if (face_edges_reverse[face_index][2] == 0)
+        {
             *point_3 = *point_2 + 1;
+        }
         else
+        {
             *point_3 = *point_2 - 1;
+        }
     }
     else
+    {
         *point_3 = *point_0 - 1;
+    }
     *point_4 = -1;
     *point_5 = -1;
     if (coord_0 == coord_0_points_amount - 1)
     {
         if (coord_1 == 0)
+        {
             *point_4 = face_vertices[face_index][1];
+        }
         else
         {
             if (face_edges_reverse[face_index][1] == 0)
+        	{
                 *point_4 = *point_1 - 1;
+            }
             else
-                *point_4 = *point_1 + 1;
+        	{
+            	*point_4 = *point_1 + 1;
+            }
         }
         if (coord_1 == points_per_edge - 1)
+        {
             *point_5 = face_vertices[face_index][2];
+        }
     }
     return 0;
 }
@@ -152,7 +186,9 @@ int find_triangle_on_face_index_from_dual_scalar_on_face_index(int dual_scalar_o
         {
             dual_scalar_on_face_index_2 = dual_scalar_on_face_index_0 + 1;
             if (coord_1_pre == points_per_edge - 1)
+            {
                 dual_scalar_on_face_index_3 = dual_scalar_on_face_index_2 + 1;
+            }
         }
         if (dual_scalar_on_face_index == dual_scalar_on_face_index_0)
         {
@@ -505,7 +541,9 @@ int build_icosahedron(double latitude_ico[], double longitude_ico[], int edge_ve
     		for (int k = 0; k < 2; ++k)
     		{
     			if (edge_vertices[j][k] == i)
+                {
     				vertices_check_counter[i] = vertices_check_counter[i] + 1;
+				}
     		}
     	}
     }
@@ -585,7 +623,9 @@ int build_icosahedron(double latitude_ico[], double longitude_ico[], int edge_ve
     		for (int k = 0; k < 3; ++k)
     		{
     			if (face_vertices[j][k] == i)
+    			{
     				vertices_check_counter[i] = vertices_check_counter[i] + 1;
+				}
     		}
     	}
     }
@@ -609,23 +649,37 @@ int build_icosahedron(double latitude_ico[], double longitude_ico[], int edge_ve
                 if (edge_vertices[k][0] == face_vertices[i][j] || edge_vertices[k][1] == face_vertices[i][j])
                 {
                     if (edge_vertices[k][0] == face_vertices[i][j])
+                    {
                         edge_other_vertex_index = 1;
+                	}
                     if (edge_vertices[k][1] == face_vertices[i][j])
+                    {
                         edge_other_vertex_index = 0;
+                	}
                     if (j == 0)
+                    {
                         check_index = 1;
+                	}
                     if (j == 1)
+                    {
                         check_index = 2;
+                	}
                     if (j == 2)
+                    {
                         check_index = 0;
+                	}
                     if (edge_vertices[k][edge_other_vertex_index] == face_vertices[i][check_index])
                     {
                         face_edges[i][j] = k;
                         edges_check_counter[k] = edges_check_counter[k] + 1;
                         if (edge_other_vertex_index == 1)
+                    	{
                             face_edges_reverse[i][j] = 0;
+                		}
                         if (edge_other_vertex_index == 0)
+                    	{
                             face_edges_reverse[i][j] = 1;
+                		}
                     }
                 }
             }

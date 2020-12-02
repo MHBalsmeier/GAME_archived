@@ -10,7 +10,7 @@ In this file, the inner product weights are computed.
 #include <stdio.h>
 #include "geos95.h"
 #include "enum.h"
-#include "grid_generator.h"
+#include "include.h"
 
 int calc_inner_product_and_related(double inner_product_weights[], double normal_distance[], double volume[], int to_index[], int from_index[], double area[], double z_scalar[], double z_vector[], int adjacent_vector_indices_h[], double volume_ratios[], double remap_horpri2hordual_vector_weights[])
 {
