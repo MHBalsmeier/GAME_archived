@@ -181,6 +181,8 @@ int calculate_vertical_faces(double area[], double z_vector_dual[], double norma
 			exit(1);
 		}
     }
+    
+    // check
     double check_area, wished_result;
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {

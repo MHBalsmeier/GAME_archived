@@ -180,6 +180,7 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     printf("Copyright (C) 2020 The GAME development team.\n");
     printf("Released under the MIT license, visit https://github.com/MHBalsmeier/game for more information.\n");
+    printf("%s", stars);
 	printf("What you want to do:\n");
 	printf("operator:\t\t\t%s\n", OPERATOR);
 	printf("run_id:\t\t\t\t%s\n", RUN_ID);
@@ -192,7 +193,79 @@ int main(int argc, char *argv[])
 	printf("Start day:\t\t\t%d\n", day);
 	printf("Start hour:\t\t\t%d\n", hour);
 	printf("%s", stars);
-	printf("I/O configuration information:\n");
+	printf("Dynamics configuration:\n");
+	printf("number of layers: %d\n", NO_OF_LAYERS);
+	printf("number of scalar data points per layer: %d\n", NO_OF_SCALARS_H);
+	double surface = 4*M_PI*pow(RADIUS, 2);
+	double points_per_axis = pow(NO_OF_SCALARS_H, 0.5);
+	int eff_hor_res_km = 1e-3*pow(surface, 0.5)/points_per_axis;
+	printf("effective horizontal resolution: %d km\n", eff_hor_res_km);
+	printf("number of horizontal vectors per layer: %d\n", NO_OF_VECTORS_H);
+	printf("number of scalar data points: %d\n", NO_OF_SCALARS);
+	printf("number of vectors: %d\n", NO_OF_VECTORS);
+	printf("number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
+	printf("Runge Kutta order: %d\n", config_info -> rk_order);
+	if (VERT_GRID_TYPE == 0)
+	{
+		printf("terrain handling: terrain following coordinates\n");
+		printf("number of layers following orography: %d\n", grid -> no_of_oro_layers);
+	}
+	if (VERT_GRID_TYPE == 1)
+	{
+		printf("terrain handling: block structure\n");
+	}
+	printf("%s", stars);
+	printf("Physics configuration:\n");
+	if (config_info -> rad_on == 0)
+	{
+		printf("Radiation is turned off.\n");
+	}
+	else
+	{
+		printf("Radiation is turned on.\n");
+	}
+	if (config_info -> mass_diff_h == 0)
+	{
+		printf("Horizontal mass diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Horizontal dry mass diffusion is turned on.\n");
+	}
+	if (config_info -> mass_diff_v == 0)
+	{
+		printf("Vertical mass diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Vertical dry mass diffusion is turned on.\n");
+	}
+	if (config_info -> temperature_diff_h == 0)
+	{
+		printf("Horizontal temperature diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Horizontal temperature diffusion is turned on.\n");
+	}
+	if (config_info -> temperature_diff_v == 0)
+	{
+		printf("Vertical temperature diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Vertical temperature diffusion is turned on.\n");
+	}
+	if (config_info -> momentum_diff == 0)
+	{
+		printf("Momentum diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Momentum diffusion is turned on.\n");
+	}
+	printf("%s", stars);
+	printf("I/O configuration:\n");
 	printf("output written in intervals of %d s\n", WRITE_OUT_INTERVAL);
 	if (io_config -> grib_output_switch == 0)
 	{
@@ -243,79 +316,7 @@ int main(int argc, char *argv[])
 		printf("Flight level output is turned on.\n");
 	}
 	printf("%s", stars);
-	printf("model run configuration information:\n");
-	printf("number of layers: %d\n", NO_OF_LAYERS);
-	if (VERT_GRID_TYPE == 0)
-	{
-		printf("terrain handling: terrain following coordinates\n");
-	}
-	if (VERT_GRID_TYPE == 1)
-	{
-		printf("terrain handling: block structure\n");
-	}
-	if (VERT_GRID_TYPE == 0)
-	{
-		printf("number of layers following orography: %d\n", grid -> no_of_oro_layers);
-	}
-	printf("number of scalar data points per layer: %d\n", NO_OF_SCALARS_H);
-	double surface = 4*M_PI*pow(RADIUS, 2);
-	double points_per_axis = pow(NO_OF_SCALARS_H, 0.5);
-	int eff_hor_res_km = 1e-3*pow(surface, 0.5)/points_per_axis;
-	printf("effective horizontal resolution: %d km\n", eff_hor_res_km);
-	printf("number of horizontal vectors per layer: %d\n", NO_OF_VECTORS_H);
-	printf("number of scalar data points: %d\n", NO_OF_SCALARS);
-	printf("number of vectors: %d\n", NO_OF_VECTORS);
-	printf("number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
-	printf("Runge Kutta order: %d\n", config_info -> rk_order);
-	if (config_info -> rad_on == 0)
-	{
-		printf("Radiation is turned off.\n");
-	}
-	else
-	{
-		printf("Radiation is turned on.\n");
-	}
-	if (config_info -> mass_diff_h == 0)
-	{
-		printf("Horizontal mass diffusion is turned off.\n");
-	}
-	else
-	{
-		printf("Horizontal dry mass diffusion is turned on.\n");
-	}
-	if (config_info -> mass_diff_v == 0)
-	{
-		printf("Vertical mass diffusion is turned off.\n");
-	}
-	else
-	{
-		printf("Vertical dry mass diffusion is turned on.\n");
-	}
-	if (config_info -> temperature_diff_h == 0)
-	{
-		printf("Horizontal temperature diffusion is turned off.\n");
-	}
-	else
-	{
-		printf("Horizontal temperature diffusion is turned on.\n");
-	}
-	if (config_info -> temperature_diff_v == 0)
-	{
-		printf("Vertical temperature diffusion is turned off.\n");
-	}
-	else
-	{
-		printf("Vertical temperature diffusion is turned on.\n");
-	}
-	if (config_info -> momentum_diff == 0)
-	{
-		printf("Momentum diffusion is turned off.\n");
-	}
-	else
-	{
-		printf("Momentum diffusion is turned on.\n");
-	}
-	printf("reading grid data ... ");
+	printf("Reading grid data.\n");
     set_grid_properties(grid, dualgrid, GEO_PROP_FILE);
     double delta_t;
     calc_delta_t(cfl_margin, &delta_t, grid);
@@ -324,12 +325,16 @@ int main(int argc, char *argv[])
     	printf("It is radiation_delta_t < delta_t.\n");
     	exit(1);
     }
+    printf("Grid loaded successfully.\n");
     printf("time step: %lf s\n", delta_t);
+    printf("%s", stars);
+    printf("Reading initial state ... ");
+    State *state_old = calloc(1, sizeof(State));
+    set_init_data(INIT_STATE_FILE, state_old, grid);
+    printf("completed.\n");
     printf("%s", stars);
     printf("It begins.\n");
     printf("%s", stars);
-    State *state_old = calloc(1, sizeof(State));
-    set_init_data(INIT_STATE_FILE, state_old, grid);
     int min_no_of_output_steps = 600/delta_t;
     double *wind_h_lowest_layer_array = calloc(1, min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
     double t_write = t_init;

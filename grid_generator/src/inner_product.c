@@ -84,9 +84,13 @@ int calc_inner_product_and_related(double inner_product_weights[], double normal
 			for (int j = 0; j < 6; ++j)
 			{
 				if (adjacent_vector_indices_h[6*from_index[h_index] + j] == h_index)
+				{
 					e_kin_h_index_0 = j;
+				}
 				if (adjacent_vector_indices_h[6*to_index[h_index] + j] == h_index)
+				{
 					e_kin_h_index_1 = j;
+				}
 			}
 			if (e_kin_h_index_0 == -1 || e_kin_h_index_1 == -1)
 			{

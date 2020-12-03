@@ -32,9 +32,13 @@ int calc_adjacent_vector_indices_h(int from_index[], int to_index[], int adjacen
 				}
                 adjacent_vector_indices_h[6*i + counter] = j;
                 if (from_index[j] == i)
+                {
                     adjacent_signs_h[6*i + counter] = 1;
+                }
                 if (to_index[j] == i)
+                {
                     adjacent_signs_h[6*i + counter] = -1;
+                }
                 ++counter;
             }
         }
@@ -42,7 +46,9 @@ int calc_adjacent_vector_indices_h(int from_index[], int to_index[], int adjacen
         {
             trouble_detected = 1;
             if (counter == 5 && i < NO_OF_PENTAGONS)
+            {
                 trouble_detected = 0;
+            }
         }
         if (trouble_detected == 1)
 		{
@@ -64,7 +70,9 @@ int calc_adjacent_vector_indices_h(int from_index[], int to_index[], int adjacen
         {
             no_of_edges = 6;
             if (j < NO_OF_PENTAGONS)
+        	{
                 no_of_edges = 5;
+            }
             double_check = 0;
             for (int k = 0; k < no_of_edges; ++k)
             {
@@ -82,9 +90,13 @@ int calc_adjacent_vector_indices_h(int from_index[], int to_index[], int adjacen
 			}
         }
         if (sign_sum_check != 0)
+        {
             printf("Problem with adjacent_signs_h.\n");
+        }
         if (counter != 2)
+        {
             printf("Problem with adjacent_vector_indices_h.\n");
+        }
     }
     return 0;
 }

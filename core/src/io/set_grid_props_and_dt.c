@@ -280,8 +280,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         }
     }
     grad(grid -> gravity_potential, grid -> gravity_m, grid);
-    printf("completed\n");
-    printf("stretching parameter: %lf\n", stretching_parameter);
+    printf("stretching parameter of the vertical grid: %lf\n", stretching_parameter);
     free(no_of_shaded_points_scalar);
     free(no_of_shaded_points_vector);
     free(latitude_scalar);
