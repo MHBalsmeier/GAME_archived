@@ -123,7 +123,7 @@ Curl_field rel_vort;
 Curl_field pot_vort;
 Scalar_field c_g_v_field;
 Scalar_field c_g_p_field;
-Scalar_field e_kin_h;
+Scalar_field e_kin;
 Vector_field cpgradt_m_cov_hor;
 Vector_field cpgradt_cov_ver_corr_hor_m;
 Vector_field pressure_gradient_1_component_cov;
@@ -139,7 +139,7 @@ Vector_field velocity_gen;
 // Collects forcings.
 typedef struct forcings {
 Vector_field pressure_gradient_acc;
-Vector_field e_kin_h_grad;
+Vector_field e_kin_grad;
 Vector_field pot_vort_tend;
 } Forcings;
 

@@ -2270,7 +2270,7 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
     	double kinetic_integral, potential_integral, internal_integral;
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
     	Scalar_field *e_kin_density = malloc(sizeof(Scalar_field));
-    	kinetic_energy(state_write_out -> velocity_gas, *e_kin_density, grid, 1);
+    	kinetic_energy(state_write_out -> velocity_gas, *e_kin_density, grid);
 		#pragma omp parallel for
 		for (int i = 0; i< NO_OF_SCALARS; ++i)
 		{

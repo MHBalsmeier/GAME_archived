@@ -44,18 +44,6 @@ double get_impl_thermo_weight()
 	return impl_thermo_weight;
 }
 
-double get_impl_w_vadv_weight()
-{
-	double impl_w_vadv_weight = 0.0;
-	return impl_w_vadv_weight;
-}
-
-double get_impl_u_vadv_weight()
-{
-	double impl_u_vadv_weight = 0.0;
-	return impl_u_vadv_weight;
-}
-
 double get_t_vadv_parameter()
 {
 	double t_vadv_parameter = 1.0;

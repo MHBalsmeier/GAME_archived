@@ -27,15 +27,15 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
     calc_pot_vort(state -> velocity_gas, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
     // Now, the generalized Coriolis term is evaluated.
     vorticity_flux(diagnostics -> flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid, dualgrid);
-    // Horizontal kinetic energy is prepared for the gradient term of the Lamb transformation.
-    kinetic_energy(state -> velocity_gas, diagnostics -> e_kin_h, grid, 0);
-    // taking the gradient of the horizontal kinetic energy
-    grad(diagnostics -> e_kin_h, forcings -> e_kin_h_grad, grid);
+    // Kinetic energy is prepared for the gradient term of the Lamb transformation.
+    kinetic_energy(state -> velocity_gas, diagnostics -> e_kin, grid);
+    // Taking the gradient of the kinetic energy
+    grad(diagnostics -> e_kin, forcings -> e_kin_grad, grid);
     // Now the explicit forces are added up.
     int layer_index, h_index;
-    double metric_term, vertical_velocity, hor_non_trad_cori_term, expl_pgrad_weight;
+    double expl_pgrad_weight;
 	expl_pgrad_weight = 1 - get_impl_thermo_weight();
-    #pragma omp parallel for private(layer_index, h_index, metric_term, vertical_velocity, hor_non_trad_cori_term)
+    #pragma omp parallel for private(layer_index, h_index)
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
     	layer_index = i/NO_OF_VECTORS_PER_LAYER;
@@ -52,12 +52,6 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
         	// checking for shading
         	&& NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_vector[h_index - NO_OF_SCALARS_H])
     		{
-    			// determining w at the edge
-    			remap_verpri2horpri_vector(state -> velocity_gas, layer_index, h_index - NO_OF_SCALARS_H, &vertical_velocity, grid);
-    			// deep atmospehre metric term -w/r*v_h
-    			metric_term = -vertical_velocity*state -> velocity_gas[i]/(RADIUS + grid -> z_vector[i]);
-    			// (-f_y*w*i)*n = -f_y*w*(i*n) = -f_y*w*cos(direction)
-    			hor_non_trad_cori_term = -vertical_velocity*dualgrid -> f_vec[2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
         		state_tendency -> velocity_gas[i] =
         		// full pressure gradient acceleration
         		forcings -> pressure_gradient_acc[i]
@@ -65,12 +59,8 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
         		+ forcings -> pot_vort_tend[i]
         		// gravity
         		- grid -> gravity_m[i]
-        		// horizontal kinetic energy term
-        		- forcings -> e_kin_h_grad[i]
-        		// the term that results from the horizontal Coriolis vector
-        		+ hor_non_trad_cori_term
-        		// deep atmosphere metric term
-        		+ metric_term
+        		// kinetic energy term
+        		- forcings -> e_kin_grad[i]
         		// momentum diffusion
         		+ irreversible_quantities -> friction_acc[i];
     		}
@@ -82,8 +72,8 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
         		state_tendency -> velocity_gas[i] =
         		// generalized Coriolis term
         		forcings -> pot_vort_tend[i]
-        		// horizontal kinetic energy term
-        		- forcings -> e_kin_h_grad[i]
+        		// kinetic energy term
+        		- forcings -> e_kin_grad[i]
         		// gravity
         		- grid -> gravity_m[i]
         		// explicit part of the pressure gradient acceleration

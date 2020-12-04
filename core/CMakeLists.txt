@@ -37,7 +37,7 @@ src/diagnostics/remap_verpri2horpri_vector.c
 src/diagnostics/ricci.c
 src/diagnostics/tangential_wind.c
 src/diagnostics/thermodynamic_diagnostics.c
-src/diagnostics/vorticity_flux_horizontal.c
+src/diagnostics/vorticity_flux_horizontal_traditional.c
 src/diagnostics/vorticity_flux_vertical.c
 src/spatial_operators/linear_combine_two_states.c
 src/io/init_state_setter.c

@@ -110,13 +110,19 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
             		// In terrain following coordinates, a vertical interpolation onto the reference z coordinate must be made. Therefore, delta_z and vertical_gradient must be determined.
 		        	delta_z = grid -> z_vector[edge_vector_index] - grid -> z_vector[index];
 		        	if (delta_z > 0)
+		        	{
 		        		index_for_vertical_gradient = index - NO_OF_VECTORS_PER_LAYER;
+	        		}
 		        	else
 		        	{
 		        		if (layer_index == NO_OF_LAYERS - 1)
+		        		{
 		        			index_for_vertical_gradient = index - NO_OF_VECTORS_PER_LAYER;
+	        			}
 		        		else
+		        		{
 		        			index_for_vertical_gradient = index + NO_OF_VECTORS_PER_LAYER;
+	        			}
 		        	}
 		        	vertical_gradient = (velocity_field[index] - velocity_field[index_for_vertical_gradient])/(grid -> z_vector[index] - grid -> z_vector[index_for_vertical_gradient]);
 		        	// Here, the vertical interpolation is made.

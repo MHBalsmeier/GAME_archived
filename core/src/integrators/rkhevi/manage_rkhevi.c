@@ -24,6 +24,7 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolation_info *interp
 	/*
 	Loop over the RK substeps.
 	*/
+	int layer_index, h_index;
 	double delta_t_rk;
 	for (int i = 0; i < config_info -> rk_order; ++i)
 	{
@@ -40,28 +41,33 @@ int manage_rkhevi(State *state_old, State *state_new, Interpolation_info *interp
 		// 2.) Explicit component of the momentum equation.
 		// ----------------------------------------------------------------------------
 		forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, interpolation_info, irreversible_quantities, config_info, i);
-		
-		// 3.) Vertical advection of horizontal momentum.
-		// ---------------------------------------------------------------------------
-		three_band_solver_ver_hor_vel_adv(state_old, state_tendency, state_new, delta_t, grid);
-		
+        // time stepping for the horizontal momentum can be directly executed
+        for (int j = 0; j < NO_OF_VECTORS; ++j)
+        {
+        	layer_index = j/NO_OF_VECTORS_PER_LAYER;
+        	h_index = j - layer_index*NO_OF_VECTORS_PER_LAYER;
+        	if (h_index >= NO_OF_SCALARS_H)
+        	{
+        		state_new -> velocity_gas[j] = state_old -> velocity_gas[j] + delta_t_rk*state_tendency -> velocity_gas[j];
+        	}
+        }
 		// Horizontal velocity can be considered to be updated from now on.
 		
-		// 4.) Explicit component of the generalized density equations.
+		// 3.) Explicit component of the generalized density equations.
 		// ----------------------------------------------------------------------------
 		backward_tendencies(state_new, interpolation_info, state_tendency, grid, dualgrid, delta_t_rk, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, time_coordinate);
 		// determining the explicit component of the new temperature
 		
-		// 5.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies (including diabatic forcings).
+		// 4.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies (including diabatic forcings).
 		// ----------------------------------------------------------------------------
 		temperature_diagnostics_explicit(state_old, state_tendency, diagnostics, delta_t_rk);
 
-		// 6.) Vertical sound wave solver.
+		// 5.) Vertical sound wave solver.
 		// ----------------------------------------------------------------------------
 		three_band_solver_ver_sound_waves(state_old, state_tendency, state_new, diagnostics, delta_t_rk, grid);
 		// Vertical velocity can be seen as updated from now on.
 		
-		// 7.) Solving the implicit component of the generalized density equaitons.
+		// 6.) Solving the implicit component of the generalized density equaitons.
 		// ----------------------------------------------------------------------------
 		three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, delta_t_rk, grid);
     }

@@ -9,7 +9,7 @@ This implements the modified TRSK scheme by Gassmann (2018).
 #include "../enum_and_typedefs.h"
 #include <stdio.h>
 
-int vorticity_flux_horizontal(Vector_field in_field_0, Curl_field in_field_1, int layer_index, int h_index, double *component, Grid *grid)
+int vorticity_flux_horizontal_traditional(Vector_field in_field_0, Curl_field in_field_1, int layer_index, int h_index, double *component, Grid *grid)
 {
     *component = 0;
     // From_index comes before to_index as usual.
