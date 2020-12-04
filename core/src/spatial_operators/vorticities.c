@@ -64,8 +64,7 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagn
 
 int add_f_to_rel_vort(Curl_field rel_vort, Curl_field out_field, Dualgrid *dualgrid)
 {
-    int layer_index, h_index;
-    int i;
+    int i, layer_index, h_index;
     #pragma omp parallel for private(i, layer_index, h_index)
     for (i = 0; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {
