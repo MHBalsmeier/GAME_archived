@@ -40,7 +40,9 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 		for (int k = 0; k < 10; ++k)
 		{
 			if (k == 0 || k == 5)
+			{
 				offset = 0;
+			}
 			if (k < 5)
 			{
 				index_offset = 0;
@@ -60,7 +62,9 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 				}
 			}
 			if (adjacent_vector_indices_h[6*from_or_to_index[i] + k - index_offset] == i)
+			{
 				offset += 1;
+			}
 			if (offset > 1)
 			{
 				printf("Problem 1 in TRSK implementation detected.\n");
@@ -75,7 +79,9 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 			{
 				sign_1 = -1;
 				if (from_index[trsk_indices[10*i + k]] == from_or_to_index[i])
+				{
 					sign_1 = 1;
+				}
 				if (from_or_to_index[i] < NO_OF_PENTAGONS)
 				{
 					no_of_edges = 5;
@@ -94,7 +100,9 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 				double longitude_edges[no_of_edges];
 				double vector_of_areas[no_of_edges];
 				for (int l = 0; l < no_of_edges; ++l)
+				{
 					vertex_indices[l] = -1;
+				}
 				counter = 0;
 				for (int l = 0; l < no_of_edges; ++l)
 				{
@@ -132,7 +140,9 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 					for (int m = 0; m < no_of_edges; ++m)
 					{
 						if ((from_index_dual[adjacent_vector_indices_h[6*from_or_to_index[i] + m]] == vertex_indices_resorted[l] && to_index_dual[adjacent_vector_indices_h[6*from_or_to_index[i] + m]] == vertex_indices_resorted[(l + 1)%no_of_edges]) || (to_index_dual[adjacent_vector_indices_h[6*from_or_to_index[i] + m]] == vertex_indices_resorted[l] && from_index_dual[adjacent_vector_indices_h[6*from_or_to_index[i] + m]] == vertex_indices_resorted[(l + 1)%no_of_edges]))
+						{
 							edge_indices[l] = adjacent_vector_indices_h[6*from_or_to_index[i] + m];
+						}
 					}
 				}
 				for (int l = 0; l < no_of_edges; ++l)
@@ -163,14 +173,22 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 				for (int l = 0; l < no_of_edges; ++l)
 				{
 					if (edge_indices[l] == i)
+					{
 						last_index = l;
+					}
 					if (edge_indices[l] == trsk_indices[10*i + k])
+					{
 						first_index = (l + 1)%no_of_edges;
+					}
 				}
 				if (k == index_offset + no_of_edges - 1)
+				{
 					sum_of_weights = 0;
+				}
 				else
+				{
 					double_sum_gen(vector_of_areas, no_of_edges, first_index, last_index, &sum_of_weights);
+				}
 				if (sum_of_weights < 0 || sum_of_weights/(rescale_for_z_offset_2d*area[from_or_to_index[i]]) > 1)
 				{
 					printf("Problem 34 in TRSK implementation detected.\n");
@@ -184,7 +202,7 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 		// modification following Gassmann (2018)
 		// First off all, the indices need to be resorted.
 		// As usual, the from cell is treated first.
-		// First of all it needs to be determined wether the cell at hand is pentagonal or hexagonal.
+		// First of all, it needs to be determined wether the cell at hand is pentagonal or hexagonal.
 		no_of_edges = 6;
 		if (from_index[i] < NO_OF_PENTAGONS)
 		{
@@ -232,7 +250,9 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
                 next_vertex_index = from_index_dual[trsk_indices[10*i + j]];
             }
             else
+            {
             	next_vertex_index = next_vertex_index_candidate;
+        	}
 		}
 		if (indices_used_counter != no_of_edges - 1)
 		{
@@ -249,7 +269,9 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 		next_vertex_index = from_index_dual[i];
         find_angle_change(direction[i], direction_dual[i], &direction_change);
         if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
+        {
             next_vertex_index = to_index_dual[i];
+        }
         indices_used_counter = 0;
 		for (int j = 0; j < no_of_edges - 1; ++j)
 		{
@@ -271,9 +293,13 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 			}
 			next_vertex_index_candidate = to_index_dual[trsk_indices[10*i + 5 + j]];
             if (next_vertex_index_candidate == next_vertex_index)
+           	{
                 next_vertex_index = from_index_dual[trsk_indices[10*i + 5 + j]];
+            }
             else
+            {
             	next_vertex_index = next_vertex_index_candidate;
+			}
 		}
 		if (indices_used_counter != no_of_edges - 1)
 		{
@@ -308,9 +334,13 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 			trsk_modified_curl_indices[10*i + 4] = trsk_indices[10*i + 5];
 		}
 		if (from_index[i] < NO_OF_PENTAGONS)
+		{
 			trsk_modified_curl_indices[10*i + 5] = trsk_indices[10*i + 3];
+		}
 		else
+		{
 			trsk_modified_curl_indices[10*i + 5] = trsk_indices[10*i + 4];
+		}
 		trsk_modified_curl_indices[10*i + 6] = trsk_indices[10*i + 5];
 		if (to_index[i] < NO_OF_PENTAGONS)
 		{

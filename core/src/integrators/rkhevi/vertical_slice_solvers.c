@@ -15,8 +15,8 @@ This file contains the implicit vertical solvers.
 #include "../../spatial_operators/spatial_operators.h"
 #include "atmostracers.h"
 
-int thomas_algorithm(double [], double [], double [], double [], double []);
-int lu_5band_solver(double [], double [], double [], double [], double [], double [], double []);
+int thomas_algorithm(double [], double [], double [], double [], double [], int);
+int lu_5band_solver(double [], double [], double [], double [], double [], double [], double [], int);
 int sign(double);
 
 int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, State *state_new, Diagnostics *diagnostics, double delta_t, Grid *grid)
@@ -25,9 +25,9 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 	// This is for Klemp (2008).
 	get_damping_layer_properties(&damping_start_height_over_toa, &damping_coeff_max);
 	damping_start_height = damping_start_height_over_toa*grid -> z_vector[0];
-	int upper_index, lower_index, j, gaseous_constituent_id;
+	int upper_index, lower_index, j;
 	double impl_pgrad_weight = get_impl_thermo_weight();
-	#pragma omp parallel for private(upper_index, lower_index, delta_z, upper_volume, lower_volume, total_volume, damping_coeff, z_above_damping, j, gaseous_constituent_id)
+	#pragma omp parallel for private(upper_index, lower_index, delta_z, upper_volume, lower_volume, total_volume, damping_coeff, z_above_damping, j)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// for meanings of these vectors look into the definition of the function lu_5band_solver
@@ -38,24 +38,17 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 		double solution_vector[2*NO_OF_LAYERS - 1];
 		double upper_weights_vector[NO_OF_LAYERS - 1];
 		double lower_weights_vector[NO_OF_LAYERS - 1];
-		double vertical_entropy_vector[NO_OF_LAYERS];
-		double vertical_entropy_gradient_component[NO_OF_LAYERS - 1];
-		double vertical_entropy_gradient[NO_OF_GASEOUS_CONSTITUENTS*(NO_OF_LAYERS - 1)];
 		double temp_interface_values[NO_OF_LAYERS - 1];
 		double c_g_v_vector[NO_OF_LAYERS];
 		double c_g_p_vector[NO_OF_LAYERS];
 		double r_g_vector[NO_OF_LAYERS];
 		double c_g_p_interface_values[NO_OF_LAYERS - 1];
-		double density_gas_vector[NO_OF_LAYERS];
-		double l_vector[2*NO_OF_LAYERS - 3];
-		double u_vector[2*NO_OF_LAYERS - 3];
 		// determining the properties of the gas phase in the grid boxes
 		for (j = 0; j < NO_OF_LAYERS; ++j)
 		{
 			c_g_v_vector[j] = spec_heat_cap_diagnostics_v(state_new, i + j*NO_OF_SCALARS_H);
 			c_g_p_vector[j] = spec_heat_cap_diagnostics_p(state_new, i + j*NO_OF_SCALARS_H);
-			r_g_vector[j] = gas_constant_diagnostics(state_new, i + j*NO_OF_SCALARS_H);	
-			density_gas_vector[j] = density_gas(state_new, i + j*NO_OF_SCALARS_H);
+			r_g_vector[j] = gas_constant_diagnostics(state_new, i + j*NO_OF_SCALARS_H);
 		}
 		// determining the upper and lower weights as well as the c_g_v interface values
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
@@ -71,36 +64,6 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 			+ lower_weights_vector[j]*state_new -> temperature_gas[lower_index];
 			c_g_p_interface_values[j] = upper_weights_vector[j]*c_g_p_vector[j] +
 			lower_weights_vector[j]*c_g_p_vector[j + 1];
-			// initializing vertical_entropy_gradient with zeros
-			for (gaseous_constituent_id = 0; gaseous_constituent_id < NO_OF_GASEOUS_CONSTITUENTS; ++gaseous_constituent_id)
-			{
-				vertical_entropy_gradient[gaseous_constituent_id*(NO_OF_LAYERS - 1) + j] = 0;
-			}
-		}
-		// determining the specific entropy gradient
-		// loop over all gaseous constituents
-		for (gaseous_constituent_id = 0; gaseous_constituent_id < NO_OF_GASEOUS_CONSTITUENTS; ++gaseous_constituent_id)
-		{
-			// determining the specific entropy of the constituent at hand
-			for (j = 0; j < NO_OF_LAYERS; ++j)
-			{	
-				if (state_new -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + gaseous_constituent_id)*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H] != 0)
-				{
-					vertical_entropy_vector[j] = state_new -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + gaseous_constituent_id)*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H]/
-					state_new -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + gaseous_constituent_id)*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H];
-				}
-				else
-				{
-					vertical_entropy_vector[j] = 0;
-				}
-			}
-			// taking the gradient
-			grad_v_scalar_column(vertical_entropy_vector, vertical_entropy_gradient_component, i, grid);
-			// adding to the density weighted sum of all specific entropy gradients
-			for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
-			{
-				vertical_entropy_gradient[gaseous_constituent_id*(NO_OF_LAYERS - 1) + j] = vertical_entropy_gradient_component[j];
-			}
 		}
 		// filling up the original vectors
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
@@ -108,13 +71,6 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 			// determining the elements of a_vector
 			delta_z = grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i];
 			a_vector[2*j] = delta_t*impl_pgrad_weight*c_g_p_interface_values[j]/delta_z;
-			for (gaseous_constituent_id = 0; gaseous_constituent_id < NO_OF_GASEOUS_CONSTITUENTS; ++gaseous_constituent_id)
-			{
-				a_vector[2*j] +=
-				- delta_t*upper_weights_vector[j]*impl_pgrad_weight
-				*state_new -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + gaseous_constituent_id)*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H]/density_gas_vector[j]
-				*vertical_entropy_gradient[gaseous_constituent_id*(NO_OF_LAYERS - 1) + j];
-			}
 			a_vector[2*j + 1] = delta_t*((r_g_vector[j]/c_g_v_vector[j] - 1)*state_new -> temperature_gas[i + (j + 1)*NO_OF_SCALARS_H] + temp_interface_values[j])*
 			grid -> area[i + j*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H];
 			
@@ -123,35 +79,10 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 			grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + j*NO_OF_SCALARS_H];
 			delta_z = grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i];
 			c_vector[2*j + 1] = -delta_t*impl_pgrad_weight*c_g_p_interface_values[j]/delta_z;
-			for (gaseous_constituent_id = 0; gaseous_constituent_id < NO_OF_GASEOUS_CONSTITUENTS; ++gaseous_constituent_id)
-			{
-				c_vector[2*j + 1] +=
-				- delta_t*lower_weights_vector[j]*impl_pgrad_weight
-				*state_new -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + gaseous_constituent_id)*NO_OF_SCALARS + i + (j + 1)*NO_OF_SCALARS_H]/density_gas_vector[j + 1]
-				*vertical_entropy_gradient[gaseous_constituent_id*(NO_OF_LAYERS - 1) + j];
-			}
 		}
-		for (int j = 0; j < NO_OF_LAYERS - 2; ++j)
-		{
-			// determining the elements of l_vector
-			l_vector[2*j] = 0;
-			l_vector[2*j + 1] = 0;
-			// determining the elements of u_vector
-			u_vector[2*j] = 0;
-			u_vector[2*j + 1] = 0;
-		}
-		l_vector[2*NO_OF_LAYERS - 4] = 0;
-		u_vector[2*NO_OF_LAYERS - 4] = 0;
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
-			if (j == 0)
-			{
-				b_vector[2*j] = 1;
-			}
-			else
-			{
-				b_vector[2*j] = 1;
-			}
+			b_vector[2*j] = 1;
 			b_vector[2*j + 1] = 1;
 			d_vector[2*j] = diagnostics -> temperature_gas_explicit[j*NO_OF_SCALARS_H + i];
 			delta_z = grid -> z_vector[j*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 2)*NO_OF_VECTORS_PER_LAYER + i];
@@ -163,7 +94,7 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 		b_vector[2*NO_OF_LAYERS - 2] =  1;
 		d_vector[2*NO_OF_LAYERS - 2] = diagnostics -> temperature_gas_explicit[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		// calling the algorithm to solve the system of linear equations
-		lu_5band_solver(a_vector, b_vector, c_vector, l_vector, u_vector, d_vector, solution_vector);
+		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, solution_vector, 2*NO_OF_LAYERS - 1);
 		// writing the result into the new state
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
@@ -320,7 +251,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						+ delta_t*state_tendency -> condensed_density_temperatures[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
 					}
 				}
-				thomas_algorithm(a_vector, b_vector, c_vector, d_vector, solution_vector);
+				thomas_algorithm(a_vector, b_vector, c_vector, d_vector, solution_vector, NO_OF_LAYERS);
 				for (j = 0; j < NO_OF_LAYERS; ++j)
 				{
 					// limiter: none of the densities may be negative
@@ -348,11 +279,11 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 	return 0;
 }
 
-int thomas_algorithm(double a_vector[], double b_vector[], double c_vector[], double d_vector[], double solution_vector[])
+int thomas_algorithm(double a_vector[], double b_vector[], double c_vector[], double d_vector[], double solution_vector[], int solution_length)
 {
 	// https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm
-	double c_prime_vector[NO_OF_LAYERS - 1];
-	double d_prime_vector[NO_OF_LAYERS];
+	double c_prime_vector[solution_length - 1];
+	double d_prime_vector[solution_length];
 	if (b_vector[0] != 0)
 	{
 		c_prime_vector[0] = c_vector[0]/b_vector[0];
@@ -361,7 +292,7 @@ int thomas_algorithm(double a_vector[], double b_vector[], double c_vector[], do
 	{
 		c_prime_vector[0] = 0;
 	}
-	for (int j = 1; j < NO_OF_LAYERS - 1; ++j)
+	for (int j = 1; j < solution_length - 1; ++j)
 	{
 		if (b_vector[j] - c_prime_vector[j - 1]*a_vector[j - 1] != 0)
 		{
@@ -380,7 +311,7 @@ int thomas_algorithm(double a_vector[], double b_vector[], double c_vector[], do
 	{
 		d_prime_vector[0] = 0;
 	}
-	for (int j = 1; j < NO_OF_LAYERS; ++j)
+	for (int j = 1; j < solution_length; ++j)
 	{
 		if (b_vector[j] - c_prime_vector[j - 1]*a_vector[j - 1] != 0)
 		{
@@ -391,23 +322,22 @@ int thomas_algorithm(double a_vector[], double b_vector[], double c_vector[], do
 			d_prime_vector[j] = 0;
 		}
 	}
-	solution_vector[NO_OF_LAYERS - 1] = d_prime_vector[NO_OF_LAYERS - 1];
-	for (int j = NO_OF_LAYERS - 2; j >= 0; --j)
+	solution_vector[solution_length - 1] = d_prime_vector[solution_length - 1];
+	for (int j = solution_length - 2; j >= 0; --j)
 	{
 		solution_vector[j] = d_prime_vector[j] - c_prime_vector[j]*solution_vector[j + 1];
 	}
 	return 0;
 }
 
-int lu_5band_solver(double a_vector[], double b_vector[], double c_vector[], double l_vector[], double u_vector[], double d_vector[], double solution_vector[])
+int lu_5band_solver(double a_vector[], double b_vector[], double c_vector[], double l_vector[], double u_vector[], double d_vector[], double solution_vector[], int solution_length)
 {
 	// Here the system of linear equations Ax = d is solved, using the LU decomposition.
 	// We reformulate this problem to LUx = d with a lower triangular matrix L and an upper triangular matrix U.
 	// Determining the vectors l_1_vector and l_2_vector, which make up the matrix L.
-	int solution_length = 2*NO_OF_LAYERS - 1;
-	double a_vector_mod[2*NO_OF_LAYERS - 2];
-	double b_vector_mod[2*NO_OF_LAYERS - 1];
-	double c_vector_mod[2*NO_OF_LAYERS - 2];
+	double a_vector_mod[solution_length - 1];
+	double b_vector_mod[solution_length];
+	double c_vector_mod[solution_length - 1];
 	for (int i = 0; i < solution_length; ++i)
 	{
 		b_vector_mod[i] = b_vector[i];
@@ -417,8 +347,8 @@ int lu_5band_solver(double a_vector[], double b_vector[], double c_vector[], dou
 		a_vector_mod[i] = a_vector[i];
 		c_vector_mod[i] = c_vector[i];
 	}
-	double l_1_vector[2*NO_OF_LAYERS - 2];
-	double l_2_vector[2*NO_OF_LAYERS - 3];
+	double l_1_vector[solution_length - 1];
+	double l_2_vector[solution_length - 1];
 	for (int i = 0; i < solution_length - 2; ++i)
 	{
 		l_1_vector[i] = a_vector_mod[i]/b_vector_mod[i];
@@ -435,7 +365,7 @@ int lu_5band_solver(double a_vector[], double b_vector[], double c_vector[], dou
 	l_1_vector[solution_length - 2] = a_vector_mod[solution_length - 2]/b_vector_mod[solution_length - 2];
 	
 	// Solving Ly = d.
-	double y_vector[2*NO_OF_LAYERS - 1];
+	double y_vector[solution_length];
 	y_vector[0] = d_vector[0];
 	y_vector[1] = d_vector[1] - l_1_vector[0]*y_vector[0];
 	for (int i = 2; i < solution_length; ++i)
@@ -444,8 +374,8 @@ int lu_5band_solver(double a_vector[], double b_vector[], double c_vector[], dou
 	}
 	
 	// It is L^{-1}A = R:
-	double r_0_vector[2*NO_OF_LAYERS - 1];
-	double r_1_vector[2*NO_OF_LAYERS - 2];
+	double r_0_vector[solution_length];
+	double r_1_vector[solution_length - 1];
 	r_0_vector[0] = b_vector[0];
 	r_1_vector[0] = c_vector[0];
 	r_0_vector[1] = -l_1_vector[0]*c_vector[0] + b_vector[1];

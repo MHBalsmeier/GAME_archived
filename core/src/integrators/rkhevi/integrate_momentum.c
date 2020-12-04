@@ -33,8 +33,6 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
     grad(diagnostics -> e_kin, forcings -> e_kin_grad, grid);
     // Now the explicit forces are added up.
     int layer_index, h_index;
-    double expl_pgrad_weight;
-	expl_pgrad_weight = 1 - get_impl_thermo_weight();
     #pragma omp parallel for private(layer_index, h_index)
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
@@ -54,7 +52,7 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
     		{
         		state_tendency -> velocity_gas[i] =
         		// full pressure gradient acceleration
-        		forcings -> pressure_gradient_acc[i]
+        		forcings -> pressure_gradient_acc_expl[i]
         		// generalized Coriolis term
         		+ forcings -> pot_vort_tend[i]
         		// gravity
@@ -77,7 +75,7 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
         		// gravity
         		- grid -> gravity_m[i]
         		// explicit part of the pressure gradient acceleration
-        		+ expl_pgrad_weight*forcings -> pressure_gradient_acc[i]
+        		+ forcings -> pressure_gradient_acc_expl[i]
         		// momentum diffusion
         		+ irreversible_quantities -> friction_acc[i];
     		}

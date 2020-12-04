@@ -138,7 +138,7 @@ Vector_field velocity_gen;
 
 // Collects forcings.
 typedef struct forcings {
-Vector_field pressure_gradient_acc;
+Vector_field pressure_gradient_acc_expl;
 Vector_field e_kin_grad;
 Vector_field pot_vort_tend;
 } Forcings;
