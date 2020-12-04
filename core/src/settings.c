@@ -9,6 +9,7 @@ In this file, the model run and I/O configurations can be set, which are not acc
 
 #include "atmostracers.h"
 #include "settings.h"
+#include "enum_and_typedefs.h"
 
 int get_gas_contituents_ids(int);
 
@@ -25,16 +26,10 @@ int get_damping_layer_properties(double *damping_start_height_over_toa, double *
 int get_gas_contituents_ids(int gas_constituent_id)
 {
 	// This defines the constituents of the gas phase.
-	int result = 0;
-	if (gas_constituent_id == 0)
-	{
-		result = 0;
-	}
-	if (gas_constituent_id == 1)
-	{
-		result = 1;
-	}
-	return result;
+	int gas_constituent_ids_vector[NO_OF_GASEOUS_CONSTITUENTS];
+	gas_constituent_ids_vector[0] = 0;
+	gas_constituent_ids_vector[1] = 1;
+	return gas_constituent_ids_vector[gas_constituent_id];
 }
 
 double get_impl_thermo_weight()
@@ -42,12 +37,6 @@ double get_impl_thermo_weight()
 	double impl_thermo_weight;
 	impl_thermo_weight = spec_heat_capacities_v_gas(0)/spec_heat_capacities_p_gas(0);
 	return impl_thermo_weight;
-}
-
-double get_t_vadv_parameter()
-{
-	double t_vadv_parameter = 1.0;
-	return t_vadv_parameter;
 }
 
 // input and output
