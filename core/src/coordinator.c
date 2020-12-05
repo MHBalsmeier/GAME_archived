@@ -376,7 +376,7 @@ int main(int argc, char *argv[])
 	time_step_counter += 1;
     int counter = 0;
     State *state_tendency = calloc(1, sizeof(State));
-    Interpolation_info *interpolation_info = calloc(1, sizeof(Interpolation_info));
+    Extrapolation_info *extrapolation_info = calloc(1, sizeof(Extrapolation_info));
     Irreversible_quantities *diffusion = calloc(1, sizeof(Irreversible_quantities));
     linear_combine_two_states(state_old, state_old, state_new, 1, 0);
     config_info -> totally_first_step_bool = 1;
@@ -385,7 +385,7 @@ int main(int argc, char *argv[])
 	{
 		radiation_init();
 	}
-    manage_rkhevi(state_old, state_new, interpolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t, t_0);
+    manage_rkhevi(state_old, state_new, extrapolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t, t_0);
     counter += 1;
     if (write_out_dry_mass_integral == 1)
     {
@@ -424,7 +424,7 @@ int main(int argc, char *argv[])
         {
         	config_info -> rad_update = 0;
     	}
-        manage_rkhevi(state_old, state_new, interpolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t, t_0);
+        manage_rkhevi(state_old, state_new, extrapolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t, t_0);
 		if (write_out_dry_mass_integral == 1)
         {
 			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 0);
@@ -491,7 +491,7 @@ int main(int argc, char *argv[])
     free(config_info);
     free(io_config);
     free(diagnostics);
-    free(interpolation_info);
+    free(extrapolation_info);
     free(forcings);
     free(state_tendency);
     free(radiation_tendency);

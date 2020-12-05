@@ -110,20 +110,30 @@ int set_horizontal_curl_indices(double direction_dual[], double direction[], int
         sign = 1;
         find_angle_change(direction_dual[i], direction[i], &direction_change);
         if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
+        {
             sign = -1;
+        }
         h_curl_indices[4*i + 0] = i + NO_OF_VECTORS_PER_LAYER;
         h_curl_signs[4*i + 0] = sign;
         if (sign == 1)
+        {
             h_curl_indices[4*i + 1] = to_index[i];
+        }
         else
+        {
             h_curl_indices[4*i + 1] = from_index[i];
+        }
         h_curl_signs[4*i + 1] = 1;
         h_curl_indices[4*i + 2] = i;
         h_curl_signs[4*i + 2] = -sign;
         if (sign == 1)
+        {
             h_curl_indices[4*i + 3] = from_index[i];
+        }
         else
+        {
             h_curl_indices[4*i + 3] = to_index[i];
+        }
         h_curl_signs[4*i + 3] = -1;
     }
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
@@ -132,7 +142,9 @@ int set_horizontal_curl_indices(double direction_dual[], double direction[], int
     	for (int j = 0; j < NO_OF_VECTORS_H; ++j)
     	{
     		if (h_curl_indices[4*j + 1] == i || h_curl_indices[4*j + 3] == i)
+    		{
     			++counter;
+			}
     	}
     	if (i < NO_OF_PENTAGONS && counter != 5)
     	{

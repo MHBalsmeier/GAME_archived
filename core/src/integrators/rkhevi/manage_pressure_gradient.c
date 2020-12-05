@@ -14,7 +14,7 @@ The vertical advection of horizontal momentum is organized here.
 
 double pressure_gradient_1_damping_factor(double);
 
-int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Interpolation_info *interpolation, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_rk_step)
+int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Extrapolation_info *extrapolation, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_rk_step)
 {
 	// 1.) The weights for the horizontal pressure gradient acceleration extrapolation.
 	// --------------------------------------------------------------------------------
@@ -27,8 +27,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
 		{
-			interpolation -> cpgradt_m_old[i] = 0;
-			interpolation -> tgrads_old[i] = 0;
+			extrapolation -> cpgradt_m_old[i] = 0;
 		}
 	}
 	// This is the standard extrapolation.
@@ -42,14 +41,12 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	// The -c_p*grad(T) component is only updated at the zeroth RK step.
 	if (no_rk_step == 0)
 	{
-		// Before calculating the new pressure gradient acceleration, the old one must be saved for extrapolation.
+		// Before calculating the new sound wave component of the pressure gradient acceleration, the old one must be saved for extrapolation.
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
 		{
-			interpolation -> cpgradt_m_old[i] =
+			extrapolation -> cpgradt_m_old[i] =
 			diagnostics -> cpgradt_m_cov_hor[i] + diagnostics -> cpgradt_cov_ver_corr_hor_m[i];
-			interpolation -> tgrads_old[i] =
-			diagnostics -> tgrads_cov_hor[i] + diagnostics -> tgrads_cov_ver_corr_hor[i];
 		}
 		
 		// 2.) The first pressure gradient term.
@@ -162,7 +159,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	
     double expl_pgrad_sound_weight;
 	expl_pgrad_sound_weight = 1 - get_impl_thermo_weight();
-	// 6.) Here, the pressure gradient acceleration is added up.
+	// 6.) Here, the explicit part of the pressure gradient acceleration is added up.
 	// --------------------------------------------------------------------------------
 	int layer_index, h_index;
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
@@ -173,18 +170,23 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		if (h_index >= NO_OF_SCALARS_H)
 		{
 			forcings -> pressure_gradient_acc_expl[i] =
-			// the old time step convariant gradient
-			old_hor_pgrad_sound_weight*(-interpolation -> cpgradt_m_old[i])
-			// the new time step convariant gradient
-			+ new_hor_pgrad_sound_weight*(-diagnostics -> cpgradt_m_cov_hor[i]) + diagnostics -> tgrads_cov_hor[i]
-			// the terrrain correction
-			- diagnostics -> cpgradt_cov_ver_corr_hor_m[i] + diagnostics -> tgrads_cov_ver_corr_hor[i];
+			// the old time step horizontal -c_p*grad(T)
+			old_hor_pgrad_sound_weight*(-extrapolation -> cpgradt_m_old[i])
+			// the new time step horizontal -c_p*grad(T)
+			+ new_hor_pgrad_sound_weight*(-diagnostics -> cpgradt_m_cov_hor[i] - diagnostics -> cpgradt_cov_ver_corr_hor_m[i])
+			// covariant T*grad(s) component
+			+ diagnostics -> tgrads_cov_hor[i]
+			// the terrrain correction of the T*grad(s) component
+			+ diagnostics -> tgrads_cov_ver_corr_hor[i];
 		}
 		// vertical case
 		else
 		{
 			forcings -> pressure_gradient_acc_expl[i] =
-			-expl_pgrad_sound_weight*diagnostics -> cpgradt_cov_ver_corr_hor_m[i] + diagnostics -> tgrads_cov_ver_corr_hor[i];
+			// weighted -c_p*grad(T) part
+			expl_pgrad_sound_weight*(-diagnostics -> cpgradt_cov_ver_corr_hor_m[i])
+			// fully explicit T*grad(s) part
+			+ diagnostics -> tgrads_cov_ver_corr_hor[i];
 		}
 	}
 	

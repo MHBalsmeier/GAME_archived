@@ -4,3 +4,4 @@ Github repository: https://github.com/MHBalsmeier/game
 */
 
 int find_z_from_p(double, double, double *);
+int lu_5band_solver(double [], double [], double [], double [], double [], double [], double [], int);

@@ -156,11 +156,10 @@ int rad_on;
 int rad_update;
 } Config_info;
 
-// This is necessary for ensuring cancellation of energetically important terms, see Gassmann and Herzog.
-typedef struct interpolation_info {
+// This is necessary for stability of horizontally propagating sound waves.
+typedef struct extrapolation_info {
 Vector_field cpgradt_m_old;
-Vector_field tgrads_old;
-} Interpolation_info;
+} Extrapolation_info;
 
 // Contains everything on turbulence parametrizations as well as constituent-related quantities.
 typedef struct irreversible_quantities {
