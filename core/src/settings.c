@@ -74,7 +74,6 @@ int get_flight_levels(double flight_levels[])
 	return 0;
 }
 
-
 // the user should not change anything below here
 // ----------------------------------------------
 
