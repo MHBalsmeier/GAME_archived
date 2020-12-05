@@ -8,7 +8,7 @@ game_home_dir=/home/max/compiled/game_dev # the root directory of your GAME inst
 operator=MHB # the ID of the person / group / institution running the model
 ideal_input_id=0 # specifies which test scenario to run
 run_id=standard_flat # run_id must only be set if ideal_input_id != -1 (otherwise it is chosen automatically)
-run_span=777600 # how long the model is supposed to run
+run_span=3456000 # how long the model is supposed to run
 valgrind_check=0 # set this to 1, if you want to check the code with Valgrind
 
 # grid properties
@@ -17,7 +17,7 @@ type_of_vertical_grid=0 # 0: terrain following coordinates, 1: block-like orogra
 orography_layers=23 # number of layers following orography (only relevent if type_of_vertical_grid == 0)
 
 # time stepping characteristics
-rk_order=3 # convergence order of the Runge-Kutta stepping
+rk_order=2 # convergence order of the Runge-Kutta stepping
 cfl_margin=0.25 # The time step will be calculated as follows (delta t) = (delta t from CFL)*(1 - cfl_margin). 0.25 can be considered a safe standard value.
 
 # "physics" configuration
@@ -34,7 +34,7 @@ start_year=2000 # defines the start time of the model run
 start_month=1 # defines the start time of the model run
 start_day=1 # defines the start time of the model run
 start_hour=0 # defines the start time of the model run
-write_out_interval=900 # every how many seconds an output file will be created
+write_out_interval=86400 # every how many seconds an output file will be created
 write_out_mass_dry_integral=1 # If set to 1, the total dry mass of the atmosphere will be written out at every time step.
 write_out_entropy_gas_integral=1 # If set to 1, the total entropy of the atmosphere will be written out at every time step.
 write_out_linearized_entropy_gas_integral=1 # If set to 1, the total linearized entropy (proportional to density times potential temperature) of the atmosphere will be written out at every time step.

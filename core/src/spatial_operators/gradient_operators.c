@@ -84,25 +84,6 @@ int grad_oro_corr(Vector_field cov_to_con_gradient_field, Grid *grid)
     return 0;
 }
 
-int grad_oro_corr_no_add(Vector_field cov_to_con_gradient_field, Grid *grid)
-{
-    // correction for terrain
-    int layer_index, h_index;
-    double vertical_gradient;
-	#pragma omp parallel for private(layer_index, h_index, vertical_gradient)
-    for (int i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
-    {
-        layer_index = i/NO_OF_VECTORS_PER_LAYER;
-        h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-        if (h_index >= NO_OF_SCALARS_H && layer_index >= NO_OF_LAYERS - grid -> no_of_oro_layers)
-        {
-        	remap_verpri2horpri_vector(cov_to_con_gradient_field, layer_index, h_index - NO_OF_SCALARS_H, &vertical_gradient, grid);
-            cov_to_con_gradient_field[i] = -grid -> slope[i]*vertical_gradient;
-        }
-    }
-    return 0;
-}
-
 int grad_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
 {
 	grad_hor_cov(in_field, out_field, grid);

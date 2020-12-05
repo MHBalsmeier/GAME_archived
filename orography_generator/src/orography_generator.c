@@ -149,7 +149,9 @@ int main(int argc, char *argv[])
 				oro[i] += z_in_vector[min_indices_vector[j]]*weights_vector[j]/weights_sum;
 			}
 			if (oro[i] < -600 || oro[i] > 5700)
+			{
 				printf("Warning: value out of usual range.\n");		
+			}
 		}
 	}
 	free(z_in_vector);

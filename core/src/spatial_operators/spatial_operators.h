@@ -6,7 +6,6 @@ Github repository: https://github.com/MHBalsmeier/game
 int grad_hor_cov(Scalar_field, Vector_field, Grid *);
 int grad_vert_cov(Scalar_field, Vector_field, Grid *);
 int grad_oro_corr(Vector_field, Grid *);
-int grad_oro_corr_no_add(Vector_field, Grid *);
 int grad_cov(Scalar_field, Vector_field, Grid *);
 int grad(Scalar_field, Vector_field, Grid *);
 int grad_v_scalar_column(double [], double [], int, Grid *);
