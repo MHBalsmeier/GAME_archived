@@ -5,6 +5,7 @@
 
 echo "Starting to compile grid generator ..."
 gcc src/* -fopenmp -lnetcdf -lm -lgeos95 -Wall -o grid_generator
+# mpicc src/* -O3 -fopenmp -lnetcdf -lm -lgeos95 -Wall -o grid_generator
 if [ $? -ne 0 ]
 then
 echo -e ${RED}Grid generator compilation failed.$NC
