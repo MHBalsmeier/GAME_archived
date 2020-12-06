@@ -77,10 +77,10 @@ int add_f_to_rel_vort(Curl_field rel_vort, Curl_field out_field, Dualgrid *dualg
 
 int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
-    int layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area, index_0, index_1, index_2, index_3, sign_0, sign_1, sign_2, sign_3;
+    int layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area, index_0, index_1, index_2, index_3;
     double rhombus_circ, dist_0, dist_1, dist_2, dist_3, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient;
     int i;
-	#pragma omp parallel for private(i, layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area, index_0, index_1, index_2, index_3, sign_0, sign_1, sign_2, sign_3, rhombus_circ, dist_0, dist_1, dist_2, dist_3, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient)
+	#pragma omp parallel for private(i, layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area, index_0, index_1, index_2, index_3, rhombus_circ, dist_0, dist_1, dist_2, dist_3, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient)
     for (i = NO_OF_VECTORS_H; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {
         layer_index = i/(2*NO_OF_VECTORS_H);
@@ -137,22 +137,17 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
         	// At the lower boundary, w vanishes. Furthermore, the covariant velocity at the surface is also zero.
             if (layer_index == NO_OF_LAYERS)
             {
-                index_2 = layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> h_curl_indices[4*h_index + 2] - NO_OF_VECTORS_H;
-                sign_2 = dualgrid -> h_curl_signs[4*h_index + 2];
+                index_2 = layer_index*NO_OF_VECTORS_PER_LAYER - NO_OF_VECTORS_H + h_index;
                 dist_2 = grid -> normal_distance[index_2];
-                horizontal_covariant(velocity_field, layer_index - 1, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_2);
-                out_field[i] = 1/dualgrid -> area[layer_index*2*NO_OF_VECTORS_H + h_index]*dist_2*sign_2*covar_2;
+                horizontal_covariant(velocity_field, layer_index - 1, h_index, grid, &covar_2);
+                out_field[i] = 1/dualgrid -> area[layer_index*2*NO_OF_VECTORS_H + h_index]*dist_2*covar_2;
             }
             else
             {
-                index_0 = layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> h_curl_indices[4*h_index + 0] - NO_OF_VECTORS_H;
-                index_1 = layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> h_curl_indices[4*h_index + 1];
-                index_2 = layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> h_curl_indices[4*h_index + 2] - NO_OF_VECTORS_H;
-                index_3 = layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> h_curl_indices[4*h_index + 3];
-                sign_0 = dualgrid -> h_curl_signs[4*h_index + 0];
-                sign_1 = dualgrid -> h_curl_signs[4*h_index + 1];
-                sign_2 = dualgrid -> h_curl_signs[4*h_index + 2];
-                sign_3 = dualgrid -> h_curl_signs[4*h_index + 3];
+                index_0 = layer_index*NO_OF_VECTORS_PER_LAYER + NO_OF_SCALARS_H + h_index;
+                index_1 = layer_index*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index];
+                index_2 = layer_index*NO_OF_VECTORS_PER_LAYER - NO_OF_VECTORS_H + h_index;
+                index_3 = layer_index*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index];
                 dist_0 = grid -> normal_distance[index_0];
                 dist_1 = grid -> normal_distance[index_1];
                 dist_2 = grid -> normal_distance[index_2];
@@ -161,10 +156,10 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
                 covar_2 = velocity_field[index_2];
                 if (layer_index >= NO_OF_LAYERS - grid -> no_of_oro_layers)
                 {
-                    horizontal_covariant(velocity_field, layer_index, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_0);
-                    horizontal_covariant(velocity_field, layer_index - 1, dualgrid -> h_curl_indices[4*h_index + 2], grid, &covar_2);
+                    horizontal_covariant(velocity_field, layer_index, h_index, grid, &covar_0);
+                    horizontal_covariant(velocity_field, layer_index - 1, h_index, grid, &covar_2);
                 }
-                out_field[i] = 1/dualgrid -> area[layer_index*2*NO_OF_VECTORS_H + h_index]*(dist_0*sign_0*covar_0 + dist_1*sign_1*velocity_field[index_1] + dist_2*sign_2*covar_2 + dist_3*sign_3*velocity_field[index_3]);
+                out_field[i] = 1/dualgrid -> area[layer_index*2*NO_OF_VECTORS_H + h_index]*(-dist_0*covar_0 + dist_1*velocity_field[index_1] + dist_2*covar_2 - dist_3*velocity_field[index_3]);
             }
         }
     }

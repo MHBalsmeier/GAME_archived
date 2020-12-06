@@ -31,7 +31,7 @@ int set_from_to_index(int [], int [], int [][3], int [][3], int [][3], int [][2]
 int set_scalar_h_dual_coords(double [], double [], double [], double [], int [][3], int [][3], int [][3], int [][2]);
 int set_z_scalar_dual(double [], double [], int [], int [], int [], double);
 int set_volume(double [], double [], double [], double [], int [], int [], double, int []);
-int calc_adjacent_vector_indices_h(int [], int [], int [], int []);
+int find_adjacent_vector_indices_h(int [], int [], int [], int []);
 int set_area_dual(double [], double [], int [], int [], double [], double []);
 int set_horizontal_curl_indices(double [], double [], int [], int [], int [], double, int []);
 int set_vertical_vorticity_stuff(int [], int [], int [], int [], int [], int [], int [], int [], int [], double [], double [], double [], double [], double [], double [], double [], double [], double []);
@@ -50,6 +50,7 @@ int slopes(double [], int [], int [], double [], double []);
 int write_statistics_file(double [], double [], double [], char []);
 int set_scalar_shading_indices(double [], double [], int []);
 int set_vector_shading_indices(int [], int [], int [], int []);
+int direct_tangential_unity(double [], double [], double [], double [], int [], int [], double [], double);
 
 
 

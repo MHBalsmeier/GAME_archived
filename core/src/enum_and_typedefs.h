@@ -98,8 +98,6 @@ int to_index[NO_OF_VECTORS_H];
 int adjacent_vector_indices_h[3*NO_OF_DUAL_SCALARS_H];
 int vorticity_indices[4*NO_OF_VECTORS_H];
 int vorticity_signs[4*NO_OF_VECTORS_H];
-int h_curl_indices[4*NO_OF_VECTORS_H];
-int h_curl_signs[4*NO_OF_VECTORS_H];
 double f_vec[3*NO_OF_VECTORS_H];
 } Dualgrid;
 

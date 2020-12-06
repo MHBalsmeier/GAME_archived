@@ -307,18 +307,6 @@ int set_scalar_h_dual_coords(double latitude_scalar_dual[], double longitude_sca
 	return 0;
 }
 
-int set_dual_vector_h_doubles(double latitude_scalar_dual[], double latitude_vector[], double direction_dual[], double longitude_vector[], int to_index_dual[], int from_index_dual[], double longitude_scalar_dual[], double rel_on_line_dual[])
-{
-    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-    {
-        find_min_dist_rel_on_line(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], latitude_vector[i], longitude_vector[i], &rel_on_line_dual[i]);
-        if (fabs(rel_on_line_dual[i] - 0.5) > 0.14)
-            printf("Bisection warning.\n");
-        direction_dual[i] = find_geodetic_direction(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], rel_on_line_dual[i]);
-    }
-    return 0;
-}
-
 int set_from_to_index_dual(int from_index_dual[], int to_index_dual[], int face_edges [][3], int face_edges_reverse[][3])
 {
 	int coord_0, coord_1, on_face_index, on_edge_index, edge_index, small_triangle_edge_index, coord_0_points_amount, first_face_found, face_index, triangle_on_face_index;
@@ -343,63 +331,101 @@ int set_from_to_index_dual(int from_index_dual[], int to_index_dual[], int face_
                         first_face_found = 1;
                     }
                     else
+                    {
                         face_index_1 = j;
+                    }
                 }
             }
             if (face_edges[face_index_0][0] == edge_index)
+            {
                 edge_rel_to_face_0 = 0;
+            }
             if (face_edges[face_index_0][1] == edge_index)
+            {
                 edge_rel_to_face_0 = 1;
+            }
             if (face_edges[face_index_0][2] == edge_index)
+            {
                 edge_rel_to_face_0 = 2;
+            }
             if (face_edges[face_index_1][0] == edge_index)
+            {
                 edge_rel_to_face_1 = 0;
+            }
             if (face_edges[face_index_1][1] == edge_index)
+            {
                 edge_rel_to_face_1 = 1;
+            }
             if (face_edges[face_index_1][2] == edge_index)
+            {
                 edge_rel_to_face_1 = 2;
+            }
             if (edge_rel_to_face_0 == 0)
             {
                 if (face_edges_reverse[face_index_0][edge_rel_to_face_0] == 0)
+                {
                     triangle_on_face_index = 2*on_edge_index;
+                }
                 else
+                {
                     triangle_on_face_index = 2*POINTS_PER_EDGE - 2*on_edge_index;
+            	}
             }
             if (edge_rel_to_face_0 == 1)
             {
                 if (face_edges_reverse[face_index_0][edge_rel_to_face_0] == 0)
+                {
                     triangle_on_face_index = -1 + (on_edge_index + 1)*(2*POINTS_PER_EDGE - on_edge_index + 1);
+                }
                 else
+            	{
                     triangle_on_face_index = TRIANGLES_PER_FACE - on_edge_index*on_edge_index - 1;
+            	}
             }
             if (edge_rel_to_face_0 == 2)
             {
                 if (face_edges_reverse[face_index_0][edge_rel_to_face_0] == 0)
+            	{
                     triangle_on_face_index = TRIANGLES_PER_FACE - 1 - on_edge_index*(on_edge_index + 2);
+            	}
                 else
+            	{
                     triangle_on_face_index = on_edge_index*(2*POINTS_PER_EDGE + 2 - on_edge_index);
+            	}
             }
             to_index_dual[i] = face_index_0*TRIANGLES_PER_FACE + triangle_on_face_index;
             if (edge_rel_to_face_1 == 0)
             {
                 if (face_edges_reverse[face_index_1][edge_rel_to_face_1] == 0)
+            	{
                     triangle_on_face_index = 2*on_edge_index;
+            	}
                 else
+            	{
                     triangle_on_face_index = 2*POINTS_PER_EDGE - 2*on_edge_index;
+            	}
             }
             if (edge_rel_to_face_1 == 1)
             {
                 if (face_edges_reverse[face_index_1][edge_rel_to_face_1] == 0)
+            	{
                     triangle_on_face_index = -1 + (on_edge_index + 1)*(2*POINTS_PER_EDGE - on_edge_index + 1);
+            	}
                 else
+            	{
                     triangle_on_face_index = TRIANGLES_PER_FACE - on_edge_index*on_edge_index - 1;
+            	}
             }
             if (edge_rel_to_face_1 == 2)
             {
                 if (face_edges_reverse[face_index_1][edge_rel_to_face_1] == 0)
+            	{
                     triangle_on_face_index = TRIANGLES_PER_FACE - 1 - on_edge_index*(on_edge_index + 2);
+            	}
                 else
+            	{
                     triangle_on_face_index = on_edge_index*(2*POINTS_PER_EDGE + 2 - on_edge_index);
+            	}
             }
             from_index_dual[i] = face_index_1*TRIANGLES_PER_FACE + triangle_on_face_index;
         }
@@ -426,6 +452,40 @@ int set_from_to_index_dual(int from_index_dual[], int to_index_dual[], int face_
                 to_index_dual[i] = from_index_dual[i] + 2*coord_0_points_amount;
             }
         }
+    }
+    return 0;
+}
+
+int set_dual_vector_h_doubles(double latitude_scalar_dual[], double latitude_vector[], double direction_dual[], double longitude_vector[], int to_index_dual[], int from_index_dual[], double longitude_scalar_dual[], double rel_on_line_dual[])
+{
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+    {
+        find_min_dist_rel_on_line(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], latitude_vector[i], longitude_vector[i], &rel_on_line_dual[i]);
+        if (fabs(rel_on_line_dual[i] - 0.5) > 0.14)
+        {
+            printf("Bisection warning.\n");
+        }
+        direction_dual[i] = find_geodetic_direction(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], rel_on_line_dual[i]);
+    }
+    return 0;
+}
+
+int direct_tangential_unity(double latitude_scalar_dual[], double longitude_scalar_dual[], double direction[], double direction_dual[], int to_index_dual[], int from_index_dual[], double rel_on_line_dual[], double ORTH_CRITERION_DEG)
+{
+	// ensuring e_y = k x e_z
+	int temp_index;
+	double direction_change;
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+    {
+	    find_angle_change(direction[i], direction_dual[i], &direction_change);
+	    if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
+	    {
+	    	temp_index = from_index_dual[i];
+	        from_index_dual[i] = to_index_dual[i];
+	        to_index_dual[i] = temp_index;
+	        rel_on_line_dual[i] = 1 - rel_on_line_dual[i];
+        	direction_dual[i] = find_geodetic_direction(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], rel_on_line_dual[i]);
+	    }
     }
     return 0;
 }

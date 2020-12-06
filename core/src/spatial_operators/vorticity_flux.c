@@ -40,7 +40,7 @@ int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vec
             upper_weight = (z_upper - grid -> z_vector[i])/(z_upper - z_lower);
             lower_weight = (grid -> z_vector[i] - z_lower)/(z_upper - z_lower);
             // adding to the result
-            out_field[i] += dualgrid -> h_curl_signs[4*(h_index - NO_OF_SCALARS_H)]*(upper_weight*upper_value + lower_weight*lower_value);
+            out_field[i] += -(upper_weight*upper_value + lower_weight*lower_value);
         }
         else
         {    

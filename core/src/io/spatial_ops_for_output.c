@@ -136,8 +136,7 @@ int inner_product_tangential(Vector_field in_field_0, Vector_field in_field_1, S
 	    {
 			tangential_wind(in_field_1, layer_index, grid -> adjacent_vector_indices_h[6*h_index + j], &tangential_wind_value, grid);
 	        out_field[i] +=
-			-dualgrid -> h_curl_signs[4*grid -> adjacent_vector_indices_h[6*h_index + j]]
-	        *grid -> inner_product_weights[8*i + j]
+	        grid -> inner_product_weights[8*i + j]
 	        *in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]
 	        *tangential_wind_value;
 	    }

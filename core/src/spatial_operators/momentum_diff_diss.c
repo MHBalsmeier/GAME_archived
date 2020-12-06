@@ -33,8 +33,8 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 int curl_of_vorticity_m(Curl_field vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
 	// Calculates the negative curl of the vorticity.
-	int layer_index, h_index, no_of_edges, sign;
-	#pragma omp parallel for private(layer_index, h_index, no_of_edges, sign)
+	int layer_index, h_index, no_of_edges;
+	#pragma omp parallel for private(layer_index, h_index, no_of_edges)
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
 		layer_index = i/NO_OF_VECTORS_PER_LAYER;
@@ -50,9 +50,7 @@ int curl_of_vorticity_m(Curl_field vorticity, Vector_field out_field, Grid *grid
 			}
 			for (int j = 0; j < no_of_edges; ++j)
 			{
-				// The sign indicates the positive curl direction.
-				sign = -dualgrid -> h_curl_signs[4*grid -> adjacent_vector_indices_h[6*h_index + j]]*grid -> adjacent_signs_h[6*h_index + j];
-				out_field[i] += sign
+				out_field[i] += grid -> adjacent_signs_h[6*h_index + j]
 				*dualgrid -> normal_distance[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]
 				*vorticity[layer_index*2*NO_OF_VECTORS_H + grid -> adjacent_vector_indices_h[6*h_index + j]];
 			}
@@ -69,10 +67,8 @@ int curl_of_vorticity_m(Curl_field vorticity, Vector_field out_field, Grid *grid
 			for (int j = 0; j < 3; ++j)
 			{
 				out_field[i] +=
-				// this sets the y direction correctly
-				-dualgrid -> h_curl_signs[4*(h_index - NO_OF_SCALARS_H)]
 				// This prefactor accounts for the fact that we average over three rhombi.
-				*1.0/3*(
+				1.0/3*(
 				// vertical length at the to_index_dual point
 				dualgrid -> normal_distance[NO_OF_DUAL_SCALARS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> to_index[h_index - NO_OF_SCALARS_H]]
 				// vorticity at the to_index_dual point
@@ -85,13 +81,11 @@ int curl_of_vorticity_m(Curl_field vorticity, Vector_field out_field, Grid *grid
 			// vertical difference of horizontal vorticity (-dzeta_y*dy)
 			out_field[i] +=
 			// substracting the upper zeta_y value
-			dualgrid -> h_curl_signs[4*(h_index - NO_OF_SCALARS_H)]
-			*dualgrid -> normal_distance[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H]
+			-dualgrid -> normal_distance[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H]
 			*vorticity[layer_index*2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
 			out_field[i] +=
 			// adding the lower zeta_y value
-			-dualgrid -> h_curl_signs[4*(h_index - NO_OF_SCALARS_H)]
-			*dualgrid -> normal_distance[(layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H]
+			dualgrid -> normal_distance[(layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H]
 			*vorticity[(layer_index + 1)*2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
 			// Dividing by the area. The additional minus sign accounts for the fact the we want the negative curl of the curl.
 			out_field[i] = -out_field[i]/grid -> area[i];

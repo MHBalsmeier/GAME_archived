@@ -14,7 +14,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 
-int calc_adjacent_vector_indices_h(int from_index[], int to_index[], int adjacent_signs_h[], int adjacent_vector_indices_h[])
+int find_adjacent_vector_indices_h(int from_index[], int to_index[], int adjacent_signs_h[], int adjacent_vector_indices_h[])
 {
     int trouble_detected = 0;
     int counter;
@@ -99,83 +99,6 @@ int calc_adjacent_vector_indices_h(int from_index[], int to_index[], int adjacen
         }
     }
     return 0;
-}
-    
-int set_horizontal_curl_indices(double direction_dual[], double direction[], int h_curl_indices[], int from_index[], int to_index[], double ORTH_CRITERION_DEG, int h_curl_signs[])
-{
-	int sign, counter;
-	double direction_change;
-    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-    {
-        sign = 1;
-        find_angle_change(direction_dual[i], direction[i], &direction_change);
-        if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
-        {
-            sign = -1;
-        }
-        h_curl_indices[4*i + 0] = i + NO_OF_VECTORS_PER_LAYER;
-        h_curl_signs[4*i + 0] = sign;
-        if (sign == 1)
-        {
-            h_curl_indices[4*i + 1] = to_index[i];
-        }
-        else
-        {
-            h_curl_indices[4*i + 1] = from_index[i];
-        }
-        h_curl_signs[4*i + 1] = 1;
-        h_curl_indices[4*i + 2] = i;
-        h_curl_signs[4*i + 2] = -sign;
-        if (sign == 1)
-        {
-            h_curl_indices[4*i + 3] = from_index[i];
-        }
-        else
-        {
-            h_curl_indices[4*i + 3] = to_index[i];
-        }
-        h_curl_signs[4*i + 3] = -1;
-    }
-    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-    {
-    	counter = 0;
-    	for (int j = 0; j < NO_OF_VECTORS_H; ++j)
-    	{
-    		if (h_curl_indices[4*j + 1] == i || h_curl_indices[4*j + 3] == i)
-    		{
-    			++counter;
-			}
-    	}
-    	if (i < NO_OF_PENTAGONS && counter != 5)
-    	{
-    		printf("Error in h_curl_indices, position 0.\n");
-    		exit(1);
-		}
-    	if (i >= NO_OF_PENTAGONS && counter != 6)
-    	{
-    		printf("Error in h_curl_indices, position 1.\n");
-    		exit(1);
-		}
-    }
-    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-    {
-    	counter = 0;
-    	for (int j = 0; j < NO_OF_VECTORS_H; ++j)
-    	{
-    		if (h_curl_indices[4*j + 0] == i + NO_OF_VECTORS_PER_LAYER || h_curl_indices[4*j + 2] == i)
-    		{
-    			++counter;
-    			if (h_curl_indices[4*j + 0] == i + NO_OF_VECTORS_PER_LAYER && h_curl_indices[4*j + 2] == i)
-    				++counter;
-			}
-    	}
-    	if (counter != 2)
-    	{
-    		printf("Error in h_curl_indices, position 2.\n");
-    		exit(1);
-		}
-    }
-	return 0;
 }
     
     
