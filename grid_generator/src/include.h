@@ -19,7 +19,7 @@ int find_triangle_edge_points(int, int, int, int *, int *, int *, int *, int *, 
 int build_icosahedron(double [], double [], int [][2], int [][3], int [][3], int [][3]);
 int generate_horizontal_generators(double [], double [], double [], double [], double [], double [], double [], int [][3], int [][3], int [][3]);
 int calc_inner_product_and_related(double [], double [], double [], int [], int [], double [], double [], double [], int [], double [], double []);
-int coriolis(int [], int [], int [], double [], double [], int [], double [], double [], double [], double [], double [], double [], double [], double [], double [], int [], int [], int [], double [], double [], double, double [], double []);
+int coriolis(int [], int [], int [], double [], double [], int [], double [], double [], double [], double [], double [], double [], double [], double [], double [], int [], int [], int [], double [], double []);
 int set_z_scalar(double [], double [], int, double, double, int);
 int set_f_vec(double [], double [], double [], double []);
 int set_orography(int, int, double []);
@@ -40,7 +40,7 @@ int set_gravity_potential(double [], double [], double);
 int set_from_to_index_dual(int [], int [], int [][3], int [][3]);
 int check_for_orthogonality(double [], double [], double);
 int calc_vorticity_indices_pre(int [], int [], double [], double [], int [], double, int []);
-int set_z_vector_and_normal_distance(double [], double [], double [], double [], double [], int [], int [], double, int);
+int set_z_vector_and_normal_distance(double [], double [], double [], double [], double [], int [], int [], double, int, double []);
 int map_area_to_sphere(double [], double [], double []);
 int calc_z_vector_dual_and_normal_distance_dual(double [], double [], double [], double, int [], int [], double [], int [], int [], double [], double [], int []);
 int set_area_dual_pre(double [], double [], double [], double [], int [], int [], double [], double);

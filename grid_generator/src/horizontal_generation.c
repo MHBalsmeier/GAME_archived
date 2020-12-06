@@ -122,7 +122,9 @@ int calc_cell_face_unity(double pent_hex_face_unity_sphere[], double latitude_sc
             }
         }
         if (counter != no_of_edges)
+        {
         	printf("Trouble in calc_cell_face_unity.\n");
+        }
         calc_spherical_polygon_face(lat_points, lon_points, no_of_edges, &pent_hex_face_unity_sphere[i]);
     }
     double pent_hex_sum_unity_sphere = 0;

@@ -63,7 +63,7 @@ int calc_inner_product_and_related(double inner_product_weights[], double normal
 	}
 	int e_kin_h_index_0, e_kin_h_index_1;
 	double total_volume, upper_volume, lower_volume, upper_volume_0, lower_volume_0, upper_volume_1, lower_volume_1, check_sum;
-	#pragma omp parallel for private(layer_index, e_kin_h_index_0, e_kin_h_index_1, total_volume, upper_volume, lower_volume, upper_volume_0, lower_volume_0, upper_volume_1, lower_volume_1, check_sum)
+	#pragma omp parallel for private(layer_index, h_index, e_kin_h_index_0, e_kin_h_index_1, total_volume, upper_volume, lower_volume, upper_volume_0, lower_volume_0, upper_volume_1, lower_volume_1, check_sum)
 	for (int i = 0; i < NO_OF_DUAL_H_VECTORS; ++i)
 	{
 		layer_index = i/NO_OF_VECTORS_H;

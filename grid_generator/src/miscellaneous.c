@@ -118,13 +118,17 @@ int calc_vorticity_indices_pre(int from_index_dual[], int to_index_dual[], doubl
                 {
                     find_angle_change(direction_dual[j], direction[j], &direction_change);
                     if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
+                    {
                         sign = -1;
+                    }
                 }
                 if (to_index_dual[j] == i)
                 {
                     find_angle_change(direction_dual[j], direction[j], &direction_change);
                     if (rad2deg(direction_change) > ORTH_CRITERION_DEG)
+                    {
                         sign = -1;
+                    }
                 }
                 vorticity_signs_pre[3*i + counter] = sign;
                 ++counter;

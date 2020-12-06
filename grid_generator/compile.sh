@@ -4,7 +4,7 @@
 # Github repository: https://github.com/MHBalsmeier/game
 
 echo "Starting to compile grid generator ..."
-mpicc -O3 src/* -fopenmp -lnetcdf -lm -lgeos95 -Wall -o grid_generator
+gcc src/* -fopenmp -lnetcdf -lm -lgeos95 -Wall -o grid_generator
 if [ $? -ne 0 ]
 then
 echo -e ${RED}Grid generator compilation failed.$NC

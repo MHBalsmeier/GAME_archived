@@ -79,7 +79,7 @@ int set_vector_shading_indices(int from_index[], int to_index[], int no_of_shade
 	return 0;
 }
 
-int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], double normal_distance[], double latitude_scalar[], double longitude_scalar[], int from_index[], int to_index[], double TOA, int VERT_GRID_TYPE)
+int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], double normal_distance[], double latitude_scalar[], double longitude_scalar[], int from_index[], int to_index[], double TOA, int VERT_GRID_TYPE, double z_surface[])
 {
 	int layer_index, h_index, upper_index, lower_index;
 	double *lowest_thicknesses = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -99,16 +99,18 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], doubl
         {
             upper_index = h_index + (layer_index - 1)*NO_OF_SCALARS_H;
             lower_index = h_index + layer_index*NO_OF_SCALARS_H;
+            // highest level
             if (layer_index == 0)
 			{
             	z_vector[i] = TOA;
                 normal_distance[i] = TOA - z_scalar[lower_index];
 			}
+			// lowest level
             else if (layer_index == NO_OF_LAYERS)
 			{
 				if (VERT_GRID_TYPE == 0)
 				{
-					z_vector[i] = z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + h_index];
+					z_vector[i] = z_surface[h_index];
                 }
 				if (VERT_GRID_TYPE == 1)
 				{
@@ -117,6 +119,7 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], doubl
                 normal_distance[i] = z_scalar[upper_index] - z_vector[i];
                 lowest_thicknesses[h_index] = z_vector[i - NO_OF_VECTORS_PER_LAYER] - z_vector[i];
 			}
+			// inner levels
             else
 			{
 				// placing the vertical vector in the middle between the two adjacent scalar points
@@ -141,7 +144,7 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], doubl
 		{
 			check_sum += normal_distance[i + j*NO_OF_VECTORS_PER_LAYER];
 		}
-		if (fabs(check_sum/(TOA - z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]) - 1) > 1e-15)
+		if (fabs(check_sum/(TOA - z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]) - 1) > 1e-10)
 		{
 			printf("Problem 0 with vertical grid structure.\n");
 			exit(1);
