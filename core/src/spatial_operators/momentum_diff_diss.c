@@ -15,12 +15,14 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 	add_vertical_divv(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
     grad(diagnostics -> velocity_gas_divv, diffusion -> friction_acc, grid);
     curl_of_vorticity_m(diagnostics -> rel_vort, diagnostics -> curl_of_vorticity_m, grid, dualgrid);
-    // Calculating the effective viscosity coefficients.
-    calc_divv_term_viscosity_eff(state, config_info, diffusion -> divv_term_viscosity_eff);
-    calc_curl_term_viscosity_eff(state, config_info, diffusion -> curl_term_viscosity_eff);
     // Multiplying the values of the differential operators by the effective viscosities.
-	scalar_times_vector(diffusion -> divv_term_viscosity_eff, diffusion -> friction_acc, diffusion -> friction_acc, grid);
-	scalar_times_vector(diffusion -> curl_term_viscosity_eff, diagnostics -> curl_of_vorticity_m, diagnostics -> curl_of_vorticity_m, grid);
+    // Calculating the effective viscosity of the divergence term.
+    calc_divv_term_viscosity_eff(state, diffusion -> viscosity_eff);
+	scalar_times_vector(diffusion -> viscosity_eff, diffusion -> friction_acc, diffusion -> friction_acc, grid);
+    // Calculating the effective viscosity of the curl term.
+    calc_curl_term_viscosity_eff(state, diffusion -> viscosity_eff);
+	scalar_times_vector(diffusion -> viscosity_eff, diagnostics -> curl_of_vorticity_m, diagnostics -> curl_of_vorticity_m, grid);
+	// adding the curl term to the divergence term
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
@@ -70,11 +72,11 @@ int curl_of_vorticity_m(Curl_field vorticity, Vector_field out_field, Grid *grid
 				// This prefactor accounts for the fact that we average over three rhombi.
 				1.0/3*(
 				// vertical length at the to_index_dual point
-				dualgrid -> normal_distance[NO_OF_DUAL_SCALARS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> to_index[h_index - NO_OF_SCALARS_H]]
+				dualgrid -> normal_distance[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> to_index[h_index - NO_OF_SCALARS_H]]
 				// vorticity at the to_index_dual point
 				*vorticity[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + dualgrid -> adjacent_vector_indices_h[3*dualgrid -> to_index[h_index - NO_OF_SCALARS_H] + j]]
 				// vertical length at the from_index_dual point
-				- dualgrid -> normal_distance[NO_OF_DUAL_SCALARS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> from_index[h_index - NO_OF_SCALARS_H]]
+				- dualgrid -> normal_distance[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> from_index[h_index - NO_OF_SCALARS_H]]
 				// vorticity at the from_index_dual point
 				*vorticity[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + dualgrid -> adjacent_vector_indices_h[3*dualgrid -> from_index[h_index - NO_OF_SCALARS_H] + j]]);
 			}

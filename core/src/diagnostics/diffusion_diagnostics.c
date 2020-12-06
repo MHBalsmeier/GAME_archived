@@ -79,7 +79,7 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 	return 0;
 }
 
-int calc_divv_term_viscosity_eff(State *state, Config_info *config_info, Scalar_field divv_term_viscosity_eff)
+int calc_divv_term_viscosity_eff(State *state, Scalar_field divv_term_viscosity_eff)
 {
 	double mean_particle_mass = mean_particle_masses_gas(0);
 	double eff_particle_radius = 130e-12;
@@ -97,7 +97,7 @@ int calc_divv_term_viscosity_eff(State *state, Config_info *config_info, Scalar_
 	return 0;
 }
 
-int calc_curl_term_viscosity_eff(State *state, Config_info *config_info, Scalar_field curl_term_viscosity_eff)
+int calc_curl_term_viscosity_eff(State *state, Scalar_field curl_term_viscosity_eff)
 {
 	double mean_particle_mass = mean_particle_masses_gas(0);
 	double eff_particle_radius = 130e-12;

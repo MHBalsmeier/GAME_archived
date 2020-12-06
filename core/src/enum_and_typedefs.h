@@ -44,11 +44,7 @@ NO_OF_DUAL_H_VECTORS = NO_OF_LEVELS*NO_OF_VECTORS_H,
 NO_OF_DUAL_V_VECTORS = NO_OF_LAYERS*NO_OF_DUAL_SCALARS_H,
 NO_OF_DUAL_VECTORS_PER_LAYER = NO_OF_VECTORS_H + NO_OF_DUAL_SCALARS_H,
 NO_OF_DUAL_SCALARS = NO_OF_LEVELS*NO_OF_DUAL_SCALARS_H,
-NO_OF_DUAL_VECTORS = NO_OF_DUAL_H_VECTORS + NO_OF_DUAL_V_VECTORS,
-TRIANGLES_PER_FACE = NO_OF_TRIANGLES/NO_OF_BASIC_TRIANGLES,
-POINTS_PER_EDGE = (int) (pow(2, RES_ID) - 1),
-SCALAR_POINTS_PER_INNER_FACE = (int) (0.5*(pow(2, RES_ID) - 2)*(pow(2, RES_ID) - 1)),
-VECTOR_POINTS_PER_INNER_FACE = (int) (1.5*(pow(2, RES_ID) - 1)*pow(2, RES_ID))};
+NO_OF_DUAL_VECTORS = NO_OF_DUAL_H_VECTORS + NO_OF_DUAL_V_VECTORS};
 
 typedef double Scalar_field[NO_OF_SCALARS];
 typedef double Vector_field[NO_OF_VECTORS];
@@ -168,8 +164,7 @@ Scalar_field mass_diffusion_source_rate;
 Scalar_field pressure_gradient_decel_factor;
 double constituent_mass_source_rates[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
 double constituent_heat_source_rates[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
-Scalar_field divv_term_viscosity_eff;
-Scalar_field curl_term_viscosity_eff;
+Scalar_field viscosity_eff;
 } Irreversible_quantities;
 
 // Info on input and output is collected here.

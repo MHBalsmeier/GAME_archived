@@ -5,8 +5,8 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int calc_mass_diffusion_coeffs(State *, Config_info *, Scalar_field, Scalar_field);
 int calc_temp_diffusion_coeffs(State *, Config_info *, Scalar_field, Scalar_field);
-int calc_divv_term_viscosity_eff(State *, Config_info *, Scalar_field);
-int calc_curl_term_viscosity_eff(State *, Config_info *, Scalar_field);
+int calc_divv_term_viscosity_eff(State *, Scalar_field);
+int calc_curl_term_viscosity_eff(State *, Scalar_field);
 int remap_horpri2hordual_vector(Vector_field, int, int, double *, Grid *);
 int vorticity_flux_horizontal_traditional(Vector_field, Curl_field, int, int, double *, Grid *);
 int vorticity_flux_vertical(Vector_field, Curl_field, int, int, double *, Grid *, Dualgrid *);
