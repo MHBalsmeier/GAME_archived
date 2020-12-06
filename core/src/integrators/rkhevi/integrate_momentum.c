@@ -43,43 +43,25 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
         {
             state_tendency -> velocity_gas[i] = 0;
         }
-        else
-        {
-        	// horizontal case
-    		if (h_index >= NO_OF_SCALARS_H
-        	// checking for shading
-        	&& NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_vector[h_index - NO_OF_SCALARS_H])
-    		{
-        		state_tendency -> velocity_gas[i] =
-        		// full pressure gradient acceleration
-        		forcings -> pressure_gradient_acc_expl[i]
-        		// generalized Coriolis term
-        		+ forcings -> pot_vort_tend[i]
-        		// gravity
-        		- grid -> gravity_m[i]
-        		// kinetic energy term
-        		- forcings -> e_kin_grad[i]
-        		// momentum diffusion
-        		+ irreversible_quantities -> friction_acc[i];
-    		}
-    		// vertical case
-        	if (h_index < NO_OF_SCALARS_H
-        	// checking for shading
-        	&& NO_OF_LAYERS - layer_index > grid -> no_of_shaded_points_scalar[h_index])
-        	{
-        		state_tendency -> velocity_gas[i] =
-        		// generalized Coriolis term
-        		forcings -> pot_vort_tend[i]
-        		// kinetic energy term
-        		- forcings -> e_kin_grad[i]
-        		// gravity
-        		- grid -> gravity_m[i]
-        		// explicit part of the pressure gradient acceleration
-        		+ forcings -> pressure_gradient_acc_expl[i]
-        		// momentum diffusion
-        		+ irreversible_quantities -> friction_acc[i];
-    		}
-        }
+        else if ((h_index >= NO_OF_SCALARS_H
+    	// checking for shading
+    	&& NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_vector[h_index - NO_OF_SCALARS_H])
+    	|| (h_index < NO_OF_SCALARS_H
+    	// checking for shading
+    	&& NO_OF_LAYERS - layer_index > grid -> no_of_shaded_points_scalar[h_index]))
+		{
+    		state_tendency -> velocity_gas[i] =
+    		// explicit component of pressure gradient acceleration
+    		forcings -> pressure_gradient_acc_expl[i]
+    		// generalized Coriolis term
+    		+ forcings -> pot_vort_tend[i]
+    		// kinetic energy term
+    		- forcings -> e_kin_grad[i]
+    		// gravity
+    		- grid -> gravity_m[i]
+    		// momentum diffusion
+    		+ irreversible_quantities -> friction_acc[i];
+		}
     }
     return 0;
 }
