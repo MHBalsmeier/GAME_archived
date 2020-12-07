@@ -7,6 +7,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include "../diagnostics/diagnostics.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "geos95.h"
 
 int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
@@ -37,8 +38,8 @@ int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vec
             + mass_flux_density[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index - NO_OF_SCALARS_H]])
             *pot_vorticity[h_index - NO_OF_SCALARS_H  + (layer_index + 1)*2*NO_OF_VECTORS_H];
             // determining the weights
-            upper_weight = (z_upper - grid -> z_vector[i])/(z_upper - z_lower);
-            lower_weight = (grid -> z_vector[i] - z_lower)/(z_upper - z_lower);
+            upper_weight = find_volume(pow((RADIUS + grid -> z_vector[i])/(RADIUS + z_lower), 2), RADIUS + grid -> z_vector[i], RADIUS + z_upper)/find_volume(1, RADIUS + z_lower, RADIUS + z_upper);
+            lower_weight = find_volume(1, RADIUS + z_lower, RADIUS + grid -> z_vector[i])/find_volume(1, RADIUS + z_lower, RADIUS + z_upper);
             // adding to the result
             out_field[i] += -(upper_weight*upper_value + lower_weight*lower_value);
         }
