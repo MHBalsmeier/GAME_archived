@@ -33,7 +33,7 @@ int calc_mass_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 	    	}
 		    if (config_info -> mass_diff_v == 1)
 		    {
-		    	mass_diffusion_coeff_para_ratio_v = pow(10, 3);
+		    	mass_diffusion_coeff_para_ratio_v = pow(10, 5);
 	    	}
 		    else
 		    {
@@ -65,7 +65,7 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
     	}
 	    if (config_info -> temperature_diff_v == 1)
 	    {
-			temp_diffusion_coeff_para_ratio_v = pow(10, 3);
+			temp_diffusion_coeff_para_ratio_v = pow(10, 5);
     	}
 		else
 	    {

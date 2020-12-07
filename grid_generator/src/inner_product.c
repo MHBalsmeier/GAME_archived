@@ -15,13 +15,12 @@ In this file, the inner product weights are computed.
 int calc_inner_product_and_related(double inner_product_weights[], double normal_distance[], double volume[], int to_index[], int from_index[], double area[], double z_scalar[], double z_vector[], int adjacent_vector_indices_h[], double volume_ratios[], double remap_horpri2hordual_vector_weights[])
 {
 	int layer_index, h_index;
-	double delta_z, weights_sum, partial_volume;
-	#pragma omp parallel for private(layer_index, h_index, delta_z, weights_sum, partial_volume)
+	double delta_z, partial_volume;
+	#pragma omp parallel for private(layer_index, h_index, delta_z, partial_volume)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		layer_index = i/NO_OF_SCALARS_H;
 		h_index = i - layer_index*NO_OF_SCALARS_H;
-		weights_sum = 0;
 		for (int j = 0; j < 6; ++j)
 		{
 			if (j < 5 || h_index >= NO_OF_PENTAGONS)
@@ -29,14 +28,13 @@ int calc_inner_product_and_related(double inner_product_weights[], double normal
 				inner_product_weights[8*i + j] = area[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]];
 				inner_product_weights[8*i + j] = inner_product_weights[8*i + j]*normal_distance[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + adjacent_vector_indices_h[6*h_index + j]];
 				inner_product_weights[8*i + j] = inner_product_weights[8*i + j]/(2*volume[i]);
-				weights_sum += inner_product_weights[8*i + j];
 			}
 			else
 			{
 				inner_product_weights[8*i + j] = 0;
 			}
 		}
-		// upper w, only needed only for diagnostics
+		// upper w
 		partial_volume = find_volume(area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]*pow((RADIUS + z_scalar[i])/(RADIUS + z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]), 2), RADIUS + z_scalar[i], RADIUS + z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]);
 		volume_ratios[2*i + 0] = partial_volume/volume[i];
 		if (layer_index == 0)
@@ -48,7 +46,7 @@ int calc_inner_product_and_related(double inner_product_weights[], double normal
 			delta_z = z_scalar[i - NO_OF_SCALARS_H] - z_scalar[i];
 		}
 		inner_product_weights[8*i + 6] = area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]*delta_z/(2*volume[i]);
-		// lower w, only needed only for diagnostics
+		// lower w
 		partial_volume = find_volume(area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER], RADIUS + z_vector[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER], RADIUS + z_scalar[i]);
 		volume_ratios[2*i + 1] = partial_volume/volume[i];
 		if (layer_index == NO_OF_LAYERS - 1)

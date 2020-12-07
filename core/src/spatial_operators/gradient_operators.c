@@ -98,20 +98,6 @@ int grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
     return 0;
 }
 
-int grad_v_scalar_column(double scalar_property[], double grad_vector[], int h_index, Grid *grid)
-{
-	for (int i = 0; i < NO_OF_LAYERS - 1; ++i)
-	{
-		grad_vector[i] = (scalar_property[i] - scalar_property[i + 1])/(grid -> z_scalar[h_index + i*NO_OF_SCALARS_H] - grid -> z_scalar[h_index + (i + 1)*NO_OF_SCALARS_H]);
-	}
-	return 0;
-}
-
-
-
-
-
-
 
 
 
