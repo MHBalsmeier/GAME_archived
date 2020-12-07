@@ -128,7 +128,7 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 				// the advection
 				-diagnostics -> flux_density_divv[j]
 				// the heating rates
-				 + state -> mass_densities[i*NO_OF_SCALARS + j]/density_total(state, j)*radiation_tendency[j]/state -> temperature_gas[j];
+				+ state -> mass_densities[i*NO_OF_SCALARS + j]/density_total(state, j)*(radiation_tendency[j] + irreversible_quantities -> temperature_diffusion_heating[j])/state -> temperature_gas[j];
 			 }
 	    }
     
