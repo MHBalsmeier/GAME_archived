@@ -123,8 +123,8 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 	double b_vector[NO_OF_LAYERS];
 	double c_vector[NO_OF_LAYERS - 1];
 	double d_vector[NO_OF_LAYERS];
-	double vertical_flux_vector[NO_OF_LAYERS - 1];
-	double vertical_flux_vector_expl[NO_OF_LAYERS - 1];
+	double vertical_flux_vector_impl[NO_OF_LAYERS - 1];
+	double vertical_flux_vector_rhs[NO_OF_LAYERS - 1];
 	double upper_weights_vector[NO_OF_LAYERS - 1];
 	double lower_weights_vector[NO_OF_LAYERS - 1];
 	double solution_vector[NO_OF_LAYERS];
@@ -132,11 +132,6 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 	int no_of_relevant_constituents = 0;
 	double density_new_at_interface, density_old_at_interface, area, upper_volume, lower_volume, total_volume;
 	int j, lower_index, upper_index;
-	double impl_m_weight = 0.5;
-	double impl_s_weight = 0.5;
-	double expl_m_weight = 1 - impl_m_weight;
-	double expl_s_weight = 1 - impl_s_weight;
-	double expl_weight_placeholer;
 	// mass densities, entropy densities, density x temperatures
 	for (int quantity_id = 0; quantity_id < 3; ++quantity_id)
 	{
@@ -159,15 +154,15 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 		for (int k = 0; k < no_of_relevant_constituents; ++k)
 		{
 			// loop over all columns
-			#pragma omp parallel for private(area, j, density_new_at_interface, density_old_at_interface, density_gas_value, density_gas_value_old, lower_index, upper_index, upper_volume, lower_volume, total_volume, a_vector, b_vector, c_vector, d_vector, vertical_flux_vector, vertical_flux_vector_expl, upper_weights_vector, lower_weights_vector, solution_vector)
+			#pragma omp parallel for private(area, j, density_new_at_interface, density_old_at_interface, density_gas_value, density_gas_value_old, lower_index, upper_index, upper_volume, lower_volume, total_volume, a_vector, b_vector, c_vector, d_vector, vertical_flux_vector_impl, vertical_flux_vector_rhs, upper_weights_vector, lower_weights_vector, solution_vector)
 			for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 			{
 				// diagnozing the vertical flux
 				for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 				{
 					// for both the explicit and the implicit component of the flux density, the new velocity is used (otherwise, it is unstable, according to experience)
-					vertical_flux_vector[j] = state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
-					vertical_flux_vector_expl[j] = state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
+					vertical_flux_vector_impl[j] = state_old -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
+					vertical_flux_vector_rhs[j] = state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 					// preparing the vertical interpolation
 					lower_index = i + (j + 1)*NO_OF_SCALARS_H;
 					upper_index = i + j*NO_OF_SCALARS_H;
@@ -186,20 +181,20 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						// The solid case.
 						if (k < NO_OF_SOLID_CONSTITUENTS)
 						{
-							vertical_flux_vector[j] -= ret_sink_velocity(0, 0.001, density_gas_value);
-							vertical_flux_vector_expl[j] -= ret_sink_velocity(0, 0.001, density_gas_value_old);
+							vertical_flux_vector_impl[j] -= ret_sink_velocity(0, 0.001, density_gas_value);
+							vertical_flux_vector_rhs[j] -= ret_sink_velocity(0, 0.001, density_gas_value_old);
 						}
 						// The liquid case.
 						else
 						{
-							vertical_flux_vector[j] -= ret_sink_velocity(1, 0.001, density_gas_value);
-							vertical_flux_vector_expl[j] -= ret_sink_velocity(1, 0.001, density_gas_value_old);
+							vertical_flux_vector_impl[j] -= ret_sink_velocity(1, 0.001, density_gas_value);
+							vertical_flux_vector_rhs[j] -= ret_sink_velocity(1, 0.001, density_gas_value_old);
 						}
 					}
 					// multiplying the vertical velocity by the area
 					area = grid -> area[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
-					vertical_flux_vector[j] = area*vertical_flux_vector[j];
-					vertical_flux_vector_expl[j] = area*vertical_flux_vector_expl[j];
+					vertical_flux_vector_impl[j] = area*vertical_flux_vector_impl[j];
+					vertical_flux_vector_rhs[j] = area*vertical_flux_vector_rhs[j];
 					// old density at the interface
 					density_old_at_interface = upper_weights_vector[j]*state_old -> mass_densities[k*NO_OF_SCALARS + upper_index]
 					+ lower_weights_vector[j]*state_old -> mass_densities[k*NO_OF_SCALARS + lower_index];
@@ -210,17 +205,17 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						density_new_at_interface =
 						upper_weights_vector[j]*state_new -> mass_densities[k*NO_OF_SCALARS + upper_index]
 						+ lower_weights_vector[j]*state_new -> mass_densities[k*NO_OF_SCALARS + lower_index];
-						vertical_flux_vector[j] = (expl_s_weight*density_old_at_interface + impl_s_weight*density_new_at_interface)*vertical_flux_vector[j];
-						vertical_flux_vector_expl[j] =
+						vertical_flux_vector_impl[j] = density_old_at_interface*vertical_flux_vector_impl[j];
+						vertical_flux_vector_rhs[j] =
 						// the old specific entropy at the interface
 						(upper_weights_vector[j]*state_old -> entropy_densities[k*NO_OF_SCALARS + upper_index]/state_old -> mass_densities[k*NO_OF_SCALARS + upper_index]
 						+ lower_weights_vector[j]*state_old -> entropy_densities[k*NO_OF_SCALARS + lower_index]/state_old -> mass_densities[k*NO_OF_SCALARS + lower_index])
 						 // the mass flux density used in ther vertical mass flux divergence
-						*(expl_s_weight*density_old_at_interface + impl_s_weight*density_new_at_interface)*vertical_flux_vector_expl[j];
+						*density_new_at_interface*vertical_flux_vector_rhs[j];
 					}
 					else
 					{
-						vertical_flux_vector_expl[j] = density_old_at_interface*vertical_flux_vector_expl[j];
+						vertical_flux_vector_rhs[j] = density_old_at_interface*vertical_flux_vector_rhs[j];
 					}
 				}
 				// filling up the original vectors
@@ -229,13 +224,13 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 					// entropy densities
 					if (quantity_id == 1)
 					{
-						a_vector[j] = impl_s_weight*upper_weights_vector[j]*delta_t/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*vertical_flux_vector[j];
-						c_vector[j] = -impl_s_weight*lower_weights_vector[j]*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector[j];
+						a_vector[j] = 0.5*upper_weights_vector[j]*delta_t/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j];
+						c_vector[j] = -0.5*lower_weights_vector[j]*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j];
 					}
 					else
 					{
-						a_vector[j] = impl_m_weight*upper_weights_vector[j]*delta_t/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*vertical_flux_vector[j];
-						c_vector[j] = -impl_m_weight*lower_weights_vector[j]*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector[j];
+						a_vector[j] = 0.5*upper_weights_vector[j]*delta_t/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j];
+						c_vector[j] = -0.5*lower_weights_vector[j]*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j];
 					}
 				}
 				for (j = 0; j < NO_OF_LAYERS; ++j)
@@ -245,34 +240,34 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 					{
 						if (j == 0)
 						{
-							b_vector[j] = state_new -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] - impl_s_weight*upper_weights_vector[j]*delta_t
-							/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector[0];
+							b_vector[j] = state_new -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] - 0.5*upper_weights_vector[j]*delta_t
+							/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[0];
 						}
 						else if (j == NO_OF_LAYERS - 1)
 						{
-							b_vector[j] = state_new -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] + impl_s_weight*lower_weights_vector[j - 1]*delta_t
-							/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector[j - 1];
+							b_vector[j] = state_new -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] + 0.5*lower_weights_vector[j - 1]*delta_t
+							/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j - 1];
 						}
 						else
 						{
-							b_vector[j] = state_new -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] + impl_s_weight*delta_t
-							/grid -> volume[i + j*NO_OF_SCALARS_H]*(lower_weights_vector[j - 1]*vertical_flux_vector[j - 1] - upper_weights_vector[j]*vertical_flux_vector[j]);
+							b_vector[j] = state_new -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] + 0.5*delta_t
+							/grid -> volume[i + j*NO_OF_SCALARS_H]*(lower_weights_vector[j - 1]*vertical_flux_vector_impl[j - 1] - upper_weights_vector[j]*vertical_flux_vector_impl[j]);
 						}
 					}
 					else
 					{
 						if (j == 0)
 						{
-							b_vector[j] = 1 - impl_m_weight*upper_weights_vector[j]*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector[0];
+							b_vector[j] = 1 - 0.5*upper_weights_vector[j]*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[0];
 						}
 						else if (j == NO_OF_LAYERS - 1)
 						{
-							b_vector[j] = 1 + impl_m_weight*lower_weights_vector[j - 1]*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector[j - 1];
+							b_vector[j] = 1 + 0.5*lower_weights_vector[j - 1]*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j - 1];
 						}
 						else
 						{
-							b_vector[j] = 1 + impl_m_weight*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]
-							*(lower_weights_vector[j - 1]*vertical_flux_vector[j - 1] - upper_weights_vector[j]*vertical_flux_vector[j]);
+							b_vector[j] = 1 + 0.5*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]
+							*(lower_weights_vector[j - 1]*vertical_flux_vector_impl[j - 1] - upper_weights_vector[j]*vertical_flux_vector_impl[j]);
 						}
 					}
 					// the explicit component
@@ -298,25 +293,17 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						+ delta_t*state_tendency -> condensed_density_temperatures[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
 					}
 					// adding the explicit part of the vertical flux divergence
-					if (quantity_id == 1)
-					{
-						expl_weight_placeholer = expl_s_weight;
-					}
-					else
-					{
-						expl_weight_placeholer = expl_m_weight;
-					}
 					if (j == 0)
 					{
-						d_vector[j] += expl_weight_placeholer*delta_t*vertical_flux_vector_expl[j]/grid -> volume[j*NO_OF_SCALARS_H + i];
+						d_vector[j] += 0.5*delta_t*vertical_flux_vector_rhs[j]/grid -> volume[j*NO_OF_SCALARS_H + i];
 					}
 					else if (j == NO_OF_LAYERS - 1)
 					{
-						d_vector[j] += -expl_weight_placeholer*delta_t*vertical_flux_vector_expl[j - 1]/grid -> volume[j*NO_OF_SCALARS_H + i];
+						d_vector[j] += -0.5*delta_t*vertical_flux_vector_rhs[j - 1]/grid -> volume[j*NO_OF_SCALARS_H + i];
 					}
 					else
 					{
-						d_vector[j] += expl_weight_placeholer*delta_t*(-vertical_flux_vector_expl[j - 1] + vertical_flux_vector_expl[j])/grid -> volume[j*NO_OF_SCALARS_H + i];
+						d_vector[j] += 0.5*delta_t*(-vertical_flux_vector_rhs[j - 1] + vertical_flux_vector_rhs[j])/grid -> volume[j*NO_OF_SCALARS_H + i];
 					}
 				}
 				thomas_algorithm(a_vector, b_vector, c_vector, d_vector, solution_vector, NO_OF_LAYERS);
