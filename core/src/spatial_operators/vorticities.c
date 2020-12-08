@@ -152,13 +152,8 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
                 dist_1 = grid -> normal_distance[index_1];
                 dist_2 = grid -> normal_distance[index_2];
                 dist_3 = grid -> normal_distance[index_3];
-                covar_0 = velocity_field[index_0];
-                covar_2 = velocity_field[index_2];
-                if (layer_index >= NO_OF_LAYERS - grid -> no_of_oro_layers)
-                {
-                    horizontal_covariant(velocity_field, layer_index, h_index, grid, &covar_0);
-                    horizontal_covariant(velocity_field, layer_index - 1, h_index, grid, &covar_2);
-                }
+                horizontal_covariant(velocity_field, layer_index, h_index, grid, &covar_0);
+                horizontal_covariant(velocity_field, layer_index - 1, h_index, grid, &covar_2);
                 out_field[i] = 1/dualgrid -> area[layer_index*2*NO_OF_VECTORS_H + h_index]*(-dist_0*covar_0 + dist_1*velocity_field[index_1] + dist_2*covar_2 - dist_3*velocity_field[index_3]);
             }
         }

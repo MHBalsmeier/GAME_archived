@@ -158,6 +158,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 		// loop over all relevant constituents
 		for (int k = 0; k < no_of_relevant_constituents; ++k)
 		{
+			// loop over all columns
 			#pragma omp parallel for private(area, j, density_new_at_interface, density_old_at_interface, density_gas_value, density_gas_value_old, lower_index, upper_index, upper_volume, lower_volume, total_volume, a_vector, b_vector, c_vector, d_vector, vertical_flux_vector, vertical_flux_vector_expl, upper_weights_vector, lower_weights_vector, solution_vector)
 			for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 			{

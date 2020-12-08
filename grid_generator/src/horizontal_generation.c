@@ -93,7 +93,7 @@ int generate_horizontal_generators(double latitude_ico[], double longitude_ico[]
 	return 0;
 }
 
-int calc_cell_face_unity(double pent_hex_face_unity_sphere[], double latitude_scalar_dual[], double longitude_scalar_dual[], int adjacent_vector_indices_h [], int vorticity_indices_pre [])
+int calc_cell_face_unity(double pent_hex_face_unity_sphere[], double latitude_scalar_dual[], double longitude_scalar_dual[], int adjacent_vector_indices_h[], int vorticity_indices_pre[])
 {
     int check_0, check_1, check_2, counter, no_of_edges;
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
@@ -107,7 +107,9 @@ int calc_cell_face_unity(double pent_hex_face_unity_sphere[], double latitude_sc
         double lon_points[no_of_edges];
         int cell_vector_indices[no_of_edges];
         for (int j = 0; j < no_of_edges; ++j)
+        {
             cell_vector_indices[j] = adjacent_vector_indices_h[6*i + j];
+        }
         counter = 0;
         for (int j = 0; j < NO_OF_DUAL_SCALARS_H; ++j)
         {
