@@ -132,8 +132,8 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 	int no_of_relevant_constituents = 0;
 	double density_new_at_interface, density_old_at_interface, area, upper_volume, lower_volume, total_volume;
 	int j, lower_index, upper_index;
-	double impl_m_weight = get_impl_thermo_weight();
-	double impl_s_weight = get_impl_thermo_weight();
+	double impl_m_weight = 0.5;
+	double impl_s_weight = 0.5;
 	double expl_m_weight = 1 - impl_m_weight;
 	double expl_s_weight = 1 - impl_s_weight;
 	double expl_weight_placeholer;
