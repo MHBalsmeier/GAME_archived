@@ -81,7 +81,17 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
 			b_vector[2*j] = 1;
-			b_vector[2*j + 1] = 1;
+			// Klemp (2008) upper boundary layer
+			z_above_damping = grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - damping_start_height;
+			if (z_above_damping < 0)
+			{
+				damping_coeff = 0;
+			}
+			else
+			{
+				damping_coeff = damping_coeff_max*pow(sin(0.5*M_PI*z_above_damping/(grid -> z_vector[0] - damping_start_height)), 2);
+			}
+			b_vector[2*j + 1] = 1 + delta_t*damping_coeff;
 			d_vector[2*j] = diagnostics -> temperature_gas_explicit[j*NO_OF_SCALARS_H + i];
 			delta_z = grid -> z_vector[j*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 2)*NO_OF_VECTORS_PER_LAYER + i];
 			d_vector[2*j + 1] =
@@ -96,18 +106,8 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 		// writing the result into the new state
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
-			// Klemp (2008) upper boundary layer
-			z_above_damping = grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - damping_start_height;
-			if (z_above_damping < 0)
-			{
-				damping_coeff = 0;
-			}
-			else
-			{
-				damping_coeff = damping_coeff_max*pow(sin(0.5*M_PI*z_above_damping/(grid -> z_vector[0] - damping_start_height)), 2);
-			}
 			state_new -> temperature_gas[j*NO_OF_SCALARS_H + i] = solution_vector[2*j];
-			state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] = solution_vector[2*j + 1]/(1 + delta_t*damping_coeff);
+			state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] = solution_vector[2*j + 1];
 		}
 		state_new -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] = solution_vector[2*(NO_OF_LAYERS - 1)];
 	}
