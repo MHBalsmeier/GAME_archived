@@ -116,7 +116,7 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 
 int three_band_solver_gen_densitites(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, double delta_t, Grid *grid)
 {
-	// Vertical constituent advection with 3-band matrices (Crank-Nicolson with variable weight).
+	// Vertical constituent advection with 3-band matrices.
 	// procedure derived in https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
 	// for meanings of these vectors look into the definition of the function thomas_algorithm
 	double a_vector[NO_OF_LAYERS - 1];
@@ -181,14 +181,14 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						// The solid case.
 						if (k < NO_OF_SOLID_CONSTITUENTS)
 						{
-							vertical_flux_vector_impl[j] -= ret_sink_velocity(0, 0.001, density_gas_value);
-							vertical_flux_vector_rhs[j] -= ret_sink_velocity(0, 0.001, density_gas_value_old);
+							vertical_flux_vector_impl[j] -= ret_sink_velocity(0, 0.001, density_gas_value_old);
+							vertical_flux_vector_rhs[j] -= ret_sink_velocity(0, 0.001, density_gas_value);
 						}
 						// The liquid case.
 						else
 						{
-							vertical_flux_vector_impl[j] -= ret_sink_velocity(1, 0.001, density_gas_value);
-							vertical_flux_vector_rhs[j] -= ret_sink_velocity(1, 0.001, density_gas_value_old);
+							vertical_flux_vector_impl[j] -= ret_sink_velocity(1, 0.001, density_gas_value_old);
+							vertical_flux_vector_rhs[j] -= ret_sink_velocity(1, 0.001, density_gas_value);
 						}
 					}
 					// multiplying the vertical velocity by the area
