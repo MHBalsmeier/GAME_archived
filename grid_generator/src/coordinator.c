@@ -44,7 +44,6 @@ The grid generation procedure is manged from this file. Memory allocation and IO
 #define BOLDCYAN "\033[1m\033[36m"
 #define BOLDWHITE "\033[1m\033[37m"
 
-const double TOA = 30000.0; // TOA = top of atmosphere
 const double ORTH_CRITERION_DEG = 89.99;
 
 int main(int argc, char *argv[])
@@ -64,6 +63,8 @@ int main(int argc, char *argv[])
    	stretching_parameter = strtof(argv[6], NULL);
    	int NO_OF_ORO_LAYERS = strtod(argv[7], NULL);
    	const int VERT_GRID_TYPE = strtod(argv[8], NULL);
+    double TOA;
+   	TOA = strtof(argv[9], NULL);
    	if (VERT_GRID_TYPE == 1)
    	{
    		NO_OF_ORO_LAYERS = 0;

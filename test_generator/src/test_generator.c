@@ -20,7 +20,6 @@ const double P_0 = 100000.0;
 const double OMEGA = 7.292115e-5;
 
 // constants specifying the grid
-const double TOA = 30000;
 
 // constants needed for the JW test state
 const double G = 9.80616;
@@ -55,6 +54,7 @@ int main(int argc, char *argv[])
    	TEST_ID = strtod(argv[1], NULL);
    	int NO_OF_ORO_LAYERS = strtod(argv[2], NULL);
    	const int VERT_GRID_TYPE = strtod(argv[3], NULL);
+   	const double TOA = strtof(argv[4], NULL);
    	if (VERT_GRID_TYPE == 1)
    	{
    		NO_OF_ORO_LAYERS = 0;
