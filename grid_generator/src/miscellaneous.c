@@ -94,7 +94,6 @@ int check_for_orthogonality(double direction[], double direction_dual[], double 
         if (fabs(rad2deg(direction_change)) < ORTH_CRITERION_DEG || fabs(rad2deg(direction_change)) > 90 + (90 - ORTH_CRITERION_DEG))
 		{
             printf("Grid non-orthogonal: Intersection angle of %lf degrees detected.\n", fabs(rad2deg(direction_change)));
-			exit(1);
 		}
     }
     return 0;

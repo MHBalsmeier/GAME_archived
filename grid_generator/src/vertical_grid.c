@@ -525,7 +525,7 @@ int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double n
 		if (fabs(check_sum/(TOA
 		- 1.0/3*(z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
 		+ z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
-		+ z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]])) - 1) > 1e-15)
+		+ z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]])) - 1) > 1e-10)
 		{
 			printf("Problem 1 with vertical grid structure.\n");
 			printf("Aborting.\n");
