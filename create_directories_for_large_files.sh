@@ -8,6 +8,10 @@ if [ ! -d grid_generator/grids ]
 then
 mkdir grid_generator/grids
 fi
+if [ ! -d grid_generator/statistics ]
+then
+mkdir grid_generator/statistics
+fi
 if [ ! -d orography_generator/orographies ]
 then
 mkdir orography_generator/orographies

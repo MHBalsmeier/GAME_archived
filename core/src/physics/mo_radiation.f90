@@ -18,9 +18,9 @@ module radiation
   implicit none
   
   ! the number of bands in the short wave region
-  integer, parameter                 :: no_of_sw_bands =  14
+  integer, parameter                 :: no_of_sw_bands = 14
   ! the number of bands in the long wave region
-  integer, parameter                 :: no_of_lw_bands =  16
+  integer, parameter                 :: no_of_lw_bands = 16
   ! the number of g points is the short wave region
   integer                            :: no_of_sw_g_points
   ! the number of g points is the long wave region
