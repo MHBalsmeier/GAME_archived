@@ -47,7 +47,7 @@ grib_output_switch=1 # If set to 1, output will be written to grib files.
 netcdf_output_switch=0 # If set to 1, output will be written to netcdf files.
 
 # parallelization
-export OMP_NUM_THREADS=1 # relevant only for OMP
+export OMP_NUM_THREADS=6 # relevant only for OMP
 number_of_cpus=1 # relevant only for MPI
 
 # that's it, now the basic run script will be sourced

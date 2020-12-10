@@ -639,6 +639,7 @@ int build_icosahedron(double latitude_ico[], double longitude_ico[], int edge_ve
     }
     free(vertices_check_counter);
     int edge_other_vertex_index, check_index;
+    check_index = 0;
     int *edges_check_counter = calloc(NO_OF_EDGES, sizeof(int));
     for (int i = 0; i < NO_OF_BASIC_TRIANGLES; ++i)
     {

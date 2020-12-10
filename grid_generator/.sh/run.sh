@@ -26,6 +26,7 @@ echo "Horizontal coordinates of the generating points (the scalar points in term
 fi
 echo "number of layers following orography: "$orography_layers
 echo "stretching parameter: "$stretching_parameter
+echo "model top: "$toa" m"
 echo "type of vertical grid: "$type_of_vertical_grid
 # end verbosity
 

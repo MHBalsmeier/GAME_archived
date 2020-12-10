@@ -9,11 +9,10 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
 {
-    int layer_index, h_index, no_of_edges;
+    int layer_index, h_index, no_of_edges, i, j;
     double contra_upper, contra_lower, comp_h, comp_v;
-    int j;
-	#pragma omp parallel for private(j, layer_index, h_index, contra_upper, contra_lower, comp_v, comp_h, no_of_edges)
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
+	#pragma omp parallel for private(layer_index, h_index, no_of_edges, i, j, contra_upper, contra_lower, comp_h, comp_v)
+    for (i = 0; i < NO_OF_SCALARS; ++i)
     {
         layer_index = i/NO_OF_SCALARS_H;
         h_index = i - layer_index*NO_OF_SCALARS_H;
@@ -60,10 +59,10 @@ int add_vertical_divv(Vector_field in_field, Scalar_field out_field, Grid *grid)
 	/*
 	This adds the divergence of the vertical component of a vector field to the input scalar field.	
 	*/
-    int layer_index, h_index;
+    int layer_index, h_index, i;
     double contra_upper, contra_lower, comp_v;
-	#pragma omp parallel for private (layer_index, h_index, contra_upper, contra_lower, comp_v)
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
+	#pragma omp parallel for private (layer_index, h_index, i, contra_upper, contra_lower, comp_v)
+    for (i = 0; i < NO_OF_SCALARS; ++i)
     {
         layer_index = i/NO_OF_SCALARS_H;
         h_index = i - layer_index*NO_OF_SCALARS_H;

@@ -35,9 +35,9 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 int curl_of_vorticity_m(Curl_field vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
 	// Calculates the negative curl of the vorticity.
-	int layer_index, h_index, no_of_edges;
-	#pragma omp parallel for private(layer_index, h_index, no_of_edges)
-	for (int i = 0; i < NO_OF_VECTORS; ++i)
+	int layer_index, h_index, no_of_edges, i, j;
+	#pragma omp parallel for private(layer_index, h_index, no_of_edges, i, j)
+	for (i = 0; i < NO_OF_VECTORS; ++i)
 	{
 		layer_index = i/NO_OF_VECTORS_PER_LAYER;
 		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
@@ -50,7 +50,7 @@ int curl_of_vorticity_m(Curl_field vorticity, Vector_field out_field, Grid *grid
 			{
 				no_of_edges = 5;
 			}
-			for (int j = 0; j < no_of_edges; ++j)
+			for (j = 0; j < no_of_edges; ++j)
 			{
 				out_field[i] += grid -> adjacent_signs_h[6*h_index + j]
 				*dualgrid -> normal_distance[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]
@@ -66,7 +66,7 @@ int curl_of_vorticity_m(Curl_field vorticity, Vector_field out_field, Grid *grid
 			out_field[i] = 0;
 			// horizontal difference of vertical vorticity (dzeta_z*dz)
 			// An averaging over three rhombi must be done.
-			for (int j = 0; j < 3; ++j)
+			for (j = 0; j < 3; ++j)
 			{
 				out_field[i] +=
 				// This prefactor accounts for the fact that we average over three rhombi.

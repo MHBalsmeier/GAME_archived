@@ -11,10 +11,10 @@ Github repository: https://github.com/MHBalsmeier/game
 
 int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
-    int layer_index, h_index;
+    int layer_index, h_index, i;
     double upper_weight, lower_weight, upper_value, lower_value, z_lower, z_upper;
-	#pragma omp parallel for private(layer_index, h_index,  upper_weight, lower_weight, upper_value, lower_value, z_lower, z_upper)
-    for (int i = 0; i < NO_OF_VECTORS; ++i)
+	#pragma omp parallel for private(layer_index, h_index, i, upper_weight, lower_weight, upper_value, lower_value, z_lower, z_upper)
+    for (i = 0; i < NO_OF_VECTORS; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;

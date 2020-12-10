@@ -15,10 +15,10 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagn
 	calc_rel_vort(velocity_field, diagnostics -> rel_vort, grid, dualgrid);
 	// pot_vort is a misuse of name here
 	add_f_to_rel_vort(diagnostics -> rel_vort, diagnostics -> pot_vort, dualgrid);
-    int layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index;
+    int i, layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index;
     double density_value, from_volume, to_volume, upper_volume, lower_volume;
-    #pragma omp parallel for private (layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index, density_value, from_volume, to_volume, upper_volume, lower_volume)
-    for (int i = 0; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
+    #pragma omp parallel for private (i, layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index, density_value, from_volume, to_volume, upper_volume, lower_volume)
+    for (i = 0; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {
         layer_index = i/(2*NO_OF_VECTORS_H);
         h_index = i - layer_index*2*NO_OF_VECTORS_H;
@@ -77,9 +77,8 @@ int add_f_to_rel_vort(Curl_field rel_vort, Curl_field out_field, Dualgrid *dualg
 
 int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
-    int layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area, index_0, index_1, index_2, index_3;
+    int i, layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area, index_0, index_1, index_2, index_3;
     double rhombus_circ, dist_0, dist_1, dist_2, dist_3, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient;
-    int i;
 	#pragma omp parallel for private(i, layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area, index_0, index_1, index_2, index_3, rhombus_circ, dist_0, dist_1, dist_2, dist_3, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient)
     for (i = NO_OF_VECTORS_H; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {

@@ -24,6 +24,7 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 	double rescale_for_z_offset_1d = (RADIUS + z_scalar[0])/(RADIUS + z_vector[0]);
 	double rescale_for_z_offset_2d = pow(rescale_for_z_offset_1d, 2);
 	double sum_of_weights = 0;
+	offset = 0;
 	// loop over all edges
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {

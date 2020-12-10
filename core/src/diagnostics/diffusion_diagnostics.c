@@ -51,7 +51,7 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 	double mean_particle_mass = mean_particle_masses_gas(0);
 	double eff_particle_radius = 130e-12;
 	double temp_diffusion_coeff, temp_diffusion_coeff_para_ratio_h, temp_diffusion_coeff_para_ratio_v, rho_g, c_g_v;
-	#pragma omp parallel for private (temp_diffusion_coeff, temp_diffusion_coeff_para_ratio_h, temp_diffusion_coeff_para_ratio_v)
+	#pragma omp parallel for private (temp_diffusion_coeff, temp_diffusion_coeff_para_ratio_h, temp_diffusion_coeff_para_ratio_v, rho_g, c_g_v)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 	    calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &temp_diffusion_coeff);

@@ -318,6 +318,7 @@ int set_from_to_index_dual(int from_index_dual[], int to_index_dual[], int face_
     int edge_rel_to_face_1 = 0;
     int face_index_0 = 0;
     int face_index_1 = 0;
+    triangle_on_face_index = 0;
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         if (i < NO_OF_EDGES*(POINTS_PER_EDGE + 1))

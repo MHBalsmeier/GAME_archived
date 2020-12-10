@@ -32,6 +32,7 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 	for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
 	{
 		// Separating the density of the constituent at hand.
+		#pragma omp parallel for
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
 		{
 		    diagnostics -> scalar_field_placeholder[j] = state -> mass_densities[i*NO_OF_SCALARS + j];
@@ -43,6 +44,7 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
         if (i < NO_OF_CONDENSED_CONSTITUENTS)
         {
 	    	// Adding a sink velocity.
+			#pragma omp parallel for private(layer_index, h_index, density_gas_value)
 	        for (int j = 0; j < NO_OF_VECTORS; ++j)
 	        {
 	            layer_index = j/NO_OF_VECTORS_PER_LAYER;
@@ -89,6 +91,7 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
         	scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
     	}
         divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
+		#pragma omp parallel for private(layer_index, h_index)
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
 		{
 			layer_index = j/NO_OF_SCALARS_H;
@@ -105,6 +108,7 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 		// Explicit entropy integrations
 		// -----------------------------
 		// Determining the specific entropy of the constituent at hand.
+		#pragma omp parallel for
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
 		{
 			if (state -> mass_densities[i*NO_OF_SCALARS + j] != 0)
@@ -118,6 +122,7 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 		}
 	    scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
 	    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
+		#pragma omp parallel for private(layer_index, h_index)
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
 		{
 			layer_index = j/NO_OF_SCALARS_H;
@@ -135,6 +140,7 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 		// This is the integration of the "density x temperature" fields. It only needs to be done for condensed constituents.
 		if (i < NO_OF_CONDENSED_CONSTITUENTS)
 		{
+			#pragma omp parallel for
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
 				diagnostics -> scalar_field_placeholder[j] = state -> condensed_density_temperatures[i*NO_OF_SCALARS + j];
@@ -142,6 +148,7 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 			// The constituent velocity has already been calculated.
 		    scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> velocity_gen, diagnostics -> flux_density, grid);
 		    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
+			#pragma omp parallel for private(layer_index, h_index, c_v_cond)
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
 				layer_index = j/NO_OF_SCALARS_H;

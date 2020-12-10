@@ -25,7 +25,7 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 	damping_start_height = damping_start_height_over_toa*grid -> z_vector[0];
 	int upper_index, lower_index, j;
 	double impl_pgrad_weight = get_impl_thermo_weight();
-	#pragma omp parallel for private(upper_index, lower_index, delta_z, upper_volume, lower_volume, total_volume, damping_coeff, z_above_damping, j)
+	#pragma omp parallel for private(upper_index, lower_index, j, delta_z, upper_volume, lower_volume, total_volume, damping_coeff)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// for meanings of these vectors look into the definition of the function lu_5band_solver
@@ -118,23 +118,10 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 {
 	// Vertical constituent advection with 3-band matrices.
 	// procedure derived in https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
-	// for meanings of these vectors look into the definition of the function thomas_algorithm
-	double a_vector[NO_OF_LAYERS - 1];
-	double b_vector[NO_OF_LAYERS];
-	double c_vector[NO_OF_LAYERS - 1];
-	double d_vector[NO_OF_LAYERS];
-	double vertical_flux_vector_impl[NO_OF_LAYERS - 1];
-	double vertical_flux_vector_rhs[NO_OF_LAYERS - 1];
-	double upper_weights_vector[NO_OF_LAYERS - 1];
-	double lower_weights_vector[NO_OF_LAYERS - 1];
-	double solution_vector[NO_OF_LAYERS];
-	double density_gas_value, density_gas_value_old;
-	int no_of_relevant_constituents = 0;
-	double density_new_at_interface, density_old_at_interface, area, upper_volume, lower_volume, total_volume;
-	int j, lower_index, upper_index;
 	// mass densities, entropy densities, density x temperatures
 	for (int quantity_id = 0; quantity_id < 3; ++quantity_id)
 	{
+		int no_of_relevant_constituents = 0;
 		// all constituents have a mass density
 		if (quantity_id == 0)
 		{
@@ -154,9 +141,22 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 		for (int k = 0; k < no_of_relevant_constituents; ++k)
 		{
 			// loop over all columns
-			#pragma omp parallel for private(area, j, density_new_at_interface, density_old_at_interface, density_gas_value, density_gas_value_old, lower_index, upper_index, upper_volume, lower_volume, total_volume, a_vector, b_vector, c_vector, d_vector, vertical_flux_vector_impl, vertical_flux_vector_rhs, upper_weights_vector, lower_weights_vector, solution_vector)
+			#pragma omp parallel for
 			for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 			{
+				// for meanings of these vectors look into the definition of the function thomas_algorithm
+				double a_vector[NO_OF_LAYERS - 1];
+				double b_vector[NO_OF_LAYERS];
+				double c_vector[NO_OF_LAYERS - 1];
+				double d_vector[NO_OF_LAYERS];
+				double vertical_flux_vector_impl[NO_OF_LAYERS - 1];
+				double vertical_flux_vector_rhs[NO_OF_LAYERS - 1];
+				double upper_weights_vector[NO_OF_LAYERS - 1];
+				double lower_weights_vector[NO_OF_LAYERS - 1];
+				double solution_vector[NO_OF_LAYERS];
+				double density_gas_value, density_gas_value_old;
+				double density_new_at_interface, density_old_at_interface, area, upper_volume, lower_volume, total_volume;
+				int j, lower_index, upper_index;
 				// diagnozing the vertical flux
 				for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 				{
