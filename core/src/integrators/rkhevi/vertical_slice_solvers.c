@@ -119,10 +119,11 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 	// Vertical constituent advection with 3-band matrices.
 	// procedure derived in https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
 	// mass densities, entropy densities, density x temperatures
+	int no_of_relevant_constituents, constituent_index_offset;
 	for (int quantity_id = 0; quantity_id < 3; ++quantity_id)
 	{
-		int no_of_relevant_constituents = 0;
-		int constituent_index_offset = 0;
+		no_of_relevant_constituents = 0;
+		constituent_index_offset = 0;
 		// all constituents have a mass density
 		if (quantity_id == 0)
 		{

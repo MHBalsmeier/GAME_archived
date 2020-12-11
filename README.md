@@ -17,7 +17,7 @@ It is known that the forecast skill of a NWP model depends more on physics and d
 * No problems with terrain following coordinates. For example: A resting atmosphere around steep orography shall remain at rest.
 * Ellipsoidal grid geometry.
 * A capable and flexible framework for coupling to physics and to other components of an Earth system model.
-* Consistency also in the presence of constituents and radiation.
+* Consistency also in the presence of multiple constituents and radiation.
 
 According to my understanding, a hexagonal C grid is the only discretization where all this can be achieved.
 
@@ -27,12 +27,8 @@ What GAME does what other models do not do and why:
 
 * It uses the entropy as a prognostic variable. Usually, models use the potential temperature as a prognostic variable which is a conserved quantity and therefore the only forcings are the diabatic forcings rendering it a suitable variable for modeling. However, the same is true for the real entropy (connected to the density times the logarithm of the potential temperature), and this last quantitiy is the much more fundamental physical property.
 * It employs the modified TRSK scheme.
-* It assigns individual densities (instead of mixing ratios) to constituents as well as individual temperatures and sink velocities.
-
-What GAME does not do and why:
-
-* It does not sacrifice physical consistency (mimetic properties of operators and conservation laws) for a higher convergence order or a performance speed-up. Higher-order schemes are only employed within the restrictions imposed by physical consistency contraints.
-* It does not contain an option for calculations in 2D, on the plane, in vertical columns or any other purely academic features. If schemes need to be tested individually, it can be done in an individual Python code.
+* It can assign individual densities (instead of mixing ratios) to constituents as well as individual temperatures and sink velocities.
+* It has different options for the time stepping as well as the complexity of the physics to make it useful for a wide range of applications.
 
 ### Things to be done
 
