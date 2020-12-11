@@ -53,7 +53,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
-			diagnostics -> c_g_p_field[i] = spec_heat_cap_diagnostics_p(state, i);
+			diagnostics -> c_g_p_field[i] = spec_heat_cap_diagnostics_p(state, i, config_info);
 		}
 		// Multiplying c_g_p with the temperature gradient.
 		grad(state -> temperature_gas, diagnostics -> cpgradt, grid);
@@ -69,7 +69,16 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		diagnostics -> tgrads[i] = 0;
 	}
 	// Each constitutent of the gas phase gets an individual term.
-	for (int j = 0; j < NO_OF_GASEOUS_CONSTITUENTS; ++j)
+	int no_of_relevant_constituents;
+	if (config_info -> simple_moisture == 0)
+	{
+		no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
+	}
+	if (config_info -> simple_moisture == 1)
+	{
+		no_of_relevant_constituents = 1;
+	}
+	for (int j = 0; j < no_of_relevant_constituents; ++j)
 	{
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
@@ -134,12 +143,16 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	
 	// 5.) The pressure gradient has to get a deceleration factor due to condensates.
 	// --------------------------------------------------------------------------------
-	#pragma omp parallel for
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	if (config_info -> simple_moisture == 0)
 	{
-		irreversible_quantities -> pressure_gradient_decel_factor[i] = density_gas(state, i)/density_total(state, i);
+		#pragma omp parallel for
+		for (int i = 0; i < NO_OF_SCALARS; ++i)
+		{
+			irreversible_quantities -> pressure_gradient_decel_factor[i] = density_gas(state, i)/density_total(state, i);
+		}
+		scalar_times_vector(irreversible_quantities -> pressure_gradient_decel_factor, forcings -> pressure_gradient_acc_expl, forcings -> pressure_gradient_acc_expl, grid);
 	}
-	scalar_times_vector(irreversible_quantities -> pressure_gradient_decel_factor, forcings -> pressure_gradient_acc_expl, forcings -> pressure_gradient_acc_expl, grid);
+	
 	return 0;
 }
 

@@ -72,7 +72,7 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 			temp_diffusion_coeff_para_ratio_v = 0;
     	}
 		rho_g = density_gas(state, i);
-		c_g_v = spec_heat_cap_diagnostics_v(state, i);
+		c_g_v = spec_heat_cap_diagnostics_v(state, i, config_info);
 	    temp_diffusion_coeff_numerical_h[i] = temp_diffusion_coeff_para_ratio_h*rho_g*c_g_v*temp_diffusion_coeff;
 	    temp_diffusion_coeff_numerical_v[i] = temp_diffusion_coeff_para_ratio_v*rho_g*c_g_v*temp_diffusion_coeff;
 	}

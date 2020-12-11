@@ -105,40 +105,44 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 				+ irreversible_quantities -> constituent_mass_source_rates[i*NO_OF_SCALARS + j];
 		    }
 	    }
+	    
 		// Explicit entropy integrations
-		// -----------------------------
-		// Determining the specific entropy of the constituent at hand.
-		#pragma omp parallel for
-		for (int j = 0; j < NO_OF_SCALARS; ++j)
+		if ((config_info -> simple_moisture == 1 && i == NO_OF_CONDENSED_CONSTITUENTS) || config_info -> simple_moisture == 0)
 		{
-			if (state -> mass_densities[i*NO_OF_SCALARS + j] != 0)
+			// -----------------------------
+			// Determining the specific entropy of the constituent at hand.
+			#pragma omp parallel for
+			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
-				diagnostics -> scalar_field_placeholder[j] = state -> entropy_densities[i*NO_OF_SCALARS + j]/state -> mass_densities[i*NO_OF_SCALARS + j];
+				if (state -> mass_densities[i*NO_OF_SCALARS + j] != 0)
+				{
+					diagnostics -> scalar_field_placeholder[j] = state -> entropy_densities[i*NO_OF_SCALARS + j]/state -> mass_densities[i*NO_OF_SCALARS + j];
+				}
+				else
+				{
+					diagnostics -> scalar_field_placeholder[j] = 0;
+				}
 			}
-			else
+			scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
+			divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
+			#pragma omp parallel for private(layer_index, h_index)
+			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
-				diagnostics -> scalar_field_placeholder[j] = 0;
+				layer_index = j/NO_OF_SCALARS_H;
+				h_index = j - layer_index*NO_OF_SCALARS_H;
+				if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
+				{
+					state_tendency -> entropy_densities[i*NO_OF_SCALARS + j] = 
+					// the advection
+					-diagnostics -> flux_density_divv[j]
+					// the heating rates
+					+ state -> mass_densities[i*NO_OF_SCALARS + j]/density_total(state, j)*(radiation_tendency[j] + irreversible_quantities -> temperature_diffusion_heating[j])/state -> temperature_gas[j];
+				 }
 			}
 		}
-	    scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
-	    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
-		#pragma omp parallel for private(layer_index, h_index)
-		for (int j = 0; j < NO_OF_SCALARS; ++j)
-		{
-			layer_index = j/NO_OF_SCALARS_H;
-			h_index = j - layer_index*NO_OF_SCALARS_H;
-			if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
-			{
-				state_tendency -> entropy_densities[i*NO_OF_SCALARS + j] = 
-				// the advection
-				-diagnostics -> flux_density_divv[j]
-				// the heating rates
-				+ state -> mass_densities[i*NO_OF_SCALARS + j]/density_total(state, j)*(radiation_tendency[j] + irreversible_quantities -> temperature_diffusion_heating[j])/state -> temperature_gas[j];
-			 }
-	    }
     
 		// This is the integration of the "density x temperature" fields. It only needs to be done for condensed constituents.
-		if (i < NO_OF_CONDENSED_CONSTITUENTS)
+		if (i < NO_OF_CONDENSED_CONSTITUENTS && config_info -> simple_moisture == 0)
 		{
 			#pragma omp parallel for
 			for (int j = 0; j < NO_OF_SCALARS; ++j)

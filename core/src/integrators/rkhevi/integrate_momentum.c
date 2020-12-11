@@ -20,7 +20,14 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		diagnostics -> scalar_field_placeholder[i] = density_gas(state, i);
+		if (config_info -> simple_moisture == 0)
+		{
+			diagnostics -> scalar_field_placeholder[i] = density_gas(state, i);
+		}
+		else
+		{
+			diagnostics -> scalar_field_placeholder[i] = state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
+		}
 	}
     scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
     // Now, the potential vorticity is evaluated.

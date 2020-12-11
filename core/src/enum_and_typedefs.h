@@ -145,6 +145,7 @@ int temperature_diff_v;
 int momentum_diff;
 int rad_on;
 int rad_update;
+int simple_moisture;
 } Config_info;
 
 // This is necessary for stability of horizontally propagating sound waves.

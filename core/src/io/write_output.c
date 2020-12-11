@@ -39,7 +39,7 @@ int get_pressure_on_flight_levels(double [], double []);
 double get_pressure_at_altitude_standard(double);
 int global_scalar_integrator(Scalar_field, Grid *, double *);
 
-int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Io_config *io_config)
+int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Io_config *io_config, Config_info *config_info)
 {
 	// Diagnostics and forcings are primarily handed over for checks.
 	
@@ -85,17 +85,17 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			// Now the aim is to determine the value of the MSLP.
 		    temp_lowest_layer = state_write_out -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		    pressure_value = density_gas(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i)
-		    *gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i)
+		    *gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i, config_info)
 		    *temp_lowest_layer;
 		    temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
 		    mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]/
-		    (gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i)*standard_vert_lapse_rate));
+		    (gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i, config_info)*standard_vert_lapse_rate));
 		    mslp[i] = pressure_value/mslp_factor;
 		    
 			// Now the aim is to determine the value of the surface pressure.
 			temp_surface = temp_lowest_layer + standard_vert_lapse_rate*(grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i]);
 		    surface_p_factor = pow(1 - (temp_surface - temp_lowest_layer)/temp_surface, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]/
-		    (gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i)*standard_vert_lapse_rate));
+		    (gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i, config_info)*standard_vert_lapse_rate));
 			surface_p[i] = pressure_value/surface_p_factor;
 			
 			// Now the aim is to calculate the 2 m temperature.
@@ -863,7 +863,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	(*rh)[i] = 100*rel_humidity(state_write_out -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i], state_write_out -> temperature_gas[i]);
-    	(*pressure)[i] = density_gas(state_write_out, i)*gas_constant_diagnostics(state_write_out, i)*state_write_out -> temperature_gas[i];
+    	(*pressure)[i] = density_gas(state_write_out, i)*gas_constant_diagnostics(state_write_out, i, config_info)*state_write_out -> temperature_gas[i];
     }
     
 	pot_temp_diagnostics_dry(state_write_out, *pot_temp);

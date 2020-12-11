@@ -28,6 +28,7 @@ temperature_diff_v=0 # turn on if you want vetical temperature diffusion
 momentum_diff=0 # turn on if you want momentum diffusion
 rad_on=0 # turn on if you want radiation
 radiation_delta_t=3600 # every how many seconds the radiation fluxes wil be updated
+simplified_moisture_switch=1 # set this to one if you do not want to assign individual temperatures to tracers
 
 # I/O
 start_year=2000 # defines the start time of the model run

@@ -102,6 +102,13 @@ int main(int argc, char *argv[])
     	printf("Aborting.\n");
 		exit(1);
 	}
+	config_info -> simple_moisture = strtod(argv[33], NULL);
+	if (config_info -> simple_moisture != 0 && config_info -> simple_moisture != 1)
+	{
+		printf("simplified_moisture_switch must be either 0 or 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
 	// in the case of block-shaped mountains, no lowers follow the orography
 	if (VERT_GRID_TYPE == 1)
 	{
@@ -264,6 +271,14 @@ int main(int argc, char *argv[])
 	{
 		printf("Momentum diffusion is turned on.\n");
 	}
+	if (config_info -> simple_moisture == 0)
+	{
+		printf("Simplified moisture is turned off.\n");
+	}
+	if (config_info -> simple_moisture == 1)
+	{
+		printf("Simplified moisture is turned on.\n");
+	}
 	printf("%s", stars);
 	printf("I/O configuration:\n");
 	printf("output written in intervals of %d s\n", WRITE_OUT_INTERVAL);
@@ -347,7 +362,7 @@ int main(int argc, char *argv[])
     }
     Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
     Forcings *forcings = calloc(1, sizeof(Forcings));
-    write_out(state_old, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config);
+    write_out(state_old, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
     t_write += WRITE_OUT_INTERVAL;
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     double t_0;
@@ -459,7 +474,7 @@ int main(int argc, char *argv[])
         }
         if(t_0 + delta_t >= t_write + 300 && t_0 <= t_write + 300)
         {
-            write_out(state_write, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config);
+            write_out(state_write, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
             t_write += WRITE_OUT_INTERVAL;
             second_time = clock();
             if (second_write_out_bool == 1)

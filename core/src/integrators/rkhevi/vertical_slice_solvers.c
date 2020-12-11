@@ -17,7 +17,7 @@ This file contains the implicit vertical solvers.
 
 int thomas_algorithm(double [], double [], double [], double [], double [], int);
 
-int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, State *state_new, Diagnostics *diagnostics, double delta_t, Grid *grid)
+int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, State *state_new, Diagnostics *diagnostics, Config_info *config_info, double delta_t, Grid *grid)
 {
 	double delta_z, upper_volume, lower_volume, total_volume, damping_coeff, damping_coeff_max, damping_start_height, z_above_damping, damping_start_height_over_toa;
 	// This is for Klemp (2008).
@@ -44,9 +44,9 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 		// determining the properties of the gas phase in the grid boxes
 		for (j = 0; j < NO_OF_LAYERS; ++j)
 		{
-			c_g_v_vector[j] = spec_heat_cap_diagnostics_v(state_new, i + j*NO_OF_SCALARS_H);
-			c_g_p_vector[j] = spec_heat_cap_diagnostics_p(state_new, i + j*NO_OF_SCALARS_H);
-			r_g_vector[j] = gas_constant_diagnostics(state_new, i + j*NO_OF_SCALARS_H);
+			c_g_v_vector[j] = spec_heat_cap_diagnostics_v(state_new, i + j*NO_OF_SCALARS_H, config_info);
+			c_g_p_vector[j] = spec_heat_cap_diagnostics_p(state_new, i + j*NO_OF_SCALARS_H, config_info);
+			r_g_vector[j] = gas_constant_diagnostics(state_new, i + j*NO_OF_SCALARS_H, config_info);
 		}
 		// determining the upper and lower weights as well as the c_g_v interface values
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
@@ -114,7 +114,7 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 	return 0;
 }
 
-int three_band_solver_gen_densitites(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, double delta_t, Grid *grid)
+int three_band_solver_gen_densitites(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, Grid *grid)
 {
 	// Vertical constituent advection with 3-band matrices.
 	// procedure derived in https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
@@ -122,23 +122,42 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 	for (int quantity_id = 0; quantity_id < 3; ++quantity_id)
 	{
 		int no_of_relevant_constituents = 0;
+		int constituent_index_offset = 0;
 		// all constituents have a mass density
 		if (quantity_id == 0)
 		{
 			no_of_relevant_constituents = NO_OF_CONSTITUENTS;
+			constituent_index_offset = 0;
 		}
 		// all constituents have an entropy density
 		if (quantity_id == 1)
 		{
-			no_of_relevant_constituents = NO_OF_CONSTITUENTS;
+			if (config_info -> simple_moisture == 0)
+			{
+				constituent_index_offset = 0;
+				no_of_relevant_constituents = NO_OF_CONSTITUENTS;
+			}
+			if (config_info -> simple_moisture == 1)
+			{
+				constituent_index_offset = NO_OF_CONDENSED_CONSTITUENTS;
+				no_of_relevant_constituents = 1;
+			}
 		}
 		// only the condensed constituents have a density x temperature field
 		if (quantity_id == 2)
 		{
-			no_of_relevant_constituents = NO_OF_CONDENSED_CONSTITUENTS;
+			constituent_index_offset = 0;
+			if(config_info -> simple_moisture == 0)
+			{
+				no_of_relevant_constituents = NO_OF_CONDENSED_CONSTITUENTS;
+			}
+			else
+			{
+				no_of_relevant_constituents = 0;
+			}
 		}
 		// loop over all relevant constituents
-		for (int k = 0; k < no_of_relevant_constituents; ++k)
+		for (int k = constituent_index_offset; k < constituent_index_offset + no_of_relevant_constituents; ++k)
 		{
 			// loop over all columns
 			#pragma omp parallel for

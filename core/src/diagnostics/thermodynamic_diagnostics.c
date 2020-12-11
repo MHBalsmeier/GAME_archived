@@ -35,7 +35,7 @@ int pot_temp_diagnostics_dry(State *state, Scalar_field pot_temp)
     return 0;
 }
 
-int temperature_diagnostics_explicit(State *state, State *state_tendency, Diagnostics *diagnostics, double delta_t)
+int temperature_diagnostics_explicit(State *state, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
 {
     double nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_gas_0, density_gas_1, delta_density_gas, delta_entropy_density, temperature_0, specific_entropy_gas_0, specific_entropy_gas_1, c_g_v, c_g_p;
     double beta = get_impl_thermo_weight();
@@ -46,7 +46,16 @@ int temperature_diagnostics_explicit(State *state, State *state_tendency, Diagno
     	// Difference of the mass densities of the gas phase.
     	density_gas_0 = 0;
     	density_gas_1 = 0;
-    	for (int j = 0; j < NO_OF_GASEOUS_CONSTITUENTS; ++j)
+		int no_of_relevant_constituents = 0;
+		if (config_info -> simple_moisture == 0)
+		{
+			no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
+		}
+		if (config_info -> simple_moisture == 1)
+		{
+			no_of_relevant_constituents = 1;
+		}
+    	for (int j = 0; j < no_of_relevant_constituents; ++j)
     	{
 			density_gas_0 += state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
 			density_gas_1 += state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i]
@@ -56,7 +65,7 @@ int temperature_diagnostics_explicit(State *state, State *state_tendency, Diagno
     	
     	entropy_density_gas_0 = 0;
     	entropy_density_gas_1 = 0;
-    	for (int j = 0; j < NO_OF_GASEOUS_CONSTITUENTS; ++j)
+    	for (int j = 0; j < no_of_relevant_constituents; ++j)
     	{
 			entropy_density_gas_0 += state -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
 			entropy_density_gas_1 += state -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i]
@@ -72,8 +81,8 @@ int temperature_diagnostics_explicit(State *state, State *state_tendency, Diagno
     	temperature_0 = state -> temperature_gas[i];
     	
 		// Determining the thermodynamic properties of the gas phase.
-    	c_g_v = spec_heat_cap_diagnostics_v(state, i);
-    	c_g_p = spec_heat_cap_diagnostics_p(state, i);
+    	c_g_v = spec_heat_cap_diagnostics_v(state, i, config_info);
+    	c_g_p = spec_heat_cap_diagnostics_p(state, i, config_info);
     	
     	nominator = c_g_v*density_gas_0*temperature_0 + (alpha*c_g_p*temperature_0 - alpha*specific_entropy_gas_0*temperature_0)*delta_density_gas + alpha*temperature_0*delta_entropy_density;
     	denominator = c_g_v*density_gas_0 + (c_g_v + beta*specific_entropy_gas_1 - beta*c_g_p)*delta_density_gas - beta*delta_entropy_density;
@@ -82,36 +91,60 @@ int temperature_diagnostics_explicit(State *state, State *state_tendency, Diagno
     return 0;
 }
 
-double spec_heat_cap_diagnostics_v(State *state, int grid_point_index)
+double spec_heat_cap_diagnostics_v(State *state, int grid_point_index, Config_info *config_info)
 {
 	double rho_g = density_gas(state, grid_point_index);
-	
+	int no_of_relevant_constituents = 0;
+	if (config_info -> simple_moisture == 0)
+	{
+		no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
+	}
+	if (config_info -> simple_moisture == 1)
+	{
+		no_of_relevant_constituents = 1;
+	}
 	double result = 0;
-	for (int i = 0; i < NO_OF_GASEOUS_CONSTITUENTS; ++i)
+	for (int i = 0; i < no_of_relevant_constituents; ++i)
 	{
 		result += state -> mass_densities[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*spec_heat_capacities_v_gas(i);
 	}
 	return result;
 }
 
-double spec_heat_cap_diagnostics_p(State *state, int grid_point_index)
+double spec_heat_cap_diagnostics_p(State *state, int grid_point_index, Config_info *config_info)
 {
 	double rho_g = density_gas(state, grid_point_index);
-	
+	int no_of_relevant_constituents = 0;
+	if (config_info -> simple_moisture == 0)
+	{
+		no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
+	}
+	if (config_info -> simple_moisture == 1)
+	{
+		no_of_relevant_constituents = 1;
+	}
 	double result = 0;
-	for (int i = 0; i < NO_OF_GASEOUS_CONSTITUENTS; ++i)
+	for (int i = 0; i < no_of_relevant_constituents; ++i)
 	{
 		result += state -> mass_densities[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*spec_heat_capacities_p_gas(i);
 	}
 	return result;
 }
 
-double gas_constant_diagnostics(State *state, int grid_point_index)
+double gas_constant_diagnostics(State *state, int grid_point_index, Config_info *config_info)
 {
 	double rho_g = density_gas(state, grid_point_index);
-	
+	int no_of_relevant_constituents = 0;
+	if (config_info -> simple_moisture == 0)
+	{
+		no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
+	}
+	if (config_info -> simple_moisture == 1)
+	{
+		no_of_relevant_constituents = 1;
+	}
 	double result = 0;
-	for (int i = 0; i < NO_OF_GASEOUS_CONSTITUENTS; ++i)
+	for (int i = 0; i < no_of_relevant_constituents; ++i)
 	{
 		result += state -> mass_densities[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*specific_gas_constants(i);
 	}
