@@ -22,7 +22,10 @@ int forward_tendencies(State *state, State *state_tendency, Grid *grid, Dualgrid
     {
 		momentum_diff_diss(state, diagnostics, irreversible_quantities, config_info, grid, dualgrid);
 		// Due to condensates, the friction acceleration needs to get a deceleration factor.
-		scalar_times_vector(irreversible_quantities -> pressure_gradient_decel_factor, irreversible_quantities -> friction_acc, irreversible_quantities -> friction_acc, grid);
+		if (config_info -> assume_lte == 0)
+		{
+			scalar_times_vector(irreversible_quantities -> pressure_gradient_decel_factor, irreversible_quantities -> friction_acc, irreversible_quantities -> friction_acc, grid);
+		}
     }
 	// Only the horizontal momentum is a forward tendency.
 	integrate_momentum(state, state_tendency, grid, dualgrid, diagnostics, forcings, irreversible_quantities, config_info);
