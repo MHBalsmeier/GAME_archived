@@ -343,7 +343,8 @@ int main(int argc, char *argv[])
     	exit(1);
     }
     printf("Grid loaded successfully.\n");
-    printf("time step: %lf s\n", delta_t);
+    printf("sound time step: %lf s\n", delta_t);
+    printf("advective time step: %lf s\n", config_info -> adv_sound_ratio*delta_t);
     printf("%s", stars);
     printf("Reading initial state ... ");
     State *state_old = calloc(1, sizeof(State));
