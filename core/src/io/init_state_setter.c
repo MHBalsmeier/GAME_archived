@@ -91,19 +91,22 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 		h_index = i - layer_index*NO_OF_SCALARS_H;
 		if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 		{
-		    init_state -> mass_densities[i] = solid_water_density[i];
-		    if (init_state -> mass_densities[i] < 0)
+		    if (NO_OF_CONSTITUENTS >= 4)
 		    {
-		    	printf("Error: init_state -> mass_densities < 0 somewhere.\n");
-		    	printf("Aborting.\n");
-		    	exit(1);
-		    }
-		    init_state -> mass_densities[NO_OF_SCALARS + i] = liquid_water_density[i];
-		    if (init_state -> mass_densities[NO_OF_SCALARS + i] < 0)
-		    {
-		    	printf("Error: init_state -> mass_densities < 0 somewhere.\n");
-		    	printf("Aborting.\n");
-		    	exit(1);
+				init_state -> mass_densities[i] = solid_water_density[i];
+				if (init_state -> mass_densities[i] < 0)
+				{
+					printf("Error: init_state -> mass_densities < 0 somewhere.\n");
+					printf("Aborting.\n");
+					exit(1);
+				}
+				init_state -> mass_densities[NO_OF_SCALARS + i] = liquid_water_density[i];
+				if (init_state -> mass_densities[NO_OF_SCALARS + i] < 0)
+				{
+					printf("Error: init_state -> mass_densities < 0 somewhere.\n");
+					printf("Aborting.\n");
+					exit(1);
+				}
 		    }
 		    init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = density_dry[i];
 		    if (init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] < 0)
@@ -112,12 +115,15 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 		    	printf("Aborting.\n");
 		    	exit(1);
 		    }
-		    init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = water_vapour_density[i];
-		    if (init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] < 0)
+		    if (NO_OF_CONSTITUENTS >= 4)
 		    {
-		    	printf("Error: init_state -> mass_densities < 0 somewhere.\n");
-		    	printf("Aborting.\n");
-		    	exit(1);
+				init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = water_vapour_density[i];
+				if (init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] < 0)
+				{
+					printf("Error: init_state -> mass_densities < 0 somewhere.\n");
+					printf("Aborting.\n");
+					exit(1);
+				}
 		    }
 	    }
 	}

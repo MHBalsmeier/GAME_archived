@@ -107,24 +107,27 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    
 		    z_height = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i];
 		    cape[i] = 0;
-		    density_v = state_write_out -> mass_densities[3*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
-		    density_h = density_gas(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i);
-		    theta_v_prime = (*pot_temperature)[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]*(1 + density_v/density_h*(mean_particle_masses_gas(0)/mean_particle_masses_gas(1) - 1));
-		    layer_index = NO_OF_LAYERS - 1;
-		    cape[i] = 0;
-		    while (z_height < z_tropopause)
+		    if (NO_OF_CONSTITUENTS >= 4)
 		    {
-				density_v = state_write_out -> mass_densities[3*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + i];
-				density_h = density_gas(state_write_out, layer_index*NO_OF_SCALARS_H + i);
-		        theta_v = (*pot_temperature)[layer_index*NO_OF_SCALARS_H + i]*(1 + density_v/density_h*(mean_particle_masses_gas(0)/mean_particle_masses_gas(1) - 1));
-		    	delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + i];
-		    	z_height += delta_z;
-		    	cape_integrand = grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i]*(theta_v_prime - theta_v)/theta_v;
-		    	if (cape_integrand > 0)
-		    	{
-		    		cape[i] += cape_integrand*delta_z;
-	    		}
-		    	--layer_index;
+				density_v = state_write_out -> mass_densities[3*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+				density_h = density_gas(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i);
+				theta_v_prime = (*pot_temperature)[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]*(1 + density_v/density_h*(mean_particle_masses_gas(0)/mean_particle_masses_gas(1) - 1));
+				layer_index = NO_OF_LAYERS - 1;
+				cape[i] = 0;
+				while (z_height < z_tropopause)
+				{
+					density_v = state_write_out -> mass_densities[3*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + i];
+					density_h = density_gas(state_write_out, layer_index*NO_OF_SCALARS_H + i);
+				    theta_v = (*pot_temperature)[layer_index*NO_OF_SCALARS_H + i]*(1 + density_v/density_h*(mean_particle_masses_gas(0)/mean_particle_masses_gas(1) - 1));
+					delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + i];
+					z_height += delta_z;
+					cape_integrand = grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i]*(theta_v_prime - theta_v)/theta_v;
+					if (cape_integrand > 0)
+					{
+						cape[i] += cape_integrand*delta_z;
+					}
+					--layer_index;
+				}
 		    }
 		    
 		    // Now come the hydrometeors.
@@ -139,7 +142,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	                }
 		        }
 		    }
-            tcdc[i] = 100*cloudy_box_counter/(NO_OF_CONDENSED_CONSTITUENTS*NO_OF_LAYERS);
+		    if (NO_OF_CONSTITUENTS >= 4)
+		    {
+            	tcdc[i] = 100*cloudy_box_counter/(NO_OF_CONDENSED_CONSTITUENTS*NO_OF_LAYERS);
+            }
             // solid precipitation rate
 		    sprate[i] = 0;
 		    for (int k = 0; k < NO_OF_SOLID_CONSTITUENTS; ++k)
@@ -861,8 +867,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     Scalar_field *epv = calloc(1, sizeof(Scalar_field));
     Scalar_field *pressure = calloc(1, sizeof(Scalar_field));
     for (int i = 0; i < NO_OF_SCALARS; ++i)
-    {
-    	(*rh)[i] = 100*rel_humidity(state_write_out -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i], state_write_out -> temperature_gas[i]);
+    {    
+	    if (NO_OF_CONSTITUENTS >= 4)
+	    {
+    		(*rh)[i] = 100*rel_humidity(state_write_out -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i], state_write_out -> temperature_gas[i]);
+    	}
     	(*pressure)[i] = density_gas(state_write_out, i)*gas_constant_diagnostics(state_write_out, i, config_info)*state_write_out -> temperature_gas[i];
     }
     
