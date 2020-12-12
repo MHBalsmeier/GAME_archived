@@ -146,6 +146,7 @@ int momentum_diff;
 int rad_on;
 int rad_update;
 int assume_lte;
+int adv_sound_ratio;
 } Config_info;
 
 // This is necessary for stability of horizontally propagating sound waves.

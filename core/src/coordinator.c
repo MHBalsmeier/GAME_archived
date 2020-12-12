@@ -96,13 +96,14 @@ int main(int argc, char *argv[])
 	grid -> no_of_oro_layers = strtod(argv[30], NULL);
 	int VERT_GRID_TYPE = strtod(argv[31], NULL);
 	config_info -> rk_order = strtod(argv[32], NULL);
+	config_info -> assume_lte = strtod(argv[33], NULL);
+	config_info -> adv_sound_ratio = strtod(argv[34], NULL);
 	if (config_info -> rk_order < 1)
 	{
 		printf("The Runge-Kutta order must be at least one.\n");
     	printf("Aborting.\n");
 		exit(1);
 	}
-	config_info -> assume_lte = strtod(argv[33], NULL);
 	if (config_info -> assume_lte != 0 && config_info -> assume_lte != 1)
 	{
 		printf("simplified_moisture_switch must be either 0 or 1.\n");
@@ -212,6 +213,7 @@ int main(int argc, char *argv[])
 	printf("number of vectors: %d\n", NO_OF_VECTORS);
 	printf("number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
 	printf("Runge Kutta order: %d\n", config_info -> rk_order);
+	printf("ratio of advective to sound time step: %d\n", config_info -> adv_sound_ratio);
 	if (VERT_GRID_TYPE == 0)
 	{
 		printf("terrain handling: terrain following coordinates\n");
@@ -388,8 +390,6 @@ int main(int argc, char *argv[])
 		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
 	}
 	Scalar_field *radiation_tendency = calloc(1, sizeof(Scalar_field));
-	time_step_counter += 1;
-    int counter = 0;
     State *state_tendency = calloc(1, sizeof(State));
     Extrapolation_info *extrapolation_info = calloc(1, sizeof(Extrapolation_info));
     Irreversible_quantities *diffusion = calloc(1, sizeof(Irreversible_quantities));
@@ -400,8 +400,8 @@ int main(int argc, char *argv[])
 	{
 		radiation_init();
 	}
-    manage_rkhevi(state_old, state_new, extrapolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t, t_0);
-    counter += 1;
+    manage_rkhevi(state_old, state_new, extrapolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t, t_0, time_step_counter);
+	time_step_counter += 1;
     if (write_out_dry_mass_integral == 1)
     {
 		write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 0);
@@ -418,7 +418,6 @@ int main(int argc, char *argv[])
     {
 		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
 	}
-	time_step_counter += 1;
     State *state_write = calloc(1, sizeof(State));
     double speed;
     double t_rad_update = t_0 + radiation_delta_t;
@@ -439,7 +438,8 @@ int main(int argc, char *argv[])
         {
         	config_info -> rad_update = 0;
     	}
-        manage_rkhevi(state_old, state_new, extrapolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t, t_0);
+        manage_rkhevi(state_old, state_new, extrapolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t, t_0, time_step_counter);
+		time_step_counter += 1;
 		if (write_out_dry_mass_integral == 1)
         {
 			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 0);
@@ -456,7 +456,6 @@ int main(int argc, char *argv[])
         {
 			write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
     	}
-		time_step_counter += 1;
         if(t_0 + delta_t >= t_write && t_0 <= t_write)
         {
             interpolation_t(state_old, state_new, state_write, t_0, t_0 + delta_t, t_write);
@@ -495,7 +494,6 @@ int main(int argc, char *argv[])
         	}
             wind_10_m_step_counter = 0;
         }
-    	counter += 1;
     }
     MPI_Finalize();
     free(month_string);

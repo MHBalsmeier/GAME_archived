@@ -14,30 +14,34 @@ In this source file, the calculation of the explicit part of the momentum equati
 #include "atmostracers.h"
 #include "../../diagnostics/diagnostics.h"
 
-int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info)
+int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int update_advection)
 {
-	// Here, the gaseous flux density is prepared for the generalized Coriolis term.
-	#pragma omp parallel for
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	// momentum advection
+	if (update_advection == 1)
 	{
-		if (config_info -> assume_lte == 0)
+		// Here, the gaseous flux density is prepared for the generalized Coriolis term.
+		#pragma omp parallel for
+		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
-			diagnostics -> scalar_field_placeholder[i] = density_gas(state, i);
+			if (config_info -> assume_lte == 0)
+			{
+				diagnostics -> scalar_field_placeholder[i] = density_gas(state, i);
+			}
+			else
+			{
+				diagnostics -> scalar_field_placeholder[i] = state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
+			}
 		}
-		else
-		{
-			diagnostics -> scalar_field_placeholder[i] = state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
-		}
-	}
-    scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
-    // Now, the potential vorticity is evaluated.
-    calc_pot_vort(state -> velocity_gas, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
-    // Now, the generalized Coriolis term is evaluated.
-    vorticity_flux(diagnostics -> flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid, dualgrid);
-    // Kinetic energy is prepared for the gradient term of the Lamb transformation.
-    kinetic_energy(state -> velocity_gas, diagnostics -> e_kin, grid);
-    // Taking the gradient of the kinetic energy
-    grad(diagnostics -> e_kin, forcings -> e_kin_grad, grid);
+		scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
+		// Now, the potential vorticity is evaluated.
+		calc_pot_vort(state -> velocity_gas, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
+		// Now, the generalized Coriolis term is evaluated.
+		vorticity_flux(diagnostics -> flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid, dualgrid);
+		// Kinetic energy is prepared for the gradient term of the Lamb transformation.
+		kinetic_energy(state -> velocity_gas, diagnostics -> e_kin, grid);
+		// Taking the gradient of the kinetic energy
+		grad(diagnostics -> e_kin, forcings -> e_kin_grad, grid);
+    }
     // Now the explicit forces are added up.
     int layer_index, h_index;
     #pragma omp parallel for private(layer_index, h_index)

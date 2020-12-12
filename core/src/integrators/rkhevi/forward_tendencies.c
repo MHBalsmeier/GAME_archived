@@ -14,11 +14,11 @@ In this source file, the forward part of the integration is managed.
 #include "../../diagnostics/diagnostics.h"
 #include "../integrators.h"
 
-int forward_tendencies(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Extrapolation_info *extrapolation_info, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_step_rk)
+int forward_tendencies(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Extrapolation_info *extrapolation_info, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_step_rk, int update_slow)
 {
 	// Update of the pressure gradient.
 	manage_pressure_gradient(state, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, no_step_rk);
-    if (no_step_rk == 0 && config_info -> momentum_diff == 1)
+    if (no_step_rk == 0 && config_info -> momentum_diff == 1 && update_slow == 1)
     {
 		momentum_diff_diss(state, diagnostics, irreversible_quantities, config_info, grid, dualgrid);
 		// Due to condensates, the friction acceleration needs to get a deceleration factor.
@@ -28,7 +28,7 @@ int forward_tendencies(State *state, State *state_tendency, Grid *grid, Dualgrid
 		}
     }
 	// Only the horizontal momentum is a forward tendency.
-	integrate_momentum(state, state_tendency, grid, dualgrid, diagnostics, forcings, irreversible_quantities, config_info);
+	integrate_momentum(state, state_tendency, grid, dualgrid, diagnostics, forcings, irreversible_quantities, config_info, update_slow);
     return 0;
 }
 

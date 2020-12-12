@@ -11,7 +11,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <stdlib.h>
 #include <stdio.h>
 
-int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrapolation_info, Grid *grid, Dualgrid *dualgrid, Scalar_field radiation_tendency, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, double delta_t, double time_coordinate)
+int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrapolation_info, Grid *grid, Dualgrid *dualgrid, Scalar_field radiation_tendency, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, double delta_t, double time_coordinate, int total_step_counter)
 {
     int max_index = find_max_index(state_old -> velocity_gas, NO_OF_VECTORS);
     int min_index = find_min_index(state_old -> velocity_gas, NO_OF_VECTORS);
@@ -40,7 +40,17 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		
 		// 2.) Explicit component of the momentum equation.
 		// ----------------------------------------------------------------------------
-		forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, i);
+		// split-explicit
+		// momentum advection is updated
+		if (fmod(total_step_counter, config_info -> adv_sound_ratio) == 0)
+		{
+			forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, i, 1);
+        }
+		// momentum advection is not updated
+        else
+		{
+			forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, i, 0);
+        }
         // time stepping for the horizontal momentum can be directly executed
         for (int j = 0; j < NO_OF_VECTORS; ++j)
         {
