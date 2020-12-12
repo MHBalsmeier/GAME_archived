@@ -10,6 +10,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include "../diagnostics/diagnostics.h"
 #include "../settings.h"
 #include <netcdf.h>
+#include "atmostracers.h"
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 
 int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
@@ -65,6 +66,15 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
         NCERR(retval);
     if ((retval = nc_close(ncid)))
         NCERR(retval);
+    
+    // resricting the maximum relative humidity to 100 %
+    for (int i = 0; i < NO_OF_SCALARS; ++i)
+    {
+		if (rel_humidity(water_vapour_density[i], temperature_gas[i]) > 1)
+		{
+			water_vapour_density[i] = water_vapour_density[i]/rel_humidity(water_vapour_density[i], temperature_gas[i]);
+		}
+    }
     
     // checking wether the stretching parameters of the grid used for creating the input file and the grid file read in do conform
     if (grid -> stretching_parameter != stretching_parameter)
@@ -140,6 +150,14 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 				if (j < NO_OF_CONDENSED_CONSTITUENTS)
 				{
 					init_state -> entropy_densities[j*NO_OF_SCALARS + i] = 0;
+					if (j == 0)
+					{
+						init_state -> condensed_density_temperatures[i] = solid_water_density[i]*solid_water_temperature[i];
+					}
+					if (j == 1)
+					{
+						init_state -> condensed_density_temperatures[NO_OF_SCALARS + i] = liquid_water_density[i]*liquid_water_temperature[i];
+					}
 				}
 				else
 				{
@@ -156,8 +174,6 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 					}
 				}
 			}
-			init_state -> condensed_density_temperatures[i] = solid_water_density[i]*solid_water_temperature[i];
-			init_state -> condensed_density_temperatures[NO_OF_SCALARS + i] = liquid_water_density[i]*liquid_water_temperature[i];
 	    }
 	}
 	for (int i = 0; i < NO_OF_VECTORS; ++i)

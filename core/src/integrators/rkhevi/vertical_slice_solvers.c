@@ -133,12 +133,12 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 		// all constituents have an entropy density
 		if (quantity_id == 1)
 		{
-			if (config_info -> simple_moisture == 0)
+			if (config_info -> assume_lte == 0)
 			{
 				constituent_index_offset = 0;
 				no_of_relevant_constituents = NO_OF_CONSTITUENTS;
 			}
-			if (config_info -> simple_moisture == 1)
+			if (config_info -> assume_lte == 1)
 			{
 				constituent_index_offset = NO_OF_CONDENSED_CONSTITUENTS;
 				no_of_relevant_constituents = 1;
@@ -148,7 +148,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 		if (quantity_id == 2)
 		{
 			constituent_index_offset = 0;
-			if(config_info -> simple_moisture == 0)
+			if(config_info -> assume_lte == 0)
 			{
 				no_of_relevant_constituents = NO_OF_CONDENSED_CONSTITUENTS;
 			}

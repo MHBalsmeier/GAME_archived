@@ -107,7 +107,7 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 	    }
 	    
 		// Explicit entropy integrations
-		if ((config_info -> simple_moisture == 1 && i == NO_OF_CONDENSED_CONSTITUENTS) || config_info -> simple_moisture == 0)
+		if ((config_info -> assume_lte == 1 && i == NO_OF_CONDENSED_CONSTITUENTS) || config_info -> assume_lte == 0)
 		{
 			// -----------------------------
 			// Determining the specific entropy of the constituent at hand.
@@ -142,7 +142,7 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 		}
     
 		// This is the integration of the "density x temperature" fields. It only needs to be done for condensed constituents.
-		if (i < NO_OF_CONDENSED_CONSTITUENTS && config_info -> simple_moisture == 0)
+		if (i < NO_OF_CONDENSED_CONSTITUENTS && config_info -> assume_lte == 0)
 		{
 			#pragma omp parallel for
 			for (int j = 0; j < NO_OF_SCALARS; ++j)

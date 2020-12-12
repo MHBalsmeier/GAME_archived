@@ -20,7 +20,7 @@ int integrate_momentum(State *state, State *state_tendency, Grid *grid, Dualgrid
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		if (config_info -> simple_moisture == 0)
+		if (config_info -> assume_lte == 0)
 		{
 			diagnostics -> scalar_field_placeholder[i] = density_gas(state, i);
 		}

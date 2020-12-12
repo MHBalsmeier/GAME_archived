@@ -70,11 +70,11 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	}
 	// Each constitutent of the gas phase gets an individual term.
 	int no_of_relevant_constituents;
-	if (config_info -> simple_moisture == 0)
+	if (config_info -> assume_lte == 0)
 	{
 		no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
 	}
-	if (config_info -> simple_moisture == 1)
+	if (config_info -> assume_lte == 1)
 	{
 		no_of_relevant_constituents = 1;
 	}
@@ -143,7 +143,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	
 	// 5.) The pressure gradient has to get a deceleration factor due to condensates.
 	// --------------------------------------------------------------------------------
-	if (config_info -> simple_moisture == 0)
+	if (config_info -> assume_lte == 0)
 	{
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_SCALARS; ++i)

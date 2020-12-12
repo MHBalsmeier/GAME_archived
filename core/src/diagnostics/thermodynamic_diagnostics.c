@@ -47,11 +47,11 @@ int temperature_diagnostics_explicit(State *state, State *state_tendency, Diagno
     	density_gas_0 = 0;
     	density_gas_1 = 0;
 		int no_of_relevant_constituents = 0;
-		if (config_info -> simple_moisture == 0)
+		if (config_info -> assume_lte == 0)
 		{
 			no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
 		}
-		if (config_info -> simple_moisture == 1)
+		if (config_info -> assume_lte == 1)
 		{
 			no_of_relevant_constituents = 1;
 		}
@@ -95,12 +95,12 @@ double spec_heat_cap_diagnostics_v(State *state, int grid_point_index, Config_in
 {
 	double rho_g = 0;
 	int no_of_relevant_constituents = 0;
-	if (config_info -> simple_moisture == 0)
+	if (config_info -> assume_lte == 0)
 	{
 		no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
 		rho_g = density_gas(state, grid_point_index);
 	}
-	if (config_info -> simple_moisture == 1)
+	if (config_info -> assume_lte == 1)
 	{
 		no_of_relevant_constituents = 1;
 		rho_g = state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index];
@@ -117,12 +117,12 @@ double spec_heat_cap_diagnostics_p(State *state, int grid_point_index, Config_in
 {
 	double rho_g = 0;
 	int no_of_relevant_constituents = 0;
-	if (config_info -> simple_moisture == 0)
+	if (config_info -> assume_lte == 0)
 	{
 		no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
 		rho_g = density_gas(state, grid_point_index);
 	}
-	if (config_info -> simple_moisture == 1)
+	if (config_info -> assume_lte == 1)
 	{
 		no_of_relevant_constituents = 1;
 		rho_g = state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index];
@@ -139,12 +139,12 @@ double gas_constant_diagnostics(State *state, int grid_point_index, Config_info 
 {
 	double rho_g = 0;
 	int no_of_relevant_constituents = 0;
-	if (config_info -> simple_moisture == 0)
+	if (config_info -> assume_lte == 0)
 	{
 		no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
 		rho_g = density_gas(state, grid_point_index);
 	}
-	if (config_info -> simple_moisture == 1)
+	if (config_info -> assume_lte == 1)
 	{
 		no_of_relevant_constituents = 1;
 		rho_g = state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index];

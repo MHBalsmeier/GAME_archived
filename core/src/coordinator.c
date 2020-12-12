@@ -102,8 +102,8 @@ int main(int argc, char *argv[])
     	printf("Aborting.\n");
 		exit(1);
 	}
-	config_info -> simple_moisture = strtod(argv[33], NULL);
-	if (config_info -> simple_moisture != 0 && config_info -> simple_moisture != 1)
+	config_info -> assume_lte = strtod(argv[33], NULL);
+	if (config_info -> assume_lte != 0 && config_info -> assume_lte != 1)
 	{
 		printf("simplified_moisture_switch must be either 0 or 1.\n");
     	printf("Aborting.\n");
@@ -271,13 +271,13 @@ int main(int argc, char *argv[])
 	{
 		printf("Momentum diffusion is turned on.\n");
 	}
-	if (config_info -> simple_moisture == 0)
+	if (config_info -> assume_lte == 0)
 	{
-		printf("Simplified moisture is turned off.\n");
+		printf("Not Assuming local thermodynamic equilibrium.\n");
 	}
-	if (config_info -> simple_moisture == 1)
+	if (config_info -> assume_lte == 1)
 	{
-		printf("Simplified moisture is turned on.\n");
+		printf("Assuming local thermodynamic equilibrium.\n");
 	}
 	printf("%s", stars);
 	printf("I/O configuration:\n");

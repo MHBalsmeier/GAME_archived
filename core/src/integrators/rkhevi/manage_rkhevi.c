@@ -55,7 +55,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		
 		// 3.) Explicit component of the generalized density equations.
 		// ----------------------------------------------------------------------------
-		backward_tendencies(state_new, state_tendency, grid, dualgrid, delta_t_rk, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, time_coordinate);
+		backward_tendencies(state_new, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, time_coordinate);
 		// determining the explicit component of the new temperature
 		
 		// 4.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies (including diabatic forcings).

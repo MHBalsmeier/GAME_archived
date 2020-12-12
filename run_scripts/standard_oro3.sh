@@ -10,6 +10,10 @@ ideal_input_id=12 # specifies which test scenario to run
 run_id=standard_oro3 # run_id must only be set if ideal_input_id != -1 (otherwise it is chosen automatically)
 run_span=3456000 # how long the model is supposed to run
 valgrind_check=0 # set this to 1, if you want to check the code with Valgrind
+start_year=2000 # defines the start time of the model run
+start_month=1 # defines the start time of the model run
+start_day=1 # defines the start time of the model run
+start_hour=0 # defines the start time of the model run
 
 # grid properties
 toa=30000 # top of atmosphere
@@ -28,13 +32,9 @@ temperature_diff_v=0 # turn on if you want vetical temperature diffusion
 momentum_diff=0 # turn on if you want momentum diffusion
 rad_on=0 # turn on if you want radiation
 radiation_delta_t=3600 # every how many seconds the radiation fluxes wil be updated
-simplified_moisture_switch=1 # set this to one if you do not want to assign individual temperatures to tracers
+assume_lte=1 # set this to one if you do not want to assign individual temperatures to tracers
 
 # I/O
-start_year=2000 # defines the start time of the model run
-start_month=1 # defines the start time of the model run
-start_day=1 # defines the start time of the model run
-start_hour=0 # defines the start time of the model run
 write_out_interval=86400 # every how many seconds an output file will be created
 write_out_mass_dry_integral=1 # If set to 1, the total dry mass of the atmosphere will be written out at every time step.
 write_out_entropy_gas_integral=1 # If set to 1, the total entropy of the atmosphere will be written out at every time step.
