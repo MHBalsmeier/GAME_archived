@@ -22,8 +22,8 @@ orography_layers=23 # number of layers following orography (only relevent if typ
 
 # time stepping characteristics
 rk_order=3 # convergence order of the Runge-Kutta stepping
-cfl_margin=0.56 # The time step will be calculated as follows (delta t) = (delta t from CFL)*(1 - cfl_margin). 0.25 can be considered a safe standard value.
-adv_sound_ratio=4 # the ratio of the advective to the sound time step
+cfl_margin=0.44 # The time step will be calculated as follows (delta t) = (delta t from CFL)*(1 - cfl_margin). 0.25 can be considered a safe standard value.
+adv_sound_ratio=3 # the ratio of the advective to the sound time step
 
 # "physics" configuration
 mass_dry_diff_h=0 # turn on if you want horizontal dry mass diffusion
