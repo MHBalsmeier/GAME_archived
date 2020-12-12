@@ -306,12 +306,8 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
 
 int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid)
 {
-	int respect_buoyance_criterion = 0;
     double max_speed = 350;
     double min_dist_horizontal = RADIUS;
-    double delta_t_candidate;
-    double brunt_vaisala_max = 0.03;
-    double delta_t_buoyancy = 2/brunt_vaisala_max;
     for (int i = 0; i < NO_OF_LAYERS; ++i)
     {
         for (int j = 0; j < NO_OF_VECTORS_H; ++j)
@@ -322,15 +318,7 @@ int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid)
     		}
         }
     }
-    delta_t_candidate = (1 - cfl_margin)*min_dist_horizontal/max_speed;
-    if (delta_t_buoyancy < delta_t_candidate && respect_buoyance_criterion == 1)
-    {
-        *delta_t = (1 - cfl_margin)*delta_t_buoyancy;
-    }
-    else
-    {
-    	*delta_t = (1 - cfl_margin)*delta_t_candidate;
-	}
+	*delta_t = (1 - cfl_margin)*min_dist_horizontal/max_speed;
     return 1;
 }
 
