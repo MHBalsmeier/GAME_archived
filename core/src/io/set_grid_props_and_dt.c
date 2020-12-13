@@ -8,6 +8,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include <netcdf.h>
 #include "../enum_and_typedefs.h"
 #include "../spatial_operators/spatial_operators.h"
+#include "../diagnostics/diagnostics.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
@@ -304,9 +305,22 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     return 0;
 }
 
-int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid)
+int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid, State *state, Config_info *config_info)
 {
-    double max_speed = 350;
+    double max_sound_speed = 0;
+    double sound_speed_value;
+    for (int i = 0; i < NO_OF_SCALARS; ++i)
+    {
+    	sound_speed_value = pow(gas_constant_diagnostics(state, i, config_info)
+    	*spec_heat_cap_diagnostics_p(state, i, config_info)/spec_heat_cap_diagnostics_v(state, i, config_info)
+    	*state -> temperature_gas[i], 0.5);
+    	if (sound_speed_value > max_sound_speed)
+    	{
+    		max_sound_speed = sound_speed_value;
+    	}
+    }
+    // adding a safety margin
+    max_sound_speed = 1.1*max_sound_speed;
     double min_dist_horizontal = RADIUS;
     for (int i = 0; i < NO_OF_LAYERS; ++i)
     {
@@ -318,7 +332,7 @@ int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid)
     		}
         }
     }
-	*delta_t = (1 - cfl_margin)*min_dist_horizontal/max_speed;
+	*delta_t = (1 - cfl_margin)*min_dist_horizontal/max_sound_speed;
     return 1;
 }
 

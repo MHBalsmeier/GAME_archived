@@ -331,28 +331,54 @@ int main(int argc, char *argv[])
 	printf("%s", stars);
 	printf("Reading grid data.\n");
     set_grid_properties(grid, dualgrid, GEO_PROP_FILE);
+    printf("Grid loaded successfully.\n");
+    printf("%s", stars);
+    printf("Reading initial state ... ");
+    State *state_old = calloc(1, sizeof(State));
+    set_init_data(INIT_STATE_FILE, state_old, grid);
+    printf("completed.\n");
+    // delta_t is the sound time step
     double delta_t;
-    calc_delta_t(cfl_margin, &delta_t, grid);
+    calc_delta_t(cfl_margin, &delta_t, grid, state_old, config_info);
     if (radiation_delta_t < delta_t)
     {
     	printf("It is radiation_delta_t < delta_t.\n");
+    	printf("Aborting.\n");
     	exit(1);
     }
-    printf("Grid loaded successfully.\n");
+    // calculating the average horizontal resolution
 	double eff_hor_res = 0;
 	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 	{
 		eff_hor_res += grid -> normal_distance[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i];
 	}
 	eff_hor_res = eff_hor_res/NO_OF_VECTORS_H;
+	// finding the minimum horizontal grid distance
+	double normal_dist_min_hor = eff_hor_res;
+	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+	{
+		if(grid -> normal_distance[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i] < normal_dist_min_hor)
+		{
+			normal_dist_min_hor = grid -> normal_distance[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i];
+		}
+	}
+	// finding the minimum vertical grid distance
+	double normal_dist_min_vert = grid -> z_vector[0]/NO_OF_LAYERS;
+	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+	{
+		if(grid -> normal_distance[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H + i] < normal_dist_min_vert)
+		{
+			normal_dist_min_vert = grid -> normal_distance[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H + i];
+		}
+	}
 	printf("effective horizontal resolution: %lf km\n", 1e-3*eff_hor_res);
+	printf("minimum normal distance: %lf km\n", 1e-3*normal_dist_min_hor);
     printf("sound time step: %lf s\n", delta_t);
     printf("advective time step: %lf s\n", config_info -> adv_sound_ratio*delta_t);
-    printf("%s", stars);
-    printf("Reading initial state ... ");
-    State *state_old = calloc(1, sizeof(State));
-    set_init_data(INIT_STATE_FILE, state_old, grid);
-    printf("completed.\n");
+    double max_speed_hor = 100;
+	printf("horizontal advective Courant numer: %lf\n", config_info -> adv_sound_ratio*delta_t/normal_dist_min_hor*max_speed_hor);
+    double max_speed_vert = 0.1;
+	printf("vertical advective Courant numer: %lf\n", config_info -> adv_sound_ratio*delta_t/normal_dist_min_vert*max_speed_vert);
     printf("%s", stars);
     printf("It begins.\n");
     printf("%s", stars);
