@@ -14,7 +14,7 @@ This is the horizontal (explicit) part of the constituent integration.
 #include "stdio.h"
 #include "stdlib.h"
 
-int integrate_generalized_densities(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_rk_step)
+int integrate_generalized_densities(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step)
 {
 
     int h_index, layer_index;
@@ -26,7 +26,7 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 	*/
 	if (no_rk_step == 0 && NO_OF_CONSTITUENTS == 4)
 	{
-	    calc_h2otracers_source_rates(irreversible_quantities -> constituent_mass_source_rates, irreversible_quantities -> constituent_heat_source_rates, state -> mass_densities, state -> condensed_density_temperatures, state -> temperature_gas, NO_OF_SCALARS, delta_t);
+	    calc_h2otracers_source_rates(irrev -> constituent_mass_source_rates, irrev -> constituent_heat_source_rates, state -> mass_densities, state -> condensed_density_temperatures, state -> temperature_gas, NO_OF_SCALARS, delta_t);
 	}
 	
 	for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
@@ -102,7 +102,7 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 				// the advection
 				-diagnostics -> flux_density_divv[j]
 				// the phase transition rates
-				+ irreversible_quantities -> constituent_mass_source_rates[i*NO_OF_SCALARS + j];
+				+ irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j];
 		    }
 	    }
 	    
@@ -136,7 +136,14 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 					// the advection
 					-diagnostics -> flux_density_divv[j]
 					// the heating rates
-					+ state -> mass_densities[i*NO_OF_SCALARS + j]/density_total(state, j)*(radiation_tendency[j] + irreversible_quantities -> temperature_diffusion_heating[j])/state -> temperature_gas[j];
+					// weighting factor
+					+ state -> mass_densities[i*NO_OF_SCALARS + j]/density_total(state, j)
+					// radiation
+					*(radiation_tendency[j]
+					// temperature diffusion
+					+ irrev -> temperature_diffusion_heating[j]
+					// dissipation, minus sign is correct (for efficiency)
+					- irrev -> heating_diss[j])/state -> temperature_gas[j];
 				 }
 			}
 		}
@@ -164,7 +171,7 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 					// the advection
 					-diagnostics -> flux_density_divv[j]
 					// the source terms
-					+ state -> mass_densities[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state, j))*(irreversible_quantities -> temperature_diffusion_heating[j] + irreversible_quantities -> heating_diss[j] + radiation_tendency[j]) + 1/c_v_cond*irreversible_quantities -> constituent_heat_source_rates[i*NO_OF_SCALARS + j] + diagnostics -> scalar_field_placeholder[j]*(irreversible_quantities -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]);
+					+ state -> mass_densities[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state, j))*(irrev -> temperature_diffusion_heating[j] + irrev -> heating_diss[j] + radiation_tendency[j]) + 1/c_v_cond*irrev -> constituent_heat_source_rates[i*NO_OF_SCALARS + j] + diagnostics -> scalar_field_placeholder[j]*(irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]);
 				}
 			}
 		}

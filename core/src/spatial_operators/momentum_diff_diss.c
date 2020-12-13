@@ -7,28 +7,29 @@ Github repository: https://github.com/MHBalsmeier/game
 #include "spatial_operators.h"
 #include "../diagnostics/diagnostics.h"
 
-int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quantities *diffusion, Config_info *config_info, Grid *grid, Dualgrid *dualgrid)
+int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid)
 {	
 	// Firstly the diffusion.
 	// Evaluating necessary differential operators.
 	divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
 	add_vertical_divv(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
-    grad(diagnostics -> velocity_gas_divv, diffusion -> friction_acc, grid);
+    grad(diagnostics -> velocity_gas_divv, irrev -> friction_acc, grid);
     curl_of_vorticity_m(diagnostics -> rel_vort, diagnostics -> curl_of_vorticity_m, grid, dualgrid);
     // Multiplying the values of the differential operators by the effective viscosities.
     // Calculating the effective viscosity of the divergence term.
-    calc_divv_term_viscosity_eff(state, diffusion -> viscosity_eff);
-	scalar_times_vector(diffusion -> viscosity_eff, diffusion -> friction_acc, diffusion -> friction_acc, grid);
+    calc_divv_term_viscosity_eff(state, irrev -> viscosity_eff);
+	scalar_times_vector(irrev -> viscosity_eff, irrev -> friction_acc, irrev -> friction_acc, grid);
     // Calculating the effective viscosity of the curl term.
-    calc_curl_term_viscosity_eff(state, diffusion -> viscosity_eff);
-	scalar_times_vector(diffusion -> viscosity_eff, diagnostics -> curl_of_vorticity_m, diagnostics -> curl_of_vorticity_m, grid);
+    calc_curl_term_viscosity_eff(state, irrev -> viscosity_eff);
+	scalar_times_vector(irrev -> viscosity_eff, diagnostics -> curl_of_vorticity_m, diagnostics -> curl_of_vorticity_m, grid);
 	// adding the curl term to the divergence term
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
-		diffusion -> friction_acc[i] += diagnostics -> curl_of_vorticity_m[i];
+		irrev -> friction_acc[i] += diagnostics -> curl_of_vorticity_m[i];
 	}
-	// dissipation remains to be implemented
+	// simplified dissipation
+	inner_product(state -> velocity_gas, irrev -> friction_acc, irrev -> heating_diss, grid);
 	return 0;
 }
 
