@@ -204,10 +204,6 @@ int main(int argc, char *argv[])
 	printf("Dynamics configuration:\n");
 	printf("number of layers: %d\n", NO_OF_LAYERS);
 	printf("number of scalar data points per layer: %d\n", NO_OF_SCALARS_H);
-	double surface = 4*M_PI*pow(RADIUS, 2);
-	double points_per_axis = pow(NO_OF_SCALARS_H, 0.5);
-	int eff_hor_res_km = 1e-3*pow(surface, 0.5)/points_per_axis;
-	printf("effective horizontal resolution: %d km\n", eff_hor_res_km);
 	printf("number of horizontal vectors per layer: %d\n", NO_OF_VECTORS_H);
 	printf("number of scalar data points: %d\n", NO_OF_SCALARS);
 	printf("number of vectors: %d\n", NO_OF_VECTORS);
@@ -343,6 +339,13 @@ int main(int argc, char *argv[])
     	exit(1);
     }
     printf("Grid loaded successfully.\n");
+	double eff_hor_res = 0;
+	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+	{
+		eff_hor_res += grid -> normal_distance[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i];
+	}
+	eff_hor_res = eff_hor_res/NO_OF_VECTORS_H;
+	printf("effective horizontal resolution: %lf km\n", 1e-3*eff_hor_res);
     printf("sound time step: %lf s\n", delta_t);
     printf("advective time step: %lf s\n", config_info -> adv_sound_ratio*delta_t);
     printf("%s", stars);
