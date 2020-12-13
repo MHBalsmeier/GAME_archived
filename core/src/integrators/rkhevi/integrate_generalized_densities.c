@@ -142,8 +142,8 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 					*(radiation_tendency[j]
 					// temperature diffusion
 					+ irrev -> temperature_diffusion_heating[j]
-					// dissipation, minus sign is correct (for efficiency)
-					- irrev -> heating_diss[j])/state -> temperature_gas[j];
+					// dissipation
+					+ irrev -> heating_diss[j])/state -> temperature_gas[j];
 				 }
 			}
 		}

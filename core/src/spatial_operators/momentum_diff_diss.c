@@ -30,6 +30,11 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 	}
 	// simplified dissipation
 	inner_product(state -> velocity_gas, irrev -> friction_acc, irrev -> heating_diss, grid);
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		irrev -> heating_diss[i] = -density_gas(state, i)*irrev -> heating_diss[i];
+	}
 	return 0;
 }
 
