@@ -422,7 +422,7 @@ int main(int argc, char *argv[])
 	Scalar_field *radiation_tendency = calloc(1, sizeof(Scalar_field));
     State *state_tendency = calloc(1, sizeof(State));
     Extrapolation_info *extrapolation_info = calloc(1, sizeof(Extrapolation_info));
-    Irreversible_quantities *diffusion = calloc(1, sizeof(Irreversible_quantities));
+    Irreversible_quantities *irrev = calloc(1, sizeof(Irreversible_quantities));
     linear_combine_two_states(state_old, state_old, state_new, 1, 0);
     config_info -> totally_first_step_bool = 1;
     config_info -> rad_update = 1;
@@ -430,7 +430,7 @@ int main(int argc, char *argv[])
 	{
 		radiation_init();
 	}
-    manage_rkhevi(state_old, state_new, extrapolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t, t_0, time_step_counter);
+    manage_rkhevi(state_old, state_new, extrapolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
 	time_step_counter += 1;
     if (write_out_dry_mass_integral == 1)
     {
@@ -468,7 +468,7 @@ int main(int argc, char *argv[])
         {
         	config_info -> rad_update = 0;
     	}
-        manage_rkhevi(state_old, state_new, extrapolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, diffusion, config_info, delta_t, t_0, time_step_counter);
+        manage_rkhevi(state_old, state_new, extrapolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
 		time_step_counter += 1;
 		if (write_out_dry_mass_integral == 1)
         {
@@ -530,7 +530,7 @@ int main(int argc, char *argv[])
     free(day_string);
     free(hour_string);
    	free(RUN_ID);
-    free(diffusion);
+    free(irrev);
     free(config_info);
     free(io_config);
     free(diagnostics);
