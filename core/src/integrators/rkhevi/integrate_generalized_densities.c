@@ -133,17 +133,20 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 				if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 				{
 					state_tendency -> entropy_densities[i*NO_OF_SCALARS + j] =
-					// the advection
+					// the advection (resolved transport)
 					-diagnostics -> flux_density_divv[j]
-					// the heating rates
+					// the diabatic forcings
 					// weighting factor
 					+ state -> mass_densities[i*NO_OF_SCALARS + j]/density_total(state, j)
-					// radiation
-					*(radiation_tendency[j]
-					// temperature diffusion
+					*(
+					// dissipation of molecular + turbulent momentum diffusion
+					+ irrev -> heating_diss[j]
+					// molecular + turbulent heat transport
 					+ irrev -> temperature_diffusion_heating[j]
-					// dissipation
-					+ irrev -> heating_diss[j])/state -> temperature_gas[j];
+					// radiation
+					+ radiation_tendency[j]
+					// this has to be divided by the temperature (we ware in the entropy equation)
+					)/state -> temperature_gas[j];
 				 }
 			}
 		}
