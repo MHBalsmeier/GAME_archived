@@ -17,8 +17,8 @@ This is the horizontal (explicit) part of the constituent integration.
 int integrate_generalized_densities(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step)
 {
 
-    int h_index, layer_index;
-    double c_v_cond, density_gas_value;
+    int h_index, layer_index, k;
+    double c_v_cond, density_gas_value, latent_heating;
     
 	/*
 	phase transitions are on only at the first RK step
@@ -125,13 +125,27 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 			}
 			scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
 			divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
-			#pragma omp parallel for private(layer_index, h_index)
+			#pragma omp parallel for private(layer_index, h_index, latent_heating, k)
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
 				layer_index = j/NO_OF_SCALARS_H;
 				h_index = j - layer_index*NO_OF_SCALARS_H;
 				if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 				{
+					// determing the latent heating depending on the configuration
+					latent_heating = 0;
+					if (config_info -> assume_lte == 0)
+					{
+						latent_heating = irrev -> constituent_heat_source_rates[i*NO_OF_SCALARS + j];
+					}
+					if (config_info -> assume_lte == 1)
+					{
+						// in this case, all the latent heating rates are assumed to act onto the gas phase
+						for (k = 0; k < NO_OF_CONDENSED_CONSTITUENTS + 1; ++k)
+						{
+							latent_heating += irrev -> constituent_heat_source_rates[k*NO_OF_SCALARS + j];
+						}
+					}
 					state_tendency -> entropy_densities[i*NO_OF_SCALARS + j] =
 					// the advection (resolved transport)
 					-diagnostics -> flux_density_divv[j]
@@ -145,6 +159,8 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 					+ irrev -> temperature_diffusion_heating[j]
 					// radiation
 					+ radiation_tendency[j]
+					// phase transitions
+					+ latent_heating
 					// this has to be divided by the temperature (we ware in the entropy equation)
 					)/state -> temperature_gas[j];
 				 }
