@@ -132,7 +132,7 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 				h_index = j - layer_index*NO_OF_SCALARS_H;
 				if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 				{
-					state_tendency -> entropy_densities[i*NO_OF_SCALARS + j] = 
+					state_tendency -> entropy_densities[i*NO_OF_SCALARS + j] =
 					// the advection
 					-diagnostics -> flux_density_divv[j]
 					// the heating rates
