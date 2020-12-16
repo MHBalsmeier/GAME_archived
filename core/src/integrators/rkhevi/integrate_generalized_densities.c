@@ -65,17 +65,7 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 					{
 						density_gas_value = 0.5*(density_gas(state, (layer_index - 1)*NO_OF_SCALARS_H + h_index) + density_gas(state, layer_index*NO_OF_SCALARS_H + h_index));
 					}
-					
-					// The solid case.
-					if (i < NO_OF_SOLID_CONSTITUENTS)
-					{
-						diagnostics -> velocity_gen[j] -= ret_sink_velocity(0, 0.001, density_gas_value);
-					}
-					// The liquid case.
-					else
-					{
-						diagnostics -> velocity_gen[j] -= ret_sink_velocity(1, 0.001, density_gas_value);
-					}
+					diagnostics -> velocity_gen[j] -= ret_sink_velocity(0, 0.001, density_gas_value);
 				}
                 // The horizontal movement is not affected by the sink velocity.
 	            else

@@ -148,7 +148,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
             }
             // solid precipitation rate
 		    sprate[i] = 0;
-		    for (int k = 0; k < NO_OF_SOLID_CONSTITUENTS; ++k)
+		    for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS/2; ++k)
 		    {
 		        sprate[i] += ret_sink_velocity(0, 0.001, density_gas(state_write_out, (layer_index - 1)*NO_OF_SCALARS_H + i))
 		        *state_write_out -> mass_densities[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
@@ -159,7 +159,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	        }
 	        // liquid precipitation rate
 		    rprate[i] = 0;
-		    for (int k = NO_OF_SOLID_CONSTITUENTS; k < NO_OF_CONDENSED_CONSTITUENTS; ++k)
+		    for (int k = NO_OF_CONDENSED_CONSTITUENTS/2; k < NO_OF_CONDENSED_CONSTITUENTS; ++k)
 		    {
 		        rprate[i] += ret_sink_velocity(1, 0.001, density_gas(state_write_out, (layer_index - 1)*NO_OF_SCALARS_H + i))
 		        *state_write_out -> mass_densities[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];

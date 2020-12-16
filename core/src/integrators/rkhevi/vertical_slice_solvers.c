@@ -202,19 +202,8 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						// determining the density of the gas at the interface
 						density_gas_value = upper_weights_vector[j]*density_gas(state_new, j*NO_OF_SCALARS_H + i) + lower_weights_vector[j]*density_gas(state_new, (j + 1)*NO_OF_SCALARS_H + i);
 						density_gas_value_old = upper_weights_vector[j]*density_gas(state_old, j*NO_OF_SCALARS_H + i) + lower_weights_vector[j]*density_gas(state_old, (j + 1)*NO_OF_SCALARS_H + i);
-						
-						// The solid case.
-						if (k < NO_OF_SOLID_CONSTITUENTS)
-						{
-							vertical_flux_vector_impl[j] -= ret_sink_velocity(0, 0.001, density_gas_value_old);
-							vertical_flux_vector_rhs[j] -= ret_sink_velocity(0, 0.001, density_gas_value);
-						}
-						// The liquid case.
-						else
-						{
-							vertical_flux_vector_impl[j] -= ret_sink_velocity(1, 0.001, density_gas_value_old);
-							vertical_flux_vector_rhs[j] -= ret_sink_velocity(1, 0.001, density_gas_value);
-						}
+						vertical_flux_vector_impl[j] -= ret_sink_velocity(0, 0.001, density_gas_value_old);
+						vertical_flux_vector_rhs[j] -= ret_sink_velocity(0, 0.001, density_gas_value);
 					}
 					// multiplying the vertical velocity by the area
 					area = grid -> area[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
