@@ -28,7 +28,7 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 	#pragma omp parallel for private(upper_index, lower_index, j, delta_z, upper_volume, lower_volume, total_volume, damping_coeff)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
-		// for meanings of these vectors look into the definition of the function lu_5band_solver
+		// for meanings of these vectors look into the definition of the function thomas_algorithm
 		double a_vector[2*NO_OF_LAYERS - 2];
 		double b_vector[2*NO_OF_LAYERS - 1];
 		double c_vector[2*NO_OF_LAYERS - 2];
