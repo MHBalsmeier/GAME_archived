@@ -195,7 +195,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 					total_volume = upper_volume + lower_volume;
 					upper_weights_vector[j] = upper_volume/total_volume;
 					lower_weights_vector[j] = lower_volume/total_volume;
-					// For condensed contituents, a sink velocity must be added.
+					// For condensed constituents, a sink velocity must be added.
 					if (k < NO_OF_CONDENSED_CONSTITUENTS)
 					{
 						// determining the density of the gas at the interface
