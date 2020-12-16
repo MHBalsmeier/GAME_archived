@@ -67,9 +67,9 @@ int temperature_diagnostics_explicit(State *state, State *state_tendency, Diagno
     	entropy_density_gas_1 = 0;
     	for (int j = 0; j < no_of_relevant_constituents; ++j)
     	{
-			entropy_density_gas_0 += state -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
-			entropy_density_gas_1 += state -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i]
-			+ delta_t*state_tendency -> entropy_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
+			entropy_density_gas_0 += state -> entropy_densities[j*NO_OF_SCALARS + i];
+			entropy_density_gas_1 += state -> entropy_densities[j*NO_OF_SCALARS + i]
+			+ delta_t*state_tendency -> entropy_densities[j*NO_OF_SCALARS + i];
     	}
     	delta_entropy_density = entropy_density_gas_1 - entropy_density_gas_0;
     	

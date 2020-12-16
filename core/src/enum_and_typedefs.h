@@ -50,8 +50,11 @@ typedef double Scalar_field[NO_OF_SCALARS];
 typedef double Vector_field[NO_OF_VECTORS];
 typedef double Dual_vector_field[NO_OF_DUAL_VECTORS];
 typedef double Curl_field[NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H];
+// all constituents have a mass density
 typedef double Mass_densities[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
-typedef double Entropy_densities[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
+// only the gaseous constituents have an entropy density
+typedef double Entropy_densities[NO_OF_GASEOUS_CONSTITUENTS*NO_OF_SCALARS];
+// only the condensed constituents have a density x temperature field
 typedef double Condensed_density_temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS];
 
 // Contains properties of the primal grid.

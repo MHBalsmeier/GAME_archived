@@ -107,7 +107,8 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 	    }
 	    
 		// Explicit entropy integrations
-		if ((config_info -> assume_lte == 1 && i == NO_OF_CONDENSED_CONSTITUENTS) || config_info -> assume_lte == 0)
+		if ((config_info -> assume_lte == 1 && i == NO_OF_CONDENSED_CONSTITUENTS)
+		|| (config_info -> assume_lte == 0 && i >= NO_OF_CONDENSED_CONSTITUENTS))
 		{
 			// -----------------------------
 			// Determining the specific entropy of the constituent at hand.
@@ -116,7 +117,9 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 			{
 				if (state -> mass_densities[i*NO_OF_SCALARS + j] != 0)
 				{
-					diagnostics -> scalar_field_placeholder[j] = state -> entropy_densities[i*NO_OF_SCALARS + j]/state -> mass_densities[i*NO_OF_SCALARS + j];
+					diagnostics -> scalar_field_placeholder[j] =
+					state -> entropy_densities[(i - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j]
+					/state -> mass_densities[i*NO_OF_SCALARS + j];
 				}
 				else
 				{
@@ -146,7 +149,7 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 							latent_heating += irrev -> constituent_heat_source_rates[k*NO_OF_SCALARS + j];
 						}
 					}
-					state_tendency -> entropy_densities[i*NO_OF_SCALARS + j] =
+					state_tendency -> entropy_densities[(i - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j] =
 					// the advection (resolved transport)
 					-diagnostics -> flux_density_divv[j]
 					// the diabatic forcings
@@ -154,7 +157,7 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 					+ state -> mass_densities[i*NO_OF_SCALARS + j]/density_total(state, j)
 					*(
 					// dissipation of molecular + turbulent momentum diffusion
-					+ irrev -> heating_diss[j]
+					irrev -> heating_diss[j]
 					// molecular + turbulent heat transport
 					+ irrev -> temperature_diffusion_heating[j]
 					// radiation

@@ -86,7 +86,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 			// Determining the speicific entropied of the dry air as well as of the water vapour.
 			if (state -> mass_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i] != 0)
 			{
-				diagnostics -> scalar_field_placeholder[i] = state -> entropy_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i]/
+				diagnostics -> scalar_field_placeholder[i] = state -> entropy_densities[j*NO_OF_SCALARS + i]/
 				state -> mass_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i];
 			}
 			else

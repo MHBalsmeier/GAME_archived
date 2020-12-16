@@ -2268,7 +2268,7 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
 		#pragma omp parallel for
 		for (int i = 0; i< NO_OF_SCALARS; ++i)
 		{
-			diagnostics -> scalar_field_placeholder[i] = state_write_out -> entropy_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
+			diagnostics -> scalar_field_placeholder[i] = state_write_out -> entropy_densities[i];
 		}
     	global_scalar_integrator(diagnostics -> scalar_field_placeholder, grid, &global_integral);
     	fprintf(global_integral_file, "%d\t%lf\n", step_counter, global_integral);

@@ -124,34 +124,39 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 	{
 		no_of_relevant_constituents = 0;
 		constituent_index_offset = 0;
-		// all constituents have a mass density
+		// mass densities
 		if (quantity_id == 0)
 		{
+			// all constituents have a mass density
 			no_of_relevant_constituents = NO_OF_CONSTITUENTS;
 			constituent_index_offset = 0;
 		}
-		// all constituents have an entropy density
+		// entropy densities
 		if (quantity_id == 1)
 		{
+			// in this case, all gaseous constituents have an entropy density
 			if (config_info -> assume_lte == 0)
 			{
-				constituent_index_offset = 0;
-				no_of_relevant_constituents = NO_OF_CONSTITUENTS;
+				constituent_index_offset = NO_OF_CONDENSED_CONSTITUENTS;
+				no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
 			}
+			// in this case, only one constituent has an entropy density
 			if (config_info -> assume_lte == 1)
 			{
 				constituent_index_offset = NO_OF_CONDENSED_CONSTITUENTS;
 				no_of_relevant_constituents = 1;
 			}
 		}
-		// only the condensed constituents have a density x temperature field
+		// density x temperature fields
 		if (quantity_id == 2)
 		{
 			constituent_index_offset = 0;
+			// in this case, all the condensed constituents have a density x temperature field
 			if(config_info -> assume_lte == 0)
 			{
 				no_of_relevant_constituents = NO_OF_CONDENSED_CONSTITUENTS;
 			}
+			// in this case, no density x temperature fields are taken into account
 			else
 			{
 				no_of_relevant_constituents = 0;
@@ -228,8 +233,8 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						vertical_flux_vector_impl[j] = density_old_at_interface*vertical_flux_vector_impl[j];
 						vertical_flux_vector_rhs[j] =
 						// the old specific entropy at the interface
-						(upper_weights_vector[j]*state_old -> entropy_densities[k*NO_OF_SCALARS + upper_index]/state_old -> mass_densities[k*NO_OF_SCALARS + upper_index]
-						+ lower_weights_vector[j]*state_old -> entropy_densities[k*NO_OF_SCALARS + lower_index]/state_old -> mass_densities[k*NO_OF_SCALARS + lower_index])
+						(upper_weights_vector[j]*state_old -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + upper_index]/state_old -> mass_densities[k*NO_OF_SCALARS + upper_index]
+						+ lower_weights_vector[j]*state_old -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + lower_index]/state_old -> mass_densities[k*NO_OF_SCALARS + lower_index])
 						 // the mass flux density used in ther vertical mass flux divergence
 						*density_new_at_interface*vertical_flux_vector_rhs[j];
 					}
@@ -302,8 +307,8 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 					if (quantity_id == 1)
 					{
 						d_vector[j] =
-						state_old -> entropy_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
-						+ delta_t*state_tendency -> entropy_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+						state_old -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
+						+ delta_t*state_tendency -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
 					}
 					// density x temperatues
 					if (quantity_id == 2)
@@ -341,7 +346,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 					if (quantity_id == 1)
 					{
 					 	// here, the solution vector actually contains the specific entropy, that's why it needs to be multiplied by the mass density
-						state_new -> entropy_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] =
+						state_new -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] =
 						state_new -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]*solution_vector[j];
 					}
 					if (quantity_id == 2)
