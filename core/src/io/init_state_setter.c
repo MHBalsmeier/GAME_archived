@@ -147,11 +147,11 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 		{
 			for (int j = 0; j < NO_OF_CONSTITUENTS; ++j)
 			{
-				if (j == 0)
+				if (j == NO_OF_CONDENSED_CONSTITUENTS - 2)
 				{
 					init_state -> condensed_density_temperatures[i] = solid_water_density[i]*solid_water_temperature[i];
 				}
-				if (j == 1)
+				if (j == NO_OF_CONDENSED_CONSTITUENTS - 1)
 				{
 					init_state -> condensed_density_temperatures[NO_OF_SCALARS + i] = liquid_water_density[i]*liquid_water_temperature[i];
 				}
@@ -173,6 +173,7 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 			}
 	    }
 	}
+	
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
     	layer_index = i/NO_OF_VECTORS_PER_LAYER;
