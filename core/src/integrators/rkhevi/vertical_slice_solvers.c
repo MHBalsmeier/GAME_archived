@@ -185,7 +185,6 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 				// diagnozing the vertical flux
 				for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 				{
-					// for both the explicit and the implicit component of the flux density, the new velocity is used (otherwise, it is unstable, according to experience)
 					vertical_flux_vector_impl[j] = state_old -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 					vertical_flux_vector_rhs[j] = state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 					// preparing the vertical interpolation
