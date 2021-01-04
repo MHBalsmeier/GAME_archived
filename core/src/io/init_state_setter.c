@@ -128,6 +128,10 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 		    if (NO_OF_CONSTITUENTS >= 4)
 		    {
 				init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = water_vapour_density[i];
+				if (init_state -> temperature_gas[i] < 273.15)
+					init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = 0.7*saturation_pressure_over_ice(init_state -> temperature_gas[i])/(specific_gas_constants(1)*init_state -> temperature_gas[i]);
+				else
+					init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = 0.7*saturation_pressure_over_water(init_state -> temperature_gas[i])/(specific_gas_constants(1)*init_state -> temperature_gas[i]);
 				if (init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] < 0)
 				{
 					printf("Error: init_state -> mass_densities < 0 somewhere.\n");

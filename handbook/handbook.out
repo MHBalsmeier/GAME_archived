@@ -5,9 +5,12 @@
 \BOOKMARK [2][-]{subsection.2.1.2}{For developing}{section.2.1}% 5
 \BOOKMARK [1][-]{section.2.2}{Building}{chapter.2}% 6
 \BOOKMARK [0][-]{chapter.3}{Running the model}{}% 7
-\BOOKMARK [0][-]{chapter.4}{Grid generation}{}% 8
-\BOOKMARK [1][-]{section.4.1}{Horizontal grid properties}{chapter.4}% 9
-\BOOKMARK [1][-]{section.4.2}{Vertical grid properties}{chapter.4}% 10
-\BOOKMARK [1][-]{section.4.3}{How to generate a grid}{chapter.4}% 11
-\BOOKMARK [0][-]{chapter.5}{Generating a new orography file}{}% 12
-\BOOKMARK [0][-]{chapter.6}{Generating a new test state file}{}% 13
+\BOOKMARK [1][-]{section.3.1}{Dynamics configuration}{chapter.3}% 8
+\BOOKMARK [1][-]{section.3.2}{Physics configuration}{chapter.3}% 9
+\BOOKMARK [2][-]{subsection.3.2.1}{Local thermodynamic equilibrium option}{section.3.2}% 10
+\BOOKMARK [0][-]{chapter.4}{Grid generation}{}% 11
+\BOOKMARK [1][-]{section.4.1}{Horizontal grid properties}{chapter.4}% 12
+\BOOKMARK [1][-]{section.4.2}{Vertical grid properties}{chapter.4}% 13
+\BOOKMARK [1][-]{section.4.3}{How to generate a grid}{chapter.4}% 14
+\BOOKMARK [0][-]{chapter.5}{Generating a new orography file}{}% 15
+\BOOKMARK [0][-]{chapter.6}{Generating a new test state file}{}% 16

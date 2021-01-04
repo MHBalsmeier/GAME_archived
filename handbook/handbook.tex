@@ -111,6 +111,17 @@ The configuration of the model must be set in three different files:
 %
 Since the files \texttt{core/src/enum\_and\_typedefs.h} and \texttt{core/src/settings.c} are part of the model's source code, the model must be recompiled if something is changed in them. Alternatively, one can compile several executables and name them according to their configuration.
 
+\section{Dynamics configuration}
+\label{sec:dynamics_configuration}
+
+\section{Physics configuration}
+\label{sec:physics_configuration}
+
+\subsection{Local thermodynamic equilibrium option}
+\label{sec:local_thermodynamic_equilibrium_option}
+
+Assuming a local thermodynamic equilibrium in a heterogeneous fluid boils down to assuming that all constituents have the same temperature. This reduces the complexity of the simulation by about 40 \%, since now internal energy densities are not prognostic variables anymore.
+
 \chapter{Grid generation}
 \label{chap:grid_generation}
 

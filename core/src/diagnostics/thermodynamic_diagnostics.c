@@ -170,7 +170,7 @@ double density_total(State *state, int grid_point_index)
 double density_gas(State *state, int grid_point_index)
 {
 	double result = 0;
-	for (int i = 0; i < NO_OF_GASEOUS_CONSTITUENTS; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		result += state -> mass_densities[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index];
 	}

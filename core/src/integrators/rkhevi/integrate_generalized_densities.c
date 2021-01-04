@@ -26,7 +26,7 @@ int integrate_generalized_densities(State *state, State *state_tendency, Grid *g
 	*/
 	if (no_rk_step == 0 && NO_OF_CONSTITUENTS == 4)
 	{
-	    calc_h2otracers_source_rates(irrev -> constituent_mass_source_rates, irrev -> constituent_heat_source_rates, state -> mass_densities, state -> condensed_density_temperatures, state -> temperature_gas, NO_OF_SCALARS, delta_t);
+	    // calc_h2otracers_source_rates(irrev -> constituent_mass_source_rates, irrev -> constituent_heat_source_rates, state -> mass_densities, state -> condensed_density_temperatures, state -> temperature_gas, NO_OF_SCALARS, delta_t);
 	}
 	
 	for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)

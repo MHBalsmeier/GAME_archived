@@ -14,6 +14,12 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {chapter}{\numberline {3}Running the model}{5}{chapter.3}%
 \defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.1}Dynamics configuration}{5}{section.3.1}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {3.2}Physics configuration}{5}{section.3.2}%
+\defcounter {refsection}{0}\relax 
+\contentsline {subsection}{\numberline {3.2.1}Local thermodynamic equilibrium option}{5}{subsection.3.2.1}%
+\defcounter {refsection}{0}\relax 
 \contentsline {chapter}{\numberline {4}Grid generation}{6}{chapter.4}%
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {4.1}Horizontal grid properties}{6}{section.4.1}%
