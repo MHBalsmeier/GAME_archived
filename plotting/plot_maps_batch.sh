@@ -12,7 +12,7 @@ init_year=${BASH_ARGV[4]} # year of the start of the model run
 init_month=${BASH_ARGV[5]} # month of the start of the model run
 init_day=${BASH_ARGV[6]} # day of the start of the model run
 init_hr=${BASH_ARGV[7]} # hour of the start of the model run
-grid_props_file=$game_home_dir/grids/B5L26T30000_O0_OL17_SCVT.nc # the file where the grid properties are stored
+grid_props_file=$game_home_dir/grids/B5L26T41152_O3_OL23_SCVT.nc # the file where the grid properties are stored
 disp_shortname_list=(
 2t rprate sprate gust prmsl gh gh cape tcc
 # 2t rprate sprate gust prmsl gh gh cape tcc
