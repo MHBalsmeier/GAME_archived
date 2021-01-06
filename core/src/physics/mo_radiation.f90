@@ -25,6 +25,9 @@ module radiation
   integer                            :: no_of_sw_g_points
   ! the number of g points is the long wave region
   integer                            :: no_of_lw_g_points
+  ! used for C interoperability
+  integer                            :: zero = 0
+  integer                            :: one = 1
   ! the gas concentrations (object holding all information on the composition
   ! of the gas phase)
   type(ty_gas_concs)                 :: gas_concentrations_sw
@@ -45,13 +48,17 @@ module radiation
   ! the gases in lowercase
   character(len = 32), dimension(size(active_gases)) :: gases_lowercase
   
-  ! interface to C function
+  ! interface to C functions
   interface
-    real(8) function specific_gas_constants(gas_number) bind(c, name =  "specific_gas_constants")
-      integer :: gas_number
+    real(C_DOUBLE) function specific_gas_constants(gas_number) bind(c, name = "specific_gas_constants")
+      use, intrinsic::iso_c_binding
+      implicit none
+      integer(C_INT), value :: gas_number
     end function specific_gas_constants
-    real(8) function molar_fraction_in_dry_air(gas_number) bind(c, name =  "molar_fraction_in_dry_air")
-      integer :: gas_number
+    real(C_DOUBLE) function molar_fraction_in_dry_air(gas_number) bind(c, name = "molar_fraction_in_dry_air")
+      use, intrinsic::iso_c_binding
+      implicit none
+      integer(C_INT), value :: gas_number
     end function molar_fraction_in_dry_air
   end interface
     
@@ -172,9 +179,9 @@ module radiation
     ! reformatting the thermodynamical state for RTE+RRTMGP
     do ji = 1,no_of_scalars_h
       do jk = 1,no_of_layers
-        temperature_rad(ji,jk) =  temperature_gas((jk-1)*no_of_scalars_h+ji)
+        temperature_rad(ji,jk) = temperature_gas((jk-1)*no_of_scalars_h+ji)
         ! the pressure is diagnozed here, using the equation of state for ideal gases
-        pressure_rad(ji,jk)   = specific_gas_constants(0) &
+        pressure_rad(ji,jk) = specific_gas_constants(0) &
         *mass_densities(no_of_condensed_constituents*no_of_scalars &
         + (jk-1)*no_of_scalars_h+ji)*temperature_rad(ji,jk)
       enddo

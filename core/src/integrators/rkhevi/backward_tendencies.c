@@ -7,6 +7,7 @@ Github repository: https://github.com/MHBalsmeier/game
 #include "../integrators.h"
 #include "../../spatial_operators/spatial_operators.h"
 #include "../../diagnostics/diagnostics.h"
+#include "../../settings.h"
 #include <stdio.h>
 #include <stdlib.h>
 
