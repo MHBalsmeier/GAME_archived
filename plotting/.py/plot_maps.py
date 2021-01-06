@@ -221,7 +221,7 @@ if uniform_range == 1:
 	norm = BoundaryNorm(bounds, ncolors = cmap.N, clip = True);
 
 points = np.zeros([len(values[:, 0]), 2]);
-fig_size = 10;
+fig_size = 7;
 for i in range(int(max_interval/plot_interval) + 1):
 	if uniform_range == 0:
 		if projection == "Gnomonic":
