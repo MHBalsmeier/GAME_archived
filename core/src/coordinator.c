@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
     printf("*\t\t\t\t\t\t\t\t\t\t*\n");
     printf("%s", stars);
     printf("Copyright (C) 2020 The GAME development team.\n");
-    printf("Released under the MIT license, visit https://github.com/MHBalsmeier/game for more information.\n");
+    printf("Released under the MIT license, visit https://github.com/AUN4GFD/game for more information.\n");
     printf("%s", stars);
 	printf("What you want to do:\n");
 	printf("operator:\t\t\t%s\n", OPERATOR);
