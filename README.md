@@ -63,11 +63,11 @@ It is recommended to run the model on Linux. We will not help people who have pr
 
 Everything is easy and quick to install.
 
-* [geos95](https://github.com/MHBalsmeier/geos95)
+* [geos95](https://github.com/AUN4GFD/geos95)
 * netcdf library (Ubuntu: sudo apt-get libnetcdf-dev, sudo apt-get libnetcdff-dev)
 * eccodes library (installation manual: https://mhbalsmeier.github.io/tutorials/eccodes_on_ubuntu.html)
 * CMake (Ubuntu: sudo apt-get install cmake)
-* [atmostracers](https://github.com/MHBalsmeier/atmostracers)
+* [atmostracers](https://github.com/AUN4GFD/atmostracers)
 * clone the DCMIP2016 repository: git clone https://github.com/ClimateGlobalChange/DCMIP2016.git
 * clone the RTE+RRTMGP repository: git clone https://github.com/earth-system-radiation/rte-rrtmgp
 
@@ -84,7 +84,7 @@ The following packages are additionally required if you want to make use of the 
 
 ### Download
 
-	git clone https://github.com/MHBalsmeier/game.git
+	git clone https://github.com/AUN4GFD/game.git
 	cd game
 	./create_directories_for_large_files.sh
 
