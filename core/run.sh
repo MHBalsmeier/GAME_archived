@@ -9,6 +9,9 @@ time_string=$(date --utc +%Y%m%d%H%M%S)
 if [ $ideal_input_id -gt "-1" ]
 then
 orography_id=-1 # orography_id will be set automatically, depending on the test ID
+# this is the NWP case
+else
+orography_id=${BASH_ARGV[10]} # the orography ID can be set by the user in this case
 fi
 
 output_dir=$game_home_dir/output/$run_id
