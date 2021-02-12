@@ -40,7 +40,6 @@ const double INVERSE_HEIGHT_STANDARD = 20e3;
 const double TEMP_GRADIENT_INV_STANDARD = 0.1/100;
 
 int find_pressure_value(double, double, double *);
-double sackur_tetrode(double, double);
 
 int main(int argc, char *argv[])
 {
@@ -456,21 +455,6 @@ int find_pressure_value(double lat, double z_height, double *result)
     *result = p;
     return 0;
 }
-
-double sackur_tetrode(double mass_density, double temperature)
-{
-	double mean_particle_mass = 0.004810e-23;
-	double entropy_constant = 2429487178047751925300627872548148580712448.000000;
-	double particle_density = mass_density/mean_particle_mass;
-	double C_D_V = spec_heat_capacities_v_gas_lookup(0);
-	// returns the specific entropy as a function of the mass density and the temperature
-	double result;
-    result = K_B*(3.0/2*log(entropy_constant)
-    + log(1/particle_density)
-    + 3.0/2*log(mean_particle_mass*C_D_V*temperature))/mean_particle_mass;
-    return result;
-}
-
 
 
 
