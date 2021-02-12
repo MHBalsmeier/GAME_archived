@@ -1,6 +1,6 @@
 /*
 This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
-Github repository: https://github.com/MHBalsmeier/game
+Github repository: https://github.com/AUN4GFD/game
 */
 
 int calc_mass_diffusion_coeffs(State *, Config_info *, Scalar_field, Scalar_field);
