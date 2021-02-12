@@ -49,7 +49,6 @@ int main(int argc, char *argv[])
 	// some thermodynamical quantities
 	double R_D = specific_gas_constants_lookup(0);
 	double C_D_P = spec_heat_capacities_p_gas_lookup(0);
-	double C_D_V = spec_heat_capacities_v_gas_lookup(0);
 	int TEST_ID;
    	TEST_ID = strtod(argv[1], NULL);
    	int NO_OF_ORO_LAYERS = strtod(argv[2], NULL);
@@ -255,7 +254,7 @@ int main(int argc, char *argv[])
     }
     // density is determined out of the hydrostatic equation
     int lower_index, upper_index;
-    double entropy_value, temperature_mean, delta_temperature, delta_gravity_potential, pot_temp_value, lower_entropy_value, upper_weight, lower_weight, upper_volume, lower_volume, total_volume;
+    double entropy_value, temperature_mean, delta_temperature, delta_gravity_potential, lower_entropy_value, upper_weight, lower_weight, upper_volume, lower_volume, total_volume;
     for (int i = NO_OF_SCALARS - 1; i >= 0; --i)
     {
     	layer_index = i/NO_OF_SCALARS_H;
