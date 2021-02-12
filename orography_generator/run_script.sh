@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
-# Github repository: https://github.com/MHBalsmeier/game
+# Github repository: https://github.com/AUN4GFD/game
 
 # oroid		description
 # 1			Gaussian mountain at 0 N / 0 E, H = 10 km
