@@ -14,12 +14,12 @@ init_day=${BASH_ARGV[6]} # day of the start of the model run
 init_hr=${BASH_ARGV[7]} # hour of the start of the model run
 grid_props_file=$game_home_dir/grids/B5L26T41152_O3_OL23_SCVT.nc # the file where the grid properties are stored
 disp_shortname_list=(
-2t rprate sprate gust prmsl gh gh cape tcc
-2t rprate sprate gust prmsl gh gh cape tcc
-2t rprate sprate gust prmsl gh gh cape tcc
-2t rprate sprate gust prmsl gh gh cape tcc
-2t rprate sprate gust prmsl gh gh cape tcc
-2t rprate sprate gust prmsl gh gh cape tcc
+2t rprate sprate surface_wind prmsl gh gh cape tcc
+2t rprate sprate surface_wind prmsl gh gh cape tcc
+2t rprate sprate surface_wind prmsl gh gh cape tcc
+2t rprate sprate surface_wind prmsl gh gh cape tcc
+2t rprate sprate surface_wind prmsl gh gh cape tcc
+2t rprate sprate surface_wind prmsl gh gh cape tcc
 ) # short names according to grib as an array 
 disp_level_list=(
 2 0 0 10 0 500 200 0 0
