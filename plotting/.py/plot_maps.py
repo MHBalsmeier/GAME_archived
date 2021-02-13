@@ -335,7 +335,7 @@ for i in range(int(max_interval/plot_interval) + 1):
 		textstr = variable_name + " (GAME)\n" + time_string;
 	ob = offsetbox.AnchoredText(textstr, loc = 3);
 	ax.add_artist(ob);
-	fig.savefig(save_directory + "/" + savename + "+" + str(time_after_init) + "s.png", dpi = 500, bbox_inches = "tight");
+	fig.savefig(save_directory + "/" + savename + "+" + str(time_after_init) + "s.png", dpi = 300, bbox_inches = "tight");
 	plt.close();
 	print("done");
 
