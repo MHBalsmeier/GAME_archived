@@ -291,7 +291,7 @@ for i in range(int(max_interval/plot_interval) + 1):
 		gl.left_labels = False;
 	new_cube = iris.cube.Cube(values_interpolated, units = unit_string_for_iris, dim_coords_and_dims = [(lat_coord, 0), (lon_coord, 1)]);
 	if contourf_plot == 1:
-		mesh = iplt.pcolormesh(new_cube, cmap = cmap, norm = norm);
+		mesh = iplt.contourf(new_cube, cmap = cmap, norm = norm);
 		cbar = plt.colorbar(mesh, fraction = 0.02, pad = 0.04, aspect = 80, orientation = "horizontal", ticks = np.arange(total_min, total_max + color_bar_dist, color_bar_dist));
 		cbar.ax.tick_params(labelsize = 12)
 		cbar.set_label(unit_string, fontsize = 16);
