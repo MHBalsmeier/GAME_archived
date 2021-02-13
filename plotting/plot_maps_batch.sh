@@ -15,7 +15,7 @@ init_hr=${BASH_ARGV[7]} # hour of the start of the model run
 grid_props_file=$game_home_dir/grids/B5L26T41152_O3_OL23_SCVT.nc # the file where the grid properties are stored
 disp_shortname_list=(
 2t rprate sprate gust prmsl gh gh cape tcc
-# 2t rprate sprate gust prmsl gh gh cape tcc
+2t rprate sprate gust prmsl gh gh cape tcc
 # 2t rprate sprate gust prmsl gh gh cape tcc
 # 2t rprate sprate gust prmsl gh gh cape tcc
 # 2t rprate sprate gust prmsl gh gh cape tcc
@@ -23,7 +23,7 @@ disp_shortname_list=(
 ) # short names according to grib as an array 
 disp_level_list=(
 2 0 0 10 0 500 200 0 0
-# 2 0 0 10 0 500 200 0 0
+2 0 0 10 0 500 200 0 0
 # 2 0 0 10 0 500 200 0 0
 # 2 0 0 10 0 500 200 0 0
 # 2 0 0 10 0 500 200 0 0
@@ -31,7 +31,7 @@ disp_level_list=(
 ) # levels according to grib as an array
 on_pressure_level_list=(
 0 0 0 0 0 1 1 0 0
-# 0 0 0 0 0 1 1 0 0
+0 0 0 0 0 1 1 0 0
 # 0 0 0 0 0 1 1 0 0
 # 0 0 0 0 0 1 1 0 0
 # 0 0 0 0 0 1 1 0 0
@@ -39,7 +39,7 @@ on_pressure_level_list=(
 ) # set this to 1 for each plot individually if the variable resides on pressure levels
 plot_intervals_list=(
 21600 21600 21600 21600 21600 21600 21600 21600 21600
-# 21600 21600 21600 21600 21600 21600 21600 21600 21600
+21600 21600 21600 21600 21600 21600 21600 21600 21600
 # 21600 21600 21600 21600 21600 21600 21600 21600 21600
 # 21600 21600 21600 21600 21600 21600 21600 21600 21600
 # 21600 21600 21600 21600 21600 21600 21600 21600 21600
@@ -47,14 +47,14 @@ plot_intervals_list=(
 ) # every how many seconds you want to plot each variable
 uniform_colormap_list=(
 0 0 0 0 0 0 0 0 0
-# 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0
 # 0 0 0 0 0 0 0 0 0
 # 0 0 0 0 0 0 0 0 0
 # 0 0 0 0 0 0 0 0 0
 # 0 0 0 0 0 0 0 0 0
 ) # set this to 1 for each plot individually if you want to enforce a uniform colormap for all the time steps
 scope_list=(
-# CONUS CONUS CONUS CONUS CONUS CONUS CONUS CONUS CONUS
+CONUS CONUS CONUS CONUS CONUS CONUS CONUS CONUS CONUS
 CEU CEU CEU CEU CEU CEU CEU CEU CEU
 # CHINA CHINA CHINA CHINA CHINA CHINA CHINA CHINA CHINA
 # INDIA INDIA INDIA INDIA INDIA INDIA INDIA INDIA INDIA
@@ -63,7 +63,7 @@ CEU CEU CEU CEU CEU CEU CEU CEU CEU
 ) # the areas of the plots
 projections_list=(
 Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
-# Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
+Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
 # Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
 # Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
 # Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
@@ -71,7 +71,7 @@ Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
 ) # the projections of the plots
 synoptical_time_mode=(
 1 1 1 1 1 1 1 1 1
-# 1 1 1 1 1 1 1 1 1
+1 1 1 1 1 1 1 1 1
 # 1 1 1 1 1 1 1 1 1
 # 1 1 1 1 1 1 1 1 1
 # 1 1 1 1 1 1 1 1 1
