@@ -5,7 +5,6 @@ import numpy as np;
 import sys;
 import toolbox.read_model_output as rmo;
 import toolbox.map_properties as mp;
-from matplotlib.colors import BoundaryNorm;
 import cartopy.feature as cfeature;
 import iris;
 import toolbox.dist_stuff as ds;
@@ -214,11 +213,10 @@ if uniform_range == 1:
 		values_range_for_plot = total_max - total_min;
 	if (values_range_for_plot == 0):
 		values_range_for_plot = 0.1;
-	color_plot_dist = values_range_for_plot/500;
+	color_plot_dist = values_range_for_plot/80;
 	bounds = np.arange(total_min, total_max + color_plot_dist, color_plot_dist);
 	color_bar_dist = values_range_for_plot/5;
 	cmap = plt.get_cmap(colormap);
-	norm = BoundaryNorm(bounds, ncolors = cmap.N, clip = True);
 
 points = np.zeros([len(values[:, 0]), 2]);
 fig_size = 7;
@@ -237,11 +235,10 @@ for i in range(int(max_interval/plot_interval) + 1):
 			total_min = np.floor(total_min);
 			total_max = np.ceil(total_max);
 			values_range_for_plot = total_max - total_min;
-		color_plot_dist = values_range_for_plot/500;
+		color_plot_dist = values_range_for_plot/80;
 		bounds = np.arange(total_min, total_max + color_plot_dist, color_plot_dist);
 		color_bar_dist = values_range_for_plot/5;
 		cmap = plt.get_cmap(colormap);
-		norm = BoundaryNorm(bounds, ncolors = cmap.N, clip = True);
 	time_after_init = i*plot_interval;
 	print("plotting " + short_name + " at level " + str(level) + " for t - t_init = " + str(time_after_init) + " s ...");
 	if (projection == "Orthographic"):
@@ -291,8 +288,8 @@ for i in range(int(max_interval/plot_interval) + 1):
 		gl.left_labels = False;
 	new_cube = iris.cube.Cube(values_interpolated, units = unit_string_for_iris, dim_coords_and_dims = [(lat_coord, 0), (lon_coord, 1)]);
 	if contourf_plot == 1:
-		mesh = iplt.contourf(new_cube, cmap = cmap, norm = norm);
-		cbar = plt.colorbar(mesh, fraction = 0.02, pad = 0.04, aspect = 80, orientation = "horizontal", ticks = np.arange(total_min, total_max + color_bar_dist, color_bar_dist));
+		cf = iplt.contourf(new_cube, cmap = cmap, levels = bounds);
+		cbar = plt.colorbar(cf, fraction = 0.02, pad = 0.04, aspect = 80, orientation = "horizontal", ticks = np.arange(total_min, total_max + color_bar_dist, color_bar_dist));
 		cbar.ax.tick_params(labelsize = 12)
 		cbar.set_label(unit_string, fontsize = 16);
 	else:
@@ -304,8 +301,8 @@ for i in range(int(max_interval/plot_interval) + 1):
 		basic_width = 1;
 		linewidths_vector = basic_width*np.ones(np.size(levels_vector));
 		linewidths_vector[big_index] = 1.5*basic_width;
-		mesh = iplt.contour(new_cube, levels_vector, linewidths = linewidths_vector, colors = "black");
-		plt.clabel(mesh, inline = True, fmt = "%1.0f", fontsize = 12, colors = "k");
+		c = iplt.contour(new_cube, levels_vector, linewidths = linewidths_vector, colors = "black");
+		plt.clabel(c, inline = True, fmt = "%1.0f", fontsize = 12, colors = "k");
 	if (scope != "World"):
 		ax.add_feature(cfeature.LAND);
 		ax.add_feature(cfeature.OCEAN);
