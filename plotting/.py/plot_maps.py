@@ -171,7 +171,11 @@ if max_interval > 24*3600 or synoptical_time_mode == 1:
     disp_time_in_hr = 1;
     time_unit_string = "hr";
 
-savename = run_id + "_" + short_name + "_" + str(level) + "_" + scope;
+if surface_bool == 0:
+	savename = run_id + "_" + short_name + "_" + str(level) + "_" + scope;
+# for surface quantties, we do not need the level in the file name
+if surface_bool == 1:
+	savename = run_id + "_" + short_name + "_" + scope;
 
 if on_pressure_bool == 0:
 	if surface_bool == 1:
