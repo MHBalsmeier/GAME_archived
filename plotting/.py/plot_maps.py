@@ -154,7 +154,7 @@ if short_name == "d":
 	rescale = 1;
 if short_name == "surface_wind":
 	variable_name = "10 m wind (colors: gusts)";
-	unit_string = "m/s";
+	unit_string = "kn";
 	rescale = conv.ms2kn(1);
 	surface_bool = 1;
 
