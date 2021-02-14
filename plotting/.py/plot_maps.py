@@ -161,6 +161,8 @@ if short_name == "surface_wind":
 unit_string_for_iris = unit_string;
 if short_name == "gh":
     unit_string_for_iris = "dam";
+if unit_string == "kn":
+    unit_string_for_iris = "kts";
 
 disp_time_in_hr = 0;
 time_unit_string = "s";
