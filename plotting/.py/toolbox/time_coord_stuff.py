@@ -1,12 +1,12 @@
 import datetime;
 
 def find_time_coord(year, month, day, hour, minute, second, microsecond):
-	time_coord = datetime.datetime(year, month, day, hour, minute).replace(tzinfo = datetime.timezone.utc).timestamp() - datetime.datetime(2000, 1, 1, 0, 0).replace(tzinfo = datetime.timezone.utc).timestamp();
+	time_coord = datetime.datetime(year, month, day, hour, minute).replace(tzinfo = datetime.timezone.utc).timestamp();
 	time_coord = time_coord + second + 1e-3*microsecond;
 	return time_coord;
 
 def return_date(time_coordinate):
-	datetime_object = datetime.datetime.utcfromtimestamp(time_coordinate + datetime.datetime(2000, 1, 1, 0, 0).replace(tzinfo = datetime.timezone.utc).timestamp());
+	datetime_object = datetime.datetime.utcfromtimestamp(time_coordinate);
 	year_found = datetime_object.year;
 	month_found = datetime_object.month;
 	day_found = datetime_object.day;
