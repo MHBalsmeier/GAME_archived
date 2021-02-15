@@ -928,7 +928,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				else
 				{
 					closest_weight = 1 - distance_from_pressure_level[closest_layer_index]/
-					(fabs(log((*pressure)[closest_layer_index*NO_OF_SCALARS_H + i]/(*pressure)[other_layer_index*NO_OF_SCALARS_H + i])) + 1e-11);
+					(fabs(log((*pressure)[closest_layer_index*NO_OF_SCALARS_H + i]/(*pressure)[other_layer_index*NO_OF_SCALARS_H + i])) + EPSILON_SECURITY);
 					geopotential_height[i][j] = closest_weight*grid -> gravity_potential[closest_layer_index*NO_OF_SCALARS_H + i]
 					+ (1 - closest_weight)*grid -> gravity_potential[other_layer_index*NO_OF_SCALARS_H + i];
 					geopotential_height[i][j] = geopotential_height[i][j]/GRAVITY_MEAN;
@@ -968,7 +968,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     			else
     			{
 					closest_weight = 1 - distance_from_pressure_level[closest_layer_index]/
-					(fabs(log(pressure_at_vector_points[closest_layer_index]/pressure_at_vector_points[other_layer_index])) + 1e-11);
+					(fabs(log(pressure_at_vector_points[closest_layer_index]/pressure_at_vector_points[other_layer_index])) + EPSILON_SECURITY);
 					u_on_pressure_levels[i][j] = closest_weight*wind_u[closest_layer_index*NO_OF_VECTORS_H + i]
 					+ (1 - closest_weight)*wind_u[other_layer_index*NO_OF_VECTORS_H + i];
 					v_on_pressure_levels[i][j] = closest_weight*wind_v[closest_layer_index*NO_OF_VECTORS_H + i]
@@ -1543,7 +1543,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     			else
     			{
 					closest_weight = 1 - distance_from_pressure_on_flight_level[closest_layer_index]/
-					(fabs(log((*pressure)[closest_layer_index*NO_OF_SCALARS_H + i]/(*pressure)[other_layer_index*NO_OF_SCALARS_H + i])) + 1e-11);
+					(fabs(log((*pressure)[closest_layer_index*NO_OF_SCALARS_H + i]/(*pressure)[other_layer_index*NO_OF_SCALARS_H + i])) + EPSILON_SECURITY);
 					t_on_flight_levels[i][j] = closest_weight*state_write_out -> temperature_gas[closest_layer_index*NO_OF_SCALARS_H + i]
 					+ (1 - closest_weight)*state_write_out -> temperature_gas[other_layer_index*NO_OF_SCALARS_H + i];
 					rh_on_flight_levels[i][j] = closest_weight*(*rh)[closest_layer_index*NO_OF_SCALARS_H + i]
@@ -1578,7 +1578,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     			else
     			{
 					closest_weight = 1 - distance_from_pressure_on_flight_level[closest_layer_index]/
-					(fabs(log(pressure_at_vector_points[closest_layer_index]/pressure_at_vector_points[other_layer_index])) + 1e-11);
+					(fabs(log(pressure_at_vector_points[closest_layer_index]/pressure_at_vector_points[other_layer_index])) + EPSILON_SECURITY);
 					u_on_flight_levels[i][j] = closest_weight*wind_u[closest_layer_index*NO_OF_VECTORS_H + i]
 					+ (1 - closest_weight)*wind_u[other_layer_index*NO_OF_VECTORS_H + i];
 					v_on_flight_levels[i][j] = closest_weight*wind_v[closest_layer_index*NO_OF_VECTORS_H + i]
