@@ -64,7 +64,7 @@ It is recommended to run the model on Linux. We will not help people who have pr
 Everything is easy and quick to install.
 
 * [geos95](https://github.com/AUN4GFD/geos95)
-* netcdf library (Ubuntu: sudo apt-get libnetcdf-dev, sudo apt-get libnetcdff-dev)
+* netcdf library (Ubuntu: sudo apt-get libnetcdf-dev libnetcdff-dev)
 * eccodes library (installation manual: https://mhbalsmeier.github.io/tutorials/eccodes_on_ubuntu.html)
 * CMake (Ubuntu: sudo apt-get install cmake)
 * [atmostracers](https://github.com/AUN4GFD/atmostracers)
