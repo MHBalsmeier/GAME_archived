@@ -1,4 +1,4 @@
-The Geophysical Fluids Modeling Framework (GAME) is a non-hydrostatic hexagonal C grid dynamical core with the possibility to advect a variable number of constituents. For radiation, it is coupled to RTE+RRTMGP.
+The Geophysical Fluids Modeling Framework (GAME) is a non-hydrostatic hexagonal C-grid dynamical core with the possibility to advect a variable number of constituents. For radiation, it is coupled to RTE+RRTMGP.
 
 ## Overview
 
@@ -19,7 +19,7 @@ It is known that the forecast skill of a NWP model depends more on physics and d
 * A capable and flexible framework for coupling to physics and to other components of an Earth system model.
 * Consistency also in the presence of multiple constituents and radiation.
 
-According to my understanding, a hexagonal C grid is the only discretization where all this can be achieved.
+According to my understanding, a hexagonal C-grid is the only discretization where all this can be achieved.
 
 ### GAME's principles a.k.a. why a new model is necessary
 
