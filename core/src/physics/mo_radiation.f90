@@ -120,8 +120,6 @@ module radiation
     real(8)	                         :: mu_0(no_of_scalars/no_of_layers)
     ! number of points where it is day
     integer                          :: no_of_day_points
-    ! number of points where it is night
-    integer                          :: no_of_night_points
     ! loop indices
     integer                          :: ji, j_day, j_night, jk
     ! the indices of columns where it is day
@@ -263,7 +261,6 @@ module radiation
     enddo
     
     no_of_day_points = j_day
-    no_of_night_points = j_night
     
     ! filling up the arrays restricted to day points
     do j_day =  1,no_of_day_points
@@ -276,8 +273,8 @@ module radiation
     end do
     
     ! setting the volume mixing ratios of the gases for the short wave calculation
-    call set_vol_mix_ratios(mass_densities, .TRUE., no_of_day_points, no_of_scalars_h, &
-    no_of_layers, no_of_scalars, no_of_condensed_constituents)
+    call set_vol_mix_ratios(mass_densities, .true., no_of_day_points, no_of_scalars_h, &
+    no_of_layers, no_of_scalars, no_of_condensed_constituents, day_indices)
     
     ! setting the short wave optical properties of clouds
     call handle_error(cloud_optics_sw%alloc_2str(no_of_day_points, no_of_layers, k_dist_sw, &
@@ -305,11 +302,11 @@ module radiation
     
     ! short wave result (in Wm^-3)
     ! clear sky
-    call calc_power_density(.TRUE., no_of_scalars, no_of_vectors, &
+    call calc_power_density(.true., no_of_scalars, no_of_vectors, &
     no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
     fluxes_clearsky_day, z_vector, radiation_tendency)
     ! all sky
-    call calc_power_density(.TRUE., no_of_scalars, no_of_vectors, &
+    call calc_power_density(.true., no_of_scalars, no_of_vectors, &
     no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
     fluxes_allsky_day, z_vector, radiation_tendency)
     
@@ -318,8 +315,8 @@ module radiation
     call free_fluxes(fluxes_allsky_day)
     
     ! setting the volume mixing ratios of the gases for the long wave calculation
-    call set_vol_mix_ratios(mass_densities, .FALSE., no_of_day_points, no_of_scalars_h, &
-    no_of_layers, no_of_scalars, no_of_condensed_constituents)
+    call set_vol_mix_ratios(mass_densities, .false., no_of_day_points, no_of_scalars_h, &
+    no_of_layers, no_of_scalars, no_of_condensed_constituents, day_indices)
     
     ! setting the long wave cloud optical properties
     call handle_error(cloud_optics_lw%alloc_1scl(no_of_scalars_h, no_of_layers, k_dist_lw, &
@@ -338,11 +335,11 @@ module radiation
    
     ! add long wave result (in Wm^-3)
     ! clear sky
-    call calc_power_density(.FALSE., no_of_scalars, no_of_vectors, &
+    call calc_power_density(.false., no_of_scalars, no_of_vectors, &
     no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
     fluxes_clearsky, z_vector, radiation_tendency)
     ! all sky
-    call calc_power_density(.FALSE., no_of_scalars, no_of_vectors, &
+    call calc_power_density(.false., no_of_scalars, no_of_vectors, &
     no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
     fluxes_allsky, z_vector, radiation_tendency)
     
@@ -501,7 +498,7 @@ module radiation
   end function coszenith
   
   subroutine set_vol_mix_ratios(mass_densities, sw_bool, no_of_day_points, no_of_scalars_h, &
-  no_of_layers, no_of_scalars, no_of_condensed_constituents)
+  no_of_layers, no_of_scalars, no_of_condensed_constituents, day_indices)
     
     real(8), intent(in)              :: mass_densities(:)
     logical, intent(in)              :: sw_bool
@@ -510,6 +507,7 @@ module radiation
     integer, intent(in)              :: no_of_layers
     integer, intent(in)              :: no_of_scalars
     integer, intent(in)              :: no_of_condensed_constituents
+    integer, intent(in)              :: day_indices(no_of_scalars/no_of_layers)
     
     ! computes volume mixing ratios
     ! the volume mixing ratio of a gas
@@ -537,6 +535,17 @@ module radiation
         case("n2o")
           vol_mix_ratio(:,:) = molar_fraction_in_dry_air(11)
         case("h2o")
+        if (sw_bool .and. no_of_condensed_constituents > 0) then
+          do jk=1,no_of_day_points
+            do jl=1,no_of_layers
+              vol_mix_ratio(jk,jl) = & 
+              mass_densities((no_of_condensed_constituents+1)*no_of_scalars+day_indices(jk)+(jl-1)*no_of_scalars_h) &
+              *specific_gas_constants(1)/ &
+              (mass_densities(no_of_condensed_constituents*no_of_scalars+day_indices(jk)+(jl-1)*no_of_scalars_h) &
+              *specific_gas_constants(0))
+            enddo
+          enddo
+        elseif (no_of_condensed_constituents > 0) then
           do jk=1,no_of_scalars_h
             do jl=1,no_of_layers
               vol_mix_ratio(jk,jl) = & 
@@ -546,6 +555,7 @@ module radiation
               *specific_gas_constants(0))
             enddo
           enddo
+        endif
       end select
       if (sw_bool) then
         call handle_error(gas_concentrations_sw%set_vmr(gases_lowercase(ji), vol_mix_ratio(1:no_of_day_points,:)))
