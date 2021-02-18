@@ -526,7 +526,6 @@ module radiation
       select case (gases_lowercase(ji))
         case("n2")
           molar_fraction_value = molar_fraction_in_dry_air(2)
-          write(*,*) molar_fraction_value
           vol_mix_ratio(:,:) = molar_fraction_value
         case("o2")
           molar_fraction_value = molar_fraction_in_dry_air(3)
