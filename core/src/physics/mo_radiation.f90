@@ -514,9 +514,7 @@ module radiation
     ! computes volume mixing ratios
     ! the volume mixing ratio of a gas
     real(8)                          :: vol_mix_ratio(no_of_scalars_h, no_of_layers)
-    ! local variables
-    real(8)                          :: molar_fraction_value
-    ! loop index
+    ! loop indices
     integer                          :: ji,jk,jl
     
     ! setting the volume mixing ratios of the gases for the long wave calculation
@@ -525,26 +523,19 @@ module radiation
       vol_mix_ratio(:,:) = 0.0_wp
       select case (gases_lowercase(ji))
         case("n2")
-          molar_fraction_value = molar_fraction_in_dry_air(2)
-          vol_mix_ratio(:,:) = molar_fraction_value
+          vol_mix_ratio(:,:) = molar_fraction_in_dry_air(2)
         case("o2")
-          molar_fraction_value = molar_fraction_in_dry_air(3)
-          vol_mix_ratio(:,:) = molar_fraction_value
+          vol_mix_ratio(:,:) = molar_fraction_in_dry_air(3)
         case("ch4")
-          molar_fraction_value = molar_fraction_in_dry_air(8)
-          vol_mix_ratio(:,:) = molar_fraction_value
+          vol_mix_ratio(:,:) = molar_fraction_in_dry_air(8)
         case("o3")
-          molar_fraction_value = molar_fraction_in_dry_air(10)
-          vol_mix_ratio(:,:) = molar_fraction_value
+          vol_mix_ratio(:,:) = molar_fraction_in_dry_air(10)
         case("co2")
-          molar_fraction_value = molar_fraction_in_dry_air(5)
-          vol_mix_ratio(:,:) = molar_fraction_value
+          vol_mix_ratio(:,:) = molar_fraction_in_dry_air(5)
         case("co")
-          molar_fraction_value = molar_fraction_in_dry_air(9)
-          vol_mix_ratio(:,:) = molar_fraction_value
+          vol_mix_ratio(:,:) = molar_fraction_in_dry_air(9)
         case("n2o")
-          molar_fraction_value = molar_fraction_in_dry_air(11)
-          vol_mix_ratio(:,:) = molar_fraction_value
+          vol_mix_ratio(:,:) = molar_fraction_in_dry_air(11)
         case("h2o")
           do jk=1,no_of_scalars_h
             do jl=1,no_of_layers
@@ -552,8 +543,7 @@ module radiation
               mass_densities((no_of_condensed_constituents+1)*no_of_scalars+jk+(jl-1)*no_of_scalars_h) &
               *specific_gas_constants(1)/ &
               (mass_densities(no_of_condensed_constituents*no_of_scalars+jk+(jl-1)*no_of_scalars_h) &
-              *specific_gas_constants(0)+mass_densities((no_of_condensed_constituents+1)*no_of_scalars+jk+(jl-1)*no_of_scalars_h) &
-              *specific_gas_constants(1))
+              *specific_gas_constants(0))
             enddo
           enddo
       end select
