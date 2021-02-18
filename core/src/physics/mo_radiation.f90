@@ -553,7 +553,8 @@ module radiation
               mass_densities((no_of_condensed_constituents+1)*no_of_scalars+jk+(jl-1)*no_of_scalars_h) &
               *specific_gas_constants(1)/ &
               (mass_densities(no_of_condensed_constituents*no_of_scalars+jk+(jl-1)*no_of_scalars_h) &
-              *specific_gas_constants(0))
+              *specific_gas_constants(0)+mass_densities((no_of_condensed_constituents+1)*no_of_scalars+jk+(jl-1)*no_of_scalars_h) &
+              *specific_gas_constants(1))
             enddo
           enddo
       end select
