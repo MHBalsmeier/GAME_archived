@@ -526,25 +526,26 @@ module radiation
       select case (gases_lowercase(ji))
         case("n2")
           molar_fraction_value = molar_fraction_in_dry_air(2)
-          vol_mix_ratio(:,:) = molar_fraction_value/(1._wp - molar_fraction_value)
+          write(*,*) molar_fraction_value
+          vol_mix_ratio(:,:) = molar_fraction_value
         case("o2")
           molar_fraction_value = molar_fraction_in_dry_air(3)
-          vol_mix_ratio(:,:) = molar_fraction_value/(1._wp - molar_fraction_value)
+          vol_mix_ratio(:,:) = molar_fraction_value
         case("ch4")
           molar_fraction_value = molar_fraction_in_dry_air(8)
-          vol_mix_ratio(:,:) = molar_fraction_value/(1._wp - molar_fraction_value)
+          vol_mix_ratio(:,:) = molar_fraction_value
         case("o3")
           molar_fraction_value = molar_fraction_in_dry_air(10)
-          vol_mix_ratio(:,:) = molar_fraction_value/(1._wp - molar_fraction_value)
+          vol_mix_ratio(:,:) = molar_fraction_value
         case("co2")
           molar_fraction_value = molar_fraction_in_dry_air(5)
-          vol_mix_ratio(:,:) = molar_fraction_value/(1._wp - molar_fraction_value)
+          vol_mix_ratio(:,:) = molar_fraction_value
         case("co")
           molar_fraction_value = molar_fraction_in_dry_air(9)
-          vol_mix_ratio(:,:) = molar_fraction_value/(1._wp - molar_fraction_value)
+          vol_mix_ratio(:,:) = molar_fraction_value
         case("n2o")
           molar_fraction_value = molar_fraction_in_dry_air(11)
-          vol_mix_ratio(:,:) = molar_fraction_value/(1._wp - molar_fraction_value)
+          vol_mix_ratio(:,:) = molar_fraction_value
         case("h2o")
           do jk=1,no_of_scalars_h
             do jl=1,no_of_layers

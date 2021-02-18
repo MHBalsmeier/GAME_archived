@@ -343,10 +343,7 @@ for i in range(int(max_interval/plot_interval) + 1):
 		ax.add_feature(cfeature.LAND);
 		ax.add_feature(cfeature.OCEAN);
 		countries = cfeature.NaturalEarthFeature(category = "cultural", name = "admin_0_countries", scale = "10m", facecolor = "none");
-		ax.add_feature(countries, edgecolor = "black");
-	if (scope == "CONUS" or scope == "INDIA" or scope == "CARIB" or scope == "CHINA"):
-		states_provinces = cfeature.NaturalEarthFeature(category = "cultural", name = "admin_1_states_provinces_lines", scale = "10m", facecolor = "none");
-		ax.add_feature(states_provinces, edgecolor = "gray");
+		ax.add_feature(countries, edgecolor = "gray");
 	time_after_init_title = time_after_init;
 	if disp_time_in_hr == 1:
 		time_after_init_title = int(time_after_init/3600);
