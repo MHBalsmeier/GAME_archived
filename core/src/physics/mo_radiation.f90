@@ -535,6 +535,7 @@ module radiation
         case("n2o")
           vol_mix_ratio(:,:) = molar_fraction_in_dry_air(11)
         case("h2o")
+        ! no_of_condensed_constituents > 0 is equivalent to the presence of water in the model atmosphere
         if (sw_bool .and. no_of_condensed_constituents > 0) then
           do jk=1,no_of_day_points
             do jl=1,no_of_layers
