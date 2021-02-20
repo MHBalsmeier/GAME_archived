@@ -3,11 +3,10 @@
 # This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 # Github repository: https://github.com/AUN4GFD/game
 
-if [ -d $fig_save_path ]
+if [ ! -d $fig_save_path ]
 then
-rm -r $fig_save_path
-fi
 mkdir $fig_save_path
+fi
 echo plotting maps ...
 number_of_variables=${#disp_shortname_list[@]}
 for (( i=0; $i<$number_of_variables ; i=$(($i+1)) ))
