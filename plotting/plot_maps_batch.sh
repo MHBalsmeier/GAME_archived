@@ -12,6 +12,7 @@ init_year=${BASH_ARGV[4]} # year of the start of the model run
 init_month=${BASH_ARGV[5]} # month of the start of the model run
 init_day=${BASH_ARGV[6]} # day of the start of the model run
 init_hr=${BASH_ARGV[7]} # hour of the start of the model run
+plot_interval=${BASH_ARGV[8]} # the interval between plots in seconds
 grid_props_file=$game_home_dir/grids/B5L26T41152_O3_OL23_SCVT.nc # the file where the grid properties are stored
 disp_shortname_list=(
 2t rprate sprate surface_wind prmsl gh gh cape tcc
@@ -38,12 +39,12 @@ on_pressure_level_list=(
 0 0 0 0 0 1 1 0 0
 ) # set this to 1 for each plot individually if the variable resides on pressure levels
 plot_intervals_list=(
-10800 10800 10800 10800 10800 10800 10800 10800 10800
-10800 10800 10800 10800 10800 10800 10800 10800 10800
-10800 10800 10800 10800 10800 10800 10800 10800 10800
-10800 10800 10800 10800 10800 10800 10800 10800 10800
-10800 10800 10800 10800 10800 10800 10800 10800 10800
-10800 10800 10800 10800 10800 10800 10800 10800 10800
+$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
+$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
+$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
+$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
+$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
+$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
 ) # every how many seconds you want to plot each variable
 uniform_colormap_list=(
 0 0 0 0 0 0 0 0 0
