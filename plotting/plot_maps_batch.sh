@@ -18,14 +18,8 @@ disp_shortname_list=(
 2t surface_wind prmsl gh gh
 2t surface_wind prmsl gh gh
 2t surface_wind prmsl gh gh
-2t surface_wind prmsl gh gh
-2t surface_wind prmsl gh gh
-2t surface_wind prmsl gh gh
 ) # short names according to grib as an array 
 disp_level_list=(
-2 10 0 500 200
-2 10 0 500 200
-2 10 0 500 200
 2 10 0 500 200
 2 10 0 500 200
 2 10 0 500 200
@@ -34,14 +28,8 @@ on_pressure_level_list=(
 0 0 0 1 1
 0 0 0 1 1
 0 0 0 1 1
-0 0 0 1 1
-0 0 0 1 1
-0 0 0 1 1
 ) # set this to 1 for each plot individually if the variable resides on pressure levels
 plot_intervals_list=(
-$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
-$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
-$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
 $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
 $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
 $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
@@ -50,30 +38,18 @@ uniform_colormap_list=(
 0 0 0 0 0
 0 0 0 0 0
 0 0 0 0 0
-0 0 0 0 0
-0 0 0 0 0
-0 0 0 0 0
 ) # set this to 1 for each plot individually if you want to enforce a uniform colormap for all the time steps
 scope_list=(
 CONUS CONUS CONUS CONUS CONUS
 CEU CEU CEU CEU CEU
-CHINA CHINA CHINA CHINA CHINA
 INDIA INDIA INDIA INDIA INDIA
-CARIB CARIB CARIB CARIB CARIB
-OCEAN OCEAN OCEAN OCEAN OCEAN
 ) # the areas of the plots
 projections_list=(
 Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
 Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
 Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
-Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
-Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
-Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
 ) # the projections of the plots
 synoptical_time_mode=(
-1 1 1 1 1
-1 1 1 1 1
-1 1 1 1 1
 1 1 1 1 1
 1 1 1 1 1
 1 1 1 1 1
