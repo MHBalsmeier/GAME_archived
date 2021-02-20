@@ -15,68 +15,68 @@ init_hr=${BASH_ARGV[7]} # hour of the start of the model run
 plot_interval=${BASH_ARGV[8]} # the interval between plots in seconds
 grid_props_file=$game_home_dir/grids/B5L26T41152_O3_OL23_SCVT.nc # the file where the grid properties are stored
 disp_shortname_list=(
-2t rprate sprate surface_wind prmsl gh gh cape tcc
-2t rprate sprate surface_wind prmsl gh gh cape tcc
-2t rprate sprate surface_wind prmsl gh gh cape tcc
-2t rprate sprate surface_wind prmsl gh gh cape tcc
-2t rprate sprate surface_wind prmsl gh gh cape tcc
-2t rprate sprate surface_wind prmsl gh gh cape tcc
+2t surface_wind prmsl gh gh
+2t surface_wind prmsl gh gh
+2t surface_wind prmsl gh gh
+2t surface_wind prmsl gh gh
+2t surface_wind prmsl gh gh
+2t surface_wind prmsl gh gh
 ) # short names according to grib as an array 
 disp_level_list=(
-2 0 0 10 0 500 200 0 0
-2 0 0 10 0 500 200 0 0
-2 0 0 10 0 500 200 0 0
-2 0 0 10 0 500 200 0 0
-2 0 0 10 0 500 200 0 0
-2 0 0 10 0 500 200 0 0
+2 10 0 500 200
+2 10 0 500 200
+2 10 0 500 200
+2 10 0 500 200
+2 10 0 500 200
+2 10 0 500 200
 ) # levels according to grib as an array
 on_pressure_level_list=(
-0 0 0 0 0 1 1 0 0
-0 0 0 0 0 1 1 0 0
-0 0 0 0 0 1 1 0 0
-0 0 0 0 0 1 1 0 0
-0 0 0 0 0 1 1 0 0
-0 0 0 0 0 1 1 0 0
+0 0 0 1 1
+0 0 0 1 1
+0 0 0 1 1
+0 0 0 1 1
+0 0 0 1 1
+0 0 0 1 1
 ) # set this to 1 for each plot individually if the variable resides on pressure levels
 plot_intervals_list=(
-$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
-$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
-$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
-$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
-$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
-$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
+$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
+$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
+$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
+$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
+$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
+$plot_interval $plot_interval $plot_interval $plot_interval $plot_interval
 ) # every how many seconds you want to plot each variable
 uniform_colormap_list=(
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
 ) # set this to 1 for each plot individually if you want to enforce a uniform colormap for all the time steps
 scope_list=(
-CONUS CONUS CONUS CONUS CONUS CONUS CONUS CONUS CONUS
-CEU CEU CEU CEU CEU CEU CEU CEU CEU
-CHINA CHINA CHINA CHINA CHINA CHINA CHINA CHINA CHINA
-INDIA INDIA INDIA INDIA INDIA INDIA INDIA INDIA INDIA
-CARIB CARIB CARIB CARIB CARIB CARIB CARIB CARIB CARIB
-OCEAN OCEAN OCEAN OCEAN OCEAN OCEAN OCEAN OCEAN OCEAN
+CONUS CONUS CONUS CONUS CONUS
+CEU CEU CEU CEU CEU
+CHINA CHINA CHINA CHINA CHINA
+INDIA INDIA INDIA INDIA INDIA
+CARIB CARIB CARIB CARIB CARIB
+OCEAN OCEAN OCEAN OCEAN OCEAN
 ) # the areas of the plots
 projections_list=(
-Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
-Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
-Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
-Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
-Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
-Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
+Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
+Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
+Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
+Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
+Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
+Gnomonic Gnomonic Gnomonic Gnomonic Gnomonic
 ) # the projections of the plots
 synoptical_time_mode=(
-1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1
-1 1 1 1 1 1 1 1 1
+1 1 1 1 1
+1 1 1 1 1
+1 1 1 1 1
+1 1 1 1 1
+1 1 1 1 1
+1 1 1 1 1
 ) # this forces the time description to be of the form "init: ..., valid: ... (+ ....)"
 source $game_home_dir/plotting/.sh/maps_root.sh # this is the script from which the python plot scripts are called
 
