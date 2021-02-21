@@ -98,6 +98,7 @@ int main(int argc, char *argv[])
 	config_info -> rk_order = strtod(argv[32], NULL);
 	config_info -> assume_lte = strtod(argv[33], NULL);
 	config_info -> adv_sound_ratio = strtod(argv[34], NULL);
+	config_info -> delta_t_between_analyses = strtod(argv[35], NULL);
 	if (config_info -> rk_order < 1)
 	{
 		printf("The Runge-Kutta order must be at least one.\n");
@@ -148,11 +149,13 @@ int main(int argc, char *argv[])
     // The NWP case.
     if (IDEAL_INPUT_ID == -1)
     {
+    	config_info -> nwp_mode = 1;
     	sprintf(INIT_STATE_FILE_PRE, "input/%d%s%s%s_nwp_B%dL%dT%d_O%d_OL%d_SCVT.nc", year, month_string, day_string, hour_string, RES_ID, NO_OF_LAYERS, toa, ORO_ID, grid -> no_of_oro_layers);
     }
     // The idealized input case.
     else
     {
+    	config_info -> nwp_mode = 0;
 		sprintf(INIT_STATE_FILE_PRE, "input/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", IDEAL_INPUT_ID, RES_ID, NO_OF_LAYERS, toa, ORO_ID, grid -> no_of_oro_layers);
     }
     char INIT_STATE_FILE[strlen(INIT_STATE_FILE_PRE) + 1];
