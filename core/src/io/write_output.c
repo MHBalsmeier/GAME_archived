@@ -2124,7 +2124,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			free(OUTPUT_FILE_PRE);
 			char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
 			sprintf(OUTPUT_FILE, "output/%s/%s+%ds.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
-			int scalar_dimid, vector_h_dimid, vector_v_dimid, temp_id, density_dry_id, pressure_id, wind_u_id, wind_v_id, wind_w_id, rh_id, ncid, retval, divv_h_all_layers_id, rel_vort_id, curl_field_dimid;
+			int scalar_dimid, vector_h_dimid, vector_v_dimid, temp_id, temp_solid_id, temp_liquid_id, density_dry_id, density_solid_id, density_liquid_id, density_vapour_id, pressure_id, wind_u_id, wind_v_id, wind_w_id, rh_id, ncid, retval, divv_h_all_layers_id, rel_vort_id, curl_field_dimid, stretching_parameter_id, single_double_dimid, vector_dimid, wind_id;
 			
 			if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
 				NCERR(retval);
@@ -2137,15 +2137,41 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				NCERR(retval);
 			if ((retval = nc_def_dim(ncid, "curl_point_index", NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H, &curl_field_dimid)))
 				NCERR(retval);
+			if ((retval = nc_def_dim(ncid, "single_double_dimid_index", 1, &single_double_dimid)))
+				NCERR(retval);
+			if ((retval = nc_def_dim(ncid, "vector_index", NO_OF_VECTORS, &vector_dimid)))
+				NCERR(retval);
 			
 			// Defining the variables.
+			if ((retval = nc_def_var(ncid, "stretching_parameter", NC_DOUBLE, 1, &single_double_dimid, &stretching_parameter_id)))
+				NCERR(retval);
 			if ((retval = nc_def_var(ncid, "temperature_gas", NC_DOUBLE, 1, &scalar_dimid, &temp_id)))
+				NCERR(retval);
+			if ((retval = nc_put_att_text(ncid, temp_id, "units", strlen("K"), "K")))
+				NCERR(retval);
+			if ((retval = nc_def_var(ncid, "temperature_solid", NC_DOUBLE, 1, &scalar_dimid, &temp_solid_id)))
+				NCERR(retval);
+			if ((retval = nc_put_att_text(ncid, temp_id, "units", strlen("K"), "K")))
+				NCERR(retval);
+			if ((retval = nc_def_var(ncid, "temperature_liquid", NC_DOUBLE, 1, &scalar_dimid, &temp_liquid_id)))
 				NCERR(retval);
 			if ((retval = nc_put_att_text(ncid, temp_id, "units", strlen("K"), "K")))
 				NCERR(retval);
 			if ((retval = nc_def_var(ncid, "density_dry", NC_DOUBLE, 1, &scalar_dimid, &density_dry_id)))
 				NCERR(retval);
 			if ((retval = nc_put_att_text(ncid, density_dry_id, "units", strlen("kg/m^3"), "kg/m^3")))
+				NCERR(retval);
+			if ((retval = nc_def_var(ncid, "density_solid", NC_DOUBLE, 1, &scalar_dimid, &density_solid_id)))
+				NCERR(retval);
+			if ((retval = nc_put_att_text(ncid, density_solid_id, "units", strlen("kg/m^3"), "kg/m^3")))
+				NCERR(retval);
+			if ((retval = nc_def_var(ncid, "density_liquid", NC_DOUBLE, 1, &scalar_dimid, &density_liquid_id)))
+				NCERR(retval);
+			if ((retval = nc_put_att_text(ncid, density_liquid_id, "units", strlen("kg/m^3"), "kg/m^3")))
+				NCERR(retval);
+			if ((retval = nc_def_var(ncid, "density_vapour", NC_DOUBLE, 1, &scalar_dimid, &density_vapour_id)))
+				NCERR(retval);
+			if ((retval = nc_put_att_text(ncid, density_vapour_id, "units", strlen("kg/m^3"), "kg/m^3")))
 				NCERR(retval);
 			if ((retval = nc_def_var(ncid, "pressure", NC_DOUBLE, 1, &scalar_dimid, &pressure_id)))
 				NCERR(retval);
@@ -2154,6 +2180,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if ((retval = nc_def_var(ncid, "wind_u", NC_DOUBLE, 1, &vector_h_dimid, &wind_u_id)))
 				NCERR(retval);
 			if ((retval = nc_put_att_text(ncid, wind_u_id, "units", strlen("m/s"), "m/s")))
+				NCERR(retval);
+			if ((retval = nc_def_var(ncid, "wind", NC_DOUBLE, 1, &vector_dimid, &wind_id)))
+				NCERR(retval);
+			if ((retval = nc_put_att_text(ncid, wind_id, "units", strlen("m/s"), "m/s")))
 				NCERR(retval);
 			if ((retval = nc_def_var(ncid, "wind_v", NC_DOUBLE, 1, &vector_h_dimid, &wind_v_id)))
 				NCERR(retval);
@@ -2181,8 +2211,16 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if ((retval = nc_enddef(ncid)))
 				NCERR(retval);
 			
+			// setting the variables
+			if ((retval = nc_put_var_double(ncid, stretching_parameter_id, &grid -> stretching_parameter)))
+				NCERR(retval);
 			if ((retval = nc_put_var_double(ncid, temp_id, &state_write_out -> temperature_gas[0])))
 				NCERR(retval);
+			if ((retval = nc_put_var_double(ncid, temp_solid_id, &state_write_out -> temperature_gas[0])))
+				NCERR(retval);
+			if ((retval = nc_put_var_double(ncid, temp_liquid_id, &state_write_out -> temperature_gas[0])))
+				NCERR(retval);
+			// dry air
 			#pragma omp parallel for
 			for (int i = 0; i < NO_OF_SCALARS; ++i)
 			{
@@ -2190,7 +2228,66 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			}
 			if ((retval = nc_put_var_double(ncid, density_dry_id, &diagnostics -> scalar_field_placeholder[0])))
 				NCERR(retval);
+			// solid water
+			if (NO_OF_CONDENSED_CONSTITUENTS > 0)
+			{
+				#pragma omp parallel for
+				for (int i = 0; i < NO_OF_SCALARS; ++i)
+				{
+					diagnostics -> scalar_field_placeholder[i] = state_write_out -> mass_densities[i];
+				}
+			}
+			else
+			{
+				#pragma omp parallel for
+				for (int i = 0; i < NO_OF_SCALARS; ++i)
+				{
+					diagnostics -> scalar_field_placeholder[i] = 0;
+				}
+			}
+			if ((retval = nc_put_var_double(ncid, density_solid_id, &diagnostics -> scalar_field_placeholder[0])))
+				NCERR(retval);
+			// liquid water
+			if (NO_OF_CONDENSED_CONSTITUENTS > 1)
+			{
+				#pragma omp parallel for
+				for (int i = 0; i < NO_OF_SCALARS; ++i)
+				{
+					diagnostics -> scalar_field_placeholder[i] = state_write_out -> mass_densities[NO_OF_SCALARS + i];
+				}
+			}
+			else
+			{
+				#pragma omp parallel for
+				for (int i = 0; i < NO_OF_SCALARS; ++i)
+				{
+					diagnostics -> scalar_field_placeholder[i] = 0;
+				}
+			}
+			if ((retval = nc_put_var_double(ncid, density_liquid_id, &diagnostics -> scalar_field_placeholder[0])))
+				NCERR(retval);
+			// water vapour
+			if (NO_OF_GASEOUS_CONSTITUENTS > 0)
+			{
+				#pragma omp parallel for
+				for (int i = 0; i < NO_OF_SCALARS; ++i)
+				{
+					diagnostics -> scalar_field_placeholder[i] = state_write_out -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i];
+				}
+			}
+			else
+			{
+				#pragma omp parallel for
+				for (int i = 0; i < NO_OF_SCALARS; ++i)
+				{
+					diagnostics -> scalar_field_placeholder[i] = 0;
+				}
+			}
+			if ((retval = nc_put_var_double(ncid, density_vapour_id, &diagnostics -> scalar_field_placeholder[0])))
+				NCERR(retval);
 			if ((retval = nc_put_var_double(ncid, pressure_id, &(*rel_vort)[0])))
+				NCERR(retval);
+			if ((retval = nc_put_var_double(ncid, wind_id, &state_write_out -> velocity_gas[0])))
 				NCERR(retval);
 			if ((retval = nc_put_var_double(ncid, wind_u_id, &wind_u[0])))
 				NCERR(retval);

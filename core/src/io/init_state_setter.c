@@ -34,11 +34,11 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "wind", &wind_id)))
         NCERR(retval);
-    if ((retval = nc_inq_varid(ncid, "density_vapour", &density_vapour_id)))
+    if ((retval = nc_inq_varid(ncid, "density_solid", &density_solid_id)))
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "density_liquid", &density_liquid_id)))
         NCERR(retval);
-    if ((retval = nc_inq_varid(ncid, "density_solid", &density_solid_id)))
+    if ((retval = nc_inq_varid(ncid, "density_vapour", &density_vapour_id)))
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "temperature_liquid", &temperature_liquid_id)))
         NCERR(retval);
