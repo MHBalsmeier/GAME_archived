@@ -209,13 +209,16 @@ for i in np.arange(1, int(max_interval/plot_interval) + 1):
 			input_file = grib_dir_name + "/" + run_id + "+" + str(time_after_init) + "s.grb2";
 	else:
 		input_file = grib_dir_name + "/" + run_id + "+" + str(time_after_init) + "s_pressure_levels.grb2";
-	lat, lon, values[:, i] = rmo.fetch_model_output(input_file, time_after_init, short_name, level, grid_props_file);
-	values[:, i] = rescale*values[:, i] + shift;
 	if short_name == "surface_wind":
-		lat, lon, values_10u[:, i] = rmo.fetch_model_output(input_file, time_after_init, short_name, level, grid_props_file);
+		lat, lon, values[:, i] = rmo.fetch_model_output(input_file, time_after_init, "gust", level, grid_props_file);
+		values[:, i] = rescale*values[:, i] + shift;
+		lat, lon, values_10u[:, i] = rmo.fetch_model_output(input_file, time_after_init, "10u", level, grid_props_file);
 		values_10u[:, i] = rescale*values_10u[:, i] + shift;
-		lat, lon, values_10v[:, i] = rmo.fetch_model_output(input_file, time_after_init, short_name, level, grid_props_file);
+		lat, lon, values_10v[:, i] = rmo.fetch_model_output(input_file, time_after_init, "10v", level, grid_props_file);
 		values_10v[:, i] = rescale*values_10v[:, i] + shift;
+	else:
+		lat, lon, values[:, i] = rmo.fetch_model_output(input_file, time_after_init, short_name, level, grid_props_file);
+		values[:, i] = rescale*values[:, i] + shift;
 
 scope_bool_vector = np.zeros([len(values[:, 0])], dtype = bool);
 if projection == "Gnomonic":
