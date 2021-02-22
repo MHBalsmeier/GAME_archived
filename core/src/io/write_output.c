@@ -348,6 +348,56 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			codes_handle *handle_sprate = NULL;
 			codes_handle *handle_wind_10m_gusts = NULL;
 			codes_handle *handle_cape = NULL;
+			
+				SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
+			handle_surface_p = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
+			if (err != 0)
+				ECCERR(err);
+			fclose(SAMPLE_FILE);
+		    if ((retval = codes_write_message(handle_surface_p, OUTPUT_FILE, "a")))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_surface_p, "discipline", 0)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_surface_p, "centre", 255)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_surface_p, "significanceOfReferenceTime", 1)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_surface_p, "productionStatusOfProcessedData", 1)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_surface_p, "typeOfProcessedData", 1)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_surface_p, "indicatorOfUnitOfTimeRange", 13)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_surface_p, "stepUnits", 13)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_surface_p, "dataDate", data_date)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_surface_p, "dataTime", data_time)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_surface_p, "forecastTime", t_write - t_init)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_surface_p, "stepRange", t_write - t_init)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_surface_p, "typeOfGeneratingProcess", 1)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_surface_p, "parameterCategory", 3)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_surface_p, "parameterNumber", 0)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_surface_p, "typeOfFirstFixedSurface", 1)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_surface_p, "scaledValueOfFirstFixedSurface", 0)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_surface_p, "scaleFactorOfFirstFixedSurface", 1)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_surface_p, "level", 0)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_double_array(handle_surface_p, "values", surface_p, NO_OF_SCALARS_H)))
+		        ECCERR(retval);
+		    if ((retval = codes_write_message(handle_surface_p, OUTPUT_FILE, "w")))
+		        ECCERR(retval);
+			codes_handle_delete(handle_surface_p);
+			
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_mslp = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 			if (err != 0)
@@ -394,54 +444,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    if ((retval = codes_write_message(handle_mslp, OUTPUT_FILE, "a")))
 		        ECCERR(retval);
 			codes_handle_delete(handle_mslp);
-			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
-			handle_surface_p = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
-			if (err != 0)
-				ECCERR(err);
-			fclose(SAMPLE_FILE);
-		    if ((retval = codes_write_message(handle_surface_p, OUTPUT_FILE, "a")))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "discipline", 0)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "centre", 255)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "significanceOfReferenceTime", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "productionStatusOfProcessedData", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "typeOfProcessedData", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "indicatorOfUnitOfTimeRange", 13)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "stepUnits", 13)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "dataDate", data_date)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "dataTime", data_time)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "forecastTime", t_write - t_init)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "stepRange", t_write - t_init)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "typeOfGeneratingProcess", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "parameterCategory", 3)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "parameterNumber", 0)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "typeOfFirstFixedSurface", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "scaledValueOfFirstFixedSurface", 0)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "scaleFactorOfFirstFixedSurface", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "level", 0)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_double_array(handle_surface_p, "values", surface_p, NO_OF_SCALARS_H)))
-		        ECCERR(retval);
-		    if ((retval = codes_write_message(handle_surface_p, OUTPUT_FILE, "a")))
-		        ECCERR(retval);
-			codes_handle_delete(handle_surface_p);
+			
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_t2 = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 			if (err != 0)
@@ -488,6 +491,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    if ((retval = codes_write_message(handle_t2, OUTPUT_FILE, "a")))
 		        ECCERR(retval);
 			codes_handle_delete(handle_t2);
+			
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_rprate = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 			if (err != 0)
@@ -534,6 +538,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    if ((retval = codes_write_message(handle_rprate, OUTPUT_FILE, "a")))
 		        ECCERR(retval);
 			codes_handle_delete(handle_rprate);
+			
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_cape = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 			if (err != 0)
@@ -582,6 +587,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    if ((retval = codes_write_message(handle_cape, OUTPUT_FILE, "a")))
 		        ECCERR(retval);
 			codes_handle_delete(handle_cape);
+			
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_sprate = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 			if (err != 0)
@@ -628,6 +634,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    if ((retval = codes_write_message(handle_sprate, OUTPUT_FILE, "a")))
 		        ECCERR(retval);
 			codes_handle_delete(handle_sprate);
+			
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_tcdc = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 			if (err != 0)
@@ -676,6 +683,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    if ((retval = codes_write_message(handle_tcdc, OUTPUT_FILE, "a")))
 		        ECCERR(retval);
 			codes_handle_delete(handle_tcdc);
+			
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_wind_u_10m_mean = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 			if (err != 0)
@@ -723,6 +731,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				ECCERR(retval);
 			codes_handle_delete(handle_wind_u_10m_mean);
 			free(wind_10_m_mean_u);
+			
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_wind_v_10m_mean = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 			if (err != 0)
@@ -770,6 +779,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				ECCERR(retval);
 			free(wind_10_m_mean_v);
 			codes_handle_delete(handle_wind_v_10m_mean);
+			
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_wind_10m_gusts = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 			if (err != 0)
@@ -984,11 +994,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		{
 			int OUTPUT_FILE_PRESSURE_LEVEL_LENGTH = 300;
 			char *OUTPUT_FILE_PRESSURE_LEVEL_PRE = malloc((OUTPUT_FILE_PRESSURE_LEVEL_LENGTH + 1)*sizeof(char));
-			sprintf(OUTPUT_FILE_PRESSURE_LEVEL_PRE, "output/%s/%s+%ds_pressure_level.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
+			sprintf(OUTPUT_FILE_PRESSURE_LEVEL_PRE, "output/%s/%s+%ds_pressure_levels.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
 			OUTPUT_FILE_PRESSURE_LEVEL_LENGTH = strlen(OUTPUT_FILE_PRESSURE_LEVEL_PRE);
 			free(OUTPUT_FILE_PRESSURE_LEVEL_PRE);
 			char *OUTPUT_FILE_PRESSURE_LEVEL = malloc((OUTPUT_FILE_PRESSURE_LEVEL_LENGTH + 1)*sizeof(char));
-			sprintf(OUTPUT_FILE_PRESSURE_LEVEL, "output/%s/%s+%ds_pressure_level.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
+			sprintf(OUTPUT_FILE_PRESSURE_LEVEL, "output/%s/%s+%ds_pressure_levels.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
 			int ncid_pressure_level, scalar_h_dimid, vector_h_dimid, level_dimid, geopot_height_id, temp_pressure_level_id, rh_pressure_level_id, wind_u_pressure_level_id, wind_v_pressure_level_id, pressure_levels_id, epv_pressure_level_id, rel_vort_pressure_level_id;
 			if ((retval = nc_create(OUTPUT_FILE_PRESSURE_LEVEL, NC_CLOBBER, &ncid_pressure_level)))
 				NCERR(retval);
@@ -1172,8 +1182,16 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_double_array(handle_geopotential_height_pressure_level, "values", geopotential_height_pressure_level, NO_OF_SCALARS_H)))
 			        ECCERR(retval);
-			    if ((retval = codes_write_message(handle_geopotential_height_pressure_level, OUTPUT_FILE_PRESSURE_LEVEL, "a")))
-			        ECCERR(retval);
+				if (i == 0)
+				{
+					if ((retval = codes_write_message(handle_geopotential_height_pressure_level, OUTPUT_FILE_PRESSURE_LEVEL, "w")))
+					    ECCERR(retval);
+				}
+				else
+				{
+					if ((retval = codes_write_message(handle_geopotential_height_pressure_level, OUTPUT_FILE_PRESSURE_LEVEL, "a")))
+					    ECCERR(retval);
+				}
 				codes_handle_delete(handle_geopotential_height_pressure_level);
 
 				SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
