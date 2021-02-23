@@ -13,7 +13,7 @@ Github repository: https://github.com/AUN4GFD/game
 #define R_D (R/M_D)
 #define P_0 100000.0
 
-int find_z_from_p(double lat, double p, double *result)
+int find_z_from_p_jw(double lat, double p, double *result)
 {
 	const double ETA_0 = 0.252;
 	const double ETA_T = 0.2;

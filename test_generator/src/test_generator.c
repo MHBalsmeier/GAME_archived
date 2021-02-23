@@ -431,13 +431,13 @@ int main(int argc, char *argv[])
 
 int find_pressure_value(double lat, double z_height, double *result)
 {
-	// this function finds the pressure at a given height (as a function of latitude) for the JW test by iterative calls to the function find_z_from_P
+	// this function finds the pressure at a given height (as a function of latitude) for the JW test by iterative calls to the function find_z_from_p_jw
     double p = P_0/2;
     double precision = 0.0001;
     double z;
     double current_max = P_0;
     double current_min = 0;
-    find_z_from_p(lat, p, &z);
+    find_z_from_p_jw(lat, p, &z);
     while (fabs(z - z_height) > precision)
     {
         if (z < z_height)
@@ -450,7 +450,7 @@ int find_pressure_value(double lat, double z_height, double *result)
             current_min = p;
             p = 0.5*(current_max + p);
         }
-        find_z_from_p(lat, p, &z);
+        find_z_from_p_jw(lat, p, &z);
     }
     *result = p;
     return 0;
