@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
 		if (ORO_ID == 2)
 		{
 			latitude = latitude_scalar[i];
-			find_z_from_p(latitude, P_0, &oro[i]);
+			find_z_from_p_jw(latitude, P_0, &oro[i]);
 		}
 		if (ORO_ID == 3)
 		{
