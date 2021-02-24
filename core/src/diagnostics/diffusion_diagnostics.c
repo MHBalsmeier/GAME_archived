@@ -123,3 +123,14 @@ int calc_diffusion_coeff(double temperature, double particle_mass, double densit
     *result = 1.0/3.0*thermal_velocity*mean_free_path;
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
