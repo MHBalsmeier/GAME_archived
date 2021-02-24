@@ -12,7 +12,7 @@ Github repository: https://github.com/AUN4GFD/game
 #define OMEGA (7.292115e-5)
 #define RADIUS 6371000.789927
 #define FOOT 0.3048
-#define EPSILON_SECURITY (1e-12)
+#define EPSILON_SECURITY (1e-10)
 
 enum grid_integers {
 // This determines the horizontal resolution.

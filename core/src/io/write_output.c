@@ -146,6 +146,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    {
             	tcdc[i] = 100*cloudy_box_counter/(NO_OF_CONDENSED_CONSTITUENTS*NO_OF_LAYERS);
             }
+            else
+            {
+            	tcdc[i] = 0;
+            }
             // solid precipitation rate
 		    sprate[i] = 0;
 		    for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS/2; ++k)
@@ -349,7 +353,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			codes_handle *handle_wind_10m_gusts = NULL;
 			codes_handle *handle_cape = NULL;
 			
-				SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
+			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_surface_p = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 			if (err != 0)
 				ECCERR(err);
