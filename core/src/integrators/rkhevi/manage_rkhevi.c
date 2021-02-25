@@ -17,7 +17,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 	// at these very coarse resolutions, a damping must be added to control grid-scale noise
 	if (RES_ID <= 5 && config_info -> momentum_diff == 1)
 	{
-		div_damp_weight = 0.0;
+		div_damp_weight = 0.1;
 	}
     int max_index = find_max_index(state_old -> velocity_gas, NO_OF_VECTORS);
     int min_index = find_min_index(state_old -> velocity_gas, NO_OF_VECTORS);
@@ -50,12 +50,12 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		// momentum advection is updated
 		if (fmod(total_step_counter, config_info -> adv_sound_ratio) == 0)
 		{
-			forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, i, 1);
+			forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, i, 1, delta_t);
         }
 		// momentum advection is not updated
         else
 		{
-			forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, i, 0);
+			forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, i, 0, delta_t);
         }
         // time stepping for the horizontal momentum can be directly executed
         for (int j = 0; j < NO_OF_VECTORS; ++j)
@@ -66,6 +66,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
         	{
         		state_new -> velocity_gas[j] = state_old -> velocity_gas[j] + delta_t_rk*state_tendency -> velocity_gas[j];
         	}
+        	// damping option for coarse resolutions
         	if (RES_ID <= 5 && config_info -> momentum_diff == 1)
         	{
         		state_new -> velocity_gas[j] = state_new -> velocity_gas[j] - div_damp_weight*(state_new -> velocity_gas[j] - state_old -> velocity_gas[j]);

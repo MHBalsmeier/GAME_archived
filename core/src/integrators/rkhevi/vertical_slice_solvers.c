@@ -29,7 +29,7 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 	// at these very coarse resolutions, a damping must be added to control grid-scale noise
 	if (RES_ID <= 5 && config_info -> momentum_diff == 1)
 	{
-		div_damp_weight = 0.1;
+		div_damp_weight = 0.0;
 	}
 	#pragma omp parallel for private(upper_index, lower_index, j, delta_z, upper_volume, lower_volume, total_volume, damping_coeff)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)

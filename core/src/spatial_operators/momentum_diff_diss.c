@@ -7,8 +7,9 @@ Github repository: https://github.com/AUN4GFD/game
 #include "spatial_operators.h"
 #include "../diagnostics/diagnostics.h"
 
-int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid)
-{	
+int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid, double delta_t)
+{
+	int layer_index, h_index;
 	// Firstly the diffusion.
 	// Evaluating necessary differential operators.
 	divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
@@ -32,30 +33,57 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 	// at these very coarse resolutions, a divergence damping must be added to control grid-scale noise
 	if (RES_ID <= 5)
 	{
+		int div_damp_order;
+		// the order of the divergence damping
+		div_damp_order = 4;
+		// calculating the homogeneous prefactor
+		double div_damp_coefff = 0.028*pow(240e3/pow(2, RES_ID - 5), div_damp_order)/(pow(2, div_damp_order)*delta_t);
 		divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
     	grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
-		// diagnostics -> velocity_gas_divv is a misuse of name
-		divv_h(irrev -> velocity_grad_div, diagnostics -> velocity_gas_divv, grid);
-		// irrev -> velocity_grad_div is a misuse of name here, it is actually the divegence damping
-    	grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
-		int layer_index, h_index;
-		double div_damp_coefff = 1e15;
+    	if (div_damp_order == 4)
+    	{
+			// diagnostics -> velocity_gas_divv is a misuse of name
+			divv_h(irrev -> velocity_grad_div, diagnostics -> velocity_gas_divv, grid);
+			// irrev -> velocity_grad_div is a misuse of name here, it is actually the divegence damping
+    		grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
+		}
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_H_VECTORS; ++i)
 		{
 			layer_index = i/NO_OF_VECTORS_H;
 			h_index = i - layer_index*NO_OF_VECTORS_H;
 			irrev -> friction_acc[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
-			+= -div_damp_coefff*irrev -> velocity_grad_div[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+			// a sign has to be taken into account here
+			+= -pow(-1, div_damp_order/2)*div_damp_coefff*irrev -> velocity_grad_div[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
 		}
 	}
 	
+	// additional friction in the boundary layer
+	double boundary_layer_height = 1e3;
+	double max_breaking_coeff = 5*1e-4;
+	double z_agl, breaking_coeff;
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
+	{
+		layer_index = i/NO_OF_VECTORS_H;
+		h_index = i - layer_index*NO_OF_VECTORS_H;
+		z_agl = grid -> z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
+		- 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[h_index]] + grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[h_index]]);
+		breaking_coeff = (1 - z_agl/boundary_layer_height)*max_breaking_coeff;
+		if (breaking_coeff < 0)
+		{
+			breaking_coeff = 0;
+		}
+		irrev -> friction_acc[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
+		+= -breaking_coeff*state -> velocity_gas[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+	}
+
 	// simplified dissipation
 	inner_product(state -> velocity_gas, irrev -> friction_acc, irrev -> heating_diss, grid);
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		irrev -> heating_diss[i] = -density_gas(state, i)*irrev -> heating_diss[i];
+		irrev -> heating_diss[i] = -0*density_gas(state, i)*irrev -> heating_diss[i];
 	}
 	return 0;
 }

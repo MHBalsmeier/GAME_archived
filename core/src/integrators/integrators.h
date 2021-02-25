@@ -3,7 +3,7 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
-int forward_tendencies(State *, State *, Grid *, Dualgrid *, Diagnostics *, Forcings *, Extrapolation_info *, Irreversible_quantities *, Config_info *, int, int);
+int forward_tendencies(State *, State *, Grid *, Dualgrid *, Diagnostics *, Forcings *, Extrapolation_info *, Irreversible_quantities *, Config_info *, int, int, double);
 int integrate_momentum(State *, State *, Grid *, Dualgrid *, Diagnostics *, Forcings *, Irreversible_quantities *, Config_info *, int);
 int backward_tendencies(State *, State *, Grid *, Dualgrid *, double, Scalar_field, Diagnostics *, Forcings *, Irreversible_quantities *, Config_info *, int, double);
 int integrate_generalized_densities(State *, State *, Grid *, Dualgrid *, double, Scalar_field, Diagnostics *, Forcings *, Irreversible_quantities *, Config_info *, int);
