@@ -25,6 +25,12 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 	damping_start_height = damping_start_height_over_toa*grid -> z_vector[0];
 	int upper_index, lower_index, j;
 	double impl_pgrad_weight = get_impl_thermo_weight();
+	double div_damp_weight = 0.0;
+	// at these very coarse resolutions, a damping must be added to control grid-scale noise
+	if (RES_ID <= 5 && config_info -> momentum_diff == 1)
+	{
+		div_damp_weight = 0.1;
+	}
 	#pragma omp parallel for private(upper_index, lower_index, j, delta_z, upper_volume, lower_volume, total_volume, damping_coeff)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
@@ -108,14 +114,32 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_tendency, S
 		{
 			state_new -> temperature_gas[j*NO_OF_SCALARS_H + i] = solution_vector[2*j];
 			state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] = solution_vector[2*j + 1];
+			if (RES_ID <= 5 && config_info -> momentum_diff == 1)
+			{
+				state_new -> temperature_gas[j*NO_OF_SCALARS_H + i] = state_new -> temperature_gas[j*NO_OF_SCALARS_H + i]
+				- div_damp_weight*(state_new -> temperature_gas[j*NO_OF_SCALARS_H + i] - state_old -> temperature_gas[j*NO_OF_SCALARS_H + i]);
+				state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] = state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]
+				- div_damp_weight*(state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - state_old -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]);
+			}
 		}
 		state_new -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] = solution_vector[2*(NO_OF_LAYERS - 1)];
+		if (RES_ID <= 5)
+		{
+			state_new -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] = state_new -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
+			- div_damp_weight*(state_new -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] - state_old -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]);
+		}
 	}
 	return 0;
 }
 
 int three_band_solver_gen_densitites(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, Grid *grid)
 {
+	double div_damp_weight = 0.0;
+	// at these very coarse resolutions, a damping must be added to control grid-scale noise
+	if (RES_ID <= 5 && config_info -> momentum_diff == 1)
+	{
+		div_damp_weight = 0.0;
+	}
 	// Vertical constituent advection with 3-band matrices.
 	// procedure derived in https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
 	// mass densities, entropy densities, density x temperatures
@@ -265,7 +289,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						{
 							b_vector[j] = state_new -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] + 0.5*delta_t
 							/grid -> volume[i + j*NO_OF_SCALARS_H]*(lower_weights_vector[j - 1]*vertical_flux_vector_impl[j - 1] - upper_weights_vector[j]*vertical_flux_vector_impl[j]);
-						}
+						}				
 					}
 					else
 					{
@@ -334,8 +358,19 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 					if (quantity_id == 1)
 					{
 					 	// here, the solution vector actually contains the specific entropy, that's why it needs to be multiplied by the mass density
-						state_new -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] =
-						state_new -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]*solution_vector[j];
+					 	if (RES_ID <= 5 && config_info -> momentum_diff == 1)
+					 	{
+							state_new -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] =
+							state_new -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
+							*(solution_vector[j] - div_damp_weight*(solution_vector[j] - 
+							state_old -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
+							/state_old -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]));
+					 	}
+						else
+						{
+							state_new -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] =
+							state_new -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]*solution_vector[j];
+						}
 					}
 					if (quantity_id == 2)
 					{

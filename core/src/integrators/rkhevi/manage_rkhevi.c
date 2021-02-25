@@ -13,6 +13,12 @@ Github repository: https://github.com/AUN4GFD/game
 
 int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrapolation_info, Grid *grid, Dualgrid *dualgrid, Scalar_field radiation_tendency, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, double delta_t, double time_coordinate, int total_step_counter)
 {
+	double div_damp_weight = 0.0;
+	// at these very coarse resolutions, a damping must be added to control grid-scale noise
+	if (RES_ID <= 5 && config_info -> momentum_diff == 1)
+	{
+		div_damp_weight = 0.0;
+	}
     int max_index = find_max_index(state_old -> velocity_gas, NO_OF_VECTORS);
     int min_index = find_min_index(state_old -> velocity_gas, NO_OF_VECTORS);
     double velocity_max = fabs(state_old -> velocity_gas[max_index]);
@@ -59,6 +65,10 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
         	if (h_index >= NO_OF_SCALARS_H)
         	{
         		state_new -> velocity_gas[j] = state_old -> velocity_gas[j] + delta_t_rk*state_tendency -> velocity_gas[j];
+        	}
+        	if (RES_ID <= 5 && config_info -> momentum_diff == 1)
+        	{
+        		state_new -> velocity_gas[j] = state_new -> velocity_gas[j] - div_damp_weight*(state_new -> velocity_gas[j] - state_old -> velocity_gas[j]);
         	}
         }
 		// Horizontal velocity can be considered to be updated from now on.

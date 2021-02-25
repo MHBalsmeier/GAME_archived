@@ -170,6 +170,7 @@ Scalar_field pressure_gradient_decel_factor;
 double constituent_mass_source_rates[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
 double constituent_heat_source_rates[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
 Scalar_field viscosity_eff;
+Vector_field velocity_grad_div;
 } Irreversible_quantities;
 
 // Info on input and output is collected here.

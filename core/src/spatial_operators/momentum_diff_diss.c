@@ -13,12 +13,12 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 	// Evaluating necessary differential operators.
 	divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
 	add_vertical_divv(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
-    grad(diagnostics -> velocity_gas_divv, irrev -> friction_acc, grid);
+    grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
     curl_of_vorticity_m(diagnostics -> rel_vort, diagnostics -> curl_of_vorticity_m, grid, dualgrid);
     // Multiplying the values of the differential operators by the effective viscosities.
     // Calculating the effective viscosity of the divergence term.
     calc_divv_term_viscosity_eff(state, irrev -> viscosity_eff);
-	scalar_times_vector(irrev -> viscosity_eff, irrev -> friction_acc, irrev -> friction_acc, grid);
+	scalar_times_vector(irrev -> viscosity_eff, irrev -> velocity_grad_div, irrev -> friction_acc, grid);
     // Calculating the effective viscosity of the curl term.
     calc_curl_term_viscosity_eff(state, irrev -> viscosity_eff);
 	scalar_times_vector(irrev -> viscosity_eff, diagnostics -> curl_of_vorticity_m, diagnostics -> curl_of_vorticity_m, grid);
@@ -28,6 +28,28 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 	{
 		irrev -> friction_acc[i] += diagnostics -> curl_of_vorticity_m[i];
 	}
+	
+	// at these very coarse resolutions, a divergence damping must be added to control grid-scale noise
+	if (RES_ID <= 5)
+	{
+		divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
+    	grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
+		// diagnostics -> velocity_gas_divv is a misuse of name
+		divv_h(irrev -> velocity_grad_div, diagnostics -> velocity_gas_divv, grid);
+		// irrev -> velocity_grad_div is a misuse of name here, it is actually the divegence damping
+    	grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
+		int layer_index, h_index;
+		double div_damp_coefff = 1e15;
+		#pragma omp parallel for
+		for (int i = 0; i < NO_OF_H_VECTORS; ++i)
+		{
+			layer_index = i/NO_OF_VECTORS_H;
+			h_index = i - layer_index*NO_OF_VECTORS_H;
+			irrev -> friction_acc[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
+			+= -div_damp_coefff*irrev -> velocity_grad_div[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+		}
+	}
+	
 	// simplified dissipation
 	inner_product(state -> velocity_gas, irrev -> friction_acc, irrev -> heating_diss, grid);
 	#pragma omp parallel for
