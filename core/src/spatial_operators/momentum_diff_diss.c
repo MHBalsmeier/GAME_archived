@@ -66,34 +66,6 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 			+= -pow(-1, div_damp_order/2)*div_damp_coefff*irrev -> velocity_grad_div[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
 		}
 	}
-	
-	// additional friction in the boundary layer
-	double boundary_layer_height = 1e3;
-	double max_breaking_coeff = 5*1e-4;
-	double z_agl, breaking_coeff;
-	#pragma omp parallel for
-	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
-	{
-		layer_index = i/NO_OF_VECTORS_H;
-		h_index = i - layer_index*NO_OF_VECTORS_H;
-		z_agl = grid -> z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
-		- 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[h_index]] + grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[h_index]]);
-		breaking_coeff = (1 - z_agl/boundary_layer_height)*max_breaking_coeff;
-		if (breaking_coeff < 0)
-		{
-			breaking_coeff = 0;
-		}
-		irrev -> friction_acc[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
-		+= -breaking_coeff*state -> velocity_gas[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
-	}
-
-	// simplified dissipation
-	inner_product(state -> velocity_gas, irrev -> friction_acc, irrev -> heating_diss, grid);
-	#pragma omp parallel for
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
-	{
-		irrev -> heating_diss[i] = -0*density_gas(state, i)*irrev -> heating_diss[i];
-	}
 	return 0;
 }
 
