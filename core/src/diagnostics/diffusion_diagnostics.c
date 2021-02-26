@@ -50,31 +50,31 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 {
 	double mean_particle_mass = mean_particle_masses_gas(0);
 	double eff_particle_radius = 130e-12;
-	double temp_diffusion_coeff, temp_diffusion_coeff_para_ratio_h, temp_diffusion_coeff_para_ratio_v, rho_g, c_g_v;
-	#pragma omp parallel for private (temp_diffusion_coeff, temp_diffusion_coeff_para_ratio_h, temp_diffusion_coeff_para_ratio_v, rho_g, c_g_v)
+	double temp_diffusion_coeff, upturn_for_scale_h, upturn_for_scale_v, rho_g, c_g_v;
+	#pragma omp parallel for private (temp_diffusion_coeff, upturn_for_scale_h, upturn_for_scale_v, rho_g, c_g_v)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 	    calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &temp_diffusion_coeff);
 	    if (config_info -> temperature_diff_h == 1)
 	    {
-			temp_diffusion_coeff_para_ratio_h = pow(10, 5);
+			upturn_for_scale_h = pow(10, 5);
     	}
 		else
 	    {
-			temp_diffusion_coeff_para_ratio_h = 0;
+			upturn_for_scale_h = 0;
     	}
 	    if (config_info -> temperature_diff_v == 1)
 	    {
-			temp_diffusion_coeff_para_ratio_v = pow(10, 5);
+			upturn_for_scale_v = pow(10, 5);
     	}
 		else
 	    {
-			temp_diffusion_coeff_para_ratio_v = 0;
+			upturn_for_scale_v = 0;
     	}
 		rho_g = density_gas(state, i);
 		c_g_v = spec_heat_cap_diagnostics_v(state, i, config_info);
-	    temp_diffusion_coeff_numerical_h[i] = temp_diffusion_coeff_para_ratio_h*rho_g*c_g_v*temp_diffusion_coeff;
-	    temp_diffusion_coeff_numerical_v[i] = temp_diffusion_coeff_para_ratio_v*rho_g*c_g_v*temp_diffusion_coeff;
+	    temp_diffusion_coeff_numerical_h[i] = upturn_for_scale_h*rho_g*c_g_v*temp_diffusion_coeff;
+	    temp_diffusion_coeff_numerical_v[i] = upturn_for_scale_v*rho_g*c_g_v*temp_diffusion_coeff;
 	}
 	return 0;
 }
