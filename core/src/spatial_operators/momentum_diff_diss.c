@@ -6,6 +6,8 @@ Github repository: https://github.com/AUN4GFD/game
 #include "../enum_and_typedefs.h"
 #include "spatial_operators.h"
 #include "../diagnostics/diagnostics.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid, double delta_t)
 {
@@ -36,6 +38,13 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 		int div_damp_order;
 		// the order of the divergence damping
 		div_damp_order = 8;
+		// checking if the divergence damping order is even
+		if (fmod(div_damp_order, 2) != 0)
+		{
+			printf("div_damp_order must be even.");
+			printf("Aborting.\n");
+			exit(1);
+		}
 		// calculating the homogeneous prefactor
 		double div_damp_coefff = 0.028*pow(240e3/pow(2, RES_ID - 5), div_damp_order)/(pow(2, div_damp_order)*delta_t);
 		divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
