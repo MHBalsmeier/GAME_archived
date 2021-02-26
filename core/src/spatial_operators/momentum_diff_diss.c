@@ -46,7 +46,11 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 			exit(1);
 		}
 		// calculating the homogeneous prefactor
-		double div_damp_coefff = 0.028*pow(240e3/pow(2, RES_ID - 5), div_damp_order)/(pow(2, div_damp_order)*delta_t)*1e-3;
+		double div_damp_coefff = 0.028*pow(240e3/pow(2, RES_ID - 5), div_damp_order)/(pow(2, div_damp_order)*delta_t);
+		if (div_damp_order == 8)
+		{
+			div_damp_coefff = 1e-3*div_damp_coefff;
+		}
 		divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
     	grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
     	for (int i = 0; i < div_damp_order/2 - 1; ++i)
