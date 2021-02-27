@@ -46,7 +46,12 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 			exit(1);
 		}
 		// the homogeneous prefactor
-		double div_damp_coeff = 5e15;
+		// this is for RES_ID = 5
+		double div_damp_coeff = 0.5e15; // unstable
+		// div_damp_coeff = 5e15; // grid-scale noise is produced, leading to instability
+		div_damp_coeff = 25e15; // grid-scale noise is produced, leading to instability (best choice probably)
+		// div_damp_coeff = 250e15; // too close to instability, unrealistically large compared to the literature
+		// div_damp_coeff = 2500e15; // unstable
 		divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
     	grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
     	for (int i = 0; i < div_damp_order/2 - 1; ++i)

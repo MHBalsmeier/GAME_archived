@@ -23,9 +23,11 @@ int calc_mass_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
 		    calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &mass_diffusion_coeff);
+			// homogeneous for now
+			calc_diffusion_coeff(273.15, mean_particle_mass, 1, eff_particle_radius, &mass_diffusion_coeff);
 		    if (config_info -> mass_diff_h == 1)
 		    {
-		    	upturn_for_scale_h = pow(10, 5);
+		    	upturn_for_scale_h = 1.5*pow(10, 4);
 	    	}
 		    else
 		    {
@@ -33,7 +35,7 @@ int calc_mass_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 	    	}
 		    if (config_info -> mass_diff_v == 1)
 		    {
-		    	upturn_for_scale_v = pow(10, 5);
+		    	upturn_for_scale_v = 1.5*pow(10, 3);
 	    	}
 		    else
 		    {
@@ -55,9 +57,11 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 	    calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &temp_diffusion_coeff);
+		// homogeneous for now
+		calc_diffusion_coeff(273.15, mean_particle_mass, 1, eff_particle_radius, &temp_diffusion_coeff);
 	    if (config_info -> temperature_diff_h == 1)
 	    {
-			upturn_for_scale_h = pow(10, 5);
+			upturn_for_scale_h = 1.5*pow(10, 4);
     	}
 		else
 	    {
@@ -65,7 +69,7 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
     	}
 	    if (config_info -> temperature_diff_v == 1)
 	    {
-			upturn_for_scale_v = pow(10, 5);
+			upturn_for_scale_v = 1.5*pow(10, 3);
     	}
 		else
 	    {
