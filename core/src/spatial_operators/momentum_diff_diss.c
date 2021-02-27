@@ -45,13 +45,14 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 			printf("Aborting.\n");
 			exit(1);
 		}
-		// calculating the homogeneous prefactor
-		double div_damp_coefff = 0.028*pow(240e3/pow(2, RES_ID - 5), div_damp_order)/(pow(2, div_damp_order)*delta_t);
-		if (div_damp_order == 8)
-		{
-			div_damp_coefff = 1e-3*div_damp_coefff;
-		}
+		// the homogeneous prefactor
+		double div_damp_coeff = 5e15;
 		divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
+		#pragma omp parallel for
+		for (int i = 0; i < NO_OF_SCALARS; ++i)
+		{
+			diagnostics -> velocity_gas_divv[i] = div_damp_coeff*diagnostics -> velocity_gas_divv[i];
+		}
     	grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
     	for (int i = 0; i < div_damp_order/2 - 1; ++i)
     	{
@@ -67,7 +68,7 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 			h_index = i - layer_index*NO_OF_VECTORS_H;
 			irrev -> friction_acc[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
 			// a sign has to be taken into account here
-			+= -pow(-1, div_damp_order/2)*div_damp_coefff*irrev -> velocity_grad_div[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+			+= -pow(-1, div_damp_order/2)*irrev -> velocity_grad_div[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
 		}
 	}
 	

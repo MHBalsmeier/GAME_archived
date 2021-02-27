@@ -84,7 +84,7 @@ int calc_divv_term_viscosity_eff(State *state, Scalar_field divv_term_viscosity_
 	double mean_particle_mass = mean_particle_masses_gas(0);
 	double eff_particle_radius = 130e-12;
 	double divv_term_viscosity_eff_value;
-	double upturning_for_scale = pow(10, 5);
+	double upturning_for_scale = 1.5*pow(10, 4);
 	#pragma omp parallel for private(divv_term_viscosity_eff_value)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
@@ -102,7 +102,7 @@ int calc_curl_term_viscosity_eff(State *state, Scalar_field curl_term_viscosity_
 	double mean_particle_mass = mean_particle_masses_gas(0);
 	double eff_particle_radius = 130e-12;
 	double curl_term_viscosity_eff_value;
-	double upturning_for_scale = pow(10, 5);
+	double upturning_for_scale = 1.5*pow(10, 4);
 	#pragma omp parallel for private(curl_term_viscosity_eff_value)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
