@@ -37,7 +37,7 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 	{
 		int div_damp_order;
 		// the order of the divergence damping
-		div_damp_order = 8;
+		div_damp_order = 4;
 		// checking if the divergence damping order is even
 		if (fmod(div_damp_order, 2) != 0)
 		{
