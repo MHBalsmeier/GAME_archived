@@ -19,9 +19,9 @@ src/settings.c
 src/integrators/rkhevi/manage_rkhevi.c
 src/integrators/rkhevi/manage_pressure_gradient.c
 src/integrators/rkhevi/forward_tendencies.c
-src/integrators/rkhevi/integrate_momentum.c
+src/integrators/rkhevi/vector_tendencies_expl.c
 src/integrators/rkhevi/backward_tendencies.c
-src/integrators/rkhevi/integrate_generalized_densities.c
+src/integrators/rkhevi/scalar_tendencies_expl.c
 src/integrators/rkhevi/vertical_slice_solvers.c
 src/spatial_operators/vorticity_flux.c
 src/spatial_operators/vorticities.c

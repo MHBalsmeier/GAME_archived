@@ -43,6 +43,6 @@ int backward_tendencies(State *state, State *state_tendency, Grid *grid, Dualgri
         add_vertical_divv(diagnostics -> flux_density, irreversible_quantities -> temperature_diffusion_heating, grid);
     }
     
-	scalar_tendencies(state, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, no_rk_step);
+	scalar_tendencies_expl(state, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, no_rk_step);
     return 0;
 }
