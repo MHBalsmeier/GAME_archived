@@ -20,7 +20,13 @@ The main organizes the model, manages the time stepping, calls model output, col
 
 int main(int argc, char *argv[])
 {
+    // taking the timestamp to measure the performance
     clock_t begin = clock();
+    
+    /*
+    Reading command line input.
+    ---------------------------
+    */
     Grid *grid = calloc(1, sizeof(Grid));
     Dualgrid *dualgrid = calloc(1, sizeof(Dualgrid));
     size_t len = strlen(argv[1]);
@@ -32,12 +38,6 @@ int main(int argc, char *argv[])
     char *WRITE_OUT_INTERVAL_PRE = malloc((len + 1)*sizeof(char));
     strcpy(WRITE_OUT_INTERVAL_PRE, argv[2]);
     int WRITE_OUT_INTERVAL = strtol(WRITE_OUT_INTERVAL_PRE, NULL, 10);
-    if (WRITE_OUT_INTERVAL < 900)
-    {
-    	printf("It is WRITE_OUT_INTERVAL < 900.\n");
-    	printf("Aborting.\n");
-    	exit(1);
-    }
     free(WRITE_OUT_INTERVAL_PRE);
     double cfl_margin = strtof(argv[3], NULL);
     Config_info *config_info = calloc(1, sizeof(Config_info));
@@ -99,6 +99,17 @@ int main(int argc, char *argv[])
 	config_info -> assume_lte = strtod(argv[33], NULL);
 	config_info -> adv_sound_ratio = strtod(argv[34], NULL);
 	config_info -> delta_t_between_analyses = strtod(argv[35], NULL);
+	
+	/*
+	Checking user input for correctness:
+	------------------------------------
+	*/
+    if (WRITE_OUT_INTERVAL < 900)
+    {
+    	printf("It is WRITE_OUT_INTERVAL < 900.\n");
+    	printf("Aborting.\n");
+    	exit(1);
+    }
 	if (config_info -> rk_order < 1)
 	{
 		printf("The Runge-Kutta order must be at least one.\n");
@@ -111,7 +122,7 @@ int main(int argc, char *argv[])
     	printf("Aborting.\n");
 		exit(1);
 	}
-	// in the case of block-shaped mountains, no lowers follow the orography
+	// in the case of block-shaped mountains, no layers follow the orography
 	if (VERT_GRID_TYPE == 1)
 	{
 		grid -> no_of_oro_layers = 0;
@@ -122,7 +133,11 @@ int main(int argc, char *argv[])
     	printf("Aborting.\n");
 		exit(1);
 	}
-    // This sets the ORO_ID (orography ID) as a function of the IDEAL_INPUT_ID.
+	
+    /*
+    This sets the ORO_ID (orography ID) as a function of the IDEAL_INPUT_ID.
+    ---------------------------------------------------------------------------
+    */
 	if (IDEAL_INPUT_ID == 0 || IDEAL_INPUT_ID == 8 || IDEAL_INPUT_ID == 9)
     {
 		ORO_ID = 0;
@@ -139,11 +154,16 @@ int main(int argc, char *argv[])
     {
 		ORO_ID = 3;
     }
-	// Determining the name of the grid file from the RES_ID, NO_OF_LAYERS and so on.
+    
+    /*
+	Determining the name of the grid file from the RES_ID, NO_OF_LAYERS and so on.
+    ------------------------------------------------------------------------------
+    */
     char GEO_PROP_FILE_PRE[200];
 	sprintf(GEO_PROP_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, toa, ORO_ID, grid -> no_of_oro_layers);
     char GEO_PROP_FILE[strlen(GEO_PROP_FILE_PRE) + 1];
     strcpy(GEO_PROP_FILE, GEO_PROP_FILE_PRE);
+    
 	// Determining the name of the init state file from the IDEAL_INPUT_ID, RES_ID, NO_OF_LAYERS and so on.
     char INIT_STATE_FILE_PRE[200];
     // The NWP case.
@@ -162,7 +182,8 @@ int main(int argc, char *argv[])
     strcpy(INIT_STATE_FILE, INIT_STATE_FILE_PRE);
     
     /*
-    determining the Unix time stamp of the initialization (UTC)
+    Determining the Unix time stamp of the initialization (UTC).
+    ------------------------------------------------------------
     */
     struct tm init_t;
     init_t.tm_year = year - 1900;
@@ -177,7 +198,10 @@ int main(int argc, char *argv[])
     // converting to double in UTC
     double t_init = (double) init_time + init_t.tm_gmtoff;
     
-    // Giving the user some information on the run to about to be executed.
+    /*
+    Giving the user some information on the run to about to be executed.
+    --------------------------------------------------------------------
+    */
     char *stars  = malloc(83*sizeof(char));
     for (int i = 0; i < 81; ++i)
         stars[i] = '*';
@@ -429,7 +453,10 @@ int main(int argc, char *argv[])
 		radiation_init();
 	}
 	
-	// preparation of the actual integration
+	/*
+	Preparation of the actual integration.
+    --------------------------------------
+    */
     double speed;
     double t_rad_update = t_0;
     int wind_10_m_step_counter = 0;
@@ -444,11 +471,21 @@ int main(int argc, char *argv[])
 	Scalar_field *radiation_tendency = calloc(1, sizeof(Scalar_field));
     State *state_write = calloc(1, sizeof(State));
     
-    // this is the loop over the time steps
+    /*
+    This is the loop over the time steps.
+    -------------------------------------
+    */
     while (t_0 + delta_t < t_init + TOTAL_RUN_SPAN + 300)
     {
+    	// updating the model time
         t_0 += delta_t;
+        
     	linear_combine_two_states(state_new, state_new, state_old, 1, 0);
+    	
+    	/*
+    	Checking if the radiative fluxes need to be updated:
+    	----------------------------------------------------
+    	*/
         if (t_0 <= t_rad_update && t_0 + delta_t >= t_rad_update)
         {
         	config_info -> rad_update = 1;
@@ -458,8 +495,15 @@ int main(int argc, char *argv[])
         {
         	config_info -> rad_update = 0;
     	}
+    	
+    	// Time step integration.
     	manage_rkhevi(state_old, state_new, extrapolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
 		time_step_counter += 1;
+		
+		/*
+		Writing out integrals over the model domain if requested by the user.
+		---------------------------------------------------------------------
+		*/
 		if (write_out_dry_mass_integral == 1)
         {
 			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 0);
@@ -476,10 +520,16 @@ int main(int argc, char *argv[])
         {
 			write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
     	}
+    	
+    	/*
+    	Writing the actual output.
+    	--------------------------
+    	*/
         if(t_0 + delta_t >= t_write && t_0 <= t_write)
         {
             interpolation_t(state_old, state_new, state_write, t_0, t_0 + delta_t, t_write);
     	}
+        
         if (t_0 >= t_write - 300)
         {
         	if (wind_10_m_step_counter < min_no_of_output_steps)
@@ -517,7 +567,10 @@ int main(int argc, char *argv[])
         printf("Step %d completed.\n", time_step_counter);
     }
     
-    // clean-up
+    /*
+    Clean-up.
+    ---------
+    */
     MPI_Finalize();
     free(month_string);
     free(day_string);
