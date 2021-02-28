@@ -29,9 +29,6 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 	for (int i = 0; i < config_info -> rk_order; ++i)
 	{
 		/*
-		general remarks:
-		-------------------------------------------------------------------------------
-		At i == 0, it is state_new == state_old.
 		state_old remains unchanged the whole time.
 		*/
 		

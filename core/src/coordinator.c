@@ -336,12 +336,12 @@ int main(int argc, char *argv[])
     printf("Grid loaded successfully.\n");
     printf("%s", stars);
     printf("Reading initial state ... ");
-    State *state_old = calloc(1, sizeof(State));
-    set_init_data(INIT_STATE_FILE, state_old, grid);
+    State *state_0 = calloc(1, sizeof(State));
+    set_init_data(INIT_STATE_FILE, state_0, grid);
     printf("completed.\n");
     // delta_t is the sound time step
     double delta_t;
-    calc_delta_t(cfl_margin, &delta_t, grid, state_old, config_info);
+    calc_delta_t(cfl_margin, &delta_t, grid, state_0, config_info);
     if (radiation_delta_t < delta_t)
     {
     	printf("It is radiation_delta_t < delta_t.\n");
@@ -384,6 +384,8 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     printf("It begins.\n");
     printf("%s", stars);
+    // Reading and processing user input finished.
+    
     int min_no_of_output_steps = 600/delta_t;
     double *wind_h_lowest_layer_array = calloc(1, min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
     double t_write = t_init;
@@ -392,11 +394,11 @@ int main(int argc, char *argv[])
 	{
 		time_step_10_m_wind = i/NO_OF_VECTORS_H;
 		h_index = i - time_step_10_m_wind*NO_OF_VECTORS_H;
-    	wind_h_lowest_layer_array[time_step_10_m_wind*NO_OF_VECTORS_H + h_index] = state_old -> velocity_gas[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + h_index];
+    	wind_h_lowest_layer_array[time_step_10_m_wind*NO_OF_VECTORS_H + h_index] = state_0 -> velocity_gas[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + h_index];
     }
     Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
     Forcings *forcings = calloc(1, sizeof(Forcings));
-    write_out(state_old, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
+    write_out(state_0, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
     t_write += WRITE_OUT_INTERVAL;
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     double t_0;
@@ -404,63 +406,49 @@ int main(int argc, char *argv[])
     int time_step_counter = 0;
     clock_t first_time, second_time;
     first_time = clock();
-    State *state_new = calloc(1, sizeof(State));
     if (write_out_dry_mass_integral == 1)
     {
-		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 0);
+		write_out_integral(state_0, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 0);
 	}
     if (write_out_entropy_integral == 1)
     {
-		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 1);
+		write_out_integral(state_0, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 1);
 	}
     if (write_out_energy_integral == 1)
     {
-		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 2);
+		write_out_integral(state_0, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 2);
 	}
     if (write_out_linearized_entropy_integral == 1)
     {
-		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
+		write_out_integral(state_0, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
 	}
-	Scalar_field *radiation_tendency = calloc(1, sizeof(Scalar_field));
-    State *state_tendency = calloc(1, sizeof(State));
-    Extrapolation_info *extrapolation_info = calloc(1, sizeof(Extrapolation_info));
-    Irreversible_quantities *irrev = calloc(1, sizeof(Irreversible_quantities));
-    linear_combine_two_states(state_old, state_old, state_new, 1, 0);
     config_info -> totally_first_step_bool = 1;
     config_info -> rad_update = 1;
 	if (config_info -> rad_on == 1)
 	{
 		radiation_init();
 	}
-    manage_rkhevi(state_old, state_new, extrapolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
-	time_step_counter += 1;
-    if (write_out_dry_mass_integral == 1)
-    {
-		write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 0);
-	}
-    if (write_out_entropy_integral == 1)
-    {
-		write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 1);
-	}
-    if (write_out_energy_integral == 1)
-    {
-		write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 2);
-	}
-    if (write_out_linearized_entropy_integral == 1)
-    {
-		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
-	}
-    State *state_write = calloc(1, sizeof(State));
+	
+	// preparation of the actual integration
     double speed;
-    double t_rad_update = t_0 + radiation_delta_t;
+    double t_rad_update = t_0;
     int wind_10_m_step_counter = 0;
     int second_write_out_bool = 1;
     MPI_Init(&argc, &argv);
     config_info -> totally_first_step_bool = 0;
+    State *state_tendency = calloc(1, sizeof(State));
+    Extrapolation_info *extrapolation_info = calloc(1, sizeof(Extrapolation_info));
+    Irreversible_quantities *irrev = calloc(1, sizeof(Irreversible_quantities));
+    State *state_1 = calloc(1, sizeof(State));
+    linear_combine_two_states(state_0, state_0, state_1, 1, 0);
+	Scalar_field *radiation_tendency = calloc(1, sizeof(Scalar_field));
+    State *state_write = calloc(1, sizeof(State));
+    
+    // this is the loop over the time steps
     while (t_0 + delta_t < t_init + TOTAL_RUN_SPAN + 300)
     {
         t_0 += delta_t;
-    	linear_combine_two_states(state_new, state_new, state_old, 1, 0);
+    	linear_combine_two_states(state_1, state_1, state_0, 1, 0);
         if (t_0 <= t_rad_update && t_0 + delta_t >= t_rad_update)
         {
         	config_info -> rad_update = 1;
@@ -470,27 +458,34 @@ int main(int argc, char *argv[])
         {
         	config_info -> rad_update = 0;
     	}
-        manage_rkhevi(state_old, state_new, extrapolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
+    	if (fmod(time_step_counter, 2) == 0)
+    	{
+        	manage_rkhevi(state_0, state_1, extrapolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
+		}
+		else
+		{
+        	manage_rkhevi(state_1, state_0, extrapolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
+		}
 		time_step_counter += 1;
 		if (write_out_dry_mass_integral == 1)
         {
-			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 0);
+			write_out_integral(state_1, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 0);
     	}
 		if (write_out_entropy_integral == 1)
         {
-			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 1);
+			write_out_integral(state_1, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 1);
     	}
 		if (write_out_energy_integral == 1)
         {
-			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 2);
+			write_out_integral(state_1, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 2);
     	}
 		if (write_out_linearized_entropy_integral == 1)
         {
-			write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
+			write_out_integral(state_0, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
     	}
         if(t_0 + delta_t >= t_write && t_0 <= t_write)
         {
-            interpolation_t(state_old, state_new, state_write, t_0, t_0 + delta_t, t_write);
+            interpolation_t(state_0, state_1, state_write, t_0, t_0 + delta_t, t_write);
     	}
         if (t_0 >= t_write - 300)
         {
@@ -498,7 +493,7 @@ int main(int argc, char *argv[])
         	{
 		    	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
        			{
-		    		wind_h_lowest_layer_array[wind_10_m_step_counter*NO_OF_VECTORS_H + i] = state_old -> velocity_gas[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i];
+		    		wind_h_lowest_layer_array[wind_10_m_step_counter*NO_OF_VECTORS_H + i] = state_0 -> velocity_gas[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i];
 		    	}
 		    	wind_10_m_step_counter += 1;
         	}
@@ -527,6 +522,8 @@ int main(int argc, char *argv[])
             wind_10_m_step_counter = 0;
         }
     }
+    
+    // clean-up
     MPI_Finalize();
     free(month_string);
     free(day_string);
@@ -542,8 +539,8 @@ int main(int argc, char *argv[])
     free(radiation_tendency);
     free(grid);
     free(dualgrid);
-    free(state_old);
-    free(state_new);
+    free(state_0);
+    free(state_1);
     free(state_write);
     printf("%s", stars);
     free(stars);
