@@ -13,14 +13,13 @@ Github repository: https://github.com/AUN4GFD/game
 
 int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrapolation_info, Grid *grid, Dualgrid *dualgrid, Scalar_field radiation_tendency, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, double delta_t, double time_coordinate, int total_step_counter)
 {
-    int max_index = find_max_index(state_old -> velocity_gas, NO_OF_VECTORS);
-    int min_index = find_min_index(state_old -> velocity_gas, NO_OF_VECTORS);
-    double velocity_max = fabs(state_old -> velocity_gas[max_index]);
-    if (fabs(state_old -> velocity_gas[min_index]) > velocity_max)
-    {
-    	velocity_max = fabs(state_old -> velocity_gas[min_index]);
+	// slow terms (momentum advection and diffusion) update switch
+	int slow_update_bool = 0;
+	if (fmod(total_step_counter, config_info -> adv_sound_ratio) == 0)
+	{
+		slow_update_bool = 1;
     }
-    printf("Maximum velocity: %lf\n", velocity_max);
+    
 	/*
 	Loop over the RK substeps.
 	*/
@@ -30,24 +29,16 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 	{
 		/*
 		state_old remains unchanged the whole time.
+		At i == 0, it is state_old == state_new.
 		*/
 		
 		// 1.) setting the time step of the RK substep
+		// ----------------------------------------------------------------------------
 		delta_t_rk = delta_t/(config_info -> rk_order - i);
 		
 		// 2.) Explicit component of the momentum equation.
 		// ----------------------------------------------------------------------------
-		// split-explicit
-		// momentum advection is updated
-		if (fmod(total_step_counter, config_info -> adv_sound_ratio) == 0)
-		{
-			forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, i, 1, delta_t);
-        }
-		// momentum advection is not updated
-        else
-		{
-			forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, i, 0, delta_t);
-        }
+		forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, i, slow_update_bool, delta_t);
         // time stepping for the horizontal momentum can be directly executed
         for (int j = 0; j < NO_OF_VECTORS; ++j)
         {
@@ -62,6 +53,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		
 		// 3.) Explicit component of the generalized density equations.
 		// ----------------------------------------------------------------------------
+		// state_new contains densities and velcoties from different time levels (velocity already updated, densities not yet)
 		backward_tendencies(state_new, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, time_coordinate);
 		// determining the explicit component of the new temperature
 		
@@ -71,7 +63,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 
 		// 5.) Vertical sound wave solver.
 		// ----------------------------------------------------------------------------
-		three_band_solver_ver_sound_waves(state_old, state_tendency, state_new, diagnostics, config_info, delta_t_rk, grid);
+		three_band_solver_ver_sound_waves(state_old, state_new, state_tendency, diagnostics, config_info, delta_t_rk, grid);
 		// Vertical velocity can be seen as updated from now on.
 		
 		// 6.) Solving the implicit component of the generalized density equaitons.
