@@ -24,7 +24,6 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 	Loop over the RK substeps.
 	*/
 	int layer_index, h_index;
-	double delta_t_rk;
 	for (int i = 0; i < 2; ++i)
 	{
 		/*
@@ -32,19 +31,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		At i == 0, it is state_old == state_new.
 		*/
 		
-		// 1.) Setting the time step of the RK substep.
-		// --------------------------------------------
-		delta_t_rk = delta_t;
-		if (i == 0)
-		{
-			delta_t_rk = get_impl_thermo_weight()*delta_t;
-		}
-		else
-		{
-			delta_t_rk = delta_t;
-		}
-		
-		// 2.) Explicit component of the momentum equation.
+		// 1.) Explicit component of the momentum equation.
 		// ------------------------------------------------
 		forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, i, slow_update_bool, delta_t);
         // time stepping for the horizontal momentum can be directly executed
@@ -54,29 +41,29 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
         	h_index = j - layer_index*NO_OF_VECTORS_PER_LAYER;
         	if (h_index >= NO_OF_SCALARS_H)
         	{
-        		state_new -> velocity_gas[j] = state_old -> velocity_gas[j] + delta_t_rk*state_tendency -> velocity_gas[j];
+        		state_new -> velocity_gas[j] = state_old -> velocity_gas[j] + delta_t/(i + 1)*state_tendency -> velocity_gas[j];
         	}
         }
 		// Horizontal velocity can be considered to be updated from now on.
 		
-		// 3.) Explicit component of the generalized density equations.
+		// 2.) Explicit component of the generalized density equations.
 		// ------------------------------------------------------------
 		// state_new contains densities and velcoties from different time levels (velocity already updated, densities not yet)
 		backward_tendencies(state_new, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, time_coordinate);
 		// determining the explicit component of the new temperature
 		
-		// 4.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies (including diabatic forcings).
+		// 3.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies (including diabatic forcings).
 		// ----------------------------------------------------------------------------------------------------------------------------------------
-		temperature_diagnostics_explicit(state_old, state_tendency, diagnostics, config_info, delta_t_rk);
+		temperature_diagnostics_explicit(state_old, state_tendency, diagnostics, config_info, delta_t/(i + 1));
 
-		// 5.) Vertical sound wave solver.
+		// 4.) Vertical sound wave solver.
 		// -------------------------------
-		three_band_solver_ver_sound_waves(state_old, state_new, state_tendency, diagnostics, config_info, delta_t_rk, grid);
+		three_band_solver_ver_sound_waves(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid, i);
 		// Vertical velocity can be seen as updated from now on.
 		
-		// 6.) Solving the implicit component of the generalized density equaitons.
+		// 5.) Solving the implicit component of the generalized density equaitons.
 		// ------------------------------------------------------------------------
-		three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, config_info, delta_t_rk, grid);
+		three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid, i);
     }
     return 0;
 }

@@ -28,7 +28,7 @@ int forward_tendencies(State *state, State *state_tendency, Grid *grid, Dualgrid
 		}
     }
 	// Only the horizontal momentum is a forward tendency.
-	vector_tendencies_expl(state, state_tendency, grid, dualgrid, diagnostics, forcings, irreversible_quantities, config_info, slow_update_bool);
+	vector_tendencies_expl(state, state_tendency, grid, dualgrid, diagnostics, forcings, irreversible_quantities, config_info, slow_update_bool, no_step_rk);
     return 0;
 }
 

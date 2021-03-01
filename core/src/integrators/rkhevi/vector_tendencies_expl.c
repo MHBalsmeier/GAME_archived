@@ -14,7 +14,7 @@ In this source file, the calculation of the explicit part of the momentum equati
 #include "atmostracers.h"
 #include "../../diagnostics/diagnostics.h"
 
-int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int update_advection)
+int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int update_advection, int no_rk_step)
 {
 	// momentum advection
 	if (update_advection == 1)
@@ -62,8 +62,9 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     	&& NO_OF_LAYERS - layer_index > grid -> no_of_shaded_points_scalar[h_index]))
 		{
     		state_tendency -> velocity_gas[i] =
+    		no_rk_step*state_tendency -> velocity_gas[i]
     		// explicit component of pressure gradient acceleration
-    		forcings -> pressure_gradient_acc_expl[i]
+    		+ forcings -> pressure_gradient_acc_expl[i]
     		// generalized Coriolis term
     		+ forcings -> pot_vort_tend[i]
     		// kinetic energy term
