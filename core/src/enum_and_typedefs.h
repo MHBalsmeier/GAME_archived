@@ -137,7 +137,6 @@ Vector_field pot_vort_tend;
 
 // Info on the run configuration is collected here.
 typedef struct config_info {
-int rk_order;
 int totally_first_step_bool;
 int mass_diff_h;
 int mass_diff_v;

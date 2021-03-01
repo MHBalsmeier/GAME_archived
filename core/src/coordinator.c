@@ -95,10 +95,9 @@ int main(int argc, char *argv[])
 	io_config -> surface_output_switch = strtod(argv[29], NULL);
 	grid -> no_of_oro_layers = strtod(argv[30], NULL);
 	int VERT_GRID_TYPE = strtod(argv[31], NULL);
-	config_info -> rk_order = strtod(argv[32], NULL);
-	config_info -> assume_lte = strtod(argv[33], NULL);
-	config_info -> adv_sound_ratio = strtod(argv[34], NULL);
-	config_info -> delta_t_between_analyses = strtod(argv[35], NULL);
+	config_info -> assume_lte = strtod(argv[32], NULL);
+	config_info -> adv_sound_ratio = strtod(argv[33], NULL);
+	config_info -> delta_t_between_analyses = strtod(argv[34], NULL);
 	
 	/*
 	Checking user input for correctness:
@@ -110,12 +109,6 @@ int main(int argc, char *argv[])
     	printf("Aborting.\n");
     	exit(1);
     }
-	if (config_info -> rk_order < 1)
-	{
-		printf("The Runge-Kutta order must be at least one.\n");
-    	printf("Aborting.\n");
-		exit(1);
-	}
 	if (config_info -> assume_lte != 0 && config_info -> assume_lte != 1)
 	{
 		printf("simplified_moisture_switch must be either 0 or 1.\n");
@@ -234,7 +227,6 @@ int main(int argc, char *argv[])
 	printf("number of scalar data points: %d\n", NO_OF_SCALARS);
 	printf("number of vectors: %d\n", NO_OF_VECTORS);
 	printf("number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
-	printf("Runge Kutta order: %d\n", config_info -> rk_order);
 	printf("ratio of advective to sound time step: %d\n", config_info -> adv_sound_ratio);
 	if (VERT_GRID_TYPE == 0)
 	{

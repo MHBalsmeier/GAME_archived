@@ -21,7 +21,6 @@ type_of_vertical_grid=0 # 0: terrain following coordinates, 1: block-like orogra
 orography_layers=23 # number of layers following orography (only relevent if type_of_vertical_grid == 0)
 
 # time stepping characteristics
-rk_order=2 # convergence order of the Runge-Kutta stepping
 cfl_margin=0.38 # The sound time step will be calculated as follows (delta t) = (delta t from CFL)*(1 - cfl_margin). 0.38 can be considered a safe standard value.
 adv_sound_ratio=3 # the ratio of the advective to the sound time step
 
