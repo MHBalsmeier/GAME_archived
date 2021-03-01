@@ -25,6 +25,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 	*/
 	int layer_index, h_index;
 	double delta_t_rk;
+	double delta_t_prefactor = 1.2;
 	for (int i = 0; i < config_info -> rk_order; ++i)
 	{
 		/*
@@ -34,7 +35,11 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		
 		// 1.) setting the time step of the RK substep
 		// ----------------------------------------------------------------------------
-		delta_t_rk = delta_t/(config_info -> rk_order - i);
+		if (i == config_info -> rk_order - 1)
+		{
+			delta_t_prefactor = 1.0;
+		}
+		delta_t_rk = delta_t_prefactor*delta_t/(config_info -> rk_order - i);
 		
 		// 2.) Explicit component of the momentum equation.
 		// ----------------------------------------------------------------------------
