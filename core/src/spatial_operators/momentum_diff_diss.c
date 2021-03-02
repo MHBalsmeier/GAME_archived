@@ -15,9 +15,16 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 	// Firstly the diffusion.
 	// Evaluating necessary differential operators.
 	divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
-	add_vertical_divv(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
+	if (config_info -> momentum_diff_v == 1)
+	{
+		add_vertical_divv(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
+    }
     grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
-    curl_of_vorticity_m(diagnostics -> rel_vort, diagnostics -> curl_of_vorticity_m, grid, dualgrid);
+    if (config_info -> momentum_diff_v == 0)
+    {
+    	calc_rel_vort(state -> velocity_gas, diagnostics -> rel_vort, grid, dualgrid, 0);
+    }
+    curl_of_vorticity_m(diagnostics -> rel_vort, diagnostics -> curl_of_vorticity_m, grid, dualgrid, config_info);
     // Multiplying the values of the differential operators by the effective viscosities.
     // Calculating the effective viscosity of the divergence term.
     calc_divv_term_viscosity_eff(state, irrev -> viscosity_eff);
@@ -74,7 +81,7 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 	return 0;
 }
 
-int curl_of_vorticity_m(Curl_field vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid)
+int curl_of_vorticity_m(Curl_field vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid, Config_info *config_info)
 {
 	// Calculates the negative curl of the vorticity.
 	int layer_index, h_index, no_of_edges, i, j;
@@ -83,10 +90,10 @@ int curl_of_vorticity_m(Curl_field vorticity, Vector_field out_field, Grid *grid
 	{
 		layer_index = i/NO_OF_VECTORS_PER_LAYER;
 		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
+		out_field[i] = 0;
 		// The vertical case.
 		if (h_index < NO_OF_SCALARS_H)
 		{
-			out_field[i] = 0;
 			no_of_edges = 6;
 			if (h_index < NO_OF_PENTAGONS)
 			{
@@ -99,13 +106,12 @@ int curl_of_vorticity_m(Curl_field vorticity, Vector_field out_field, Grid *grid
 				*vorticity[layer_index*2*NO_OF_VECTORS_H + grid -> adjacent_vector_indices_h[6*h_index + j]];
 			}
 			// Dividing by the area. The additional minus sign accounts for the fact the we want the negative curl of the curl.
-			out_field[i] = -out_field[i]/grid -> area[i];
+			out_field[i] = -config_info -> momentum_diff_v*out_field[i]/grid -> area[i];
 		}
 		// The horizontal case.
 		// Remember: (curl(zeta))*e_x = dzeta_z/dy - dzeta_y/dz = (dz*dzeta_z - dy*dzeta_y)/(dy*dz) = (dz*dzeta_z - dy*dzeta_y)/area (Stokes' Theorem, which is used here)
 		else
 		{
-			out_field[i] = 0;
 			// horizontal difference of vertical vorticity (dzeta_z*dz)
 			// An averaging over three rhombi must be done.
 			for (j = 0; j < 3; ++j)

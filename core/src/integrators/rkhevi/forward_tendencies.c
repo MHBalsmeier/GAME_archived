@@ -18,7 +18,7 @@ int forward_tendencies(State *state, State *state_tendency, Grid *grid, Dualgrid
 {
 	// Update of the pressure gradient.
 	manage_pressure_gradient(state, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, no_step_rk);
-    if (no_step_rk == 0 && config_info -> momentum_diff == 1 && slow_update_bool == 1)
+    if (no_step_rk == 0 && config_info -> momentum_diff_h == 1 && slow_update_bool == 1)
     {
 		momentum_diff_diss(state, diagnostics, irreversible_quantities, config_info, grid, dualgrid, delta_t);
 		// Due to condensates, the friction acceleration needs to get a deceleration factor.

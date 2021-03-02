@@ -853,7 +853,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		divv_h(state_write_out -> velocity_gas, divv_h_all_layers, grid);
 	}
     Curl_field *rel_vort = calloc(1, sizeof(Curl_field));
-	calc_rel_vort(state_write_out -> velocity_gas, *rel_vort, grid, dualgrid);
+	calc_rel_vort(state_write_out -> velocity_gas, *rel_vort, grid, dualgrid, 0);
 	
 	// Diagnozing the u and v wind components at the vector points.
     double wind_0, wind_1;

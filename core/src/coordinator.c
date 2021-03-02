@@ -41,63 +41,64 @@ int main(int argc, char *argv[])
     free(WRITE_OUT_INTERVAL_PRE);
     double cfl_margin = strtof(argv[3], NULL);
     Config_info *config_info = calloc(1, sizeof(Config_info));
-    config_info -> momentum_diff = strtod(argv[4], NULL);
-    config_info -> rad_on = strtod(argv[5], NULL);
-    len = strlen(argv[6]);
+    config_info -> momentum_diff_h = strtod(argv[4], NULL);
+    config_info -> momentum_diff_v = strtod(argv[5], NULL);
+    config_info -> rad_on = strtod(argv[6], NULL);
+    len = strlen(argv[7]);
     char *OPERATOR = malloc((len + 1)*sizeof(char));
-    strcpy(OPERATOR, argv[6]);
+    strcpy(OPERATOR, argv[7]);
     int write_out_dry_mass_integral;
-    write_out_dry_mass_integral = strtod(argv[7], NULL);
+    write_out_dry_mass_integral = strtod(argv[8], NULL);
     int write_out_entropy_integral; 
-    write_out_entropy_integral = strtod(argv[8], NULL);
+    write_out_entropy_integral = strtod(argv[9], NULL);
     int write_out_energy_integral;
-    write_out_energy_integral = strtod(argv[9], NULL);
-    config_info -> temperature_diff_h = strtod(argv[10], NULL);
+    write_out_energy_integral = strtod(argv[10], NULL);
+    config_info -> temperature_diff_h = strtod(argv[11], NULL);
     double radiation_delta_t;
-    radiation_delta_t = strtof(argv[11], NULL);
+    radiation_delta_t = strtof(argv[12], NULL);
     int year;
-    year = strtod(argv[12], NULL);
+    year = strtod(argv[13], NULL);
     int month;
-    month = strtod(argv[13], NULL);
-    len = strlen(argv[13]);
-    char *month_string = malloc((len + 1)*sizeof(char));
-    strcpy(month_string, argv[13]);
-    int day;
-    day = strtod(argv[14], NULL);
+    month = strtod(argv[14], NULL);
     len = strlen(argv[14]);
-    char *day_string = malloc((len + 1)*sizeof(char));
-    strcpy(day_string, argv[14]);
-    int hour;
-    hour = strtod(argv[15], NULL);
+    char *month_string = malloc((len + 1)*sizeof(char));
+    strcpy(month_string, argv[14]);
+    int day;
+    day = strtod(argv[15], NULL);
     len = strlen(argv[15]);
+    char *day_string = malloc((len + 1)*sizeof(char));
+    strcpy(day_string, argv[15]);
+    int hour;
+    hour = strtod(argv[16], NULL);
+    len = strlen(argv[16]);
     char *hour_string = malloc((len + 1)*sizeof(char));
-    strcpy(hour_string, argv[15]);
-    config_info -> temperature_diff_v = strtod(argv[16], NULL);
-    len = strlen(argv[17]);
+    strcpy(hour_string, argv[16]);
+    config_info -> temperature_diff_v = strtod(argv[17], NULL);
+    len = strlen(argv[18]);
     char *RUN_ID = malloc((len + 1)*sizeof(char));
-    strcpy(RUN_ID, argv[17]);
+    strcpy(RUN_ID, argv[18]);
     int write_out_linearized_entropy_integral;
-    write_out_linearized_entropy_integral = strtod(argv[18], NULL);
+    write_out_linearized_entropy_integral = strtod(argv[19], NULL);
     int toa;
-	toa = strtod(argv[19], NULL);
+	toa = strtod(argv[20], NULL);
 	int ORO_ID;
-	ORO_ID = strtod(argv[20], NULL);
+	ORO_ID = strtod(argv[21], NULL);
     int IDEAL_INPUT_ID;
-    IDEAL_INPUT_ID = strtod(argv[21], NULL);
-	config_info -> mass_diff_h = strtod(argv[22], NULL);
-	config_info -> mass_diff_v = strtod(argv[23], NULL);
+    IDEAL_INPUT_ID = strtod(argv[22], NULL);
+	config_info -> mass_diff_h = strtod(argv[23], NULL);
+	config_info -> mass_diff_v = strtod(argv[24], NULL);
     Io_config *io_config = calloc(1, sizeof(Io_config));
-	io_config -> grib_output_switch = strtod(argv[24], NULL);
-	io_config -> netcdf_output_switch = strtod(argv[25], NULL);
-	io_config -> pressure_level_output_switch = strtod(argv[26], NULL);
-	io_config -> flight_level_output_switch = strtod(argv[27], NULL);
-	io_config -> model_level_output_switch = strtod(argv[28], NULL);
-	io_config -> surface_output_switch = strtod(argv[29], NULL);
-	grid -> no_of_oro_layers = strtod(argv[30], NULL);
-	int VERT_GRID_TYPE = strtod(argv[31], NULL);
-	config_info -> assume_lte = strtod(argv[32], NULL);
-	config_info -> adv_sound_ratio = strtod(argv[33], NULL);
-	config_info -> delta_t_between_analyses = strtod(argv[34], NULL);
+	io_config -> grib_output_switch = strtod(argv[25], NULL);
+	io_config -> netcdf_output_switch = strtod(argv[26], NULL);
+	io_config -> pressure_level_output_switch = strtod(argv[27], NULL);
+	io_config -> flight_level_output_switch = strtod(argv[28], NULL);
+	io_config -> model_level_output_switch = strtod(argv[29], NULL);
+	io_config -> surface_output_switch = strtod(argv[30], NULL);
+	grid -> no_of_oro_layers = strtod(argv[31], NULL);
+	int VERT_GRID_TYPE = strtod(argv[32], NULL);
+	config_info -> assume_lte = strtod(argv[33], NULL);
+	config_info -> adv_sound_ratio = strtod(argv[34], NULL);
+	config_info -> delta_t_between_analyses = strtod(argv[35], NULL);
 	
 	/*
 	Checking user input for correctness:
@@ -123,6 +124,12 @@ int main(int argc, char *argv[])
 	if (io_config -> grib_output_switch == 0 && io_config -> netcdf_output_switch == 0)
 	{
 		printf("Either grib_output_switch or netcdf_output_switch must be set to 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
+	if (config_info -> momentum_diff_h == 0 && config_info -> momentum_diff_v == 1)
+	{
+		printf("Horizontal momentum diffusion cannot be off if vertical momentum diffusion is on.\n");
     	printf("Aborting.\n");
 		exit(1);
 	}
@@ -279,13 +286,21 @@ int main(int argc, char *argv[])
 	{
 		printf("Vertical temperature diffusion is turned on.\n");
 	}
-	if (config_info -> momentum_diff == 0)
+	if (config_info -> momentum_diff_h == 0)
 	{
-		printf("Momentum diffusion is turned off.\n");
+		printf("Horizontal momentum diffusion is turned off.\n");
 	}
 	else
 	{
-		printf("Momentum diffusion is turned on.\n");
+		printf("Horizontal momentum diffusion is turned on.\n");
+	}
+	if (config_info -> momentum_diff_v == 0)
+	{
+		printf("Vertical momentum diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Vertical momentum diffusion is turned on.\n");
 	}
 	if (config_info -> assume_lte == 0)
 	{
