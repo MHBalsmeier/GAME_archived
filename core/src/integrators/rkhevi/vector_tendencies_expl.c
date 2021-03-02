@@ -49,7 +49,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     new_weight = 1;
     if (no_rk_step == 1)
     {
-    	new_weight = get_impl_thermo_weight();
+    	new_weight = 0.5;
     	old_weight = 1 - new_weight;
     }
     #pragma omp parallel for private(layer_index, h_index)
