@@ -54,7 +54,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		
 		// 3.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies (including diabatic forcings).
 		// ----------------------------------------------------------------------------------------------------------------------------------------
-		temperature_diagnostics_explicit(state_old, state_tendency, diagnostics, config_info, delta_t/(i + 1));
+		temperature_diagnostics_explicit(state_old, state_tendency, diagnostics, config_info, delta_t);
 
 		// 4.) Vertical sound wave solver.
 		// -------------------------------
@@ -63,7 +63,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		
 		// 5.) Solving the implicit component of the generalized density equaitons.
 		// ------------------------------------------------------------------------
-		three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid, i);
+		three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid);
     }
     return 0;
 }
