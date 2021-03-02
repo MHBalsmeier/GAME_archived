@@ -44,6 +44,14 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     }
     // Now the explicit forces are added up.
     int layer_index, h_index;
+    double old_weight, new_weight;
+    old_weight = 0;
+    new_weight = 1;
+    if (no_rk_step == 1)
+    {
+    	new_weight = get_impl_thermo_weight();
+    	old_weight = 1 - new_weight;
+    }
     #pragma omp parallel for private(layer_index, h_index)
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
@@ -62,7 +70,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     	&& NO_OF_LAYERS - layer_index > grid -> no_of_shaded_points_scalar[h_index]))
 		{
     		state_tendency -> velocity_gas[i] =
-    		no_rk_step*state_tendency -> velocity_gas[i]
+    		old_weight*state_tendency -> velocity_gas[i] + new_weight*(
     		// explicit component of pressure gradient acceleration
     		+ forcings -> pressure_gradient_acc_expl[i]
     		// generalized Coriolis term
@@ -72,7 +80,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     		// gravity
     		- grid -> gravity_m[i]
     		// momentum diffusion
-    		+ irreversible_quantities -> friction_acc[i];
+    		+ irreversible_quantities -> friction_acc[i]);
 		}
     }
     return 0;

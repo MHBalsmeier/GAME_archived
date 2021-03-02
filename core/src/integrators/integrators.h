@@ -9,5 +9,5 @@ int backward_tendencies(State *, State *, Grid *, Dualgrid *, double, Scalar_fie
 int vector_tendencies_expl(State *, State *, Grid *, Dualgrid *, Diagnostics *, Forcings *, Irreversible_quantities *, Config_info *, int, int);
 int scalar_tendencies_expl(State *, State *, Grid *, Dualgrid *, double, Scalar_field, Diagnostics *, Forcings *, Irreversible_quantities *, Config_info *, int);
 int three_band_solver_gen_densitites(State *, State *, State *, Diagnostics *, Config_info *, double, Grid *);
-int three_band_solver_ver_sound_waves(State *, State *, State *, Diagnostics *, Config_info *, double, Grid *, int);
+int three_band_solver_ver_sound_waves(State *, State *, State *, Diagnostics *, Config_info *, double, Grid *);
 int manage_pressure_gradient(State *, Grid *, Dualgrid *, Diagnostics *, Forcings *, Extrapolation_info *, Irreversible_quantities *, Config_info *, int);

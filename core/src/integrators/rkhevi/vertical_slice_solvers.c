@@ -17,7 +17,7 @@ This file contains the implicit vertical solvers.
 
 int thomas_algorithm(double [], double [], double [], double [], double [], int);
 
-int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, Grid *grid, int no_rk_step)
+int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, Grid *grid)
 {
 	double delta_z, upper_volume, lower_volume, total_volume, damping_coeff, damping_coeff_max, damping_start_height, z_above_damping, damping_start_height_over_toa;
 	// This is for Klemp (2008).
@@ -97,7 +97,7 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 			d_vector[2*j + 1] =
 			state_old -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]
 			// explicit tendency
-			+ delta_t/(no_rk_step + 1)*state_tendency -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
+			+ delta_t*state_tendency -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
 		}
 		b_vector[2*NO_OF_LAYERS - 2] =  1;
 		d_vector[2*NO_OF_LAYERS - 2] = diagnostics -> temperature_gas_explicit[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];

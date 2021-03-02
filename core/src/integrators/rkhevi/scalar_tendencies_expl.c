@@ -9,6 +9,7 @@ This is the horizontal (explicit) part of the constituent integration.
 
 #include "../../enum_and_typedefs.h"
 #include "atmostracers.h"
+#include "../../settings.h"
 #include "../../spatial_operators/spatial_operators.h"
 #include "../../diagnostics/diagnostics.h"
 #include "stdio.h"
@@ -28,6 +29,15 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 	{
 	    // calc_h2otracers_source_rates(irrev -> constituent_mass_source_rates, irrev -> constituent_heat_source_rates, state -> mass_densities, state -> condensed_density_temperatures, state -> temperature_gas, NO_OF_SCALARS, delta_t);
 	}
+
+    double old_weight, new_weight;
+    old_weight = 0;
+    new_weight = 1;
+    if (no_rk_step == 1)
+    {
+    	new_weight = get_impl_thermo_weight();
+    	old_weight = 1 - new_weight;
+    }
 	
 	for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
 	{
@@ -89,10 +99,12 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 			if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 			{
 				state_tendency -> mass_densities[i*NO_OF_SCALARS + j]
+				= old_weight*state_tendency -> mass_densities[i*NO_OF_SCALARS + j]
+				+ new_weight*(
 				// the advection
-				= -diagnostics -> flux_density_divv[j]
+				-diagnostics -> flux_density_divv[j]
 				// the phase transition rates
-				+ irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j];
+				+ irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]);
 		    }
 	    }
 	    
@@ -140,8 +152,10 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 						}
 					}
 					state_tendency -> entropy_densities[(i - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j]
+					= old_weight*state_tendency -> entropy_densities[(i - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j]
+					+ new_weight*(
 					// the advection (resolved transport)
-					= -diagnostics -> flux_density_divv[j]
+					-diagnostics -> flux_density_divv[j]
 					// the diabatic forcings
 					// weighting factor
 					+ state -> mass_densities[i*NO_OF_SCALARS + j]/density_total(state, j)
@@ -155,7 +169,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 					// phase transitions
 					+ latent_heating
 					// this has to be divided by the temperature (we ware in the entropy equation)
-					)/state -> temperature_gas[j];
+					)/state -> temperature_gas[j]);
 				 }
 			}
 		}
@@ -180,10 +194,15 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 				{
 					c_v_cond = ret_c_v_cond(i, 0, state -> condensed_density_temperatures[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + state -> mass_densities[i*NO_OF_SCALARS + j]));
 					state_tendency -> condensed_density_temperatures[i*NO_OF_SCALARS + j]
+					= old_weight*state_tendency -> condensed_density_temperatures[i*NO_OF_SCALARS + j]
+					+ new_weight*(
 					// the advection
-					= -diagnostics -> flux_density_divv[j]
+					-diagnostics -> flux_density_divv[j]
 					// the source terms
-					+ state -> mass_densities[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state, j))*(irrev -> temperature_diffusion_heating[j] + irrev -> heating_diss[j] + radiation_tendency[j]) + 1/c_v_cond*irrev -> constituent_heat_source_rates[i*NO_OF_SCALARS + j] + diagnostics -> scalar_field_placeholder[j]*(irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]);
+					+ state -> mass_densities[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state, j))
+					*(irrev -> temperature_diffusion_heating[j] + irrev -> heating_diss[j] + radiation_tendency[j])
+					+ 1/c_v_cond*irrev -> constituent_heat_source_rates[i*NO_OF_SCALARS + j]
+					+ diagnostics -> scalar_field_placeholder[j]*(irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]));
 				}
 			}
 		}

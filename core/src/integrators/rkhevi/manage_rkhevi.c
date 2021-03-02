@@ -41,14 +41,13 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
         	h_index = j - layer_index*NO_OF_VECTORS_PER_LAYER;
         	if (h_index >= NO_OF_SCALARS_H)
         	{
-        		state_new -> velocity_gas[j] = state_old -> velocity_gas[j] + delta_t/(i + 1)*state_tendency -> velocity_gas[j];
+        		state_new -> velocity_gas[j] = state_old -> velocity_gas[j] + delta_t*state_tendency -> velocity_gas[j];
         	}
         }
 		// Horizontal velocity can be considered to be updated from now on.
 		
 		// 2.) Explicit component of the generalized density equations.
 		// ------------------------------------------------------------
-		// state_new contains densities and velcoties from different time levels (velocity already updated, densities not yet)
 		backward_tendencies(state_new, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, time_coordinate);
 		// determining the explicit component of the new temperature
 		
@@ -58,7 +57,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 
 		// 4.) Vertical sound wave solver.
 		// -------------------------------
-		three_band_solver_ver_sound_waves(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid, i);
+		three_band_solver_ver_sound_waves(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid);
 		// Vertical velocity can be seen as updated from now on.
 		
 		// 5.) Solving the implicit component of the generalized density equaitons.
