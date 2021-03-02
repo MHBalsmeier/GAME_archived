@@ -58,8 +58,12 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
             total_volume = upper_volume + lower_volume;
             upper_weights_vector[j] = upper_volume/total_volume;
             lower_weights_vector[j] = lower_volume/total_volume;
-			temp_interface_values[j] = upper_weights_vector[j]*state_new -> temperature_gas[upper_index]
-			+ lower_weights_vector[j]*state_new -> temperature_gas[lower_index];
+			temp_interface_values[j] = (1 - impl_pgrad_weight)*(
+			upper_weights_vector[j]*state_old -> temperature_gas[upper_index]
+			+ lower_weights_vector[j]*state_old -> temperature_gas[lower_index]);
+			temp_interface_values[j] += impl_pgrad_weight*(
+			upper_weights_vector[j]*state_new -> temperature_gas[upper_index]
+			+ lower_weights_vector[j]*state_new -> temperature_gas[lower_index]);
 			c_g_p_interface_values[j] = upper_weights_vector[j]*c_g_p_vector[j] +
 			lower_weights_vector[j]*c_g_p_vector[j + 1];
 		}
