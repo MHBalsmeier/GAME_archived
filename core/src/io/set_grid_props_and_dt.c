@@ -322,10 +322,12 @@ int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid, State *state, C
     // adding a safety margin
     max_sound_speed = 1.1*max_sound_speed;
     double min_dist_horizontal = RADIUS;
+    double mean_dist_horizontal = 0;
     for (int i = 0; i < NO_OF_LAYERS; ++i)
     {
         for (int j = 0; j < NO_OF_VECTORS_H; ++j)
         {
+        	mean_dist_horizontal += grid -> normal_distance[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j];
             if (grid -> normal_distance[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] < min_dist_horizontal)
             {
                 min_dist_horizontal = grid -> normal_distance[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j];
@@ -333,6 +335,18 @@ int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid, State *state, C
         }
     }
 	*delta_t = (1 - cfl_margin)*min_dist_horizontal/max_sound_speed;
+	
+	/*
+	the homogeneous prefactor of the divergence damping
+	this is for RES_ID = 5
+	double div_damp_coeff = 0.5e15; // unstable
+	div_damp_coeff = 5e15; // grid-scale noise is produced, leading to instability
+	div_damp_coeff = 28e15; // grid-scale noise is produced, leading to instability (best choice probably)
+	div_damp_coeff = 250e15; // too close to instability, unrealistically large compared to the literature
+	div_damp_coeff = 2500e15; // unstable
+	*/
+	// generalized version following the ICON paper
+	config_info -> div_damp_coeff = 1/(450*(*delta_t))*pow(mean_dist_horizontal/NO_OF_H_VECTORS, 4);
     return 1;
 }
 

@@ -149,6 +149,7 @@ int assume_lte;
 int adv_sound_ratio;
 int nwp_mode;
 int delta_t_between_analyses;
+double div_damp_coeff;
 } Config_info;
 
 // This is necessary for stability of horizontally propagating sound waves.

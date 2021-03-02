@@ -35,9 +35,8 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 	// at these very coarse resolutions, a divergence damping must be added to control grid-scale noise
 	if (RES_ID <= 5)
 	{
-		int div_damp_order;
 		// the order of the divergence damping
-		div_damp_order = 4;
+		int div_damp_order = 4;
 		// checking if the divergence damping order is even
 		if (fmod(div_damp_order, 2) != 0)
 		{
@@ -45,15 +44,8 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 			printf("Aborting.\n");
 			exit(1);
 		}
-		// the homogeneous prefactor
-		// this is for RES_ID = 5
-		double div_damp_coeff = 0.5e15; // unstable
-		// div_damp_coeff = 5e15; // grid-scale noise is produced, leading to instability
-		div_damp_coeff = 25e15; // grid-scale noise is produced, leading to instability (best choice probably)
-		// div_damp_coeff = 250e15; // too close to instability, unrealistically large compared to the literature
-		// div_damp_coeff = 2500e15; // unstable
 		divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
-    	grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
+		grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
     	for (int i = 0; i < div_damp_order/2 - 1; ++i)
     	{
 			// diagnostics -> velocity_gas_divv is a misuse of name
@@ -68,7 +60,7 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 			h_index = i - layer_index*NO_OF_VECTORS_H;
 			irrev -> friction_acc[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
 			// a sign has to be taken into account here
-			+= -pow(-1, div_damp_order/2)*div_damp_coeff*irrev -> velocity_grad_div[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+			+= -pow(-1, div_damp_order/2)*config_info -> div_damp_coeff*irrev -> velocity_grad_div[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
 		}
 	}
 	
