@@ -12,7 +12,6 @@
 # 5:	JW test, moist, perturbed
 
 echo "***** TEST FILE CREATION *****"
-echo "Copyright (C) 2020 The GAME development team."
 if [ $valgrind_check -eq 0 ]
 then
 mpirun -np $number_of_cpus ./test_generator $test_id $orography_layers $type_of_vertical_grid $toa
