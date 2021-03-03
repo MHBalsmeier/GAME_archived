@@ -4,7 +4,6 @@
 # Github repository: https://github.com/AUN4GFD/game
 
 echo "***** OROGRAPHY FILE CREATION *****"
-echo "Copyright (C) 2020 The GAME development team."
 if [ $valgrind_check -eq 0 ]
 then
 mpirun -np $number_of_cpus ./orography_generator $oro_id

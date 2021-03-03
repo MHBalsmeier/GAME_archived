@@ -5,7 +5,6 @@
 
 # verbosity
 echo "***** GRID FILE CREATION *****"
-echo "Copyright (C) 2020 The GAME development team."
 echo ""
 echo "Setup:"
 echo "oro_id = $oro_id."
