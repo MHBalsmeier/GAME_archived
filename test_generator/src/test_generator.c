@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
    	{
    		NO_OF_ORO_LAYERS = 0;
    	}
+   	
    	// determining the orography ID as a function of the test ID
 	int ORO_ID;
 	if (TEST_ID == 0 || TEST_ID == 8 || TEST_ID == 9)
@@ -72,6 +73,7 @@ int main(int argc, char *argv[])
 	{
 		ORO_ID = 3;
 	}
+	
     int FILE_NAME_LENGTH = 100;
     char *GEO_PROP_FILE_PRE = malloc((FILE_NAME_LENGTH + 1)*sizeof(char));
     sprintf(GEO_PROP_FILE_PRE, "../grid_generator/grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
@@ -191,6 +193,7 @@ int main(int argc, char *argv[])
     }
     Forcings *forcings = calloc(1, sizeof(Forcings));
     
+    // reading the grid properties which are not part of the struct grid
     double *latitude_vector = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *longitude_vector = malloc(NO_OF_VECTORS_H*sizeof(double));
     int ncid_grid, retval, latitude_vector_id, longitude_vector_id;
@@ -208,9 +211,9 @@ int main(int argc, char *argv[])
     if ((retval = nc_close(ncid_grid)))
         NCERR(retval);
 
+    // horizontal wind fields are determind here
     for (int i = 0; i < NO_OF_LAYERS; ++i)
     {
-        // horizontal wind fields are determind here
         for (int j = 0; j < NO_OF_VECTORS_H; ++j)
         {
             lat = latitude_vector[j];
@@ -249,6 +252,7 @@ int main(int argc, char *argv[])
             }
         }
     }
+    // setting the vertical wind field equal to zero
     for (int i = 0; i < NO_OF_LEVELS; ++i)
     {
     	#pragma omp parallel for private(lat, lon, z_height)
@@ -265,6 +269,7 @@ int main(int argc, char *argv[])
     }    
     
     Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
+    // this is the density which has not yet been hydrostatically balanced
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		diagnostics -> scalar_field_placeholder[i] = pressure[i]/(R_D*temperature[i]);

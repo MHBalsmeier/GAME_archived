@@ -531,6 +531,7 @@ int main(int argc, char *argv[])
     	/*
     	Writing the actual output.
     	--------------------------
+    	// interpolating to the output time
     	*/
         if(t_0 + delta_t >= t_write && t_0 <= t_write)
         {

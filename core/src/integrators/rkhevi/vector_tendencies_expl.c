@@ -45,13 +45,12 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     // Now the explicit forces are added up.
     int layer_index, h_index;
     double old_weight, new_weight;
-    old_weight = 0;
     new_weight = 1;
     if (no_rk_step == 1)
     {
     	new_weight = 0.5;
-    	old_weight = 1 - new_weight;
     }
+	old_weight = 1 - new_weight;
     #pragma omp parallel for private(layer_index, h_index)
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
