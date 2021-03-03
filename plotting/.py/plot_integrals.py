@@ -67,6 +67,7 @@ if write_out_energy_integral == 1:
 	plt.plot(time_vector, 100*(potential_vector - potential_vector[0])/total_begin);
 	plt.plot(time_vector, 100*(internal_vector - internal_vector[0])/total_begin);
 	plt.plot(time_vector, 100*(kinetic_vector + potential_vector + internal_vector - total_begin)/total_begin);
+	print("relative energy change: " + str(100*(kinetic_vector[-1] + potential_vector[-1] + internal_vector[-1] - total_begin)/total_begin) + " %");
 	plt.legend(["kinetic", "potential", "internal", "total"]);
 	plt.grid();
 	fig.savefig(fig_save_path + "/" + run_id + "_energy_integrals.png", dpi = 500);

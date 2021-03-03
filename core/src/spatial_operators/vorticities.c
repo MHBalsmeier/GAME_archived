@@ -1,6 +1,8 @@
 /*
 This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/AUN4GFD/game
+*/
+/*
 Here, vorticities are calculated. The word "vorticity" hereby refers to both vertical and tangential components.
 */
 
@@ -17,11 +19,13 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagn
 	add_f_to_rel_vort(diagnostics -> rel_vort, diagnostics -> pot_vort, dualgrid);
     int i, layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index;
     double density_value, from_volume, to_volume, upper_volume, lower_volume;
+    // determining the density value by which we need to divide
     #pragma omp parallel for private (i, layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index, density_value, from_volume, to_volume, upper_volume, lower_volume)
     for (i = 0; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {
         layer_index = i/(2*NO_OF_VECTORS_H);
         h_index = i - layer_index*2*NO_OF_VECTORS_H;
+        // interpolation of the density to the center or the rhombi
         if (h_index >= NO_OF_VECTORS_H)
         {
 			edge_vector_index_h = h_index - NO_OF_VECTORS_H;
@@ -31,6 +35,7 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagn
 				density_value += grid -> density_to_rhombus_weights[4*edge_vector_index_h + j]*density_field[layer_index*NO_OF_SCALARS_H + grid -> density_to_rhombus_indices[4*edge_vector_index_h + j]];
 			}
         }
+        // interpolation of the density to the half level edges
         else
         {
         	if (layer_index == 0)
@@ -57,6 +62,7 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagn
             	density_value += 0.5*lower_volume/to_volume*density_field[upper_to_index + NO_OF_SCALARS_H];
             }
         }
+        // division by the density to obtain the "potential vorticity"
 		diagnostics -> pot_vort[i] = diagnostics -> pot_vort[i]/density_value;
     }
     return 0;
@@ -64,6 +70,9 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagn
 
 int add_f_to_rel_vort(Curl_field rel_vort, Curl_field out_field, Dualgrid *dualgrid)
 {
+	/*
+	Adding the Coriolis parameter to the relative vorticity.
+	*/
     int i, layer_index, h_index;
     #pragma omp parallel for private(i, layer_index, h_index)
     for (i = 0; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
