@@ -117,7 +117,6 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 int three_band_solver_gen_densitites(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, Grid *grid)
 {
 	// Vertical constituent advection with 3-band matrices.
-	// procedure derived in https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
 	// mass densities, entropy densities, density x temperatures
 	int no_of_relevant_constituents, constituent_index_offset;
 	double impl_weight = get_impl_thermo_weight();
@@ -184,10 +183,12 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 				double density_gas_value, density_gas_value_old;
 				double density_new_at_interface, density_old_at_interface, area, upper_volume, lower_volume, total_volume;
 				int j, lower_index, upper_index;
-				// diagnozing the vertical flux
+				
+				// diagnozing the vertical fluxes
 				for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 				{
-					vertical_flux_vector_impl[j] = state_old -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
+					vertical_flux_vector_impl[j] = expl_weight*state_old -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]
+					+ impl_weight*state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 					vertical_flux_vector_rhs[j] = state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 					// preparing the vertical interpolation
 					lower_index = i + (j + 1)*NO_OF_SCALARS_H;
@@ -213,26 +214,30 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 					// old density at the interface
 					density_old_at_interface = upper_weights_vector[j]*state_old -> mass_densities[k*NO_OF_SCALARS + upper_index]
 					+ lower_weights_vector[j]*state_old -> mass_densities[k*NO_OF_SCALARS + lower_index];
+					// new density at the interface
+					density_new_at_interface =
+					upper_weights_vector[j]*state_new -> mass_densities[k*NO_OF_SCALARS + upper_index]
+					+ lower_weights_vector[j]*state_new -> mass_densities[k*NO_OF_SCALARS + lower_index];
 					// for entropy densities, the vertical_flux_density is the mass flux density
 					if (quantity_id == 1)
 					{
-						// new density at the interface
-						density_new_at_interface =
-						upper_weights_vector[j]*state_new -> mass_densities[k*NO_OF_SCALARS + upper_index]
-						+ lower_weights_vector[j]*state_new -> mass_densities[k*NO_OF_SCALARS + lower_index];
-						vertical_flux_vector_impl[j] = density_old_at_interface*vertical_flux_vector_impl[j];
+						vertical_flux_vector_impl[j] = (expl_weight*density_old_at_interface + impl_weight*density_new_at_interface)*vertical_flux_vector_impl[j];
 						vertical_flux_vector_rhs[j] =
 						// the old specific entropy at the interface
-						(upper_weights_vector[j]*state_old -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + upper_index]/state_old -> mass_densities[k*NO_OF_SCALARS + upper_index]
-						+ lower_weights_vector[j]*state_old -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + lower_index]/state_old -> mass_densities[k*NO_OF_SCALARS + lower_index])
-						 // the mass flux density used in ther vertical mass flux divergence
+						(upper_weights_vector[j]*state_new -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + upper_index]/state_new -> mass_densities[k*NO_OF_SCALARS + upper_index]
+						+ lower_weights_vector[j]*state_new -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + lower_index]/state_new -> mass_densities[k*NO_OF_SCALARS + lower_index])
+						 // the mass flux density used in the vertical mass flux divergence
 						*density_new_at_interface*vertical_flux_vector_rhs[j];
 					}
 					else
 					{
-						vertical_flux_vector_rhs[j] = density_old_at_interface*vertical_flux_vector_rhs[j];
+						vertical_flux_vector_rhs[j] = density_new_at_interface*vertical_flux_vector_rhs[j];
 					}
 				}
+				
+				/*
+				Now we proceed to solve the vertical tridiagonal problems.
+				*/
 				// filling up the original vectors
 				for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 				{
