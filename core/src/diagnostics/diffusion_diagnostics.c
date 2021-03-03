@@ -87,7 +87,7 @@ int calc_divv_term_viscosity_eff(State *state, Scalar_field divv_term_viscosity_
 {
 	// these things could be modified
 	double diff_h_smag_fac = 0.18;
-	double shear_bg = 0*2*1.5e-5;
+	double shear_bg = 3*1.5e-5;
 	
 	double eff_particle_radius = 130e-12;
 	double mean_particle_mass = mean_particle_masses_gas(0);
@@ -120,7 +120,7 @@ int calc_curl_term_viscosity_eff(State *state, Scalar_field curl_term_viscosity_
 {
 	// these things could be modified
 	double diff_h_smag_fac = 0.18;
-	double shear_bg = 0*2*1.5e-5;
+	double shear_bg = 3*1.5e-5;
 	
 	double eff_particle_radius = 130e-12;
 	double mean_particle_mass = mean_particle_masses_gas(0);
