@@ -84,6 +84,7 @@ double density_to_rhombus_weights[4*NO_OF_VECTORS_H];
 double trsk_weights[10*NO_OF_VECTORS_H];
 double remap_horpri2hordual_vector_weights[2*NO_OF_DUAL_H_VECTORS];
 double stretching_parameter;
+double mean_area_edge;
 } Grid;
 
 // Contains properties of the dual grid.

@@ -305,7 +305,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     return 0;
 }
 
-int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid, State *state, Config_info *config_info)
+int calc_delta_t_and_related(double cfl_margin, double *delta_t, Grid *grid, Dualgrid *dualgrid, State *state, Config_info *config_info)
 {
     double max_sound_speed = 0;
     double sound_speed_value;
@@ -322,12 +322,13 @@ int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid, State *state, C
     // adding a safety margin
     max_sound_speed = 1.1*max_sound_speed;
     double min_dist_horizontal = RADIUS;
-    double mean_dist_horizontal = 0;
+    double edge_area = 0;
     for (int i = 0; i < NO_OF_LAYERS; ++i)
     {
         for (int j = 0; j < NO_OF_VECTORS_H; ++j)
         {
-        	mean_dist_horizontal += grid -> normal_distance[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j];
+            edge_area += 0.5*grid -> normal_distance[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j]
+            *dualgrid -> normal_distance[i*NO_OF_DUAL_VECTORS_PER_LAYER + j];
             if (grid -> normal_distance[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] < min_dist_horizontal)
             {
                 min_dist_horizontal = grid -> normal_distance[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j];
@@ -335,6 +336,7 @@ int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid, State *state, C
         }
     }
 	*delta_t = (1 - cfl_margin)*min_dist_horizontal/max_sound_speed;
+	grid -> mean_area_edge = edge_area/NO_OF_H_VECTORS;
 	
 	/*
 	the homogeneous prefactor of the divergence damping
@@ -346,7 +348,7 @@ int calc_delta_t(double cfl_margin, double *delta_t, Grid *grid, State *state, C
 	div_damp_coeff = 2500e15; // unstable
 	*/
 	// generalized version following the ICON paper
-	config_info -> div_damp_coeff = 1/(450*(*delta_t))*pow(mean_dist_horizontal/NO_OF_H_VECTORS, 4);
+	config_info -> div_damp_coeff = 1/(500*(*delta_t))*pow(grid -> mean_area_edge, 2);
     return 1;
 }
 

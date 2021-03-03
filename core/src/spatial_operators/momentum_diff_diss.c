@@ -19,18 +19,21 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 	{
 		add_vertical_divv(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
     }
-    grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
-    if (config_info -> momentum_diff_v == 0)
-    {
-    	calc_rel_vort(state -> velocity_gas, diagnostics -> rel_vort, grid, dualgrid, 0);
-    }
+	if (config_info -> momentum_diff_v == 0)
+	{
+    	grad_hor(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
+	}
+	if (config_info -> momentum_diff_v == 1)
+	{
+    	grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
+	}
     curl_of_vorticity_m(diagnostics -> rel_vort, diagnostics -> curl_of_vorticity_m, grid, dualgrid, config_info);
     // Multiplying the values of the differential operators by the effective viscosities.
     // Calculating the effective viscosity of the divergence term.
-    calc_divv_term_viscosity_eff(state, irrev -> viscosity_eff);
+    calc_divv_term_viscosity_eff(state, irrev -> viscosity_eff, grid, delta_t);
 	scalar_times_vector(irrev -> viscosity_eff, irrev -> velocity_grad_div, irrev -> friction_acc, grid);
     // Calculating the effective viscosity of the curl term.
-    calc_curl_term_viscosity_eff(state, irrev -> viscosity_eff);
+    calc_curl_term_viscosity_eff(state, irrev -> viscosity_eff, grid, delta_t);
 	scalar_times_vector(irrev -> viscosity_eff, diagnostics -> curl_of_vorticity_m, diagnostics -> curl_of_vorticity_m, grid);
 	// adding the curl term to the divergence term
 	#pragma omp parallel for
@@ -128,15 +131,18 @@ int curl_of_vorticity_m(Curl_field vorticity, Vector_field out_field, Grid *grid
 				// vorticity at the from_index_dual point
 				*vorticity[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + dualgrid -> adjacent_vector_indices_h[3*dualgrid -> from_index[h_index - NO_OF_SCALARS_H] + j]]);
 			}
-			// vertical difference of horizontal vorticity (-dzeta_y*dy)
-			out_field[i] +=
-			// substracting the upper zeta_y value
-			-dualgrid -> normal_distance[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H]
-			*vorticity[layer_index*2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
-			out_field[i] +=
-			// adding the lower zeta_y value
-			dualgrid -> normal_distance[(layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H]
-			*vorticity[(layer_index + 1)*2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
+			if (config_info -> momentum_diff_v == 1)
+			{
+				// vertical difference of horizontal vorticity (-dzeta_y*dy)
+				out_field[i] +=
+				// substracting the upper zeta_y value
+				-dualgrid -> normal_distance[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H]
+				*vorticity[layer_index*2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
+				out_field[i] +=
+				// adding the lower zeta_y value
+				dualgrid -> normal_distance[(layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H]
+				*vorticity[(layer_index + 1)*2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
+			}
 			// Dividing by the area. The additional minus sign accounts for the fact the we want the negative curl of the curl.
 			out_field[i] = -out_field[i]/grid -> area[i];
 		}

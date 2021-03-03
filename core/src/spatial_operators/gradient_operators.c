@@ -98,6 +98,23 @@ int grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
     return 0;
 }
 
+int grad_hor(Scalar_field in_field, Vector_field out_field, Grid *grid)
+{
+	grad_cov(in_field, out_field, grid);
+	grad_oro_corr(out_field, grid);
+    int layer_index, h_index;
+	#pragma omp parallel for private(layer_index, h_index)
+    for (int i = 0; i < NO_OF_VECTORS; ++i)
+    {
+        layer_index = i/NO_OF_VECTORS_PER_LAYER;
+        h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
+        if (h_index < NO_OF_SCALARS_H)
+        {
+            out_field[i] = 0;
+        }
+    }
+    return 0;
+}
 
 
 

@@ -372,7 +372,7 @@ int main(int argc, char *argv[])
     printf("completed.\n");
     // delta_t is the sound time step
     double delta_t;
-    calc_delta_t(cfl_margin, &delta_t, grid, state_old, config_info);
+    calc_delta_t_and_related(cfl_margin, &delta_t, grid, dualgrid, state_old, config_info);
     if (radiation_delta_t < delta_t)
     {
     	printf("It is radiation_delta_t < delta_t.\n");

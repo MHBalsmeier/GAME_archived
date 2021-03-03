@@ -83,37 +83,67 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 	return 0;
 }
 
-int calc_divv_term_viscosity_eff(State *state, Scalar_field divv_term_viscosity_eff)
+int calc_divv_term_viscosity_eff(State *state, Scalar_field divv_term_viscosity_eff, Grid *grid, double delta_t)
 {
-	double mean_particle_mass = mean_particle_masses_gas(0);
+	// these things could be modified
+	double diff_h_smag_fac = 0.18;
+	double shear_bg = 1.5e-5;
+	
 	double eff_particle_radius = 130e-12;
-	double divv_term_viscosity_eff_value;
-	double upturning_for_scale = 1.5*pow(10, 4);
-	#pragma omp parallel for private(divv_term_viscosity_eff_value)
+	double mean_particle_mass = mean_particle_masses_gas(0);
+	double molecular_viscosity;
+	// the maximum diffusion coefficient (based on stability, including a 50 % safety margin)
+	double max_diff_h_coeff_turb = 0.5*0.25*grid -> mean_area_edge/delta_t;
+	// the minimum "background" diffusion coefficient
+	double min_diff_h_coeff_turb = grid -> mean_area_edge*diff_h_smag_fac*shear_bg;
+	double viscosity_value;
+	#pragma omp parallel for private(molecular_viscosity)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &divv_term_viscosity_eff_value);
+		// calculating the molecular viscosity
+		// calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &molecular_viscosity);
 		// homogeneous for now
-		calc_diffusion_coeff(273.15, mean_particle_mass, 1, eff_particle_radius, &divv_term_viscosity_eff_value);
+		viscosity_value = 0.01*(100*min_diff_h_coeff_turb + 0*max_diff_h_coeff_turb);
+		calc_diffusion_coeff(273.15, mean_particle_mass, 1, eff_particle_radius, &molecular_viscosity);
+		// the molecular viscosity is the absolute minimum
+		if (molecular_viscosity > viscosity_value)
+		{
+			viscosity_value = molecular_viscosity;
+		}
 		// neglecting the volume viscosity for now
-		divv_term_viscosity_eff[i] = 4.0/3*upturning_for_scale*divv_term_viscosity_eff_value;
+		divv_term_viscosity_eff[i] = 4.0/3*viscosity_value;
 	}
 	return 0;
 }
 
-int calc_curl_term_viscosity_eff(State *state, Scalar_field curl_term_viscosity_eff)
+int calc_curl_term_viscosity_eff(State *state, Scalar_field curl_term_viscosity_eff, Grid *grid, double delta_t)
 {
-	double mean_particle_mass = mean_particle_masses_gas(0);
+	// these things could be modified
+	double diff_h_smag_fac = 0.18;
+	double shear_bg = 1.5e-5;
+	
 	double eff_particle_radius = 130e-12;
-	double curl_term_viscosity_eff_value;
-	double upturning_for_scale = 1.5*pow(10, 4);
-	#pragma omp parallel for private(curl_term_viscosity_eff_value)
+	double mean_particle_mass = mean_particle_masses_gas(0);
+	double molecular_viscosity;
+	// the maximum diffusion coefficient (based on stability, including a 50 % safety margin)
+	double max_diff_h_coeff_turb = 0.5*0.25*grid -> mean_area_edge/delta_t;
+	// the minimum "background" diffusion coefficient
+	double min_diff_h_coeff_turb = grid -> mean_area_edge*diff_h_smag_fac*shear_bg;
+	double viscosity_value;
+	#pragma omp parallel for private(molecular_viscosity)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &curl_term_viscosity_eff_value);
+		// calculating the molecular viscosity
+		// calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &molecular_viscosity);
 		// homogeneous for now
-		calc_diffusion_coeff(273.15, mean_particle_mass, 1, eff_particle_radius, &curl_term_viscosity_eff_value);
-		curl_term_viscosity_eff[i] = upturning_for_scale*curl_term_viscosity_eff_value;
+		viscosity_value = 0.01*(100*min_diff_h_coeff_turb + 0*max_diff_h_coeff_turb);
+		calc_diffusion_coeff(273.15, mean_particle_mass, 1, eff_particle_radius, &molecular_viscosity);
+		// the molecular viscosity is the absolute minimum
+		if (molecular_viscosity > viscosity_value)
+		{
+			viscosity_value = molecular_viscosity;
+		}
+		curl_term_viscosity_eff[i] = viscosity_value;
 	}
 	return 0;
 }
