@@ -87,7 +87,7 @@ int calc_divv_term_viscosity_eff(State *state, Scalar_field divv_term_viscosity_
 {
 	// these things could be modified
 	double diff_h_smag_fac = 0.18;
-	double shear_bg = 1.5e-5;
+	double shear_bg = 0*2*1.5e-5;
 	
 	double eff_particle_radius = 130e-12;
 	double mean_particle_mass = mean_particle_masses_gas(0);
@@ -103,7 +103,7 @@ int calc_divv_term_viscosity_eff(State *state, Scalar_field divv_term_viscosity_
 		// calculating the molecular viscosity
 		// calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &molecular_viscosity);
 		// homogeneous for now
-		viscosity_value = 5*min_diff_h_coeff_turb;
+		viscosity_value = min_diff_h_coeff_turb;
 		calc_diffusion_coeff(273.15, mean_particle_mass, 1, eff_particle_radius, &molecular_viscosity);
 		// the molecular viscosity is the absolute minimum
 		if (molecular_viscosity > viscosity_value)
@@ -120,7 +120,7 @@ int calc_curl_term_viscosity_eff(State *state, Scalar_field curl_term_viscosity_
 {
 	// these things could be modified
 	double diff_h_smag_fac = 0.18;
-	double shear_bg = 1.5e-5;
+	double shear_bg = 0*2*1.5e-5;
 	
 	double eff_particle_radius = 130e-12;
 	double mean_particle_mass = mean_particle_masses_gas(0);
@@ -136,7 +136,7 @@ int calc_curl_term_viscosity_eff(State *state, Scalar_field curl_term_viscosity_
 		// calculating the molecular viscosity
 		// calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &molecular_viscosity);
 		// homogeneous for now
-		viscosity_value = 5*min_diff_h_coeff_turb;
+		viscosity_value = min_diff_h_coeff_turb;
 		calc_diffusion_coeff(273.15, mean_particle_mass, 1, eff_particle_radius, &molecular_viscosity);
 		// the molecular viscosity is the absolute minimum
 		if (molecular_viscosity > viscosity_value)

@@ -348,7 +348,7 @@ int calc_delta_t_and_related(double cfl_margin, double *delta_t, Grid *grid, Dua
 	div_damp_coeff = 2500e15; // unstable
 	*/
 	// generalized version following the ICON paper
-	config_info -> div_damp_coeff = 0*1/(500*(*delta_t))*pow(grid -> mean_area_edge, 2);
+	config_info -> div_damp_coeff = 1/(500*(*delta_t))*pow(grid -> mean_area_edge, 2);
     return 1;
 }
 
