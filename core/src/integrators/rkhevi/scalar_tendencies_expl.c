@@ -27,7 +27,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 	*/
 	if (no_rk_step == 0 && NO_OF_CONSTITUENTS == 4)
 	{
-	    // calc_h2otracers_source_rates(irrev -> constituent_mass_source_rates, irrev -> constituent_heat_source_rates, state -> mass_densities, state -> condensed_density_temperatures, state -> temperature_gas, NO_OF_SCALARS, delta_t);
+	    calc_h2otracers_source_rates(irrev -> constituent_mass_source_rates, irrev -> constituent_heat_source_rates, state -> mass_densities, state -> condensed_density_temperatures, state -> temperature_gas, NO_OF_SCALARS, delta_t);
 	}
 
     double old_weight, new_weight;
