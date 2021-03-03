@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
     double *direction_dual = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *area_dual_pre = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
     double *area_dual = malloc((NO_OF_DUAL_H_VECTORS + NO_OF_H_VECTORS)*sizeof(double));
-    double *f_vec = malloc(3*NO_OF_VECTORS_H*sizeof(double));
+    double *f_vec = malloc(2*NO_OF_VECTORS_H*sizeof(double));
     double *triangle_face_unit_sphere = malloc(NO_OF_DUAL_SCALARS_H*sizeof(double));
     double *pent_hex_face_unity_sphere = malloc(NO_OF_SCALARS_H*sizeof(double));
     double *rel_on_line_dual = malloc(NO_OF_VECTORS_H*sizeof(double));
@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_v_6_index", 6*NO_OF_LEVELS*NO_OF_SCALARS_H, &vector_v_dimid_6)))
         ERR(retval);
-    if ((retval = nc_def_dim(ncid_g_prop, "f_vec_index", 3*NO_OF_VECTORS_H, &f_vec_dimid)))
+    if ((retval = nc_def_dim(ncid_g_prop, "f_vec_index", 2*NO_OF_VECTORS_H, &f_vec_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "vector_index_dual", NO_OF_DUAL_VECTORS, &vector_dual_dimid)))
         ERR(retval);

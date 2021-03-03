@@ -20,7 +20,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     double *z_vector = malloc(NO_OF_VECTORS*sizeof(double));
     double *trsk_weights = malloc(10*NO_OF_VECTORS_H*sizeof(double));
     double *area_dual = malloc((NO_OF_DUAL_H_VECTORS + NO_OF_H_VECTORS)*sizeof(double));
-    double *f_vec = malloc(3*NO_OF_VECTORS_H*sizeof(double));
+    double *f_vec = malloc(2*NO_OF_VECTORS_H*sizeof(double));
     double *direction = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *gravity_potential = malloc(NO_OF_SCALARS*sizeof(double));
     double *volume_ratios = malloc(2*NO_OF_SCALARS*sizeof(double));
@@ -220,9 +220,9 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
             grid -> trsk_modified_curl_indices[10*i + j] = trsk_modified_curl_indices[10*i + j];
             grid -> trsk_weights[10*i + j] = trsk_weights[10*i + j];
 		}
-        for (int j = 0; j < 3; ++j)
+        for (int j = 0; j < 2; ++j)
         {
-		    dualgrid -> f_vec[3*i + j] = f_vec[3*i + j];
+		    dualgrid -> f_vec[2*i + j] = f_vec[2*i + j];
         }
     }
     for (int i = 0; i < NO_OF_SCALARS; ++i)

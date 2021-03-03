@@ -17,7 +17,7 @@ Github repository: https://github.com/AUN4GFD/game
 int set_f_vec(double latitude_vector[], double direction[], double direction_dual[], double f_vec[])
 {
 	#pragma omp parallel for
-    for (int i = 0; i < 3*NO_OF_VECTORS_H; ++i)
+    for (int i = 0; i < 2*NO_OF_VECTORS_H; ++i)
     {
     	// horizontal component at dual vector points
         if (i < NO_OF_VECTORS_H)
@@ -28,11 +28,6 @@ int set_f_vec(double latitude_vector[], double direction[], double direction_dua
         else if (i < 2*NO_OF_VECTORS_H)
         {
         	f_vec[i] = 2*OMEGA*sin(latitude_vector[i - NO_OF_VECTORS_H]);
-    	}
-    	// preparation of horizontal non-traditional Coriolis term
-        else
-        {
-        	f_vec[i] = 2*OMEGA*cos(latitude_vector[i - 2*NO_OF_VECTORS_H])*cos(direction[i - 2*NO_OF_VECTORS_H]);
     	}
     }
  	return 0;   
