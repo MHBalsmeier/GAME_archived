@@ -4,7 +4,7 @@ Github repository: https://github.com/AUN4GFD/game
 */
 
 /*
-The main organizes the model, manages the time stepping, calls model output, collects the lowest model layer wind for 10 m wind mean and so on. All the memory needed for integration is allocated and freed here for efficiency (I wonder if this is really relevant).
+The main organizes the model, manages the time stepping, calls model output, collects the lowest model layer wind for 10 m wind mean and so on. All the memory needed for the integration is allocated and freed here.
 */
 
 #include <stdio.h>
@@ -429,6 +429,7 @@ int main(int argc, char *argv[])
     }
     Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
     Forcings *forcings = calloc(1, sizeof(Forcings));
+    // writing out the initial state of the model run
     write_out(state_old, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
     t_write += WRITE_OUT_INTERVAL;
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
@@ -463,10 +464,8 @@ int main(int argc, char *argv[])
 	Preparation of the actual integration.
     --------------------------------------
     */
-    double speed;
     double t_rad_update = t_0;
     int wind_10_m_step_counter = 0;
-    int second_write_out_bool = 1;
     MPI_Init(&argc, &argv);
     State *state_tendency = calloc(1, sizeof(State));
     Extrapolation_info *extrapolation_info = calloc(1, sizeof(Extrapolation_info));
@@ -480,7 +479,10 @@ int main(int argc, char *argv[])
     This is the loop over the time steps.
     -------------------------------------
     */
+    // This is necessary because at the very first step of the model integration, some things are handled differently in the time stepping.
     config_info -> totally_first_step_bool = 1;
+    // this is to store the speed of the model integration
+    double speed;
     while (t_0 + delta_t < t_init + TOTAL_RUN_SPAN + 300)
     {
     	// updating the model time
@@ -504,6 +506,7 @@ int main(int argc, char *argv[])
     	
     	// Time step integration.
     	manage_rkhevi(state_old, state_new, extrapolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
+    	// This switch can be set to zero now and remains there.
     	config_info -> totally_first_step_bool = 0;
 		time_step_counter += 1;
 		
@@ -538,6 +541,7 @@ int main(int argc, char *argv[])
             interpolation_t(state_old, state_new, state_write, t_0, t_0 + delta_t, t_write);
     	}
         
+        // 5 minutes before the output time, the wind in the lowest layer needs to be collected for 10 m wind diagnostics.
         if (t_0 >= t_write - 300)
         {
         	if (wind_10_m_step_counter < min_no_of_output_steps)
@@ -549,29 +553,29 @@ int main(int argc, char *argv[])
 		    	wind_10_m_step_counter += 1;
         	}
         }
+        // 5 minutes after the output time, the 10 m wind diagnostics can be executed, so output can actually be written
         if(t_0 + delta_t >= t_write + 300 && t_0 <= t_write + 300)
         {
+        	// here, output is actually written
             write_out(state_write, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
+            // setting the next output time
             t_write += WRITE_OUT_INTERVAL;
+            
+            // Calculating the speed of the model.
             second_time = clock();
-            if (second_write_out_bool == 1)
-            {
-            	speed = (CLOCKS_PER_SEC*(WRITE_OUT_INTERVAL + 300))/((double) second_time - first_time);
-            	second_write_out_bool = 0;
-        	}
-            else
-            {
-            	speed = CLOCKS_PER_SEC*WRITE_OUT_INTERVAL/((double) second_time - first_time);
-        	}
+        	speed = CLOCKS_PER_SEC*WRITE_OUT_INTERVAL/((double) second_time - first_time);
             printf("current speed: %lf\n", speed);
             first_time = clock();
             printf("run progress: %f h\n", (t_0 + delta_t - t_init)/SECONDS_PER_HOUR);
+            
+            // resetting the wind in the lowest layer to zero
             for (int i = 0; i < min_no_of_output_steps*NO_OF_VECTORS_H; ++i)
             {
             	wind_h_lowest_layer_array[i] = 0;
         	}
             wind_10_m_step_counter = 0;
         }
+        // giving the user information on the run progress
         printf("Step %d completed.\n", time_step_counter);
     }
     

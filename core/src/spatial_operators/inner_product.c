@@ -9,7 +9,6 @@ Github repository: https://github.com/AUN4GFD/game
 int kinetic_energy(Vector_field in_field, Scalar_field out_field, Grid *grid)
 {
 	// This function computes the kinetic energy, if in_field is the wind field. Only this part is neeed for the 3D Lamb transformation.
-	// For diag_bool == 1 it computes the 3D kinetic energy. This is only needed for diagnostics.
 	int layer_index, h_index, j, no_of_edges;
 	#pragma omp parallel for private (j, layer_index, h_index, no_of_edges)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
