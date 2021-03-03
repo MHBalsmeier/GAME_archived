@@ -453,7 +453,6 @@ int main(int argc, char *argv[])
     {
 		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
 	}
-    config_info -> totally_first_step_bool = 1;
     config_info -> rad_update = 1;
 	if (config_info -> rad_on == 1)
 	{
@@ -469,7 +468,6 @@ int main(int argc, char *argv[])
     int wind_10_m_step_counter = 0;
     int second_write_out_bool = 1;
     MPI_Init(&argc, &argv);
-    config_info -> totally_first_step_bool = 0;
     State *state_tendency = calloc(1, sizeof(State));
     Extrapolation_info *extrapolation_info = calloc(1, sizeof(Extrapolation_info));
     Irreversible_quantities *irrev = calloc(1, sizeof(Irreversible_quantities));
@@ -482,6 +480,7 @@ int main(int argc, char *argv[])
     This is the loop over the time steps.
     -------------------------------------
     */
+    config_info -> totally_first_step_bool = 1;
     while (t_0 + delta_t < t_init + TOTAL_RUN_SPAN + 300)
     {
     	// updating the model time
@@ -505,6 +504,7 @@ int main(int argc, char *argv[])
     	
     	// Time step integration.
     	manage_rkhevi(state_old, state_new, extrapolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
+    	config_info -> totally_first_step_bool = 0;
 		time_step_counter += 1;
 		
 		/*
