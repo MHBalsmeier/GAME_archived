@@ -20,6 +20,7 @@ double calc_micro_density(double, double);
 double calc_condensates_density_sum(int, Mass_densities);
 int vertical_contravariant_corr(Vector_field, int, int, Grid *, double *);
 int horizontal_covariant(Vector_field, int, int, Grid *, double *);
-int temperature_diagnostics_explicit(State *, State *, Diagnostics *, Config_info *, double);
+int temperature_diagnostics_explicit(State *, State *, State *, Diagnostics *, Config_info *, double, int);
 double density_total(State *, int);
 double density_gas(State *, int);
+int entropy_density_step(State *, State *, Config_info *);

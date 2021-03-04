@@ -119,10 +119,11 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 	// Vertical constituent advection with 3-band matrices.
 	// mass densities, entropy densities, density x temperatures
 	int no_of_relevant_constituents, constituent_index_offset;
-	double impl_weight = 0.5;
-	double expl_weight = 1 - impl_weight;
+	double impl_weight, expl_weight;
 	for (int quantity_id = 0; quantity_id < 3; ++quantity_id)
 	{
+		impl_weight = 0.5;
+		expl_weight = 1 - impl_weight;
 		no_of_relevant_constituents = 0;
 		constituent_index_offset = 0;
 		// mass densities
@@ -224,8 +225,8 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						vertical_flux_vector_impl[j] = expl_weight*density_old_at_interface*vertical_flux_vector_rhs[j] + impl_weight*density_new_at_interface*vertical_flux_vector_impl[j];
 						vertical_flux_vector_rhs[j] =
 						// the old specific entropy at the interface
-						(upper_weights_vector[j]*state_old -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + upper_index]/state_old -> mass_densities[k*NO_OF_SCALARS + upper_index]
-						+ lower_weights_vector[j]*state_old -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + lower_index]/state_old -> mass_densities[k*NO_OF_SCALARS + lower_index])
+						(upper_weights_vector[j]*state_new -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + upper_index]/state_new -> mass_densities[k*NO_OF_SCALARS + upper_index]
+						+ lower_weights_vector[j]*state_new -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + lower_index]/state_new -> mass_densities[k*NO_OF_SCALARS + lower_index])
 						 // the mass flux density used in the vertical mass flux divergence
 						*vertical_flux_vector_impl[j];
 					}
