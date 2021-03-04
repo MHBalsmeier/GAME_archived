@@ -43,7 +43,7 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 	}
 	
 	// at these very coarse resolutions, a divergence damping must be added to control grid-scale noise
-	if (RES_ID <= 5)
+	if (RES_ID <= -1)
 	{
 		// the order of the divergence damping
 		int div_damp_order = 4;
