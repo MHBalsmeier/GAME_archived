@@ -138,7 +138,7 @@ int entropy_density_step(State *state_old, State *state_new, Config_info *config
 			temperature_0 = state_old -> temperature_gas[i];
 			temperature_1 = state_new -> temperature_gas[i];
 			delta_temperature = temperature_1 - temperature_0;
-			// specific entropies
+			// specific entropy
 			specific_entropy_0 = state_old -> entropy_densities[j*NO_OF_SCALARS + i]/density_0;
 			nominator = c_v*density_0*delta_temperature + c_v*temperature_1*delta_density - (alpha*c_p*temperature_0 + beta*c_p*temperature_1 - alpha*specific_entropy_0*temperature_0)*delta_density + (alpha*temperature_0 + beta*temperature_1)*state_old -> entropy_densities[j*NO_OF_SCALARS + i];
 			denominator = alpha*temperature_0 + beta*temperature_1 - beta/density_1*temperature_1*delta_density;
