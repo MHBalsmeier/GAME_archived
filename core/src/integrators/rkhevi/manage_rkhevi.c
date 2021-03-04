@@ -53,7 +53,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		
 		// 3.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies (including diabatic forcings).
 		// ----------------------------------------------------------------------------------------------------------------------------------------
-		temperature_diagnostics_explicit(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, 0);
+		temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, 0);
 
 		// 4.) Vertical sound wave solver.
 		// -------------------------------

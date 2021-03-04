@@ -35,7 +35,7 @@ int pot_temp_diagnostics_dry(State *state, Scalar_field pot_temp)
     return 0;
 }
 
-int temperature_diagnostics_explicit(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, int write_to_new)
+int temperature_step(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, int write_to_new)
 {
     double nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_gas_0, density_gas_1, delta_density_gas, delta_entropy_density, temperature_0, specific_entropy_gas_0, specific_entropy_gas_1, c_g_v, c_g_p;
     double beta = get_impl_thermo_weight();
