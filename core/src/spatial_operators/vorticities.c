@@ -25,6 +25,10 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagn
     {
         layer_index = i/(2*NO_OF_VECTORS_H);
         h_index = i - layer_index*2*NO_OF_VECTORS_H;
+        
+        /*
+        Determination of the density value by which we have to divide.
+        */
         // interpolation of the density to the center or the rhombi
         if (h_index >= NO_OF_VECTORS_H)
         {
@@ -62,6 +66,7 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagn
             	density_value += 0.5*lower_volume/to_volume*density_field[upper_to_index + NO_OF_SCALARS_H];
             }
         }
+        
         // division by the density to obtain the "potential vorticity"
 		diagnostics -> pot_vort[i] = diagnostics -> pot_vort[i]/density_value;
     }

@@ -164,6 +164,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 				no_of_relevant_constituents = 0;
 			}
 		}
+		
 		// loop over all relevant constituents
 		for (int k = constituent_index_offset; k < constituent_index_offset + no_of_relevant_constituents; ++k)
 		{
@@ -312,7 +313,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						state_old -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
 						+ delta_t*state_tendency -> entropy_densities[(k - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
 					}
-					// density x temperatues
+					// density x temperatures
 					if (quantity_id == 2)
 					{
 						d_vector[j] =
@@ -356,9 +357,9 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						state_new -> condensed_density_temperatures[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = solution_vector[j];
 					}
 				}
-			}
-		}
-	}
+			} // horizontal index
+		} // constituent
+	} // quantity
 	return 0;
 }
 
