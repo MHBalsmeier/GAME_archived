@@ -116,6 +116,7 @@ Vector_field temperature_gradient;
 Scalar_field pressure_gradient_1_prefactor;
 Scalar_field temperature_gas_explicit;
 Curl_field rel_vort;
+Curl_field rel_vort_pot;
 Curl_field pot_vort;
 Scalar_field c_g_v_field;
 Scalar_field c_g_p_field;
@@ -134,6 +135,7 @@ typedef struct forcings {
 Vector_field pressure_gradient_acc_expl;
 Vector_field e_kin_grad;
 Vector_field pot_vort_tend;
+Vector_field rel_vort_tend;
 } Forcings;
 
 // Info on the run configuration is collected here.

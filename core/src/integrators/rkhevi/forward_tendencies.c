@@ -18,17 +18,8 @@ int forward_tendencies(State *state, State *state_tendency, Grid *grid, Dualgrid
 {
 	// Update of the pressure gradient.
 	manage_pressure_gradient(state, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, no_step_rk);
-    if (no_step_rk == 0 && config_info -> momentum_diff_h == 1 && slow_update_bool == 1)
-    {
-		momentum_diff_diss(state, diagnostics, irreversible_quantities, config_info, grid, dualgrid, delta_t);
-		// Due to condensates, the friction acceleration needs to get a deceleration factor.
-		if (config_info -> assume_lte == 0)
-		{
-			scalar_times_vector(irreversible_quantities -> pressure_gradient_decel_factor, irreversible_quantities -> friction_acc, irreversible_quantities -> friction_acc, grid);
-		}
-    }
 	// Only the horizontal momentum is a forward tendency.
-	vector_tendencies_expl(state, state_tendency, grid, dualgrid, diagnostics, forcings, irreversible_quantities, config_info, slow_update_bool, no_step_rk);
+	vector_tendencies_expl(state, state_tendency, grid, dualgrid, diagnostics, forcings, irreversible_quantities, config_info, slow_update_bool, no_step_rk, delta_t);
     return 0;
 }
 

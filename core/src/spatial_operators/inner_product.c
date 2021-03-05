@@ -31,7 +31,7 @@ int kinetic_energy(Vector_field in_field, Scalar_field out_field, Grid *grid)
     return 0;
 }
 
-int inner_product(Vector_field in_field_0, Vector_field in_field_1, Scalar_field out_field, Grid *grid)
+int inner_product(Vector_field in_field_0, Vector_field in_field_1, Scalar_field out_field, Grid *grid, int vert_switch)
 {
     // This function computes the inner product of the two vector fields in_field_0 and in_field_1. This is needed for computing the dissipation due to momentum diffusion (friction).
     int layer_index, h_index, j, no_of_edges;
@@ -51,8 +51,8 @@ int inner_product(Vector_field in_field_0, Vector_field in_field_1, Scalar_field
 	        out_field[i] += grid -> inner_product_weights[8*i + j]*in_field_0[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]*
 			in_field_1[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]];
 	    }
-	    out_field[i] += grid -> inner_product_weights[8*i + 6]*in_field_0[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]*in_field_1[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
-	    out_field[i] += grid -> inner_product_weights[8*i + 7]*in_field_0[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER]*in_field_1[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
+	    out_field[i] += vert_switch*grid -> inner_product_weights[8*i + 6]*in_field_0[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]*in_field_1[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
+	    out_field[i] += vert_switch*grid -> inner_product_weights[8*i + 7]*in_field_0[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER]*in_field_1[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
 	}
     return 0;
 }

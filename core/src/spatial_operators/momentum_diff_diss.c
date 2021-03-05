@@ -9,7 +9,7 @@ Github repository: https://github.com/AUN4GFD/game
 #include <stdlib.h>
 #include <stdio.h>
 
-int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid, double delta_t)
+int momentum_diff_diss(State *state, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid, double delta_t)
 {
 	int layer_index, h_index;
 	// Firstly the diffusion.
@@ -28,22 +28,19 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
     	grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
 	}
     curl_of_vorticity_m(diagnostics -> rel_vort, diagnostics -> curl_of_vorticity_m, grid, dualgrid, config_info);
-    // Multiplying the values of the differential operators by the effective viscosities.
-    // Calculating the effective viscosity of the divergence term.
-    calc_divv_term_viscosity_eff(state, irrev -> viscosity_eff, grid, delta_t);
-	scalar_times_vector(irrev -> viscosity_eff, irrev -> velocity_grad_div, irrev -> friction_acc, grid);
-    // Calculating the effective viscosity of the curl term.
-    calc_curl_term_viscosity_eff(state, irrev -> viscosity_eff, grid, delta_t);
-	scalar_times_vector(irrev -> viscosity_eff, diagnostics -> curl_of_vorticity_m, diagnostics -> curl_of_vorticity_m, grid);
 	// adding the curl term to the divergence term
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
-		irrev -> friction_acc[i] += diagnostics -> curl_of_vorticity_m[i];
+		irrev -> friction_acc[i] = irrev -> velocity_grad_div[i] + diagnostics -> curl_of_vorticity_m[i];
 	}
+    // Calculating the effective horizontal kinematic viscosity (Eddy viscosity).
+	hori_viscosity_eff(state, irrev -> viscosity_eff, grid, diagnostics, forcings, delta_t);
+	// multiplying by the viscosity
+	scalar_times_vector(irrev -> viscosity_eff, irrev -> friction_acc, irrev -> friction_acc, grid);
 	
 	// at these very coarse resolutions, a divergence damping must be added to control grid-scale noise (switched out currently)
-	if (RES_ID <= -1)
+	if (RES_ID <= 4)
 	{
 		// the order of the divergence damping
 		int div_damp_order = 4;
@@ -75,7 +72,7 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 	}
 	
 	// simplified dissipation
-	inner_product(state -> velocity_gas, irrev -> friction_acc, irrev -> heating_diss, grid);
+	inner_product(state -> velocity_gas, irrev -> friction_acc, irrev -> heating_diss, grid, 1);
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
