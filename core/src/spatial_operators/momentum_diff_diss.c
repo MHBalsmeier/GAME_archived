@@ -42,7 +42,7 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 		irrev -> friction_acc[i] += diagnostics -> curl_of_vorticity_m[i];
 	}
 	
-	// at these very coarse resolutions, a divergence damping must be added to control grid-scale noise
+	// at these very coarse resolutions, a divergence damping must be added to control grid-scale noise (switched out currently)
 	if (RES_ID <= -1)
 	{
 		// the order of the divergence damping
