@@ -14,7 +14,7 @@ Here, vorticities are calculated. The word "vorticity" hereby refers to both ver
 int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagnostics *diagnostics, Grid *grid, Dualgrid *dualgrid)
 {
 	// It is called "potential vorticity", but it is not Ertel's potential vorticity. It is the absolute vorticity divided by the density.
-	calc_rel_vort(velocity_field, diagnostics -> rel_vort, grid, dualgrid, 1);
+	calc_rel_vort(velocity_field, diagnostics -> rel_vort, grid, dualgrid);
 	// pot_vort is a misuse of name here
 	add_f_to_rel_vort(diagnostics -> rel_vort, diagnostics -> pot_vort, dualgrid);
     int i, layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index;
@@ -84,7 +84,7 @@ int add_f_to_rel_vort(Curl_field rel_vort, Curl_field out_field, Dualgrid *dualg
     return 0;
 }
 
-int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid, Dualgrid *dualgrid, int vertical_switch)
+int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
     int i, layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area, index_0, index_1, index_2, index_3;
     double rhombus_circ, dist_0, dist_1, dist_2, dist_3, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient;
@@ -157,9 +157,9 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
                 index_2 = layer_index*NO_OF_VECTORS_PER_LAYER - NO_OF_VECTORS_H + h_index;
                 index_3 = layer_index*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index];
                 dist_0 = grid -> normal_distance[index_0];
-                dist_1 = vertical_switch*grid -> normal_distance[index_1];
+                dist_1 = grid -> normal_distance[index_1];
                 dist_2 = grid -> normal_distance[index_2];
-                dist_3 = vertical_switch*grid -> normal_distance[index_3];
+                dist_3 = grid -> normal_distance[index_3];
                 horizontal_covariant(velocity_field, layer_index, h_index, grid, &covar_0);
                 horizontal_covariant(velocity_field, layer_index - 1, h_index, grid, &covar_2);
                 out_field[i] = 1/dualgrid -> area[layer_index*2*NO_OF_VECTORS_H + h_index]*(-dist_0*covar_0 + dist_1*velocity_field[index_1] + dist_2*covar_2 - dist_3*velocity_field[index_3]);
