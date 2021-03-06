@@ -32,6 +32,7 @@ temperature_diff_v=0 # turn on if you want vetical temperature diffusion
 momentum_diff_h=1 # turn on if you want horizontal momentum diffusion
 momentum_diff_v=0 # turn on if you want vertical momentum diffusion
 div_damp_4th_order_switch=0 # turn on if you want 4th order horizontal divergence damping
+dissipative_heating=1 # turn on if you want a dissipative heating rate
 rad_on=0 # turn on if you want radiation
 radiation_delta_t=3600 # every how many seconds the radiation fluxes wil be updated
 assume_lte=1 # set this to one if you do not want to assign individual temperatures to tracers

@@ -100,6 +100,7 @@ int main(int argc, char *argv[])
 	config_info -> adv_sound_ratio = strtod(argv[34], NULL);
 	config_info -> delta_t_between_analyses = strtod(argv[35], NULL);
 	config_info -> div_damp_4th_order_switch = strtod(argv[36], NULL);
+	config_info -> dissipative_heating = strtod(argv[37], NULL);
 	
 	/*
 	Checking user input for correctness:
@@ -310,6 +311,14 @@ int main(int argc, char *argv[])
 	else
 	{
 		printf("4th order divergence damping is turned on.\n");
+	}
+	if (config_info -> dissipative_heating == 0)
+	{
+		printf("Dissipative heating is turned off.\n");
+	}
+	else
+	{
+		printf("Dissipative heating is turned on.\n");
 	}
 	if (config_info -> assume_lte == 0)
 	{

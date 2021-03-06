@@ -60,12 +60,16 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Forcings *forcing
 	}
 	
 	// simplified dissipation
-	inner_product(state -> velocity_gas, irrev -> friction_acc, irrev -> heating_diss, grid, 1);
-	#pragma omp parallel for
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	if (config_info -> dissipative_heating == 1)
 	{
-		irrev -> heating_diss[i] = -density_gas(state, i)*irrev -> heating_diss[i];
+		inner_product(state -> velocity_gas, irrev -> friction_acc, irrev -> heating_diss, grid, 1);
+		#pragma omp parallel for
+		for (int i = 0; i < NO_OF_SCALARS; ++i)
+		{
+			irrev -> heating_diss[i] = -density_gas(state, i)*irrev -> heating_diss[i];
+		}
 	}
+	
 	return 0;
 }
 

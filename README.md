@@ -28,7 +28,7 @@ What GAME does what other models do not do and why:
 * It uses the entropy as a prognostic variable. Usually, models use the potential temperature as a prognostic variable which is a conserved quantity and therefore the only forcings are the diabatic forcings rendering it a suitable variable for modeling. However, the same is true for the real entropy (connected to the density times the logarithm of the potential temperature), and this last quantitiy is the much more fundamental physical property.
 * It employs the modified TRSK scheme.
 * It can assign individual densities (instead of mixing ratios) to constituents as well as individual temperatures and sink velocities.
-* It has different options for the time stepping as well as the complexity of the physics to make it useful for a wide range of applications.
+* It has different options for the complexity of the physics to make it useful for a wide range of applications.
 
 ### Things to be done
 

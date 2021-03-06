@@ -154,6 +154,7 @@ int adv_sound_ratio;
 int nwp_mode;
 int delta_t_between_analyses;
 int div_damp_4th_order_switch;
+int dissipative_heating;
 double div_damp_coeff;
 } Config_info;
 
