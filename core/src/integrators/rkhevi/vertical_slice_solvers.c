@@ -19,10 +19,9 @@ int thomas_algorithm(double [], double [], double [], double [], double [], int)
 
 int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, Grid *grid)
 {
-	double delta_z, upper_volume, lower_volume, total_volume, damping_coeff, damping_coeff_max, damping_start_height, z_above_damping, damping_start_height_over_toa;
+	double delta_z, upper_volume, lower_volume, total_volume, damping_coeff, damping_start_height, z_above_damping;
 	// This is for Klemp (2008).
-	get_damping_layer_properties(&damping_start_height_over_toa, &damping_coeff_max);
-	damping_start_height = damping_start_height_over_toa*grid -> z_vector[0];
+	damping_start_height = config_info -> damping_start_height_over_toa*grid -> z_vector[0];
 	int upper_index, lower_index, j;
 	double impl_pgrad_weight = get_impl_thermo_weight();
 	#pragma omp parallel for private(upper_index, lower_index, j, delta_z, upper_volume, lower_volume, total_volume, damping_coeff)
@@ -89,7 +88,7 @@ int three_band_solver_ver_sound_waves(State *state_old, State *state_new, State 
 			}
 			else
 			{
-				damping_coeff = damping_coeff_max*pow(sin(0.5*M_PI*z_above_damping/(grid -> z_vector[0] - damping_start_height)), 2);
+				damping_coeff = config_info -> damping_coeff_max*pow(sin(0.5*M_PI*z_above_damping/(grid -> z_vector[0] - damping_start_height)), 2);
 			}
 			b_vector[2*j + 1] = 1 + delta_t*damping_coeff;
 			d_vector[2*j] = diagnostics -> temperature_gas_explicit[j*NO_OF_SCALARS_H + i];

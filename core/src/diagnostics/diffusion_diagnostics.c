@@ -83,11 +83,8 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 	return 0;
 }
 
-int hori_viscosity_eff(State *state, Scalar_field viscosity_eff, Grid *grid, Diagnostics *diagnostics, Forcings *forcings, double delta_t)
+int hori_viscosity_eff(State *state, Scalar_field viscosity_eff, Grid *grid, Diagnostics *diagnostics, Forcings *forcings, Config_info *config_info, double delta_t)
 {
-	// these things can be modified
-	double diff_h_smag_fac = 0.18;
-	double shear_bg = 1.5e-5;
 	// these things are hardly ever modified
 	double eff_particle_radius = 130e-12;
 	double mean_particle_mass = mean_particle_masses_gas(0);
@@ -95,7 +92,7 @@ int hori_viscosity_eff(State *state, Scalar_field viscosity_eff, Grid *grid, Dia
 	// the maximum diffusion coefficient (based on stability, including a 30 % safety margin)
 	double max_diff_h_coeff_turb = (1 - 0.3)*0.25*grid -> mean_area_edge/delta_t;
 	// the minimum "background" diffusion coefficient
-	double min_diff_h_coeff_turb = grid -> mean_area_edge*diff_h_smag_fac*shear_bg;
+	double min_diff_h_coeff_turb = grid -> mean_area_edge*config_info -> diff_h_smag_fac*config_info -> shear_bg;
 	double viscosity_value, shear;
 	inner_product(forcings -> rel_vort_tend, forcings -> rel_vort_tend, diagnostics -> scalar_field_placeholder, grid, 0);
 	#pragma omp parallel for private(molecular_viscosity, shear)
@@ -108,7 +105,7 @@ int hori_viscosity_eff(State *state, Scalar_field viscosity_eff, Grid *grid, Dia
 			shear = sqrt(diagnostics -> scalar_field_placeholder[i])/sqrt(diagnostics -> e_kin[i]);
 		}
 		// preliminary result
-		viscosity_value =  grid -> mean_area_edge*diff_h_smag_fac*shear;
+		viscosity_value =  grid -> mean_area_edge*config_info -> diff_h_smag_fac*shear;
 		
 		/*
 		Checking if the calculated value is "allowed".

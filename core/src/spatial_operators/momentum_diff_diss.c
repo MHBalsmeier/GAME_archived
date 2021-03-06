@@ -35,7 +35,7 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Forcings *forcing
 		irrev -> friction_acc[i] = irrev -> velocity_grad_div[i] - diagnostics -> curl_of_vorticity[i];
 	}
     // Calculating the effective horizontal kinematic viscosity (Eddy viscosity).
-	hori_viscosity_eff(state, irrev -> viscosity_eff, grid, diagnostics, forcings, delta_t);
+	hori_viscosity_eff(state, irrev -> viscosity_eff, grid, diagnostics, forcings, config_info, delta_t);
 	// multiplying by the viscosity
 	scalar_times_vector(irrev -> viscosity_eff, irrev -> friction_acc, irrev -> friction_acc, grid);
 	

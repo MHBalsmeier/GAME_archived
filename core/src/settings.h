@@ -9,7 +9,6 @@ Github repository: https://github.com/AUN4GFD/game
 // The number of flight levels for the flight level output.
 #define NO_OF_FLIGHT_LEVELS 7
 
-int get_damping_layer_properties(double *, double *);
 double get_impl_thermo_weight();
 double get_t_vadv_parameter();
 int ask_for_divergence_output(int *);

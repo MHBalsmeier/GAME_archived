@@ -101,6 +101,10 @@ int main(int argc, char *argv[])
 	config_info -> delta_t_between_analyses = strtod(argv[35], NULL);
 	config_info -> div_damp_4th_order_switch = strtod(argv[36], NULL);
 	config_info -> dissipative_heating = strtod(argv[37], NULL);
+	config_info -> diff_h_smag_fac = strtof(argv[38], NULL);
+	config_info -> shear_bg = strtof(argv[39], NULL);
+	config_info -> damping_start_height_over_toa = strtof(argv[40], NULL);
+	config_info -> damping_coeff_max = strtof(argv[41], NULL);
 	
 	/*
 	Checking user input for correctness:
@@ -247,15 +251,8 @@ int main(int argc, char *argv[])
 		printf("terrain handling: block structure\n");
 	}
 	printf("%s", stars);
+	
 	printf("Physics configuration:\n");
-	if (config_info -> rad_on == 0)
-	{
-		printf("Radiation is turned off.\n");
-	}
-	else
-	{
-		printf("Radiation is turned on.\n");
-	}
 	if (config_info -> mass_diff_h == 0)
 	{
 		printf("Horizontal mass diffusion is turned off.\n");
@@ -320,6 +317,10 @@ int main(int argc, char *argv[])
 	{
 		printf("Dissipative heating is turned on.\n");
 	}
+	printf("Horizontal diffusion Smagorinsky factor: %lf.\n", config_info -> diff_h_smag_fac);
+	printf("Background shear: %lf 1/s.\n", config_info -> shear_bg);
+	printf("Swamp layer starts at %lf m.\n", config_info -> damping_start_height_over_toa*toa);
+	printf("Maximum swamp layer damping coefficient: %lf 1/s.\n", config_info -> damping_coeff_max);
 	if (config_info -> assume_lte == 0)
 	{
 		printf("Not Assuming local thermodynamic equilibrium.\n");
@@ -328,6 +329,15 @@ int main(int argc, char *argv[])
 	{
 		printf("Assuming local thermodynamic equilibrium.\n");
 	}
+	if (config_info -> rad_on == 0)
+	{
+		printf("Radiation is turned off.\n");
+	}
+	else
+	{
+		printf("Radiation is turned on.\n");
+	}
+	
 	printf("%s", stars);
 	printf("I/O configuration:\n");
 	printf("output written in intervals of %d s\n", WRITE_OUT_INTERVAL);

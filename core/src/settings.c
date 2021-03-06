@@ -13,16 +13,6 @@ In this file, the model run and I/O configurations can be set, which are not acc
 
 int get_gas_contituents_ids(int);
 
-// This is for the Klemp (2008) upper boundary damping layer.
-int get_damping_layer_properties(double *damping_start_height_over_toa, double *damping_coeff_max)
-{
-	// This is where the damping starts in relation to the TOA. 0.75, for example, means that the upper 25 % of the atmosphere are affected by Klemp damping.
-	*damping_start_height_over_toa = 0.53;
-	// The maximum damping coefficient (the damping coefficient increases towards the TOA).
-	*damping_coeff_max = 0.25;
-	return 0;
-}
-
 int get_gas_contituents_ids(int gas_constituent_id)
 {
 	// This defines the constituents of the gas phase.
