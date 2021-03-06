@@ -27,39 +27,27 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Forcings *forcing
 	{
     	grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
 	}
-    curl_of_vorticity_m(diagnostics -> rel_vort, diagnostics -> curl_of_vorticity_m, grid, dualgrid, config_info);
+    curl_of_vorticity(diagnostics -> rel_vort, diagnostics -> curl_of_vorticity, grid, dualgrid, config_info);
 	// adding the curl term to the divergence term
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
-		irrev -> friction_acc[i] = irrev -> velocity_grad_div[i] + diagnostics -> curl_of_vorticity_m[i];
+		irrev -> friction_acc[i] = irrev -> velocity_grad_div[i] - diagnostics -> curl_of_vorticity[i];
 	}
     // Calculating the effective horizontal kinematic viscosity (Eddy viscosity).
 	hori_viscosity_eff(state, irrev -> viscosity_eff, grid, diagnostics, forcings, delta_t);
 	// multiplying by the viscosity
 	scalar_times_vector(irrev -> viscosity_eff, irrev -> friction_acc, irrev -> friction_acc, grid);
 	
-	// at these very coarse resolutions, a divergence damping must be added to control grid-scale noise (switched out currently)
-	if (RES_ID <= 4)
+	// 4th order divergence damping
+	if (config_info -> div_damp_4th_order_switch == 1)
 	{
-		// the order of the divergence damping
-		int div_damp_order = 4;
-		// checking if the divergence damping order is even
-		if (fmod(div_damp_order, 2) != 0)
-		{
-			printf("div_damp_order must be even.");
-			printf("Aborting.\n");
-			exit(1);
-		}
 		divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
 		grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
-    	for (int i = 0; i < div_damp_order/2 - 1; ++i)
-    	{
-			// diagnostics -> velocity_gas_divv is a misuse of name
-			divv_h(irrev -> velocity_grad_div, diagnostics -> velocity_gas_divv, grid);
-			// irrev -> velocity_grad_div is a misuse of name here, it is actually the divegence damping
-    		grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
-		}
+		// diagnostics -> velocity_gas_divv is a misuse of name
+		divv_h(irrev -> velocity_grad_div, diagnostics -> velocity_gas_divv, grid);
+		// irrev -> velocity_grad_div is a misuse of name here, it is actually the divegence damping
+		grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_H_VECTORS; ++i)
 		{
@@ -67,7 +55,7 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Forcings *forcing
 			h_index = i - layer_index*NO_OF_VECTORS_H;
 			irrev -> friction_acc[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
 			// a sign has to be taken into account here
-			+= -pow(-1, div_damp_order/2)*config_info -> div_damp_coeff*irrev -> velocity_grad_div[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+			+= -config_info -> div_damp_coeff*irrev -> velocity_grad_div[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
 		}
 	}
 	
@@ -81,7 +69,7 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Forcings *forcing
 	return 0;
 }
 
-int curl_of_vorticity_m(Curl_field vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid, Config_info *config_info)
+int curl_of_vorticity(Curl_field vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid, Config_info *config_info)
 {
 	// Calculates the negative curl of the vorticity.
 	int layer_index, h_index, no_of_edges, i, j;
@@ -105,8 +93,8 @@ int curl_of_vorticity_m(Curl_field vorticity, Vector_field out_field, Grid *grid
 				*dualgrid -> normal_distance[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]
 				*vorticity[layer_index*2*NO_OF_VECTORS_H + grid -> adjacent_vector_indices_h[6*h_index + j]];
 			}
-			// Dividing by the area. The additional minus sign accounts for the fact the we want the negative curl of the curl.
-			out_field[i] = -config_info -> momentum_diff_v*out_field[i]/grid -> area[i];
+			// Dividing by the area.
+			out_field[i] = config_info -> momentum_diff_v*out_field[i]/grid -> area[i];
 		}
 		// The horizontal case.
 		// Remember: (curl(zeta))*e_x = dzeta_z/dy - dzeta_y/dz = (dz*dzeta_z - dy*dzeta_y)/(dy*dz) = (dz*dzeta_z - dy*dzeta_y)/area (Stokes' Theorem, which is used here)
@@ -140,8 +128,8 @@ int curl_of_vorticity_m(Curl_field vorticity, Vector_field out_field, Grid *grid
 				dualgrid -> normal_distance[(layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H]
 				*vorticity[(layer_index + 1)*2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
 			}
-			// Dividing by the area. The additional minus sign accounts for the fact the we want the negative curl of the curl.
-			out_field[i] = -out_field[i]/grid -> area[i];
+			// Dividing by the area.
+			out_field[i] = out_field[i]/grid -> area[i];
 		}
 	}
 	return 0;

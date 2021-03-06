@@ -852,8 +852,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	{
 		divv_h(state_write_out -> velocity_gas, divv_h_all_layers, grid);
 	}
-    Curl_field *rel_vort = calloc(1, sizeof(Curl_field));
-	calc_rel_vort(state_write_out -> velocity_gas, *rel_vort, grid, dualgrid);
+    Curl_field *rel_vort_edge = calloc(1, sizeof(Curl_field));
+	calc_rel_vort(state_write_out -> velocity_gas, *rel_vort_edge, grid, dualgrid);
+    Scalar_field *rel_vort = calloc(1, sizeof(Scalar_field));
+	curl_fiel_to_cells(*rel_vort_edge, *rel_vort, grid);
 	
 	// Diagnozing the u and v wind components at the vector points.
     double wind_0, wind_1;
@@ -915,7 +917,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     	double (*epv_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
     	double (*u_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_PRESSURE_LEVELS]));
     	double (*v_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_PRESSURE_LEVELS]));
-    	double (*rel_vort_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_PRESSURE_LEVELS]));
+    	double (*rel_vort_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
     	
     	// Vertical interpolation to the pressure levels.
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
@@ -938,6 +940,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 					t_on_pressure_levels[i][j] = 9999;
 					rh_on_pressure_levels[i][j] = 9999;
 					epv_on_pressure_levels[i][j] = 9999;
+					rel_vort_on_pressure_levels[i][j] = 9999;
 				}
 				else
 				{
@@ -952,6 +955,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 					+ (1 - closest_weight)*(*rh)[other_layer_index*NO_OF_SCALARS_H + i];
 					epv_on_pressure_levels[i][j] = closest_weight*(*epv)[closest_layer_index*NO_OF_SCALARS_H + i]
 					+ (1 - closest_weight)*(*epv)[other_layer_index*NO_OF_SCALARS_H + i];
+					rel_vort_on_pressure_levels[i][j] = closest_weight*(*rel_vort)[closest_layer_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*(*rel_vort)[other_layer_index*NO_OF_SCALARS_H + i];
 				}
 			}
 		}
@@ -977,7 +982,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     			{
 					u_on_pressure_levels[i][j] = 9999;
 					v_on_pressure_levels[i][j] = 9999;
-					rel_vort_on_pressure_levels[i][j] = 9999;
     			}
     			else
     			{
@@ -987,8 +991,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 					+ (1 - closest_weight)*wind_u[other_layer_index*NO_OF_VECTORS_H + i];
 					v_on_pressure_levels[i][j] = closest_weight*wind_v[closest_layer_index*NO_OF_VECTORS_H + i]
 					+ (1 - closest_weight)*wind_v[other_layer_index*NO_OF_VECTORS_H + i];
-					rel_vort_on_pressure_levels[i][j] = closest_weight*(*rel_vort)[NO_OF_VECTORS_H + closest_layer_index*2*NO_OF_VECTORS_H + i]
-					+ (1 - closest_weight)*(*rel_vort)[NO_OF_VECTORS_H + other_layer_index*2*NO_OF_VECTORS_H + i];
     			}
 			}
     	}
@@ -1048,7 +1050,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				NCERR(retval);
 			if ((retval = nc_put_att_text(ncid_pressure_level, wind_v_pressure_level_id, "units", strlen("m/s"), "m/s")))
 				NCERR(retval);
-			if ((retval = nc_def_var(ncid_pressure_level, "relative_vorticity", NC_DOUBLE, 2, dimids_pressure_level_vector, &rel_vort_pressure_level_id)))
+			if ((retval = nc_def_var(ncid_pressure_level, "relative_vorticity", NC_DOUBLE, 2, dimids_pressure_level_scalar, &rel_vort_pressure_level_id)))
 				NCERR(retval);
 			if ((retval = nc_put_att_text(ncid_pressure_level, rel_vort_pressure_level_id, "units", strlen("1/s"), "1/s")))
 				NCERR(retval);
@@ -1098,7 +1100,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			double *epv_pressure_level = malloc(NO_OF_SCALARS_H*sizeof(double));
 			double *wind_u_pressure_level = malloc(NO_OF_VECTORS_H*sizeof(double));
 			double *wind_v_pressure_level = malloc(NO_OF_VECTORS_H*sizeof(double));
-			double *rel_vort_pressure_level = malloc(NO_OF_VECTORS_H*sizeof(double));
+			double *rel_vort_pressure_level = malloc(NO_OF_SCALARS*sizeof(double));
 			
 			codes_handle *handle_geopotential_height_pressure_level = NULL;
 			codes_handle *handle_temperature_pressure_level = NULL;
@@ -1134,7 +1136,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				{
 					wind_v_pressure_level[j] = v_on_pressure_levels[j][i];
 				}
-				for (int j = 0; j < NO_OF_VECTORS_H; ++j)
+				for (int j = 0; j < NO_OF_SCALARS_H; ++j)
 				{
 					rel_vort_pressure_level[j] = rel_vort_on_pressure_levels[j][i];
 				}
@@ -1345,7 +1347,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "level", 0.01*pressure_levels[i])))
 			        ECCERR(retval);
-			    if ((retval = codes_set_double_array(handle_rel_vort_pressure_level, "values", rel_vort_pressure_level, NO_OF_VECTORS_H)))
+			    if ((retval = codes_set_double_array(handle_rel_vort_pressure_level, "values", rel_vort_pressure_level, NO_OF_SCALARS_H)))
 			        ECCERR(retval);
 			    if ((retval = codes_write_message(handle_rel_vort_pressure_level, OUTPUT_FILE_PRESSURE_LEVEL, "a")))
 			        ECCERR(retval);
@@ -1693,7 +1695,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		double *rh_h = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *wind_u_h = malloc(NO_OF_VECTORS_H*sizeof(double));
 		double *wind_v_h = malloc(NO_OF_VECTORS_H*sizeof(double));
-		double *rel_vort_h = malloc(NO_OF_VECTORS_H*sizeof(double));
+		double *rel_vort_h = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *divv_h = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *wind_w_h = malloc(NO_OF_SCALARS_H*sizeof(double));
 		int OUTPUT_FILE_LENGTH = 300;
@@ -1875,7 +1877,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			{
 			    wind_u_h[j] = wind_u[i*NO_OF_VECTORS_H + j];
 			    wind_v_h[j] = wind_v[i*NO_OF_VECTORS_H + j];
-			    rel_vort_h[j] = (*rel_vort)[NO_OF_VECTORS_H + i*2*NO_OF_VECTORS_H + j];
+			    rel_vort_h[j] = (*rel_vort)[i*NO_OF_SCALARS_H + j];
 			}
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_wind_u_h = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
@@ -2010,7 +2012,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_rel_vort, "level", i)))
 			    ECCERR(retval);
-			if ((retval = codes_set_double_array(handle_rel_vort, "values", rel_vort_h, NO_OF_VECTORS_H)))
+			if ((retval = codes_set_double_array(handle_rel_vort, "values", rel_vort_h, NO_OF_SCALARS_H)))
 			    ECCERR(retval);
 			if ((retval = codes_write_message(handle_rel_vort, OUTPUT_FILE, "a")))
 			    ECCERR(retval);
@@ -2218,7 +2220,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			NCERR(retval);
 		if ((retval = nc_put_att_text(ncid, rh_id, "units", strlen("%"), "%")))
 			NCERR(retval);
-		if ((retval = nc_def_var(ncid, "rel_vort", NC_DOUBLE, 1, &curl_field_dimid, &rel_vort_id)))
+		if ((retval = nc_def_var(ncid, "rel_vort", NC_DOUBLE, 1, &scalar_dimid, &rel_vort_id)))
 			NCERR(retval);
 		if ((retval = nc_put_att_text(ncid, rel_vort_id, "units", strlen("1/s"), "1/s")))
 			NCERR(retval);
@@ -2331,6 +2333,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			NCERR(retval);
 	}
 	free(divv_h_all_layers);
+	free(rel_vort_edge);
 	free(rel_vort);
 	free(wind_u);
 	free(wind_v);

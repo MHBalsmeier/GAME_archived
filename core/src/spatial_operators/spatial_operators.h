@@ -22,4 +22,5 @@ int scalar_times_vector_scalar_h_v(Scalar_field, Scalar_field, Vector_field, Vec
 int linear_combine_two_states(State *, State *, State *, double, double);
 int momentum_diff_diss(State *, Diagnostics *, Forcings *, Irreversible_quantities*, Config_info *, Grid *, Dualgrid *, double);
 int inner_product(Vector_field, Vector_field, Scalar_field, Grid *, int);
-int curl_of_vorticity_m(Curl_field, Vector_field, Grid *, Dualgrid *, Config_info *);
+int curl_of_vorticity(Curl_field, Vector_field, Grid *, Dualgrid *, Config_info *);
+int curl_fiel_to_cells(Curl_field, Scalar_field, Grid *);

@@ -125,7 +125,7 @@ Vector_field cpgradt;
 Vector_field tgrads_component;
 Vector_field tgrads;
 Scalar_field velocity_gas_divv;
-Vector_field curl_of_vorticity_m;
+Vector_field curl_of_vorticity;
 Scalar_field scalar_field_placeholder;
 Vector_field velocity_gen;
 } Diagnostics;
@@ -153,6 +153,7 @@ int assume_lte;
 int adv_sound_ratio;
 int nwp_mode;
 int delta_t_between_analyses;
+int div_damp_4th_order_switch;
 double div_damp_coeff;
 } Config_info;
 

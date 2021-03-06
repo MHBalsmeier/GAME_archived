@@ -99,6 +99,7 @@ int main(int argc, char *argv[])
 	config_info -> assume_lte = strtod(argv[33], NULL);
 	config_info -> adv_sound_ratio = strtod(argv[34], NULL);
 	config_info -> delta_t_between_analyses = strtod(argv[35], NULL);
+	config_info -> div_damp_4th_order_switch = strtod(argv[36], NULL);
 	
 	/*
 	Checking user input for correctness:
