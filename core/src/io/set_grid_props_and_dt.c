@@ -309,6 +309,12 @@ int calc_delta_t_and_related(double cfl_margin, double *delta_t, Grid *grid, Dua
 {
     double max_sound_speed = 0;
     double sound_speed_value;
+    
+    // the gravity wave criterion
+    double n_freq = 0.03;
+    double delta_t_brunt_vaisala = 2/n_freq;
+    // delta_t_brunt_vaisala = (1 - cfl_margin)*delta_t_brunt_vaisala;
+    
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	sound_speed_value = pow(gas_constant_diagnostics(state, i, config_info)
@@ -336,6 +342,11 @@ int calc_delta_t_and_related(double cfl_margin, double *delta_t, Grid *grid, Dua
         }
     }
 	*delta_t = (1 - cfl_margin)*min_dist_horizontal/max_sound_speed;
+	if (*delta_t > delta_t_brunt_vaisala)
+	{
+		*delta_t = delta_t_brunt_vaisala;
+	}
+	
 	grid -> mean_area_edge = edge_area/NO_OF_H_VECTORS;
 	
 	/*

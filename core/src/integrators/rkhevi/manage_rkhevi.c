@@ -63,6 +63,10 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		// 5.) Solving the implicit component of the generalized density equations.
 		// ------------------------------------------------------------------------
 		three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid);
+		
+		// 6.) Doing the thermodynamically consistent entropy step.
+		// --------------------------------------------------------
+		entropy_density_step(state_old, state_new, config_info);
     }
     return 0;
 }
