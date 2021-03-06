@@ -37,8 +37,6 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		calc_pot_vort(state -> velocity_gas, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
 		// Now, the generalized Coriolis term is evaluated.
 		vorticity_flux(diagnostics -> flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid, dualgrid);
-		// this is necessary for estimating the shear in the tubulence parameterizations
-		vorticity_flux(diagnostics -> flux_density, diagnostics -> rel_vort_pot, forcings -> rel_vort_tend, grid, dualgrid);
 		// Kinetic energy is prepared for the gradient term of the Lamb transformation.
 		kinetic_energy(state -> velocity_gas, diagnostics -> e_kin, grid);
 		// Taking the gradient of the kinetic energy
@@ -47,7 +45,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     // momentum diffusion and dissipation
     if (no_rk_step == 0 && config_info -> momentum_diff_h == 1 && update_advection == 1)
     {
-		momentum_diff_diss(state, diagnostics, forcings, irreversible_quantities, config_info, grid, dualgrid, delta_t);
+		momentum_diff_diss(state, diagnostics, irreversible_quantities, config_info, grid, dualgrid, delta_t);
 		// Due to condensates, the friction acceleration needs to get a deceleration factor.
 		if (config_info -> assume_lte == 0)
 		{

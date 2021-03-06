@@ -128,6 +128,13 @@ Scalar_field velocity_gas_divv;
 Vector_field curl_of_vorticity;
 Scalar_field scalar_field_placeholder;
 Vector_field velocity_gen;
+Vector_field u_at_edge;
+Vector_field v_at_edge;
+Scalar_field u_at_cell;
+Scalar_field v_at_cell;
+Vector_field u_at_cell_grad;
+Vector_field v_at_cell_grad;
+Vector_field shear;
 } Diagnostics;
 
 // Collects forcings.
@@ -135,7 +142,6 @@ typedef struct forcings {
 Vector_field pressure_gradient_acc_expl;
 Vector_field e_kin_grad;
 Vector_field pot_vort_tend;
-Vector_field rel_vort_tend;
 } Forcings;
 
 // Info on the run configuration is collected here.
@@ -179,7 +185,7 @@ Scalar_field mass_diffusion_source_rate;
 Scalar_field pressure_gradient_decel_factor;
 double constituent_mass_source_rates[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
 double constituent_heat_source_rates[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
-Scalar_field viscosity_eff;
+Vector_field viscosity_eff;
 Vector_field velocity_grad_div;
 } Irreversible_quantities;
 

@@ -3,9 +3,9 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
+int calc_temp_diffusion_coeffs(State *, Config_info *, Irreversible_quantities *, Diagnostics *, double, Grid *);
 int calc_mass_diffusion_coeffs(State *, Config_info *, Scalar_field, Scalar_field);
-int calc_temp_diffusion_coeffs(State *, Config_info *, Scalar_field, Scalar_field);
-int hori_viscosity_eff(State *, Scalar_field, Grid *, Diagnostics *, Forcings *, Config_info *, double);
+int hori_viscosity_eff(State *, Scalar_field, Grid *, Diagnostics *, Config_info *, double);
 int remap_horpri2hordual_vector(Vector_field, int, int, double *, Grid *);
 int vorticity_flux_horizontal_traditional(Vector_field, Curl_field, int, int, double *, Grid *);
 int vorticity_flux_vertical(Vector_field, Curl_field, int, int, double *, Grid *, Dualgrid *);
@@ -23,3 +23,4 @@ int temperature_step(State *, State *, State *, Diagnostics *, Config_info *, do
 double density_total(State *, int);
 double density_gas(State *, int);
 int entropy_density_step(State *, State *, Config_info *);
+int calc_uv_at_edge(Vector_field, Vector_field, Vector_field, Grid *);

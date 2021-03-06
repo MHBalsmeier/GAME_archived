@@ -9,7 +9,7 @@ Github repository: https://github.com/AUN4GFD/game
 #include <stdlib.h>
 #include <stdio.h>
 
-int momentum_diff_diss(State *state, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid, double delta_t)
+int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid, double delta_t)
 {
 	int layer_index, h_index;
 	// Firstly the diffusion.
@@ -35,9 +35,9 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Forcings *forcing
 		irrev -> friction_acc[i] = irrev -> velocity_grad_div[i] - diagnostics -> curl_of_vorticity[i];
 	}
     // Calculating the effective horizontal kinematic viscosity (Eddy viscosity).
-	hori_viscosity_eff(state, irrev -> viscosity_eff, grid, diagnostics, forcings, config_info, delta_t);
+	hori_viscosity_eff(state, irrev -> viscosity_eff, grid, diagnostics, config_info, delta_t);
 	// multiplying by the viscosity
-	scalar_times_vector(irrev -> viscosity_eff, irrev -> friction_acc, irrev -> friction_acc, grid);
+	vector_times_vector(irrev -> viscosity_eff, irrev -> friction_acc, irrev -> friction_acc);
 	
 	// 4th order divergence damping
 	if (config_info -> div_damp_4th_order_switch == 1)

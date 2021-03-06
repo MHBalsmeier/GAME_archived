@@ -9,11 +9,16 @@ Github repository: https://github.com/AUN4GFD/game
 #include "diagnostics.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "geos95.h"
 
 int calc_diffusion_coeff(double temperature, double particle_mass, double denstiy, double particle_radius, double *result);
+int calc_shear(State *, Diagnostics *, Grid *);
 
 int calc_mass_diffusion_coeffs(State *state, Config_info *config_info, Scalar_field mass_diffusion_coeff_numerical_h, Scalar_field mass_diffusion_coeff_numerical_v)
 {
+	/*
+	This function computes the viscous temperature diffusion coefficient (including Eddys).
+	*/
 	if (config_info -> mass_diff_h == 1 || config_info -> mass_diff_v == 1)
 	{
 		double mean_particle_mass = mean_particle_masses_gas(0);
@@ -23,11 +28,9 @@ int calc_mass_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
 		    calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &mass_diffusion_coeff);
-			// homogeneous for now
-			calc_diffusion_coeff(273.15, mean_particle_mass, 1, eff_particle_radius, &mass_diffusion_coeff);
 		    if (config_info -> mass_diff_h == 1)
 		    {
-		    	upturn_for_scale_h = 1.5*pow(10, 4);
+		    	upturn_for_scale_h = 1;
 	    	}
 		    else
 		    {
@@ -35,7 +38,7 @@ int calc_mass_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 	    	}
 		    if (config_info -> mass_diff_v == 1)
 		    {
-		    	upturn_for_scale_v = 1.5*pow(10, 3);
+		    	upturn_for_scale_v = 1;
 	    	}
 		    else
 		    {
@@ -48,42 +51,31 @@ int calc_mass_diffusion_coeffs(State *state, Config_info *config_info, Scalar_fi
 	return 0;
 }
 
-int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Scalar_field temp_diffusion_coeff_numerical_h, Scalar_field temp_diffusion_coeff_numerical_v)
+int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Irreversible_quantities *irreversible_quantities, Diagnostics *diagnostics, double delta_t, Grid *grid)
 {
-	double mean_particle_mass = mean_particle_masses_gas(0);
-	double eff_particle_radius = 130e-12;
-	double temp_diffusion_coeff, upturn_for_scale_h, upturn_for_scale_v, rho_g, c_g_v;
-	#pragma omp parallel for private (temp_diffusion_coeff, upturn_for_scale_h, upturn_for_scale_v, rho_g, c_g_v)
+	/*
+	This function computes the viscous temperature diffusion coefficient (including Eddys).
+	*/
+	double rho_g, c_g_v;
+	// The Eddy viscosity coefficient only has to be calculated if it has not yet been done.
+	if (config_info -> momentum_diff_h == 1)
+	{
+		hori_viscosity_eff(state, irreversible_quantities -> viscosity_eff, grid, diagnostics, config_info, delta_t);
+	}
+	edges_to_cells(irreversible_quantities -> viscosity_eff, irreversible_quantities -> scalar_diffusion_coeff_numerical_h, grid);
+	#pragma omp parallel for private (rho_g, c_g_v)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-	    calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &temp_diffusion_coeff);
-		// homogeneous for now
-		calc_diffusion_coeff(273.15, mean_particle_mass, 1, eff_particle_radius, &temp_diffusion_coeff);
-	    if (config_info -> temperature_diff_h == 1)
-	    {
-			upturn_for_scale_h = 1.5*pow(10, 4);
-    	}
-		else
-	    {
-			upturn_for_scale_h = 0;
-    	}
-	    if (config_info -> temperature_diff_v == 1)
-	    {
-			upturn_for_scale_v = 1.5*pow(10, 3);
-    	}
-		else
-	    {
-			upturn_for_scale_v = 0;
-    	}
 		rho_g = density_gas(state, i);
 		c_g_v = spec_heat_cap_diagnostics_v(state, i, config_info);
-	    temp_diffusion_coeff_numerical_h[i] = upturn_for_scale_h*rho_g*c_g_v*temp_diffusion_coeff;
-	    temp_diffusion_coeff_numerical_v[i] = upturn_for_scale_v*rho_g*c_g_v*temp_diffusion_coeff;
+	    irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i] = rho_g*c_g_v* irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i];
+	    // vertical Eddy viscosity is about two orders of magnitude smaller
+	    irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i] = 0.01*irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i];
 	}
 	return 0;
 }
 
-int hori_viscosity_eff(State *state, Scalar_field viscosity_eff, Grid *grid, Diagnostics *diagnostics, Forcings *forcings, Config_info *config_info, double delta_t)
+int hori_viscosity_eff(State *state, Scalar_field viscosity_eff, Grid *grid, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
 {
 	// these things are hardly ever modified
 	double eff_particle_radius = 130e-12;
@@ -93,25 +85,31 @@ int hori_viscosity_eff(State *state, Scalar_field viscosity_eff, Grid *grid, Dia
 	double max_diff_h_coeff_turb = (1 - 0.3)*0.25*grid -> mean_area_edge/delta_t;
 	// the minimum "background" diffusion coefficient
 	double min_diff_h_coeff_turb = grid -> mean_area_edge*config_info -> diff_h_smag_fac*config_info -> shear_bg;
-	double viscosity_value, shear;
-	inner_product(forcings -> rel_vort_tend, forcings -> rel_vort_tend, diagnostics -> scalar_field_placeholder, grid, 0);
-	#pragma omp parallel for private(molecular_viscosity, shear)
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	double viscosity_value;
+	// calculatuing the shear
+	calc_shear(state, diagnostics, grid);
+	int layer_index, h_index;
+	#pragma omp parallel for private(molecular_viscosity, layer_index, h_index)
+	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
 	{
-		// this is only an estimate
-		shear = 0;
-		if (diagnostics -> e_kin[i] > EPSILON_SECURITY)
-		{
-			shear = sqrt(diagnostics -> scalar_field_placeholder[i])/sqrt(diagnostics -> e_kin[i]);
-		}
+		layer_index = i/NO_OF_VECTORS_H;
+		h_index = i - layer_index*NO_OF_VECTORS_H;
+		
 		// preliminary result
-		viscosity_value =  grid -> mean_area_edge*config_info -> diff_h_smag_fac*shear;
+		viscosity_value =  grid -> mean_area_edge*config_info -> diff_h_smag_fac*diagnostics -> shear[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
 		
 		/*
 		Checking if the calculated value is "allowed".
 		*/
 		// calculating the molecular viscosity
-		calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &molecular_viscosity);
+		calc_diffusion_coeff(
+		0.5*(state -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]]
+		+ state -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]]),
+		mean_particle_mass,
+		0.5*(state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]]
+		+ state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]]),
+		eff_particle_radius,
+		&molecular_viscosity);
 		// the molecular viscosity is the absolute minimum
 		if (viscosity_value < molecular_viscosity)
 		{
@@ -129,10 +127,50 @@ int hori_viscosity_eff(State *state, Scalar_field viscosity_eff, Grid *grid, Dia
 		}
 		
 		// result
-		viscosity_eff[i] = viscosity_value;
+		viscosity_eff[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index] = viscosity_value;
 	}
 	return 0;
 }
+
+int calc_shear(State *state, Diagnostics *diagnostics, Grid *grid)
+{
+	/*
+	This function calculates the shear of the horizontal wind field at vector points.
+	*/
+	// calculating eastward and northward winds at edge
+	calc_uv_at_edge(state -> velocity_gas, diagnostics -> u_at_edge, diagnostics -> v_at_edge, grid);
+	// averaging the wind components to the cell centers
+	edges_to_cells(diagnostics -> u_at_edge, diagnostics -> u_at_cell, grid);
+	edges_to_cells(diagnostics -> v_at_edge, diagnostics -> v_at_cell, grid);
+	// computing the horizontal gradient of the eastward wind
+	grad_hor(diagnostics -> u_at_cell, diagnostics -> u_at_cell_grad, grid);
+	// computing the horizontal gradient of the northward wind
+	grad_hor(diagnostics -> v_at_cell, diagnostics -> v_at_cell_grad, grid);
+	int layer_index, h_index;
+	double comp_orth, comp_tang, dudx, dudy, dvdx, dvdy;
+	#pragma omp parallel for private(layer_index, h_index, dudx, dudy, dvdx, dvdy, comp_orth, comp_tang)
+	for (int i = 0; i < NO_OF_VECTORS; ++i)
+	{
+		layer_index = i/NO_OF_VECTORS_PER_LAYER;
+		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
+		// only the shear of the horizontal wind field is diagnozed
+		if (h_index >= NO_OF_SCALARS_H)
+		{
+			// diagnozing u quantities
+			comp_orth = diagnostics -> u_at_cell_grad[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+			tangential_wind(diagnostics -> u_at_cell_grad, layer_index, h_index, &comp_tang, grid);
+			passive_turn(comp_orth, comp_tang, -grid -> direction[h_index], &dudx, &dudy);
+			// diagnozing v quantities
+			comp_orth = diagnostics -> v_at_cell_grad[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+			tangential_wind(diagnostics -> v_at_cell_grad, layer_index, h_index, &comp_tang, grid);
+			passive_turn(comp_orth, comp_tang, -grid -> direction[h_index], &dvdx, &dvdy);
+			// calculating the deformation according to the MPAS paper
+			diagnostics -> shear[i] = sqrt(pow(dudx - dvdy, 2) + pow(dudy + dvdx, 2));
+		}
+	}
+	return 0;
+}
+
 
 int calc_diffusion_coeff(double temperature, double particle_mass, double density, double particle_radius, double *result)
 {
@@ -143,10 +181,6 @@ int calc_diffusion_coeff(double temperature, double particle_mass, double densit
     *result = 1.0/3.0*thermal_velocity*mean_free_path;
     return 0;
 }
-
-
-
-
 
 
 

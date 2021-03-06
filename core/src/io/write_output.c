@@ -173,6 +173,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	        	rprate[i] = 0;
 	        }
 		}
+		free(pot_temperature);
 		
 		// 10 m wind diagnostics
 		double *wind_10_m_both_dir_array = malloc(2*min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
@@ -189,7 +190,9 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			wind_10_m_both_dir_array[2*j + 0] = wind_10_m_downscale_factor*wind_h_lowest_layer_array[j];
 			wind_tangential = 0;
 			for (int i = 0; i < 10; ++i)
+			{
 				wind_tangential += grid -> trsk_weights[10*h_index + i]*wind_h_lowest_layer_array[time_step_10_m_wind*NO_OF_VECTORS_H + grid -> trsk_indices[10*h_index + i]];
+			}
 			wind_10_m_both_dir_array[2*j + 1] = wind_10_m_downscale_factor*wind_tangential;
 			wind_10_m_speed[j] = sqrt(pow(wind_10_m_both_dir_array[2*j + 0], 2) + pow(wind_10_m_both_dir_array[2*j + 1], 2));
 			if (time_step_10_m_wind == 0)
@@ -203,6 +206,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				wind_10_m_mean_v[h_index] += 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 1];
 			}
 		}
+		// freeing memory we do not need anymore
+		free(wind_10_m_both_dir_array);
 		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 		{
 			passive_turn(wind_10_m_mean_u[i], wind_10_m_mean_v[i], -grid -> direction[i], &wind_u_value, &wind_v_value);
@@ -232,7 +237,20 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				wind_10_m_gusts_speed[i] = (1 + 0.2)*wind_speed_10_m_mean;
 			}
 		}
-		free(pot_temperature);
+		// freeing memory we do not need anymore
+		free(vector_for_std_deviation);
+		free(wind_10_m_speed);
+		// allocating memory for output diagnostics
+		double *wind_10_m_mean_u_at_cell = malloc(NO_OF_SCALARS_H*sizeof(double));
+		double *wind_10_m_mean_v_at_cell = malloc(NO_OF_SCALARS_H*sizeof(double));
+		double *wind_10_m_gusts_speed_at_cell = malloc(NO_OF_SCALARS_H*sizeof(double));
+		// averaging the wind quantities to cell centers for output
+		edges_to_cells_lowest_layer(wind_10_m_mean_u, wind_10_m_mean_u_at_cell, grid);
+		free(wind_10_m_mean_u);
+		edges_to_cells_lowest_layer(wind_10_m_mean_v, wind_10_m_mean_v_at_cell, grid);
+		free(wind_10_m_mean_v);
+		edges_to_cells_lowest_layer(wind_10_m_gusts_speed, wind_10_m_gusts_speed_at_cell, grid);
+		free(wind_10_m_gusts_speed);
 		
 		// Netcdf output.
 		if (io_config -> netcdf_output_switch == 1)
@@ -244,14 +262,12 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			free(OUTPUT_FILE_PRE);
 			char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
 			sprintf(OUTPUT_FILE, "output/%s/%s+%ds_surface.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
-			int scalar_h_dimid, vector_h_dimid, mslp_id, ncid, retval, surface_p_id, rprate_id, sprate_id, cape_id, tcdc_id, t2_id, u10_id, v10_id, gusts_id;
+			int scalar_h_dimid, mslp_id, ncid, retval, surface_p_id, rprate_id, sprate_id, cape_id, tcdc_id, t2_id, u10_id, v10_id, gusts_id;
 			
 			if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
 				NCERR(retval);
 			free(OUTPUT_FILE);
 			if ((retval = nc_def_dim(ncid, "scalar_index_h", NO_OF_SCALARS_H, &scalar_h_dimid)))
-				NCERR(retval);
-			if ((retval = nc_def_dim(ncid, "vector_index_h", NO_OF_VECTORS_H, &vector_h_dimid)))
 				NCERR(retval);
 			
 			// Defining the variables.
@@ -283,15 +299,15 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				NCERR(retval);
 			if ((retval = nc_put_att_text(ncid, cape_id, "units", strlen("J/kg"), "J/kg")))
 				NCERR(retval);
-			if ((retval = nc_def_var(ncid, "10u", NC_DOUBLE, 1, &vector_h_dimid, &u10_id)))
+			if ((retval = nc_def_var(ncid, "10u", NC_DOUBLE, 1, &scalar_h_dimid, &u10_id)))
 				NCERR(retval);
 			if ((retval = nc_put_att_text(ncid, cape_id, "units", strlen("m/s"), "m/s")))
 				NCERR(retval);
-			if ((retval = nc_def_var(ncid, "10v", NC_DOUBLE, 1, &vector_h_dimid, &v10_id)))
+			if ((retval = nc_def_var(ncid, "10v", NC_DOUBLE, 1, &scalar_h_dimid, &v10_id)))
 				NCERR(retval);
 			if ((retval = nc_put_att_text(ncid, cape_id, "units", strlen("m/s"), "m/s")))
 				NCERR(retval);
-			if ((retval = nc_def_var(ncid, "10gusts", NC_DOUBLE, 1, &vector_h_dimid, &gusts_id)))
+			if ((retval = nc_def_var(ncid, "10gusts", NC_DOUBLE, 1, &scalar_h_dimid, &gusts_id)))
 				NCERR(retval);
 			if ((retval = nc_put_att_text(ncid, cape_id, "units", strlen("m/s"), "m/s")))
 				NCERR(retval);
@@ -312,11 +328,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				NCERR(retval);
 			if ((retval = nc_put_var_double(ncid, cape_id, &cape[0])))
 				NCERR(retval);
-			if ((retval = nc_put_var_double(ncid, u10_id, &wind_10_m_mean_u[0])))
+			if ((retval = nc_put_var_double(ncid, u10_id, &wind_10_m_mean_u_at_cell[0])))
 				NCERR(retval);
-			if ((retval = nc_put_var_double(ncid, v10_id, &wind_10_m_mean_v[0])))
+			if ((retval = nc_put_var_double(ncid, v10_id, &wind_10_m_mean_v_at_cell[0])))
 				NCERR(retval);
-			if ((retval = nc_put_var_double(ncid, gusts_id, &wind_10_m_gusts_speed[0])))
+			if ((retval = nc_put_var_double(ncid, gusts_id, &wind_10_m_gusts_speed_at_cell[0])))
 				NCERR(retval);
 			
 			// Closing the netcdf file.
@@ -729,12 +745,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_u_10m_mean, "level", 10)))
 				ECCERR(retval);
-			if ((retval = codes_set_double_array(handle_wind_u_10m_mean, "values", wind_10_m_mean_u, NO_OF_VECTORS_H)))
+			if ((retval = codes_set_double_array(handle_wind_u_10m_mean, "values", wind_10_m_mean_u_at_cell, NO_OF_SCALARS_H)))
 				ECCERR(retval);
 			if ((retval = codes_write_message(handle_wind_u_10m_mean, OUTPUT_FILE, "a")))
 				ECCERR(retval);
 			codes_handle_delete(handle_wind_u_10m_mean);
-			free(wind_10_m_mean_u);
 			
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_wind_v_10m_mean = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
@@ -777,11 +792,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_v_10m_mean, "level", 10)))
 				ECCERR(retval);
-			if ((retval = codes_set_double_array(handle_wind_v_10m_mean, "values", wind_10_m_mean_v, NO_OF_VECTORS_H)))
+			if ((retval = codes_set_double_array(handle_wind_v_10m_mean, "values", wind_10_m_mean_v_at_cell, NO_OF_SCALARS_H)))
 				ECCERR(retval);
 			if ((retval = codes_write_message(handle_wind_v_10m_mean, OUTPUT_FILE, "a")))
 				ECCERR(retval);
-			free(wind_10_m_mean_v);
 			codes_handle_delete(handle_wind_v_10m_mean);
 			
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
@@ -825,18 +839,18 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_10m_gusts, "level", 10)))
 				ECCERR(retval);
-			if ((retval = codes_set_double_array(handle_wind_10m_gusts, "values", wind_10_m_gusts_speed, NO_OF_VECTORS_H)))
+			if ((retval = codes_set_double_array(handle_wind_10m_gusts, "values", wind_10_m_gusts_speed_at_cell, NO_OF_SCALARS_H)))
 				ECCERR(retval);
 			if ((retval = codes_write_message(handle_wind_10m_gusts, OUTPUT_FILE, "a")))
 				ECCERR(retval);
+			free(OUTPUT_FILE);
 			codes_handle_delete(handle_wind_10m_gusts);
 			fclose(OUT_GRIB);
 		}
 		
-		free(vector_for_std_deviation);
-		free(wind_10_m_speed);
-		free(wind_10_m_gusts_speed);
-		free(wind_10_m_both_dir_array);
+		free(wind_10_m_mean_u_at_cell);
+		free(wind_10_m_mean_v_at_cell);
+		free(wind_10_m_gusts_speed_at_cell);
 		free(t2);
 		free(mslp);
 		free(surface_p);
@@ -855,29 +869,13 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     Curl_field *rel_vort_edge = calloc(1, sizeof(Curl_field));
 	calc_rel_vort(state_write_out -> velocity_gas, *rel_vort_edge, grid, dualgrid);
     Scalar_field *rel_vort = calloc(1, sizeof(Scalar_field));
-	curl_fiel_to_cells(*rel_vort_edge, *rel_vort, grid);
+	curl_field_to_cells(*rel_vort_edge, *rel_vort, grid);
 	
 	// Diagnozing the u and v wind components at the vector points.
-    double wind_0, wind_1;
-	double *wind_u = malloc(NO_OF_H_VECTORS*sizeof(double));
-	double *wind_v = malloc(NO_OF_H_VECTORS*sizeof(double));
-	double *wind_w = malloc(NO_OF_V_VECTORS*sizeof(double));
-	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
-	{
-		layer_index = i/NO_OF_VECTORS_H;
-		h_index = i - layer_index*NO_OF_VECTORS_H;
-        wind_0 = state_write_out -> velocity_gas[h_index + layer_index*NO_OF_VECTORS_H + (layer_index + 1)*NO_OF_SCALARS_H];
-        tangential_wind(state_write_out -> velocity_gas, layer_index, h_index, &wind_1, grid);
-        passive_turn(wind_0, wind_1, -grid -> direction[h_index], &wind_u_value, &wind_v_value);
-        wind_u[i] = wind_u_value;
-        wind_v[i] = wind_v_value;
-	}
-	for (int i = 0; i < NO_OF_V_VECTORS; ++i)
-	{
-		layer_index = i/NO_OF_VECTORS_PER_LAYER;
-		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-		wind_w[i] = state_write_out -> velocity_gas[layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
-	}
+	calc_uv_at_edge(state_write_out -> velocity_gas, diagnostics -> u_at_edge, diagnostics -> v_at_edge, grid);
+	// Averaging to cell centers for output.
+	edges_to_cells(diagnostics -> u_at_edge, diagnostics -> u_at_cell, grid);
+	edges_to_cells(diagnostics -> v_at_edge, diagnostics -> v_at_cell, grid);
     Scalar_field *rh = calloc(1, sizeof(Scalar_field));
 	Scalar_field *pot_temp = calloc(1, sizeof(Scalar_field));
     Scalar_field *epv = calloc(1, sizeof(Scalar_field));
@@ -908,15 +906,14 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     {
     	double *pressure_levels = malloc(sizeof(double)*NO_OF_PRESSURE_LEVELS);
     	double *distance_from_pressure_level = malloc(sizeof(double)*NO_OF_LAYERS);
-    	double *pressure_at_vector_points = malloc(sizeof(double)*NO_OF_LAYERS);
     	get_pressure_levels(pressure_levels);
     	// Allocating memory for the variables on pressure levels.
     	double (*geopotential_height)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
     	double (*t_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
     	double (*rh_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
     	double (*epv_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
-    	double (*u_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_PRESSURE_LEVELS]));
-    	double (*v_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_PRESSURE_LEVELS]));
+    	double (*u_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
+    	double (*v_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
     	double (*rel_vort_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
     	
     	// Vertical interpolation to the pressure levels.
@@ -941,6 +938,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 					rh_on_pressure_levels[i][j] = 9999;
 					epv_on_pressure_levels[i][j] = 9999;
 					rel_vort_on_pressure_levels[i][j] = 9999;
+					u_on_pressure_levels[i][j] = 9999;
+					v_on_pressure_levels[i][j] = 9999;
 				}
 				else
 				{
@@ -957,43 +956,13 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 					+ (1 - closest_weight)*(*epv)[other_layer_index*NO_OF_SCALARS_H + i];
 					rel_vort_on_pressure_levels[i][j] = closest_weight*(*rel_vort)[closest_layer_index*NO_OF_SCALARS_H + i]
 					+ (1 - closest_weight)*(*rel_vort)[other_layer_index*NO_OF_SCALARS_H + i];
+					u_on_pressure_levels[i][j] = closest_weight*diagnostics-> u_at_cell[closest_layer_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*diagnostics-> u_at_cell[other_layer_index*NO_OF_SCALARS_H + i];
+					v_on_pressure_levels[i][j] = closest_weight*diagnostics-> v_at_cell[closest_layer_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*diagnostics-> v_at_cell[other_layer_index*NO_OF_SCALARS_H + i];
 				}
 			}
 		}
-		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-		{
-			for (int k = 0; k < NO_OF_LAYERS; ++k)
-			{
-				pressure_at_vector_points[k] = 0.5*((*pressure)[k*NO_OF_SCALARS_H + grid -> from_index[i]] + (*pressure)[k*NO_OF_SCALARS_H + grid -> to_index[i]]);
-			}
-    		for (int j = 0; j < NO_OF_PRESSURE_LEVELS; ++j)
-			{
-				for (int k = 0; k < NO_OF_LAYERS; ++k)
-				{
-					distance_from_pressure_level[k] = fabs(log(pressure_levels[j]/pressure_at_vector_points[k]));
-				}
-				closest_layer_index = find_min_index(distance_from_pressure_level, NO_OF_LAYERS);
-				other_layer_index = closest_layer_index + 1;
-				if (pressure_levels[j] < pressure_at_vector_points[closest_layer_index])
-				{
-					other_layer_index = closest_layer_index - 1;
-				}
-    			if ((closest_layer_index == NO_OF_LAYERS - 1 && other_layer_index == NO_OF_LAYERS) || (closest_layer_index < 0 || other_layer_index < 0))
-    			{
-					u_on_pressure_levels[i][j] = 9999;
-					v_on_pressure_levels[i][j] = 9999;
-    			}
-    			else
-    			{
-					closest_weight = 1 - distance_from_pressure_level[closest_layer_index]/
-					(fabs(log(pressure_at_vector_points[closest_layer_index]/pressure_at_vector_points[other_layer_index])) + EPSILON_SECURITY);
-					u_on_pressure_levels[i][j] = closest_weight*wind_u[closest_layer_index*NO_OF_VECTORS_H + i]
-					+ (1 - closest_weight)*wind_u[other_layer_index*NO_OF_VECTORS_H + i];
-					v_on_pressure_levels[i][j] = closest_weight*wind_v[closest_layer_index*NO_OF_VECTORS_H + i]
-					+ (1 - closest_weight)*wind_v[other_layer_index*NO_OF_VECTORS_H + i];
-    			}
-			}
-    	}
     	
 		// Netcdf output.
 		if (io_config -> netcdf_output_switch == 1)
@@ -1005,22 +974,17 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			free(OUTPUT_FILE_PRESSURE_LEVEL_PRE);
 			char *OUTPUT_FILE_PRESSURE_LEVEL = malloc((OUTPUT_FILE_PRESSURE_LEVEL_LENGTH + 1)*sizeof(char));
 			sprintf(OUTPUT_FILE_PRESSURE_LEVEL, "output/%s/%s+%ds_pressure_levels.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
-			int ncid_pressure_level, scalar_h_dimid, vector_h_dimid, level_dimid, geopot_height_id, temp_pressure_level_id, rh_pressure_level_id, wind_u_pressure_level_id, wind_v_pressure_level_id, pressure_levels_id, epv_pressure_level_id, rel_vort_pressure_level_id;
+			int ncid_pressure_level, scalar_h_dimid, level_dimid, geopot_height_id, temp_pressure_level_id, rh_pressure_level_id, wind_u_pressure_level_id, wind_v_pressure_level_id, pressure_levels_id, epv_pressure_level_id, rel_vort_pressure_level_id;
 			if ((retval = nc_create(OUTPUT_FILE_PRESSURE_LEVEL, NC_CLOBBER, &ncid_pressure_level)))
 				NCERR(retval);
 			free(OUTPUT_FILE_PRESSURE_LEVEL);
 			if ((retval = nc_def_dim(ncid_pressure_level, "scalar_index_h", NO_OF_SCALARS_H, &scalar_h_dimid)))
-				NCERR(retval);
-			if ((retval = nc_def_dim(ncid_pressure_level, "vector_index_h", NO_OF_VECTORS_H, &vector_h_dimid)))
 				NCERR(retval);
 			if ((retval = nc_def_dim(ncid_pressure_level, "level_index", NO_OF_PRESSURE_LEVELS, &level_dimid)))
 				NCERR(retval);
 			int dimids_pressure_level_scalar[2];
 			dimids_pressure_level_scalar[0] = scalar_h_dimid;
 			dimids_pressure_level_scalar[1] = level_dimid;
-			int dimids_pressure_level_vector[2];
-			dimids_pressure_level_vector[0] = vector_h_dimid;
-			dimids_pressure_level_vector[1] = level_dimid;
 			// Defining the variables.
 			if ((retval = nc_def_var(ncid_pressure_level, "pressure_levels", NC_DOUBLE, 1, &level_dimid, &pressure_levels_id)))
 				NCERR(retval);
@@ -1042,11 +1006,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				NCERR(retval);
 			if ((retval = nc_put_att_text(ncid_pressure_level, epv_pressure_level_id, "units", strlen("Km^2/(kgs)"), "Km^2/(kgs)")))
 				NCERR(retval);
-			if ((retval = nc_def_var(ncid_pressure_level, "wind_u", NC_DOUBLE, 2, dimids_pressure_level_vector, &wind_u_pressure_level_id)))
+			if ((retval = nc_def_var(ncid_pressure_level, "wind_u", NC_DOUBLE, 2, dimids_pressure_level_scalar, &wind_u_pressure_level_id)))
 				NCERR(retval);
 			if ((retval = nc_put_att_text(ncid_pressure_level, wind_u_pressure_level_id, "units", strlen("m/s"), "m/s")))
 				NCERR(retval);
-			if ((retval = nc_def_var(ncid_pressure_level, "wind_v", NC_DOUBLE, 2, dimids_pressure_level_vector, &wind_v_pressure_level_id)))
+			if ((retval = nc_def_var(ncid_pressure_level, "wind_v", NC_DOUBLE, 2, dimids_pressure_level_scalar, &wind_v_pressure_level_id)))
 				NCERR(retval);
 			if ((retval = nc_put_att_text(ncid_pressure_level, wind_v_pressure_level_id, "units", strlen("m/s"), "m/s")))
 				NCERR(retval);
@@ -1098,9 +1062,9 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			double *temperature_pressure_level = malloc(NO_OF_SCALARS_H*sizeof(double));
 			double *rh_pressure_level = malloc(NO_OF_SCALARS_H*sizeof(double));
 			double *epv_pressure_level = malloc(NO_OF_SCALARS_H*sizeof(double));
-			double *wind_u_pressure_level = malloc(NO_OF_VECTORS_H*sizeof(double));
-			double *wind_v_pressure_level = malloc(NO_OF_VECTORS_H*sizeof(double));
-			double *rel_vort_pressure_level = malloc(NO_OF_SCALARS*sizeof(double));
+			double *wind_u_pressure_level = malloc(NO_OF_SCALARS_H*sizeof(double));
+			double *wind_v_pressure_level = malloc(NO_OF_SCALARS_H*sizeof(double));
+			double *rel_vort_pressure_level = malloc(NO_OF_SCALARS_H*sizeof(double));
 			
 			codes_handle *handle_geopotential_height_pressure_level = NULL;
 			codes_handle *handle_temperature_pressure_level = NULL;
@@ -1128,11 +1092,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				{
 					epv_pressure_level[j] = epv_on_pressure_levels[j][i];
 				}
-				for (int j = 0; j < NO_OF_VECTORS_H; ++j)
+				for (int j = 0; j < NO_OF_SCALARS_H; ++j)
 				{
 					wind_u_pressure_level[j] = u_on_pressure_levels[j][i];
 				}
-				for (int j = 0; j < NO_OF_VECTORS_H; ++j)
+				for (int j = 0; j < NO_OF_SCALARS_H; ++j)
 				{
 					wind_v_pressure_level[j] = v_on_pressure_levels[j][i];
 				}
@@ -1449,7 +1413,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "level", 0.01*pressure_levels[i])))
 			        ECCERR(retval);
-			    if ((retval = codes_set_double_array(handle_wind_u_pressure_level, "values", wind_u_pressure_level, NO_OF_VECTORS_H)))
+			    if ((retval = codes_set_double_array(handle_wind_u_pressure_level, "values", wind_u_pressure_level, NO_OF_SCALARS_H)))
 			        ECCERR(retval);
 			    if ((retval = codes_write_message(handle_wind_u_pressure_level, OUTPUT_FILE_PRESSURE_LEVEL, "a")))
 			        ECCERR(retval);
@@ -1500,7 +1464,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "level", 0.01*pressure_levels[i])))
 			        ECCERR(retval);
-			    if ((retval = codes_set_double_array(handle_wind_v_pressure_level, "values", wind_v_pressure_level, NO_OF_VECTORS_H)))
+			    if ((retval = codes_set_double_array(handle_wind_v_pressure_level, "values", wind_v_pressure_level, NO_OF_SCALARS_H)))
 			        ECCERR(retval);
 			    if ((retval = codes_write_message(handle_wind_v_pressure_level, OUTPUT_FILE_PRESSURE_LEVEL, "a")))
 			        ECCERR(retval);
@@ -1526,7 +1490,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     	free(epv_on_pressure_levels);
     	free(pressure_levels);
     	free(distance_from_pressure_level);
-    	free(pressure_at_vector_points);
     }
 
 	// Aviation output.
@@ -1537,12 +1500,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     	double *pressure_on_flight_levels = malloc(sizeof(double)*NO_OF_FLIGHT_LEVELS);
     	get_pressure_on_flight_levels(flight_levels, pressure_on_flight_levels);
     	double *distance_from_pressure_on_flight_level = malloc(sizeof(double)*NO_OF_LAYERS);
-    	double *pressure_at_vector_points = malloc(sizeof(double)*NO_OF_LAYERS);
     	// Allocating memory for the output arrays.
     	double (*t_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_FLIGHT_LEVELS]));
     	double (*rh_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_FLIGHT_LEVELS]));
-    	double (*u_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_FLIGHT_LEVELS]));
-    	double (*v_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_VECTORS_H][NO_OF_FLIGHT_LEVELS]));
+    	double (*u_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_FLIGHT_LEVELS]));
+    	double (*v_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_FLIGHT_LEVELS]));
     	
     	// Vertical interpolation to the flight levels.
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
@@ -1563,6 +1525,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     			{
     				t_on_flight_levels[i][j] = 9999;
     				rh_on_flight_levels[i][j] = 9999;
+					u_on_flight_levels[i][j] = 9999;
+					v_on_flight_levels[i][j] = 9999;
     			}
     			else
     			{
@@ -1572,47 +1536,15 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 					+ (1 - closest_weight)*state_write_out -> temperature_gas[other_layer_index*NO_OF_SCALARS_H + i];
 					rh_on_flight_levels[i][j] = closest_weight*(*rh)[closest_layer_index*NO_OF_SCALARS_H + i]
 					+ (1 - closest_weight)*(*rh)[other_layer_index*NO_OF_SCALARS_H + i];
+					u_on_flight_levels[i][j] = closest_weight*diagnostics -> u_at_cell[closest_layer_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*diagnostics -> u_at_cell[other_layer_index*NO_OF_SCALARS_H + i];
+					v_on_flight_levels[i][j] = closest_weight*diagnostics -> v_at_cell[closest_layer_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*diagnostics -> v_at_cell[other_layer_index*NO_OF_SCALARS_H + i];
     			}
     			
     		}
 		}
-		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-		{
-			for (int k = 0; k < NO_OF_LAYERS; ++k)
-			{
-				pressure_at_vector_points[k] = 0.5*((*pressure)[k*NO_OF_SCALARS_H + grid -> from_index[i]] + (*pressure)[k*NO_OF_SCALARS_H + grid -> to_index[i]]);
-			}
-			for (int j = 0; j < NO_OF_FLIGHT_LEVELS; ++j)
-    		{
-				for (int k = 0; k < NO_OF_LAYERS; ++k)
-				{
-					distance_from_pressure_on_flight_level[k] = fabs(log(pressure_on_flight_levels[j]/pressure_at_vector_points[k]));
-				}
-				closest_layer_index = find_min_index(distance_from_pressure_on_flight_level, NO_OF_LAYERS);
-				other_layer_index = closest_layer_index + 1;
-				if (pressure_on_flight_levels[j] < pressure_at_vector_points[closest_layer_index])
-				{
-					other_layer_index = closest_layer_index - 1;
-				}
-    			if ((closest_layer_index == NO_OF_LAYERS - 1 && other_layer_index == NO_OF_LAYERS) || (closest_layer_index < 0 || other_layer_index < 0))
-    			{
-					u_on_flight_levels[i][j] = 9999;
-					v_on_flight_levels[i][j] = 9999;
-    			}
-    			else
-    			{
-					closest_weight = 1 - distance_from_pressure_on_flight_level[closest_layer_index]/
-					(fabs(log(pressure_at_vector_points[closest_layer_index]/pressure_at_vector_points[other_layer_index])) + EPSILON_SECURITY);
-					u_on_flight_levels[i][j] = closest_weight*wind_u[closest_layer_index*NO_OF_VECTORS_H + i]
-					+ (1 - closest_weight)*wind_u[other_layer_index*NO_OF_VECTORS_H + i];
-					v_on_flight_levels[i][j] = closest_weight*wind_v[closest_layer_index*NO_OF_VECTORS_H + i]
-					+ (1 - closest_weight)*wind_v[other_layer_index*NO_OF_VECTORS_H + i];
-    			}
-    			
-    		}
-    	}
     	free(pressure_on_flight_levels);
-    	free(pressure_at_vector_points);
     	free(distance_from_pressure_on_flight_level);
     	
 		int OUTPUT_FILE_AVIATION_LENGTH = 300;
@@ -1622,23 +1554,18 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		free(OUTPUT_FILE_AVIATION_PRE);
 		char *OUTPUT_FILE_AVIATION = malloc((OUTPUT_FILE_AVIATION_LENGTH + 1)*sizeof(char));
 		sprintf(OUTPUT_FILE_AVIATION, "output/%s/%s+%ds_flight_levels.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
-		int ncid_flight_level, scalar_h_dimid, vector_h_dimid, level_dimid, temp_flight_level_id, rh_flight_level_id, wind_u_flight_level_id, wind_v_flight_level_id, flight_levels_id;
+		int ncid_flight_level, scalar_h_dimid, level_dimid, temp_flight_level_id, rh_flight_level_id, wind_u_flight_level_id, wind_v_flight_level_id, flight_levels_id;
 		
 		if ((retval = nc_create(OUTPUT_FILE_AVIATION, NC_CLOBBER, &ncid_flight_level)))
 			NCERR(retval);
 		free(OUTPUT_FILE_AVIATION);
 		if ((retval = nc_def_dim(ncid_flight_level, "scalar_index_h", NO_OF_SCALARS_H, &scalar_h_dimid)))
 			NCERR(retval);
-		if ((retval = nc_def_dim(ncid_flight_level, "vector_index_h", NO_OF_VECTORS_H, &vector_h_dimid)))
-			NCERR(retval);
 		if ((retval = nc_def_dim(ncid_flight_level, "flight_levels", NO_OF_FLIGHT_LEVELS, &level_dimid)))
 			NCERR(retval);
 		int dimids_flight_level_scalar[2];
 		dimids_flight_level_scalar[0] = scalar_h_dimid;
 		dimids_flight_level_scalar[1] = level_dimid;
-		int dimids_flight_level_vector[2];
-		dimids_flight_level_vector[0] = vector_h_dimid;
-		dimids_flight_level_vector[1] = level_dimid;
 		// Defining the variables.
 		if ((retval = nc_def_var(ncid_flight_level, "flight_levels", NC_DOUBLE, 1, &level_dimid, &flight_levels_id)))
 			NCERR(retval);
@@ -1652,11 +1579,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			NCERR(retval);
 		if ((retval = nc_put_att_text(ncid_flight_level, rh_flight_level_id, "units", strlen("%"), "%")))
 			NCERR(retval);
-		if ((retval = nc_def_var(ncid_flight_level, "wind_u", NC_DOUBLE, 2, dimids_flight_level_vector, &wind_u_flight_level_id)))
+		if ((retval = nc_def_var(ncid_flight_level, "wind_u", NC_DOUBLE, 2, dimids_flight_level_scalar, &wind_u_flight_level_id)))
 			NCERR(retval);
 		if ((retval = nc_put_att_text(ncid_flight_level, wind_u_flight_level_id, "units", strlen("m/s"), "m/s")))
 			NCERR(retval);
-		if ((retval = nc_def_var(ncid_flight_level, "wind_v", NC_DOUBLE, 2, dimids_flight_level_vector, &wind_v_flight_level_id)))
+		if ((retval = nc_def_var(ncid_flight_level, "wind_v", NC_DOUBLE, 2, dimids_flight_level_scalar, &wind_v_flight_level_id)))
 			NCERR(retval);
 		if ((retval = nc_put_att_text(ncid_flight_level, wind_v_flight_level_id, "units", strlen("m/s"), "m/s")))
 			NCERR(retval);
@@ -1693,8 +1620,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		double *temperature_h = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *pressure_h = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *rh_h = malloc(NO_OF_SCALARS_H*sizeof(double));
-		double *wind_u_h = malloc(NO_OF_VECTORS_H*sizeof(double));
-		double *wind_v_h = malloc(NO_OF_VECTORS_H*sizeof(double));
+		double *wind_u_h = malloc(NO_OF_SCALARS_H*sizeof(double));
+		double *wind_v_h = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *rel_vort_h = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *divv_h = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *wind_w_h = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -1875,8 +1802,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			codes_handle_delete(handle_rh);
 			for (int j = 0; j < NO_OF_VECTORS_H; ++j)
 			{
-			    wind_u_h[j] = wind_u[i*NO_OF_VECTORS_H + j];
-			    wind_v_h[j] = wind_v[i*NO_OF_VECTORS_H + j];
+			    wind_u_h[j] = diagnostics -> u_at_cell[i*NO_OF_SCALARS_H + j];
+			    wind_v_h[j] = diagnostics -> v_at_cell[i*NO_OF_SCALARS_H + j];
 			    rel_vort_h[j] = (*rel_vort)[i*NO_OF_SCALARS_H + j];
 			}
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
@@ -1920,7 +1847,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_u_h, "level", i)))
 			    ECCERR(retval);
-			if ((retval = codes_set_double_array(handle_wind_u_h, "values", wind_u_h, NO_OF_VECTORS_H)))
+			if ((retval = codes_set_double_array(handle_wind_u_h, "values", diagnostics -> u_at_cell, NO_OF_VECTORS_H)))
 			    ECCERR(retval);
 			if ((retval = codes_write_message(handle_wind_u_h, OUTPUT_FILE, "a")))
 			    ECCERR(retval);
@@ -1966,7 +1893,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_v_h, "level", i)))
 			    ECCERR(retval);
-			if ((retval = codes_set_double_array(handle_wind_v_h, "values", wind_v_h, NO_OF_VECTORS_H)))
+			if ((retval = codes_set_double_array(handle_wind_v_h, "values", diagnostics -> v_at_cell, NO_OF_VECTORS_H)))
 			    ECCERR(retval);
 			if ((retval = codes_write_message(handle_wind_v_h, OUTPUT_FILE, "a")))
 			    ECCERR(retval);
@@ -2071,6 +1998,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				codes_handle_delete(handle_divv_h);
 			}
 		}
+		free(OUTPUT_FILE);
 		free(wind_u_h);
 		free(wind_v_h);
 		free(rel_vort_h);
@@ -2147,7 +2075,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		free(OUTPUT_FILE_PRE);
 		char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
 		sprintf(OUTPUT_FILE, "output/%s/%s+%ds.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
-		int scalar_dimid, vector_h_dimid, vector_v_dimid, temp_id, temp_solid_id, temp_liquid_id, density_dry_id, density_solid_id, density_liquid_id, density_vapour_id, pressure_id, wind_u_id, wind_v_id, wind_w_id, rh_id, ncid, retval, divv_h_all_layers_id, rel_vort_id, curl_field_dimid, stretching_parameter_id, single_double_dimid, vector_dimid, wind_id;
+		int scalar_dimid, vector_h_dimid, vector_v_dimid, temp_id, temp_solid_id, temp_liquid_id, density_dry_id, density_solid_id, density_liquid_id, density_vapour_id, pressure_id, rh_id, ncid, retval, divv_h_all_layers_id, rel_vort_id, curl_field_dimid, stretching_parameter_id, single_double_dimid, vector_dimid, wind_id;
 		
 		if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
 			NCERR(retval);
@@ -2200,21 +2128,9 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			NCERR(retval);
 		if ((retval = nc_put_att_text(ncid, pressure_id, "units", strlen("Pa"), "Pa")))
 			NCERR(retval);
-		if ((retval = nc_def_var(ncid, "wind_u", NC_DOUBLE, 1, &vector_h_dimid, &wind_u_id)))
-			NCERR(retval);
-		if ((retval = nc_put_att_text(ncid, wind_u_id, "units", strlen("m/s"), "m/s")))
-			NCERR(retval);
 		if ((retval = nc_def_var(ncid, "wind", NC_DOUBLE, 1, &vector_dimid, &wind_id)))
 			NCERR(retval);
 		if ((retval = nc_put_att_text(ncid, wind_id, "units", strlen("m/s"), "m/s")))
-			NCERR(retval);
-		if ((retval = nc_def_var(ncid, "wind_v", NC_DOUBLE, 1, &vector_h_dimid, &wind_v_id)))
-			NCERR(retval);
-		if ((retval = nc_put_att_text(ncid, wind_v_id, "units", strlen("m/s"), "m/s")))
-			NCERR(retval);
-		if ((retval = nc_def_var(ncid, "wind_w", NC_DOUBLE, 1, &vector_v_dimid, &wind_w_id)))
-			NCERR(retval);
-		if ((retval = nc_put_att_text(ncid, wind_w_id, "units", strlen("m/s"), "m/s")))
 			NCERR(retval);
 		if ((retval = nc_def_var(ncid, "rh", NC_DOUBLE, 1, &scalar_dimid, &rh_id)))
 			NCERR(retval);
@@ -2312,12 +2228,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, wind_id, &state_write_out -> velocity_gas[0])))
 			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, wind_u_id, &wind_u[0])))
-			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, wind_v_id, &wind_v[0])))
-			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, wind_w_id, &wind_w[0])))
-			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, rh_id, &(*rh)[0])))
 			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, rel_vort_id, &(*rel_vort)[0])))
@@ -2335,9 +2245,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	free(divv_h_all_layers);
 	free(rel_vort_edge);
 	free(rel_vort);
-	free(wind_u);
-	free(wind_v);
-	free(wind_w);
 	free(rh);
 	free(epv);
 	free(pressure);

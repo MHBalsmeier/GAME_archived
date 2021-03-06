@@ -32,8 +32,8 @@ int backward_tendencies(State *state, State *state_tendency, Grid *grid, Dualgri
     // Temperature diffusion gets updated here, but only at the first RK step and if heat conduction is switched on.
     if (no_rk_step == 0 && (config_info -> temperature_diff_h == 1 || config_info -> temperature_diff_v == 1))
     {
-    	// Now we need to calculate the scalar diffusion coefficients.
-        calc_temp_diffusion_coeffs(state, config_info, irreversible_quantities -> scalar_diffusion_coeff_numerical_h, irreversible_quantities -> scalar_diffusion_coeff_numerical_v);
+    	// Now we need to calculate the temperature diffusion coefficients.
+        calc_temp_diffusion_coeffs(state, config_info, irreversible_quantities, diagnostics, delta_t, grid);
         // The diffusion of the temperature depends on its gradient.
 		grad(state -> temperature_gas, diagnostics -> temperature_gradient, grid);
 		// Now the diffusive temperature flux density can be obtained.

@@ -69,8 +69,6 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagn
         
         // division by the density to obtain the "potential vorticity"
 		diagnostics -> pot_vort[i] = diagnostics -> pot_vort[i]/density_value;
-		// this is necessary for estimating the shear in the tubulence parameterizations
-		diagnostics -> rel_vort_pot[i] = diagnostics -> rel_vort[i]/density_value;
     }
     return 0;
 }
