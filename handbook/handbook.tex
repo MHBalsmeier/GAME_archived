@@ -101,12 +101,11 @@ Scripts with the suffix \texttt{\_dev} are not different from the original scrip
 \chapter{Running the model}
 \label{chap:running_the_model}
 
-The configuration of the model must be set in three different files:
+The configuration of the model must be set in two different files:
 
 \begin{itemize}
-\item \texttt{core/src/enum\_and\_typedefs.h}: modify \texttt{RES\_ID}, \texttt{NO\_OF\_LAYERS} and \texttt{NO\_OF\_ORO\_LAYERS}. These must conform with the grid file and the initialization state file.
-\item The file \texttt{core/src/settings.c}: configure  settings that are not accessible via the run scripts. Some quantities in \texttt{core/src/settings.h} will also need to be modified.
-\item The run script: one of the files contained in the directory \texttt{run\_scripts}. The comments in these files explain the meaning of the variables.
+\item \texttt{core/src/enum\_and\_typedefs.h}: modify \texttt{RES\_ID}, \texttt{NO\_OF\_LAYERS}, \texttt{NO\_OF\_GASEOUS\_CONSTITUENTS} and \texttt{NO\_OF\_CONDENSED\_CONSTITUENTS}. These must conform with the grid file and the initialization state file. It must be done before the compilation.
+\item The run script: one of the files contained in the directory \texttt{run\_scripts}. The comments in these files explain the meaning of the variables. This can be done after the compilation.
 \end{itemize}
 %
 Since the files \texttt{core/src/enum\_and\_typedefs.h} and \texttt{core/src/settings.c} are part of the model's source code, the model must be recompiled if something is changed in them. Alternatively, one can compile several executables and name them according to their configuration.
