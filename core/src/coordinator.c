@@ -303,6 +303,14 @@ int main(int argc, char *argv[])
 	{
 		printf("Vertical momentum diffusion is turned on.\n");
 	}
+	if (config_info -> div_damp_4th_order_switch == 0)
+	{
+		printf("4th order divergence damping is turned off.\n");
+	}
+	else
+	{
+		printf("4th order divergence damping is turned on.\n");
+	}
 	if (config_info -> assume_lte == 0)
 	{
 		printf("Not Assuming local thermodynamic equilibrium.\n");
