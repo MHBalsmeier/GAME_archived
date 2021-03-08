@@ -39,6 +39,7 @@ int temperature_step(State *state_old, State *state_new, State *state_tendency, 
 {
     double nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_gas_0, density_gas_1, delta_density_gas, delta_entropy_density, temperature_0, specific_entropy_gas_0, specific_entropy_gas_1, c_g_v, c_g_p;
     double beta = get_impl_thermo_weight();
+    beta = 1;
     double alpha = 1 - beta;
 	#pragma omp parallel for private(nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_gas_0, density_gas_1, delta_density_gas, delta_entropy_density, temperature_0, specific_entropy_gas_0, specific_entropy_gas_1, c_g_v, c_g_p)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
@@ -95,6 +96,7 @@ int entropy_density_step(State *state_old, State *state_new, State *state_tenden
 {
 	double c_v, c_p, temperature_0, temperature_1, delta_temperature, density_0, density_1, delta_density, nominator, denominator, specific_entropy_0;
     double beta = get_impl_thermo_weight();
+    beta = 1;
     double alpha = 1 - beta;
     int no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
     if (config_info -> assume_lte == 1)

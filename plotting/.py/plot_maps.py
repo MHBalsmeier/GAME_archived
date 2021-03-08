@@ -222,7 +222,7 @@ if projection == "Gnomonic":
 	desired_lat_deg, desired_lon_deg, height_map, width_map = mp.return_central_point(scope);
 	for i in range(len(scope_bool_array[:, 0])):
 		for j in range(len(scope_bool_array[0, :])):
-			if ds.calc_distance(desired_lat_deg, desired_lon_deg, np.rad2deg(lat[i]), np.rad2deg(lon[j])) < height_map or ds.calc_distance(desired_lat_deg, desired_lon_deg, np.rad2deg(lat[i]), np.rad2deg(lon[i, j])) < width_map:
+			if ds.calc_distance(desired_lat_deg, desired_lon_deg, np.rad2deg(lat[i]), np.rad2deg(lon[j])) < height_map or ds.calc_distance(desired_lat_deg, desired_lon_deg, np.rad2deg(lat[i]), np.rad2deg(lon[j])) < width_map:
 				scope_bool_array[i, j] = True;
 
 if uniform_range == 1:
@@ -295,8 +295,8 @@ for i in range(int(max_interval/plot_interval) + 1):
 		proj = ccrs.Gnomonic(central_latitude = desired_lat_deg, central_longitude = desired_lon_deg, globe = None);
 		ax = plt.axes(projection = proj);
 		ax.set_extent([-width_map/2, width_map/2, -height_map/2, height_map/2], crs = proj);
-	lat_plot_deg = np.rad2deg(lat_plot);
-	lon_plot_deg = np.rad2deg(lon_plot);
+	lat_plot_deg = np.rad2deg(lat);
+	lon_plot_deg = np.rad2deg(lon);
 	if (projection != "Gnomonic"):
 		lat_coord = iris.coords.DimCoord(lat_plot_deg, standard_name = "latitude", units = "degrees", coord_system = coord_sys);
 		lon_coord = iris.coords.DimCoord(lon_plot_deg, standard_name = "longitude", units = "degrees", coord_system = coord_sys);

@@ -109,12 +109,6 @@ int main(int argc, char *argv[])
 	Checking user input for correctness:
 	------------------------------------
 	*/
-	if (io_config -> native_grid_output == 0 && io_config -> latlon_grid_output == 0)
-	{
-		printf("Either native_grid_output or latlon_grid_output must be set to 1.");
-		printf("Aborting.\n");
-		exit(1);
-	}
     if (WRITE_OUT_INTERVAL < 900)
     {
     	printf("It is WRITE_OUT_INTERVAL < 900.\n");

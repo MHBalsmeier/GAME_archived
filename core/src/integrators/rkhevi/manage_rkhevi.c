@@ -37,13 +37,10 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		At i == 0, it is state_old == state_new.
 		*/
 		
-		if (hor_div_update_bool == 1)
-		{
-			// 1.) Explicit component of the momentum equation.
-			// ------------------------------------------------
-			forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, i, slow_update_bool, delta_t);
-		    // time stepping for the horizontal momentum can be directly executed
-	    }
+		// 1.) Explicit component of the momentum equation.
+		// ------------------------------------------------
+		forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, i, slow_update_bool, delta_t);
+	    // time stepping for the horizontal momentum can be directly executed
 	    
 	    for (int j = 0; j < NO_OF_VECTORS; ++j)
 	    {

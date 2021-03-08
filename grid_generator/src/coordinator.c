@@ -264,8 +264,10 @@ int main(int argc, char *argv[])
 	set_area_dual(area_dual, z_vector, from_index_dual, to_index_dual, area_dual_pre, z_vector_dual);
     printf(GREEN "finished.\n" RESET);
     
-    // interpolation to the lat lon grid
+    // interpolation to the lat-lon grid
+    printf("Calculating interpolation to the lat-lon grid ... ");
     interpolate_ll(latitude_scalar, longitude_scalar, interpol_indices, interpol_weights);
+    printf(GREEN "finished.\n" RESET);
     
     // more advanced stuff: tangential vector reconstruction and inner product
     printf("Calculating inner product weights and related things ... ");

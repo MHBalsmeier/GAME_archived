@@ -202,8 +202,6 @@ int netcdf_output_switch;
 int pressure_level_output_switch;
 int model_level_output_switch;
 int surface_output_switch;
-int native_grid_output;
-int latlon_grid_output;
 } Io_config;
 
 

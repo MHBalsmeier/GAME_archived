@@ -1704,11 +1704,15 @@ int set_basic_props2grib(codes_handle *handle, long data_date, long data_time, l
 	    ECCERR(retval);
 	if ((retval = codes_set_long(handle, "iScansNegatively", 0)))
 	    ECCERR(retval);
-	if ((retval = codes_set_long(handle, "jScansPositively", 1)))
+	if ((retval = codes_set_long(handle, "jScansPositively", 0)))
 	    ECCERR(retval);
-	if ((retval = codes_set_double(handle, "latitudeOfFirstGridPointInDegrees", rad2deg(M_PI - 0.5*M_PI/NO_OF_LAT_IO_POINTS))))
+	if ((retval = codes_set_double(handle, "latitudeOfFirstGridPointInDegrees", rad2deg(M_PI/2 - 0.5*M_PI/NO_OF_LAT_IO_POINTS))))
 	    ECCERR(retval);
 	if ((retval = codes_set_double(handle, "longitudeOfFirstGridPointInDegrees", 0)))
+	    ECCERR(retval);
+	if ((retval = codes_set_double(handle, "latitudeOfLastGridPointInDegrees", -rad2deg(M_PI/2 - 0.5*M_PI/NO_OF_LAT_IO_POINTS))))
+	    ECCERR(retval);
+	if ((retval = codes_set_double(handle, "longitudeOfLastGridPointInDegrees", rad2deg(-2*M_PI/NO_OF_LON_IO_POINTS))))
 	    ECCERR(retval);
 	if ((retval = codes_set_double(handle, "iDirectionIncrementInDegrees", rad2deg(2*M_PI/NO_OF_LON_IO_POINTS))))
 	    ECCERR(retval);

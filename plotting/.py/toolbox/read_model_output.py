@@ -23,15 +23,30 @@ def gid_read_values(filename, short_name, step, level):
     return_array = ec.codes_get_array(gid, "values");
     ec.codes_release(gid);
     return return_array;
-    
+
+def vector_2_array(vector, no_of_lines, no_of_columns):
+    array = np.zeros([no_of_lines, no_of_columns]);
+    for i in range(0, no_of_lines):
+        for j in range(0, no_of_columns):
+            array[i, j] = vector[i*no_of_columns + j];
+    return array;
+
 def fetch_model_output(input_file, step, short_name, level):
-    file = open(input_file, "rb");
-    gid = ec.codes_grib_new_from_file(file);
-    file.close();
-    values = gid_read_values(input_file, short_name, step, level);
-	lat_vector_deg = np.deg2rad(ec.codes_get_array(gid, "latitudes"));
-	lon_vector_deg = np.deg2rad(ec.codes_get_array(gid, "longitudes"));
-    return lat, lon, values;
+	file = open(input_file, "rb");
+	gid = ec.codes_grib_new_from_file(file);
+	file.close();
+	values = gid_read_values(input_file, short_name, step, level);
+	lat = np.deg2rad(ec.codes_get_array(gid, "latitudes"));
+	lon = np.deg2rad(ec.codes_get_array(gid, "longitudes"));
+	no_of_columns = ec.codes_get_long(gid, "Ni");
+	no_of_lines = ec.codes_get_long(gid, "Nj");
+	lat_vector = np.zeros([no_of_lines]);
+	lon_vector = np.zeros([no_of_columns]);
+	for i in range(no_of_lines):
+	    lat_vector[i] = lat[i*no_of_columns];
+	for i in range(no_of_columns):
+	    lon_vector[i] = lon[i];
+	return lat_vector, lon_vector, vector_2_array(values, no_of_lines, no_of_columns);
     
     
     

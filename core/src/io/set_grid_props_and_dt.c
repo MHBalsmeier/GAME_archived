@@ -329,7 +329,7 @@ int calc_delta_t_and_related(double cfl_margin, double *delta_t, Grid *grid, Dua
     double sound_speed_value;
     
     // the gravity wave criterion
-    double n_freq = 0.03;
+    double n_freq = 0.1;
     double delta_t_brunt_vaisala = 2/n_freq;
     // delta_t_brunt_vaisala = (1 - cfl_margin)*delta_t_brunt_vaisala;
     
