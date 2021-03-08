@@ -1,7 +1,6 @@
 # This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 # Github repository: https://github.com/AUN4GFD/game
 
-import toolbox.grid_reader as grid_reader;
 import eccodes as ec;
 import numpy as np;
 from colorama import Fore;
@@ -25,13 +24,13 @@ def gid_read_values(filename, short_name, step, level):
     ec.codes_release(gid);
     return return_array;
     
-def fetch_model_output(input_file, step, short_name, level, grid_props_file):
+def fetch_model_output(input_file, step, short_name, level):
     file = open(input_file, "rb");
     gid = ec.codes_grib_new_from_file(file);
     file.close();
     values = gid_read_values(input_file, short_name, step, level);
-    variable_name_suffix = "scalar";
-    lat, lon = grid_reader.read_grid_props(grid_props_file, "latitude_" + variable_name_suffix, "longitude_" + variable_name_suffix);
+	lat_vector_deg = np.deg2rad(ec.codes_get_array(gid, "latitudes"));
+	lon_vector_deg = np.deg2rad(ec.codes_get_array(gid, "longitudes"));
     return lat, lon, values;
     
     

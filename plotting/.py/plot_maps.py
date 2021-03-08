@@ -189,8 +189,8 @@ if short_name == "surface_wind":
 else:
 	lat, lon, values_pre = rmo.fetch_model_output(input_file, 0, short_name, level);
 
-values = np.zeros([len(lat), int(max_interval/plot_interval) + 1]);
-values[:, 0] = rescale*values_pre + shift;
+values = np.zeros([len(lat), len(lon), int(max_interval/plot_interval) + 1]);
+values[:, :, 0] = rescale*values_pre + shift;
 if short_name == "surface_wind":
 	values_10u = np.zeros([len(lat), len(lon), int(max_interval/plot_interval) + 1]);
 	values_10u[:, :, 0] = rescale*values_pre_10u + shift;
@@ -214,20 +214,21 @@ for i in np.arange(1, int(max_interval/plot_interval) + 1):
 		lat, lon, values_10v[:, :, i] = rmo.fetch_model_output(input_file, time_after_init, "10v", level);
 		values_10v[:, :, i] = rescale*values_10v[:, :, i] + shift;
 	else:
-		lat, lon, values[:, i] = rmo.fetch_model_output(input_file, time_after_init, short_name, level);
-		values[:, i] = rescale*values[:, i] + shift;
+		lat, lon, values[:, :, i] = rmo.fetch_model_output(input_file, time_after_init, short_name, level);
+		values[:, :, i] = rescale*values[:, :, i] + shift;
 
-scope_bool_vector = np.zeros([len(values[:, 0])], dtype = bool);
+scope_bool_array = np.zeros([len(values[:, 0]), len(values[0, :])], dtype = bool);
 if projection == "Gnomonic":
 	desired_lat_deg, desired_lon_deg, height_map, width_map = mp.return_central_point(scope);
-	for i in range(len(scope_bool_vector)):
-		if ds.calc_distance(desired_lat_deg, desired_lon_deg, np.rad2deg(lat[i]), np.rad2deg(lon[i])) < height_map or ds.calc_distance(desired_lat_deg, desired_lon_deg, np.rad2deg(lat[i]), np.rad2deg(lon[i])) < width_map:
-			scope_bool_vector[i] = True;
+	for i in range(len(scope_bool_array[:, 0])):
+		for j in range(len(scope_bool_array[0, :])):
+			if ds.calc_distance(desired_lat_deg, desired_lon_deg, np.rad2deg(lat[i]), np.rad2deg(lon[j])) < height_map or ds.calc_distance(desired_lat_deg, desired_lon_deg, np.rad2deg(lat[i]), np.rad2deg(lon[i, j])) < width_map:
+				scope_bool_array[i, j] = True;
 
 if uniform_range == 1:
 	if projection == "Gnomonic":
-		total_min = np.min(values[scope_bool_vector, :]);
-		total_max = np.max(values[scope_bool_vector, :]);
+		total_min = np.min(values[scope_bool_array, :]);
+		total_max = np.max(values[scope_bool_array, :]);
 	else:
 		total_min = np.min(values);
 		total_max = np.max(values);
@@ -243,16 +244,15 @@ if uniform_range == 1:
 	color_bar_dist = values_range_for_plot/5;
 	cmap = plt.get_cmap(colormap);
 
-points = np.zeros([len(values[:, 0]), 2]);
 fig_size = 7;
 for i in range(int(max_interval/plot_interval) + 1):
 	if uniform_range == 0:
 		if projection == "Gnomonic":
-			total_min = np.min(values[scope_bool_vector, i]);
-			total_max = np.max(values[scope_bool_vector, i]);
+			total_min = np.min(values[scope_bool_array, i]);
+			total_max = np.max(values[scope_bool_array, i]);
 		else:
-			total_min = np.min(values[:, i]);
-			total_max = np.max(values[:, i]);
+			total_min = np.min(values[:, :, i]);
+			total_max = np.max(values[:, :, i]);
 		if total_min == total_max:
 			total_max = total_min + 0.001;
 		values_range_for_plot = total_max - total_min;
@@ -295,14 +295,8 @@ for i in range(int(max_interval/plot_interval) + 1):
 		proj = ccrs.Gnomonic(central_latitude = desired_lat_deg, central_longitude = desired_lon_deg, globe = None);
 		ax = plt.axes(projection = proj);
 		ax.set_extent([-width_map/2, width_map/2, -height_map/2, height_map/2], crs = proj);
-	lat_plot_deg = np.linspace(-90, 90, 1000);
-	lon_plot_deg = np.linspace(-180, 180, 1000);
-	lat_plot_barbs_deg = np.linspace(-90, 90, 36);
-	lon_plot_barbs_deg = np.linspace(-180, 180, 72);
-	Xi, Yi = np.meshgrid(lon_plot_deg, lat_plot_deg);
-	Xi_barbs, Yi_barbs = np.meshgrid(lon_plot_barbs_deg, lat_plot_barbs_deg);
-	points[:, 0] = np.rad2deg(lat);
-	points[:, 1] = np.rad2deg(lon);
+	lat_plot_deg = np.rad2deg(lat_plot);
+	lon_plot_deg = np.rad2deg(lon_plot);
 	if (projection != "Gnomonic"):
 		lat_coord = iris.coords.DimCoord(lat_plot_deg, standard_name = "latitude", units = "degrees", coord_system = coord_sys);
 		lon_coord = iris.coords.DimCoord(lon_plot_deg, standard_name = "longitude", units = "degrees", coord_system = coord_sys);
@@ -316,7 +310,7 @@ for i in range(int(max_interval/plot_interval) + 1):
 	gl.yformatter = LATITUDE_FORMATTER;
 	if scope == "World":
 		gl.left_labels = False;
-	new_cube = iris.cube.Cube(values, units = unit_string_for_iris, dim_coords_and_dims = [(lat_coord, 0), (lon_coord, 1)]);
+	new_cube = iris.cube.Cube(values[:, :, i], units = unit_string_for_iris, dim_coords_and_dims = [(lat_coord, 0), (lon_coord, 1)]);
 	if contourf_plot == 1:
 		cf = iplt.contourf(new_cube, cmap = cmap, levels = bounds);
 		cbar = plt.colorbar(cf, fraction = 0.02, pad = 0.04, aspect = 80, orientation = "horizontal", ticks = np.arange(total_min, total_max + color_bar_dist, color_bar_dist));
@@ -334,7 +328,7 @@ for i in range(int(max_interval/plot_interval) + 1):
 		c = iplt.contour(new_cube, levels_vector, linewidths = linewidths_vector, colors = "black");
 		plt.clabel(c, inline = True, fmt = "%1.0f", fontsize = 12, colors = "k");
 	if short_name == "surface_wind":
-		ax.barbs(lon_plot_barbs_deg, lat_plot_barbs_deg, values_10u, values_10v, length = 6, sizes = dict(emptybarb = 0.3, spacing = 0.2, height = 0.5), linewidth = 1.1, transform = ccrs.PlateCarree());
+		ax.barbs(lon_plot_deg, lat_plot_deg, values_10u[:, :, i], values_10v[:, :, i], length = 6, sizes = dict(emptybarb = 0.3, spacing = 0.2, height = 0.5), linewidth = 1.1, transform = ccrs.PlateCarree());
 	if (scope != "World"):
 		ax.add_feature(cfeature.LAND);
 		ax.add_feature(cfeature.OCEAN);
