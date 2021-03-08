@@ -15,15 +15,19 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 {
 	// slow terms (momentum advection and diffusion) update switch
 	int slow_update_bool = 0;
+	int hor_div_update_bool = 0;
+	double delta_t_small = delta_t;
 	if (fmod(total_step_counter, config_info -> adv_sound_ratio) == 0)
 	{
 		slow_update_bool = 1;
+		hor_div_update_bool = 1;
+		delta_t = config_info -> adv_sound_ratio*delta_t_small;
     }
 	// horizontal fast terms (momentum advection and diffusion) update switch
-	int hor_div_update_bool = 0;
-	if (fmod(total_step_counter, config_info -> fast_hv_ratio) == 0)
+	if (fmod(total_step_counter, config_info -> fast_hv_ratio) == 0 && slow_update_bool == 0)
 	{
 		hor_div_update_bool = 1;
+		delta_t = config_info -> fast_hv_ratio*delta_t_small;
     }
     
 	/*
@@ -62,7 +66,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		
 		// 3.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies (including diabatic forcings).
 		// ----------------------------------------------------------------------------------------------------------------------------------------
-		temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t);
+		temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, 0);
 
 		// 4.) Vertical sound wave solver.
 		// -------------------------------
@@ -76,6 +80,14 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		// 6.) Doing the thermodynamically consistent entropy step.
 		// --------------------------------------------------------
 		entropy_density_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t);
+    }
+
+	// in this case, a large time step has been taken, which we modify into a small step here    
+    if (hor_div_update_bool == 1)
+    {
+    	linear_combine_two_states(state_old, state_new, state_new, 1 - delta_t_small/delta_t, delta_t_small/delta_t);
+    	// this is for thermodynamic consistency
+		temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t_small, 1);
     }
     return 0;
 }

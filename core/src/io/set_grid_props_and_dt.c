@@ -365,9 +365,10 @@ int calc_delta_t_and_related(double cfl_margin, double *delta_t, Grid *grid, Dua
 		config_info -> fast_hv_ratio = *delta_t/delta_t_brunt_vaisala;
 		*delta_t = delta_t_brunt_vaisala;
 	}
+    config_info -> adv_sound_ratio = config_info -> fast_hv_ratio*config_info -> adv_sound_ratio;
 	
+	// diffusion preparation
 	grid -> mean_area_edge = edge_area/NO_OF_H_VECTORS;
-	
 	/*
 	the homogeneous prefactor of the divergence damping
 	this is for RES_ID = 5
