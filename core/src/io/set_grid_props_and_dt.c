@@ -362,6 +362,7 @@ int calc_delta_t_and_related(double cfl_margin, double *delta_t, Grid *grid, Dua
 	*delta_t = (1 - cfl_margin)*min_dist_horizontal/max_sound_speed;
 	if (*delta_t > delta_t_brunt_vaisala)
 	{
+		config_info -> fast_hv_ratio = *delta_t/delta_t_brunt_vaisala;
 		*delta_t = delta_t_brunt_vaisala;
 	}
 	

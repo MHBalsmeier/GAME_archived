@@ -162,6 +162,7 @@ int rad_on;
 int rad_update;
 int assume_lte;
 int adv_sound_ratio;
+int fast_hv_ratio;
 int nwp_mode;
 int delta_t_between_analyses;
 int div_damp_4th_order_switch;

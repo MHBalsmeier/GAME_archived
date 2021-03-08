@@ -19,6 +19,12 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 	{
 		slow_update_bool = 1;
     }
+	// horizontal fast terms (momentum advection and diffusion) update switch
+	int hor_div_update_bool = 0;
+	if (fmod(total_step_counter, config_info -> fast_hv_ratio) == 0)
+	{
+		hor_div_update_bool = 1;
+    }
     
 	/*
 	Loop over the RK substeps.
@@ -31,25 +37,31 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		At i == 0, it is state_old == state_new.
 		*/
 		
-		// 1.) Explicit component of the momentum equation.
-		// ------------------------------------------------
-		forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, i, slow_update_bool, delta_t);
-        // time stepping for the horizontal momentum can be directly executed
-        for (int j = 0; j < NO_OF_VECTORS; ++j)
-        {
-        	layer_index = j/NO_OF_VECTORS_PER_LAYER;
-        	h_index = j - layer_index*NO_OF_VECTORS_PER_LAYER;
-        	if (h_index >= NO_OF_SCALARS_H)
-        	{
-        		state_new -> velocity_gas[j] = state_old -> velocity_gas[j] + delta_t*state_tendency -> velocity_gas[j];
-        	}
-        }
+		if (hor_div_update_bool == 1)
+		{
+			// 1.) Explicit component of the momentum equation.
+			// ------------------------------------------------
+			forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, i, slow_update_bool, delta_t);
+		    // time stepping for the horizontal momentum can be directly executed
+	    }
+	    
+	    for (int j = 0; j < NO_OF_VECTORS; ++j)
+	    {
+	    	layer_index = j/NO_OF_VECTORS_PER_LAYER;
+	    	h_index = j - layer_index*NO_OF_VECTORS_PER_LAYER;
+	    	if (h_index >= NO_OF_SCALARS_H)
+	    	{
+	    		state_new -> velocity_gas[j] = state_old -> velocity_gas[j] + delta_t*state_tendency -> velocity_gas[j];
+	    	}
+	    }
 		// Horizontal velocity can be considered to be updated from now on.
-		
-		// 2.) Explicit component of the generalized density equations.
-		// ------------------------------------------------------------
-		backward_tendencies(state_new, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, time_coordinate);
-		// determining the explicit component of the new temperature
+
+		if (hor_div_update_bool == 1)
+		{
+			// 2.) Explicit component of the generalized density equations.
+			// ------------------------------------------------------------
+			backward_tendencies(state_new, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, time_coordinate);
+		}
 		
 		// 3.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies (including diabatic forcings).
 		// ----------------------------------------------------------------------------------------------------------------------------------------
