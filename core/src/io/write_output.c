@@ -37,7 +37,7 @@ const double MIN_CRITERION_CLOUY_BOX = 1e-4;
 
 double calc_std_dev(double [], int);
 int global_scalar_integrator(Scalar_field, Grid *, double *);
-int set_basic_props2grib(codes_handle *, long, long, long, long);
+int set_basic_props2grib(codes_handle *, long, long, long, long, long, long);
 
 int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Io_config *io_config, Config_info *config_info)
 {
@@ -376,11 +376,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			set_basic_props2grib(handle_surface_p, data_date, data_time, t_write, t_init);
-		    if ((retval = codes_set_long(handle_surface_p, "parameterCategory", 3)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "parameterNumber", 0)))
-		        ECCERR(retval);
+			set_basic_props2grib(handle_surface_p, data_date, data_time, t_write, t_init, 3, 0);
 		    if ((retval = codes_set_long(handle_surface_p, "typeOfFirstFixedSurface", 1)))
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_surface_p, "scaledValueOfFirstFixedSurface", 0)))
@@ -401,11 +397,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			set_basic_props2grib(handle_mslp, data_date, data_time, t_write, t_init);
-		    if ((retval = codes_set_long(handle_mslp, "parameterCategory", 3)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_mslp, "parameterNumber", 1)))
-		        ECCERR(retval);
+			set_basic_props2grib(handle_mslp, data_date, data_time, t_write, t_init, 3, 1);
 		    if ((retval = codes_set_long(handle_mslp, "typeOfFirstFixedSurface", 102)))
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_mslp, "scaledValueOfFirstFixedSurface", 0)))
@@ -426,11 +418,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			set_basic_props2grib(handle_t2, data_date, data_time, t_write, t_init);
-		    if ((retval = codes_set_long(handle_t2, "parameterCategory", 0)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_t2, "parameterNumber", 0)))
-		        ECCERR(retval);
+			set_basic_props2grib(handle_t2, data_date, data_time, t_write, t_init, 3, 0);
 		    if ((retval = codes_set_long(handle_t2, "typeOfFirstFixedSurface", 103)))
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_t2, "scaledValueOfFirstFixedSurface", 2)))
@@ -451,11 +439,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			set_basic_props2grib(handle_rprate, data_date, data_time, t_write, t_init);
-		    if ((retval = codes_set_long(handle_rprate, "parameterCategory", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_rprate, "parameterNumber", 65)))
-		        ECCERR(retval);
+			set_basic_props2grib(handle_rprate, data_date, data_time, t_write, t_init, 1, 65);
 		    if ((retval = codes_set_long(handle_rprate, "typeOfFirstFixedSurface", 103)))
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_rprate, "scaledValueOfFirstFixedSurface", 0)))
@@ -476,11 +460,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			set_basic_props2grib(handle_cape, data_date, data_time, t_write, t_init);
-		    if ((retval = codes_set_long(handle_cape, "parameterCategory", 7)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_cape, "parameterNumber", 6)))
-		        ECCERR(retval);
+			set_basic_props2grib(handle_cape, data_date, data_time, t_write, t_init, 7, 6);
 		    if ((retval = codes_set_long(handle_cape, "typeOfFirstFixedSurface", 103)))
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_cape, "scaledValueOfFirstFixedSurface", 0)))
@@ -503,11 +483,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			set_basic_props2grib(handle_sprate, data_date, data_time, t_write, t_init);
-		    if ((retval = codes_set_long(handle_sprate, "parameterCategory", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_sprate, "parameterNumber", 66)))
-		        ECCERR(retval);
+			set_basic_props2grib(handle_sprate, data_date, data_time, t_write, t_init, 1, 66);
 		    if ((retval = codes_set_long(handle_sprate, "typeOfFirstFixedSurface", 103)))
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_sprate, "scaledValueOfFirstFixedSurface", 0)))
@@ -528,11 +504,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			set_basic_props2grib(handle_tcdc, data_date, data_time, t_write, t_init);
-		    if ((retval = codes_set_long(handle_tcdc, "parameterCategory", 6)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_tcdc, "parameterNumber", 1)))
-		        ECCERR(retval);
+			set_basic_props2grib(handle_tcdc, data_date, data_time, t_write, t_init, 6, 1);
 		    if ((retval = codes_set_long(handle_tcdc, "typeOfFirstFixedSurface", 103)))
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_tcdc, "scaledValueOfFirstFixedSurface", 0)))
@@ -555,11 +527,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			set_basic_props2grib(handle_wind_u_10m_mean, data_date, data_time, t_write, t_init);
-			if ((retval = codes_set_long(handle_wind_u_10m_mean, "parameterCategory", 2)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_10m_mean, "parameterNumber", 2)))
-				ECCERR(retval);
+			set_basic_props2grib(handle_wind_u_10m_mean, data_date, data_time, t_write, t_init, 2, 2);
 			if ((retval = codes_set_long(handle_wind_u_10m_mean, "typeOfFirstFixedSurface", 103)))
 				ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_u_10m_mean, "scaledValueOfFirstFixedSurface", 10)))
@@ -580,11 +548,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			set_basic_props2grib(handle_wind_v_10m_mean, data_date, data_time, t_write, t_init);
-			if ((retval = codes_set_long(handle_wind_v_10m_mean, "parameterCategory", 2)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_10m_mean, "parameterNumber", 3)))
-				ECCERR(retval);
+			set_basic_props2grib(handle_wind_v_10m_mean, data_date, data_time, t_write, t_init, 2, 3);
 			if ((retval = codes_set_long(handle_wind_v_10m_mean, "typeOfFirstFixedSurface", 103)))
 				ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_v_10m_mean, "scaledValueOfFirstFixedSurface", 10)))
@@ -605,11 +569,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			set_basic_props2grib(handle_wind_10m_gusts, data_date, data_time, t_write, t_init);
-			if ((retval = codes_set_long(handle_wind_10m_gusts, "parameterCategory", 2)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_10m_gusts, "parameterNumber", 22)))
-				ECCERR(retval);
+			set_basic_props2grib(handle_wind_10m_gusts, data_date, data_time, t_write, t_init, 2, 22);
 			if ((retval = codes_set_long(handle_wind_10m_gusts, "typeOfFirstFixedSurface", 103)))
 				ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_10m_gusts, "scaledValueOfFirstFixedSurface", 10)))
@@ -890,14 +850,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				if (err != 0)
 					ECCERR(err);
 				fclose(SAMPLE_FILE);
-				set_basic_props2grib(handle_geopotential_height_pressure_level, data_date, data_time, t_write, t_init);
+				set_basic_props2grib(handle_geopotential_height_pressure_level, data_date, data_time, t_write, t_init, 3, 5);
 			    if ((retval = codes_set_double(handle_geopotential_height_pressure_level, "missingValue", 9999)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "bitmapPresent", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "parameterCategory", 3)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "parameterNumber", 5)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "typeOfFirstFixedSurface", 100)))
 			        ECCERR(retval);
@@ -927,14 +883,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				if (err != 0)
 					ECCERR(err);
 				fclose(SAMPLE_FILE);
-				set_basic_props2grib(handle_temperature_pressure_level, data_date, data_time, t_write, t_init);
+				set_basic_props2grib(handle_temperature_pressure_level, data_date, data_time, t_write, t_init, 0, 0);
 			    if ((retval = codes_set_double(handle_temperature_pressure_level, "missingValue", 9999)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_temperature_pressure_level, "bitmapPresent", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_temperature_pressure_level, "parameterCategory", 0)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_temperature_pressure_level, "parameterNumber", 0)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_temperature_pressure_level, "typeOfFirstFixedSurface", 100)))
 			        ECCERR(retval);
@@ -956,14 +908,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				if (err != 0)
 					ECCERR(err);
 				fclose(SAMPLE_FILE);
-				set_basic_props2grib(handle_rh_pressure_level, data_date, data_time, t_write, t_init);
+				set_basic_props2grib(handle_rh_pressure_level, data_date, data_time, t_write, t_init, 1, 1);
 			    if ((retval = codes_set_double(handle_rh_pressure_level, "missingValue", 9999)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_rh_pressure_level, "bitmapPresent", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rh_pressure_level, "parameterCategory", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rh_pressure_level, "parameterNumber", 1)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_rh_pressure_level, "typeOfFirstFixedSurface", 100)))
 			        ECCERR(retval);
@@ -985,14 +933,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				if (err != 0)
 					ECCERR(err);
 				fclose(SAMPLE_FILE);
-				set_basic_props2grib(handle_rel_vort_pressure_level, data_date, data_time, t_write, t_init);
+				set_basic_props2grib(handle_rel_vort_pressure_level, data_date, data_time, t_write, t_init, 2, 12);
 			    if ((retval = codes_set_double(handle_rel_vort_pressure_level, "missingValue", 9999)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "bitmapPresent", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "parameterCategory", 2)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "parameterNumber", 12)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "typeOfFirstFixedSurface", 100)))
 			        ECCERR(retval);
@@ -1014,14 +958,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				if (err != 0)
 					ECCERR(err);
 				fclose(SAMPLE_FILE);
-				set_basic_props2grib(handle_epv_pressure_level, data_date, data_time, t_write, t_init);
+				set_basic_props2grib(handle_epv_pressure_level, data_date, data_time, t_write, t_init, 2, 14);
 			    if ((retval = codes_set_double(handle_epv_pressure_level, "missingValue", 9999)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_epv_pressure_level, "bitmapPresent", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_epv_pressure_level, "parameterCategory", 2)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_epv_pressure_level, "parameterNumber", 14)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_epv_pressure_level, "typeOfFirstFixedSurface", 100)))
 			        ECCERR(retval);
@@ -1043,14 +983,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				if (err != 0)
 					ECCERR(err);
 				fclose(SAMPLE_FILE);
-				set_basic_props2grib(handle_wind_u_pressure_level, data_date, data_time, t_write, t_init);
+				set_basic_props2grib(handle_wind_u_pressure_level, data_date, data_time, t_write, t_init, 2, 2);
 			    if ((retval = codes_set_double(handle_wind_u_pressure_level, "missingValue", 9999)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "bitmapPresent", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "parameterCategory", 2)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "parameterNumber", 2)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "typeOfFirstFixedSurface", 100)))
 			        ECCERR(retval);
@@ -1072,14 +1008,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				if (err != 0)
 					ECCERR(err);
 				fclose(SAMPLE_FILE);
-				set_basic_props2grib(handle_wind_v_pressure_level, data_date, data_time, t_write, t_init);
+				set_basic_props2grib(handle_wind_v_pressure_level, data_date, data_time, t_write, t_init, 2, 3);
 			    if ((retval = codes_set_double(handle_wind_v_pressure_level, "missingValue", 9999)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "bitmapPresent", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "parameterCategory", 2)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "parameterNumber", 3)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "typeOfFirstFixedSurface", 100)))
 			        ECCERR(retval);
@@ -1164,11 +1096,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			set_basic_props2grib(handle_temperature_h, data_date, data_time, t_write, t_init);
-			if ((retval = codes_set_long(handle_temperature_h, "parameterCategory", 0)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_temperature_h, "parameterNumber", 0)))
-			    ECCERR(retval);
+			set_basic_props2grib(handle_temperature_h, data_date, data_time, t_write, t_init, 0, 0);
 			if ((retval = codes_set_long(handle_temperature_h, "typeOfFirstFixedSurface", 26)))
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_temperature_h, "scaledValueOfFirstFixedSurface", i)))
@@ -1196,11 +1124,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			set_basic_props2grib(handle_pressure_h, data_date, data_time, t_write, t_init);
-			if ((retval = codes_set_long(handle_pressure_h, "parameterCategory", 3)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_pressure_h, "parameterNumber", 0)))
-			    ECCERR(retval);
+			set_basic_props2grib(handle_pressure_h, data_date, data_time, t_write, t_init, 0, 0);
 			if ((retval = codes_set_long(handle_pressure_h, "typeOfFirstFixedSurface", 26)))
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_pressure_h, "scaledValueOfFirstFixedSurface", i)))
@@ -1220,11 +1144,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			set_basic_props2grib(handle_rh, data_date, data_time, t_write, t_init);
-			if ((retval = codes_set_long(handle_rh, "parameterCategory", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rh, "parameterNumber", 1)))
-			    ECCERR(retval);
+			set_basic_props2grib(handle_rh, data_date, data_time, t_write, t_init, 0, 1);
 			if ((retval = codes_set_long(handle_rh, "typeOfFirstFixedSurface", 26)))
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_rh, "scaledValueOfFirstFixedSurface", i)))
@@ -1250,11 +1170,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			set_basic_props2grib(handle_wind_u_h, data_date, data_time, t_write, t_init);
-			if ((retval = codes_set_long(handle_wind_u_h, "parameterCategory", 2)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_h, "parameterNumber", 2)))
-			    ECCERR(retval);
+			set_basic_props2grib(handle_wind_u_h, data_date, data_time, t_write, t_init, 2, 2);
 			if ((retval = codes_set_long(handle_wind_u_h, "typeOfFirstFixedSurface", 26)))
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_u_h, "scaledValueOfFirstFixedSurface", i)))
@@ -1274,11 +1190,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			set_basic_props2grib(handle_wind_v_h, data_date, data_time, t_write, t_init);
-			if ((retval = codes_set_long(handle_wind_v_h, "parameterCategory", 2)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_h, "parameterNumber", 3)))
-			    ECCERR(retval);
+			set_basic_props2grib(handle_wind_v_h, data_date, data_time, t_write, t_init, 2, 3);
 			if ((retval = codes_set_long(handle_wind_v_h, "typeOfFirstFixedSurface", 26)))
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_v_h, "scaledValueOfFirstFixedSurface", i)))
@@ -1298,13 +1210,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			set_basic_props2grib(handle_rel_vort, data_date, data_time, t_write, t_init);
-			if ((retval = codes_set_long(handle_rel_vort, "typeOfGeneratingProcess", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rel_vort, "parameterCategory", 2)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rel_vort, "parameterNumber", 12)))
-			    ECCERR(retval);
+			set_basic_props2grib(handle_rel_vort, data_date, data_time, t_write, t_init, 2, 12);
 			if ((retval = codes_set_long(handle_rel_vort, "typeOfFirstFixedSurface", 26)))
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_rel_vort, "scaledValueOfFirstFixedSurface", i)))
@@ -1330,11 +1236,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				if (err != 0)
 					ECCERR(err);
 				fclose(SAMPLE_FILE);
-				set_basic_props2grib(handle_divv_h, data_date, data_time, t_write, t_init);
-				if ((retval = codes_set_long(handle_divv_h, "parameterCategory", 2)))
-					ECCERR(retval);
-				if ((retval = codes_set_long(handle_divv_h, "parameterNumber", 13)))
-					ECCERR(retval);
+				set_basic_props2grib(handle_divv_h, data_date, data_time, t_write, t_init, 2, 13);
 				if ((retval = codes_set_long(handle_divv_h, "typeOfFirstFixedSurface", 26)))
 					ECCERR(retval);
 				if ((retval = codes_set_long(handle_divv_h, "scaledValueOfFirstFixedSurface", i)))
@@ -1370,11 +1272,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			{
 			    wind_w_h[j] = state_write_out -> velocity_gas[j + i*NO_OF_VECTORS_PER_LAYER];
 			}
-			set_basic_props2grib(handle_wind_w_h, data_date, data_time, t_write, t_init);
-			if ((retval = codes_set_long(handle_wind_w_h, "parameterCategory", 2)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_w_h, "parameterNumber", 9)))
-			    ECCERR(retval);
+			set_basic_props2grib(handle_wind_w_h, data_date, data_time, t_write, t_init, 2, 9);
 			if ((retval = codes_set_long(handle_wind_w_h, "typeOfFirstFixedSurface", 26)))
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_w_h, "scaleFactorOfFirstFixedSurface", 1)))
@@ -1678,12 +1576,16 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
 	return 0;
 }
 
-int set_basic_props2grib(codes_handle *handle, long data_date, long data_time, long t_write, long t_init)
+int set_basic_props2grib(codes_handle *handle, long data_date, long data_time, long t_write, long t_init, long parameter_category, long parameter_number)
 {
 	/*
 	This function sets the basic properties of a grib message.
 	*/
-	int retval;	
+	int retval;
+    if ((retval = codes_set_long(handle, "parameterCategory", parameter_category)))
+        ECCERR(retval);
+    if ((retval = codes_set_long(handle, "parameterNumber", parameter_number)))
+        ECCERR(retval);
 	if ((retval = codes_set_long(handle, "dataDate", data_date)))
 		ECCERR(retval);
 	if ((retval = codes_set_long(handle, "dataTime", data_time)))
