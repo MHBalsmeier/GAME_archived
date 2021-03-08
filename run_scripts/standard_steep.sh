@@ -40,6 +40,8 @@ damping_coeff_max=0.25 # maximum swamp layer damping coefficient
 rad_on=0 # turn on if you want radiation
 radiation_delta_t=3600 # every how many seconds the radiation fluxes wil be updated
 assume_lte=1 # set this to one if you do not want to assign individual temperatures to tracers
+native_grid_output=1 # set to 1 if you want output at cell centers
+latlon_grid_output=1 # set to 1 if you want output on a latlon grid
 
 # I/O
 write_out_interval=86400 # every how many seconds an output file will be created
@@ -50,9 +52,8 @@ write_out_energy_integral=1 # If set to 1, the total integrals of the energy for
 model_level_output_switch=0 # If set to 1, variables will be written out on model levels.
 pressure_level_output_switch=1 # If set to 1, additional output on pressure_leveltical pressure levels will be created. The pressure levels can be set in the file core/src/settings.c. The numer of pressure levels must be set in the file core/src/settings.h.
 surface_output_switch=1 # If set to 1, surface variables will be diagnozed and writing to separate files.
-flight_level_output_switch=0 # If set to 1, additional output on flight levels will be created. The flight levels can be set in the file core/src/settings.c. The numer of flight levels must be set in the file core/src/settings.h.
-grib_output_switch=1 # If set to 1, output will be written to grib files.
-netcdf_output_switch=0 # If set to 1, output will be written to netcdf files.
+grib_output_switch=1 # If set to 1, output will be written to grib files on a lat-lon grid.
+netcdf_output_switch=0 # If set to 1, output will be written to netcdf files on the hexagonal (and pentagonal) cell centers.
 
 # parallelization
 export OMP_NUM_THREADS=6 # relevant only for OMP

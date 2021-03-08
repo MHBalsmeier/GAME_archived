@@ -31,6 +31,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     double *normal_distance_dual = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
     double *latitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
     double *longitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
+    double *interpol_weights = malloc(3*NO_OF_LATLON_IO_POINTS*sizeof(double));
     int *from_index = malloc(NO_OF_VECTORS_H*sizeof(int));
     int *to_index = malloc(NO_OF_VECTORS_H*sizeof(int));
     int *from_index_dual = malloc(NO_OF_VECTORS_H*sizeof(int));
@@ -45,8 +46,9 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     int *density_to_rhombus_indices = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int *no_of_shaded_points_scalar = malloc(NO_OF_SCALARS_H*sizeof(int));
     int *no_of_shaded_points_vector = malloc(NO_OF_VECTORS_H*sizeof(int));
+    int *interpol_indices = malloc(3*NO_OF_LATLON_IO_POINTS*sizeof(int));
     int ncid, retval;
-    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_weights_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, vorticity_indices_id, trsk_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, direction_id, gravity_potential_id, inner_product_weights_id, slope_id, volume_ratios_id, remap_horpri2hordual_vector_weights_id, density_to_rhombus_weights_id, density_to_rhombus_indices_id, normal_distance_dual_id, adjacent_vector_indices_dual_h_id, latitude_scalar_id, longitude_scalar_id, stretching_parameter_id, no_of_shaded_points_scalar_id, no_of_shaded_points_vector_id;
+    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_weights_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, vorticity_indices_id, trsk_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, direction_id, gravity_potential_id, inner_product_weights_id, slope_id, volume_ratios_id, remap_horpri2hordual_vector_weights_id, density_to_rhombus_weights_id, density_to_rhombus_indices_id, normal_distance_dual_id, adjacent_vector_indices_dual_h_id, latitude_scalar_id, longitude_scalar_id, stretching_parameter_id, no_of_shaded_points_scalar_id, no_of_shaded_points_vector_id, interpol_indices_id, interpol_weights_id;
     double stretching_parameter;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
@@ -116,6 +118,10 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "no_of_shaded_points_vector", &no_of_shaded_points_vector_id)))
         ERR(retval);
+    if ((retval = nc_inq_varid(ncid, "interpol_indices", &interpol_indices_id)))
+        ERR(retval);
+    if ((retval = nc_inq_varid(ncid, "interpol_weights", &interpol_weights_id)))
+        ERR(retval);
     if ((retval = nc_get_var_double(ncid, stretching_parameter_id, &stretching_parameter)))
         ERR(retval);
     grid -> stretching_parameter = stretching_parameter;
@@ -155,6 +161,8 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, longitude_scalar_id, &longitude_scalar[0])))
         ERR(retval);
+    if ((retval = nc_get_var_double(ncid, interpol_weights_id, &interpol_weights[0])))
+        ERR(retval);
     if ((retval = nc_get_var_int(ncid, from_index_id, &from_index[0])))
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, to_index_id, &to_index[0])))
@@ -178,6 +186,8 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     if ((retval = nc_get_var_int(ncid, no_of_shaded_points_scalar_id, &no_of_shaded_points_scalar[0])))
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, no_of_shaded_points_vector_id, &no_of_shaded_points_vector[0])))
+        ERR(retval);
+    if ((retval = nc_get_var_int(ncid, interpol_indices_id, &interpol_indices[0])))
         ERR(retval);
     if ((retval = nc_close(ncid)))
         ERR(retval);
@@ -268,6 +278,12 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
 		    dualgrid -> adjacent_vector_indices_h[3*i + j] = adjacent_vector_indices_dual_h[3*i + j];
         }
     }
+    for (int i = 0; i < 3*NO_OF_LATLON_IO_POINTS; ++i)
+    {
+    	grid -> latlon_interpol_indices[i] = interpol_indices[i];
+    	grid -> latlon_interpol_weights[i] = interpol_weights[i];
+    }
+    // computing the gradient of the gravity potential
     grad(grid -> gravity_potential, grid -> gravity_m, grid);
     printf("stretching parameter of the vertical grid: %lf\n", stretching_parameter);
     free(no_of_shaded_points_scalar);
@@ -302,6 +318,8 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     free(adjacent_signs_h);
     free(vorticity_signs);
     free(adjacent_vector_indices_dual_h);
+    free(interpol_indices);
+    free(interpol_weights);
     return 0;
 }
 

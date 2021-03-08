@@ -23,6 +23,7 @@ Here, the output is written to grib and/or netcdf files and integrals are writte
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 
+
 // constants that are specific to the ICAO standard atmosphere
 const double GRAVITY_MEAN = 9.80616;
 const double TEMP_GRADIENT = -0.65/100;
@@ -35,9 +36,8 @@ const double SCALE_HEIGHT = 8e3;
 const double MIN_CRITERION_CLOUY_BOX = 1e-4;
 
 double calc_std_dev(double [], int);
-int get_pressure_on_flight_levels(double [], double []);
-double get_pressure_at_altitude_standard(double);
 int global_scalar_integrator(Scalar_field, Grid *, double *);
+int set_basic_props2grib(codes_handle *, long, long, long, long);
 
 int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Io_config *io_config, Config_info *config_info)
 {
@@ -63,6 +63,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	
 	int layer_index, h_index;
 	double wind_u_value, wind_v_value, cloudy_box_counter;
+	
+	double *grib_output_field = malloc(NO_OF_LATLON_IO_POINTS*sizeof(double));
 	
 	
 	// Surface output.
@@ -374,32 +376,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-		    if ((retval = codes_write_message(handle_surface_p, OUTPUT_FILE, "a")))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "discipline", 0)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "centre", 255)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "significanceOfReferenceTime", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "productionStatusOfProcessedData", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "typeOfProcessedData", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "indicatorOfUnitOfTimeRange", 13)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "stepUnits", 13)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "dataDate", data_date)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "dataTime", data_time)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "forecastTime", t_write - t_init)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "stepRange", t_write - t_init)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_surface_p, "typeOfGeneratingProcess", 1)))
-		        ECCERR(retval);
+			set_basic_props2grib(handle_surface_p, data_date, data_time, t_write, t_init);
 		    if ((retval = codes_set_long(handle_surface_p, "parameterCategory", 3)))
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_surface_p, "parameterNumber", 0)))
@@ -412,7 +389,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_surface_p, "level", 0)))
 		        ECCERR(retval);
-		    if ((retval = codes_set_double_array(handle_surface_p, "values", surface_p, NO_OF_SCALARS_H)))
+		    interpolate_to_ll(surface_p, grib_output_field, grid);
+		    if ((retval = codes_set_double_array(handle_surface_p, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 		        ECCERR(retval);
 		    if ((retval = codes_write_message(handle_surface_p, OUTPUT_FILE, "w")))
 		        ECCERR(retval);
@@ -423,30 +401,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-		    if ((retval = codes_set_long(handle_mslp, "discipline", 0)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_mslp, "centre", 255)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_mslp, "significanceOfReferenceTime", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_mslp, "productionStatusOfProcessedData", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_mslp, "typeOfProcessedData", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_mslp, "indicatorOfUnitOfTimeRange", 13)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_mslp, "stepUnits", 13)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_mslp, "dataDate", data_date)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_mslp, "dataTime", data_time)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_mslp, "forecastTime", t_write - t_init)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_mslp, "stepRange", t_write - t_init)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_mslp, "typeOfGeneratingProcess", 1)))
-		        ECCERR(retval);
+			set_basic_props2grib(handle_mslp, data_date, data_time, t_write, t_init);
 		    if ((retval = codes_set_long(handle_mslp, "parameterCategory", 3)))
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_mslp, "parameterNumber", 1)))
@@ -459,7 +414,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_mslp, "level", 0)))
 		        ECCERR(retval);
-		    if ((retval = codes_set_double_array(handle_mslp, "values", mslp, NO_OF_SCALARS_H)))
+		    interpolate_to_ll(mslp, grib_output_field, grid);
+		    if ((retval = codes_set_double_array(handle_mslp, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 		        ECCERR(retval);
 		    if ((retval = codes_write_message(handle_mslp, OUTPUT_FILE, "a")))
 		        ECCERR(retval);
@@ -470,30 +426,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-		    if ((retval = codes_set_long(handle_t2, "discipline", 0)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_t2, "centre", 255)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_t2, "significanceOfReferenceTime", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_t2, "productionStatusOfProcessedData", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_t2, "typeOfProcessedData", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_t2, "indicatorOfUnitOfTimeRange", 13)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_t2, "stepUnits", 13)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_t2, "dataDate", data_date)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_t2, "dataTime", data_time)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_t2, "forecastTime", t_write - t_init)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_t2, "stepRange", t_write - t_init)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_t2, "typeOfGeneratingProcess", 1)))
-		        ECCERR(retval);
+			set_basic_props2grib(handle_t2, data_date, data_time, t_write, t_init);
 		    if ((retval = codes_set_long(handle_t2, "parameterCategory", 0)))
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_t2, "parameterNumber", 0)))
@@ -506,7 +439,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_t2, "level", 2)))
 		        ECCERR(retval);
-		    if ((retval = codes_set_double_array(handle_t2, "values", t2, NO_OF_SCALARS_H)))
+		    interpolate_to_ll(t2, grib_output_field, grid);
+		    if ((retval = codes_set_double_array(handle_t2, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 		        ECCERR(retval);
 		    if ((retval = codes_write_message(handle_t2, OUTPUT_FILE, "a")))
 		        ECCERR(retval);
@@ -517,30 +451,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-		    if ((retval = codes_set_long(handle_rprate, "discipline", 0)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_rprate, "centre", 255)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_rprate, "significanceOfReferenceTime", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_rprate, "productionStatusOfProcessedData", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_rprate, "typeOfProcessedData", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_rprate, "indicatorOfUnitOfTimeRange", 13)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_rprate, "stepUnits", 13)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_rprate, "dataDate", data_date)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_rprate, "dataTime", data_time)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_rprate, "forecastTime", t_write - t_init)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_rprate, "stepRange", t_write - t_init)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_rprate, "typeOfGeneratingProcess", 1)))
-		        ECCERR(retval);
+			set_basic_props2grib(handle_rprate, data_date, data_time, t_write, t_init);
 		    if ((retval = codes_set_long(handle_rprate, "parameterCategory", 1)))
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_rprate, "parameterNumber", 65)))
@@ -553,7 +464,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_rprate, "level", 0)))
 		        ECCERR(retval);
-		    if ((retval = codes_set_double_array(handle_rprate, "values", rprate, NO_OF_SCALARS_H)))
+		    interpolate_to_ll(rprate, grib_output_field, grid);
+		    if ((retval = codes_set_double_array(handle_rprate, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 		        ECCERR(retval);
 		    if ((retval = codes_write_message(handle_rprate, OUTPUT_FILE, "a")))
 		        ECCERR(retval);
@@ -564,30 +476,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-		    if ((retval = codes_set_long(handle_cape, "discipline", 0)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_cape, "centre", 255)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_cape, "significanceOfReferenceTime", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_cape, "productionStatusOfProcessedData", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_cape, "typeOfProcessedData", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_cape, "indicatorOfUnitOfTimeRange", 13)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_cape, "stepUnits", 13)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_cape, "dataDate", data_date)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_cape, "dataTime", data_time)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_cape, "forecastTime", t_write - t_init)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_cape, "stepRange", t_write - t_init)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_cape, "typeOfGeneratingProcess", 1)))
-		        ECCERR(retval);
+			set_basic_props2grib(handle_cape, data_date, data_time, t_write, t_init);
 		    if ((retval = codes_set_long(handle_cape, "parameterCategory", 7)))
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_cape, "parameterNumber", 6)))
@@ -602,7 +491,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_cape, "level", 0)))
 		        ECCERR(retval);
-		    if ((retval = codes_set_double_array(handle_cape, "values", cape, NO_OF_SCALARS_H)))
+		    interpolate_to_ll(cape, grib_output_field, grid);
+		    if ((retval = codes_set_double_array(handle_cape, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 		        ECCERR(retval);
 		    if ((retval = codes_write_message(handle_cape, OUTPUT_FILE, "a")))
 		        ECCERR(retval);
@@ -613,30 +503,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-		    if ((retval = codes_set_long(handle_sprate, "discipline", 0)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_sprate, "centre", 255)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_sprate, "significanceOfReferenceTime", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_sprate, "productionStatusOfProcessedData", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_sprate, "typeOfProcessedData", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_sprate, "indicatorOfUnitOfTimeRange", 13)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_sprate, "stepUnits", 13)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_sprate, "dataDate", data_date)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_sprate, "dataTime", data_time)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_sprate, "forecastTime", t_write - t_init)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_sprate, "stepRange", t_write - t_init)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_sprate, "typeOfGeneratingProcess", 1)))
-		        ECCERR(retval);
+			set_basic_props2grib(handle_sprate, data_date, data_time, t_write, t_init);
 		    if ((retval = codes_set_long(handle_sprate, "parameterCategory", 1)))
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_sprate, "parameterNumber", 66)))
@@ -649,7 +516,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_sprate, "level", 0)))
 		        ECCERR(retval);
-		    if ((retval = codes_set_double_array(handle_sprate, "values", sprate, NO_OF_SCALARS_H)))
+		    interpolate_to_ll(sprate, grib_output_field, grid);
+		    if ((retval = codes_set_double_array(handle_sprate, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 		        ECCERR(retval);
 		    if ((retval = codes_write_message(handle_sprate, OUTPUT_FILE, "a")))
 		        ECCERR(retval);
@@ -660,30 +528,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-		    if ((retval = codes_set_long(handle_tcdc, "discipline", 0)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_tcdc, "centre", 255)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_tcdc, "significanceOfReferenceTime", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_tcdc, "productionStatusOfProcessedData", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_tcdc, "typeOfProcessedData", 1)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_tcdc, "indicatorOfUnitOfTimeRange", 13)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_tcdc, "stepUnits", 13)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_tcdc, "dataDate", data_date)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_tcdc, "dataTime", data_time)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_tcdc, "forecastTime", t_write - t_init)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_tcdc, "stepRange", t_write - t_init)))
-		        ECCERR(retval);
-		    if ((retval = codes_set_long(handle_tcdc, "typeOfGeneratingProcess", 1)))
-		        ECCERR(retval);
+			set_basic_props2grib(handle_tcdc, data_date, data_time, t_write, t_init);
 		    if ((retval = codes_set_long(handle_tcdc, "parameterCategory", 6)))
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_tcdc, "parameterNumber", 1)))
@@ -698,7 +543,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		        ECCERR(retval);
 		    if ((retval = codes_set_string(handle_tcdc, "shortName", "tcc", &tcc_string_length)))
 		        ECCERR(retval);
-		    if ((retval = codes_set_double_array(handle_tcdc, "values", tcdc, NO_OF_SCALARS_H)))
+		    interpolate_to_ll(tcdc, grib_output_field, grid);
+		    if ((retval = codes_set_double_array(handle_tcdc, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 		        ECCERR(retval);
 		    if ((retval = codes_write_message(handle_tcdc, OUTPUT_FILE, "a")))
 		        ECCERR(retval);
@@ -709,30 +555,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			if ((retval = codes_set_long(handle_wind_u_10m_mean, "discipline", 0)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_10m_mean, "centre", 255)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_10m_mean, "significanceOfReferenceTime", 1)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_10m_mean, "productionStatusOfProcessedData", 1)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_10m_mean, "typeOfProcessedData", 1)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_10m_mean, "indicatorOfUnitOfTimeRange", 13)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_10m_mean, "stepUnits", 13)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_10m_mean, "dataDate", data_date)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_10m_mean, "dataTime", data_time)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_10m_mean, "forecastTime", t_write - t_init)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_10m_mean, "stepRange", t_write - t_init)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_10m_mean, "typeOfGeneratingProcess", 1)))
-				ECCERR(retval);
+			set_basic_props2grib(handle_wind_u_10m_mean, data_date, data_time, t_write, t_init);
 			if ((retval = codes_set_long(handle_wind_u_10m_mean, "parameterCategory", 2)))
 				ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_u_10m_mean, "parameterNumber", 2)))
@@ -745,7 +568,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_u_10m_mean, "level", 10)))
 				ECCERR(retval);
-			if ((retval = codes_set_double_array(handle_wind_u_10m_mean, "values", wind_10_m_mean_u_at_cell, NO_OF_SCALARS_H)))
+		    interpolate_to_ll(wind_10_m_mean_u_at_cell, grib_output_field, grid);
+			if ((retval = codes_set_double_array(handle_wind_u_10m_mean, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 				ECCERR(retval);
 			if ((retval = codes_write_message(handle_wind_u_10m_mean, OUTPUT_FILE, "a")))
 				ECCERR(retval);
@@ -756,30 +580,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			if ((retval = codes_set_long(handle_wind_v_10m_mean, "discipline", 0)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_10m_mean, "centre", 255)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_10m_mean, "significanceOfReferenceTime", 1)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_10m_mean, "productionStatusOfProcessedData", 1)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_10m_mean, "typeOfProcessedData", 1)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_10m_mean, "indicatorOfUnitOfTimeRange", 13)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_10m_mean, "stepUnits", 13)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_10m_mean, "dataDate", data_date)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_10m_mean, "dataTime", data_time)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_10m_mean, "forecastTime", t_write - t_init)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_10m_mean, "stepRange", t_write - t_init)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_10m_mean, "typeOfGeneratingProcess", 1)))
-				ECCERR(retval);
+			set_basic_props2grib(handle_wind_v_10m_mean, data_date, data_time, t_write, t_init);
 			if ((retval = codes_set_long(handle_wind_v_10m_mean, "parameterCategory", 2)))
 				ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_v_10m_mean, "parameterNumber", 3)))
@@ -792,7 +593,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_v_10m_mean, "level", 10)))
 				ECCERR(retval);
-			if ((retval = codes_set_double_array(handle_wind_v_10m_mean, "values", wind_10_m_mean_v_at_cell, NO_OF_SCALARS_H)))
+		    interpolate_to_ll(wind_10_m_mean_v_at_cell, grib_output_field, grid);
+			if ((retval = codes_set_double_array(handle_wind_v_10m_mean, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 				ECCERR(retval);
 			if ((retval = codes_write_message(handle_wind_v_10m_mean, OUTPUT_FILE, "a")))
 				ECCERR(retval);
@@ -803,30 +605,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			if ((retval = codes_set_long(handle_wind_10m_gusts, "discipline", 0)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_10m_gusts, "centre", 255)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_10m_gusts, "significanceOfReferenceTime", 1)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_10m_gusts, "productionStatusOfProcessedData", 1)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_10m_gusts, "typeOfProcessedData", 1)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_10m_gusts, "indicatorOfUnitOfTimeRange", 13)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_10m_gusts, "stepUnits", 13)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_10m_gusts, "dataDate", data_date)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_10m_gusts, "dataTime", data_time)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_10m_gusts, "forecastTime", t_write - t_init)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_10m_gusts, "stepRange", t_write - t_init)))
-				ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_10m_gusts, "typeOfGeneratingProcess", 1)))
-				ECCERR(retval);
+			set_basic_props2grib(handle_wind_10m_gusts, data_date, data_time, t_write, t_init);
 			if ((retval = codes_set_long(handle_wind_10m_gusts, "parameterCategory", 2)))
 				ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_10m_gusts, "parameterNumber", 22)))
@@ -839,7 +618,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_10m_gusts, "level", 10)))
 				ECCERR(retval);
-			if ((retval = codes_set_double_array(handle_wind_10m_gusts, "values", wind_10_m_gusts_speed_at_cell, NO_OF_SCALARS_H)))
+		    interpolate_to_ll(wind_10_m_gusts_speed_at_cell, grib_output_field, grid);
+			if ((retval = codes_set_double_array(handle_wind_10m_gusts, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 				ECCERR(retval);
 			if ((retval = codes_write_message(handle_wind_10m_gusts, OUTPUT_FILE, "a")))
 				ECCERR(retval);
@@ -1110,30 +890,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				if (err != 0)
 					ECCERR(err);
 				fclose(SAMPLE_FILE);
-			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "discipline", 0)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "centre", 255)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "significanceOfReferenceTime", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "productionStatusOfProcessedData", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "typeOfProcessedData", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "indicatorOfUnitOfTimeRange", 13)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "stepUnits", 13)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "dataDate", data_date)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "dataTime", data_time)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "forecastTime", t_write - t_init)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "stepRange", t_write - t_init)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "typeOfGeneratingProcess", 1)))
-			        ECCERR(retval);
+				set_basic_props2grib(handle_geopotential_height_pressure_level, data_date, data_time, t_write, t_init);
 			    if ((retval = codes_set_double(handle_geopotential_height_pressure_level, "missingValue", 9999)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "bitmapPresent", 1)))
@@ -1150,7 +907,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_geopotential_height_pressure_level, "level", 0.01*pressure_levels[i])))
 			        ECCERR(retval);
-			    if ((retval = codes_set_double_array(handle_geopotential_height_pressure_level, "values", geopotential_height_pressure_level, NO_OF_SCALARS_H)))
+		    	interpolate_to_ll(geopotential_height_pressure_level, grib_output_field, grid);
+			    if ((retval = codes_set_double_array(handle_geopotential_height_pressure_level, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 			        ECCERR(retval);
 				if (i == 0)
 				{
@@ -1169,30 +927,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				if (err != 0)
 					ECCERR(err);
 				fclose(SAMPLE_FILE);
-			    if ((retval = codes_set_long(handle_temperature_pressure_level, "discipline", 0)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_temperature_pressure_level, "centre", 255)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_temperature_pressure_level, "significanceOfReferenceTime", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_temperature_pressure_level, "productionStatusOfProcessedData", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_temperature_pressure_level, "typeOfProcessedData", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_temperature_pressure_level, "indicatorOfUnitOfTimeRange", 13)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_temperature_pressure_level, "stepUnits", 13)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_temperature_pressure_level, "dataDate", data_date)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_temperature_pressure_level, "dataTime", data_time)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_temperature_pressure_level, "forecastTime", t_write - t_init)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_temperature_pressure_level, "stepRange", t_write - t_init)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_temperature_pressure_level, "typeOfGeneratingProcess", 1)))
-			        ECCERR(retval);
+				set_basic_props2grib(handle_temperature_pressure_level, data_date, data_time, t_write, t_init);
 			    if ((retval = codes_set_double(handle_temperature_pressure_level, "missingValue", 9999)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_temperature_pressure_level, "bitmapPresent", 1)))
@@ -1209,7 +944,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_temperature_pressure_level, "level", 0.01*pressure_levels[i])))
 			        ECCERR(retval);
-			    if ((retval = codes_set_double_array(handle_temperature_pressure_level, "values", temperature_pressure_level, NO_OF_SCALARS_H)))
+		    	interpolate_to_ll(temperature_pressure_level, grib_output_field, grid);
+			    if ((retval = codes_set_double_array(handle_temperature_pressure_level, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 			        ECCERR(retval);
 			    if ((retval = codes_write_message(handle_temperature_pressure_level, OUTPUT_FILE_PRESSURE_LEVEL, "a")))
 			        ECCERR(retval);
@@ -1220,30 +956,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				if (err != 0)
 					ECCERR(err);
 				fclose(SAMPLE_FILE);
-			    if ((retval = codes_set_long(handle_rh_pressure_level, "discipline", 0)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rh_pressure_level, "centre", 255)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rh_pressure_level, "significanceOfReferenceTime", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rh_pressure_level, "productionStatusOfProcessedData", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rh_pressure_level, "typeOfProcessedData", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rh_pressure_level, "indicatorOfUnitOfTimeRange", 13)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rh_pressure_level, "stepUnits", 13)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rh_pressure_level, "dataDate", data_date)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rh_pressure_level, "dataTime", data_time)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rh_pressure_level, "forecastTime", t_write - t_init)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rh_pressure_level, "stepRange", t_write - t_init)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rh_pressure_level, "typeOfGeneratingProcess", 1)))
-			        ECCERR(retval);
+				set_basic_props2grib(handle_rh_pressure_level, data_date, data_time, t_write, t_init);
 			    if ((retval = codes_set_double(handle_rh_pressure_level, "missingValue", 9999)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_rh_pressure_level, "bitmapPresent", 1)))
@@ -1260,7 +973,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_rh_pressure_level, "level", 0.01*pressure_levels[i])))
 			        ECCERR(retval);
-			    if ((retval = codes_set_double_array(handle_rh_pressure_level, "values", rh_pressure_level, NO_OF_SCALARS_H)))
+		    	interpolate_to_ll(rh_pressure_level, grib_output_field, grid);
+			    if ((retval = codes_set_double_array(handle_rh_pressure_level, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 			        ECCERR(retval);
 			    if ((retval = codes_write_message(handle_rh_pressure_level, OUTPUT_FILE_PRESSURE_LEVEL, "a")))
 			        ECCERR(retval);
@@ -1271,30 +985,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				if (err != 0)
 					ECCERR(err);
 				fclose(SAMPLE_FILE);
-			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "discipline", 0)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "centre", 255)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "significanceOfReferenceTime", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "productionStatusOfProcessedData", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "typeOfProcessedData", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "indicatorOfUnitOfTimeRange", 13)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "stepUnits", 13)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "dataDate", data_date)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "dataTime", data_time)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "forecastTime", t_write - t_init)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "stepRange", t_write - t_init)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "typeOfGeneratingProcess", 1)))
-			        ECCERR(retval);
+				set_basic_props2grib(handle_rel_vort_pressure_level, data_date, data_time, t_write, t_init);
 			    if ((retval = codes_set_double(handle_rel_vort_pressure_level, "missingValue", 9999)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "bitmapPresent", 1)))
@@ -1311,7 +1002,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_rel_vort_pressure_level, "level", 0.01*pressure_levels[i])))
 			        ECCERR(retval);
-			    if ((retval = codes_set_double_array(handle_rel_vort_pressure_level, "values", rel_vort_pressure_level, NO_OF_SCALARS_H)))
+		    	interpolate_to_ll(rel_vort_pressure_level, grib_output_field, grid);
+			    if ((retval = codes_set_double_array(handle_rel_vort_pressure_level, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 			        ECCERR(retval);
 			    if ((retval = codes_write_message(handle_rel_vort_pressure_level, OUTPUT_FILE_PRESSURE_LEVEL, "a")))
 			        ECCERR(retval);
@@ -1322,30 +1014,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				if (err != 0)
 					ECCERR(err);
 				fclose(SAMPLE_FILE);
-			    if ((retval = codes_set_long(handle_epv_pressure_level, "discipline", 0)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_epv_pressure_level, "centre", 255)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_epv_pressure_level, "significanceOfReferenceTime", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_epv_pressure_level, "productionStatusOfProcessedData", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_epv_pressure_level, "typeOfProcessedData", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_epv_pressure_level, "indicatorOfUnitOfTimeRange", 13)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_epv_pressure_level, "stepUnits", 13)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_epv_pressure_level, "dataDate", data_date)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_epv_pressure_level, "dataTime", data_time)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_epv_pressure_level, "forecastTime", t_write - t_init)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_epv_pressure_level, "stepRange", t_write - t_init)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_epv_pressure_level, "typeOfGeneratingProcess", 1)))
-			        ECCERR(retval);
+				set_basic_props2grib(handle_epv_pressure_level, data_date, data_time, t_write, t_init);
 			    if ((retval = codes_set_double(handle_epv_pressure_level, "missingValue", 9999)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_epv_pressure_level, "bitmapPresent", 1)))
@@ -1362,7 +1031,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_epv_pressure_level, "level", 0.01*pressure_levels[i])))
 			        ECCERR(retval);
-			    if ((retval = codes_set_double_array(handle_epv_pressure_level, "values", epv_pressure_level, NO_OF_SCALARS_H)))
+		    	interpolate_to_ll(epv_pressure_level, grib_output_field, grid);
+			    if ((retval = codes_set_double_array(handle_epv_pressure_level, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 			        ECCERR(retval);
 			    if ((retval = codes_write_message(handle_epv_pressure_level, OUTPUT_FILE_PRESSURE_LEVEL, "a")))
 			        ECCERR(retval);
@@ -1373,30 +1043,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				if (err != 0)
 					ECCERR(err);
 				fclose(SAMPLE_FILE);
-			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "discipline", 0)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "centre", 255)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "significanceOfReferenceTime", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "productionStatusOfProcessedData", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "typeOfProcessedData", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "indicatorOfUnitOfTimeRange", 13)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "stepUnits", 13)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "dataDate", data_date)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "dataTime", data_time)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "forecastTime", t_write - t_init)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "stepRange", t_write - t_init)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "typeOfGeneratingProcess", 1)))
-			        ECCERR(retval);
+				set_basic_props2grib(handle_wind_u_pressure_level, data_date, data_time, t_write, t_init);
 			    if ((retval = codes_set_double(handle_wind_u_pressure_level, "missingValue", 9999)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "bitmapPresent", 1)))
@@ -1413,7 +1060,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_u_pressure_level, "level", 0.01*pressure_levels[i])))
 			        ECCERR(retval);
-			    if ((retval = codes_set_double_array(handle_wind_u_pressure_level, "values", wind_u_pressure_level, NO_OF_SCALARS_H)))
+		    	interpolate_to_ll(wind_u_pressure_level, grib_output_field, grid);
+			    if ((retval = codes_set_double_array(handle_wind_u_pressure_level, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 			        ECCERR(retval);
 			    if ((retval = codes_write_message(handle_wind_u_pressure_level, OUTPUT_FILE_PRESSURE_LEVEL, "a")))
 			        ECCERR(retval);
@@ -1424,30 +1072,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				if (err != 0)
 					ECCERR(err);
 				fclose(SAMPLE_FILE);
-			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "discipline", 0)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "centre", 255)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "significanceOfReferenceTime", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "productionStatusOfProcessedData", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "typeOfProcessedData", 1)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "indicatorOfUnitOfTimeRange", 13)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "stepUnits", 13)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "dataDate", data_date)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "dataTime", data_time)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "forecastTime", t_write - t_init)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "stepRange", t_write - t_init)))
-			        ECCERR(retval);
-			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "typeOfGeneratingProcess", 1)))
-			        ECCERR(retval);
+				set_basic_props2grib(handle_wind_v_pressure_level, data_date, data_time, t_write, t_init);
 			    if ((retval = codes_set_double(handle_wind_v_pressure_level, "missingValue", 9999)))
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "bitmapPresent", 1)))
@@ -1464,7 +1089,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			        ECCERR(retval);
 			    if ((retval = codes_set_long(handle_wind_v_pressure_level, "level", 0.01*pressure_levels[i])))
 			        ECCERR(retval);
-			    if ((retval = codes_set_double_array(handle_wind_v_pressure_level, "values", wind_v_pressure_level, NO_OF_SCALARS_H)))
+		    	interpolate_to_ll(wind_v_pressure_level, grib_output_field, grid);
+			    if ((retval = codes_set_double_array(handle_wind_v_pressure_level, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 			        ECCERR(retval);
 			    if ((retval = codes_write_message(handle_wind_v_pressure_level, OUTPUT_FILE_PRESSURE_LEVEL, "a")))
 			        ECCERR(retval);
@@ -1490,127 +1116,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     	free(epv_on_pressure_levels);
     	free(pressure_levels);
     	free(distance_from_pressure_level);
-    }
-
-	// Aviation output.
-    if (io_config -> flight_level_output_switch == 1)
-    {
-    	double *flight_levels = malloc(sizeof(double)*NO_OF_FLIGHT_LEVELS);
-    	get_flight_levels(flight_levels);
-    	double *pressure_on_flight_levels = malloc(sizeof(double)*NO_OF_FLIGHT_LEVELS);
-    	get_pressure_on_flight_levels(flight_levels, pressure_on_flight_levels);
-    	double *distance_from_pressure_on_flight_level = malloc(sizeof(double)*NO_OF_LAYERS);
-    	// Allocating memory for the output arrays.
-    	double (*t_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_FLIGHT_LEVELS]));
-    	double (*rh_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_FLIGHT_LEVELS]));
-    	double (*u_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_FLIGHT_LEVELS]));
-    	double (*v_on_flight_levels)[NO_OF_FLIGHT_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_FLIGHT_LEVELS]));
-    	
-    	// Vertical interpolation to the flight levels.
-		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-		{
-			for (int j = 0; j < NO_OF_FLIGHT_LEVELS; ++j)
-    		{
-				for (int k = 0; k < NO_OF_LAYERS; ++k)
-				{
-					distance_from_pressure_on_flight_level[k] = fabs(log(pressure_on_flight_levels[j]/(*pressure)[k*NO_OF_SCALARS_H + i]));
-				}
-				closest_layer_index = find_min_index(distance_from_pressure_on_flight_level, NO_OF_LAYERS);
-				other_layer_index = closest_layer_index + 1;
-				if (pressure_on_flight_levels[j] < (*pressure)[closest_layer_index*NO_OF_SCALARS_H + i])
-				{
-					other_layer_index = closest_layer_index - 1;
-				}
-    			if ((closest_layer_index == NO_OF_LAYERS - 1 && other_layer_index == NO_OF_LAYERS) || (closest_layer_index < 0 || other_layer_index < 0))
-    			{
-    				t_on_flight_levels[i][j] = 9999;
-    				rh_on_flight_levels[i][j] = 9999;
-					u_on_flight_levels[i][j] = 9999;
-					v_on_flight_levels[i][j] = 9999;
-    			}
-    			else
-    			{
-					closest_weight = 1 - distance_from_pressure_on_flight_level[closest_layer_index]/
-					(fabs(log((*pressure)[closest_layer_index*NO_OF_SCALARS_H + i]/(*pressure)[other_layer_index*NO_OF_SCALARS_H + i])) + EPSILON_SECURITY);
-					t_on_flight_levels[i][j] = closest_weight*state_write_out -> temperature_gas[closest_layer_index*NO_OF_SCALARS_H + i]
-					+ (1 - closest_weight)*state_write_out -> temperature_gas[other_layer_index*NO_OF_SCALARS_H + i];
-					rh_on_flight_levels[i][j] = closest_weight*(*rh)[closest_layer_index*NO_OF_SCALARS_H + i]
-					+ (1 - closest_weight)*(*rh)[other_layer_index*NO_OF_SCALARS_H + i];
-					u_on_flight_levels[i][j] = closest_weight*diagnostics -> u_at_cell[closest_layer_index*NO_OF_SCALARS_H + i]
-					+ (1 - closest_weight)*diagnostics -> u_at_cell[other_layer_index*NO_OF_SCALARS_H + i];
-					v_on_flight_levels[i][j] = closest_weight*diagnostics -> v_at_cell[closest_layer_index*NO_OF_SCALARS_H + i]
-					+ (1 - closest_weight)*diagnostics -> v_at_cell[other_layer_index*NO_OF_SCALARS_H + i];
-    			}
-    			
-    		}
-		}
-    	free(pressure_on_flight_levels);
-    	free(distance_from_pressure_on_flight_level);
-    	
-		int OUTPUT_FILE_AVIATION_LENGTH = 300;
-		char *OUTPUT_FILE_AVIATION_PRE = malloc((OUTPUT_FILE_AVIATION_LENGTH + 1)*sizeof(char));
-		sprintf(OUTPUT_FILE_AVIATION_PRE, "output/%s/%s+%ds_flight_levels.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
-		OUTPUT_FILE_AVIATION_LENGTH = strlen(OUTPUT_FILE_AVIATION_PRE);
-		free(OUTPUT_FILE_AVIATION_PRE);
-		char *OUTPUT_FILE_AVIATION = malloc((OUTPUT_FILE_AVIATION_LENGTH + 1)*sizeof(char));
-		sprintf(OUTPUT_FILE_AVIATION, "output/%s/%s+%ds_flight_levels.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
-		int ncid_flight_level, scalar_h_dimid, level_dimid, temp_flight_level_id, rh_flight_level_id, wind_u_flight_level_id, wind_v_flight_level_id, flight_levels_id;
-		
-		if ((retval = nc_create(OUTPUT_FILE_AVIATION, NC_CLOBBER, &ncid_flight_level)))
-			NCERR(retval);
-		free(OUTPUT_FILE_AVIATION);
-		if ((retval = nc_def_dim(ncid_flight_level, "scalar_index_h", NO_OF_SCALARS_H, &scalar_h_dimid)))
-			NCERR(retval);
-		if ((retval = nc_def_dim(ncid_flight_level, "flight_levels", NO_OF_FLIGHT_LEVELS, &level_dimid)))
-			NCERR(retval);
-		int dimids_flight_level_scalar[2];
-		dimids_flight_level_scalar[0] = scalar_h_dimid;
-		dimids_flight_level_scalar[1] = level_dimid;
-		// Defining the variables.
-		if ((retval = nc_def_var(ncid_flight_level, "flight_levels", NC_DOUBLE, 1, &level_dimid, &flight_levels_id)))
-			NCERR(retval);
-		if ((retval = nc_put_att_text(ncid_flight_level, flight_levels_id, "units", strlen("1"), "1")))
-			NCERR(retval);
-		if ((retval = nc_def_var(ncid_flight_level, "temperature", NC_DOUBLE, 2, dimids_flight_level_scalar, &temp_flight_level_id)))
-			NCERR(retval);
-		if ((retval = nc_put_att_text(ncid_flight_level, temp_flight_level_id, "units", strlen("K"), "K")))
-			NCERR(retval);
-		if ((retval = nc_def_var(ncid_flight_level, "relative_humidity", NC_DOUBLE, 2, dimids_flight_level_scalar, &rh_flight_level_id)))
-			NCERR(retval);
-		if ((retval = nc_put_att_text(ncid_flight_level, rh_flight_level_id, "units", strlen("%"), "%")))
-			NCERR(retval);
-		if ((retval = nc_def_var(ncid_flight_level, "wind_u", NC_DOUBLE, 2, dimids_flight_level_scalar, &wind_u_flight_level_id)))
-			NCERR(retval);
-		if ((retval = nc_put_att_text(ncid_flight_level, wind_u_flight_level_id, "units", strlen("m/s"), "m/s")))
-			NCERR(retval);
-		if ((retval = nc_def_var(ncid_flight_level, "wind_v", NC_DOUBLE, 2, dimids_flight_level_scalar, &wind_v_flight_level_id)))
-			NCERR(retval);
-		if ((retval = nc_put_att_text(ncid_flight_level, wind_v_flight_level_id, "units", strlen("m/s"), "m/s")))
-			NCERR(retval);
-		if ((retval = nc_enddef(ncid_flight_level)))
-			NCERR(retval);
-		
-		// Writing the arrays.
-		if ((retval = nc_put_var_double(ncid_flight_level, flight_levels_id, &flight_levels[0])))
-			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid_flight_level, temp_flight_level_id, &t_on_flight_levels[0][0])))
-			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid_flight_level, rh_flight_level_id, &rh_on_flight_levels[0][0])))
-			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid_flight_level, wind_u_flight_level_id, &u_on_flight_levels[0][0])))
-			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid_flight_level, wind_v_flight_level_id, &v_on_flight_levels[0][0])))
-			NCERR(retval);
-		
-		// Closing the netcdf file.
-		if ((retval = nc_close(ncid_flight_level)))
-			NCERR(retval);
-			
-    	free(t_on_flight_levels);
-    	free(rh_on_flight_levels);
-    	free(u_on_flight_levels);
-    	free(v_on_flight_levels);
-    	free(flight_levels);
     }
 
 	// Grib output.
@@ -1659,30 +1164,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			if ((retval = codes_set_long(handle_temperature_h, "discipline", 0)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_temperature_h, "centre", 255)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_temperature_h, "significanceOfReferenceTime", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_temperature_h, "productionStatusOfProcessedData", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_temperature_h, "typeOfProcessedData", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_temperature_h, "indicatorOfUnitOfTimeRange", 13)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_temperature_h, "stepUnits", 13)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_temperature_h, "dataDate", data_date)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_temperature_h, "dataTime", data_time)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_temperature_h, "forecastTime", t_write - t_init)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_temperature_h, "stepRange", t_write - t_init)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_temperature_h, "typeOfGeneratingProcess", 1)))
-			    ECCERR(retval);
+			set_basic_props2grib(handle_temperature_h, data_date, data_time, t_write, t_init);
 			if ((retval = codes_set_long(handle_temperature_h, "parameterCategory", 0)))
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_temperature_h, "parameterNumber", 0)))
@@ -1695,7 +1177,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_temperature_h, "level", i)))
 			    ECCERR(retval);
-			if ((retval = codes_set_double_array(handle_temperature_h, "values", temperature_h, NO_OF_SCALARS_H)))
+	    	interpolate_to_ll(temperature_h, grib_output_field, grid);
+			if ((retval = codes_set_double_array(handle_temperature_h, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 			    ECCERR(retval);
 			if (i == 0)
 			{
@@ -1713,30 +1196,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			if ((retval = codes_set_long(handle_pressure_h, "discipline", 0)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_pressure_h, "centre", 255)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_pressure_h, "significanceOfReferenceTime", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_pressure_h, "productionStatusOfProcessedData", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_pressure_h, "typeOfProcessedData", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_pressure_h, "indicatorOfUnitOfTimeRange", 13)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_pressure_h, "stepUnits", 13)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_pressure_h, "dataDate", data_date)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_pressure_h, "dataTime", data_time)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_pressure_h, "forecastTime", t_write - t_init)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_pressure_h, "stepRange", t_write - t_init)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_pressure_h, "typeOfGeneratingProcess", 1)))
-			    ECCERR(retval);
+			set_basic_props2grib(handle_pressure_h, data_date, data_time, t_write, t_init);
 			if ((retval = codes_set_long(handle_pressure_h, "parameterCategory", 3)))
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_pressure_h, "parameterNumber", 0)))
@@ -1749,7 +1209,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_pressure_h, "level", i)))
 			    ECCERR(retval);
-			if ((retval = codes_set_double_array(handle_pressure_h, "values", pressure_h, NO_OF_SCALARS_H)))
+	    	interpolate_to_ll(pressure_h, grib_output_field, grid);
+			if ((retval = codes_set_double_array(handle_pressure_h, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 			    ECCERR(retval);
 			if ((retval = codes_write_message(handle_pressure_h, OUTPUT_FILE, "a")))
 			    ECCERR(retval);
@@ -1759,30 +1220,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			if ((retval = codes_set_long(handle_rh, "discipline", 0)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rh, "centre", 255)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rh, "significanceOfReferenceTime", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rh, "productionStatusOfProcessedData", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rh, "typeOfProcessedData", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rh, "indicatorOfUnitOfTimeRange", 13)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rh, "stepUnits", 13)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rh, "dataDate", data_date)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rh, "dataTime", data_time)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rh, "forecastTime", t_write - t_init)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rh, "stepRange", t_write - t_init)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rh, "typeOfGeneratingProcess", 1)))
-			    ECCERR(retval);
+			set_basic_props2grib(handle_rh, data_date, data_time, t_write, t_init);
 			if ((retval = codes_set_long(handle_rh, "parameterCategory", 1)))
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_rh, "parameterNumber", 1)))
@@ -1795,7 +1233,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_rh, "level", i)))
 			    ECCERR(retval);
-			if ((retval = codes_set_double_array(handle_rh, "values", rh_h, NO_OF_SCALARS_H)))
+	    	interpolate_to_ll(rh_h, grib_output_field, grid);
+			if ((retval = codes_set_double_array(handle_rh, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 			    ECCERR(retval);
 			if ((retval = codes_write_message(handle_rh, OUTPUT_FILE, "a")))
 			    ECCERR(retval);
@@ -1811,30 +1250,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			if ((retval = codes_set_long(handle_wind_u_h, "discipline", 0)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_h, "centre", 255)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_h, "significanceOfReferenceTime", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_h, "productionStatusOfProcessedData", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_h, "typeOfProcessedData", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_h, "indicatorOfUnitOfTimeRange", 13)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_h, "stepUnits", 13)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_h, "dataDate", data_date)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_h, "dataTime", data_time)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_h, "forecastTime", t_write - t_init)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_h, "stepRange", t_write - t_init)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_u_h, "typeOfGeneratingProcess", 1)))
-			    ECCERR(retval);
+			set_basic_props2grib(handle_wind_u_h, data_date, data_time, t_write, t_init);
 			if ((retval = codes_set_long(handle_wind_u_h, "parameterCategory", 2)))
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_u_h, "parameterNumber", 2)))
@@ -1847,7 +1263,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_u_h, "level", i)))
 			    ECCERR(retval);
-			if ((retval = codes_set_double_array(handle_wind_u_h, "values", diagnostics -> u_at_cell, NO_OF_VECTORS_H)))
+	    	interpolate_to_ll(wind_u_h, grib_output_field, grid);
+			if ((retval = codes_set_double_array(handle_wind_u_h, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 			    ECCERR(retval);
 			if ((retval = codes_write_message(handle_wind_u_h, OUTPUT_FILE, "a")))
 			    ECCERR(retval);
@@ -1857,30 +1274,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			if ((retval = codes_set_long(handle_wind_v_h, "discipline", 0)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_h, "centre", 255)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_h, "significanceOfReferenceTime", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_h, "productionStatusOfProcessedData", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_h, "typeOfProcessedData", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_h, "indicatorOfUnitOfTimeRange", 13)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_h, "stepUnits", 13)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_h, "dataDate", data_date)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_h, "dataTime", data_time)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_h, "forecastTime", t_write - t_init)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_h, "stepRange", t_write - t_init)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_v_h, "typeOfGeneratingProcess", 1)))
-			    ECCERR(retval);
+			set_basic_props2grib(handle_wind_v_h, data_date, data_time, t_write, t_init);
 			if ((retval = codes_set_long(handle_wind_v_h, "parameterCategory", 2)))
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_v_h, "parameterNumber", 3)))
@@ -1893,7 +1287,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_v_h, "level", i)))
 			    ECCERR(retval);
-			if ((retval = codes_set_double_array(handle_wind_v_h, "values", diagnostics -> v_at_cell, NO_OF_VECTORS_H)))
+	    	interpolate_to_ll(wind_v_h, grib_output_field, grid);
+			if ((retval = codes_set_double_array(handle_wind_v_h, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 			    ECCERR(retval);
 			if ((retval = codes_write_message(handle_wind_v_h, OUTPUT_FILE, "a")))
 			    ECCERR(retval);
@@ -1903,28 +1298,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			if ((retval = codes_set_long(handle_rel_vort, "discipline", 0)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rel_vort, "centre", 255)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rel_vort, "significanceOfReferenceTime", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rel_vort, "productionStatusOfProcessedData", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rel_vort, "typeOfProcessedData", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rel_vort, "indicatorOfUnitOfTimeRange", 13)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rel_vort, "stepUnits", 13)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rel_vort, "dataDate", data_date)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rel_vort, "dataTime", data_time)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rel_vort, "forecastTime", t_write - t_init)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_rel_vort, "stepRange", t_write - t_init)))
-			    ECCERR(retval);
+			set_basic_props2grib(handle_rel_vort, data_date, data_time, t_write, t_init);
 			if ((retval = codes_set_long(handle_rel_vort, "typeOfGeneratingProcess", 1)))
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_rel_vort, "parameterCategory", 2)))
@@ -1939,7 +1313,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_rel_vort, "level", i)))
 			    ECCERR(retval);
-			if ((retval = codes_set_double_array(handle_rel_vort, "values", rel_vort_h, NO_OF_SCALARS_H)))
+	    	interpolate_to_ll(rel_vort_h, grib_output_field, grid);
+			if ((retval = codes_set_double_array(handle_rel_vort, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 			    ECCERR(retval);
 			if ((retval = codes_write_message(handle_rel_vort, OUTPUT_FILE, "a")))
 			    ECCERR(retval);
@@ -1955,30 +1330,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				if (err != 0)
 					ECCERR(err);
 				fclose(SAMPLE_FILE);
-				if ((retval = codes_set_long(handle_divv_h, "discipline", 0)))
-					ECCERR(retval);
-				if ((retval = codes_set_long(handle_divv_h, "centre", 255)))
-					ECCERR(retval);
-				if ((retval = codes_set_long(handle_divv_h, "significanceOfReferenceTime", 1)))
-					ECCERR(retval);
-				if ((retval = codes_set_long(handle_divv_h, "productionStatusOfProcessedData", 1)))
-					ECCERR(retval);
-				if ((retval = codes_set_long(handle_divv_h, "typeOfProcessedData", 1)))
-					ECCERR(retval);
-				if ((retval = codes_set_long(handle_divv_h, "indicatorOfUnitOfTimeRange", 13)))
-					ECCERR(retval);
-				if ((retval = codes_set_long(handle_divv_h, "stepUnits", 13)))
-					ECCERR(retval);
-				if ((retval = codes_set_long(handle_divv_h, "dataDate", data_date)))
-					ECCERR(retval);
-				if ((retval = codes_set_long(handle_divv_h, "dataTime", data_time)))
-					ECCERR(retval);
-				if ((retval = codes_set_long(handle_divv_h, "forecastTime", t_write - t_init)))
-					ECCERR(retval);
-				if ((retval = codes_set_long(handle_divv_h, "stepRange", t_write - t_init)))
-					ECCERR(retval);
-				if ((retval = codes_set_long(handle_divv_h, "typeOfGeneratingProcess", 1)))
-					ECCERR(retval);
+				set_basic_props2grib(handle_divv_h, data_date, data_time, t_write, t_init);
 				if ((retval = codes_set_long(handle_divv_h, "parameterCategory", 2)))
 					ECCERR(retval);
 				if ((retval = codes_set_long(handle_divv_h, "parameterNumber", 13)))
@@ -1991,7 +1343,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 					ECCERR(retval);
 				if ((retval = codes_set_long(handle_divv_h, "level", i)))
 					ECCERR(retval);
-				if ((retval = codes_set_double_array(handle_divv_h, "values", divv_h, NO_OF_SCALARS_H)))
+	    		interpolate_to_ll(divv_h, grib_output_field, grid);
+				if ((retval = codes_set_double_array(handle_divv_h, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 					ECCERR(retval);
 				if ((retval = codes_write_message(handle_divv_h, OUTPUT_FILE, "a")))
 					ECCERR(retval);
@@ -2017,30 +1370,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			{
 			    wind_w_h[j] = state_write_out -> velocity_gas[j + i*NO_OF_VECTORS_PER_LAYER];
 			}
-			if ((retval = codes_set_long(handle_wind_w_h, "discipline", 0)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_w_h, "centre", 255)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_w_h, "significanceOfReferenceTime", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_w_h, "productionStatusOfProcessedData", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_w_h, "typeOfProcessedData", 1)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_w_h, "indicatorOfUnitOfTimeRange", 13)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_w_h, "stepUnits", 13)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_w_h, "dataDate", data_date)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_w_h, "dataTime", data_time)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_w_h, "forecastTime", t_write - t_init)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_w_h, "stepRange", t_write - t_init)))
-			    ECCERR(retval);
-			if ((retval = codes_set_long(handle_wind_w_h, "typeOfGeneratingProcess", 1)))
-			    ECCERR(retval);
+			set_basic_props2grib(handle_wind_w_h, data_date, data_time, t_write, t_init);
 			if ((retval = codes_set_long(handle_wind_w_h, "parameterCategory", 2)))
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_w_h, "parameterNumber", 9)))
@@ -2053,7 +1383,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			    ECCERR(retval);
 			if ((retval = codes_set_long(handle_wind_w_h, "level", i)))
 			    ECCERR(retval);
-			if ((retval = codes_set_double_array(handle_wind_w_h, "values", wind_w_h, NO_OF_SCALARS_H)))
+	    	interpolate_to_ll(wind_w_h, grib_output_field, grid);
+			if ((retval = codes_set_double_array(handle_wind_w_h, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
 			    ECCERR(retval);
 			if ((retval = codes_write_message(handle_wind_w_h, OUTPUT_FILE, "a")))
 			    ECCERR(retval);
@@ -2242,6 +1573,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		if ((retval = nc_close(ncid)))
 			NCERR(retval);
 	}
+	free(grib_output_field);
 	free(divv_h_all_layers);
 	free(rel_vort_edge);
 	free(rel_vort);
@@ -2346,6 +1678,59 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
 	return 0;
 }
 
+int set_basic_props2grib(codes_handle *handle, long data_date, long data_time, long t_write, long t_init)
+{
+	/*
+	This function sets the basic properties of a grib message.
+	*/
+	int retval;	
+	if ((retval = codes_set_long(handle, "dataDate", data_date)))
+		ECCERR(retval);
+	if ((retval = codes_set_long(handle, "dataTime", data_time)))
+		ECCERR(retval);
+	if ((retval = codes_set_long(handle, "forecastTime", t_write - t_init)))
+		ECCERR(retval);
+	if ((retval = codes_set_long(handle, "stepRange", t_write - t_init)))
+		ECCERR(retval);
+	if ((retval = codes_set_long(handle, "typeOfGeneratingProcess", 1)))
+		ECCERR(retval);
+	if ((retval = codes_set_long(handle, "discipline", 0)))
+		ECCERR(retval);
+	if ((retval = codes_set_long(handle, "gridDefinitionTemplateNumber", 0)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle, "Ni", NO_OF_LON_IO_POINTS)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle, "Nj", NO_OF_LAT_IO_POINTS)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle, "iScansNegatively", 0)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle, "jScansPositively", 1)))
+	    ECCERR(retval);
+	if ((retval = codes_set_double(handle, "latitudeOfFirstGridPointInDegrees", rad2deg(M_PI - 0.5*M_PI/NO_OF_LAT_IO_POINTS))))
+	    ECCERR(retval);
+	if ((retval = codes_set_double(handle, "longitudeOfFirstGridPointInDegrees", 0)))
+	    ECCERR(retval);
+	if ((retval = codes_set_double(handle, "iDirectionIncrementInDegrees", rad2deg(2*M_PI/NO_OF_LON_IO_POINTS))))
+	    ECCERR(retval);
+	if ((retval = codes_set_double(handle, "jDirectionIncrementInDegrees", rad2deg(M_PI/NO_OF_LAT_IO_POINTS))))
+	    ECCERR(retval);
+    if ((retval = codes_set_long(handle, "discipline", 0)))
+        ECCERR(retval);
+    if ((retval = codes_set_long(handle, "centre", 255)))
+        ECCERR(retval);
+    if ((retval = codes_set_long(handle, "significanceOfReferenceTime", 1)))
+        ECCERR(retval);
+    if ((retval = codes_set_long(handle, "productionStatusOfProcessedData", 1)))
+        ECCERR(retval);
+    if ((retval = codes_set_long(handle, "typeOfProcessedData", 1)))
+        ECCERR(retval);
+    if ((retval = codes_set_long(handle, "indicatorOfUnitOfTimeRange", 13)))
+        ECCERR(retval);
+    if ((retval = codes_set_long(handle, "stepUnits", 13)))
+        ECCERR(retval);
+	return 0;
+}
+
 double calc_std_dev(double vector_for_std_deviation[], int no_of_values)
 {
 	double mean = 0;
@@ -2355,35 +1740,6 @@ double calc_std_dev(double vector_for_std_deviation[], int no_of_values)
 	for (int i = 0; i < no_of_values; ++i)
 		result += pow(vector_for_std_deviation[i] - mean, 2);
 	result = 1/sqrt(no_of_values)*sqrt(result);
-	return result;
-}
-
-int get_pressure_on_flight_levels(double flight_levels[], double pressure_on_flight_levels[])
-{
-	for (int i = 0; i < NO_OF_FLIGHT_LEVELS; ++i)
-	{
-		pressure_on_flight_levels[i] = get_pressure_at_altitude_standard(100*FOOT*flight_levels[i]);
-	}
-	return 0;
-}
-
-double get_pressure_at_altitude_standard(double altitude)
-{
-    const double TROPO_TEMP_STANDARD = T_SFC + TROPO_HEIGHT_STANDARD*TEMP_GRADIENT;
-	double pressure_at_inv_standard, result;
-    if (altitude < TROPO_HEIGHT_STANDARD)
-    {
-        result = P_0_STANDARD*pow(1 + TEMP_GRADIENT*altitude/T_SFC, -GRAVITY_MEAN/(specific_gas_constants(0)*TEMP_GRADIENT));
-    }
-    else if (altitude < INVERSE_HEIGHT_STANDARD)
-    {
-        result = P_0_STANDARD*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT_STANDARD/T_SFC, -GRAVITY_MEAN/(specific_gas_constants(0)*TEMP_GRADIENT))*exp(-GRAVITY_MEAN*(altitude - TROPO_HEIGHT_STANDARD)/(specific_gas_constants(0)*TROPO_TEMP_STANDARD));
-    }
-    else
-    {
-    	pressure_at_inv_standard = P_0_STANDARD*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT_STANDARD/T_SFC, -GRAVITY_MEAN/(specific_gas_constants(0)*TEMP_GRADIENT))*exp(-GRAVITY_MEAN*(INVERSE_HEIGHT_STANDARD - TROPO_HEIGHT_STANDARD)/(specific_gas_constants(0)*TROPO_TEMP_STANDARD));
-        result = pressure_at_inv_standard*pow(1 + TEMP_GRADIENT*(altitude - INVERSE_HEIGHT_STANDARD)/T_SFC, -GRAVITY_MEAN/(specific_gas_constants(0)*TEMP_GRADIENT));
-    }
 	return result;
 }
 

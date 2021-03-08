@@ -42,7 +42,10 @@ NO_OF_DUAL_H_VECTORS = NO_OF_LEVELS*NO_OF_VECTORS_H,
 NO_OF_DUAL_V_VECTORS = NO_OF_LAYERS*NO_OF_DUAL_SCALARS_H,
 NO_OF_DUAL_VECTORS_PER_LAYER = NO_OF_VECTORS_H + NO_OF_DUAL_SCALARS_H,
 NO_OF_DUAL_SCALARS = NO_OF_LEVELS*NO_OF_DUAL_SCALARS_H,
-NO_OF_DUAL_VECTORS = NO_OF_DUAL_H_VECTORS + NO_OF_DUAL_V_VECTORS};
+NO_OF_DUAL_VECTORS = NO_OF_DUAL_H_VECTORS + NO_OF_DUAL_V_VECTORS,
+NO_OF_LON_IO_POINTS = (int) (4*(pow(2, RES_ID))),
+NO_OF_LAT_IO_POINTS = (int) (2*(pow(2, RES_ID))),
+NO_OF_LATLON_IO_POINTS = NO_OF_LON_IO_POINTS*NO_OF_LAT_IO_POINTS};
 
 typedef double Scalar_field[NO_OF_SCALARS];
 typedef double Vector_field[NO_OF_VECTORS];
@@ -85,6 +88,8 @@ double trsk_weights[10*NO_OF_VECTORS_H];
 double remap_horpri2hordual_vector_weights[2*NO_OF_DUAL_H_VECTORS];
 double stretching_parameter;
 double mean_area_edge;
+int latlon_interpol_indices[3*NO_OF_LATLON_IO_POINTS];
+double latlon_interpol_weights[3*NO_OF_LATLON_IO_POINTS];
 } Grid;
 
 // Contains properties of the dual grid.
@@ -194,9 +199,10 @@ typedef struct io_config {
 int grib_output_switch;
 int netcdf_output_switch;
 int pressure_level_output_switch;
-int flight_level_output_switch;
 int model_level_output_switch;
 int surface_output_switch;
+int native_grid_output;
+int latlon_grid_output;
 } Io_config;
 
 

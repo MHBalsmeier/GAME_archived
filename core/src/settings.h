@@ -6,9 +6,6 @@ Github repository: https://github.com/AUN4GFD/game
 // The number of pressure levels for the pressure level output.
 #define NO_OF_PRESSURE_LEVELS 6
 
-// The number of flight levels for the flight level output.
-#define NO_OF_FLIGHT_LEVELS 7
-
 double get_impl_thermo_weight();
 double get_t_vadv_parameter();
 int ask_for_divergence_output(int *);
@@ -17,5 +14,4 @@ double mean_particle_masses_gas(int);
 double spec_heat_capacities_v_gas(int);
 double spec_heat_capacities_p_gas(int);
 double specific_gas_constants(int);
-int get_flight_levels(double []);
 int get_pressure_levels(double []);

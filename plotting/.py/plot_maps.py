@@ -17,25 +17,22 @@ import matplotlib.offsetbox as offsetbox;
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER;
 import iris.coord_systems as cs;
 import iris.plot as iplt;
-from scipy.interpolate import griddata;
-
 max_interval = int(sys.argv[1]);
 plot_interval = int(sys.argv[2]);
 level = int(sys.argv[3]);
 short_name = sys.argv[4];
-grid_props_file = sys.argv[5];
-save_directory = sys.argv[6];
-grib_dir_name = sys.argv[7];
-projection = sys.argv[8];
-run_id = sys.argv[9];
-uniform_range = int(sys.argv[10]);
-scope = sys.argv[11];
-on_pressure_bool = int(sys.argv[12]);
-synoptical_time_mode = int(sys.argv[13]);
-init_year = int(sys.argv[14]);
-init_month = int(sys.argv[15]);
-init_day = int(sys.argv[16]);
-init_hour = int(sys.argv[17]);
+save_directory = sys.argv[5];
+grib_dir_name = sys.argv[6];
+projection = sys.argv[7];
+run_id = sys.argv[8];
+uniform_range = int(sys.argv[9]);
+scope = sys.argv[10];
+on_pressure_bool = int(sys.argv[11]);
+synoptical_time_mode = int(sys.argv[12]);
+init_year = int(sys.argv[13]);
+init_month = int(sys.argv[14]);
+init_day = int(sys.argv[15]);
+init_hour = int(sys.argv[16]);
 
 start_timestamp = tcs.find_time_coord(init_year, init_month, init_day, init_hour, 0, 0, 0);
 
@@ -186,19 +183,19 @@ else:
 	input_file = grib_dir_name + "/" + run_id + "+0s_pressure_levels.grb2";
 
 if short_name == "surface_wind":
-	lat, lon, values_pre = rmo.fetch_model_output(input_file, 0, "gust", level, grid_props_file);
-	lat, lon, values_pre_10u = rmo.fetch_model_output(input_file, 0, "10u", level, grid_props_file);
-	lat, lon, values_pre_10v = rmo.fetch_model_output(input_file, 0, "10v", level, grid_props_file);
+	lat, lon, values_pre = rmo.fetch_model_output(input_file, 0, "gust", level);
+	lat, lon, values_pre_10u = rmo.fetch_model_output(input_file, 0, "10u", level);
+	lat, lon, values_pre_10v = rmo.fetch_model_output(input_file, 0, "10v", level);
 else:
-	lat, lon, values_pre = rmo.fetch_model_output(input_file, 0, short_name, level, grid_props_file);
+	lat, lon, values_pre = rmo.fetch_model_output(input_file, 0, short_name, level);
 
 values = np.zeros([len(lat), int(max_interval/plot_interval) + 1]);
 values[:, 0] = rescale*values_pre + shift;
 if short_name == "surface_wind":
-	values_10u = np.zeros([len(lat), int(max_interval/plot_interval) + 1]);
-	values_10u[:, 0] = rescale*values_pre_10u + shift;
-	values_10v = np.zeros([len(lat), int(max_interval/plot_interval) + 1]);
-	values_10v[:, 0] = rescale*values_pre_10v + shift;
+	values_10u = np.zeros([len(lat), len(lon), int(max_interval/plot_interval) + 1]);
+	values_10u[:, :, 0] = rescale*values_pre_10u + shift;
+	values_10v = np.zeros([len(lat), len(lon), int(max_interval/plot_interval) + 1]);
+	values_10v[:, :, 0] = rescale*values_pre_10v + shift;
 
 for i in np.arange(1, int(max_interval/plot_interval) + 1):
 	time_after_init = i*plot_interval;
@@ -210,14 +207,14 @@ for i in np.arange(1, int(max_interval/plot_interval) + 1):
 	else:
 		input_file = grib_dir_name + "/" + run_id + "+" + str(time_after_init) + "s_pressure_levels.grb2";
 	if short_name == "surface_wind":
-		lat, lon, values[:, i] = rmo.fetch_model_output(input_file, time_after_init, "gust", level, grid_props_file);
-		values[:, i] = rescale*values[:, i] + shift;
-		lat, lon, values_10u[:, i] = rmo.fetch_model_output(input_file, time_after_init, "10u", level, grid_props_file);
-		values_10u[:, i] = rescale*values_10u[:, i] + shift;
-		lat, lon, values_10v[:, i] = rmo.fetch_model_output(input_file, time_after_init, "10v", level, grid_props_file);
-		values_10v[:, i] = rescale*values_10v[:, i] + shift;
+		lat, lon, values[:, :, i] = rmo.fetch_model_output(input_file, time_after_init, "gust", level);
+		values[:, :, i] = rescale*values[:, :, i] + shift;
+		lat, lon, values_10u[:, :, i] = rmo.fetch_model_output(input_file, time_after_init, "10u", level);
+		values_10u[:, :, i] = rescale*values_10u[:, :, i] + shift;
+		lat, lon, values_10v[:, :, i] = rmo.fetch_model_output(input_file, time_after_init, "10v", level);
+		values_10v[:, :, i] = rescale*values_10v[:, :, i] + shift;
 	else:
-		lat, lon, values[:, i] = rmo.fetch_model_output(input_file, time_after_init, short_name, level, grid_props_file);
+		lat, lon, values[:, i] = rmo.fetch_model_output(input_file, time_after_init, short_name, level);
 		values[:, i] = rescale*values[:, i] + shift;
 
 scope_bool_vector = np.zeros([len(values[:, 0])], dtype = bool);
@@ -306,10 +303,6 @@ for i in range(int(max_interval/plot_interval) + 1):
 	Xi_barbs, Yi_barbs = np.meshgrid(lon_plot_barbs_deg, lat_plot_barbs_deg);
 	points[:, 0] = np.rad2deg(lat);
 	points[:, 1] = np.rad2deg(lon);
-	values_interpolated = griddata(points, values[:, i], (Yi, Xi), method = "linear");
-	if short_name == "surface_wind":
-		values_interpolated_10u = griddata(points, values_10u[:, i], (Yi_barbs, Xi_barbs), method = "linear");
-		values_interpolated_10v = griddata(points, values_10v[:, i], (Yi_barbs, Xi_barbs), method = "linear");
 	if (projection != "Gnomonic"):
 		lat_coord = iris.coords.DimCoord(lat_plot_deg, standard_name = "latitude", units = "degrees", coord_system = coord_sys);
 		lon_coord = iris.coords.DimCoord(lon_plot_deg, standard_name = "longitude", units = "degrees", coord_system = coord_sys);
@@ -323,7 +316,7 @@ for i in range(int(max_interval/plot_interval) + 1):
 	gl.yformatter = LATITUDE_FORMATTER;
 	if scope == "World":
 		gl.left_labels = False;
-	new_cube = iris.cube.Cube(values_interpolated, units = unit_string_for_iris, dim_coords_and_dims = [(lat_coord, 0), (lon_coord, 1)]);
+	new_cube = iris.cube.Cube(values, units = unit_string_for_iris, dim_coords_and_dims = [(lat_coord, 0), (lon_coord, 1)]);
 	if contourf_plot == 1:
 		cf = iplt.contourf(new_cube, cmap = cmap, levels = bounds);
 		cbar = plt.colorbar(cf, fraction = 0.02, pad = 0.04, aspect = 80, orientation = "horizontal", ticks = np.arange(total_min, total_max + color_bar_dist, color_bar_dist));
@@ -341,7 +334,7 @@ for i in range(int(max_interval/plot_interval) + 1):
 		c = iplt.contour(new_cube, levels_vector, linewidths = linewidths_vector, colors = "black");
 		plt.clabel(c, inline = True, fmt = "%1.0f", fontsize = 12, colors = "k");
 	if short_name == "surface_wind":
-		ax.barbs(lon_plot_barbs_deg, lat_plot_barbs_deg, values_interpolated_10u, values_interpolated_10v, length = 6, sizes = dict(emptybarb = 0.3, spacing = 0.2, height = 0.5), linewidth = 1.1, transform = ccrs.PlateCarree());
+		ax.barbs(lon_plot_barbs_deg, lat_plot_barbs_deg, values_10u, values_10v, length = 6, sizes = dict(emptybarb = 0.3, spacing = 0.2, height = 0.5), linewidth = 1.1, transform = ccrs.PlateCarree());
 	if (scope != "World"):
 		ax.add_feature(cfeature.LAND);
 		ax.add_feature(cfeature.OCEAN);

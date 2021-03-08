@@ -91,25 +91,30 @@ int main(int argc, char *argv[])
 	io_config -> grib_output_switch = strtod(argv[25], NULL);
 	io_config -> netcdf_output_switch = strtod(argv[26], NULL);
 	io_config -> pressure_level_output_switch = strtod(argv[27], NULL);
-	io_config -> flight_level_output_switch = strtod(argv[28], NULL);
-	io_config -> model_level_output_switch = strtod(argv[29], NULL);
-	io_config -> surface_output_switch = strtod(argv[30], NULL);
-	grid -> no_of_oro_layers = strtod(argv[31], NULL);
-	int VERT_GRID_TYPE = strtod(argv[32], NULL);
-	config_info -> assume_lte = strtod(argv[33], NULL);
-	config_info -> adv_sound_ratio = strtod(argv[34], NULL);
-	config_info -> delta_t_between_analyses = strtod(argv[35], NULL);
-	config_info -> div_damp_4th_order_switch = strtod(argv[36], NULL);
-	config_info -> dissipative_heating = strtod(argv[37], NULL);
-	config_info -> diff_h_smag_fac = strtof(argv[38], NULL);
-	config_info -> shear_bg = strtof(argv[39], NULL);
-	config_info -> damping_start_height_over_toa = strtof(argv[40], NULL);
-	config_info -> damping_coeff_max = strtof(argv[41], NULL);
+	io_config -> model_level_output_switch = strtod(argv[28], NULL);
+	io_config -> surface_output_switch = strtod(argv[29], NULL);
+	grid -> no_of_oro_layers = strtod(argv[30], NULL);
+	int VERT_GRID_TYPE = strtod(argv[31], NULL);
+	config_info -> assume_lte = strtod(argv[32], NULL);
+	config_info -> adv_sound_ratio = strtod(argv[33], NULL);
+	config_info -> delta_t_between_analyses = strtod(argv[34], NULL);
+	config_info -> div_damp_4th_order_switch = strtod(argv[35], NULL);
+	config_info -> dissipative_heating = strtod(argv[36], NULL);
+	config_info -> diff_h_smag_fac = strtof(argv[37], NULL);
+	config_info -> shear_bg = strtof(argv[38], NULL);
+	config_info -> damping_start_height_over_toa = strtof(argv[39], NULL);
+	config_info -> damping_coeff_max = strtof(argv[40], NULL);
 	
 	/*
 	Checking user input for correctness:
 	------------------------------------
 	*/
+	if (io_config -> native_grid_output == 0 && io_config -> latlon_grid_output == 0)
+	{
+		printf("Either native_grid_output or latlon_grid_output must be set to 1.");
+		printf("Aborting.\n");
+		exit(1);
+	}
     if (WRITE_OUT_INTERVAL < 900)
     {
     	printf("It is WRITE_OUT_INTERVAL < 900.\n");
@@ -380,14 +385,6 @@ int main(int argc, char *argv[])
 	else
 	{
 		printf("Pressure level output is turned on.\n");
-	}
-	if (io_config -> flight_level_output_switch == 0)
-	{
-		printf("Flight level output is turned off.\n");
-	}
-	else
-	{
-		printf("Flight level output is turned on.\n");
 	}
 	printf("%s", stars);
 	printf("Reading grid data.\n");

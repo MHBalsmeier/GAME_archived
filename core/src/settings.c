@@ -53,19 +53,6 @@ int ask_for_divergence_output(int *write_out_divv_h)
 	return 0;
 }
 
-// This function returns the flight levels for the flight_level output.
-int get_flight_levels(double flight_levels[])
-{
-	flight_levels[0] = 100;
-	flight_levels[1] = 150;
-	flight_levels[2] = 200;
-	flight_levels[3] = 250;
-	flight_levels[4] = 300;
-	flight_levels[5] = 350;
-	flight_levels[6] = 400;
-	return 0;
-}
-
 // the user should not change anything below here
 // ----------------------------------------------
 

@@ -146,6 +146,26 @@ int inner_product_tangential(Vector_field in_field_0, Vector_field in_field_1, S
     return 0;
 }
 
+int interpolate_to_ll(double in_field[], double out_field[], Grid *grid)
+{
+	/*
+	This function interpolates a scalar field to a lat-lon grid.
+	*/
+	int i, j;
+	#pragma omp parallel for private(i, j)
+	for (i = 0; i < NO_OF_LATLON_IO_POINTS; ++i)
+	{
+		out_field[i] = 0;
+		for (j = 0; j < 3; ++j)
+		{
+			out_field[i] += grid -> latlon_interpol_weights[3*i + j]*in_field[grid -> latlon_interpol_indices[3*i + j]];
+		}
+	}
+	return 0;
+}
+
+
+
 
 
 

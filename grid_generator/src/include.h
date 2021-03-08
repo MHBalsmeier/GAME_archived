@@ -51,7 +51,7 @@ int write_statistics_file(double [], double [], double [], char []);
 int set_scalar_shading_indices(double [], double [], int []);
 int set_vector_shading_indices(int [], int [], int [], int []);
 int direct_tangential_unity(double [], double [], double [], double [], int [], int [], double [], double);
-
+int interpolate_ll(double [], double [], int [], double []);
 
 
 
