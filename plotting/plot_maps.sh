@@ -21,7 +21,7 @@ on_pressure_level_list=(
 plot_intervals_list=(
 86400) # every how many seconds you want to plot each variable
 uniform_colormap_list=(
-0) # set this to 1 for each plot individually if you want to enforce a uniform colormap for all the time steps
+1) # set this to 1 for each plot individually if you want to enforce a uniform colormap for all the time steps
 scope_list=(
 WORLD) # the areas of the plots
 projections_list=(
