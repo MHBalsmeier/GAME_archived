@@ -176,7 +176,7 @@ double div_damp_coeff;
 
 // This is necessary for stability of horizontally propagating sound waves.
 typedef struct extrapolation_info {
-Vector_field cpgradt_m_old;
+Vector_field pgrad_acc_old;
 } Extrapolation_info;
 
 // Contains everything on turbulence parametrizations as well as constituent-related quantities.

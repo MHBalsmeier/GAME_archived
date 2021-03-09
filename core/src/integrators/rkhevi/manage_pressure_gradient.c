@@ -14,7 +14,7 @@ The vertical advection of horizontal momentum is organized here.
 
 double pressure_gradient_1_damping_factor(double);
 
-int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Extrapolation_info *extrapolation, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_rk_step)
+int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Extrapolation_info *extrapolation, Irreversible_quantities *irreversible_quantities, Config_info *config_info)
 {
 	// 1.) The weights for the horizontal pressure gradient acceleration extrapolation.
 	// --------------------------------------------------------------------------------
@@ -27,7 +27,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
 		{
-			extrapolation -> cpgradt_m_old[i] = 0;
+			extrapolation -> pgrad_acc_old[i] = 0;
 		}
 	}
 	// This is the standard extrapolation.
@@ -38,27 +38,24 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		new_hor_pgrad_sound_weight = 1 - old_hor_pgrad_sound_weight;
 	}
 	
-	// 2.) The first pressure gradient term (-c_p*grad(T)). It is only updated at the zeroth RK step to stabilize horizontally propagating sound waves.
-	if (no_rk_step == 0)
+	// 2.) The first pressure gradient term (-c_p*grad(T)).
+	// Before calculating the pressure gradient acceleration, the old one must be saved for extrapolation.
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
-		// Before calculating the new sound wave component of the pressure gradient acceleration, the old one must be saved for extrapolation.
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_VECTORS; ++i)
-		{
-			extrapolation -> cpgradt_m_old[i] =	diagnostics -> cpgradt[i];
-		}
-		
-		// --------------------------------------------------------------------------------
-		// Diagnozing c_g_p.
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_SCALARS; ++i)
-		{
-			diagnostics -> c_g_p_field[i] = spec_heat_cap_diagnostics_p(state, i, config_info);
-		}
-		// Multiplying c_g_p with the temperature gradient.
-		grad(state -> temperature_gas, diagnostics -> cpgradt, grid);
-		scalar_times_vector(diagnostics -> c_g_p_field, diagnostics -> cpgradt, diagnostics -> cpgradt, grid);
+		extrapolation -> pgrad_acc_old[i] =	-diagnostics -> cpgradt[i] + diagnostics -> tgrads[i];
 	}
+	
+	// --------------------------------------------------------------------------------
+	// Diagnozing c_g_p.
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		diagnostics -> c_g_p_field[i] = spec_heat_cap_diagnostics_p(state, i, config_info);
+	}
+	// Multiplying c_g_p with the temperature gradient.
+	grad(state -> temperature_gas, diagnostics -> cpgradt, grid);
+	scalar_times_vector(diagnostics -> c_g_p_field, diagnostics -> cpgradt, diagnostics -> cpgradt, grid);
 		
 	// 3.) The second pressure gradient term. (updated at every step)
 	// --------------------------------------------------------------------------------
@@ -124,20 +121,16 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		{
 			forcings -> pressure_gradient_acc_expl[i] = 
 			// the old time step horizontal -c_p*grad(T)
-			old_hor_pgrad_sound_weight*(-extrapolation -> cpgradt_m_old[i])
+			old_hor_pgrad_sound_weight*extrapolation -> pgrad_acc_old[i]
 			// the new time step horizontal -c_p*grad(T)
-			+ new_hor_pgrad_sound_weight*(-diagnostics -> cpgradt[i])
-			// T*grad(s) component
-			+ diagnostics -> tgrads[i];
+			+ new_hor_pgrad_sound_weight*(-diagnostics -> cpgradt[i] + diagnostics -> tgrads[i]);
 		}
 		// vertical case
 		else
 		{
 			forcings -> pressure_gradient_acc_expl[i] = 
 			// weighted -c_p*grad(T) part
-			expl_pgrad_sound_weight*(-diagnostics -> cpgradt[i])
-			// T*grad(s) part
-			+ diagnostics -> tgrads[i];
+			expl_pgrad_sound_weight*(-diagnostics -> cpgradt[i] + diagnostics -> tgrads[i]);
 		}
 	}
 	

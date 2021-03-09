@@ -10,4 +10,4 @@ int vector_tendencies_expl(State *, State *, Grid *, Dualgrid *, Diagnostics *, 
 int scalar_tendencies_expl(State *, State *, Grid *, Dualgrid *, double, Scalar_field, Diagnostics *, Forcings *, Irreversible_quantities *, Config_info *, int);
 int three_band_solver_gen_densitites(State *, State *, State *, Diagnostics *, Config_info *, double, Grid *);
 int three_band_solver_ver_waves(State *, State *, State *, Diagnostics *, Config_info *, double, Grid *);
-int manage_pressure_gradient(State *, Grid *, Dualgrid *, Diagnostics *, Forcings *, Extrapolation_info *, Irreversible_quantities *, Config_info *, int);
+int manage_pressure_gradient(State *, Grid *, Dualgrid *, Diagnostics *, Forcings *, Extrapolation_info *, Irreversible_quantities *, Config_info *);

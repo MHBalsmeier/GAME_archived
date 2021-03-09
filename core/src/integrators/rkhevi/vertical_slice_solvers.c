@@ -34,7 +34,6 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		double d_vector[NO_OF_LAYERS - 1];
 		double density_explicit[NO_OF_LAYERS];
 		double entropy_density_explicit[NO_OF_LAYERS];
-		double denisty_interface_old[NO_OF_LAYERS - 1];
 		double spec_entropy_interface[NO_OF_LAYERS - 1];
 		double solution_vector[NO_OF_LAYERS - 1];
 		double upper_weights_vector[NO_OF_LAYERS - 1];
@@ -44,14 +43,31 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		double c_g_p_vector[NO_OF_LAYERS];
 		double r_g_vector[NO_OF_LAYERS];
 		double c_g_p_interface_values[NO_OF_LAYERS - 1];
-		double density_interface_new;
-		// determining the properties of the gas phase in the grid boxes
+		double dTdrho[NO_OF_LAYERS];
+		double dTdstilde[NO_OF_LAYERS];
+		double dsdrho[NO_OF_LAYERS];
+		double dsdstilde[NO_OF_LAYERS];
+		double density_interface_old, density_interface_new;
+		// determining the properties of the gas phase in the grid boxes and explicit quantities
 		for (j = 0; j < NO_OF_LAYERS; ++j)
 		{
 			c_g_v_vector[j] = spec_heat_cap_diagnostics_v(state_new, i + j*NO_OF_SCALARS_H, config_info);
 			c_g_p_vector[j] = spec_heat_cap_diagnostics_p(state_new, i + j*NO_OF_SCALARS_H, config_info);
 			r_g_vector[j] = gas_constant_diagnostics(state_new, i + j*NO_OF_SCALARS_H, config_info);
+			// explicit density
+			density_explicit[j] = state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
+			+ delta_t*state_tendency -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+			// explicit entropy density
+			entropy_density_explicit[j] = state_old -> entropy_densities[j*NO_OF_SCALARS_H + i]
+			+ delta_t*state_tendency -> entropy_densities[j*NO_OF_SCALARS_H + i];
+			// partial derivatives of T = T(rho, stilde)
+			dTdrho[NO_OF_LAYERS] = diagnostics -> temperature_gas_explicit[j*NO_OF_SCALARS_H + i]/(c_g_v_vector[j]*density_explicit[j])*(r_g_vector[j] - entropy_density_explicit[j]/density_explicit[j]);
+			dTdstilde[j] = diagnostics -> temperature_gas_explicit[j*NO_OF_SCALARS_H + i]/(c_g_v_vector[j]*density_explicit[j]);
+			// partial derivatives of s = T(rho, stilde)
+			dsdrho[NO_OF_LAYERS] = -entropy_density_explicit[j]/pow(density_explicit[j], 2);
+			dsdstilde[j] = 1/density_explicit[j];
 		}
+		
 		// determining the upper and lower weights as well as the c_g_v interface values
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
@@ -67,6 +83,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			c_g_p_interface_values[j] = upper_weights_vector[j]*c_g_p_vector[j] +
 			lower_weights_vector[j]*c_g_p_vector[j + 1];
 		}
+		
 		// filling up the original vectors
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{			
@@ -154,17 +171,23 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		// vertical velocity
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
+			density_interface_old
+			= upper_weights_vector[j]*state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
+			+ lower_weights_vector[j]*state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (j + 1)*NO_OF_SCALARS_H + i];
 			density_interface_new
 			= upper_weights_vector[j]*state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
 			+ lower_weights_vector[j]*state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (j + 1)*NO_OF_SCALARS_H + i];
 			state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]
 			= (2*solution_vector[j]/grid -> area[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - density_interface_new*state_old -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i])
-			/denisty_interface_old[j];
+			/density_interface_old;
 		}
 		// temperature
 		for (j = 0; j < NO_OF_LAYERS; ++j)
 		{
-			state_new -> temperature_gas[j*NO_OF_SCALARS_H + i] = diagnostics -> temperature_explicit[j*NO_OF_SCALARS_H + i];
+			state_new -> temperature_gas[j*NO_OF_SCALARS_H + i]
+			= diagnostics -> temperature_gas_explicit[j*NO_OF_SCALARS_H + i]
+			+ dTdrho[j]*(state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] - density_explicit[j])
+			+ dTdstilde[j]*(state_new -> entropy_densities[j*NO_OF_SCALARS_H + i] - entropy_density_explicit[j]);
 		}
 	}
 	return 0;
