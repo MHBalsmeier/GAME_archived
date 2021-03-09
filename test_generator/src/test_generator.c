@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 	{
 		ORO_ID = 0;
 	}
-	if (TEST_ID == 1)
+	if (TEST_ID == 1 || TEST_ID == 13)
 	{
 		ORO_ID = 1;
 	}
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
             }
         }
         // dry Ullrich test
-        if (TEST_ID == 8 || TEST_ID == 10)
+        if (TEST_ID == 8 || TEST_ID == 10 || TEST_ID == 13)
         {
         	baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i], &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
         }
@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
                 state -> velocity_gas[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]);
             }
             // dry Ullrich test
-            if (TEST_ID == 8 || TEST_ID == 10)
+            if (TEST_ID == 8 || TEST_ID == 10 || TEST_ID == 13)
             {
         		baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
                 state -> velocity_gas[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
             lat = grid -> latitude_scalar[j];
             lon = grid -> longitude_scalar[j];
             z_height = grid -> z_vector[j + i*NO_OF_VECTORS_PER_LAYER];
-            if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 8 || TEST_ID == 9 || TEST_ID == 10 || TEST_ID == 11 || TEST_ID == 12)
+            if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 8 || TEST_ID == 9 || TEST_ID == 10 || TEST_ID == 11 || TEST_ID == 12 || TEST_ID == 13)
             {
                 state -> velocity_gas[i*NO_OF_VECTORS_PER_LAYER + j] = 0;
             }

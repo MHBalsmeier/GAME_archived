@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
     {
 		ORO_ID = 0;
     }
-	if (IDEAL_INPUT_ID == 1)
+	if (IDEAL_INPUT_ID == 1 || IDEAL_INPUT_ID == 13)
     {
 		ORO_ID = 1;
     }
@@ -390,17 +390,26 @@ int main(int argc, char *argv[])
 		printf("Pressure level output is turned on.\n");
 	}
 	printf("%s", stars);
-	printf("Reading grid data.\n");
+	printf("Model is fully configured now. Starting to read external data.\n");
+	printf("%s", stars);
+    // Reading and processing user input finished.
+    
+    // Reading external data.
+	printf("Reading grid data ...\n");
     set_grid_properties(grid, dualgrid, GEO_PROP_FILE);
     printf("Grid loaded successfully.\n");
     printf("%s", stars);
-    printf("Reading initial state ... ");
+    printf("Reading initial state ...\n");
     State *state_old = calloc(1, sizeof(State));
     set_init_data(INIT_STATE_FILE, state_old, grid);
-    printf("completed.\n");
+	printf("Initial state loaded successfully.\n");
+	printf("%s", stars);
+	
+	printf("Calculating time step ...\n");
     // delta_t is the sound time step
     double delta_t;
     calc_delta_t_and_related(cfl_margin, &delta_t, grid, dualgrid, state_old, config_info);
+	printf("Time step set. Information on CFL-related quantities:\n");
     if (radiation_delta_t < delta_t)
     {
     	printf("It is radiation_delta_t < delta_t.\n");
@@ -444,7 +453,6 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     printf("It begins.\n");
     printf("%s", stars);
-    // Reading and processing user input finished.
     
     int min_no_of_output_steps = 600/delta_t;
     double *wind_h_lowest_layer_array = calloc(1, min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));

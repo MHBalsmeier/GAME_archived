@@ -17,8 +17,9 @@
 # 10:	Ullrich test, dry, perturbed, with oro_id = 3
 # 11:	Ullrich test, moist, perturbed, with oro_id = 3
 # 12:	standard atmosphere with oro_id = 3
+# 13:	Ullrich test, dry, with Gaussian mountain
 
-test_id=8
+test_id=13
 type_of_vertical_grid=0 # 0: terrain following coordinates, 1: block-like orography
 orography_layers=23 # number of layers following orography (only relevant if type_of_vertical_grid == 0)
 toa=41152 # height of the top of the atmosphere
