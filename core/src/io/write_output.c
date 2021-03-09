@@ -418,7 +418,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if (err != 0)
 				ECCERR(err);
 			fclose(SAMPLE_FILE);
-			set_basic_props2grib(handle_t2, data_date, data_time, t_write, t_init, 3, 0);
+			set_basic_props2grib(handle_t2, data_date, data_time, t_write, t_init, 0, 0);
 		    if ((retval = codes_set_long(handle_t2, "typeOfFirstFixedSurface", 103)))
 		        ECCERR(retval);
 		    if ((retval = codes_set_long(handle_t2, "scaledValueOfFirstFixedSurface", 2)))

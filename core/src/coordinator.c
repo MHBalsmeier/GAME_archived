@@ -242,11 +242,11 @@ int main(int argc, char *argv[])
 	printf("number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
 	if (config_info -> pv_consistency == 0)
 	{
-		printf("Consistent potential vorticity formulation off.");
+		printf("Consistent potential vorticity formulation off.\n");
 	}
 	if (config_info -> pv_consistency == 1)
 	{
-		printf("Consistent potential vorticity formulation on.");
+		printf("Consistent potential vorticity formulation on.\n");
 	}
 	printf("ratio of advective to sound time step: %d\n", config_info -> adv_sound_ratio);
 	if (VERT_GRID_TYPE == 0)

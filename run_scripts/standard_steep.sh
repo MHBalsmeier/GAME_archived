@@ -26,7 +26,7 @@ adv_sound_ratio=1 # the ratio of the advective to the sound time step
 momentum_diff_h=1 # turn on if you want horizontal momentum diffusion
 div_damp_4th_order_switch=0 # turn on if you want 4th order horizontal divergence damping
 dissipative_heating=1 # turn on if you want a dissipative heating rate
-diff_h_smag_fac=0.18 # horizontal diffusion Smagorinsky factor
+diff_h_smag_fac=0.4 # horizontal diffusion Smagorinsky factor
 shear_bg=1.5e-5 # assumed background (minimum) shear
 pv_consistency=1 # set to 1 if you want Poisson-bracket formalism of the vorticity flux term
 
@@ -41,8 +41,6 @@ damping_coeff_max=0.25 # maximum swamp layer damping coefficient
 rad_on=0 # turn on if you want radiation
 radiation_delta_t=3600 # every how many seconds the radiation fluxes wil be updated
 assume_lte=1 # set this to one if you do not want to assign individual temperatures to tracers
-native_grid_output=1 # set to 1 if you want output at cell centers
-latlon_grid_output=1 # set to 1 if you want output on a latlon grid
 
 # I/O
 write_out_interval=86400 # every how many seconds an output file will be created

@@ -111,8 +111,8 @@ int main(int argc, char *argv[])
 	for (i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		double distance_vector[no_of_lat_points*no_of_lon_points];
-		int min_indices_vector[4];
-		double weights_vector[4];
+		int min_indices_vector[3];
+		double weights_vector[3];
 		if (ORO_ID == 1)
 		{
 			sigma_mountain = MOUNTAIN_FWHM/pow(8*log(2), 0.5);
@@ -132,19 +132,19 @@ int main(int argc, char *argv[])
 				lon_index = j - lat_index*no_of_lon_points;
 				distance_vector[j] = calculate_distance_h(deg2rad(latitude_input[lat_index]), deg2rad(longitude_input[lon_index]), latitude_scalar[i], longitude_scalar[i], 1);
 			}
-			for (j = 0; j < 4; ++j)
+			for (j = 0; j < 3; ++j)
 			{
 				min_indices_vector[j] = -1;
 			}
 			weights_sum = 0;
-			for (j = 0; j < 4; ++j)
+			for (j = 0; j < 3; ++j)
 			{
-				min_indices_vector[j] = find_min_index_exclude(distance_vector, no_of_lat_points*no_of_lon_points, min_indices_vector, 4);
+				min_indices_vector[j] = find_min_index_exclude(distance_vector, no_of_lat_points*no_of_lon_points, min_indices_vector, 3);
 				weights_vector[j] = 1/(distance_vector[min_indices_vector[j]] + 0.01);
 				weights_sum += weights_vector[j];
 			}
 			oro[i] = 0;
-			for (j = 0; j < 4; ++j)
+			for (j = 0; j < 3; ++j)
 			{
 				oro[i] += z_in_vector[min_indices_vector[j]]*weights_vector[j]/weights_sum;
 			}

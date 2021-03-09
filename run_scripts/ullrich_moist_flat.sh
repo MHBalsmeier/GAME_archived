@@ -26,7 +26,7 @@ adv_sound_ratio=1 # the ratio of the advective to the sound time step
 momentum_diff_h=1 # turn on if you want horizontal momentum diffusion
 div_damp_4th_order_switch=0 # turn on if you want 4th order horizontal divergence damping
 dissipative_heating=1 # turn on if you want a dissipative heating rate
-diff_h_smag_fac=0.18 # horizontal diffusion Smagorinsky factor
+diff_h_smag_fac=0.4 # horizontal diffusion Smagorinsky factor
 shear_bg=1.5e-5 # assumed background (minimum) shear
 pv_consistency=1 # set to 1 if you want Poisson-bracket formalism of the vorticity flux term
 

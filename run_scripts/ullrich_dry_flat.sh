@@ -26,7 +26,7 @@ adv_sound_ratio=1 # the ratio of the advective to the sound time step
 momentum_diff_h=1 # turn on if you want horizontal momentum diffusion
 div_damp_4th_order_switch=0 # turn on if you want 4th order horizontal divergence damping
 dissipative_heating=1 # turn on if you want a dissipative heating rate
-diff_h_smag_fac=0.18 # horizontal diffusion Smagorinsky factor
+diff_h_smag_fac=0.4 # horizontal diffusion Smagorinsky factor
 shear_bg=1.5e-5 # assumed background (minimum) shear
 pv_consistency=1 # set to 1 if you want Poisson-bracket formalism of the vorticity flux term
 
@@ -35,7 +35,6 @@ mass_dry_diff_h=0 # turn on if you want horizontal dry mass diffusion
 mass_dry_diff_v=0 # turn on if you want vetical dry mass diffusion
 temperature_diff_h=0 # turn on if you want horizontal temperature diffusion
 temperature_diff_v=0 # turn on if you want vetical temperature diffusion
-momentum_diff_h=1 # turn on if you want horizontal momentum diffusion
 momentum_diff_v=0 # turn on if you want vertical momentum diffusion
 damping_start_height_over_toa=0.53 # Swamp layer boundary in relation to the TOA.
 damping_coeff_max=0.25 # maximum swamp layer damping coefficient
@@ -54,6 +53,7 @@ pressure_level_output_switch=1 # If set to 1, additional output on pressure_leve
 surface_output_switch=1 # If set to 1, surface variables will be diagnozed and writing to separate files.
 grib_output_switch=1 # If set to 1, output will be written to grib files on a lat-lon grid.
 netcdf_output_switch=0 # If set to 1, output will be written to netcdf files on the hexagonal (and pentagonal) cell centers.
+
 # parallelization
 export OMP_NUM_THREADS=6 # relevant only for OMP
 number_of_cpus=1 # relevant only for MPI
