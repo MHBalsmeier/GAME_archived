@@ -152,7 +152,7 @@ int ver_viscosity_eff(State *state, Vector_field viscosity_eff, Grid *grid)
 			{
 				layer_index = i - 1;
 			}
-			for (int k = 0; k < NO_OF_EDGES; ++k)
+			for (k = 0; k < NO_OF_EDGES; ++k)
 			{
 				viscosity_eff[i*NO_OF_VECTORS_PER_LAYER + j] += vertical_mom_viscosity_over_hor_viscosity
 				*1.0/no_of_edges
@@ -160,6 +160,7 @@ int ver_viscosity_eff(State *state, Vector_field viscosity_eff, Grid *grid)
 			}
 		}
 	}
+	return 0;
 }
 
 int calc_shear(State *state, Diagnostics *diagnostics, Grid *grid)
