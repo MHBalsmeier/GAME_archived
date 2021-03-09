@@ -127,6 +127,7 @@ int entropy_density_step(State *state_old, State *state_new, State *state_tenden
     {
     	for (int j = 0; j < no_of_relevant_constituents; ++j)
     	{
+    		delta_t = 0;
     		// thermodynamic properties of the constituent at hand
     		c_v = spec_heat_capacities_v_gas(j);
     		c_p = spec_heat_capacities_p_gas(j);
@@ -137,6 +138,7 @@ int entropy_density_step(State *state_old, State *state_new, State *state_tenden
 			delta_density = density_1 - density_0;
 			// Difference of the temperatures of the constituent at hand.
 			temperature_0 = diagnostics -> temperature_gas_explicit[i];
+			temperature_0 = state_old -> temperature_gas[i];
 			temperature_1 = state_new -> temperature_gas[i];
 			delta_temperature = temperature_1 - temperature_0;
 			// specific entropy
