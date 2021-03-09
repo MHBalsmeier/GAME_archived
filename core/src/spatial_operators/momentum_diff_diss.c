@@ -36,6 +36,11 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 	}
     // Calculating the effective horizontal kinematic viscosity (Eddy viscosity).
 	hori_viscosity_eff(state, irrev -> viscosity_eff, grid, diagnostics, config_info, delta_t);
+    // Calculating the effective vertical kinematic viscosity (Eddy viscosity).
+	if (config_info -> momentum_diff_v == 1)
+	{
+		ver_viscosity_eff(state, irrev -> viscosity_eff, grid);
+	}
 	// multiplying by the viscosity
 	vector_times_vector(irrev -> viscosity_eff, irrev -> friction_acc, irrev -> friction_acc);
 	
