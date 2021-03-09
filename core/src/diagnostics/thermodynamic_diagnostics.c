@@ -112,46 +112,6 @@ int temperature_step(State *state_old, State *state_new, State *state_tendency, 
     return 0;
 }
 
-int entropy_density_step(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
-{
-	double c_v, c_p, temperature_0, temperature_1, delta_temperature, density_0, density_1, delta_density, nominator, denominator, specific_entropy_0;
-    double beta = get_impl_thermo_weight();
-    double alpha = 1 - beta;
-    int no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
-    if (config_info -> assume_lte == 1)
-    {
-    	no_of_relevant_constituents = 1;
-    }
-	#pragma omp parallel for private (c_v, c_p, temperature_0, temperature_1, delta_temperature, density_0, density_1, delta_density, nominator, denominator, specific_entropy_0)
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
-    {
-    	for (int j = 0; j < no_of_relevant_constituents; ++j)
-    	{
-    		delta_t = 0;
-    		// thermodynamic properties of the constituent at hand
-    		c_v = spec_heat_capacities_v_gas(j);
-    		c_p = spec_heat_capacities_p_gas(j);
-			// Difference of the mass densities of the constituent at hand.
-			density_0 = state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i]
-			+ delta_t*state_tendency -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
-			density_1 = state_new -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
-			delta_density = density_1 - density_0;
-			// Difference of the temperatures of the constituent at hand.
-			temperature_0 = diagnostics -> temperature_gas_explicit[i];
-			temperature_0 = state_old -> temperature_gas[i];
-			temperature_1 = state_new -> temperature_gas[i];
-			delta_temperature = temperature_1 - temperature_0;
-			// specific entropy
-			specific_entropy_0 = (state_old -> entropy_densities[j*NO_OF_SCALARS + i] + delta_t*state_tendency -> entropy_densities[j*NO_OF_SCALARS + i])/density_0;
-			nominator = c_v*density_0*delta_temperature + c_v*temperature_1*delta_density - (alpha*c_p*temperature_0 + beta*c_p*temperature_1 - alpha*specific_entropy_0*temperature_0)*delta_density + (alpha*temperature_0 + beta*temperature_1)*(state_old -> entropy_densities[j*NO_OF_SCALARS + i] + delta_t*state_tendency -> entropy_densities[j*NO_OF_SCALARS + i]);
-			denominator = alpha*temperature_0 + beta*temperature_1 - beta/density_1*temperature_1*delta_density;
-			state_new -> entropy_densities[j*NO_OF_SCALARS + i] = nominator/denominator;
-    	}
-    }
-    
-    return 0;
-}
-
 double spec_heat_cap_diagnostics_v(State *state, int grid_point_index, Config_info *config_info)
 {
 	double rho_g = 0;

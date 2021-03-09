@@ -443,8 +443,7 @@ int main(int argc, char *argv[])
 	}
 	printf("effective horizontal resolution: %lf km\n", 1e-3*eff_hor_res);
 	printf("minimum normal distance: %lf km\n", 1e-3*normal_dist_min_hor);
-    printf("vertical small time step: %lf s\n", delta_t);
-    printf("horizontal small time step: %lf s\n", config_info -> fast_hv_ratio*delta_t);
+    printf("divergent modes time step: %lf s\n", delta_t);
     printf("advective time step: %lf s\n", config_info -> adv_sound_ratio*delta_t);
     double max_speed_hor = 100;
 	printf("horizontal advective Courant numer: %lf\n", config_info -> adv_sound_ratio*delta_t/normal_dist_min_hor*max_speed_hor);

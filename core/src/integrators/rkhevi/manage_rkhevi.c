@@ -15,25 +15,15 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 {
 	// slow terms (momentum advection and diffusion) update switch
 	int slow_update_bool = 0;
-	// horizontal divergent modes update switch
-	int hor_div_update_bool = 0;
-	// delta_t_small is the time step of the vertical explicit gravity wave integration
+	// delta_t_small is the time step of the divergent modes integration
 	double delta_t_small = delta_t;
 	// check if slow terms have to be updated
 	if (fmod(total_step_counter, config_info -> adv_sound_ratio) == 0)
 	{
 		// set the respective update switch to one
 		slow_update_bool = 1;
-		// in this case, also the horizontal divergent modes will be update
-		hor_div_update_bool = 1;
 		// delta_t is the large time step for the advection integration
 		delta_t = config_info -> adv_sound_ratio*delta_t_small;
-    }
-	// horizontal fast terms (momentum advection and diffusion) update switch (only relevant if slow terms won't be updated)
-	if (fmod(total_step_counter, config_info -> fast_hv_ratio) == 0 && slow_update_bool == 0)
-	{
-		hor_div_update_bool = 1;
-		delta_t = config_info -> fast_hv_ratio*delta_t_small;
     }
     
 	/*
@@ -63,12 +53,9 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 	    }
 		// Horizontal velocity can be considered to be updated from now on.
 
-		if (hor_div_update_bool == 1)
-		{
-			// 2.) Explicit component of the generalized density equations.
-			// ------------------------------------------------------------
-			backward_tendencies(state_new, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, time_coordinate);
-		}
+		// 2.) Explicit component of the generalized density equations.
+		// ------------------------------------------------------------
+		backward_tendencies(state_new, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, time_coordinate);
 		
 		// 3.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies (including diabatic forcings).
 		// ----------------------------------------------------------------------------------------------------------------------------------------
@@ -76,20 +63,19 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 
 		// 4.) Vertical sound wave solver.
 		// -------------------------------
-		three_band_solver_ver_sound_waves(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid);
+		three_band_solver_ver_waves(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid);
 		// Vertical velocity can be seen as updated from now on.
 		
-		// 5.) Solving the implicit component of the generalized density equations.
-		// ------------------------------------------------------------------------
-		three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid);
-		
-		// 6.) Doing the thermodynamically consistent entropy step.
-		// --------------------------------------------------------
-		entropy_density_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t);
+		// 5.) Solving the implicit component of the generalized density equations for tracers.
+		// ------------------------------------------------------------------------------------
+		if (NO_OF_CONSTITUENTS > 1)
+		{
+			three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid);
+		}
     }
 
 	// in this case, a large time step has been taken, which we modify into a small step here    
-    if (hor_div_update_bool == 1)
+    if (slow_update_bool == 1)
     {
     	linear_combine_two_states(state_old, state_new, state_new, 1 - delta_t_small/delta_t, delta_t_small/delta_t);
     	// this is for thermodynamic consistency
