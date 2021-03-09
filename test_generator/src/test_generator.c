@@ -69,11 +69,10 @@ int main(int argc, char *argv[])
 	{
 		ORO_ID = 2;
 	}
-	if (TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 10 || TEST_ID == 11 || TEST_ID == 12)
+	if (TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 10 || TEST_ID == 11 || TEST_ID == 12 || TEST_ID == 14)
 	{
 		ORO_ID = 3;
 	}
-	
     int FILE_NAME_LENGTH = 100;
     char *GEO_PROP_FILE_PRE = malloc((FILE_NAME_LENGTH + 1)*sizeof(char));
     sprintf(GEO_PROP_FILE_PRE, "../grid_generator/grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
@@ -176,7 +175,7 @@ int main(int argc, char *argv[])
             }
         }
         // dry Ullrich test
-        if (TEST_ID == 8 || TEST_ID == 10 || TEST_ID == 13)
+        if (TEST_ID == 8 || TEST_ID == 10 || TEST_ID == 13 || TEST_ID == 14)
         {
         	baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i], &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
         }
@@ -239,10 +238,14 @@ int main(int argc, char *argv[])
                 state -> velocity_gas[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]);
             }
             // dry Ullrich test
-            if (TEST_ID == 8 || TEST_ID == 10 || TEST_ID == 13)
+            if (TEST_ID == 8 || TEST_ID == 10 || TEST_ID == 13 || TEST_ID == 14)
             {
         		baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
                 state -> velocity_gas[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
+                if (TEST_ID == 14)
+                {
+                	state -> velocity_gas[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = -state -> velocity_gas[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j];
+                }
             }
             // moist Ullrich test
             if (TEST_ID == 9 || TEST_ID == 11)
@@ -261,7 +264,7 @@ int main(int argc, char *argv[])
             lat = grid -> latitude_scalar[j];
             lon = grid -> longitude_scalar[j];
             z_height = grid -> z_vector[j + i*NO_OF_VECTORS_PER_LAYER];
-            if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 8 || TEST_ID == 9 || TEST_ID == 10 || TEST_ID == 11 || TEST_ID == 12 || TEST_ID == 13)
+            if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 8 || TEST_ID == 9 || TEST_ID == 10 || TEST_ID == 11 || TEST_ID == 12 || TEST_ID == 13 || TEST_ID == 14)
             {
                 state -> velocity_gas[i*NO_OF_VECTORS_PER_LAYER + j] = 0;
             }

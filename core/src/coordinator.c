@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
     {
 		ORO_ID = 2;
     }
-	if (IDEAL_INPUT_ID == 6 || IDEAL_INPUT_ID == 7 || IDEAL_INPUT_ID == 10 || IDEAL_INPUT_ID == 11 || IDEAL_INPUT_ID == 12)
+	if (IDEAL_INPUT_ID == 6 || IDEAL_INPUT_ID == 7 || IDEAL_INPUT_ID == 10 || IDEAL_INPUT_ID == 11 || IDEAL_INPUT_ID == 12 || IDEAL_INPUT_ID == 14)
     {
 		ORO_ID = 3;
     }
