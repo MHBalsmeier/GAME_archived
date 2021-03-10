@@ -90,41 +90,15 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		// filling up the coefficient vectors
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{			
-			// determining the elements of a_vector
-			delta_z = grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i];
-			a_vector[2*j] = delta_t*impl_pgrad_weight*c_g_p_interface_values[j]/delta_z;
-			a_vector[2*j + 1] = delta_t*((r_g_vector[j]/c_g_v_vector[j] - 1)*state_new -> temperature_gas[i + (j + 1)*NO_OF_SCALARS_H] + temp_interface_values[j])*
-			grid -> area[i + j*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H];
-			
-			// determining the elements of c_vector
-			c_vector[2*j] = -delta_t*((r_g_vector[j]/c_g_v_vector[j] - 1)*state_new -> temperature_gas[i + j*NO_OF_SCALARS_H] + temp_interface_values[j])*
-			grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/grid -> volume[i + j*NO_OF_SCALARS_H];
-			delta_z = grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i];
-			c_vector[2*j + 1] = -delta_t*impl_pgrad_weight*c_g_p_interface_values[j]/delta_z;
+			b_vector[j] = 0;
+			c_vector[j] = 0;
+			d_vector[j] = 0;
 		}
-		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
+		for (j = 0; j < NO_OF_LAYERS - 2; ++j)
 		{
-			b_vector[2*j] = 1;
-			// Klemp (2008) upper boundary layer
-			z_above_damping = grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - damping_start_height;
-			if (z_above_damping < 0)
-			{
-				damping_coeff = 0;
-			}
-			else
-			{
-				damping_coeff = config_info -> damping_coeff_max*pow(sin(0.5*M_PI*z_above_damping/(grid -> z_vector[0] - damping_start_height)), 2);
-			}
-			b_vector[2*j + 1] = 1 + delta_t*damping_coeff;
-			d_vector[2*j] = diagnostics -> temperature_gas_explicit[j*NO_OF_SCALARS_H + i];
-			delta_z = grid -> z_vector[j*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(j + 2)*NO_OF_VECTORS_PER_LAYER + i];
-			d_vector[2*j + 1] =
-			state_old -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]
-			// explicit tendency
-			+ delta_t*state_tendency -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
+			a_vector[j] = 0;
+			c_vector[j] = 0;
 		}
-		b_vector[2*NO_OF_LAYERS - 2] =  1;
-		d_vector[2*NO_OF_LAYERS - 2] = diagnostics -> temperature_gas_explicit[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		
 		// calling the algorithm to solve the system of linear equations
 		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, solution_vector, NO_OF_LAYERS - 1);
