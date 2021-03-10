@@ -51,9 +51,9 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		// determining the properties of the gas phase in the grid boxes and explicit quantities
 		for (j = 0; j < NO_OF_LAYERS; ++j)
 		{
-			c_g_v_vector[j] = spec_heat_cap_diagnostics_v(state_new, i + j*NO_OF_SCALARS_H, config_info);
-			c_g_p_vector[j] = spec_heat_cap_diagnostics_p(state_new, i + j*NO_OF_SCALARS_H, config_info);
-			r_g_vector[j] = gas_constant_diagnostics(state_new, i + j*NO_OF_SCALARS_H, config_info);
+			c_g_v_vector[j] = spec_heat_cap_diagnostics_v(state_old, i + j*NO_OF_SCALARS_H, config_info);
+			c_g_p_vector[j] = spec_heat_cap_diagnostics_p(state_old, i + j*NO_OF_SCALARS_H, config_info);
+			r_g_vector[j] = gas_constant_diagnostics(state_old, i + j*NO_OF_SCALARS_H, config_info);
 			// explicit density
 			density_explicit[j] = state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
 			+ delta_t*state_tendency -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
@@ -61,11 +61,11 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			entropy_density_explicit[j] = state_old -> entropy_densities[j*NO_OF_SCALARS_H + i]
 			+ delta_t*state_tendency -> entropy_densities[j*NO_OF_SCALARS_H + i];
 			// partial derivatives of T = T(rho, stilde)
-			dTdrho[NO_OF_LAYERS] = diagnostics -> temperature_gas_explicit[j*NO_OF_SCALARS_H + i]/(c_g_v_vector[j]*density_explicit[j])*(r_g_vector[j] - entropy_density_explicit[j]/density_explicit[j]);
-			dTdstilde[j] = diagnostics -> temperature_gas_explicit[j*NO_OF_SCALARS_H + i]/(c_g_v_vector[j]*density_explicit[j]);
-			// partial derivatives of s = T(rho, stilde)
-			dsdrho[NO_OF_LAYERS] = -entropy_density_explicit[j]/pow(density_explicit[j], 2);
-			dsdstilde[j] = 1/density_explicit[j];
+			dTdrho[j] = state_old -> temperature_gas[j*NO_OF_SCALARS_H + i]/(c_g_v_vector[j]*state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i])*(r_g_vector[j] - state_old -> entropy_densities[j*NO_OF_SCALARS_H + i]/state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]);
+			dTdstilde[j] = state_old -> temperature_gas[j*NO_OF_SCALARS_H + i]/(c_g_v_vector[j]*state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]);
+			// partial derivatives of s = s(rho, stilde)
+			dsdrho[j] = -state_old -> entropy_densities[j*NO_OF_SCALARS_H + i]/pow(state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i], 2);
+			dsdstilde[j] = 1/state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
 		}
 		
 		// determining the upper and lower weights as well as the c_g_v interface values
@@ -80,11 +80,14 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
             lower_weights_vector[j] = lower_volume/total_volume;
 			temp_interface_values[j] = upper_weights_vector[j]*state_new -> temperature_gas[upper_index]
 			+ lower_weights_vector[j]*state_new -> temperature_gas[lower_index];
+			spec_entropy_interface[j]
+			= upper_weights_vector[j]*0
+			+ lower_weights_vector[j]*0;
 			c_g_p_interface_values[j] = upper_weights_vector[j]*c_g_p_vector[j] +
 			lower_weights_vector[j]*c_g_p_vector[j + 1];
 		}
 		
-		// filling up the original vectors
+		// filling up the coefficient vectors
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{			
 			// determining the elements of a_vector
@@ -124,7 +127,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		d_vector[2*NO_OF_LAYERS - 2] = diagnostics -> temperature_gas_explicit[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		
 		// calling the algorithm to solve the system of linear equations
-		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, solution_vector, 2*NO_OF_LAYERS - 1);
+		thomas_algorithm(a_vector, b_vector, c_vector, d_vector, solution_vector, NO_OF_LAYERS - 1);
 		
 		/*
 		Writing the result into the new state.
