@@ -35,8 +35,27 @@ int pot_temp_diagnostics_dry(State *state, Scalar_field pot_temp)
     return 0;
 }
 
+int temperature_explicit_from_eos(State *state_old, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
+{
+	// explicit temperature diagnostics based on the exact equation of state
+	double c_g_p = spec_heat_cap_diagnostics_p(state_old, NO_OF_SCALARS/2, config_info);
+	double c_g_v = spec_heat_cap_diagnostics_v(state_old, NO_OF_SCALARS/2, config_info);
+	double r_g = gas_constant_diagnostics(state_old, NO_OF_SCALARS/2, config_info);
+	double density, theta, specific_entropy;
+	#pragma omp parallel for private(density, theta, specific_entropy)
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		density = state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] + delta_t*state_tendency -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
+		specific_entropy = (state_old -> entropy_densities[i] + delta_t*state_tendency -> entropy_densities[i])/density;
+		theta = exp(specific_entropy/c_g_p);
+		diagnostics -> temperature_gas_explicit[i] = pow(theta, c_g_p/c_g_v)*pow(density*r_g/P_0, r_g/c_g_v);
+	}
+	return 0;
+}
+
 int temperature_step(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, int write2new)
 {
+	// explicit temperature diagnostics based on linearization of internal energy
     double nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_gas_0, density_gas_1, delta_density_gas, delta_entropy_density, temperature_0, specific_entropy_gas_0, specific_entropy_gas_1, c_g_v, c_g_p;
     double beta = get_impl_thermo_weight();
     double alpha = 1 - beta;

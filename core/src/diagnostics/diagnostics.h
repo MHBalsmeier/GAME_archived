@@ -24,3 +24,4 @@ int temperature_step(State *, State *, State *, Diagnostics *, Config_info *, do
 double density_total(State *, int);
 double density_gas(State *, int);
 int calc_uv_at_edge(Vector_field, Vector_field, Vector_field, Grid *);
+int temperature_explicit_from_eos(State *, State *, Diagnostics *, Config_info *, double);
