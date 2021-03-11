@@ -123,7 +123,8 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			- c_g_p*alpha[j + 1]
 			+ temp_old_interface_values[j]*gamma[j]
 			+ temp_old_interface_values[j]*delta[j]*spec_entropy_interface_new[j]
-			- (grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_pgrad_weight*pow(delta_t, 2))*2/grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]
+			- (grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])
+			/(impl_pgrad_weight*pow(delta_t, 2)*density_interface_old[j])*2/grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]
 			+ temp_old_interface_values[j]*gamma[j + 1]
 			+ temp_old_interface_values[j]*delta[j + 1]*spec_entropy_interface_new[j]
 			+ (grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_pgrad_weight*delta_t*density_interface_old[j])
@@ -146,7 +147,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			- temp_old_interface_values[j + 1]*gamma[j + 1]
 			- temp_old_interface_values[j + 1]*delta[j + 1]*spec_entropy_interface_new[j]
 			- (grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 2)*NO_OF_SCALARS_H])/(impl_pgrad_weight*delta_t)
-			*state_old -> velocity_gas[i + (j + 2)*NO_OF_VECTORS_PER_LAYER]*a[j]/(grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*density_interface_old[j + 1]);
+			*state_old -> velocity_gas[i + (j + 2)*NO_OF_VECTORS_PER_LAYER]*a[j + 1]/(grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*density_interface_old[j + 1]);
 			// above the main diagonal
 			e_vector[j]
 			= c_g_p*alpha[j + 1]
