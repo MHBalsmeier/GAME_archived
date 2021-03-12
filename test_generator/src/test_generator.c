@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
             lon = longitude_vector[j];
             z_height = grid -> z_vector[NO_OF_SCALARS_H + j + i*NO_OF_VECTORS_PER_LAYER];
             // standard atmosphere: no wind
-            if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 12 || TEST_ID == 14)
+            if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 12)
             {
                 state -> velocity_gas[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = 0;
             }
@@ -242,6 +242,11 @@ int main(int argc, char *argv[])
             {
         		baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
                 state -> velocity_gas[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
+            }
+            if (TEST_ID == 14)
+            {
+        		baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
+                state -> velocity_gas[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = -(u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]));
             }
             // moist Ullrich test
             if (TEST_ID == 9 || TEST_ID == 11)

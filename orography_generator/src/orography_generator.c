@@ -105,14 +105,31 @@ int main(int argc, char *argv[])
     	lon_index = i - lat_index*no_of_lon_points;
     	z_in_vector[i] = z_input[lat_index][lon_index];
     }
+    // finding the number of points used for the average
+    int no_of_avg_points;
+    // this is the average number of points of the input dataset per model grid cell 
+    double area_ratio = sqrt(no_of_lat_points*no_of_lon_points/NO_OF_SCALARS_H);
+    int no_of_cells_for_gliding_avrg = 9;
+    no_of_avg_points = (int) no_of_cells_for_gliding_avrg*area_ratio;
+    if (no_of_avg_points >= 1)
+    {
+    	printf("number of points used for averaging: %d\n", no_of_avg_points);
+    }
+    else
+    {
+    	printf("Error: number of points used for averaging is zero.\n");
+    	printf("Aborting.\n");
+    	exit(1);
+    }
+    // executing the actual interpolation
     double weights_sum, sigma_mountain;
     int j;
 	#pragma omp parallel for private(j, distance, latitude, lat_index, lon_index, weights_sum)
 	for (i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		double distance_vector[no_of_lat_points*no_of_lon_points];
-		int min_indices_vector[3];
-		double weights_vector[3];
+		int min_indices_vector[no_of_avg_points];
+		double weights_vector[no_of_avg_points];
 		if (ORO_ID == 1)
 		{
 			sigma_mountain = MOUNTAIN_FWHM/pow(8*log(2), 0.5);
@@ -132,19 +149,19 @@ int main(int argc, char *argv[])
 				lon_index = j - lat_index*no_of_lon_points;
 				distance_vector[j] = calculate_distance_h(deg2rad(latitude_input[lat_index]), deg2rad(longitude_input[lon_index]), latitude_scalar[i], longitude_scalar[i], 1);
 			}
-			for (j = 0; j < 3; ++j)
+			for (j = 0; j < no_of_avg_points; ++j)
 			{
 				min_indices_vector[j] = -1;
 			}
 			weights_sum = 0;
-			for (j = 0; j < 3; ++j)
+			for (j = 0; j < no_of_avg_points; ++j)
 			{
-				min_indices_vector[j] = find_min_index_exclude(distance_vector, no_of_lat_points*no_of_lon_points, min_indices_vector, 3);
+				min_indices_vector[j] = find_min_index_exclude(distance_vector, no_of_lat_points*no_of_lon_points, min_indices_vector, no_of_avg_points);
 				weights_vector[j] = 1/(distance_vector[min_indices_vector[j]] + 0.01);
 				weights_sum += weights_vector[j];
 			}
 			oro[i] = 0;
-			for (j = 0; j < 3; ++j)
+			for (j = 0; j < no_of_avg_points; ++j)
 			{
 				oro[i] += z_in_vector[min_indices_vector[j]]*weights_vector[j]/weights_sum;
 			}
@@ -154,6 +171,8 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
+	printf("minimum orography: %lf m\n", oro[find_min_index(oro, NO_OF_SCALARS_H)]);
+	printf("maximum orography: %lf m\n", oro[find_max_index(oro, NO_OF_SCALARS_H)]);
 	free(z_in_vector);
 	free(z_input);
 	free(latitude_input);
