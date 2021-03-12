@@ -19,7 +19,10 @@ int grad_hor_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
         if (h_index >= NO_OF_SCALARS_H)
         {
-            out_field[i] = (in_field[grid -> to_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H] - in_field[grid -> from_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H])/grid -> normal_distance[i];
+            out_field[i]
+            = (in_field[grid -> to_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H]
+            - in_field[grid -> from_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H])
+            /grid -> normal_distance[i];
         }
     }
     return 0;
@@ -47,18 +50,18 @@ int grad_vert_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
         out_field[i] =
-        out_field[i + NO_OF_VECTORS_PER_LAYER] +
-        (out_field[i + NO_OF_VECTORS_PER_LAYER] - out_field[i + 2*NO_OF_VECTORS_PER_LAYER])/
-        (grid -> z_vector[i + NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[i + 2*NO_OF_VECTORS_PER_LAYER])*
-        (grid -> z_vector[i] - grid -> z_vector[i + NO_OF_VECTORS_PER_LAYER]);
+        out_field[i + NO_OF_VECTORS_PER_LAYER]
+        + (out_field[i + NO_OF_VECTORS_PER_LAYER] - out_field[i + 2*NO_OF_VECTORS_PER_LAYER])/
+        (grid -> z_vector[i + NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[i + 2*NO_OF_VECTORS_PER_LAYER])
+        *(grid -> z_vector[i] - grid -> z_vector[i + NO_OF_VECTORS_PER_LAYER]);
     }
     // linear extrapolation to the surface
     #pragma omp parallel for
     for (int i = NO_OF_VECTORS - NO_OF_SCALARS_H; i < NO_OF_VECTORS; ++i)
     {
         out_field[i] =
-        out_field[i - NO_OF_VECTORS_PER_LAYER] +
-        (out_field[i - 2*NO_OF_VECTORS_PER_LAYER] - out_field[i - NO_OF_VECTORS_PER_LAYER])/
+        out_field[i - NO_OF_VECTORS_PER_LAYER]
+        + (out_field[i - 2*NO_OF_VECTORS_PER_LAYER] - out_field[i - NO_OF_VECTORS_PER_LAYER])/
         (grid -> z_vector[i - 2*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[i - NO_OF_VECTORS_PER_LAYER])
         *(grid -> z_vector[i] - grid -> z_vector[i - NO_OF_VECTORS_PER_LAYER]);
     }

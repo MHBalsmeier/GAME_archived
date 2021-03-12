@@ -35,9 +35,80 @@ const double TEMP_GRADIENT_INV_STANDARD = 0.1/100;
 const double SCALE_HEIGHT = 8e3;
 const double MIN_CRITERION_CLOUY_BOX = 1e-4;
 
-double calc_std_dev(double [], int);
 int global_scalar_integrator(Scalar_field, Grid *, double *);
-int set_basic_props2grib(codes_handle *, long, long, long, long, long, long);
+
+double calc_std_dev(double vector_for_std_deviation[], int no_of_values)
+{
+	double mean = 0;
+	for (int i = 0; i < no_of_values; ++i)
+		mean += 1.0/no_of_values*vector_for_std_deviation[i];
+	double result = 0;
+	for (int i = 0; i < no_of_values; ++i)
+		result += pow(vector_for_std_deviation[i] - mean, 2);
+	result = 1/sqrt(no_of_values)*sqrt(result);
+	return result;
+}
+
+int set_basic_props2grib(codes_handle *handle, long data_date, long data_time, long t_write, long t_init, long parameter_category, long parameter_number)
+{
+	/*
+	This function sets the basic properties of a grib message.
+	*/
+	int retval;
+    if ((retval = codes_set_long(handle, "parameterCategory", parameter_category)))
+        ECCERR(retval);
+    if ((retval = codes_set_long(handle, "parameterNumber", parameter_number)))
+        ECCERR(retval);
+	if ((retval = codes_set_long(handle, "dataDate", data_date)))
+		ECCERR(retval);
+	if ((retval = codes_set_long(handle, "dataTime", data_time)))
+		ECCERR(retval);
+	if ((retval = codes_set_long(handle, "forecastTime", t_write - t_init)))
+		ECCERR(retval);
+	if ((retval = codes_set_long(handle, "stepRange", t_write - t_init)))
+		ECCERR(retval);
+	if ((retval = codes_set_long(handle, "typeOfGeneratingProcess", 1)))
+		ECCERR(retval);
+	if ((retval = codes_set_long(handle, "discipline", 0)))
+		ECCERR(retval);
+	if ((retval = codes_set_long(handle, "gridDefinitionTemplateNumber", 0)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle, "Ni", NO_OF_LON_IO_POINTS)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle, "Nj", NO_OF_LAT_IO_POINTS)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle, "iScansNegatively", 0)))
+	    ECCERR(retval);
+	if ((retval = codes_set_long(handle, "jScansPositively", 0)))
+	    ECCERR(retval);
+	if ((retval = codes_set_double(handle, "latitudeOfFirstGridPointInDegrees", rad2deg(M_PI/2 - 0.5*M_PI/NO_OF_LAT_IO_POINTS))))
+	    ECCERR(retval);
+	if ((retval = codes_set_double(handle, "longitudeOfFirstGridPointInDegrees", 0)))
+	    ECCERR(retval);
+	if ((retval = codes_set_double(handle, "latitudeOfLastGridPointInDegrees", -rad2deg(M_PI/2 - 0.5*M_PI/NO_OF_LAT_IO_POINTS))))
+	    ECCERR(retval);
+	if ((retval = codes_set_double(handle, "longitudeOfLastGridPointInDegrees", rad2deg(-2*M_PI/NO_OF_LON_IO_POINTS))))
+	    ECCERR(retval);
+	if ((retval = codes_set_double(handle, "iDirectionIncrementInDegrees", rad2deg(2*M_PI/NO_OF_LON_IO_POINTS))))
+	    ECCERR(retval);
+	if ((retval = codes_set_double(handle, "jDirectionIncrementInDegrees", rad2deg(M_PI/NO_OF_LAT_IO_POINTS))))
+	    ECCERR(retval);
+    if ((retval = codes_set_long(handle, "discipline", 0)))
+        ECCERR(retval);
+    if ((retval = codes_set_long(handle, "centre", 255)))
+        ECCERR(retval);
+    if ((retval = codes_set_long(handle, "significanceOfReferenceTime", 1)))
+        ECCERR(retval);
+    if ((retval = codes_set_long(handle, "productionStatusOfProcessedData", 1)))
+        ECCERR(retval);
+    if ((retval = codes_set_long(handle, "typeOfProcessedData", 1)))
+        ECCERR(retval);
+    if ((retval = codes_set_long(handle, "indicatorOfUnitOfTimeRange", 13)))
+        ECCERR(retval);
+    if ((retval = codes_set_long(handle, "stepUnits", 13)))
+        ECCERR(retval);
+	return 0;
+}
 
 int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Io_config *io_config, Config_info *config_info)
 {
@@ -65,7 +136,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	double wind_u_value, wind_v_value, cloudy_box_counter;
 	
 	double *grib_output_field = malloc(NO_OF_LATLON_IO_POINTS*sizeof(double));
-	
 	
 	// Surface output.
 	if (io_config -> surface_output_switch == 1)
@@ -1576,79 +1646,6 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
 	return 0;
 }
 
-int set_basic_props2grib(codes_handle *handle, long data_date, long data_time, long t_write, long t_init, long parameter_category, long parameter_number)
-{
-	/*
-	This function sets the basic properties of a grib message.
-	*/
-	int retval;
-    if ((retval = codes_set_long(handle, "parameterCategory", parameter_category)))
-        ECCERR(retval);
-    if ((retval = codes_set_long(handle, "parameterNumber", parameter_number)))
-        ECCERR(retval);
-	if ((retval = codes_set_long(handle, "dataDate", data_date)))
-		ECCERR(retval);
-	if ((retval = codes_set_long(handle, "dataTime", data_time)))
-		ECCERR(retval);
-	if ((retval = codes_set_long(handle, "forecastTime", t_write - t_init)))
-		ECCERR(retval);
-	if ((retval = codes_set_long(handle, "stepRange", t_write - t_init)))
-		ECCERR(retval);
-	if ((retval = codes_set_long(handle, "typeOfGeneratingProcess", 1)))
-		ECCERR(retval);
-	if ((retval = codes_set_long(handle, "discipline", 0)))
-		ECCERR(retval);
-	if ((retval = codes_set_long(handle, "gridDefinitionTemplateNumber", 0)))
-	    ECCERR(retval);
-	if ((retval = codes_set_long(handle, "Ni", NO_OF_LON_IO_POINTS)))
-	    ECCERR(retval);
-	if ((retval = codes_set_long(handle, "Nj", NO_OF_LAT_IO_POINTS)))
-	    ECCERR(retval);
-	if ((retval = codes_set_long(handle, "iScansNegatively", 0)))
-	    ECCERR(retval);
-	if ((retval = codes_set_long(handle, "jScansPositively", 0)))
-	    ECCERR(retval);
-	if ((retval = codes_set_double(handle, "latitudeOfFirstGridPointInDegrees", rad2deg(M_PI/2 - 0.5*M_PI/NO_OF_LAT_IO_POINTS))))
-	    ECCERR(retval);
-	if ((retval = codes_set_double(handle, "longitudeOfFirstGridPointInDegrees", 0)))
-	    ECCERR(retval);
-	if ((retval = codes_set_double(handle, "latitudeOfLastGridPointInDegrees", -rad2deg(M_PI/2 - 0.5*M_PI/NO_OF_LAT_IO_POINTS))))
-	    ECCERR(retval);
-	if ((retval = codes_set_double(handle, "longitudeOfLastGridPointInDegrees", rad2deg(-2*M_PI/NO_OF_LON_IO_POINTS))))
-	    ECCERR(retval);
-	if ((retval = codes_set_double(handle, "iDirectionIncrementInDegrees", rad2deg(2*M_PI/NO_OF_LON_IO_POINTS))))
-	    ECCERR(retval);
-	if ((retval = codes_set_double(handle, "jDirectionIncrementInDegrees", rad2deg(M_PI/NO_OF_LAT_IO_POINTS))))
-	    ECCERR(retval);
-    if ((retval = codes_set_long(handle, "discipline", 0)))
-        ECCERR(retval);
-    if ((retval = codes_set_long(handle, "centre", 255)))
-        ECCERR(retval);
-    if ((retval = codes_set_long(handle, "significanceOfReferenceTime", 1)))
-        ECCERR(retval);
-    if ((retval = codes_set_long(handle, "productionStatusOfProcessedData", 1)))
-        ECCERR(retval);
-    if ((retval = codes_set_long(handle, "typeOfProcessedData", 1)))
-        ECCERR(retval);
-    if ((retval = codes_set_long(handle, "indicatorOfUnitOfTimeRange", 13)))
-        ECCERR(retval);
-    if ((retval = codes_set_long(handle, "stepUnits", 13)))
-        ECCERR(retval);
-	return 0;
-}
-
-double calc_std_dev(double vector_for_std_deviation[], int no_of_values)
-{
-	double mean = 0;
-	for (int i = 0; i < no_of_values; ++i)
-		mean += 1.0/no_of_values*vector_for_std_deviation[i];
-	double result = 0;
-	for (int i = 0; i < no_of_values; ++i)
-		result += pow(vector_for_std_deviation[i] - mean, 2);
-	result = 1/sqrt(no_of_values)*sqrt(result);
-	return result;
-}
-
 int global_scalar_integrator(Scalar_field density_gen, Grid *grid, double *result)
 {
     *result = 0;
@@ -1667,4 +1664,6 @@ int interpolation_t(State *state_0, State *state_p1, State *state_write, double 
     linear_combine_two_states(state_0, state_p1, state_write, weight_0, weight_p1);
     return 0;
 }
+
+
 

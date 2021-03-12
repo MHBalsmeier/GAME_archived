@@ -24,7 +24,10 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
         comp_h = 0;
         for (j = 0; j < no_of_edges; ++j)
         {
-			comp_h += in_field[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]*grid -> adjacent_signs_h[6*h_index + j]*grid -> area[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]];
+			comp_h
+			+= in_field[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]
+			*grid -> adjacent_signs_h[6*h_index + j]
+			*grid -> area[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]];
         }
         if (layer_index == 0)
         {
@@ -47,7 +50,9 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
             {
                 vertical_contravariant_corr(in_field, layer_index + 1, h_index, grid, &contra_lower);
             }
-            comp_v = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - contra_lower*grid -> area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
+            comp_v
+            = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
+            - contra_lower*grid -> area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
         }
         out_field[i] = 1/grid -> volume[i]*(comp_h + comp_v);
     }
@@ -81,7 +86,8 @@ int add_vertical_divv(Vector_field in_field, Scalar_field out_field, Grid *grid)
             contra_upper = in_field[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
             contra_lower = in_field[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
         }
-    	comp_v = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - contra_lower*grid -> area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
+    	comp_v = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
+    	- contra_lower*grid -> area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
         out_field[i] += 1/grid -> volume[i]*comp_v;
     }
     return 0;
