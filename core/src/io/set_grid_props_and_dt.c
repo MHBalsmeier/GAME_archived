@@ -167,6 +167,10 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, to_index_id, &to_index[0])))
         ERR(retval);
+    if ((retval = nc_get_var_int(ncid, from_index_dual_id, &from_index_dual[0])))
+        ERR(retval);
+    if ((retval = nc_get_var_int(ncid, to_index_dual_id, &to_index_dual[0])))
+        ERR(retval);
     if ((retval = nc_get_var_int(ncid, adjacent_vector_indices_h_id, &adjacent_vector_indices_h[0])))
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, adjacent_vector_indices_dual_h_id, &adjacent_vector_indices_dual_h[0])))
@@ -221,8 +225,8 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         grid -> to_index[i] = to_index[i];
         grid -> from_index[i] = from_index[i];
         grid -> direction[i] = direction[i];
-        dualgrid -> from_index[i] = from_index[i];
-        dualgrid -> to_index[i] = to_index[i];
+        dualgrid -> from_index[i] = from_index_dual[i];
+        dualgrid -> to_index[i] = to_index_dual[i];
         grid -> no_of_shaded_points_vector[i] = no_of_shaded_points_vector[i];
         for (int j = 0; j < 10; ++j)
         {

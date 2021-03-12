@@ -81,9 +81,9 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 int curl_of_vorticity(Curl_field vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid, Config_info *config_info)
 {
 	// Calculates the negative curl of the vorticity.
-	int layer_index, h_index, no_of_edges, i, j;
-	#pragma omp parallel for private(layer_index, h_index, no_of_edges, i, j)
-	for (i = 0; i < NO_OF_VECTORS; ++i)
+	int layer_index, h_index, no_of_edges;
+	#pragma omp parallel for private(layer_index, h_index, no_of_edges)
+	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
 		layer_index = i/NO_OF_VECTORS_PER_LAYER;
 		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
@@ -91,19 +91,21 @@ int curl_of_vorticity(Curl_field vorticity, Vector_field out_field, Grid *grid, 
 		// The vertical case.
 		if (h_index < NO_OF_SCALARS_H)
 		{
-			no_of_edges = 6;
-			if (h_index < NO_OF_PENTAGONS)
+			if (config_info -> momentum_diff_v == 1)
 			{
-				no_of_edges = 5;
+				no_of_edges = 6;
+				if (h_index < NO_OF_PENTAGONS)
+				{
+					no_of_edges = 5;
+				}
+				for (int j = 0; j < no_of_edges; ++j)
+				{
+					out_field[i] = out_field[i]
+					+ grid -> adjacent_signs_h[6*h_index + j]
+					*dualgrid -> normal_distance[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]
+					*vorticity[layer_index*2*NO_OF_VECTORS_H + grid -> adjacent_vector_indices_h[6*h_index + j]];
+				}
 			}
-			for (j = 0; j < no_of_edges; ++j)
-			{
-				out_field[i] += grid -> adjacent_signs_h[6*h_index + j]
-				*dualgrid -> normal_distance[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]
-				*vorticity[layer_index*2*NO_OF_VECTORS_H + grid -> adjacent_vector_indices_h[6*h_index + j]];
-			}
-			// Dividing by the area.
-			out_field[i] = config_info -> momentum_diff_v*out_field[i]/grid -> area[i];
 		}
 		// The horizontal case.
 		// Remember: (curl(zeta))*e_x = dzeta_z/dy - dzeta_y/dz = (dz*dzeta_z - dy*dzeta_y)/(dy*dz) = (dz*dzeta_z - dy*dzeta_y)/area (Stokes' Theorem, which is used here)
@@ -111,11 +113,11 @@ int curl_of_vorticity(Curl_field vorticity, Vector_field out_field, Grid *grid, 
 		{
 			// horizontal difference of vertical vorticity (dzeta_z*dz)
 			// An averaging over three rhombi must be done.
-			for (j = 0; j < 3; ++j)
+			for (int j = 0; j < 3; ++j)
 			{
-				out_field[i] +=
+				out_field[i] = out_field[i]
 				// This prefactor accounts for the fact that we average over three rhombi.
-				1.0/3*(
+				+ 1.0/3*(
 				// vertical length at the to_index_dual point
 				dualgrid -> normal_distance[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> to_index[h_index - NO_OF_SCALARS_H]]
 				// vorticity at the to_index_dual point
@@ -128,18 +130,18 @@ int curl_of_vorticity(Curl_field vorticity, Vector_field out_field, Grid *grid, 
 			if (config_info -> momentum_diff_v == 1)
 			{
 				// vertical difference of horizontal vorticity (-dzeta_y*dy)
-				out_field[i] +=
+				out_field[i] = out_field[i] + 0.001*(
 				// substracting the upper zeta_y value
-				-dualgrid -> normal_distance[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H]
-				*vorticity[layer_index*2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
-				out_field[i] +=
+				- dualgrid -> normal_distance[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H]
+				*vorticity[layer_index*2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H]);
+				out_field[i] = out_field[i] + 0.001*(
 				// adding the lower zeta_y value
-				dualgrid -> normal_distance[(layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H]
-				*vorticity[(layer_index + 1)*2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
+				+ dualgrid -> normal_distance[(layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H]
+				*vorticity[(layer_index + 1)*2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H]);
 			}
-			// Dividing by the area.
-			out_field[i] = out_field[i]/grid -> area[i];
 		}
+		// Dividing by the area.
+		out_field[i] = out_field[i]/grid -> area[i];
 	}
 	return 0;
 }
