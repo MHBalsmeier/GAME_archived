@@ -60,7 +60,7 @@ int horizontal_covariant(Vector_field vector_field, int layer_index, int h_index
 {
 	double vertical_component;
 	remap_verpri2horpri_vector(vector_field, layer_index, h_index, &vertical_component, grid);
-	int vector_index = layer_index*NO_OF_VECTORS_PER_LAYER + NO_OF_SCALARS_H + h_index;
+	int vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
 	*result = vector_field[vector_index] + grid -> slope[vector_index]*vertical_component;
 	return 0;
 }
