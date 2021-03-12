@@ -215,7 +215,8 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			else
 			{
 				state_new -> entropy_densities[j*NO_OF_SCALARS_H + i]
-				= entropy_density_explicit[j] + delta_t*(-spec_entropy_interface_new[j - 1]*solution_vector[j - 1] + spec_entropy_interface_new[j]*solution_vector[j])/grid -> volume[j*NO_OF_SCALARS_H + i];
+				= entropy_density_explicit[j] + delta_t*(-spec_entropy_interface_new[j - 1]*solution_vector[j - 1] + spec_entropy_interface_new[j]*solution_vector[j])
+				/grid -> volume[j*NO_OF_SCALARS_H + i];
 			}
 		}
 		// vertical velocity
