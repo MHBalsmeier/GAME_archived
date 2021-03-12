@@ -554,7 +554,7 @@ int slopes(double z_scalar[], int from_index[], int to_index[], double normal_di
 			slope[i] = delta_z/delta_x;
 			if (fabs(slope[i]) > 1)
 			{
-				printf("Problem in with slopes.\n");
+				printf("Problem with slopes.\n");
 				printf("Aborting.\n");
 				exit(1);
 			}
