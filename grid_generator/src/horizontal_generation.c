@@ -497,6 +497,9 @@ int direct_tangential_unity(double latitude_scalar_dual[], double longitude_scal
 
 int read_horizontal_explicit(double latitude_scalar[], double longitude_scalar[], int from_index[], int to_index[], int from_index_dual[], int to_index_dual[], char filename[], int *no_of_lloyd_cycles)
 {
+	/*
+	This function reads the arrays that fully define the horizontal grid.
+	*/
 	int ncid, latitude_scalar_id, longitude_scalar_id, retval, from_index_id, to_index_id, from_index_dual_id, to_index_dual_id, no_of_lloyd_cycles_id;
 	retval = 0;
     if ((nc_open(filename, NC_NOWRITE, &ncid)))

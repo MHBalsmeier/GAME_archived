@@ -10,7 +10,9 @@ Github repository: https://github.com/AUN4GFD/game
 
 int grad_hor_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
 {
-	// calculates the horizontal covariant gradient
+	/*
+	calculates the horizontal covariant gradient
+    */
     int layer_index, h_index;
 	#pragma omp parallel for private(layer_index, h_index)
     for (int i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
@@ -30,7 +32,9 @@ int grad_hor_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
 
 int grad_vert_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
 {
-	// calculates the vertical covariant gradient
+	/*
+	calculates the vertical covariant gradient
+    */
     int layer_index, h_index, lower_index, upper_index;
     // loop over the inner grid points
 	#pragma omp parallel for private(layer_index, h_index, lower_index, upper_index)
@@ -89,6 +93,9 @@ int grad_oro_corr(Vector_field con_to_cov_gradient_field, Grid *grid)
 
 int grad_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
 {
+	/*
+	Calculates the covariant gradient.
+	*/
 	grad_hor_cov(in_field, out_field, grid);
 	grad_vert_cov(in_field, out_field, grid);
     return 0;
@@ -96,6 +103,9 @@ int grad_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
 
 int grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
 {
+	/*
+	Calculates the gradient (horizontally contravariant, vertically covariant).
+	*/
 	grad_cov(in_field, out_field, grid);
 	grad_oro_corr(out_field, grid);
     return 0;
@@ -103,6 +113,9 @@ int grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
 
 int grad_hor(Scalar_field in_field, Vector_field out_field, Grid *grid)
 {
+	/*
+	Calculates the horizontal contravariant gradient.
+	*/
 	grad_cov(in_field, out_field, grid);
 	grad_oro_corr(out_field, grid);
     int layer_index, h_index;

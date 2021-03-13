@@ -81,6 +81,10 @@ int set_vector_shading_indices(int from_index[], int to_index[], int no_of_shade
 
 int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], double normal_distance[], double latitude_scalar[], double longitude_scalar[], int from_index[], int to_index[], double TOA, int VERT_GRID_TYPE, double z_surface[])
 {
+	/*
+	Calculates the vertical position of the vector points
+	as well as the normal distances of the primal grid.
+	*/
 	int layer_index, h_index, upper_index, lower_index;
 	double *lowest_thicknesses = malloc(NO_OF_SCALARS_H*sizeof(double));
     for (int i = 0; i < NO_OF_VECTORS; ++i)
@@ -91,9 +95,17 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], doubl
         if (h_index >= NO_OF_SCALARS_H)
         {
         	// placing the vector vertically in the middle between the two adjacent scalar points
-            z_vector[i] = 0.5*(z_scalar[layer_index*NO_OF_SCALARS_H + to_index[h_index - NO_OF_SCALARS_H]] + z_scalar[layer_index*NO_OF_SCALARS_H + from_index[h_index - NO_OF_SCALARS_H]]);
+            z_vector[i]
+            = 0.5*(z_scalar[layer_index*NO_OF_SCALARS_H + to_index[h_index - NO_OF_SCALARS_H]]
+            + z_scalar[layer_index*NO_OF_SCALARS_H + from_index[h_index - NO_OF_SCALARS_H]]);
             // calculating the horizontal distance
-            normal_distance[i] = calculate_distance_h(latitude_scalar[from_index[h_index - NO_OF_SCALARS_H]], longitude_scalar[from_index[h_index - NO_OF_SCALARS_H]], latitude_scalar[to_index[h_index - NO_OF_SCALARS_H]], longitude_scalar[to_index[h_index - NO_OF_SCALARS_H]], RADIUS + z_vector[i]);
+            normal_distance[i]
+            = calculate_distance_h(
+            latitude_scalar[from_index[h_index - NO_OF_SCALARS_H]],
+            longitude_scalar[from_index[h_index - NO_OF_SCALARS_H]],
+            latitude_scalar[to_index[h_index - NO_OF_SCALARS_H]],
+            longitude_scalar[to_index[h_index - NO_OF_SCALARS_H]],
+            RADIUS + z_vector[i]);
         }
         else
         {
@@ -223,28 +235,64 @@ int set_z_scalar_dual(double z_scalar_dual[], double z_vector[], int from_index[
 				dual_scalar_h_index = face_index*TRIANGLES_PER_FACE + 1 + 2*triangle_on_face_index + coord_1;
                 dual_scalar_index = layer_index*NO_OF_DUAL_SCALARS_H + dual_scalar_h_index;
 				find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index, index_vector_for_dual_scalar_z);
-                z_scalar_dual[dual_scalar_index] = 1.0/3*(z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
+                z_scalar_dual[dual_scalar_index]
+                = 1.0/3*(
+                z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
+                + z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
+                + z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
 				find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index - 1, index_vector_for_dual_scalar_z);
-                z_scalar_dual[dual_scalar_index - 1] = 1.0/3*(z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
+                z_scalar_dual[dual_scalar_index - 1]
+                = 1.0/3*(
+                z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
+                + z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
+                + z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
                 if (layer_index == NO_OF_LAYERS - 1)
                 {
 					find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index, index_vector_for_dual_scalar_z);
-                	z_scalar_dual[dual_scalar_index + NO_OF_DUAL_SCALARS_H] = 1.0/3*(z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
+                	z_scalar_dual[dual_scalar_index + NO_OF_DUAL_SCALARS_H]
+                	= 1.0/3*(
+                	z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
+                	+ z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
+                	+ z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
 					find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index - 1, index_vector_for_dual_scalar_z);
-                	z_scalar_dual[dual_scalar_index + NO_OF_DUAL_SCALARS_H - 1] = 1.0/3*(z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
+                	z_scalar_dual[dual_scalar_index + NO_OF_DUAL_SCALARS_H - 1]
+                	= 1.0/3*(
+                	z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
+                	+ z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
+                	+ z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
                 }
                 if (coord_0 == coord_0_points_amount - 1)
                 {
 					find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index + 1, index_vector_for_dual_scalar_z);
-                	z_scalar_dual[dual_scalar_index + 1] = 1.0/3*(z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
+                	z_scalar_dual[dual_scalar_index + 1]
+                	= 1.0/3*(
+                	z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
+                	+ z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
+                	+ z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
                     if (layer_index == NO_OF_LAYERS - 1)
-            			z_scalar_dual[dual_scalar_index + 1 + NO_OF_DUAL_SCALARS_H] = 1.0/3*(z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
+                    {
+            			z_scalar_dual[dual_scalar_index + 1 + NO_OF_DUAL_SCALARS_H]
+            			= 1.0/3*(
+            			z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
+            			+ z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
+            			+ z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
+        			}
                     if (coord_1 == POINTS_PER_EDGE - 1)
                     {
 						find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index + 2, index_vector_for_dual_scalar_z);
-                		z_scalar_dual[dual_scalar_index + 2] = 1.0/3*(z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
+                		z_scalar_dual[dual_scalar_index + 2]
+                		= 1.0/3*(
+                		z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
+                		+ z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
+                		+ z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
                         if (layer_index == NO_OF_LAYERS - 1)
-            				z_scalar_dual[dual_scalar_index + 2 + NO_OF_DUAL_SCALARS_H] = 1.0/3*(z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]] + z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]] + z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
+                        {
+            				z_scalar_dual[dual_scalar_index + 2 + NO_OF_DUAL_SCALARS_H]
+            				= 1.0/3*(
+            				z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
+            				+ z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
+            				+ z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
+        				}
                     }
                 }
             }
@@ -537,12 +585,16 @@ int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double n
 
 int slopes(double z_scalar[], int from_index[], int to_index[], double normal_distance[], double slope[])
 {
+	/*
+	Calculates the slopes of the terrain following coordinates.
+	*/
 	int layer_index, h_index;
 	double delta_x, delta_z;
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
 		layer_index = i/NO_OF_VECTORS_PER_LAYER;
 		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
+		// At the vertical vector points, the slopes are set to zero.
 		if (h_index < NO_OF_SCALARS_H)
 		{
 			slope[i] = 0;
@@ -550,8 +602,11 @@ int slopes(double z_scalar[], int from_index[], int to_index[], double normal_di
 		else
 		{
 			delta_x = normal_distance[layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
-			delta_z = z_scalar[layer_index*NO_OF_SCALARS_H + to_index[h_index - NO_OF_SCALARS_H]] - z_scalar[layer_index*NO_OF_SCALARS_H + from_index[h_index - NO_OF_SCALARS_H]];
+			delta_z
+			= z_scalar[layer_index*NO_OF_SCALARS_H + to_index[h_index - NO_OF_SCALARS_H]]
+			- z_scalar[layer_index*NO_OF_SCALARS_H + from_index[h_index - NO_OF_SCALARS_H]];
 			slope[i] = delta_z/delta_x;
+			// Checking for unrealistic values.
 			if (fabs(slope[i]) > 1)
 			{
 				printf("Problem with slopes.\n");

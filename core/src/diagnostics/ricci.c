@@ -9,6 +9,10 @@ Github repository: https://github.com/AUN4GFD/game
 
 int vertical_contravariant_corr(Vector_field vector_field, int layer_index, int h_index, Grid *grid, double *result)
 {
+	/*
+	Calculates (the vertical contravariant component - the vertical covariant component)
+	of a vector field out of the horizontal contravariant components.
+	*/
 	// Attention: adjacent_signs_h appears twice, thus does not need to be taken into account.
 	*result = 0;
 	int scalar_index, vector_index;
@@ -58,6 +62,7 @@ int vertical_contravariant_corr(Vector_field vector_field, int layer_index, int 
 
 int horizontal_covariant(Vector_field vector_field, int layer_index, int h_index, Grid *grid, double *result)
 {
+	// Calculates the horizontal covariant component of a vector field out of the horizontal contravariant and the vertical covariant components.
 	double vertical_component;
 	remap_verpri2horpri_vector(vector_field, layer_index, h_index, &vertical_component, grid);
 	int vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
