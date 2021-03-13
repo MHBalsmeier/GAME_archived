@@ -17,7 +17,10 @@ int scalar_times_vector(Scalar_field scalar_field, Vector_field vector_field, Ve
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
         if (h_index >= NO_OF_SCALARS_H)
         {
-            scalar_value = 0.5*(scalar_field[grid -> to_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H] + scalar_field[grid -> from_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H]);
+            scalar_value
+            = 0.5*(
+            scalar_field[grid -> to_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H]
+            + scalar_field[grid -> from_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H]);
         }
         else
         {
@@ -36,7 +39,10 @@ int scalar_times_vector(Scalar_field scalar_field, Vector_field vector_field, Ve
     #pragma omp parallel for private(scalar_value)
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
-        scalar_value = scalar_field[i] + (scalar_field[i] - scalar_field[i + NO_OF_SCALARS_H])/(grid -> z_scalar[i] - grid -> z_scalar[i + NO_OF_SCALARS_H])
+        scalar_value
+        = scalar_field[i]
+        + (scalar_field[i] - scalar_field[i + NO_OF_SCALARS_H])
+        /(grid -> z_scalar[i] - grid -> z_scalar[i + NO_OF_SCALARS_H])
         *(grid -> z_vector[i] - grid -> z_scalar[i]);
     	out_field[i] = scalar_value*vector_field[i];
     }
@@ -47,8 +53,10 @@ int scalar_times_vector(Scalar_field scalar_field, Vector_field vector_field, Ve
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
         upper_index = h_index + (layer_index - 1)*NO_OF_SCALARS_H;
-        scalar_value = scalar_field[upper_index]
-        + (scalar_field[upper_index - NO_OF_SCALARS_H] - scalar_field[upper_index])/(grid -> z_scalar[upper_index - NO_OF_SCALARS_H] - grid -> z_scalar[upper_index])
+        scalar_value
+        = scalar_field[upper_index]
+        + (scalar_field[upper_index - NO_OF_SCALARS_H] - scalar_field[upper_index])
+        /(grid -> z_scalar[upper_index - NO_OF_SCALARS_H] - grid -> z_scalar[upper_index])
         *(grid -> z_vector[i] - grid -> z_scalar[upper_index]);
     	out_field[i] = scalar_value*vector_field[i];
     }
@@ -95,8 +103,10 @@ int scalar_times_vector_scalar_h_v(Scalar_field in_field_h, Scalar_field in_fiel
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
         upper_index = h_index + (layer_index - 1)*NO_OF_SCALARS_H;
-        scalar_value = in_field_v[upper_index]
-        + (in_field_v[upper_index - NO_OF_SCALARS_H] - in_field_v[upper_index])/(grid -> z_scalar[upper_index - NO_OF_SCALARS_H] - grid -> z_scalar[upper_index])
+        scalar_value
+        = in_field_v[upper_index]
+        + (in_field_v[upper_index - NO_OF_SCALARS_H] - in_field_v[upper_index])
+        /(grid -> z_scalar[upper_index - NO_OF_SCALARS_H] - grid -> z_scalar[upper_index])
         *(grid -> z_vector[i] - grid -> z_scalar[upper_index]);
         out_field[i] = scalar_value*vector_field[i];
     }

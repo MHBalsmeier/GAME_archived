@@ -36,7 +36,9 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagn
 			density_value = 0;
 			for (int j = 0; j < 4; ++j)
 			{
-				density_value += grid -> density_to_rhombus_weights[4*edge_vector_index_h + j]*density_field[layer_index*NO_OF_SCALARS_H + grid -> density_to_rhombus_indices[4*edge_vector_index_h + j]];
+				density_value
+				+= grid -> density_to_rhombus_weights[4*edge_vector_index_h + j]
+				*density_field[layer_index*NO_OF_SCALARS_H + grid -> density_to_rhombus_indices[4*edge_vector_index_h + j]];
 			}
         }
         // interpolation of the density to the half level edges
