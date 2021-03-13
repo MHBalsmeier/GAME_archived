@@ -18,6 +18,7 @@ start_hour=0 # defines the start time of the model run
 # grid properties
 toa=41152 # top of atmosphere
 type_of_vertical_grid=0 # 0: terrain following coordinates, 1: block-like orography
+orography_id=0 # ID of the orography field, for ideal_input_id > -1 orography_id will be set automatically
 orography_layers=23 # number of layers following orography (only relevent if type_of_vertical_grid == 0)
 
 # dynamics settings
@@ -53,6 +54,7 @@ pressure_level_output_switch=1 # If set to 1, additional output on pressure_leve
 surface_output_switch=1 # If set to 1, surface variables will be diagnozed and writing to separate files.
 grib_output_switch=1 # If set to 1, output will be written to grib files on a lat-lon grid.
 netcdf_output_switch=0 # If set to 1, output will be written to netcdf files on the hexagonal (and pentagonal) cell centers.
+delta_t_between_analyses=-1 # the time difference between two analyses, only relevant in NWP mode
 
 # parallelization
 export OMP_NUM_THREADS=6 # relevant only for OMP
