@@ -245,25 +245,22 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 {
 	// Vertical advection of generalized densities (of tracers) with 3-band matrices.
 	// mass densities, density x temperatures
-	int no_of_relevant_constituents, constituent_index_offset;
+	int no_of_relevant_constituents;
 	double impl_weight, expl_weight;
 	impl_weight = 0.5;
 	expl_weight = 1 - impl_weight;
 	for (int quantity_id = 0; quantity_id < 2; ++quantity_id)
 	{
 		no_of_relevant_constituents = 0;
-		constituent_index_offset = 0;
 		// mass densities
 		if (quantity_id == 0)
 		{
 			// all constituents have a mass density
 			no_of_relevant_constituents = NO_OF_CONSTITUENTS - 1;
-			constituent_index_offset = 0;
 		}
 		// density x temperature fields
 		if (quantity_id == 1)
 		{
-			constituent_index_offset = 0;
 			// in this case, all the condensed constituents have a density x temperature field
 			if(config_info -> assume_lte == 0)
 			{
@@ -277,7 +274,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 		}
 		
 		// loop over all relevant constituents
-		for (int k = constituent_index_offset; k < constituent_index_offset + no_of_relevant_constituents; ++k)
+		for (int k = 0; k < no_of_relevant_constituents; ++k)
 		{
 			// This is done for all tracers apart from the main gaseous constituent.
 		 	if (quantity_id != 0 || k != NO_OF_CONDENSED_CONSTITUENTS)
@@ -319,8 +316,8 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 							// determining the density of the gas at the interface
 							density_gas_value = a[j]*density_gas(state_new, j*NO_OF_SCALARS_H + i) + b[j]*density_gas(state_new, (j + 1)*NO_OF_SCALARS_H + i);
 							density_gas_value_old = a[j]*density_gas(state_old, j*NO_OF_SCALARS_H + i) + b[j]*density_gas(state_old, (j + 1)*NO_OF_SCALARS_H + i);
-							vertical_flux_vector_impl[j] -= ret_sink_velocity(0, 0.001, density_gas_value_old);
-							vertical_flux_vector_rhs[j] -= ret_sink_velocity(0, 0.001, density_gas_value);
+							vertical_flux_vector_impl[j] -= 0.1;// ret_sink_velocity(0, 0.001, density_gas_value_old);
+							vertical_flux_vector_rhs[j] -= 0.1;// ret_sink_velocity(0, 0.001, density_gas_value);
 						}
 						// multiplying the vertical velocity by the area
 						area = grid -> area[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
