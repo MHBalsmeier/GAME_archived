@@ -18,18 +18,11 @@ This is the horizontal (explicit) part of the constituent integration.
 int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step)
 {
 
+	// declaring needed variables
     int h_index, layer_index, k;
     double c_v_cond, density_gas_value, latent_heating;
     
-	/*
-	phase transitions are on only at the first RK step
-	only then, they are also updated
-	*/
-	if (no_rk_step == 0 && NO_OF_CONSTITUENTS == 4)
-	{
-	    calc_h2otracers_source_rates(irrev -> constituent_mass_source_rates, irrev -> constituent_heat_source_rates, state -> mass_densities, state -> condensed_density_temperatures, state -> temperature_gas, NO_OF_SCALARS, delta_t);
-	}
-
+    // determining the weights for the RK stepping
     double old_weight, new_weight;
     new_weight = 1;
     if (no_rk_step == 1)
@@ -37,7 +30,23 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     	new_weight = 0.5;
     }
 	old_weight = 1 - new_weight;
+    
+	/*
+	phase transitions are only updated at the first RK step
+	*/
+	if (no_rk_step == 0 && NO_OF_CONSTITUENTS == 4)
+	{
+	    calc_h2otracers_source_rates(
+	    irrev -> constituent_mass_source_rates,
+	    irrev -> constituent_heat_source_rates,
+	    state -> mass_densities,
+	    state -> condensed_density_temperatures,
+	    state -> temperature_gas,
+	    NO_OF_SCALARS,
+	    delta_t);
+	}
 	
+	// loop over all constituents
 	for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
 	{
 		// Separating the density of the constituent at hand.

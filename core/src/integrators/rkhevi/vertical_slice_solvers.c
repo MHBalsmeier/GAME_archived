@@ -244,7 +244,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 int three_band_solver_gen_densitites(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, Grid *grid)
 {
 	// Vertical advection of generalized densities (of tracers) with 3-band matrices.
-	// mass densities, entropy densities, density x temperatures
+	// mass densities, density x temperatures
 	int no_of_relevant_constituents, constituent_index_offset;
 	double impl_weight, expl_weight;
 	impl_weight = 0.5;
@@ -389,7 +389,11 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 							r_vector[j] += expl_weight*delta_t*(-vertical_flux_vector_rhs[j - 1] + vertical_flux_vector_rhs[j])/grid -> volume[j*NO_OF_SCALARS_H + i];
 						}
 					}
+					
+					// calling the algorithm to solve the system of linear equations
 					thomas_algorithm(c_vector, d_vector, e_vector, r_vector, solution_vector, NO_OF_LAYERS);
+					
+					// writing the result into the new state
 					for (j = 0; j < NO_OF_LAYERS; ++j)
 					{
 						// limiter: none of the densities may be negative
@@ -397,10 +401,14 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						{
 							solution_vector[j] = 0;
 						}
+						
+						// mass densities
 						if (quantity_id == 0)
 						{
 							state_new -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = solution_vector[j];
 						}
+						
+						// density x temperature fields
 						if (quantity_id == 1)
 						{
 							state_new -> condensed_density_temperatures[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = solution_vector[j];
