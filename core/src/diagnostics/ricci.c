@@ -17,6 +17,7 @@ int vertical_contravariant_corr(Vector_field vector_field, int layer_index, int 
 	*result = 0;
 	int scalar_index, vector_index;
 	int no_of_edges = 6;
+	double upper_volume, lower_volume, total_volume, vert_weight;
 	if (h_index < NO_OF_PENTAGONS)
 	{
 		no_of_edges = 5;
@@ -29,7 +30,11 @@ int vertical_contravariant_corr(Vector_field vector_field, int layer_index, int 
 			{
 				scalar_index = layer_index*NO_OF_SCALARS_H + h_index;
 				vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + i];
-				*result += -0.5*grid -> inner_product_weights[8*scalar_index + i]*grid -> slope[vector_index]*vector_field[vector_index];
+				lower_volume = grid -> volume_ratios[2*scalar_index + 0]*grid -> volume[scalar_index];
+				upper_volume = grid -> volume_ratios[2*(scalar_index - NO_OF_SCALARS_H) + 1]*grid -> volume[scalar_index - NO_OF_SCALARS_H];
+				total_volume = lower_volume + upper_volume;
+				vert_weight = lower_volume/total_volume;
+				*result += -vert_weight*grid -> inner_product_weights[8*scalar_index + i]*grid -> slope[vector_index]*vector_field[vector_index];
 			}
     	}
     	else if (layer_index == NO_OF_LAYERS)
@@ -43,17 +48,23 @@ int vertical_contravariant_corr(Vector_field vector_field, int layer_index, int 
     	}
     	else
     	{
+			scalar_index = layer_index*NO_OF_SCALARS_H + h_index;
+			lower_volume = grid -> volume_ratios[2*scalar_index + 0]*grid -> volume[scalar_index];
+			upper_volume = grid -> volume_ratios[2*(scalar_index - NO_OF_SCALARS_H) + 1]*grid -> volume[scalar_index - NO_OF_SCALARS_H];
+			total_volume = lower_volume + upper_volume;
 			for (int i = 0; i < no_of_edges; ++i)
 			{
 				scalar_index = (layer_index - 1)*NO_OF_SCALARS_H + h_index;
 				vector_index = NO_OF_SCALARS_H + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + i];
-				*result += -0.5*grid -> inner_product_weights[8*scalar_index + i]*grid -> slope[vector_index]*vector_field[vector_index];
+				vert_weight = upper_volume/total_volume;
+				*result += -vert_weight*grid -> inner_product_weights[8*scalar_index + i]*grid -> slope[vector_index]*vector_field[vector_index];
 			}
 			for (int i = 0; i < no_of_edges; ++i)
 			{
 				scalar_index = layer_index*NO_OF_SCALARS_H + h_index;
 				vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + i];
-				*result += -0.5*grid -> inner_product_weights[8*scalar_index + i]*grid -> slope[vector_index]*vector_field[vector_index];
+				vert_weight = lower_volume/total_volume;
+				*result += -vert_weight*grid -> inner_product_weights[8*scalar_index + i]*grid -> slope[vector_index]*vector_field[vector_index];
 			}
     	}
     }
