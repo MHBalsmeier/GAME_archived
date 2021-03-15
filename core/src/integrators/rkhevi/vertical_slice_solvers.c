@@ -316,8 +316,8 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 							// determining the density of the gas at the interface
 							density_gas_value = a[j]*density_gas(state_new, j*NO_OF_SCALARS_H + i) + b[j]*density_gas(state_new, (j + 1)*NO_OF_SCALARS_H + i);
 							density_gas_value_old = a[j]*density_gas(state_old, j*NO_OF_SCALARS_H + i) + b[j]*density_gas(state_old, (j + 1)*NO_OF_SCALARS_H + i);
-							vertical_flux_vector_impl[j] -= 0.1;// ret_sink_velocity(0, 0.001, density_gas_value_old);
-							vertical_flux_vector_rhs[j] -= 0.1;// ret_sink_velocity(0, 0.001, density_gas_value);
+							vertical_flux_vector_impl[j] -= 1;// ret_sink_velocity(0, 0.001, density_gas_value_old);
+							vertical_flux_vector_rhs[j] -= 1;// ret_sink_velocity(0, 0.001, density_gas_value);
 						}
 						// multiplying the vertical velocity by the area
 						area = grid -> area[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
