@@ -182,7 +182,7 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 				}
 				
 				// checking wether the triangles sum up to the cell area
-				if (fabs(check_sum/(rescale_for_z_offset_2d*area[from_or_to_index[i]]) - 1) > 1e-10)
+				if (fabs(check_sum/(rescale_for_z_offset_2d*area[from_or_to_index[i]]) - 1) > EPSILON_SECURITY)
 				{
 					printf("Problem 30 in TRSK implementation detected. %lf\n", check_sum/(rescale_for_z_offset_2d*area[from_or_to_index[i]]));
 					exit(1);
@@ -409,7 +409,7 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 				}
 				value_1 = normal_distance[NO_OF_SCALARS_H + first_index]/(rescale_for_z_offset_1d*normal_distance_dual[i])*trsk_weights[second_index];
 				check_sum = value_0 + value_1;
-				if (fabs(check_sum) > 1e-10)
+				if (fabs(check_sum) > EPSILON_SECURITY)
 				{
 					printf("Problem 39 in TRSK implementation detected.%lf\n", check_sum);
 					exit(1);

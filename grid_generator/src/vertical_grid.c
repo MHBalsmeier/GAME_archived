@@ -156,7 +156,7 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], doubl
 		{
 			check_sum += normal_distance[i + j*NO_OF_VECTORS_PER_LAYER];
 		}
-		if (fabs(check_sum/(TOA - z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]) - 1) > 1e-10)
+		if (fabs(check_sum/(TOA - z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]) - 1) > EPSILON_SECURITY)
 		{
 			printf("Problem 0 with vertical grid structure.\n");
 			exit(1);
@@ -207,7 +207,7 @@ int calculate_vertical_faces(double area[], double z_vector_dual[], double norma
     	{
     		check_area += area[NO_OF_SCALARS_H + i + j*NO_OF_VECTORS_PER_LAYER];
     	}
-    	if(fabs(check_area/wished_result - 1) > 1e-10)
+    	if(fabs(check_area/wished_result - 1) > EPSILON_SECURITY)
     	{
     		printf("Error with vertical faces. Coefficient which should be zero has value %lf.\n", check_area/wished_result - 1);
     		exit(1);
@@ -343,7 +343,7 @@ int set_volume(double volume[], double z_scalar_dual[], double z_vector[], doubl
     volume_sum_ideal = 0;
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     	volume_sum_ideal += find_volume(area[NO_OF_VECTORS - NO_OF_SCALARS_H + i], RADIUS + z_vector[NO_OF_VECTORS- NO_OF_SCALARS_H + i], RADIUS + TOA);
-    if (fabs(volume_sum/volume_sum_ideal - 1) > 1e-10)
+    if (fabs(volume_sum/volume_sum_ideal - 1) > EPSILON_SECURITY)
 	{
         printf("Sum of volumes of grid boxes does not match volume of entire atmosphere.\n");
 		exit(1);
@@ -410,7 +410,7 @@ int set_area_dual_pre(double area_dual_pre[], double z_vector_dual[], double nor
     	{
     		check_area += area_dual_pre[i + j*NO_OF_DUAL_VECTORS_PER_LAYER];
     	}
-    	if(fabs(check_area/wished_result - 1) > 1e-10)
+    	if(fabs(check_area/wished_result - 1) > EPSILON_SECURITY)
     	{
     		printf("Error with dual vertical faces. Coefficient which should be zero has value %lf.\n", check_area/wished_result - 1);
     		exit(1);
@@ -466,7 +466,7 @@ int set_area_dual(double area_dual[], double z_vector[], int from_index_dual[], 
     	check_area += area_dual[NO_OF_VECTORS_H + i];
     }
     earth_surface = 4*M_PI*pow(RADIUS + z_vector[NO_OF_SCALARS_H], 2);
-    if (fabs(check_area/earth_surface - 3) > 1e-10)
+    if (fabs(check_area/earth_surface - 3) > EPSILON_SECURITY)
     {
     	printf("Problem with rhombus areas.\n");
     	exit(1);
@@ -573,7 +573,7 @@ int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double n
 		if (fabs(check_sum/(TOA
 		- 1.0/3*(z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
 		+ z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
-		+ z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]])) - 1) > 1e-10)
+		+ z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]])) - 1) > EPSILON_SECURITY)
 		{
 			printf("Problem 1 with vertical grid structure.\n");
 			printf("Aborting.\n");

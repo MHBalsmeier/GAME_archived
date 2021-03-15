@@ -145,7 +145,7 @@ int calc_cell_face_unity(double pent_hex_face_unity_sphere[], double latitude_sc
 			exit(1);
 		}
     }
-    if (fabs(pent_hex_sum_unity_sphere/(4*M_PI) - 1) > 1e-10)
+    if (fabs(pent_hex_sum_unity_sphere/(4*M_PI) - 1) > EPSILON_SECURITY)
 	{
         printf("Sum of faces of pentagons and hexagons on unity sphere does not match face of unit sphere.\n");
 		exit(1);
@@ -199,7 +199,7 @@ int calc_triangle_face_unity(double triangle_face_unit_sphere[], double latitude
 			exit(1);
 		}
     }
-    if (fabs(triangle_sum_unit_sphere/(4*M_PI) - 1) > 1e-10)
+    if (fabs(triangle_sum_unit_sphere/(4*M_PI) - 1) > EPSILON_SECURITY)
 	{
         printf("Sum of faces of triangles on unit sphere does not match face of unit sphere.\n");
 		exit(1);

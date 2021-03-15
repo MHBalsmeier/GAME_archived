@@ -259,7 +259,7 @@ int set_vertical_vorticity_stuff(int vorticity_indices_pre[], int vorticity_sign
 				exit(1);
 			}
 		}
-		if (fabs(check_sum - 1) > 1e-10)
+		if (fabs(check_sum - 1) > EPSILON_SECURITY)
 		{
 			printf("Error in density_to_rhombus_weights, position 0. Coefficient which should be one has value %lf.\n", check_sum);
 			exit(1);

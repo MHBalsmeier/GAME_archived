@@ -4,18 +4,10 @@ Github repository: https://github.com/AUN4GFD/game
 */
 
 #include <math.h>
-#define N_A (6.0221409e23)
-#define K_B (1.380649e-23)
-#define M_D 0.028964420
-#define R (N_A*K_B)
-#define R_D (R/M_D)
-#define C_P 1005.0
-#define C_V (C_P - R_D)
-#define KAPPA (C_P/C_V)
-#define P_0 100000.0
 #define OMEGA (7.292115e-5)
 #define SEMIMAJOR 6378137.0
 #define SEMIMINOR 6356752.314
+#define EPSILON_SECURITY (1e-10)
 
 enum grid_integers {
 RES_ID = 5,

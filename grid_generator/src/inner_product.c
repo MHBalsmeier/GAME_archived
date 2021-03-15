@@ -58,6 +58,11 @@ int calc_inner_product_and_related(double inner_product_weights[], double normal
 			delta_z = z_scalar[i] - z_scalar[i + NO_OF_SCALARS_H];
 		}
 		inner_product_weights[8*i + 7] = area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER]*delta_z/(2*volume[i]);
+		if (fabs(volume_ratios[2*i + 0] + volume_ratios[2*i + 1] - 1) > EPSILON_SECURITY)
+		{
+			printf("Error in calculating volume_ratios.");
+			exit(1);
+		}
 	}
 	int e_kin_h_index_0, e_kin_h_index_1;
 	double total_volume, upper_volume, lower_volume, upper_volume_0, lower_volume_0, upper_volume_1, lower_volume_1, check_sum;
@@ -105,7 +110,7 @@ int calc_inner_product_and_related(double inner_product_weights[], double normal
 			remap_horpri2hordual_vector_weights[2*i + 0] = upper_volume/total_volume;
 			remap_horpri2hordual_vector_weights[2*i + 1] = lower_volume/total_volume;
 			check_sum = remap_horpri2hordual_vector_weights[2*i + 0] + remap_horpri2hordual_vector_weights[2*i + 1];
-			if (fabs(check_sum - 1) > 1e-10)
+			if (fabs(check_sum - 1) > EPSILON_SECURITY)
 			{
 				printf("Error in calculating remap_horpri2hordual_vector_weights. Check sum is %lf, should be 1.\n", check_sum);
 				exit(1);
