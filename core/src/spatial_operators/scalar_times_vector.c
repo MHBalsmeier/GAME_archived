@@ -9,8 +9,8 @@ Github repository: https://github.com/AUN4GFD/game
 int scalar_times_vector(Scalar_field scalar_field, Vector_field vector_field, Vector_field out_field, Grid *grid)
 {
     int layer_index, h_index, lower_index, upper_index, i;
-    double scalar_value, total_volume, upper_volume, lower_volume, upper_weight, lower_weight;
-	#pragma omp parallel for private (layer_index, h_index, lower_index, upper_index, i, scalar_value, total_volume, upper_volume, lower_volume, upper_weight, lower_weight)
+    double scalar_value;
+	#pragma omp parallel for private (layer_index, h_index, lower_index, upper_index, i, scalar_value)
     for (i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
@@ -26,12 +26,9 @@ int scalar_times_vector(Scalar_field scalar_field, Vector_field vector_field, Ve
         {
             lower_index = h_index + layer_index*NO_OF_SCALARS_H;
             upper_index = h_index + (layer_index - 1)*NO_OF_SCALARS_H;
-            upper_volume = grid -> volume_ratios[2*upper_index + 1]*grid -> volume[upper_index];
-            lower_volume = grid -> volume_ratios[2*lower_index + 0]*grid -> volume[lower_index];
-            total_volume = upper_volume + lower_volume;
-            upper_weight = upper_volume/total_volume;
-            lower_weight = lower_volume/total_volume;
-            scalar_value = 0.5*scalar_field[upper_index] + 0.5*scalar_field[lower_index];
+            scalar_value = 0.5*(
+            scalar_field[upper_index]
+            + scalar_field[lower_index]);
         }
     	out_field[i] = scalar_value*vector_field[i];
     }
@@ -66,8 +63,8 @@ int scalar_times_vector(Scalar_field scalar_field, Vector_field vector_field, Ve
 int scalar_times_vector_scalar_h_v(Scalar_field in_field_h, Scalar_field in_field_v, Vector_field vector_field, Vector_field out_field, Grid *grid)
 {
     int layer_index, h_index, lower_index, upper_index, i;
-    double scalar_value, total_volume, upper_volume, lower_volume, upper_weight, lower_weight;
-    #pragma omp parallel for private (layer_index, h_index, lower_index, upper_index, i, scalar_value, total_volume, upper_volume, lower_volume, upper_weight, lower_weight)
+    double scalar_value;
+    #pragma omp parallel for private (layer_index, h_index, lower_index, upper_index, i, scalar_value)
     for (i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
@@ -83,12 +80,9 @@ int scalar_times_vector_scalar_h_v(Scalar_field in_field_h, Scalar_field in_fiel
         {
             lower_index = h_index + layer_index*NO_OF_SCALARS_H;
             upper_index = h_index + (layer_index - 1)*NO_OF_SCALARS_H;
-            upper_volume = grid -> volume_ratios[2*upper_index + 1]*grid -> volume[upper_index];
-            lower_volume = grid -> volume_ratios[2*lower_index + 0]*grid -> volume[lower_index];
-            total_volume = upper_volume + lower_volume;
-            upper_weight = upper_volume/total_volume;
-            lower_weight = lower_volume/total_volume;
-            scalar_value = 0.5*in_field_v[upper_index] + 0.5*in_field_v[lower_index];
+            scalar_value = 0.5*(
+            in_field_v[upper_index]
+            + in_field_v[lower_index]);
         }
         out_field[i] = scalar_value*vector_field[i];
     }

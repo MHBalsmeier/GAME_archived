@@ -19,7 +19,7 @@ int thomas_algorithm(double [], double [], double [], double [], double [], int)
 
 int three_band_solver_ver_waves(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, Grid *grid)
 {
-	double upper_volume, lower_volume, total_volume, damping_coeff, damping_start_height, z_above_damping;
+	double damping_coeff, damping_start_height, z_above_damping;
 	// This is for Klemp (2008).
 	damping_start_height = config_info -> damping_start_height_over_toa*grid -> z_vector[0];
 	int upper_index, lower_index, j;
@@ -27,7 +27,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 	double c_g_v = spec_heat_cap_diagnostics_v(state_old, NO_OF_SCALARS/2, config_info);
 	double c_g_p = spec_heat_cap_diagnostics_p(state_old, NO_OF_SCALARS/2, config_info);
 	double r_g = gas_constant_diagnostics(state_old, NO_OF_SCALARS/2, config_info);
-	#pragma omp parallel for private(upper_index, lower_index, j, upper_volume, lower_volume, total_volume, damping_coeff)
+	#pragma omp parallel for private(upper_index, lower_index, j, damping_coeff)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// for meanings of these vectors look into the Kompendium
@@ -43,8 +43,6 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		double spec_entropy_new[NO_OF_LAYERS];
 		double spec_entropy_interface_new[NO_OF_LAYERS - 1];
 		double solution_vector[NO_OF_LAYERS - 1];
-		double a[NO_OF_LAYERS - 1];
-		double b[NO_OF_LAYERS - 1];
 		double temp_new_interface_values[NO_OF_LAYERS - 1];
 		double density_interface_old[NO_OF_LAYERS - 1];
 		double density_interface_explicit[NO_OF_LAYERS - 1];
@@ -88,29 +86,23 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		// determining the upper and lower weights as well as the interface values
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
-			// weights
-            upper_index = i + j*NO_OF_SCALARS_H;
-            lower_index = i + (j + 1)*NO_OF_SCALARS_H;
-            upper_volume = grid -> volume_ratios[2*upper_index + 1]*grid -> volume[upper_index];
-            lower_volume = grid -> volume_ratios[2*lower_index + 0]*grid -> volume[lower_index];
-            total_volume = upper_volume + lower_volume;
-            a[j] = 0.5; // upper_volume/total_volume;
-            b[j] = 0.5; // lower_volume/total_volume;
+			upper_index = i + j*NO_OF_SCALARS_H;
+			lower_index = i + (j + 1)*NO_OF_SCALARS_H;
 			// interface values
 			temp_new_interface_values[j]
-			= a[j]*state_new -> temperature_gas[upper_index]
-			+ b[j]*state_new -> temperature_gas[lower_index];
+			= 0.5*(state_new -> temperature_gas[upper_index]
+			+ state_new -> temperature_gas[lower_index]);
 			density_interface_old[j]
-			= a[j]*state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + upper_index]
-			+ b[j]*state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + lower_index];
+			= 0.5*(state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + upper_index]
+			+ state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + lower_index]);
 			density_interface_explicit[j]
-			= a[j]*(state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + upper_index]
+			= 0.5*((state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + upper_index]
 			+ delta_t*state_tendency -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + upper_index])
-			+ b[j]*(state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + lower_index]
-			+ delta_t*state_tendency -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + lower_index]);
+			+ (state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + lower_index]
+			+ delta_t*state_tendency -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + lower_index]));
 			spec_entropy_interface_new[j]
-			= a[j]*spec_entropy_new[j]
-			+ b[j]*spec_entropy_new[j + 1];
+			= 0.5*(spec_entropy_new[j]
+			+ spec_entropy_new[j + 1]);
 		}
 		
 		// filling up the coefficient vectors
@@ -128,7 +120,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			+ temp_new_interface_values[j]*gamma[j + 1]
 			+ temp_new_interface_values[j]*delta[j + 1]*spec_entropy_interface_new[j]
 			+ (grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_pgrad_weight*delta_t*density_interface_old[j])
-			*state_old -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*(a[j]/grid -> volume[i + j*NO_OF_SCALARS_H] - b[j]/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]);
+			*state_old -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*(0.5/grid -> volume[i + j*NO_OF_SCALARS_H] - 0.5/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]);
 			// right hand side
 			r_vector[j]
 			= -(grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_pgrad_weight*pow(delta_t, 2))
@@ -147,7 +139,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			- temp_new_interface_values[j + 1]*gamma[j + 1]
 			- temp_new_interface_values[j + 1]*delta[j + 1]*spec_entropy_interface_new[j]
 			- (grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 2)*NO_OF_SCALARS_H])/(impl_pgrad_weight*delta_t)
-			*state_old -> velocity_gas[i + (j + 2)*NO_OF_VECTORS_PER_LAYER]*a[j + 1]/(grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*density_interface_old[j + 1]);
+			*state_old -> velocity_gas[i + (j + 2)*NO_OF_VECTORS_PER_LAYER]*0.5/(grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*density_interface_old[j + 1]);
 			// above the main diagonal
 			e_vector[j]
 			= c_g_p*alpha[j + 1]
@@ -155,7 +147,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			- temp_new_interface_values[j]*gamma[j + 1]
 			- temp_new_interface_values[j]*delta[j + 1]*spec_entropy_interface_new[j + 1]
 			+ (grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_pgrad_weight*delta_t)
-			*state_old -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*b[j]/(grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*density_interface_old[j]);
+			*state_old -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*0.5/(grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*density_interface_old[j]);
 		}
 		
 		// calling the algorithm to solve the system of linear equations
@@ -223,8 +215,8 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
 			density_interface_new
-			= a[j]*state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
-			+ b[j]*state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (j + 1)*NO_OF_SCALARS_H + i];
+			= 0.5*(state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
+			+ state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (j + 1)*NO_OF_SCALARS_H + i]);
 			state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]
 			= (2*solution_vector[j]/grid -> area[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - density_interface_new*state_old -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i])
 			/density_interface_old[j];
@@ -290,11 +282,8 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 					double r_vector[NO_OF_LAYERS];
 					double vertical_flux_vector_impl[NO_OF_LAYERS - 1];
 					double vertical_flux_vector_rhs[NO_OF_LAYERS - 1];
-					double a[NO_OF_LAYERS - 1];
-					double b[NO_OF_LAYERS - 1];
 					double solution_vector[NO_OF_LAYERS];
-					double density_gas_value, density_gas_value_old;
-					double density_old_at_interface, area, upper_volume, lower_volume, total_volume;
+					double density_old_at_interface, area;
 					int j, lower_index, upper_index;
 					
 					// diagnozing the vertical fluxes
@@ -305,19 +294,11 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						// preparing the vertical interpolation
 						lower_index = i + (j + 1)*NO_OF_SCALARS_H;
 						upper_index = i + j*NO_OF_SCALARS_H;
-						upper_volume = grid -> volume_ratios[2*upper_index + 1]*grid -> volume[upper_index];
-						lower_volume = grid -> volume_ratios[2*lower_index + 0]*grid -> volume[lower_index];
-						total_volume = upper_volume + lower_volume;
-						a[j] = 0.5; // upper_volume/total_volume;
-						b[j] = 0.5; // lower_volume/total_volume;
 						// For condensed constituents, a sink velocity must be added.
 						if (k < NO_OF_CONDENSED_CONSTITUENTS)
 						{
-							// determining the density of the gas at the interface
-							density_gas_value = a[j]*density_gas(state_new, j*NO_OF_SCALARS_H + i) + b[j]*density_gas(state_new, (j + 1)*NO_OF_SCALARS_H + i);
-							density_gas_value_old = a[j]*density_gas(state_old, j*NO_OF_SCALARS_H + i) + b[j]*density_gas(state_old, (j + 1)*NO_OF_SCALARS_H + i);
-							vertical_flux_vector_impl[j] -= 1;// ret_sink_velocity(0, 0.001, density_gas_value_old);
-							vertical_flux_vector_rhs[j] -= 1;// ret_sink_velocity(0, 0.001, density_gas_value);
+							vertical_flux_vector_impl[j] -= 1;
+							vertical_flux_vector_rhs[j] -= 1;
 						}
 						// multiplying the vertical velocity by the area
 						area = grid -> area[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
@@ -325,8 +306,8 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						vertical_flux_vector_rhs[j] = area*vertical_flux_vector_rhs[j];
 						// old density at the interface
 						density_old_at_interface
-						= a[j]*state_old -> mass_densities[k*NO_OF_SCALARS + upper_index]
-						+ b[j]*state_old -> mass_densities[k*NO_OF_SCALARS + lower_index];
+						= 0.5*(state_old -> mass_densities[k*NO_OF_SCALARS + upper_index]
+						+ state_old -> mass_densities[k*NO_OF_SCALARS + lower_index]);
 						vertical_flux_vector_rhs[j] = density_old_at_interface*vertical_flux_vector_rhs[j];
 					}
 					
@@ -336,26 +317,26 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 					// filling up the original vectors
 					for (j = 0; j < NO_OF_LAYERS - 1; ++j)
 					{
-						c_vector[j] = impl_weight*a[j]*delta_t/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j];
-						e_vector[j] = -impl_weight*b[j]*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j];
+						c_vector[j] = impl_weight*0.5*delta_t/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j];
+						e_vector[j] = -impl_weight*0.5*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j];
 					}
 					for (j = 0; j < NO_OF_LAYERS; ++j)
 					{
 						if (j == 0)
 						{
 							d_vector[j] = 1
-							- impl_weight*a[j]*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[0];
+							- impl_weight*0.5*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[0];
 						}
 						else if (j == NO_OF_LAYERS - 1)
 						{
 							d_vector[j] = 1
-							+ impl_weight*b[j - 1]*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j - 1];
+							+ impl_weight*0.5*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j - 1];
 						}
 						else
 						{
 							d_vector[j] = 1
 							+ impl_weight*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]
-							*(b[j - 1]*vertical_flux_vector_impl[j - 1] - a[j]*vertical_flux_vector_impl[j]);
+							*0.5*(vertical_flux_vector_impl[j - 1] - vertical_flux_vector_impl[j]);
 						}
 						// the explicit component
 						// mass densities

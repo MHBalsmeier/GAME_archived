@@ -286,8 +286,7 @@ int main(int argc, char *argv[])
 	grad(diagnostics -> e_kin, forcings -> e_kin_grad, grid);
     free(diagnostics);
     // density is determined out of the hydrostatic equation
-    int lower_index, upper_index;
-    double entropy_value, temperature_mean, delta_temperature, delta_gravity_potential, lower_entropy_value, upper_weight, lower_weight, upper_volume, lower_volume, total_volume, delta_z;
+    double entropy_value, temperature_mean, delta_temperature, delta_gravity_potential, lower_entropy_value, delta_z;
     for (int i = NO_OF_SCALARS - 1; i >= 0; --i)
     {
     	layer_index = i/NO_OF_SCALARS_H;
@@ -300,14 +299,7 @@ int main(int argc, char *argv[])
         else
         {
         	lower_entropy_value = spec_entropy_from_temp(state -> mass_densities[i + NO_OF_SCALARS_H], temperature[i + NO_OF_SCALARS_H]);
-            lower_index = i + NO_OF_SCALARS_H;
-            upper_index = i;
-            upper_volume = grid -> volume_ratios[2*upper_index + 1]*grid -> volume[upper_index];
-            lower_volume = grid -> volume_ratios[2*lower_index + 0]*grid -> volume[lower_index];
-            total_volume = upper_volume + lower_volume;
-            upper_weight = upper_volume/total_volume;
-            lower_weight = lower_volume/total_volume;
-        	temperature_mean = upper_weight*temperature[i] + lower_weight*temperature[i + NO_OF_SCALARS_H];
+        	temperature_mean = 0.5*(temperature[i] + temperature[i + NO_OF_SCALARS_H]);
         	delta_temperature = temperature[i] - temperature[i + NO_OF_SCALARS_H];
         	delta_z = grid -> z_scalar[i] - grid -> z_scalar[i + NO_OF_SCALARS_H];
         	delta_gravity_potential = grid -> gravity_potential[i] - grid -> gravity_potential[i + NO_OF_SCALARS_H]
