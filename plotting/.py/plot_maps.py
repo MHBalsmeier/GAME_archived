@@ -364,24 +364,26 @@ for i in range(int(max_interval/plot_interval) + 1):
 	time_after_init_title = time_after_init;
 	if disp_time_in_hr == 1:
 		time_after_init_title = int(time_after_init/3600);
+	implementation_name = "GAME";
 	if synoptical_time_mode == 0:
 		time_string = "init + " + str(time_after_init_title) + " " + time_unit_string;
 	if synoptical_time_mode == 1:
+		implementation_name = "EFS";
 		time_string = "init: " + str(init_year) + "-" + str(init_month) + "-" + str(init_day) + ", " + str(init_hour) + " UTC\n";
 		valid_year, valid_month, valid_day, valid_hour, dump, dump, dump = tcs.return_date(start_timestamp + time_after_init);
 		time_string = time_string + "valid: " + str(valid_year) + "-" + str(valid_month) + "-" + str(valid_day) + ", " + str(valid_hour) + " UTC (+ " + str(time_after_init_title) + " hrs)";
 	if show_level_on == 1:
 		if on_pressure_bool == 1:
 			if contourf_plot == 0:
-				textstr = str(level) + " hPa " + variable_name + " / " + unit_string + " (GAME)\n" + time_string;
+				textstr = str(level) + " hPa " + variable_name + " / " + unit_string + " (" + implementation_name + ")\n" + time_string;
 			if contourf_plot == 1:
-				textstr = str(level) + " hPa " + variable_name + " (GAME)\n" + time_string;
+				textstr = str(level) + " hPa " + variable_name + " (" + implementation_name + ")\n" + time_string;
 		if surface_bool == 1:
 			textstr = variable_name + "\n" + time_string;
 		if surface_bool == 0 and on_pressure_bool == 0:
 			textstr = variable_name + " at level " + str(level) + "\n" + time_string;
 	else:
-		textstr = variable_name + " (GAME)\n" + time_string;
+		textstr = variable_name + " (" + implementation_name + ")\n" + time_string;
 	ob = offsetbox.AnchoredText(textstr, loc = 3);
 	ax.add_artist(ob);
 	fig.savefig(save_directory + "/" + savename + "+" + str(time_after_init_title) + time_unit_string + ".png", dpi = 200, bbox_inches = "tight");
