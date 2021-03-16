@@ -226,7 +226,7 @@ double calc_micro_density(double density_macro, double condensates_density_sum)
 	double result = density_macro/(1 - condensates_density_sum/RHO_WATER);
 	if (result < 0)
 	{
-		printf("Error: microscopic density negative.\n");
+		printf("Error: microscopic density is negative.\n");
 		printf("Aborting.\n");
 		exit(1);
 	}
@@ -251,7 +251,7 @@ double calc_condensates_density_sum(int scalar_gridpoint_index, Mass_densities m
 	}
 	if (result < 0)
 	{
-		printf("Error: condensates_density_sum negative.\n");
+		printf("Error: condensates_density_sum is negative.\n");
 		printf("Aborting.\n");
 		exit(1);
 	}
