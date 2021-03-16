@@ -94,8 +94,8 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
             upper_volume = grid -> volume_ratios[2*upper_index + 1]*grid -> volume[upper_index];
             lower_volume = grid -> volume_ratios[2*lower_index + 0]*grid -> volume[lower_index];
             total_volume = upper_volume + lower_volume;
-            a[j] = upper_volume/total_volume;
-            b[j] = lower_volume/total_volume;
+            a[j] = 0.5; // upper_volume/total_volume;
+            b[j] = 0.5; // lower_volume/total_volume;
 			// interface values
 			temp_new_interface_values[j]
 			= a[j]*state_new -> temperature_gas[upper_index]
@@ -308,8 +308,8 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						upper_volume = grid -> volume_ratios[2*upper_index + 1]*grid -> volume[upper_index];
 						lower_volume = grid -> volume_ratios[2*lower_index + 0]*grid -> volume[lower_index];
 						total_volume = upper_volume + lower_volume;
-						a[j] = upper_volume/total_volume;
-						b[j] = lower_volume/total_volume;
+						a[j] = 0.5; // upper_volume/total_volume;
+						b[j] = 0.5; // lower_volume/total_volume;
 						// For condensed constituents, a sink velocity must be added.
 						if (k < NO_OF_CONDENSED_CONSTITUENTS)
 						{

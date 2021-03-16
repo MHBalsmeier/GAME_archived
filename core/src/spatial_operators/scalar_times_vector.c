@@ -31,7 +31,7 @@ int scalar_times_vector(Scalar_field scalar_field, Vector_field vector_field, Ve
             total_volume = upper_volume + lower_volume;
             upper_weight = upper_volume/total_volume;
             lower_weight = lower_volume/total_volume;
-            scalar_value = upper_weight*scalar_field[upper_index] + lower_weight*scalar_field[lower_index];
+            scalar_value = 0.5*scalar_field[upper_index] + 0.5*scalar_field[lower_index];
         }
     	out_field[i] = scalar_value*vector_field[i];
     }
@@ -74,7 +74,10 @@ int scalar_times_vector_scalar_h_v(Scalar_field in_field_h, Scalar_field in_fiel
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
         if (h_index >= NO_OF_SCALARS_H)
         {
-            scalar_value = 0.5*(in_field_h[grid -> to_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H] + in_field_h[grid -> from_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H]);
+            scalar_value
+            = 0.5*(
+            in_field_h[grid -> to_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H]
+            + in_field_h[grid -> from_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H]);
         }
         else
         {
@@ -85,7 +88,7 @@ int scalar_times_vector_scalar_h_v(Scalar_field in_field_h, Scalar_field in_fiel
             total_volume = upper_volume + lower_volume;
             upper_weight = upper_volume/total_volume;
             lower_weight = lower_volume/total_volume;
-            scalar_value = upper_weight*in_field_v[upper_index] + lower_weight*in_field_v[lower_index];
+            scalar_value = 0.5*in_field_v[upper_index] + 0.5*in_field_v[lower_index];
         }
         out_field[i] = scalar_value*vector_field[i];
     }
@@ -93,7 +96,11 @@ int scalar_times_vector_scalar_h_v(Scalar_field in_field_h, Scalar_field in_fiel
     #pragma omp parallel for private(scalar_value)
     for (i = 0; i < NO_OF_SCALARS_H; ++i)
     {
-        scalar_value = in_field_v[i] + 0.5*(in_field_v[i] - in_field_v[i + NO_OF_SCALARS_H]);
+        scalar_value
+        = in_field_v[i]
+        + (in_field_v[i] - in_field_v[i + NO_OF_SCALARS_H])
+        /(grid -> z_scalar[i] - grid -> z_scalar[i + NO_OF_SCALARS_H])
+        *(grid -> z_vector[i] - grid -> z_scalar[i]);
         out_field[i] = scalar_value*vector_field[i];
     }
     // linear extrapolation to the surface

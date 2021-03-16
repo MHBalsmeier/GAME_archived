@@ -31,8 +31,9 @@ int vertical_contravariant_corr(Vector_field vector_field, int layer_index, int 
 				scalar_index = layer_index*NO_OF_SCALARS_H + h_index;
 				vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + i];
 				lower_volume = grid -> volume_ratios[2*scalar_index + 0]*grid -> volume[scalar_index];
-				upper_volume = grid -> volume_ratios[2*(scalar_index - NO_OF_SCALARS_H) + 1]*grid -> volume[scalar_index - NO_OF_SCALARS_H];
-				total_volume = lower_volume + upper_volume;
+				total_volume
+				= grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
+				*grid -> normal_distance[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
 				vert_weight = lower_volume/total_volume;
 				*result += -vert_weight*grid -> inner_product_weights[8*scalar_index + i]*grid -> slope[vector_index]*vector_field[vector_index];
 			}
@@ -51,7 +52,9 @@ int vertical_contravariant_corr(Vector_field vector_field, int layer_index, int 
 			scalar_index = layer_index*NO_OF_SCALARS_H + h_index;
 			lower_volume = grid -> volume_ratios[2*scalar_index + 0]*grid -> volume[scalar_index];
 			upper_volume = grid -> volume_ratios[2*(scalar_index - NO_OF_SCALARS_H) + 1]*grid -> volume[scalar_index - NO_OF_SCALARS_H];
-			total_volume = lower_volume + upper_volume;
+			total_volume
+			= grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
+			*grid -> normal_distance[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
 			for (int i = 0; i < no_of_edges; ++i)
 			{
 				scalar_index = (layer_index - 1)*NO_OF_SCALARS_H + h_index;
