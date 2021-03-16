@@ -12,8 +12,7 @@ Github repository: https://github.com/AUN4GFD/game
 int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
     int layer_index, h_index, i;
-    double upper_weight, lower_weight, upper_value, lower_value, z_lower, z_upper;
-	#pragma omp parallel for private(layer_index, h_index, i, upper_weight, lower_weight, upper_value, lower_value, z_lower, z_upper)
+	#pragma omp parallel for private(layer_index, h_index, i)
     for (i = 0; i < NO_OF_VECTORS; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
@@ -32,32 +31,33 @@ int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vec
             vorticity_flux_horizontal_traditional(mass_flux_density, pot_vorticity, layer_index, h_index - NO_OF_SCALARS_H, &out_field[i], grid);
             
         	/*
-        	Horizontal non-traditional component (horizontal potential vorticity times vertical mass flux density).
+        	Horizontal "non-standard" component (horizontal potential vorticity times vertical mass flux density).
             -------------------------------------------------------------------------------------------------------
             */
-            // z position of the upper end of the face
-            z_upper = 0.5*(
-            grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index - NO_OF_SCALARS_H]]
-            + grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index - NO_OF_SCALARS_H]]);
-            // z position of the lower end of the face
-            z_lower = 0.5*(
-            grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index - NO_OF_SCALARS_H]]
-            + grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index - NO_OF_SCALARS_H]]);
-            // vorticity flux value at upper end of the face
-            upper_value = 0.5*(
-            mass_flux_density[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index - NO_OF_SCALARS_H]]
-            + mass_flux_density[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index - NO_OF_SCALARS_H]])
-            *pot_vorticity[h_index - NO_OF_SCALARS_H + layer_index*2*NO_OF_VECTORS_H];
-            // vorticity flux value at lower end of the face
-            lower_value = 0.5*(
-            mass_flux_density[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index - NO_OF_SCALARS_H]]
-            + mass_flux_density[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index - NO_OF_SCALARS_H]])
-            *pot_vorticity[h_index - NO_OF_SCALARS_H  + (layer_index + 1)*2*NO_OF_VECTORS_H];
-            // determining the weights
-            upper_weight = find_volume(pow((RADIUS + grid -> z_vector[i])/(RADIUS + z_lower), 2), RADIUS + grid -> z_vector[i], RADIUS + z_upper)/find_volume(1, RADIUS + z_lower, RADIUS + z_upper);
-            lower_weight = find_volume(1, RADIUS + z_lower, RADIUS + grid -> z_vector[i])/find_volume(1, RADIUS + z_lower, RADIUS + z_upper);
-            // adding to the result
-            out_field[i] += -(upper_weight*upper_value + lower_weight*lower_value);
+            out_field[i]
+			= out_field[i]
+			- 0.5
+			*grid -> inner_product_weights[8*(layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index - NO_OF_SCALARS_H]) + 6]
+			*mass_flux_density[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index - NO_OF_SCALARS_H]]
+			*pot_vorticity[h_index - NO_OF_SCALARS_H + layer_index*2*NO_OF_VECTORS_H];
+			out_field[i]
+			= out_field[i]
+			- 0.5
+			*grid -> inner_product_weights[8*(layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index - NO_OF_SCALARS_H]) + 7]
+			*mass_flux_density[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index - NO_OF_SCALARS_H]]
+			*pot_vorticity[h_index - NO_OF_SCALARS_H + (layer_index + 1)*2*NO_OF_VECTORS_H];
+			out_field[i]
+			= out_field[i]
+			- 0.5
+			*grid -> inner_product_weights[8*(layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index - NO_OF_SCALARS_H]) + 6]
+			*mass_flux_density[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index - NO_OF_SCALARS_H]]
+			*pot_vorticity[h_index - NO_OF_SCALARS_H + layer_index*2*NO_OF_VECTORS_H];
+			out_field[i]
+			= out_field[i]
+			- 0.5
+			*grid -> inner_product_weights[8*(layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index - NO_OF_SCALARS_H]) + 7]
+			*mass_flux_density[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index - NO_OF_SCALARS_H]]
+			*pot_vorticity[h_index - NO_OF_SCALARS_H + (layer_index + 1)*2*NO_OF_VECTORS_H];
         }
         
         /*

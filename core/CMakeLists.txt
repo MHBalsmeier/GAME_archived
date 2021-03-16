@@ -33,7 +33,6 @@ src/spatial_operators/scalar_times_vector.c
 src/spatial_operators/gradient_operators.c
 src/spatial_operators/inner_product.c
 src/diagnostics/diffusion_diagnostics.c
-src/diagnostics/remap_horpri2hordual_vector.c
 src/diagnostics/remap_verpri2horpri_vector.c
 src/diagnostics/ricci.c
 src/diagnostics/tangential_wind.c
