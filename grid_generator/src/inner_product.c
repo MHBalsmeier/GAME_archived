@@ -12,7 +12,7 @@ In this file, the inner product weights are computed.
 #include "enum.h"
 #include "include.h"
 
-int calc_inner_product_and_related(double inner_product_weights[], double normal_distance[], double volume[], int to_index[], int from_index[], double area[], double z_scalar[], double z_vector[], int adjacent_vector_indices_h[])
+int calc_inner_product(double inner_product_weights[], double normal_distance[], double volume[], int to_index[], int from_index[], double area[], double z_scalar[], double z_vector[], int adjacent_vector_indices_h[])
 {
 	int layer_index, h_index;
 	double delta_z;

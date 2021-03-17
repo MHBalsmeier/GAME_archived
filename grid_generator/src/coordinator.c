@@ -268,8 +268,8 @@ int main(int argc, char *argv[])
     printf(GREEN "finished.\n" RESET);
     
     // more advanced stuff: tangential vector reconstruction and inner product
-    printf("Calculating inner product weights and related things ... ");
-	calc_inner_product_and_related(inner_product_weights, normal_distance, volume, to_index, from_index, area, z_scalar, z_vector, adjacent_vector_indices_h);
+    printf("Calculating inner product weights ... ");
+	calc_inner_product(inner_product_weights, normal_distance, volume, to_index, from_index, area, z_scalar, z_vector, adjacent_vector_indices_h);
     printf(GREEN "finished.\n" RESET);
     
     // modified TRSK
