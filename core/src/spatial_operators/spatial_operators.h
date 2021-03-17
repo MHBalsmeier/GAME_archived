@@ -24,6 +24,3 @@ int linear_combine_two_states(State *, State *, State *, double, double);
 int momentum_diff_diss(State *, Diagnostics *, Irreversible_quantities*, Config_info *, Grid *, Dualgrid *, double);
 int inner_product(Vector_field, Vector_field, Scalar_field, Grid *, int);
 int curl_of_vorticity(Curl_field, Vector_field, Grid *, Dualgrid *, Config_info *);
-int curl_field_to_cells(Curl_field, Scalar_field, Grid *);
-int edges_to_cells(Vector_field, Scalar_field, Grid *);
-int edges_to_cells_lowest_layer(double [], double [], Grid *);

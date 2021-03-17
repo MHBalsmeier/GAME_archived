@@ -46,13 +46,6 @@ int get_pressure_levels(double pressure_levels[])
 	return 0;
 }
 
-// Wether or not horizontal wind divergence shall be written out.
-int ask_for_divergence_output(int *write_out_divv_h)
-{
-	*write_out_divv_h = 1;
-	return 0;
-}
-
 // the user should not change anything below here
 // ----------------------------------------------
 

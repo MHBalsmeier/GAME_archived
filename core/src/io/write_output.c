@@ -15,6 +15,7 @@ Here, the output is written to grib and/or netcdf files and integrals are writte
 #include "io.h"
 #include "../diagnostics/diagnostics.h"
 #include "../spatial_operators/spatial_operators.h"
+#include "../diagnostics/diagnostics.h"
 #include "../settings.h"
 #include "eccodes.h"
 #include "geos95.h"
@@ -42,9 +43,6 @@ int global_scalar_integrator(Scalar_field, Grid *, double *);
 int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Io_config *io_config, Config_info *config_info)
 {
 	// Diagnostics and forcings are primarily handed over for checks.
-	
-	int write_out_divv_h;
-	ask_for_divergence_output(&write_out_divv_h);
 	
 	// Time stuff.
     time_t t_init_t = (time_t) t_init;
@@ -601,10 +599,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     
     // Diagnostics of quantities that are not surface-specific.    
 	double *divv_h_all_layers = malloc(NO_OF_SCALARS*sizeof(double));
-	if (write_out_divv_h == 1)
-	{
-		divv_h(state_write_out -> velocity_gas, divv_h_all_layers, grid);
-	}
+	divv_h(state_write_out -> velocity_gas, divv_h_all_layers, grid);
     Curl_field *rel_vort_edge = calloc(1, sizeof(Curl_field));
 	calc_rel_vort(state_write_out -> velocity_gas, *rel_vort_edge, grid, dualgrid);
     Scalar_field *rel_vort = calloc(1, sizeof(Scalar_field));
@@ -1224,33 +1219,30 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if ((retval = codes_write_message(handle_rel_vort, OUTPUT_FILE, "a")))
 			    ECCERR(retval);
 			codes_handle_delete(handle_rel_vort);
-			if (write_out_divv_h == 1)
-			{	
-				for (int j = 0; j < NO_OF_SCALARS_H; ++j)
-				{
-					divv_h[j] = divv_h_all_layers[i*NO_OF_SCALARS_H + j];
-				}
-				SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
-				handle_divv_h = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
-				if (err != 0)
-					ECCERR(err);
-				fclose(SAMPLE_FILE);
-				set_basic_props2grib(handle_divv_h, data_date, data_time, t_write, t_init, 2, 13);
-				if ((retval = codes_set_long(handle_divv_h, "typeOfFirstFixedSurface", 26)))
-					ECCERR(retval);
-				if ((retval = codes_set_long(handle_divv_h, "scaledValueOfFirstFixedSurface", i)))
-					ECCERR(retval);
-				if ((retval = codes_set_long(handle_divv_h, "scaleFactorOfFirstFixedSurface", 1)))
-					ECCERR(retval);
-				if ((retval = codes_set_long(handle_divv_h, "level", i)))
-					ECCERR(retval);
-	    		interpolate_to_ll(divv_h, grib_output_field, grid);
-				if ((retval = codes_set_double_array(handle_divv_h, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
-					ECCERR(retval);
-				if ((retval = codes_write_message(handle_divv_h, OUTPUT_FILE, "a")))
-					ECCERR(retval);
-				codes_handle_delete(handle_divv_h);
+			for (int j = 0; j < NO_OF_SCALARS_H; ++j)
+			{
+				divv_h[j] = divv_h_all_layers[i*NO_OF_SCALARS_H + j];
 			}
+			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
+			handle_divv_h = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
+			if (err != 0)
+				ECCERR(err);
+			fclose(SAMPLE_FILE);
+			set_basic_props2grib(handle_divv_h, data_date, data_time, t_write, t_init, 2, 13);
+			if ((retval = codes_set_long(handle_divv_h, "typeOfFirstFixedSurface", 26)))
+				ECCERR(retval);
+			if ((retval = codes_set_long(handle_divv_h, "scaledValueOfFirstFixedSurface", i)))
+				ECCERR(retval);
+			if ((retval = codes_set_long(handle_divv_h, "scaleFactorOfFirstFixedSurface", 1)))
+				ECCERR(retval);
+			if ((retval = codes_set_long(handle_divv_h, "level", i)))
+				ECCERR(retval);
+    		interpolate_to_ll(divv_h, grib_output_field, grid);
+			if ((retval = codes_set_double_array(handle_divv_h, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
+				ECCERR(retval);
+			if ((retval = codes_write_message(handle_divv_h, OUTPUT_FILE, "a")))
+				ECCERR(retval);
+			codes_handle_delete(handle_divv_h);
 		}
 		free(OUTPUT_FILE);
 		free(wind_u_h);
@@ -1303,12 +1295,14 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		free(OUTPUT_FILE_PRE);
 		char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
 		sprintf(OUTPUT_FILE, "output/%s/%s+%ds.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
-		int scalar_dimid, vector_h_dimid, vector_v_dimid, temp_id, temp_solid_id, temp_liquid_id, density_dry_id, density_solid_id, density_liquid_id, density_vapour_id, pressure_id, rh_id, ncid, retval, divv_h_all_layers_id, rel_vort_id, curl_field_dimid, stretching_parameter_id, single_double_dimid, vector_dimid, wind_id;
+		int scalar_dimid, vector_h_dimid, vector_v_dimid, temp_id, temp_solid_id, temp_liquid_id, density_dry_id, density_solid_id, density_liquid_id, density_vapour_id, rh_id, ncid, retval, divv_h_all_layers_id, rel_vort_id, curl_field_dimid, stretching_parameter_id, single_double_dimid, vector_dimid, wind_id;
 		
 		if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
 			NCERR(retval);
 		free(OUTPUT_FILE);
 		if ((retval = nc_def_dim(ncid, "scalar_index", NO_OF_SCALARS, &scalar_dimid)))
+			NCERR(retval);
+		if ((retval = nc_def_dim(ncid, "vector_index", NO_OF_VECTORS, &vector_dimid)))
 			NCERR(retval);
 		if ((retval = nc_def_dim(ncid, "vector_index_h", NO_OF_H_VECTORS, &vector_h_dimid)))
 			NCERR(retval);
@@ -1317,8 +1311,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		if ((retval = nc_def_dim(ncid, "curl_point_index", NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H, &curl_field_dimid)))
 			NCERR(retval);
 		if ((retval = nc_def_dim(ncid, "single_double_dimid_index", 1, &single_double_dimid)))
-			NCERR(retval);
-		if ((retval = nc_def_dim(ncid, "vector_index", NO_OF_VECTORS, &vector_dimid)))
 			NCERR(retval);
 		
 		// Defining the variables.
@@ -1352,10 +1344,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			NCERR(retval);
 		if ((retval = nc_put_att_text(ncid, density_vapour_id, "units", strlen("kg/m^3"), "kg/m^3")))
 			NCERR(retval);
-		if ((retval = nc_def_var(ncid, "pressure", NC_DOUBLE, 1, &scalar_dimid, &pressure_id)))
-			NCERR(retval);
-		if ((retval = nc_put_att_text(ncid, pressure_id, "units", strlen("Pa"), "Pa")))
-			NCERR(retval);
 		if ((retval = nc_def_var(ncid, "wind", NC_DOUBLE, 1, &vector_dimid, &wind_id)))
 			NCERR(retval);
 		if ((retval = nc_put_att_text(ncid, wind_id, "units", strlen("m/s"), "m/s")))
@@ -1368,13 +1356,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			NCERR(retval);
 		if ((retval = nc_put_att_text(ncid, rel_vort_id, "units", strlen("1/s"), "1/s")))
 			NCERR(retval);
-		if (write_out_divv_h == 1)
-		{
-			if ((retval = nc_def_var(ncid, "divv_h_all_layers", NC_DOUBLE, 1, &scalar_dimid, &divv_h_all_layers_id)))
-				NCERR(retval);
-			if ((retval = nc_put_att_text(ncid, divv_h_all_layers_id, "units", strlen("1/s"), "1/s")))
-				NCERR(retval);
-		}
+		if ((retval = nc_def_var(ncid, "divv_h_all_layers", NC_DOUBLE, 1, &scalar_dimid, &divv_h_all_layers_id)))
+			NCERR(retval);
+		if ((retval = nc_put_att_text(ncid, divv_h_all_layers_id, "units", strlen("1/s"), "1/s")))
+			NCERR(retval);
 		if ((retval = nc_enddef(ncid)))
 			NCERR(retval);
 		
@@ -1452,19 +1437,14 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		}
 		if ((retval = nc_put_var_double(ncid, density_vapour_id, &diagnostics -> scalar_field_placeholder[0])))
 			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, pressure_id, &(*rel_vort)[0])))
-			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, wind_id, &state_write_out -> velocity_gas[0])))
 			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, rh_id, &(*rh)[0])))
 			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, rel_vort_id, &(*rel_vort)[0])))
 			NCERR(retval);
-		if (write_out_divv_h == 1)
-		{
-			if ((retval = nc_put_var_double(ncid, divv_h_all_layers_id, &divv_h_all_layers[0])))
-				NCERR(retval);
-		}
+		if ((retval = nc_put_var_double(ncid, divv_h_all_layers_id, &divv_h_all_layers[0])))
+			NCERR(retval);
 		
 		// Closing the netcdf file.
 		if ((retval = nc_close(ncid)))
