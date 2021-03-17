@@ -8,11 +8,11 @@ In this source file, the forward part of the integration is managed.
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "../../enum_and_typedefs.h"
-#include "../../spatial_operators/spatial_operators.h"
+#include "../enum_and_typedefs.h"
+#include "../spatial_operators/spatial_operators.h"
 #include "atmostracers.h"
-#include "../../diagnostics/diagnostics.h"
-#include "../integrators.h"
+#include "../diagnostics/diagnostics.h"
+#include "time_stepping.h"
 
 int forward_tendencies(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Extrapolation_info *extrapolation_info, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_step_rk, int slow_update_bool, double delta_t)
 {

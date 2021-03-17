@@ -3,10 +3,10 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
-#include "../../enum_and_typedefs.h"
-#include "../../spatial_operators/spatial_operators.h"
-#include "../integrators.h"
-#include "../../diagnostics/diagnostics.h"
+#include "../enum_and_typedefs.h"
+#include "../spatial_operators/spatial_operators.h"
+#include "time_stepping.h"
+#include "../diagnostics/diagnostics.h"
 #include <geos95.h>
 #include <stdlib.h>
 #include <stdio.h>

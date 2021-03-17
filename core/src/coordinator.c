@@ -15,7 +15,7 @@ The main organizes the model, manages the time stepping, calls model output, col
 #include "io/io.h"
 #include "spatial_operators/spatial_operators.h"
 #include "diagnostics/diagnostics.h"
-#include "integrators/integrators.h"
+#include "time_stepping/time_stepping.h"
 #include <mpi.h>
 
 int main(int argc, char *argv[])

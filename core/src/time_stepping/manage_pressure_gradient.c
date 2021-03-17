@@ -4,13 +4,13 @@ Github repository: https://github.com/AUN4GFD/game
 The vertical advection of horizontal momentum is organized here.
 */
 
-#include "../../enum_and_typedefs.h"
-#include "../../settings.h"
+#include "../enum_and_typedefs.h"
+#include "../settings.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "../../diagnostics/diagnostics.h"
+#include "../diagnostics/diagnostics.h"
 #include <omp.h>
-#include "../../spatial_operators/spatial_operators.h"
+#include "../spatial_operators/spatial_operators.h"
 
 double pressure_gradient_1_damping_factor(double);
 

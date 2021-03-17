@@ -9,10 +9,10 @@ This file contains the implicit vertical solvers.
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "../../enum_and_typedefs.h"
-#include "../../settings.h"
-#include "../../diagnostics/diagnostics.h"
-#include "../../spatial_operators/spatial_operators.h"
+#include "../enum_and_typedefs.h"
+#include "../settings.h"
+#include "../diagnostics/diagnostics.h"
+#include "../spatial_operators/spatial_operators.h"
 #include "atmostracers.h"
 
 int thomas_algorithm(double [], double [], double [], double [], double [], int);

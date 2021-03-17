@@ -8,11 +8,11 @@ In this source file, the calculation of the explicit part of the momentum equati
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "../../enum_and_typedefs.h"
-#include "../../settings.h"
-#include "../../spatial_operators/spatial_operators.h"
+#include "../enum_and_typedefs.h"
+#include "../settings.h"
+#include "../spatial_operators/spatial_operators.h"
 #include "atmostracers.h"
-#include "../../diagnostics/diagnostics.h"
+#include "../diagnostics/diagnostics.h"
 
 int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int update_advection, int no_rk_step, double delta_t)
 {

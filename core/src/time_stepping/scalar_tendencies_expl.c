@@ -7,11 +7,11 @@ Github repository: https://github.com/AUN4GFD/game
 This is the horizontal (explicit) part of the constituent integration.
 */
 
-#include "../../enum_and_typedefs.h"
+#include "../enum_and_typedefs.h"
 #include "atmostracers.h"
-#include "../../settings.h"
-#include "../../spatial_operators/spatial_operators.h"
-#include "../../diagnostics/diagnostics.h"
+#include "../settings.h"
+#include "../spatial_operators/spatial_operators.h"
+#include "../diagnostics/diagnostics.h"
 #include "stdio.h"
 #include "stdlib.h"
 
