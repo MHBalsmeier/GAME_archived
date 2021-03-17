@@ -96,7 +96,7 @@ int hori_viscosity_eff(State *state, Vector_field viscosity_eff, Grid *grid, Dia
 		h_index = i - layer_index*NO_OF_VECTORS_H;
 		
 		// preliminary result
-		viscosity_value =  grid -> mean_area_edge*config_info -> diff_h_smag_fac*diagnostics -> shear[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+		viscosity_value = grid -> mean_area_edge*config_info -> diff_h_smag_fac*diagnostics -> shear[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
 		
 		/*
 		Checking if the calculated value is "allowed".
@@ -188,13 +188,13 @@ int calc_shear(State *state, Diagnostics *diagnostics, Grid *grid)
 		if (h_index >= NO_OF_SCALARS_H)
 		{
 			// diagnozing u quantities
-			comp_orth = diagnostics -> u_at_cell_grad[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
-			tangential_wind(diagnostics -> u_at_cell_grad, layer_index, h_index, &comp_tang, grid);
-			passive_turn(comp_orth, comp_tang, -grid -> direction[h_index], &dudx, &dudy);
+			comp_orth = diagnostics -> u_at_cell_grad[layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+			tangential_wind(diagnostics -> u_at_cell_grad, layer_index, h_index - NO_OF_SCALARS_H, &comp_tang, grid);
+			passive_turn(comp_orth, comp_tang, -grid -> direction[h_index - NO_OF_SCALARS_H], &dudx, &dudy);
 			// diagnozing v quantities
-			comp_orth = diagnostics -> v_at_cell_grad[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
-			tangential_wind(diagnostics -> v_at_cell_grad, layer_index, h_index, &comp_tang, grid);
-			passive_turn(comp_orth, comp_tang, -grid -> direction[h_index], &dvdx, &dvdy);
+			comp_orth = diagnostics -> v_at_cell_grad[layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+			tangential_wind(diagnostics -> v_at_cell_grad, layer_index, h_index - NO_OF_SCALARS_H, &comp_tang, grid);
+			passive_turn(comp_orth, comp_tang, -grid -> direction[h_index - NO_OF_SCALARS_H], &dvdx, &dvdy);
 			// calculating the deformation according to the MPAS paper
 			diagnostics -> shear[i] = sqrt(pow(dudx - dvdy, 2) + pow(dudy + dvdx, 2));
 		}

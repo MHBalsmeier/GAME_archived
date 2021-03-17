@@ -18,9 +18,9 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagn
 	// pot_vort is a misuse of name here
 	add_f_to_rel_vort(diagnostics -> rel_vort, diagnostics -> pot_vort, dualgrid);
     int i, layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index;
-    double density_value, from_volume, to_volume, upper_volume, lower_volume;
+    double density_value;
     // determining the density value by which we need to divide
-    #pragma omp parallel for private (i, layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index, density_value, from_volume, to_volume, upper_volume, lower_volume)
+    #pragma omp parallel for private (i, layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index, density_value)
     for (i = 0; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {
         layer_index = i/(2*NO_OF_VECTORS_H);
@@ -55,17 +55,9 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagn
             else
             {
             	upper_from_index = (layer_index - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index];
-            	upper_volume = grid -> volume_ratios[2*upper_from_index + 1]*grid -> volume[upper_from_index];
-            	lower_volume = grid -> volume_ratios[2*(upper_from_index + NO_OF_SCALARS_H) + 0]*grid -> volume[upper_from_index + NO_OF_SCALARS_H];
-            	from_volume = upper_volume + lower_volume;
-            	density_value = 0.5*upper_volume/from_volume*density_field[upper_from_index];
-            	density_value += 0.5*lower_volume/from_volume*density_field[upper_from_index + NO_OF_SCALARS_H];
             	upper_to_index = (layer_index - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index];
-            	upper_volume = grid -> volume_ratios[2*upper_to_index + 1]*grid -> volume[upper_to_index];
-            	lower_volume = grid -> volume_ratios[2*(upper_to_index + NO_OF_SCALARS_H) + 0]*grid -> volume[upper_to_index + NO_OF_SCALARS_H];
-            	to_volume = upper_volume + lower_volume;
-            	density_value += 0.5*upper_volume/to_volume*density_field[upper_to_index];
-            	density_value += 0.5*lower_volume/to_volume*density_field[upper_to_index + NO_OF_SCALARS_H];
+            	density_value = 0.25*(density_field[upper_from_index] + density_field[upper_to_index]
+            	+ density_field[upper_from_index + NO_OF_SCALARS_H] + density_field[upper_to_index + NO_OF_SCALARS_H]);
             }
         }
         

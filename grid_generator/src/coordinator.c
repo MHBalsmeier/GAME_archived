@@ -169,9 +169,7 @@ int main(int argc, char *argv[])
     double *rel_on_line_dual = malloc(NO_OF_VECTORS_H*sizeof(double));
 	double *z_surface = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *inner_product_weights = malloc(8*NO_OF_SCALARS*sizeof(double));
-	double *volume_ratios = malloc(2*NO_OF_SCALARS*sizeof(double));
 	double *slope = malloc(NO_OF_VECTORS*sizeof(double));
-    double *remap_horpri2hordual_vector_weights = malloc(2*NO_OF_DUAL_H_VECTORS*sizeof(double));
     double *density_to_rhombus_weights = malloc(4*NO_OF_VECTORS_H*sizeof(double));
     double *interpol_weights = malloc(3*NO_OF_LATLON_IO_POINTS*sizeof(double));
     int *to_index = malloc(NO_OF_VECTORS_H*sizeof(int));
@@ -271,7 +269,7 @@ int main(int argc, char *argv[])
     
     // more advanced stuff: tangential vector reconstruction and inner product
     printf("Calculating inner product weights and related things ... ");
-	calc_inner_product_and_related(inner_product_weights, normal_distance, volume, to_index, from_index, area, z_scalar, z_vector, adjacent_vector_indices_h, volume_ratios, remap_horpri2hordual_vector_weights);
+	calc_inner_product_and_related(inner_product_weights, normal_distance, volume, to_index, from_index, area, z_scalar, z_vector, adjacent_vector_indices_h);
     printf(GREEN "finished.\n" RESET);
     
     // modified TRSK
@@ -293,7 +291,7 @@ int main(int argc, char *argv[])
 	write_statistics_file(pent_hex_face_unity_sphere, normal_distance, normal_distance_dual, STATISTICS_FILE);
 	
 	// writing the result to a netcdf file
-    int retval, latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_weights_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, vorticity_indices_id, trsk_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, latlon_dimid_3, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_10, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, inner_product_weights_id, scalar_8_dimid, slope_id, scalar_2_dimid, volume_ratios_id, remap_horpri2hordual_vector_weights_id, vector_h_dual_dimid_2, density_to_rhombus_indices_id, density_to_rhombus_weights_id, vorticity_indices_pre_id, ncid_g_prop, single_double_dimid, stretching_parameter_id, no_of_shaded_points_vector_id, no_of_shaded_points_scalar_id, no_of_lloyd_cycles_id, single_int_dimid, interpol_indices_id, interpol_weights_id;
+    int retval, latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_weights_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, vorticity_indices_id, trsk_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, latlon_dimid_3, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_10, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, inner_product_weights_id, scalar_8_dimid, slope_id, scalar_2_dimid, vector_h_dual_dimid_2, density_to_rhombus_indices_id, density_to_rhombus_weights_id, vorticity_indices_pre_id, ncid_g_prop, single_double_dimid, stretching_parameter_id, no_of_shaded_points_vector_id, no_of_shaded_points_scalar_id, no_of_lloyd_cycles_id, single_int_dimid, interpol_indices_id, interpol_weights_id;
     printf("Starting to write to output file ... ");
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
@@ -399,10 +397,6 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "inner_product_weights", NC_DOUBLE, 1, &scalar_8_dimid, &inner_product_weights_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "volume_ratios", NC_DOUBLE, 1, &scalar_2_dimid, &volume_ratios_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "remap_horpri2hordual_vector_weights", NC_DOUBLE, 1, &vector_h_dual_dimid_2, &remap_horpri2hordual_vector_weights_id)))
-        ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "density_to_rhombus_weights", NC_DOUBLE, 1, &vector_h_dimid_4, &density_to_rhombus_weights_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "interpol_weights", NC_DOUBLE, 1, &latlon_dimid_3, &interpol_weights_id)))
@@ -469,8 +463,6 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, inner_product_weights_id, &inner_product_weights[0])))
         ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, volume_ratios_id, &volume_ratios[0])))
-        ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, trsk_weights_id, &trsk_weights[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, z_vector_dual_id, &z_vector_dual[0])))
@@ -488,8 +480,6 @@ int main(int argc, char *argv[])
     if ((retval = nc_put_var_double(ncid_g_prop, longitude_vector_id, &longitude_vector[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, slope_id, &slope[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, remap_horpri2hordual_vector_weights_id, &remap_horpri2hordual_vector_weights[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, density_to_rhombus_weights_id, &density_to_rhombus_weights[0])))
         ERR(retval);
@@ -537,10 +527,8 @@ int main(int argc, char *argv[])
     free(direction_dual);
     free(density_to_rhombus_weights);
     free(density_to_rhombus_indices);
-    free(remap_horpri2hordual_vector_weights);
     free(slope);
     free(rel_on_line_dual);
-    free(volume_ratios);
     free(inner_product_weights);
     free(gravity_potential);
     free(latitude_vector);

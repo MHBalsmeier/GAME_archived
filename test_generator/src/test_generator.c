@@ -278,9 +278,11 @@ int main(int argc, char *argv[])
 	{
 		diagnostics -> scalar_field_placeholder[i] = pressure[i]/(R_D*temperature[i]);
 	}
-	scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
-	calc_pot_vort(state -> velocity_gas, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
-	vorticity_flux(diagnostics -> flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid, dualgrid);
+	calc_rel_vort(state -> velocity_gas, diagnostics -> rel_vort, grid, dualgrid);
+	// pot_vort is a misuse of name here
+	add_f_to_rel_vort(diagnostics -> rel_vort, diagnostics -> pot_vort, dualgrid);
+	// Now, the generalized Coriolis term is evaluated.
+	vorticity_flux(state -> velocity_gas, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid, dualgrid);
     free(dualgrid);
 	kinetic_energy(state -> velocity_gas, diagnostics -> e_kin, grid);
 	grad(diagnostics -> e_kin, forcings -> e_kin_grad, grid);
