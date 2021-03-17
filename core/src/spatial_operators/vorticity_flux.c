@@ -28,7 +28,7 @@ int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vec
         {
         	h_index_shifted = h_index - NO_OF_SCALARS_H;
         	/*
-        	Traditional component (vertical potential vorticity times horizontal mass flux density).
+        	"Standard" component (vertical potential vorticity times horizontal mass flux density).
             ----------------------------------------------------------------------------------------
             */
 			// From_index comes before to_index as usual.

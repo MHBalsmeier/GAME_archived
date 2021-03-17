@@ -54,7 +54,8 @@ int vertical_contravariant_corr(Vector_field vector_field, int layer_index, int 
 				*result
 				+= -0.5
 				*grid -> inner_product_weights[8*scalar_index + i]
-				*grid -> slope[vector_index]*vector_field[vector_index];
+				*grid -> slope[vector_index]
+				*vector_field[vector_index];
 			}
     	}
     	else if (layer_index == NO_OF_LAYERS)
@@ -65,7 +66,8 @@ int vertical_contravariant_corr(Vector_field vector_field, int layer_index, int 
 				vector_index = NO_OF_SCALARS_H + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + i];
 				*result
 				+= -grid -> inner_product_weights[8*scalar_index + i]
-				*grid -> slope[vector_index]*vector_field[vector_index];
+				*grid -> slope[vector_index]
+				*vector_field[vector_index];
 			}
     	}
     	else
@@ -78,7 +80,8 @@ int vertical_contravariant_corr(Vector_field vector_field, int layer_index, int 
 				*result
 				+= -0.5
 				*grid -> inner_product_weights[8*scalar_index + i]
-				*grid -> slope[vector_index]*vector_field[vector_index];
+				*grid -> slope[vector_index]
+				*vector_field[vector_index];
 			}
 			for (int i = 0; i < no_of_edges; ++i)
 			{
@@ -87,7 +90,8 @@ int vertical_contravariant_corr(Vector_field vector_field, int layer_index, int 
 				*result
 				+= -0.5
 				*grid -> inner_product_weights[8*scalar_index + i]
-				*grid -> slope[vector_index]*vector_field[vector_index];
+				*grid -> slope[vector_index]
+				*vector_field[vector_index];
 			}
     	}
     }
@@ -109,7 +113,8 @@ int tangential_wind(Vector_field in_field, int layer_index, int h_index, double 
     *component = 0;
 	for (int i = 0; i < 10; ++i)
 	{
-		*component += grid -> trsk_weights[10*h_index + i]*in_field[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_indices[10*h_index + i]];
+		*component += grid -> trsk_weights[10*h_index + i]
+		*in_field[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> trsk_indices[10*h_index + i]];
 	}
     return 0;
 }
@@ -152,7 +157,9 @@ int curl_field_to_cells(Curl_field in_field, Scalar_field out_field, Grid *grid)
         }
         for (j = 0; j < no_of_edges; ++j)
         {
-        	out_field[i] += 0.5*grid -> inner_product_weights[8*i + j]*in_field[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> adjacent_vector_indices_h[6*h_index + j]];
+        	out_field[i] += 0.5
+        	*grid -> inner_product_weights[8*i + j]
+        	*in_field[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + grid -> adjacent_vector_indices_h[6*h_index + j]];
     	}
     }
     return 0;
@@ -175,7 +182,9 @@ int edges_to_cells(Vector_field in_field, Scalar_field out_field, Grid *grid)
         }
         for (j = 0; j < no_of_edges; ++j)
         {
-        	out_field[i] += 0.5*grid -> inner_product_weights[8*i + j]*in_field[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]];
+        	out_field[i] += 0.5
+        	*grid -> inner_product_weights[8*i + j]
+        	*in_field[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]];
     	}
     }
     return 0;
@@ -196,7 +205,9 @@ int edges_to_cells_lowest_layer(double in_field[NO_OF_VECTORS_H], double out_fie
         }
         for (j = 0; j < no_of_edges; ++j)
         {
-        	out_field[i] += 0.5*grid -> inner_product_weights[8*(NO_OF_SCALARS - NO_OF_SCALARS_H + i) + j]*in_field[grid -> adjacent_vector_indices_h[6*i + j]];
+        	out_field[i] += 0.5
+        	*grid -> inner_product_weights[8*(NO_OF_SCALARS - NO_OF_SCALARS_H + i) + j]
+        	*in_field[grid -> adjacent_vector_indices_h[6*i + j]];
     	}
     }
     return 0;
