@@ -1372,6 +1372,14 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, temp_liquid_id, &state_write_out -> temperature_gas[0])))
 			NCERR(retval);
+		if ((retval = nc_put_var_double(ncid, wind_id, &state_write_out -> velocity_gas[0])))
+			NCERR(retval);
+		if ((retval = nc_put_var_double(ncid, rh_id, &(*rh)[0])))
+			NCERR(retval);
+		if ((retval = nc_put_var_double(ncid, rel_vort_id, &(*rel_vort)[0])))
+			NCERR(retval);
+		if ((retval = nc_put_var_double(ncid, divv_h_all_layers_id, &divv_h_all_layers[0])))
+			NCERR(retval);
 		// dry air
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
@@ -1436,14 +1444,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			}
 		}
 		if ((retval = nc_put_var_double(ncid, density_vapour_id, &diagnostics -> scalar_field_placeholder[0])))
-			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, wind_id, &state_write_out -> velocity_gas[0])))
-			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, rh_id, &(*rh)[0])))
-			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, rel_vort_id, &(*rel_vort)[0])))
-			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, divv_h_all_layers_id, &divv_h_all_layers[0])))
 			NCERR(retval);
 		
 		// Closing the netcdf file.
