@@ -511,7 +511,7 @@ int main(int argc, char *argv[])
     config_info -> totally_first_step_bool = 1;
     // this is to store the speed of the model integration
     double speed;
-    while (t_0 + delta_t < t_init + TOTAL_RUN_SPAN + 300)
+    while (t_0 < t_init + TOTAL_RUN_SPAN + 300)
     {   
     	linear_combine_two_states(state_new, state_new, state_old, 1, 0);
     	
