@@ -249,6 +249,14 @@ int main(int argc, char *argv[])
 	{
 		printf("terrain handling: block structure\n");
 	}
+	if (config_info -> momentum_diff_h == 0)
+	{
+		printf("Horizontal momentum diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Horizontal momentum diffusion is turned on.\n");
+	}
 	printf("%s", stars);
 	
 	printf("Physics configuration:\n");
@@ -283,14 +291,6 @@ int main(int argc, char *argv[])
 	else
 	{
 		printf("Vertical temperature diffusion is turned on.\n");
-	}
-	if (config_info -> momentum_diff_h == 0)
-	{
-		printf("Horizontal momentum diffusion is turned off.\n");
-	}
-	else
-	{
-		printf("Horizontal momentum diffusion is turned on.\n");
 	}
 	if (config_info -> momentum_diff_v == 0)
 	{
