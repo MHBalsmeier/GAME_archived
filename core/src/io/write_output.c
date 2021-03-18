@@ -616,8 +616,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	}
     
     // Diagnostics of quantities that are not surface-specific.    
-	double *divv_h_all_layers = malloc(NO_OF_SCALARS*sizeof(double));
-	divv_h(state_write_out -> velocity_gas, divv_h_all_layers, grid);
+    Scalar_field *divv_h_all_layers = calloc(1, sizeof(Scalar_field));
+	divv_h(state_write_out -> velocity_gas, *divv_h_all_layers, grid);
     Curl_field *rel_vort_edge = calloc(1, sizeof(Curl_field));
 	calc_rel_vort(state_write_out -> velocity_gas, *rel_vort_edge, grid, dualgrid);
     Scalar_field *rel_vort = calloc(1, sizeof(Scalar_field));
@@ -1171,7 +1171,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if ((retval = codes_write_message(handle_rh, OUTPUT_FILE, "a")))
 			    ECCERR(retval);
 			codes_handle_delete(handle_rh);
-			for (int j = 0; j < NO_OF_VECTORS_H; ++j)
+			for (int j = 0; j < NO_OF_SCALARS_H; ++j)
 			{
 			    wind_u_h[j] = diagnostics -> u_at_cell[i*NO_OF_SCALARS_H + j];
 			    wind_v_h[j] = diagnostics -> v_at_cell[i*NO_OF_SCALARS_H + j];
@@ -1239,7 +1239,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			codes_handle_delete(handle_rel_vort);
 			for (int j = 0; j < NO_OF_SCALARS_H; ++j)
 			{
-				divv_h[j] = divv_h_all_layers[i*NO_OF_SCALARS_H + j];
+				divv_h[j] = (*divv_h_all_layers)[i*NO_OF_SCALARS_H + j];
 			}
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_divv_h = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
@@ -1262,7 +1262,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				ECCERR(retval);
 			codes_handle_delete(handle_divv_h);
 		}
-		free(OUTPUT_FILE);
 		free(wind_u_h);
 		free(wind_v_h);
 		free(rel_vort_h);
@@ -1396,7 +1395,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, rel_vort_id, &(*rel_vort)[0])))
 			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, divv_h_all_layers_id, &divv_h_all_layers[0])))
+		if ((retval = nc_put_var_double(ncid, divv_h_all_layers_id, &(*divv_h_all_layers)[0])))
 			NCERR(retval);
 		// dry air
 		#pragma omp parallel for
