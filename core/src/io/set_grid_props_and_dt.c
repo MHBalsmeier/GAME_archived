@@ -336,15 +336,6 @@ int calc_delta_t_and_related(double cfl_margin, double *delta_t, Grid *grid, Dua
 	
 	// diffusion preparation
 	grid -> mean_area_edge = edge_area/NO_OF_H_VECTORS;
-	/*
-	the homogeneous prefactor of the divergence damping
-	this is for RES_ID = 5
-	double div_damp_coeff = 0.5e15; // unstable
-	div_damp_coeff = 5e15; // grid-scale noise is produced, leading to instability
-	div_damp_coeff = 28e15; // grid-scale noise is produced, leading to instability (best choice probably)
-	div_damp_coeff = 250e15; // too close to instability, unrealistically large compared to the literature
-	div_damp_coeff = 2500e15; // unstable
-	*/
 	// generalized version following the ICON paper
 	config_info -> div_damp_coeff = 1/(500*(*delta_t))*pow(grid -> mean_area_edge, 2);
     return 1;
