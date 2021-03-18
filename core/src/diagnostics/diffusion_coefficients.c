@@ -132,30 +132,14 @@ int hori_viscosity_eff(State *state, Vector_field viscosity_eff, Grid *grid, Dia
 
 int ver_viscosity_eff(State *state, Vector_field viscosity_eff, Grid *grid)
 {
-	int layer_index, no_of_edges, k;
-	double vertical_mom_viscosity_over_hor_viscosity = 0.01;
+	double eff_particle_radius = 130e-12;
+	double mean_particle_mass = mean_particle_masses_gas(0);
 	for (int i = 0; i < NO_OF_LEVELS; ++i)
 	{
-		#pragma omp parallel for private(layer_index, no_of_edges, k)
 		for (int j = 0; j < NO_OF_SCALARS_H; ++j)
 		{
-			viscosity_eff[i*NO_OF_VECTORS_PER_LAYER + j] = 0;
-			no_of_edges = 6;
-			if (j < NO_OF_PENTAGONS)
-			{
-				no_of_edges = 5;
-			}
-			layer_index = i;
-			if (i == NO_OF_LEVELS - 1)
-			{
-				layer_index = i - 1;
-			}
-			for (k = 0; k < no_of_edges; ++k)
-			{
-				viscosity_eff[i*NO_OF_VECTORS_PER_LAYER + j] += vertical_mom_viscosity_over_hor_viscosity
-				*1.0/no_of_edges
-				*viscosity_eff[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*j + k]];
-			}
+			calc_diffusion_coeff(state -> temperature_gas[NO_OF_SCALARS/2], mean_particle_mass,
+			state -> mass_densities[NO_OF_SCALARS/2], eff_particle_radius, &viscosity_eff[i*NO_OF_VECTORS_PER_LAYER + j]);
 		}
 	}
 	return 0;

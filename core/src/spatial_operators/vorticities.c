@@ -102,9 +102,9 @@ int add_f_to_rel_vort(Curl_field rel_vort, Curl_field out_field, Dualgrid *dualg
 
 int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
-    int i, layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area, index_0, index_1, index_2, index_3;
+    int i, layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, index_0, index_1, index_2, index_3;
     double rhombus_circ, dist_0, dist_1, dist_2, dist_3, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient;
-	#pragma omp parallel for private(i, layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, edge_vector_index_dual_area, index_0, index_1, index_2, index_3, rhombus_circ, dist_0, dist_1, dist_2, dist_3, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient)
+	#pragma omp parallel for private(i, layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, index_0, index_1, index_2, index_3, rhombus_circ, dist_0, dist_1, dist_2, dist_3, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient)
     for (i = NO_OF_VECTORS_H; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {
         layer_index = i/(2*NO_OF_VECTORS_H);
@@ -114,7 +114,6 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
         {
 			edge_vector_index_h = h_index - NO_OF_VECTORS_H;
 	        edge_vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + edge_vector_index_h;
-	        edge_vector_index_dual_area = NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + edge_vector_index_h;
         	rhombus_circ = 0;
         	// The rhombus has four edges.
         	for (int k = 0; k < 4; ++k)
@@ -153,7 +152,7 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
     			}
     			rhombus_circ += length_rescale_factor*grid -> normal_distance[index]*sign*velocity_value;
         	}
-        	out_field[i] = rhombus_circ/dualgrid -> area[edge_vector_index_dual_area];
+        	out_field[i] = rhombus_circ/dualgrid -> area[i];
         }
         // tangential vorticities
         else
