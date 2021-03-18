@@ -29,7 +29,6 @@ div_damp_4th_order_switch=0 # turn on if you want 4th order horizontal divergenc
 dissipative_heating=1 # turn on if you want a dissipative heating rate
 diff_h_smag_fac=0.4 # horizontal diffusion Smagorinsky factor
 shear_bg=1.5e-5 # assumed background (minimum) shear
-pv_consistency=0 # set to 1 if you want Poisson-bracket formalism of the vorticity flux term
 
 # "physics" configuration
 mass_dry_diff_h=0 # turn on if you want horizontal dry mass diffusion

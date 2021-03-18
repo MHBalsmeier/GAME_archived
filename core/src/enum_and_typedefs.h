@@ -164,7 +164,6 @@ int nwp_mode;
 int delta_t_between_analyses;
 int div_damp_4th_order_switch;
 int dissipative_heating;
-int pv_consistency;
 double diff_h_smag_fac;
 double shear_bg;
 double damping_start_height_over_toa;
