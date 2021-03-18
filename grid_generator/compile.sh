@@ -4,7 +4,7 @@
 # Github repository: https://github.com/AUN4GFD/game
 
 echo "Starting to compile grid generator ..."
-mpicc src/* -O2 -fopenmp -lnetcdf -lm -lgeos95 -Wall -o grid_generator
+mpicc src/* -O1 -fopenmp -lnetcdf -lm -lgeos95 -Wall -o grid_generator
 if [ $? -ne 0 ]
 then
 echo -e ${RED}Grid generator compilation failed.$NC
