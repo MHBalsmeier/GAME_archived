@@ -5,6 +5,7 @@ Github repository: https://github.com/AUN4GFD/game
 
 /*
 Here, the output is written to grib and/or netcdf files and integrals are written to text files if configured that way.
+In addition to that, some postprocessing diagnostics are also calculated here.
 */
 
 #include "../../../core/src/enum_and_typedefs.h"
@@ -23,7 +24,6 @@ Here, the output is written to grib and/or netcdf files and integrals are writte
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
-
 
 // constants that are specific to the ICAO standard atmosphere
 const double GRAVITY_MEAN = 9.80616;
@@ -64,7 +64,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	
 	double *grib_output_field = malloc(NO_OF_LATLON_IO_POINTS*sizeof(double));
 	
-	// Surface output.
+	/*
+	Surface output including diagnostics.
+	-------------------------------------
+	*/
 	if (io_config -> surface_output_switch == 1)
 	{
 		Scalar_field *pot_temperature = calloc(1, sizeof(Scalar_field));
@@ -174,7 +177,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		}
 		free(pot_temperature);
 		
-		// 10 m wind diagnostics
+		/*
+		10 m wind diagnostics
+		---------------------
+		*/
 		double *wind_10_m_both_dir_array = malloc(2*min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
 		double wind_10_m_downscale_factor = 0.667;
 		double wind_tangential;
@@ -213,24 +219,36 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			wind_10_m_mean_u[i] = wind_u_value;
 			wind_10_m_mean_v[i] = wind_v_value;
 		}
+		/*
+		Diagnozing gusts at 10 m above the surface.
+		-------------------------------------------
+		*/
 		double standard_deviation;
 		double gusts_parameter = 3;
 		double *wind_10_m_gusts_speed = malloc(NO_OF_VECTORS_H*sizeof(double));
 		double *vector_for_std_deviation = malloc(min_no_of_output_steps*sizeof(double));
 		double wind_speed_10_m_mean;
+		// loop over all horizontal vectors
 		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 		{
+			// initializing the mean with zero
 			wind_speed_10_m_mean = 0;
+			// loop over all steps that are in the 10 minutes window around the output time
 			for (int j = 0; j < min_no_of_output_steps; ++j)
 			{
+				// collecting all the wind speed values at this data point
 				vector_for_std_deviation[j] = wind_10_m_speed[j*NO_OF_VECTORS_H + i];
+				// updating the mean wind speed
 				wind_speed_10_m_mean += 1.0/min_no_of_output_steps*wind_10_m_speed[j*NO_OF_VECTORS_H + i];
 			}
+			// calculating the standard deviation
 			standard_deviation = calc_std_dev(vector_for_std_deviation, min_no_of_output_steps);
+			// this is the case where the gust diagnostics is actually used
 			if (t_write != t_init && min_no_of_output_steps >= 10)
 			{
 				wind_10_m_gusts_speed[i] = wind_speed_10_m_mean + gusts_parameter*standard_deviation;
 			}
+			// This is the case at the first step or if not enough steps in the output window are available.
 			else
 			{
 				wind_10_m_gusts_speed[i] = (1 + 0.2)*wind_speed_10_m_mean;

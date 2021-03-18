@@ -123,7 +123,10 @@ int epv_diagnostics(Curl_field pot_vort, Scalar_field pot_temp, Scalar_field epv
 
 int inner_product_tangential(Vector_field in_field_0, Vector_field in_field_1, Scalar_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
-    // This function computes the inner product of the two vector fields in_field_0 and in_field_1. This is needed for computing the dissipation due to momentum diffusion (friction).
+    /*
+    This function computes the inner product of the two vector fields in_field_0 and in_field_1.
+    The difference to the normal inner product is, that the components are given as tangential components.
+    */
     int layer_index, h_index, j;
     double tangential_wind_value;
     #pragma omp parallel for private (j, layer_index, h_index)
