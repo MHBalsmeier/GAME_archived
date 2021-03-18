@@ -80,9 +80,9 @@ int hori_viscosity_eff(State *state, Vector_field viscosity_eff, Grid *grid, Dia
 	double mean_particle_mass = mean_particle_masses_gas(0);
 	double molecular_viscosity;
 	// the maximum diffusion coefficient (based on stability, including a 30 % safety margin)
-	double max_diff_h_coeff_turb = (1 - 0.3)*0.25*grid -> mean_area_edge/delta_t;
+	double max_diff_h_coeff_turb = (1 - 0.3)*0.25*grid -> mean_area_cell/delta_t;
 	// the minimum "background" diffusion coefficient
-	double min_diff_h_coeff_turb = grid -> mean_area_edge*config_info -> diff_h_smag_fac*config_info -> shear_bg;
+	double min_diff_h_coeff_turb = grid -> mean_area_cell*config_info -> diff_h_smag_fac*config_info -> shear_bg;
 	double viscosity_value;
 	// calculatuing the shear
 	calc_horizontal_shear(state, diagnostics, grid);
@@ -94,7 +94,7 @@ int hori_viscosity_eff(State *state, Vector_field viscosity_eff, Grid *grid, Dia
 		h_index = i - layer_index*NO_OF_VECTORS_H;
 		
 		// preliminary result
-		viscosity_value = grid -> mean_area_edge*config_info -> diff_h_smag_fac*diagnostics -> shear[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+		viscosity_value = grid -> mean_area_cell*config_info -> diff_h_smag_fac*diagnostics -> shear[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
 		
 		/*
 		Checking if the calculated value is "allowed".

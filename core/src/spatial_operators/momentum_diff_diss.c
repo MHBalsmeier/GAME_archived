@@ -11,7 +11,6 @@ Github repository: https://github.com/AUN4GFD/game
 
 int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid, double delta_t)
 {
-	int layer_index, h_index;
 	// Firstly the diffusion.
 	// Evaluating necessary differential operators.
 	divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
@@ -43,26 +42,6 @@ int momentum_diff_diss(State *state, Diagnostics *diagnostics, Irreversible_quan
 	}
 	// multiplying by the viscosity
 	vector_times_vector(irrev -> viscosity_eff, irrev -> friction_acc, irrev -> friction_acc);
-	
-	// 4th order divergence damping
-	if (config_info -> div_damp_4th_order_switch == 1)
-	{
-		divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
-		grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
-		// diagnostics -> velocity_gas_divv is a misuse of name
-		divv_h(irrev -> velocity_grad_div, diagnostics -> velocity_gas_divv, grid);
-		// irrev -> velocity_grad_div is a misuse of name here, it is actually the divegence damping
-		grad(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_H_VECTORS; ++i)
-		{
-			layer_index = i/NO_OF_VECTORS_H;
-			h_index = i - layer_index*NO_OF_VECTORS_H;
-			irrev -> friction_acc[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
-			// a sign has to be taken into account here
-			+= -config_info -> div_damp_coeff*irrev -> velocity_grad_div[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
-		}
-	}
 	
 	// simplified dissipation
 	if (config_info -> dissipative_heating == 1)
@@ -130,14 +109,14 @@ int curl_of_vorticity(Curl_field vorticity, Vector_field out_field, Grid *grid, 
 			if (config_info -> momentum_diff_v == 1)
 			{
 				// vertical difference of horizontal vorticity (-dzeta_y*dy)
-				out_field[i] = out_field[i] + 0.001*(
+				out_field[i] = out_field[i] +
 				// substracting the upper zeta_y value
 				- dualgrid -> normal_distance[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H]
-				*vorticity[layer_index*2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H]);
-				out_field[i] = out_field[i] + 0.001*(
+				*vorticity[layer_index*2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
+				out_field[i] = out_field[i] +
 				// adding the lower zeta_y value
 				+ dualgrid -> normal_distance[(layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H]
-				*vorticity[(layer_index + 1)*2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H]);
+				*vorticity[(layer_index + 1)*2*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H];
 			}
 		}
 		// Dividing by the area.

@@ -99,12 +99,11 @@ int main(int argc, char *argv[])
 	config_info -> assume_lte = strtod(argv[32], NULL);
 	config_info -> adv_sound_ratio = strtod(argv[33], NULL);
 	config_info -> delta_t_between_analyses = strtod(argv[34], NULL);
-	config_info -> div_damp_4th_order_switch = strtod(argv[35], NULL);
-	config_info -> dissipative_heating = strtod(argv[36], NULL);
-	config_info -> diff_h_smag_fac = strtof(argv[37], NULL);
-	config_info -> shear_bg = strtof(argv[38], NULL);
-	config_info -> damping_start_height_over_toa = strtof(argv[39], NULL);
-	config_info -> damping_coeff_max = strtof(argv[40], NULL);
+	config_info -> dissipative_heating = strtod(argv[35], NULL);
+	config_info -> diff_h_smag_fac = strtof(argv[36], NULL);
+	config_info -> shear_bg = strtof(argv[37], NULL);
+	config_info -> damping_start_height_over_toa = strtof(argv[38], NULL);
+	config_info -> damping_coeff_max = strtof(argv[39], NULL);
 	
 	/*
 	Checking user input for correctness:
@@ -300,14 +299,6 @@ int main(int argc, char *argv[])
 	else
 	{
 		printf("Vertical momentum diffusion is turned on.\n");
-	}
-	if (config_info -> div_damp_4th_order_switch == 0)
-	{
-		printf("4th order divergence damping is turned off.\n");
-	}
-	else
-	{
-		printf("4th order divergence damping is turned on.\n");
 	}
 	if (config_info -> dissipative_heating == 0)
 	{
@@ -512,7 +503,7 @@ int main(int argc, char *argv[])
     // this is to store the speed of the model integration
     double speed;
     while (t_0 < t_init + TOTAL_RUN_SPAN + 300)
-    {   
+    {
     	linear_combine_two_states(state_new, state_new, state_old, 1, 0);
     	
     	/*

@@ -85,7 +85,7 @@ double direction[NO_OF_VECTORS_H];
 double density_to_rhombus_weights[4*NO_OF_VECTORS_H];
 double trsk_weights[10*NO_OF_VECTORS_H];
 double stretching_parameter;
-double mean_area_edge;
+double mean_area_cell;
 int latlon_interpol_indices[3*NO_OF_LATLON_IO_POINTS];
 double latlon_interpol_weights[3*NO_OF_LATLON_IO_POINTS];
 } Grid;
@@ -162,13 +162,11 @@ int assume_lte;
 int adv_sound_ratio;
 int nwp_mode;
 int delta_t_between_analyses;
-int div_damp_4th_order_switch;
 int dissipative_heating;
 double diff_h_smag_fac;
 double shear_bg;
 double damping_start_height_over_toa;
 double damping_coeff_max;
-double div_damp_coeff;
 } Config_info;
 
 // This is necessary for stability of horizontally propagating sound waves.
