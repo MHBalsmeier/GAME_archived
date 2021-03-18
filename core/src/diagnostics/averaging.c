@@ -13,6 +13,9 @@ This file contains functions that perform averagings.
 
 int remap_verpri2horpri_vector(Vector_field vector_field, int layer_index, int h_index, double *component, Grid *grid)
 {
+	/*
+	Reconstructs the certical vector component *component at edge h_index in layer layer_index.
+	*/
     *component
     = grid -> inner_product_weights[8*(layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]) + 6]
     *vector_field[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]];
@@ -100,7 +103,9 @@ int vertical_contravariant_corr(Vector_field vector_field, int layer_index, int 
 
 int horizontal_covariant(Vector_field vector_field, int layer_index, int h_index, Grid *grid, double *result)
 {
-	// Calculates the horizontal covariant component of a vector field out of the horizontal contravariant and the vertical covariant components.
+	/*
+	Calculates the horizontal covariant component of a vector field out of the horizontal contravariant and the vertical covariant components.
+	*/
 	double vertical_component;
 	remap_verpri2horpri_vector(vector_field, layer_index, h_index, &vertical_component, grid);
 	int vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
@@ -110,7 +115,13 @@ int horizontal_covariant(Vector_field vector_field, int layer_index, int h_index
 
 int tangential_wind(Vector_field in_field, int layer_index, int h_index, double *component, Grid *grid)
 {
+	/*
+	This function computes the tangential component *component of the vector field in_field at edge h_index in layer layer_index
+	using the TRSK weights.
+	*/
+	// initializing the result with zero
     *component = 0;
+    // loop over the maximum of ten edges 
 	for (int i = 0; i < 10; ++i)
 	{
 		*component += grid -> trsk_weights[10*h_index + i]
@@ -125,6 +136,7 @@ int calc_uv_at_edge(Vector_field in_field, Vector_field out_field_u, Vector_fiel
 	This function diagnozes eastward and northward components of a vector field at edges.
 	*/
 	int layer_index, h_index;
+	// orthogonal and tangential component at edge, respectively
 	double wind_0, wind_1;
 	#pragma omp parallel for private(layer_index, h_index, wind_0, wind_1)
 	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
@@ -132,7 +144,9 @@ int calc_uv_at_edge(Vector_field in_field, Vector_field out_field_u, Vector_fiel
 		layer_index = i/NO_OF_VECTORS_H;
 		h_index = i - layer_index*NO_OF_VECTORS_H;
 		wind_0 = in_field[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+		// finding the tangential component
 		tangential_wind(in_field, layer_index, h_index, &wind_1, grid);
+		// turning the Cartesian coordinate system to obtain u and v
 		passive_turn(wind_0, wind_1, -grid -> direction[h_index],
 		&out_field_u[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index],
 		&out_field_v[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]);
@@ -142,19 +156,24 @@ int calc_uv_at_edge(Vector_field in_field, Vector_field out_field_u, Vector_fiel
 
 int curl_field_to_cells(Curl_field in_field, Scalar_field out_field, Grid *grid)
 {
-	// This function averages a curl field from edges to centers.
+	/*
+	This function averages a curl field from edges to cell centers.
+	*/
 	int layer_index, h_index, j, no_of_edges;
 	#pragma omp parallel for private (j, layer_index, h_index, no_of_edges)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	layer_index = i/NO_OF_SCALARS_H;
     	h_index = i - layer_index*NO_OF_SCALARS_H;
+    	// initializing the result with zero
         out_field[i] = 0;
+        // determining the number of edges of the cell at hand
         no_of_edges = 6;
         if (h_index < NO_OF_PENTAGONS)
         {
         	no_of_edges = 5;
         }
+        // loop over all edges of the respective cell
         for (j = 0; j < no_of_edges; ++j)
         {
         	out_field[i] += 0.5
@@ -167,19 +186,24 @@ int curl_field_to_cells(Curl_field in_field, Scalar_field out_field, Grid *grid)
 
 int edges_to_cells(Vector_field in_field, Scalar_field out_field, Grid *grid)
 {
-	// This function averages a vector field from edges to centers.
+	/*
+	This function averages a vector field from edges to cell centers.
+	*/
 	int layer_index, h_index, j, no_of_edges;
 	#pragma omp parallel for private (j, layer_index, h_index, no_of_edges)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	layer_index = i/NO_OF_SCALARS_H;
     	h_index = i - layer_index*NO_OF_SCALARS_H;
+        // initializing the result with zero
         out_field[i] = 0;
+        // determining the number of edges of the cell at hand
         no_of_edges = 6;
         if (h_index < NO_OF_PENTAGONS)
         {
         	no_of_edges = 5;
         }
+        // loop over all cell edges
         for (j = 0; j < no_of_edges; ++j)
         {
         	out_field[i] += 0.5
@@ -192,17 +216,22 @@ int edges_to_cells(Vector_field in_field, Scalar_field out_field, Grid *grid)
 
 int edges_to_cells_lowest_layer(double in_field[NO_OF_VECTORS_H], double out_field[NO_OF_SCALARS_H], Grid *grid)
 {
-	// This function averages a horizontal vector field (defined on a single layer) from edges to centers in the lowest layer.
+	/*
+	This function averages a horizontal vector field (defined in the lowest layer) from edges to centers.
+	*/
 	int j, no_of_edges;
 	#pragma omp parallel for private (j, no_of_edges)
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
+    	// initializing the result with zero
         out_field[i] = 0;
+        // determining the number of edges of the cell at hand
         no_of_edges = 6;
         if (i < NO_OF_PENTAGONS)
         {
         	no_of_edges = 5;
         }
+        // loop over all edges of the respective cell
         for (j = 0; j < no_of_edges; ++j)
         {
         	out_field[i] += 0.5

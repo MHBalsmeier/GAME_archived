@@ -32,6 +32,7 @@ src/spatial_operators/divergences.c
 src/spatial_operators/scalar_times_vector.c
 src/spatial_operators/gradient_operators.c
 src/spatial_operators/inner_product.c
+src/spatial_operators/shear.c
 src/diagnostics/diffusion_coefficients.c
 src/diagnostics/averaging.c
 src/diagnostics/thermodynamic_diagnostics.c
