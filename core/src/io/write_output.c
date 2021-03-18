@@ -34,7 +34,7 @@ const double TROPO_HEIGHT_STANDARD = 11e3;
 const double INVERSE_HEIGHT_STANDARD = 20e3;
 const double TEMP_GRADIENT_INV_STANDARD = 0.1/100;
 const double SCALE_HEIGHT = 8e3;
-const double MIN_CRITERION_CLOUY_BOX = 1e-4;
+const double MIN_CRITERION_CLOUDY_BOX = 1e-4;
 
 int set_basic_props2grib(codes_handle *, long, long, long, long, long, long);
 double calc_std_dev(double [], int);
@@ -138,7 +138,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    {
 		        for (int l = 0; l < NO_OF_LAYERS; ++l)
 		        {
-		            if (state_write_out -> mass_densities[k*NO_OF_SCALARS + l*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUY_BOX)
+		            if (state_write_out -> mass_densities[k*NO_OF_SCALARS + l*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX)
 		            {
 		        		cloudy_box_counter += 1;
 	                }
@@ -146,7 +146,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    }
 		    if (NO_OF_CONSTITUENTS >= 4)
 		    {
-            	tcdc[i] = 100*cloudy_box_counter/(NO_OF_CONDENSED_CONSTITUENTS*NO_OF_LAYERS);
+            	tcdc[i] = 100*cloudy_box_counter/(2*NO_OF_LAYERS);
             }
             else
             {

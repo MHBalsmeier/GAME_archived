@@ -15,6 +15,7 @@ The main organizes the model, manages the time stepping, calls model output, col
 #include "io/io.h"
 #include "spatial_operators/spatial_operators.h"
 #include "diagnostics/diagnostics.h"
+#include "physics/physics.h"
 #include "time_stepping/time_stepping.h"
 #include <mpi.h>
 
@@ -511,10 +512,7 @@ int main(int argc, char *argv[])
     // this is to store the speed of the model integration
     double speed;
     while (t_0 + delta_t < t_init + TOTAL_RUN_SPAN + 300)
-    {
-    	// updating the model time
-        t_0 += delta_t;
-        
+    {   
     	linear_combine_two_states(state_new, state_new, state_old, 1, 0);
     	
     	/*
@@ -604,6 +602,9 @@ int main(int argc, char *argv[])
         }
         // giving the user information on the run progress
         printf("Step %d completed.\n", time_step_counter);
+        
+    	// updating the model time
+        t_0 += delta_t;
     }
     
     /*
