@@ -44,13 +44,30 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagn
         // interpolation of the density to the half level edges
         else
         {
+        	// linear extrapolation to the TOA
         	if (layer_index == 0)
         	{
-				density_value = 0.5*(density_field[grid -> from_index[h_index]] + density_field[grid -> to_index[h_index]]);
+				density_value
+				= 0.5*(density_field[grid -> from_index[h_index]] + density_field[grid -> to_index[h_index]])
+				// the gradient
+				+ (0.5*(density_field[grid -> from_index[h_index]] + density_field[grid -> to_index[h_index]])
+				- 0.5*(density_field[grid -> from_index[h_index] + NO_OF_SCALARS_H] + density_field[grid -> to_index[h_index] + NO_OF_SCALARS_H]))
+				/(grid -> z_vector[NO_OF_SCALARS + h_index] - grid -> z_vector[NO_OF_SCALARS + NO_OF_VECTORS_PER_LAYER + h_index])
+				// delta z
+				*(grid -> z_vector[0] - grid -> z_vector[NO_OF_SCALARS + h_index]);
         	}
+        	// linear extrapolation to the surface
             else if (layer_index == NO_OF_LAYERS)
             {
-				density_value = 0.5*(density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]] + density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]);
+				density_value =
+				0.5*(density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]] + density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]])
+				// the gradient
+				+ (0.5*(density_field[(layer_index - 2)*NO_OF_SCALARS_H + grid -> from_index[h_index]] + density_field[(layer_index - 2)*NO_OF_SCALARS_H + grid -> to_index[h_index]])
+				- 0.5*(density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]] + density_field[(layer_index - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]))
+				/(grid -> z_vector[NO_OF_SCALARS + (layer_index - 2)*NO_OF_VECTORS_PER_LAYER + h_index] - grid -> z_vector[NO_OF_SCALARS + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER + h_index])
+				// delta z
+				*(0.5*(grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]] + grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index]])
+				- grid -> z_vector[NO_OF_SCALARS + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER + h_index]);
             }
             else
             {
