@@ -15,12 +15,12 @@ This is the horizontal (explicit) part of the constituent integration.
 #include "stdio.h"
 #include "stdlib.h"
 
-int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step)
+int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step, Vector_field wind_advect_tracer)
 {
 
 	// declaring needed variables
     int h_index, layer_index, k;
-    double c_v_cond, density_gas_value, latent_heating;
+    double c_v_cond, latent_heating;
     
     // determining the weights for the RK stepping
     double old_weight, new_weight;
@@ -58,46 +58,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
         
         // This is the mass advection, which needs to be carried out for all constituents.
         // -------------------------------------------------------------------------------
-        // For condensed constituents, a sink velocity must be added.
-        if (i < NO_OF_CONDENSED_CONSTITUENTS)
-        {
-	    	// Adding a sink velocity.
-			#pragma omp parallel for private(layer_index, h_index, density_gas_value)
-	        for (int j = 0; j < NO_OF_VECTORS; ++j)
-	        {
-	            layer_index = j/NO_OF_VECTORS_PER_LAYER;
-	            h_index = j - layer_index*NO_OF_VECTORS_PER_LAYER;
-	            
-	            // If the component is vertical, the sink velocity of this constituent must substracted.
-	            if (h_index < NO_OF_SCALARS_H)
-	            {
-					if (layer_index == 0)
-					{
-						density_gas_value = density_gas(state, h_index);
-					}
-					else if (layer_index == NO_OF_LAYERS)
-					{
-						density_gas_value = density_gas(state, (layer_index - 1)*NO_OF_SCALARS_H + h_index);
-					}
-					else
-					{
-						density_gas_value = 0.5*(density_gas(state, (layer_index - 1)*NO_OF_SCALARS_H + h_index) + density_gas(state, layer_index*NO_OF_SCALARS_H + h_index));
-					}
-					diagnostics -> velocity_gen[j] -= ret_sink_velocity(0, 0.001, density_gas_value);
-				}
-                // The horizontal movement is not affected by the sink velocity.
-	            else
-	            {
-	            	diagnostics -> velocity_gen[j] = state -> velocity_gas[j];
-            	}
-	        }
-        	scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> velocity_gen, diagnostics -> flux_density, grid);
-    	}
-    	// This is not the case for gaseous constituents.
-    	else
-    	{
-        	scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
-    	}
+    	scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
         divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 		#pragma omp parallel for private(layer_index, h_index)
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
@@ -136,7 +97,16 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 					diagnostics -> scalar_field_placeholder[j] = 0;
 				}
 			}
-			scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
+			// calling entropy advection according to user input
+			if (config_info -> entropy_advection_order == 2)
+			{
+				scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
+			}
+			if (config_info -> entropy_advection_order == 3)
+			{
+				advection_3rd_order(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, wind_advect_tracer,
+				diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid, no_rk_step, delta_t);
+			}
 			divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			#pragma omp parallel for private(layer_index, h_index, latent_heating, k)
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
@@ -191,7 +161,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 				diagnostics -> scalar_field_placeholder[j] = state -> condensed_density_temperatures[i*NO_OF_SCALARS + j];
 			}
 			// The constituent velocity has already been calculated.
-		    scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> velocity_gen, diagnostics -> flux_density, grid);
+		    scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
 		    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			#pragma omp parallel for private(layer_index, h_index, c_v_cond)
 			for (int j = 0; j < NO_OF_SCALARS; ++j)

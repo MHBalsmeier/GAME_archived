@@ -55,7 +55,14 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 
 		// 2.) Explicit component of the generalized density equations.
 		// ------------------------------------------------------------
-		backward_tendencies(state_new, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, time_coordinate);
+		if (i == 0)
+		{
+			backward_tendencies(state_new, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, time_coordinate, state_old);
+		}
+		if (i == 1)
+		{	
+			backward_tendencies(state_new, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, time_coordinate, state_new);
+		}
 		
 		// 3.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies (including diabatic forcings).
 		// ----------------------------------------------------------------------------------------------------------------------------------------
@@ -63,7 +70,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 
 		// 4.) Vertical sound wave solver.
 		// -------------------------------
-		three_band_solver_ver_waves(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid);
+		three_band_solver_ver_waves(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid, i);
 		// Vertical velocity can be seen as updated from now on.
 		
 		// 5.) Solving the implicit component of the generalized density equations for tracers.

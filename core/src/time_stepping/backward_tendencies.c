@@ -12,7 +12,7 @@ Github repository: https://github.com/AUN4GFD/game
 #include <stdio.h>
 #include <stdlib.h>
 
-int backward_tendencies(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_rk_step, double time_coordinate)
+int backward_tendencies(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int no_rk_step, double time_coordinate, State *state_advect_tracer)
 {
     // Radiation is updated here.
     if (config_info -> rad_on == 1 && config_info -> rad_update == 1 && no_rk_step == 0)
@@ -38,12 +38,23 @@ int backward_tendencies(State *state, State *state_tendency, Grid *grid, Dualgri
         // The diffusion of the temperature depends on its gradient.
 		grad(state -> temperature_gas, diagnostics -> temperature_gradient, grid);
 		// Now the diffusive temperature flux density can be obtained.
-        scalar_times_vector_scalar_h_v(irreversible_quantities -> scalar_diffusion_coeff_numerical_h, irreversible_quantities -> scalar_diffusion_coeff_numerical_v, diagnostics -> temperature_gradient, diagnostics -> flux_density, grid);
+        scalar_times_vector_scalar_h_v(irreversible_quantities -> scalar_diffusion_coeff_numerical_h, irreversible_quantities -> scalar_diffusion_coeff_numerical_v,
+        diagnostics -> temperature_gradient, diagnostics -> flux_density, grid);
         // The divergence of the diffusive temperature flux density is the diffusive temperature heating.
         divv_h(diagnostics -> flux_density, irreversible_quantities -> temperature_diffusion_heating, grid);
         add_vertical_divv(diagnostics -> flux_density, irreversible_quantities -> temperature_diffusion_heating, grid);
     }
     
-	scalar_tendencies_expl(state, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, no_rk_step);
+	scalar_tendencies_expl(state, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, no_rk_step,
+	state_advect_tracer -> velocity_gas);
     return 0;
 }
+
+
+
+
+
+
+
+
+
