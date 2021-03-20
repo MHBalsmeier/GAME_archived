@@ -19,8 +19,8 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 {
 
 	// declaring needed variables
-    int h_index, layer_index, k;
-    double c_v_cond, latent_heating;
+    int h_index, layer_index;
+    double c_v_cond;
     
     // determining the weights for the RK stepping
     double old_weight, new_weight;
@@ -119,27 +119,13 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 			}
 			divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			// adding the tendencies in all grid boxes
-			#pragma omp parallel for private(layer_index, h_index, latent_heating, k)
+			#pragma omp parallel for private(layer_index, h_index)
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
 				layer_index = j/NO_OF_SCALARS_H;
 				h_index = j - layer_index*NO_OF_SCALARS_H;
 				if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 				{
-					// determing the latent heating depending on the configuration
-					latent_heating = 0;
-					if (config_info -> assume_lte == 0)
-					{
-						latent_heating = irrev -> constituent_heat_source_rates[i*NO_OF_SCALARS + j];
-					}
-					if (config_info -> assume_lte == 1)
-					{
-						// in this case, all the latent heating rates are assumed to act onto the gas phase
-						for (k = 0; k < NO_OF_CONDENSED_CONSTITUENTS + 1; ++k)
-						{
-							latent_heating += irrev -> constituent_heat_source_rates[k*NO_OF_SCALARS + j];
-						}
-					}
 					state_tendency -> entropy_densities[(i - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j]
 					= old_weight*state_tendency -> entropy_densities[(i - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j]
 					+ new_weight*(
@@ -156,7 +142,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 					// radiation
 					+ radiation_tendency[j]
 					// phase transitions
-					+ latent_heating
+					+ irrev -> constituent_heat_source_rates[i*NO_OF_SCALARS + j]
 					// this has to be divided by the temperature (we ware in the entropy equation)
 					)/state -> temperature_gas[j]);
 				 }
