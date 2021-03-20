@@ -142,7 +142,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 					// radiation
 					+ radiation_tendency[j]
 					// phase transitions
-					+ irrev -> constituent_heat_source_rates[i*NO_OF_SCALARS + j]
+					+ irrev -> constituent_heat_source_rates[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j]
 					// this has to be divided by the temperature (we ware in the entropy equation)
 					)/state -> temperature_gas[j]);
 				 }
