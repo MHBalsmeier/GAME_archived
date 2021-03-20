@@ -104,7 +104,8 @@ int main(int argc, char *argv[])
 	config_info -> shear_bg = strtof(argv[37], NULL);
 	config_info -> damping_start_height_over_toa = strtof(argv[38], NULL);
 	config_info -> damping_coeff_max = strtof(argv[39], NULL);
-	config_info -> entropy_advection_order = strtof(argv[40], NULL);
+	config_info -> mass_advection_order = strtof(argv[40], NULL);
+	config_info -> entropy_advection_order = strtof(argv[41], NULL);
 	
 	/*
 	Checking user input for correctness:
@@ -136,6 +137,12 @@ int main(int argc, char *argv[])
 	if (config_info -> momentum_diff_h == 0 && config_info -> momentum_diff_v == 1)
 	{
 		printf("Horizontal momentum diffusion cannot be off if vertical momentum diffusion is on.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
+	if (config_info -> mass_advection_order != 2 && config_info -> mass_advection_order != 3)
+	{
+		printf("Mass advection order must be set to 2 or 3.\n");
     	printf("Aborting.\n");
 		exit(1);
 	}
@@ -264,6 +271,7 @@ int main(int argc, char *argv[])
 	{
 		printf("Horizontal momentum diffusion is turned on.\n");
 	}
+	printf("mass advection order: %d\n", config_info -> mass_advection_order);
 	printf("entropy advection order: %d\n", config_info -> entropy_advection_order);
 	printf("%s", stars);
 	

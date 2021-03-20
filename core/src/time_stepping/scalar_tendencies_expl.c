@@ -58,7 +58,16 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
         
         // This is the mass advection, which needs to be carried out for all constituents.
         // -------------------------------------------------------------------------------
-    	scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
+		// calling mass advection according to user input
+		if (config_info -> mass_advection_order == 2)
+		{
+			scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
+		}
+		if (config_info -> mass_advection_order == 3)
+		{
+			advection_3rd_order(diagnostics -> scalar_field_placeholder, state -> velocity_gas, wind_advect_tracer,
+			diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid, no_rk_step, delta_t);
+		}
         divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 		#pragma omp parallel for private(layer_index, h_index)
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
@@ -102,7 +111,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 			{
 				scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
 			}
-			if (config_info -> entropy_advection_order == 3)
+			if (config_info -> mass_advection_order == 3)
 			{
 				advection_3rd_order(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, wind_advect_tracer,
 				diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid, no_rk_step, delta_t);

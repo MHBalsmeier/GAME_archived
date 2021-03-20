@@ -163,6 +163,7 @@ int adv_sound_ratio;
 int nwp_mode;
 int delta_t_between_analyses;
 int dissipative_heating;
+int mass_advection_order;
 int entropy_advection_order;
 double diff_h_smag_fac;
 double shear_bg;
