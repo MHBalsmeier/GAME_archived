@@ -49,7 +49,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 	// loop over all constituents
 	for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
 	{
-		// Separating the density of the constituent at hand.
+		// Separating the mass density of the constituent at hand.
 		#pragma omp parallel for
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
 		{
@@ -69,6 +69,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 			diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid, no_rk_step, delta_t);
 		}
         divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
+		// adding the tendencies in all grid boxes
 		#pragma omp parallel for private(layer_index, h_index)
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
 		{
@@ -86,11 +87,11 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		    }
 	    }
 	    
-		// Explicit entropy integrations
+		// explicit entropy integrations
+		// -----------------------------
 		if ((config_info -> assume_lte == 1 && i == NO_OF_CONDENSED_CONSTITUENTS)
 		|| (config_info -> assume_lte == 0 && i >= NO_OF_CONDENSED_CONSTITUENTS))
 		{
-			// -----------------------------
 			// Determining the specific entropy of the constituent at hand.
 			#pragma omp parallel for
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
@@ -117,6 +118,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 				diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid, no_rk_step, delta_t);
 			}
 			divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
+			// adding the tendencies in all grid boxes
 			#pragma omp parallel for private(layer_index, h_index, latent_heating, k)
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
@@ -162,6 +164,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		}
     
 		// This is the integration of the "density x temperature" fields. It only needs to be done for condensed constituents.
+		// -------------------------------------------------------------------------------------------------------------------
 		if (i < NO_OF_CONDENSED_CONSTITUENTS && config_info -> assume_lte == 0)
 		{
 			#pragma omp parallel for
@@ -172,6 +175,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 			// The constituent velocity has already been calculated.
 		    scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
 		    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
+			// adding the tendencies in all grid boxes
 			#pragma omp parallel for private(layer_index, h_index, c_v_cond)
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
@@ -193,7 +197,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 				}
 			}
 		}
-	}
+	} // constituent loop
 	return 0;
 }
 
