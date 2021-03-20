@@ -23,7 +23,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     double c_v_cond;
     
     // determining the weights for the RK stepping
-    double old_weight, new_weight;
+    double old_weight, new_weight, latent_heating;
     new_weight = 1;
     if (no_rk_step == 1)
     {
@@ -119,13 +119,19 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 			}
 			divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			// adding the tendencies in all grid boxes
-			#pragma omp parallel for private(layer_index, h_index)
+			#pragma omp parallel for private(layer_index, h_index, latent_heating)
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
 				layer_index = j/NO_OF_SCALARS_H;
 				h_index = j - layer_index*NO_OF_SCALARS_H;
 				if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 				{
+					// determining the latent heating
+					latent_heating = 0;
+					for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS; ++k)
+					{
+						latent_heating += irrev -> constituent_heat_source_rates[k*NO_OF_SCALARS + j];
+					}
 					state_tendency -> entropy_densities[(i - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j]
 					= old_weight*state_tendency -> entropy_densities[(i - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j]
 					+ new_weight*(
@@ -142,7 +148,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 					// radiation
 					+ radiation_tendency[j]
 					// phase transitions
-					+ irrev -> constituent_heat_source_rates[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j]
+					+ latent_heating
 					// this has to be divided by the temperature (we ware in the entropy equation)
 					)/state -> temperature_gas[j]);
 				 }
