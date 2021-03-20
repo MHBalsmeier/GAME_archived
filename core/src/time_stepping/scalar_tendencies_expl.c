@@ -23,7 +23,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     double c_v_cond;
     
     // determining the weights for the RK stepping
-    double old_weight, new_weight, latent_heating;
+    double old_weight, new_weight, tracer_heating, density_gas_weight;
     new_weight = 1;
     if (no_rk_step == 1)
     {
@@ -119,18 +119,27 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 			}
 			divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			// adding the tendencies in all grid boxes
-			#pragma omp parallel for private(layer_index, h_index, latent_heating)
+			#pragma omp parallel for private(layer_index, h_index, tracer_heating)
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
 				layer_index = j/NO_OF_SCALARS_H;
 				h_index = j - layer_index*NO_OF_SCALARS_H;
 				if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 				{
-					// determining the latent heating
-					latent_heating = 0;
-					for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS; ++k)
+					// determining the heating rate that comes from the tracers
+					tracer_heating = 0;
+					if (config_info -> assume_lte == 0)
 					{
-						latent_heating += irrev -> constituent_heat_source_rates[k*NO_OF_SCALARS + j];
+						density_gas_weight = density_gas(state, j);
+						tracer_heating = irrev -> constituent_heat_source_rates[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j];
+					}
+					if (config_info -> assume_lte == 1)
+					{
+						density_gas_weight = state -> mass_densities[i*NO_OF_SCALARS + j];
+						for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS + 1; ++k)
+						{
+							tracer_heating += irrev -> constituent_heat_source_rates[k*NO_OF_SCALARS + j];
+						}
 					}
 					state_tendency -> entropy_densities[(i - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j]
 					= old_weight*state_tendency -> entropy_densities[(i - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j]
@@ -139,18 +148,18 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 					-diagnostics -> flux_density_divv[j]
 					// the diabatic forcings
 					// weighting factor
-					+ state -> mass_densities[i*NO_OF_SCALARS + j]/density_total(state, j)
-					*(
+					+ state -> mass_densities[i*NO_OF_SCALARS + j]/density_total(state, j)*(
 					// dissipation of molecular + turbulent momentum diffusion
 					irrev -> heating_diss[j]
 					// molecular + turbulent heat transport
 					+ irrev -> temperature_diffusion_heating[j]
 					// radiation
 					+ radiation_tendency[j]
-					// phase transitions
-					+ latent_heating
 					// this has to be divided by the temperature (we ware in the entropy equation)
-					)/state -> temperature_gas[j]);
+					)/state -> temperature_gas[j]
+					// phase transitions
+					+ tracer_heating*state -> mass_densities[i*NO_OF_SCALARS + j]/density_gas_weight
+					/state -> temperature_gas[j]);
 				 }
 			}
 		}

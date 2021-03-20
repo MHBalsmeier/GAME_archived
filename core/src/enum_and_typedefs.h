@@ -187,7 +187,7 @@ Vector_field mass_diffusion_flux_density;
 Scalar_field mass_diffusion_source_rate;
 Scalar_field pressure_gradient_decel_factor;
 double constituent_mass_source_rates[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
-double constituent_heat_source_rates[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS];
+double constituent_heat_source_rates[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS];
 Vector_field viscosity_eff;
 Vector_field velocity_grad_div;
 } Irreversible_quantities;
