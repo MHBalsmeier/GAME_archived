@@ -11,6 +11,7 @@ The main organizes the model, manages the time stepping, calls model output, col
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "geos95.h"
 #include "enum_and_typedefs.h"
 #include "io/io.h"
 #include "spatial_operators/spatial_operators.h"
@@ -453,19 +454,45 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     
     int min_no_of_output_steps = 600/delta_t;
-    double *wind_h_lowest_layer_array = calloc(1, min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
+    double *wind_h_10m_array = calloc(1, min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
     double t_write = t_init;
-    int h_index, time_step_10_m_wind;
-	for (int i = 0; i < min_no_of_output_steps*NO_OF_VECTORS_H; ++i)
+    double delta_z, wind_closest, wind_other, wind_gradient;
+    double vector_to_minimize[NO_OF_LAYERS];
+    int closest_index, second_closest_index;
+	for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)
 	{
-		time_step_10_m_wind = i/NO_OF_VECTORS_H;
-		h_index = i - time_step_10_m_wind*NO_OF_VECTORS_H;
-    	wind_h_lowest_layer_array[time_step_10_m_wind*NO_OF_VECTORS_H + h_index] = state_old -> velocity_gas[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + h_index];
+		for (int j = 0; j < NO_OF_LAYERS; ++j)
+		{
+			vector_to_minimize[j] = fabs(grid -> z_vector[NO_OF_SCALARS_H + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + h_index] + 10
+			- grid -> z_vector[NO_OF_SCALARS_H + j*NO_OF_VECTORS_PER_LAYER + h_index]);
+		}
+		closest_index = find_min_index(vector_to_minimize, NO_OF_LAYERS);
+		second_closest_index = closest_index - 1;
+		if (grid -> z_vector[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index] > grid -> z_vector[NO_OF_SCALARS_H + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + h_index] + 10
+		&& closest_index < NO_OF_LAYERS - 1)
+		{
+			second_closest_index = closest_index + 1;
+		}
+		delta_z
+		= 0.5*(grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]]
+		+ grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index]]) + 10
+		- grid -> z_vector[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index];		
+		wind_closest = state_old -> velocity_gas[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
+		wind_other = state_old -> velocity_gas[NO_OF_SCALARS_H + second_closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
+		// calculating the vertical gradient of the horizontal wind
+		wind_gradient = (wind_closest - wind_other)
+		/(grid -> z_vector[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index] - grid -> z_vector[NO_OF_SCALARS_H + second_closest_index*NO_OF_VECTORS_PER_LAYER + h_index]);
+		// here, for all output time steps, the initial value is used
+		for (int time_step_10_m_wind = 0; time_step_10_m_wind < min_no_of_output_steps; ++time_step_10_m_wind)
+		{
+			wind_h_10m_array[time_step_10_m_wind*NO_OF_VECTORS_H + h_index]
+			= wind_closest + delta_z*wind_gradient;
+    	}
     }
     Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
     Forcings *forcings = calloc(1, sizeof(Forcings));
     // writing out the initial state of the model run
-    write_out(state_old, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
+    write_out(state_old, wind_h_10m_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
     t_write += WRITE_OUT_INTERVAL;
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     double t_0;
@@ -578,9 +605,38 @@ int main(int argc, char *argv[])
         {
         	if (wind_10_m_step_counter < min_no_of_output_steps)
         	{
-		    	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+		    	for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)
        			{
-		    		wind_h_lowest_layer_array[wind_10_m_step_counter*NO_OF_VECTORS_H + i] = state_old -> velocity_gas[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i];
+   					for (int j = 0; j < NO_OF_LAYERS; ++j)
+					{
+						vector_to_minimize[j] = fabs(grid -> z_vector[NO_OF_SCALARS_H + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + h_index] + 10
+						- grid -> z_vector[NO_OF_SCALARS_H + j*NO_OF_VECTORS_PER_LAYER + h_index]);
+					}
+					closest_index = find_min_index(vector_to_minimize, NO_OF_LAYERS);
+					second_closest_index = closest_index - 1;
+					if (grid -> z_vector[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index]
+					> grid -> z_vector[NO_OF_SCALARS_H + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + h_index] + 10
+					&& closest_index < NO_OF_LAYERS - 1)
+					{
+						second_closest_index = closest_index + 1;
+					}
+					// the vertical distance between the desired position and the closest layers
+					delta_z
+					= 0.5*(grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]]
+					+ grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index]]) + 10
+					- grid -> z_vector[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
+					// wind in the closest layer
+					wind_closest = state_old -> velocity_gas[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
+					// wind in the other layer
+					wind_other = state_old -> velocity_gas[NO_OF_SCALARS_H + second_closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
+					// calculating thevertical gradient of the horizontal wind
+					wind_gradient = (wind_closest - wind_other)
+					// the vertical distance between the two layers used for calculating the gradient
+					/(grid -> z_vector[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index]
+					- grid -> z_vector[NO_OF_SCALARS_H + second_closest_index*NO_OF_VECTORS_PER_LAYER + h_index]);
+					// interpolating or extrapolating the wind to the desired position
+		    		wind_h_10m_array[wind_10_m_step_counter*NO_OF_VECTORS_H + h_index]
+		    		= wind_closest + delta_z*wind_gradient;
 		    	}
 		    	wind_10_m_step_counter += 1;
         	}
@@ -589,7 +645,7 @@ int main(int argc, char *argv[])
         if(t_0 + delta_t >= t_write + 300 && t_0 <= t_write + 300)
         {
         	// here, output is actually written
-            write_out(state_write, wind_h_lowest_layer_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
+            write_out(state_write, wind_h_10m_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
             // setting the next output time
             t_write += WRITE_OUT_INTERVAL;
             
@@ -603,7 +659,7 @@ int main(int argc, char *argv[])
             // resetting the wind in the lowest layer to zero
             for (int i = 0; i < min_no_of_output_steps*NO_OF_VECTORS_H; ++i)
             {
-            	wind_h_lowest_layer_array[i] = 0;
+            	wind_h_10m_array[i] = 0;
         	}
             wind_10_m_step_counter = 0;
         }

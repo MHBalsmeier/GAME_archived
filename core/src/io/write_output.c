@@ -40,7 +40,7 @@ int set_basic_props2grib(codes_handle *, long, long, long, long, long, long);
 double calc_std_dev(double [], int);
 int global_scalar_integrator(Scalar_field, Grid *, double *);
 
-int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Io_config *io_config, Config_info *config_info)
+int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Io_config *io_config, Config_info *config_info)
 {
 	// Diagnostics and forcings are primarily handed over for checks.
 	
@@ -59,8 +59,9 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     int retval;
 	int err = 0;
 	
-	int layer_index, h_index;
+	int layer_index;
 	double wind_u_value, wind_v_value, cloudy_box_counter;
+	double vector_to_minimize[NO_OF_LAYERS];
 	
 	double *grib_output_field = malloc(NO_OF_LATLON_IO_POINTS*sizeof(double));
 	
@@ -79,7 +80,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		double *rprate = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *sprate = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *cape = malloc(NO_OF_SCALARS_H*sizeof(double));
-		double temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta_v_prime, theta_v, cape_integrand, delta_z, temp_upper, temp_lower, delta_z_temp, temperature_gradient, density_v, density_h;
+		int closest_index, second_closest_index;
+		double temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta_v_prime, theta_v, cape_integrand, delta_z, temp_closest, temp_other, delta_z_temp, temperature_gradient, density_v, density_h;
 		double z_tropopause = 15e3;
 		double standard_vert_lapse_rate = 0.0065;
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
@@ -101,11 +103,23 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			surface_p[i] = pressure_value/surface_p_factor;
 			
 			// Now the aim is to calculate the 2 m temperature.
-		    delta_z_temp = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i] + 2 - grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
-		    temp_upper = state_write_out -> temperature_gas[(NO_OF_LAYERS - 2)*NO_OF_SCALARS_H + i];
-		    temp_lower = temp_lowest_layer;
-		    temperature_gradient = (temp_upper - temp_lower)/(grid -> z_scalar[i + (NO_OF_LAYERS - 2)*NO_OF_SCALARS_H] - grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]);
-		    t2[i] = temp_lowest_layer + delta_z_temp*temperature_gradient;
+			for (int j = 0; j < NO_OF_LAYERS; ++j)
+			{
+				vector_to_minimize[j] = fabs(grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i] + 2 - grid -> z_scalar[i + j*NO_OF_SCALARS_H]);
+			}
+			closest_index = find_min_index(vector_to_minimize, NO_OF_LAYERS);
+			second_closest_index = closest_index - 1;
+			if (grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] > grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i] + 2 && closest_index < NO_OF_LAYERS - 1)
+			{
+				second_closest_index = closest_index + 1;
+			}
+		    delta_z_temp = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i] + 2 - grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H];
+		    temp_closest = state_write_out -> temperature_gas[closest_index*NO_OF_SCALARS_H + i];
+		    temp_other = state_write_out -> temperature_gas[second_closest_index*NO_OF_SCALARS_H + i];
+		    // calculating the vertical temperature gradient that will be used for the extrapolation
+		    temperature_gradient = (temp_closest - temp_other)/(grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] - grid -> z_scalar[i + second_closest_index*NO_OF_SCALARS_H]);
+		    // performing the interpolation / extrapolation to two meters above the surface
+		    t2[i] = temp_closest + delta_z_temp*temperature_gradient;
 		    
 		    z_height = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i];
 		    cape[i] = 0;
@@ -146,7 +160,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    }
 		    if (NO_OF_CONSTITUENTS >= 4)
 		    {
-            	tcdc[i] = 100*cloudy_box_counter/(2*NO_OF_LAYERS);
+            	tcdc[i] = fmax(100*cloudy_box_counter/(2*NO_OF_LAYERS/10), 100);
             }
             else
             {
@@ -181,38 +195,32 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		10 m wind diagnostics
 		---------------------
 		*/
-		double *wind_10_m_both_dir_array = malloc(2*min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
-		double wind_10_m_downscale_factor = 0.667;
 		double wind_tangential;
-		int time_step_10_m_wind;
+		int j;
 		double *wind_10_m_speed = malloc(min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
 		double *wind_10_m_mean_u = malloc(NO_OF_VECTORS_H*sizeof(double));
 		double *wind_10_m_mean_v = malloc(NO_OF_VECTORS_H*sizeof(double));
-		for (int j = 0; j < min_no_of_output_steps*NO_OF_VECTORS_H; ++j)
+		// loop over the horizontal vector points
+		for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)
 		{
-			time_step_10_m_wind = j/NO_OF_VECTORS_H;
-			h_index = j - time_step_10_m_wind*NO_OF_VECTORS_H;
-			wind_10_m_both_dir_array[2*j + 0] = wind_10_m_downscale_factor*wind_h_lowest_layer_array[j];
-			wind_tangential = 0;
-			for (int i = 0; i < 10; ++i)
+			// initializing the means with zero
+			wind_10_m_mean_u[h_index] = 0;
+			wind_10_m_mean_v[h_index] = 0;
+			// loop over the time steps
+			for (int time_step_10_m_wind = 0; time_step_10_m_wind < min_no_of_output_steps; ++time_step_10_m_wind)
 			{
-				wind_tangential += grid -> trsk_weights[10*h_index + i]*wind_h_lowest_layer_array[time_step_10_m_wind*NO_OF_VECTORS_H + grid -> trsk_indices[10*h_index + i]];
-			}
-			wind_10_m_both_dir_array[2*j + 1] = wind_10_m_downscale_factor*wind_tangential;
-			wind_10_m_speed[j] = sqrt(pow(wind_10_m_both_dir_array[2*j + 0], 2) + pow(wind_10_m_both_dir_array[2*j + 1], 2));
-			if (time_step_10_m_wind == 0)
-			{
-				wind_10_m_mean_u[h_index] = 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 0];
-				wind_10_m_mean_v[h_index] = 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 1];
-			}
-			else
-			{
-				wind_10_m_mean_u[h_index] += 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 0];
-				wind_10_m_mean_v[h_index] += 1.0/min_no_of_output_steps*wind_10_m_both_dir_array[2*j + 1];
+				j = time_step_10_m_wind*NO_OF_VECTORS_H + h_index;
+				wind_tangential = 0;
+				for (int i = 0; i < 10; ++i)
+				{
+					wind_tangential += grid -> trsk_weights[10*h_index + i]*wind_h_10m_array[time_step_10_m_wind*NO_OF_VECTORS_H + grid -> trsk_indices[10*h_index + i]];
+				}
+				wind_10_m_speed[j] = sqrt(pow(wind_h_10m_array[j], 2) + pow(wind_tangential, 2));
+				wind_10_m_mean_u[h_index] += 1.0/min_no_of_output_steps*wind_h_10m_array[j];
+				wind_10_m_mean_v[h_index] += 1.0/min_no_of_output_steps*wind_tangential;
 			}
 		}
 		// freeing memory we do not need anymore
-		free(wind_10_m_both_dir_array);
 		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 		{
 			passive_turn(wind_10_m_mean_u[i], wind_10_m_mean_v[i], -grid -> direction[i], &wind_u_value, &wind_v_value);
@@ -657,7 +665,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     if (io_config -> pressure_level_output_switch == 1)
     {
     	double *pressure_levels = malloc(sizeof(double)*NO_OF_PRESSURE_LEVELS);
-    	double *distance_from_pressure_level = malloc(sizeof(double)*NO_OF_LAYERS);
     	get_pressure_levels(pressure_levels);
     	// Allocating memory for the variables on pressure levels.
     	double (*geopotential_height)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
@@ -680,10 +687,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 					This leads to fabs(z_2 - z_1) = fabs(H*log(p_2/p) - H*log(p_1/p)) = H*fabs(log(p_2/p) - log(p_1/p)) = H*fabs(log(p_2/p_1))
 					propto fabs(log(p_2/p_1)).
 					*/
-					distance_from_pressure_level[k] = fabs(log(pressure_levels[j]/(*pressure)[k*NO_OF_SCALARS_H + i]));
+					vector_to_minimize[k] = fabs(log(pressure_levels[j]/(*pressure)[k*NO_OF_SCALARS_H + i]));
 				}
 				// Finding the model layer that is the closest to the desired pressure level.
-				closest_layer_index = find_min_index(distance_from_pressure_level, NO_OF_LAYERS);
+				closest_layer_index = find_min_index(vector_to_minimize, NO_OF_LAYERS);
 				// first guess for the other layer that will be used for the interpolation
 				other_layer_index = closest_layer_index + 1;
 				// in this case, the layer above the closest layer will be used for the interpolation
@@ -708,7 +715,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 					this is the interpolation weight:
 					closest_weight = 1 - fabs((delta z)_{closest})/(fabs(z_{closest} - z_{other}))
 					*/
-					closest_weight = 1 - distance_from_pressure_level[closest_layer_index]/
+					closest_weight = 1 - vector_to_minimize[closest_layer_index]/
 					(fabs(log((*pressure)[closest_layer_index*NO_OF_SCALARS_H + i]/(*pressure)[other_layer_index*NO_OF_SCALARS_H + i])) + EPSILON_SECURITY);
 					geopotential_height[i][j] = closest_weight*grid -> gravity_potential[closest_layer_index*NO_OF_SCALARS_H + i]
 					+ (1 - closest_weight)*grid -> gravity_potential[other_layer_index*NO_OF_SCALARS_H + i];
@@ -1072,7 +1079,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     	free(v_on_pressure_levels);
     	free(epv_on_pressure_levels);
     	free(pressure_levels);
-    	free(distance_from_pressure_level);
     }
 
 	// Grib output.

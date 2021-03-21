@@ -8,6 +8,7 @@ Here, vorticities are calculated. The word "vorticity" hereby refers to both ver
 
 #include "../enum_and_typedefs.h"
 #include <stdio.h>
+#include "geos95.h"
 #include "../diagnostics/diagnostics.h"
 #include "spatial_operators.h"
 

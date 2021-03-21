@@ -10,7 +10,6 @@ Github repository: https://github.com/AUN4GFD/game
 #define SECONDS_PER_HOUR 3600
 #define RHO_WATER 1024.0
 #define OMEGA (7.292115e-5)
-#define RADIUS 6371000.789927
 #define FOOT 0.3048
 #define EPSILON_SECURITY (1e-10)
 

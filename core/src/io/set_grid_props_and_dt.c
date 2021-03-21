@@ -6,6 +6,7 @@ Github repository: https://github.com/AUN4GFD/game
 #include <stdlib.h>
 #include <stdio.h>
 #include <netcdf.h>
+#include "geos95.h"
 #include "../enum_and_typedefs.h"
 #include "../spatial_operators/spatial_operators.h"
 #include "../diagnostics/diagnostics.h"
