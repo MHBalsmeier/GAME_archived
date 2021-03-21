@@ -67,6 +67,14 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
     if ((retval = nc_close(ncid)))
         NCERR(retval);
     
+    // checking wether the stretching parameters of the grid used for creating the input file and the grid file read in do conform
+    if (grid -> stretching_parameter != stretching_parameter)
+    {
+    	printf("Stretching parameters of grid and input file do not conform.\n");
+    	printf("Aborting.\n");
+    	exit(1);
+    }
+    
     // resricting the maximum relative humidity to 100 %
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
@@ -74,14 +82,6 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 		{
 			water_vapour_density[i] = water_vapour_density[i]/rel_humidity(water_vapour_density[i], temperature_gas[i]);
 		}
-    }
-    
-    // checking wether the stretching parameters of the grid used for creating the input file and the grid file read in do conform
-    if (grid -> stretching_parameter != stretching_parameter)
-    {
-    	printf("Stretching parameters of grid and input file do not conform.\n");
-    	printf("Aborting.\n");
-    	exit(1);
     }
     
     int layer_index, h_index;
@@ -128,7 +128,7 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 		    if (NO_OF_CONSTITUENTS >= 4)
 		    {
 				init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = water_vapour_density[i];
-				if (init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] < 0)
+				if (init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] < 0)
 				{
 					printf("Error: init_state -> mass_densities < 0 somewhere.\n");
 					printf("Aborting.\n");

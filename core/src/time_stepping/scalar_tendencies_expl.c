@@ -34,7 +34,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 	/*
 	phase transitions are only updated at the first RK step
 	*/
-	if (no_rk_step == 0 && NO_OF_CONSTITUENTS == 4)
+	if (NO_OF_CONSTITUENTS == 4)
 	{
 	    calc_h2otracers_source_rates(
 	    irrev -> constituent_mass_source_rates,

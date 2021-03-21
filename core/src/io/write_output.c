@@ -675,14 +675,23 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			{
 				for (int k = 0; k < NO_OF_LAYERS; ++k)
 				{
+					/*
+					It is approx. p = p_0exp(-z/H) => log(p) = log(p_0) - z/H => z/H = log(p_0) - log(p) = log(p_0/p) => z = H*log(p_0/p).
+					This leads to fabs(z_2 - z_1) = fabs(H*log(p_2/p) - H*log(p_1/p)) = H*fabs(log(p_2/p) - log(p_1/p)) = H*fabs(log(p_2/p_1))
+					propto fabs(log(p_2/p_1)).
+					*/
 					distance_from_pressure_level[k] = fabs(log(pressure_levels[j]/(*pressure)[k*NO_OF_SCALARS_H + i]));
 				}
+				// Finding the model layer that is the closest to the desired pressure level.
 				closest_layer_index = find_min_index(distance_from_pressure_level, NO_OF_LAYERS);
+				// first guess for the other layer that will be used for the interpolation
 				other_layer_index = closest_layer_index + 1;
+				// in this case, the layer above the closest layer will be used for the interpolation
 				if (pressure_levels[j] < (*pressure)[closest_layer_index*NO_OF_SCALARS_H + i])
 				{
 					other_layer_index = closest_layer_index - 1;
 				}
+				// in this case, a missing value will be written
 				if ((closest_layer_index == NO_OF_LAYERS - 1 && other_layer_index == NO_OF_LAYERS) || (closest_layer_index < 0 || other_layer_index < 0))
 				{
 					geopotential_height[i][j] = 9999;
@@ -695,6 +704,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				}
 				else
 				{
+					/*
+					this is the interpolation weight:
+					closest_weight = 1 - fabs((delta z)_{closest})/(fabs(z_{closest} - z_{other}))
+					*/
 					closest_weight = 1 - distance_from_pressure_level[closest_layer_index]/
 					(fabs(log((*pressure)[closest_layer_index*NO_OF_SCALARS_H + i]/(*pressure)[other_layer_index*NO_OF_SCALARS_H + i])) + EPSILON_SECURITY);
 					geopotential_height[i][j] = closest_weight*grid -> gravity_potential[closest_layer_index*NO_OF_SCALARS_H + i]
