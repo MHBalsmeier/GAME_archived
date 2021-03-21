@@ -43,7 +43,8 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 	    state -> condensed_density_temperatures,
 	    state -> temperature_gas,
 	    NO_OF_SCALARS,
-	    delta_t);
+	    delta_t,
+	    config_info -> assume_lte);
 	}
 	
 	// loop over all constituents

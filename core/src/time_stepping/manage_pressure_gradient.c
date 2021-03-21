@@ -98,12 +98,12 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 			*state -> temperature_gas[i]
 			*state -> mass_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i]/density_gas(state, i);
 		}
-		grad(diagnostics -> scalar_field_placeholder, diagnostics -> tgrads_component, grid);
-		scalar_times_vector(diagnostics -> pressure_gradient_1_prefactor, diagnostics -> tgrads_component, diagnostics -> tgrads_component, grid);
+		grad(diagnostics -> scalar_field_placeholder, diagnostics -> vector_field_placeholder, grid);
+		scalar_times_vector(diagnostics -> pressure_gradient_1_prefactor, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
 		{
-			diagnostics -> tgrads[i] += diagnostics -> tgrads_component[i];
+			diagnostics -> tgrads[i] += diagnostics -> vector_field_placeholder[i];
 		}
 	}
 	
