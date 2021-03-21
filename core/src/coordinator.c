@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     printf("Released under the MIT license, visit https://github.com/AUN4GFD/game for more information.\n");
     printf("%s", stars);
-	printf("What you want to do:\n");
+	printf("what you want to do:\n");
 	printf("operator:\t\t\t%s\n", OPERATOR);
 	printf("run_id:\t\t\t\t%s\n", RUN_ID);
 	free(OPERATOR);
@@ -408,13 +408,15 @@ int main(int argc, char *argv[])
     // delta_t is the sound time step
     double delta_t;
     calc_delta_t_and_related(cfl_margin, &delta_t, grid, dualgrid, state_old, config_info);
-	printf("Time step set. Information on CFL-related quantities:\n");
     if (radiation_delta_t < delta_t)
     {
     	printf("It is radiation_delta_t < delta_t.\n");
     	printf("Aborting.\n");
     	exit(1);
     }
+	printf("Time step set. Information on CFL-related quantities:\n");
+    printf("divergent modes time step: %lf s\n", delta_t);
+    printf("advective time step: %lf s\n", config_info -> adv_sound_ratio*delta_t);
     // calculating the average horizontal resolution
 	double eff_hor_res = 0;
 	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
@@ -441,9 +443,7 @@ int main(int argc, char *argv[])
 		}
 	}
 	printf("effective horizontal resolution: %lf km\n", 1e-3*eff_hor_res);
-	printf("minimum normal distance: %lf km\n", 1e-3*normal_dist_min_hor);
-    printf("divergent modes time step: %lf s\n", delta_t);
-    printf("advective time step: %lf s\n", config_info -> adv_sound_ratio*delta_t);
+	printf("minimum horizontal normal distance: %lf km\n", 1e-3*normal_dist_min_hor);
     double max_speed_hor = 100;
 	printf("horizontal advective Courant numer: %lf\n", config_info -> adv_sound_ratio*delta_t/normal_dist_min_hor*max_speed_hor);
     double max_speed_vert = 0.1;

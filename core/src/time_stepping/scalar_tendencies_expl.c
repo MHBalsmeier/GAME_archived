@@ -23,7 +23,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     double c_v_cond;
     
     // determining the weights for the RK stepping
-    double old_weight, new_weight, tracer_heating, density_gas_weight;
+    double old_weight, new_weight, tracer_heating, density_gas_weight, density_total_weight;
     new_weight = 1;
     if (no_rk_step == 1)
     {
@@ -120,7 +120,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 			}
 			divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			// adding the tendencies in all grid boxes
-			#pragma omp parallel for private(layer_index, h_index, tracer_heating)
+			#pragma omp parallel for private(layer_index, h_index, tracer_heating, density_gas_weight, density_total_weight)
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
 				layer_index = j/NO_OF_SCALARS_H;
@@ -129,14 +129,18 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 				{
 					// determining the heating rate that comes from the tracers
 					tracer_heating = 0;
+					density_gas_weight = 0;
+					density_total_weight = 0;
 					if (config_info -> assume_lte == 0)
 					{
 						density_gas_weight = density_gas(state, j);
+						density_total_weight = density_total(state, j);
 						tracer_heating = irrev -> constituent_heat_source_rates[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j];
 					}
 					if (config_info -> assume_lte == 1)
 					{
-						density_gas_weight = state -> mass_densities[i*NO_OF_SCALARS + j];
+						density_gas_weight = state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j];
+						density_total_weight = state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j];
 						for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS + 1; ++k)
 						{
 							tracer_heating += irrev -> constituent_heat_source_rates[k*NO_OF_SCALARS + j];
@@ -149,7 +153,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 					-diagnostics -> flux_density_divv[j]
 					// the diabatic forcings
 					// weighting factor
-					+ state -> mass_densities[i*NO_OF_SCALARS + j]/density_total(state, j)*(
+					+ state -> mass_densities[i*NO_OF_SCALARS + j]/density_total_weight*(
 					// dissipation of molecular + turbulent momentum diffusion
 					irrev -> heating_diss[j]
 					// molecular + turbulent heat transport
