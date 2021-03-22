@@ -102,20 +102,22 @@ int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vec
             -------------------------------------------------------------------------------------------------------
             */
             out_field[i]
+            // effect of layer above
 			-= 0.5
 			*grid -> inner_product_weights[8*(layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index_shifted]) + 6]
 			*mass_flux_density[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index_shifted]]
 			*pot_vorticity[h_index_shifted + layer_index*2*NO_OF_VECTORS_H];
 			out_field[i]
 			-= 0.5
-			*grid -> inner_product_weights[8*(layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index_shifted]) + 7]
-			*mass_flux_density[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index_shifted]]
-			*pot_vorticity[h_index_shifted + (layer_index + 1)*2*NO_OF_VECTORS_H];
-			out_field[i]
-			-= 0.5
 			*grid -> inner_product_weights[8*(layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index_shifted]) + 6]
 			*mass_flux_density[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index_shifted]]
 			*pot_vorticity[h_index_shifted + layer_index*2*NO_OF_VECTORS_H];
+            // effect of layer below
+			out_field[i]
+			-= 0.5
+			*grid -> inner_product_weights[8*(layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index_shifted]) + 7]
+			*mass_flux_density[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index_shifted]]
+			*pot_vorticity[h_index_shifted + (layer_index + 1)*2*NO_OF_VECTORS_H];
 			out_field[i]
 			-= 0.5
 			*grid -> inner_product_weights[8*(layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index_shifted]) + 7]
@@ -128,7 +130,7 @@ int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vec
         --------------------------------------------------------------
         */
         else
-        {    
+        {
 			/*
 			Determining the vertical acceleration due to the vorticity flux term.
 			*/
