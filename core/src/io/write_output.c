@@ -146,20 +146,18 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		    }
 		    
 		    // Now come the hydrometeors.
-        	cloudy_box_counter = 0;
-		    for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS; ++k)
-		    {
-		        for (int l = 0; l < NO_OF_LAYERS; ++l)
-		        {
-		            if (state_write_out -> mass_densities[k*NO_OF_SCALARS + l*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX)
-		            {
-		        		cloudy_box_counter += 1;
-	                }
-		        }
-		    }
 		    if (NO_OF_CONSTITUENTS >= 4)
 		    {
-            	tcdc[i] = fmax(100*cloudy_box_counter/(2*NO_OF_LAYERS/10), 100);
+        		cloudy_box_counter = 0;
+    	        for (int k = 0; k < NO_OF_LAYERS; ++k)
+			    {
+			        if (state_write_out -> mass_densities[k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX
+			        || state_write_out -> mass_densities[NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX)
+			        {
+			    		cloudy_box_counter += 1;
+		            }
+			    }
+            	tcdc[i] = fmax(100*cloudy_box_counter/(NO_OF_LAYERS/10.0), 100);
             }
             else
             {
