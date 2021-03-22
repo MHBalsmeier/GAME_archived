@@ -416,8 +416,8 @@ int main(int argc, char *argv[])
     	exit(1);
     }
 	printf("Time step set. Information on CFL-related quantities:\n");
-    printf("divergent modes time step: %lf s\n", delta_t);
-    printf("advective time step: %lf s\n", config_info -> adv_sound_ratio*delta_t);
+    printf("fast dynamic modes time step: %lf s\n", delta_t);
+    printf("slow dynamic modes time step: %lf s\n", config_info -> adv_sound_ratio*delta_t);
     // calculating the average horizontal resolution
 	double eff_hor_res = 0;
 	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
@@ -453,10 +453,10 @@ int main(int argc, char *argv[])
     printf("It begins.\n");
     printf("%s", stars);
     
-    int min_no_of_output_steps = 600/delta_t;
-    double *wind_h_10m_array = calloc(1, min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
+    int min_no_of_10m_wind_avg_steps = 600/delta_t;
+    double *wind_h_10m_array = calloc(1, min_no_of_10m_wind_avg_steps*NO_OF_VECTORS_H*sizeof(double));
     double t_write = t_init;
-    double delta_z, wind_closest, wind_other, wind_gradient;
+    double delta_z, wind_closest, wind_second_closest, wind_gradient;
     double vector_to_minimize[NO_OF_LAYERS];
     int closest_index, second_closest_index;
 	for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)
@@ -468,7 +468,8 @@ int main(int argc, char *argv[])
 		}
 		closest_index = find_min_index(vector_to_minimize, NO_OF_LAYERS);
 		second_closest_index = closest_index - 1;
-		if (grid -> z_vector[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index] > grid -> z_vector[NO_OF_SCALARS_H + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + h_index] + 10
+		if (grid -> z_vector[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index]
+		> grid -> z_vector[NO_OF_SCALARS_H + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + h_index] + 10
 		&& closest_index < NO_OF_LAYERS - 1)
 		{
 			second_closest_index = closest_index + 1;
@@ -478,12 +479,12 @@ int main(int argc, char *argv[])
 		+ grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index]]) + 10
 		- grid -> z_vector[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index];		
 		wind_closest = state_old -> velocity_gas[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
-		wind_other = state_old -> velocity_gas[NO_OF_SCALARS_H + second_closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
+		wind_second_closest = state_old -> velocity_gas[NO_OF_SCALARS_H + second_closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
 		// calculating the vertical gradient of the horizontal wind
-		wind_gradient = (wind_closest - wind_other)
+		wind_gradient = (wind_closest - wind_second_closest)
 		/(grid -> z_vector[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index] - grid -> z_vector[NO_OF_SCALARS_H + second_closest_index*NO_OF_VECTORS_PER_LAYER + h_index]);
 		// here, for all output time steps, the initial value is used
-		for (int time_step_10_m_wind = 0; time_step_10_m_wind < min_no_of_output_steps; ++time_step_10_m_wind)
+		for (int time_step_10_m_wind = 0; time_step_10_m_wind < min_no_of_10m_wind_avg_steps; ++time_step_10_m_wind)
 		{
 			wind_h_10m_array[time_step_10_m_wind*NO_OF_VECTORS_H + h_index]
 			= wind_closest + delta_z*wind_gradient;
@@ -492,7 +493,7 @@ int main(int argc, char *argv[])
     Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
     Forcings *forcings = calloc(1, sizeof(Forcings));
     // writing out the initial state of the model run
-    write_out(state_old, wind_h_10m_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
+    write_out(state_old, wind_h_10m_array, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
     t_write += WRITE_OUT_INTERVAL;
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     double t_0;
@@ -603,7 +604,7 @@ int main(int argc, char *argv[])
         // 5 minutes before the output time, the wind in the lowest layer needs to be collected for 10 m wind diagnostics.
         if (t_0 >= t_write - 300)
         {
-        	if (wind_10_m_step_counter < min_no_of_output_steps)
+        	if (wind_10_m_step_counter < min_no_of_10m_wind_avg_steps)
         	{
 		    	for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)
        			{
@@ -628,9 +629,9 @@ int main(int argc, char *argv[])
 					// wind in the closest layer
 					wind_closest = state_old -> velocity_gas[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
 					// wind in the other layer
-					wind_other = state_old -> velocity_gas[NO_OF_SCALARS_H + second_closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
-					// calculating thevertical gradient of the horizontal wind
-					wind_gradient = (wind_closest - wind_other)
+					wind_second_closest = state_old -> velocity_gas[NO_OF_SCALARS_H + second_closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
+					// calculating the vertical gradient of the horizontal wind
+					wind_gradient = (wind_closest - wind_second_closest)
 					// the vertical distance between the two layers used for calculating the gradient
 					/(grid -> z_vector[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index]
 					- grid -> z_vector[NO_OF_SCALARS_H + second_closest_index*NO_OF_VECTORS_PER_LAYER + h_index]);
@@ -645,7 +646,7 @@ int main(int argc, char *argv[])
         if(t_0 + delta_t >= t_write + 300 && t_0 <= t_write + 300)
         {
         	// here, output is actually written
-            write_out(state_write, wind_h_10m_array, min_no_of_output_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
+            write_out(state_write, wind_h_10m_array, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
             // setting the next output time
             t_write += WRITE_OUT_INTERVAL;
             
@@ -657,7 +658,7 @@ int main(int argc, char *argv[])
             printf("run progress: %f h\n", (t_0 + delta_t - t_init)/SECONDS_PER_HOUR);
             
             // resetting the wind in the lowest layer to zero
-            for (int i = 0; i < min_no_of_output_steps*NO_OF_VECTORS_H; ++i)
+            for (int i = 0; i < min_no_of_10m_wind_avg_steps*NO_OF_VECTORS_H; ++i)
             {
             	wind_h_10m_array[i] = 0;
         	}

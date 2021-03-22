@@ -59,7 +59,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
     int retval;
 	int err = 0;
 	
-	int layer_index;
+	int layer_index, closest_index, second_closest_index;
 	double wind_u_value, wind_v_value, cloudy_box_counter;
 	double vector_to_minimize[NO_OF_LAYERS];
 	
@@ -80,8 +80,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		double *rprate = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *sprate = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *cape = malloc(NO_OF_SCALARS_H*sizeof(double));
-		int closest_index, second_closest_index;
-		double temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta_v_prime, theta_v, cape_integrand, delta_z, temp_closest, temp_other, delta_z_temp, temperature_gradient, density_v, density_h;
+		double temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta_v_prime, theta_v, cape_integrand, delta_z, temp_closest, temp_second_closest, delta_z_temp, temperature_gradient, density_v, density_h;
 		double z_tropopause = 15e3;
 		double standard_vert_lapse_rate = 0.0065;
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
@@ -115,9 +114,9 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 			}
 		    delta_z_temp = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i] + 2 - grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H];
 		    temp_closest = state_write_out -> temperature_gas[closest_index*NO_OF_SCALARS_H + i];
-		    temp_other = state_write_out -> temperature_gas[second_closest_index*NO_OF_SCALARS_H + i];
+		    temp_second_closest = state_write_out -> temperature_gas[second_closest_index*NO_OF_SCALARS_H + i];
 		    // calculating the vertical temperature gradient that will be used for the extrapolation
-		    temperature_gradient = (temp_closest - temp_other)/(grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] - grid -> z_scalar[i + second_closest_index*NO_OF_SCALARS_H]);
+		    temperature_gradient = (temp_closest - temp_second_closest)/(grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] - grid -> z_scalar[i + second_closest_index*NO_OF_SCALARS_H]);
 		    // performing the interpolation / extrapolation to two meters above the surface
 		    t2[i] = temp_closest + delta_z_temp*temperature_gradient;
 		    
@@ -220,17 +219,13 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 				wind_10_m_mean_v[h_index] += 1.0/min_no_of_output_steps*wind_tangential;
 			}
 		}
-		// freeing memory we do not need anymore
 		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 		{
 			passive_turn(wind_10_m_mean_u[i], wind_10_m_mean_v[i], -grid -> direction[i], &wind_u_value, &wind_v_value);
 			wind_10_m_mean_u[i] = wind_u_value;
 			wind_10_m_mean_v[i] = wind_v_value;
 		}
-		/*
-		Diagnozing gusts at 10 m above the surface.
-		-------------------------------------------
-		*/
+		// diagnozing gusts at 10 m above the surface
 		double standard_deviation;
 		double gusts_parameter = 3;
 		double *wind_10_m_gusts_speed = malloc(NO_OF_VECTORS_H*sizeof(double));
@@ -660,7 +655,6 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
     free(pot_temp);
     
 	// Pressure level output.
-	int closest_layer_index, other_layer_index;
 	double closest_weight;
     if (io_config -> pressure_level_output_switch == 1)
     {
@@ -690,16 +684,16 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 					vector_to_minimize[k] = fabs(log(pressure_levels[j]/(*pressure)[k*NO_OF_SCALARS_H + i]));
 				}
 				// Finding the model layer that is the closest to the desired pressure level.
-				closest_layer_index = find_min_index(vector_to_minimize, NO_OF_LAYERS);
+				closest_index = find_min_index(vector_to_minimize, NO_OF_LAYERS);
 				// first guess for the other layer that will be used for the interpolation
-				other_layer_index = closest_layer_index + 1;
+				second_closest_index = closest_index + 1;
 				// in this case, the layer above the closest layer will be used for the interpolation
-				if (pressure_levels[j] < (*pressure)[closest_layer_index*NO_OF_SCALARS_H + i])
+				if (pressure_levels[j] < (*pressure)[closest_index*NO_OF_SCALARS_H + i])
 				{
-					other_layer_index = closest_layer_index - 1;
+					second_closest_index = closest_index - 1;
 				}
 				// in this case, a missing value will be written
-				if ((closest_layer_index == NO_OF_LAYERS - 1 && other_layer_index == NO_OF_LAYERS) || (closest_layer_index < 0 || other_layer_index < 0))
+				if ((closest_index == NO_OF_LAYERS - 1 && second_closest_index == NO_OF_LAYERS) || (closest_index < 0 || second_closest_index < 0))
 				{
 					geopotential_height[i][j] = 9999;
 					t_on_pressure_levels[i][j] = 9999;
@@ -715,23 +709,23 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 					this is the interpolation weight:
 					closest_weight = 1 - fabs((delta z)_{closest})/(fabs(z_{closest} - z_{other}))
 					*/
-					closest_weight = 1 - vector_to_minimize[closest_layer_index]/
-					(fabs(log((*pressure)[closest_layer_index*NO_OF_SCALARS_H + i]/(*pressure)[other_layer_index*NO_OF_SCALARS_H + i])) + EPSILON_SECURITY);
-					geopotential_height[i][j] = closest_weight*grid -> gravity_potential[closest_layer_index*NO_OF_SCALARS_H + i]
-					+ (1 - closest_weight)*grid -> gravity_potential[other_layer_index*NO_OF_SCALARS_H + i];
+					closest_weight = 1 - vector_to_minimize[closest_index]/
+					(fabs(log((*pressure)[closest_index*NO_OF_SCALARS_H + i]/(*pressure)[second_closest_index*NO_OF_SCALARS_H + i])) + EPSILON_SECURITY);
+					geopotential_height[i][j] = closest_weight*grid -> gravity_potential[closest_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*grid -> gravity_potential[second_closest_index*NO_OF_SCALARS_H + i];
 					geopotential_height[i][j] = geopotential_height[i][j]/GRAVITY_MEAN;
-					t_on_pressure_levels[i][j] = closest_weight*state_write_out -> temperature_gas[closest_layer_index*NO_OF_SCALARS_H + i]
-					+ (1 - closest_weight)*state_write_out -> temperature_gas[other_layer_index*NO_OF_SCALARS_H + i];
-					rh_on_pressure_levels[i][j] = closest_weight*(*rh)[closest_layer_index*NO_OF_SCALARS_H + i]
-					+ (1 - closest_weight)*(*rh)[other_layer_index*NO_OF_SCALARS_H + i];
-					epv_on_pressure_levels[i][j] = closest_weight*(*epv)[closest_layer_index*NO_OF_SCALARS_H + i]
-					+ (1 - closest_weight)*(*epv)[other_layer_index*NO_OF_SCALARS_H + i];
-					rel_vort_on_pressure_levels[i][j] = closest_weight*(*rel_vort)[closest_layer_index*NO_OF_SCALARS_H + i]
-					+ (1 - closest_weight)*(*rel_vort)[other_layer_index*NO_OF_SCALARS_H + i];
-					u_on_pressure_levels[i][j] = closest_weight*diagnostics-> u_at_cell[closest_layer_index*NO_OF_SCALARS_H + i]
-					+ (1 - closest_weight)*diagnostics-> u_at_cell[other_layer_index*NO_OF_SCALARS_H + i];
-					v_on_pressure_levels[i][j] = closest_weight*diagnostics-> v_at_cell[closest_layer_index*NO_OF_SCALARS_H + i]
-					+ (1 - closest_weight)*diagnostics-> v_at_cell[other_layer_index*NO_OF_SCALARS_H + i];
+					t_on_pressure_levels[i][j] = closest_weight*state_write_out -> temperature_gas[closest_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*state_write_out -> temperature_gas[second_closest_index*NO_OF_SCALARS_H + i];
+					rh_on_pressure_levels[i][j] = closest_weight*(*rh)[closest_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*(*rh)[second_closest_index*NO_OF_SCALARS_H + i];
+					epv_on_pressure_levels[i][j] = closest_weight*(*epv)[closest_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*(*epv)[second_closest_index*NO_OF_SCALARS_H + i];
+					rel_vort_on_pressure_levels[i][j] = closest_weight*(*rel_vort)[closest_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*(*rel_vort)[second_closest_index*NO_OF_SCALARS_H + i];
+					u_on_pressure_levels[i][j] = closest_weight*diagnostics-> u_at_cell[closest_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*diagnostics-> u_at_cell[second_closest_index*NO_OF_SCALARS_H + i];
+					v_on_pressure_levels[i][j] = closest_weight*diagnostics-> v_at_cell[closest_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*diagnostics-> v_at_cell[second_closest_index*NO_OF_SCALARS_H + i];
 				}
 			}
 		}
