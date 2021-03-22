@@ -78,16 +78,15 @@ int hori_viscosity_eff(State *state, Vector_field viscosity_eff, Grid *grid, Dia
 	// these things are hardly ever modified
 	double eff_particle_radius = 130e-12;
 	double mean_particle_mass = mean_particle_masses_gas(0);
-	double molecular_viscosity;
 	// the maximum diffusion coefficient (based on stability, including a 30 % safety margin)
 	double max_diff_h_coeff_turb = (1 - 0.3)*0.25*grid -> mean_area_cell/delta_t;
 	// the minimum "background" diffusion coefficient
 	double min_diff_h_coeff_turb = grid -> mean_area_cell*config_info -> diff_h_smag_fac*config_info -> shear_bg;
-	double viscosity_value;
+	double viscosity_value, molecular_viscosity;
 	// calculatuing the shear
 	calc_horizontal_shear(state, diagnostics, grid);
 	int layer_index, h_index;
-	#pragma omp parallel for private(molecular_viscosity, layer_index, h_index)
+	#pragma omp parallel for private(molecular_viscosity, layer_index, h_index, viscosity_value)
 	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
 	{
 		layer_index = i/NO_OF_VECTORS_H;

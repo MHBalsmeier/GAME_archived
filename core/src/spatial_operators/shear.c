@@ -27,25 +27,22 @@ int calc_horizontal_shear(State *state, Diagnostics *diagnostics, Grid *grid)
 	grad_hor(diagnostics -> v_at_cell, diagnostics -> v_at_edge, grid);
 	int layer_index, h_index;
 	double comp_orth, comp_tang, dudx, dudy, dvdx, dvdy;
+	// only the shear of the horizontal wind field is diagnozed
 	#pragma omp parallel for private(layer_index, h_index, dudx, dudy, dvdx, dvdy, comp_orth, comp_tang)
-	for (int i = 0; i < NO_OF_VECTORS; ++i)
+	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
 	{
-		layer_index = i/NO_OF_VECTORS_PER_LAYER;
-		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-		// only the shear of the horizontal wind field is diagnozed
-		if (h_index >= NO_OF_SCALARS_H)
-		{
-			// diagnozing u quantities
-			comp_orth = diagnostics -> u_at_edge[layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
-			tangential_wind(diagnostics -> u_at_edge, layer_index, h_index - NO_OF_SCALARS_H, &comp_tang, grid);
-			passive_turn(comp_orth, comp_tang, -grid -> direction[h_index - NO_OF_SCALARS_H], &dudx, &dudy);
-			// diagnozing v quantities
-			comp_orth = diagnostics -> v_at_edge[layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
-			tangential_wind(diagnostics -> v_at_edge, layer_index, h_index - NO_OF_SCALARS_H, &comp_tang, grid);
-			passive_turn(comp_orth, comp_tang, -grid -> direction[h_index - NO_OF_SCALARS_H], &dvdx, &dvdy);
-			// calculating the deformation according to the MPAS paper
-			diagnostics -> shear[i] = sqrt(pow(dudx - dvdy, 2) + pow(dudy + dvdx, 2));
-		}
+		layer_index = i/NO_OF_VECTORS_H;
+		h_index = i - layer_index*NO_OF_VECTORS_H;
+		// diagnozing u quantities
+		comp_orth = diagnostics -> u_at_edge[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+		tangential_wind(diagnostics -> u_at_edge, layer_index, h_index, &comp_tang, grid);
+		passive_turn(comp_orth, comp_tang, -grid -> direction[h_index], &dudx, &dudy);
+		// diagnozing v quantities
+		comp_orth = diagnostics -> v_at_edge[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+		tangential_wind(diagnostics -> v_at_edge, layer_index, h_index, &comp_tang, grid);
+		passive_turn(comp_orth, comp_tang, -grid -> direction[h_index], &dvdx, &dvdy);
+		// calculating the deformation according to the MPAS paper
+		diagnostics -> shear[i] = sqrt(pow(dudx - dvdy, 2) + pow(dudy + dvdx, 2));
 	}
 	return 0;
 }
