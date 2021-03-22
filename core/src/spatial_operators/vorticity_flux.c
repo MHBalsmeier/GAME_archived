@@ -101,8 +101,8 @@ int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vec
         	Horizontal "non-standard" component (horizontal potential vorticity times vertical mass flux density).
             -------------------------------------------------------------------------------------------------------
             */
-            out_field[i]
             // effect of layer above
+            out_field[i]
 			-= 0.5
 			*grid -> inner_product_weights[8*(layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index_shifted]) + 6]
 			*mass_flux_density[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index_shifted]]
