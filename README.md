@@ -4,20 +4,19 @@ The Geophysical Fluids Modeling Framework (GAME) is a non-hydrostatic hexagonal 
 
 It is known that the forecast skill of a NWP model depends more on physics and data assimilation than on the dynamical core. However, all dynamical cores I know of have inconsistencies even in the most fundamental dynamical quantities (mass, energy forms and entropy). That is why the aim of this project is to develop a next generation dynamical core with the following properties:
 
-* Stability.
-* The numerical dispersion relation shall contain no unphysical branches.
-* The numerical dispersion relation shall contain all relevant physical branches, including a geostrophic mode.
-* Strong scalability on massively parallel computer architectures.
-* Mass conservation to machine precision.
-* Energy conversions shall be based on a spatial discretization of Poisson brackets.
-* Total energy conservation, apart from non-cancelling errors through explicit time stepping.
-* Consistent local dissipation and entropy production.
-* Satisfaction of the Second Law of Thermodynamics including entropy conservation to machine precision in an adiabatic setup.
-* Absence of unphysical numerical stabilizers like divergence damping, fixers, filters and so on.
-* No problems with terrain following coordinates. For example: A resting atmosphere around steep orography shall remain at rest.
-* Ellipsoidal grid geometry.
-* A capable and flexible framework for coupling to physics and to other components of an Earth system model.
-* Consistency also in the presence of multiple constituents and radiation.
+* stability
+* the numerical dispersion relation shall contain no unphysical branches
+* the numerical dispersion relation shall contain all relevant physical branches, including a geostrophic mode
+* strong scalability on massively parallel computer architectures
+* mass conservation to machine precision
+* energy conversions shall be based on a spatial discretization of Poisson brackets
+* energy conservation in the spatial discretization
+* consistent friction and entropy production
+* absence of unphysical numerical stabilizers like divergence damping, fixers and filters
+* no stability problems with terrain following coordinates
+* ellipsoidal grid geometry
+* a capable and flexible framework for coupling to physics and to other components of an Earth system model
+* consistency also in the presence of multiple constituents and radiation
 
 According to my understanding, a hexagonal C-grid is the only discretization where all this can be achieved.
 
@@ -32,14 +31,13 @@ What GAME does what other models do not do and why:
 
 ### Things to be done
 
-* Improvement of the momentum diffusion operator including dissipation.
-* A regional mode.
-* Implementation of SLEVE.
-* Implementation of MPI parallelization.
-* A way to construct Voronoi meshes on an ellipsoid.
-* A largely implicit 3D solver for efficiency (larger time step) and better energy conservation properties.
-* A nesting option.
-* Implementation of ocean dynamics and physics.
+* improvement of the momentum diffusion operator
+* a regional mode
+* SLEVE
+* MPI parallelization
+* a way to construct Voronoi meshes on an ellipsoid
+* a nesting option
+* ocean dynamics and physics
 
 ## Documents
 
