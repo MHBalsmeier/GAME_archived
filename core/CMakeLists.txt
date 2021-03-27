@@ -24,10 +24,8 @@ src/time_stepping/vertical_slice_solvers.c
 src/spatial_operators/vorticity_flux.c
 src/spatial_operators/vorticities.c
 src/spatial_operators/momentum_diff_diss.c
-src/spatial_operators/scalar_times_scalar.c
-src/spatial_operators/vector_times_vector.c
 src/spatial_operators/divergences.c
-src/spatial_operators/scalar_times_vector.c
+src/spatial_operators/multiplications.c
 src/spatial_operators/gradient_operators.c
 src/spatial_operators/inner_product.c
 src/spatial_operators/shear.c

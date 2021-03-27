@@ -3,10 +3,34 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
+/*
+In this file, algebraic multiplications of fields are collected.
+*/
+
 #include "../enum_and_typedefs.h"
 #include "spatial_operators.h"
 #include "../diagnostics/diagnostics.h"
 #include <stdio.h>
+
+int scalar_times_scalar(Scalar_field in_field_0, Scalar_field in_field_1, Scalar_field out_field)
+{
+	#pragma omp parallel for
+    for (int i = 0; i < NO_OF_SCALARS; ++i)
+    {
+    	out_field[i] = in_field_0[i]*in_field_1[i];
+	}
+    return 0;
+}
+
+int vector_times_vector(Vector_field in_field_0, Vector_field in_field_1, Vector_field out_field)
+{
+	#pragma omp parallel for
+    for (int i = 0; i < NO_OF_VECTORS; ++i)
+    {
+    	out_field[i] = in_field_0[i]*in_field_1[i];
+	}
+    return 0;
+}
 
 int scalar_times_vector(Scalar_field scalar_field, Vector_field vector_field, Vector_field out_field, Grid *grid)
 {
