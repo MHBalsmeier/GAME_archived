@@ -27,7 +27,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     new_weight = 1;
     if (no_rk_step == 1)
     {
-    	new_weight = 0.75;
+    	new_weight = get_impl_thermo_weight();
     }
 	old_weight = 1 - new_weight;
     
