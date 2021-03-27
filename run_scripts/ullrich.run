@@ -28,8 +28,8 @@ momentum_diff_h=1 # turn on if you want horizontal momentum diffusion
 dissipative_heating=1 # turn on if you want a dissipative heating rate
 diff_h_smag_fac=0.13 # horizontal diffusion Smagorinsky factor
 shear_bg=1.5e-5 # assumed background (minimum) shear
-mass_advection_order=3 # set this to 2 or 3 (convergence order of the mass advection)
-entropy_advection_order=3 # set this to 2 or 3 (convergence order of the entropy advection)
+mass_advection_order=2 # set this to 2 or 3 (convergence order of the mass advection)
+entropy_advection_order=2 # set this to 2 or 3 (convergence order of the entropy advection)
 
 # "physics" configuration
 mass_dry_diff_h=0 # turn on if you want horizontal dry mass diffusion

@@ -16,7 +16,7 @@ In this source file, the calculation of the explicit part of the momentum equati
 int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, int update_advection, int no_rk_step, double delta_t)
 {
 	// momentum advection
-	if (update_advection == 1)
+	if ((update_advection == 1 && no_rk_step == 1) || config_info -> totally_first_step_bool == 1)
 	{
 		// Here, the gaseous flux density is prepared for the generalized Coriolis term.
 		#pragma omp parallel for
