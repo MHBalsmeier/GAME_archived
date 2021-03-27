@@ -62,7 +62,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		// calling mass advection according to user input
 		if (config_info -> mass_advection_order == 2)
 		{
-			scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
+			scalar_times_vector(diagnostics -> scalar_field_placeholder, wind_advect_tracer, diagnostics -> flux_density, grid);
 		}
 		if (config_info -> mass_advection_order == 3)
 		{

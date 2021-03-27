@@ -6,6 +6,7 @@ Github repository: https://github.com/AUN4GFD/game
 #include "../enum_and_typedefs.h"
 #include "../spatial_operators/spatial_operators.h"
 #include "time_stepping.h"
+#include "../physics/physics.h"
 #include "../diagnostics/diagnostics.h"
 #include <geos95.h>
 #include <stdlib.h>
@@ -39,7 +40,13 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		
 		// 1.) Explicit component of the momentum equation.
 		// ------------------------------------------------
-		forward_tendencies(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info, i, slow_update_bool, delta_t);
+		// Update of the pressure gradient.
+		if (i == 0)
+		{
+			manage_pressure_gradient(state_new, grid, dualgrid, diagnostics, forcings, extrapolation_info, irreversible_quantities, config_info);
+		}
+		// Only the horizontal momentum is a forward tendency.
+		vector_tendencies_expl(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, irreversible_quantities, config_info, slow_update_bool, i, delta_t);
 	    // time stepping for the horizontal momentum can be directly executed
 	    
 	    for (int j = 0; j < NO_OF_VECTORS; ++j)
@@ -55,13 +62,43 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 
 		// 2.) Explicit component of the generalized density equations.
 		// ------------------------------------------------------------
+	    // Radiation is updated here.
+		if (config_info -> rad_on == 1 && config_info -> rad_update == 1 && i == 0)
+		{
+			printf("Starting update of radiative fluxes ...\n");
+			// Fortran needs pointers, this is why this is necessary
+			int no_of_scalars = NO_OF_SCALARS;
+			int no_of_vectors = NO_OF_VECTORS;
+			int no_of_vectors_per_layer = NO_OF_VECTORS_PER_LAYER;
+			int no_of_constituents = NO_OF_CONSTITUENTS;
+			int no_of_condensed_constituents = NO_OF_CONDENSED_CONSTITUENTS;
+			int no_of_layers = NO_OF_LAYERS;
+			calc_radiative_flux_convergence(grid -> latitude_scalar, grid -> longitude_scalar, grid -> z_scalar, grid -> z_vector,
+			state_new -> mass_densities, state_new -> temperature_gas, radiation_tendency, &no_of_scalars, &no_of_vectors, &no_of_vectors_per_layer, &no_of_layers, &no_of_constituents, 
+			&no_of_condensed_constituents, &time_coordinate);
+			printf("Update of radiative fluxes completed.\n");
+		}
+		// Temperature diffusion gets updated here, but only at the first RK step and if heat conduction is switched on.
+		if (i == 0 && (config_info -> temperature_diff_h == 1 || config_info -> temperature_diff_v == 1))
+		{
+			// Now we need to calculate the temperature diffusion coefficients.
+		    calc_temp_diffusion_coeffs(state_new, config_info, irreversible_quantities, diagnostics, delta_t, grid);
+		    // The diffusion of the temperature depends on its gradient.
+			grad(state_new -> temperature_gas, diagnostics -> temperature_gradient, grid);
+			// Now the diffusive temperature flux density can be obtained.
+		    scalar_times_vector_scalar_h_v(irreversible_quantities -> scalar_diffusion_coeff_numerical_h, irreversible_quantities -> scalar_diffusion_coeff_numerical_v,
+		    diagnostics -> temperature_gradient, diagnostics -> flux_density, grid);
+		    // The divergence of the diffusive temperature flux density is the diffusive temperature heating.
+		    divv_h(diagnostics -> flux_density, irreversible_quantities -> temperature_diffusion_heating, grid);
+		    add_vertical_divv(diagnostics -> flux_density, irreversible_quantities -> temperature_diffusion_heating, grid);
+		}
 		if (i == 0)
 		{
-			backward_tendencies(state_new, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, time_coordinate, state_old);
+			scalar_tendencies_expl(state_new, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, state_old -> velocity_gas);
 		}
 		if (i == 1)
 		{	
-			backward_tendencies(state_new, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, time_coordinate, state_new);
+			scalar_tendencies_expl(state_new, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, state_new -> velocity_gas);
 		}
 		
 		// 3.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies (including diabatic forcings).

@@ -18,9 +18,7 @@ src/coordinator.c
 src/settings.c
 src/time_stepping/manage_rkhevi.c
 src/time_stepping/manage_pressure_gradient.c
-src/time_stepping/forward_tendencies.c
 src/time_stepping/vector_tendencies_expl.c
-src/time_stepping/backward_tendencies.c
 src/time_stepping/scalar_tendencies_expl.c
 src/time_stepping/vertical_slice_solvers.c
 src/spatial_operators/vorticity_flux.c
