@@ -12,6 +12,8 @@ Github repository: https://github.com/AUN4GFD/game
 #include <stdlib.h>
 #include <stdio.h>
 
+int temperature_step(State *, State *, State *, Diagnostics *, Config_info *, double, int);
+
 int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrapolation_info, Grid *grid, Dualgrid *dualgrid, Scalar_field radiation_tendency, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, double delta_t, double time_coordinate, int total_step_counter)
 {
 	// slow terms (momentum advection and diffusion) update switch
@@ -119,16 +121,93 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
     }
 
 	// in this case, a large time step has been taken, which we modify into a small step here    
-    if (slow_update_bool == 1)
+    if (slow_update_bool == 1 && config_info -> adv_sound_ratio > 1)
     {
     	linear_combine_two_states(state_old, state_new, state_new, 1 - delta_t_small/delta_t, delta_t_small/delta_t);
     	// this is for thermodynamic consistency
 		temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t_small, 1);
     }
+    
     return 0;
 }
 
-
+int temperature_step(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, int write2new)
+{
+	// explicit temperature diagnostics based on linearization of internal energy
+    double nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_gas_0, density_gas_1, delta_density_gas, delta_entropy_density, temperature_0, specific_entropy_gas_0, specific_entropy_gas_1, c_g_v, c_g_p;
+    double beta = get_impl_thermo_weight();
+    double alpha = 1 - beta;
+	#pragma omp parallel for private(nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_gas_0, density_gas_1, delta_density_gas, delta_entropy_density, temperature_0, specific_entropy_gas_0, specific_entropy_gas_1, c_g_v, c_g_p)
+    for (int i = 0; i < NO_OF_SCALARS; ++i)
+    {
+    	// Difference of the mass densities of the gas phase.
+    	density_gas_0 = 0;
+    	density_gas_1 = 0;
+		int no_of_relevant_constituents = 0;
+		if (config_info -> assume_lte == 0)
+		{
+			no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
+		}
+		if (config_info -> assume_lte == 1)
+		{
+			no_of_relevant_constituents = 1;
+		}
+    	for (int j = 0; j < no_of_relevant_constituents; ++j)
+    	{
+			density_gas_0 += state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
+			if (write2new == 0)
+			{
+				density_gas_1 += state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i]
+				+ delta_t*state_tendency -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
+			}
+			if (write2new == 1)
+			{
+				density_gas_1 += state_new -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
+			}
+    	}
+    	delta_density_gas = density_gas_1 - density_gas_0;
+    	
+    	entropy_density_gas_0 = 0;
+    	entropy_density_gas_1 = 0;
+    	for (int j = 0; j < no_of_relevant_constituents; ++j)
+    	{
+			entropy_density_gas_0 += state_old -> entropy_densities[j*NO_OF_SCALARS + i];
+			if (write2new == 0)
+			{
+				entropy_density_gas_1 += state_old -> entropy_densities[j*NO_OF_SCALARS + i]
+				+ delta_t*state_tendency -> entropy_densities[j*NO_OF_SCALARS + i];
+			}
+			if (write2new == 1)
+			{
+				entropy_density_gas_1 += state_new -> entropy_densities[j*NO_OF_SCALARS + i];
+			}
+    	}
+    	delta_entropy_density = entropy_density_gas_1 - entropy_density_gas_0;
+    	
+    	// Specific entropies of the gas phase of the two time steps.
+    	specific_entropy_gas_0 = entropy_density_gas_0/density_gas_0;
+    	specific_entropy_gas_1 = entropy_density_gas_1/density_gas_1;
+    	
+    	// The temperature of the gas phase of the old time step.
+    	temperature_0 = state_old -> temperature_gas[i];
+    	
+		// Determining the thermodynamic properties of the gas phase.
+    	c_g_v = spec_heat_cap_diagnostics_v(state_old, i, config_info);
+    	c_g_p = spec_heat_cap_diagnostics_p(state_old, i, config_info);
+    	
+    	nominator = c_g_v*density_gas_0*temperature_0 + (alpha*c_g_p*temperature_0 - alpha*specific_entropy_gas_0*temperature_0)*delta_density_gas + alpha*temperature_0*delta_entropy_density;
+    	denominator = c_g_v*density_gas_0 + (c_g_v + beta*specific_entropy_gas_1 - beta*c_g_p)*delta_density_gas - beta*delta_entropy_density;
+    	if (write2new == 0)
+    	{
+			diagnostics -> temperature_gas_explicit[i] = nominator/denominator;
+		}
+    	if (write2new == 1)
+    	{
+			state_new -> temperature_gas[i] = nominator/denominator;
+		}
+    }
+    return 0;
+}
 
 
 

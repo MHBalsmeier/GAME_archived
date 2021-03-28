@@ -14,7 +14,5 @@ double spec_heat_cap_diagnostics_v(State *, int, Config_info *);
 double gas_constant_diagnostics(State *, int, Config_info *);
 double calc_micro_density(double, double);
 double calc_condensates_density_sum(int, Mass_densities);
-int temperature_step(State *, State *, State *, Diagnostics *, Config_info *, double, int);
 double density_total(State *, int);
 double density_gas(State *, int);
-int temperature_explicit_from_eos(State *, State *, Diagnostics *, Config_info *, double);
