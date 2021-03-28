@@ -4,6 +4,7 @@ Github repository: https://github.com/AUN4GFD/game
 */
 
 #include "../enum_and_typedefs.h"
+#include "../settings.h"
 #include "../spatial_operators/spatial_operators.h"
 #include "time_stepping.h"
 #include "../physics/physics.h"
