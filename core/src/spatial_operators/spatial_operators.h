@@ -26,3 +26,9 @@ int momentum_diff_diss(State *, Diagnostics *, Irreversible_quantities*, Config_
 int inner_product(Vector_field, Vector_field, Scalar_field, Grid *, int);
 int curl_of_vorticity(Curl_field, Vector_field, Grid *, Dualgrid *, Config_info *);
 int calc_horizontal_shear(State *, Diagnostics *, Grid *);
+int tangential_wind(Vector_field, int, int, double *, Grid *);
+int calc_uv_at_edge(Vector_field, Vector_field, Vector_field, Grid *);
+int vertical_contravariant_corr(Vector_field, int, int, Grid *, double *);
+int horizontal_covariant(Vector_field, int, int, Grid *, double *);
+int curl_field_to_cells(Curl_field, Scalar_field, Grid *);
+int edges_to_cells(Vector_field, Scalar_field, Grid *);

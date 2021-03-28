@@ -18,10 +18,3 @@ int temperature_step(State *, State *, State *, Diagnostics *, Config_info *, do
 double density_total(State *, int);
 double density_gas(State *, int);
 int temperature_explicit_from_eos(State *, State *, Diagnostics *, Config_info *, double);
-int tangential_wind(Vector_field, int, int, double *, Grid *);
-int calc_uv_at_edge(Vector_field, Vector_field, Vector_field, Grid *);
-int vertical_contravariant_corr(Vector_field, int, int, Grid *, double *);
-int horizontal_covariant(Vector_field, int, int, Grid *, double *);
-int curl_field_to_cells(Curl_field, Scalar_field, Grid *);
-int edges_to_cells(Vector_field, Scalar_field, Grid *);
-int edges_to_cells_lowest_layer(double [], double [], Grid *);

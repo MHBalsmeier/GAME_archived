@@ -29,8 +29,8 @@ src/spatial_operators/multiplications.c
 src/spatial_operators/gradient_operators.c
 src/spatial_operators/inner_product.c
 src/spatial_operators/shear.c
+src/spatial_operators/averaging.c
 src/diagnostics/diffusion_coefficients.c
-src/diagnostics/averaging.c
 src/diagnostics/thermodynamic_diagnostics.c
 src/spatial_operators/linear_combine_two_states.c
 src/io/init_state_setter.c

@@ -220,33 +220,5 @@ int edges_to_cells(Vector_field in_field, Scalar_field out_field, Grid *grid)
     return 0;
 }
 
-int edges_to_cells_lowest_layer(double in_field[NO_OF_VECTORS_H], double out_field[NO_OF_SCALARS_H], Grid *grid)
-{
-	/*
-	This function averages a horizontal vector field (defined in the lowest layer) from edges to centers.
-	*/
-	int j, no_of_edges;
-	#pragma omp parallel for private (j, no_of_edges)
-    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-    {
-    	// initializing the result with zero
-        out_field[i] = 0;
-        // determining the number of edges of the cell at hand
-        no_of_edges = 6;
-        if (i < NO_OF_PENTAGONS)
-        {
-        	no_of_edges = 5;
-        }
-        // loop over all edges of the respective cell
-        for (j = 0; j < no_of_edges; ++j)
-        {
-        	out_field[i] += 0.5
-        	*grid -> inner_product_weights[8*(NO_OF_SCALARS - NO_OF_SCALARS_H + i) + j]
-        	*in_field[grid -> adjacent_vector_indices_h[6*i + j]];
-    	}
-    }
-    return 0;
-}
-
 
 
