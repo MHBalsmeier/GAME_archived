@@ -119,19 +119,16 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		{
 			three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid);
 		}
-		
-		// 6.) Thermodynamically consistent temperature step.
-		// --------------------------------------------------
-		temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, 1);
     }
 
 	// in this case, a large time step has been taken, which we modify into a small step here    
     if (slow_update_bool == 1 && config_info -> adv_sound_ratio > 1)
     {
     	linear_combine_two_states(state_old, state_new, state_new, 1 - delta_t_small/delta_t, delta_t_small/delta_t);
-		// this is for thermodynamic consistency
-		temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t_small, 1);
     }
+	// this is for thermodynamic consistency
+	temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t_small, 1);
+    
     return 0;
 }
 
