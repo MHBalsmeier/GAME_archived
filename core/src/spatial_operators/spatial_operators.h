@@ -22,13 +22,14 @@ int advection_3rd_order(Scalar_field, Vector_field, Vector_field, Vector_field, 
 int scalar_times_vector_scalar_h_v(Scalar_field, Scalar_field, Vector_field, Vector_field, Grid *);
 int vector_times_vector(Vector_field, Vector_field, Vector_field);
 int linear_combine_two_states(State *, State *, State *, double, double);
-int momentum_diff_diss(State *, Diagnostics *, Irreversible_quantities*, Config_info *, Grid *, Dualgrid *, double);
 int inner_product(Vector_field, Vector_field, Scalar_field, Grid *, int);
-int curl_of_vorticity(Curl_field, Vector_field, Grid *, Dualgrid *, Config_info *);
-int calc_horizontal_shear(State *, Diagnostics *, Grid *);
 int tangential_wind(Vector_field, int, int, double *, Grid *);
 int calc_uv_at_edge(Vector_field, Vector_field, Vector_field, Grid *);
 int vertical_contravariant_corr(Vector_field, int, int, Grid *, double *);
 int horizontal_covariant(Vector_field, int, int, Grid *, double *);
 int curl_field_to_cells(Curl_field, Scalar_field, Grid *);
 int edges_to_cells(Vector_field, Scalar_field, Grid *);
+int hori_momentum_diffusion(State *, Diagnostics *, Irreversible_quantities*, Config_info *, Grid *, Dualgrid *, double);
+int curl_of_vorticity(Curl_field, Vector_field, Grid *, Dualgrid *, Config_info *);
+int calc_horizontal_shear(State *, Diagnostics *, Grid *);
+int simple_dissipation_rate(State *, Irreversible_quantities *, Grid *);

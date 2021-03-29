@@ -129,21 +129,6 @@ int hori_viscosity_eff(State *state, Vector_field viscosity_eff, Grid *grid, Dia
 	return 0;
 }
 
-int ver_viscosity_eff(State *state, Vector_field viscosity_eff, Grid *grid)
-{
-	double eff_particle_radius = 130e-12;
-	double mean_particle_mass = mean_particle_masses_gas(0);
-	for (int i = 0; i < NO_OF_LEVELS; ++i)
-	{
-		for (int j = 0; j < NO_OF_SCALARS_H; ++j)
-		{
-			calc_diffusion_coeff(state -> temperature_gas[NO_OF_SCALARS/2], mean_particle_mass,
-			state -> mass_densities[NO_OF_SCALARS/2], eff_particle_radius, &viscosity_eff[i*NO_OF_VECTORS_PER_LAYER + j]);
-		}
-	}
-	return 0;
-}
-
 int calc_diffusion_coeff(double temperature, double particle_mass, double density, double particle_radius, double *result)
 {
     double thermal_velocity = sqrt(8*K_B*temperature/(M_PI*particle_mass));

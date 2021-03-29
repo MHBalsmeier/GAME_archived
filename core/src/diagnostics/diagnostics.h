@@ -6,7 +6,6 @@ Github repository: https://github.com/AUN4GFD/game
 int calc_temp_diffusion_coeffs(State *, Config_info *, Irreversible_quantities *, Diagnostics *, double, Grid *);
 int calc_mass_diffusion_coeffs(State *, Config_info *, Scalar_field, Scalar_field);
 int hori_viscosity_eff(State *, Vector_field, Grid *, Diagnostics *, Config_info *, double);
-int ver_viscosity_eff(State *, Vector_field, Grid *);
 int remap_verpri2horpri_vector(Vector_field, int, int, double *, Grid *);
 int pot_temp_diagnostics_dry(State *, Scalar_field);
 double spec_heat_cap_diagnostics_p(State *, int, Config_info *);
