@@ -119,23 +119,25 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		{
 			three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid);
 		}
+		
+		// 6.) Thermodynamically consistent temperature step.
+		// --------------------------------------------------
+		temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, 1);
     }
 
 	// in this case, a large time step has been taken, which we modify into a small step here    
     if (slow_update_bool == 1 && config_info -> adv_sound_ratio > 1)
     {
     	linear_combine_two_states(state_old, state_new, state_new, 1 - delta_t_small/delta_t, delta_t_small/delta_t);
+		// this is for thermodynamic consistency
+		temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t_small, 1);
     }
-
-	// this is for thermodynamic consistency
-	temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t_small, 1);
-    
     return 0;
 }
 
 int temperature_step(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, int write2new)
 {
-	// explicit temperature diagnostics based on linearization of internal energy
+	// temperature step based on linearization of internal energy
     double nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_gas_0, density_gas_1, delta_density_gas, delta_entropy_density, temperature_0, specific_entropy_gas_0, specific_entropy_gas_1, c_g_v, c_g_p;
     double beta = get_impl_thermo_weight();
     double alpha = 1 - beta;

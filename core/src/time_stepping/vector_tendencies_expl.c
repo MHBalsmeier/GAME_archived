@@ -45,16 +45,21 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     if (no_rk_step == 0 && config_info -> momentum_diff_h == 1 && update_advection == 1)
     {
 		hori_momentum_diffusion(state, diagnostics, irreversible_quantities, config_info, grid, dualgrid, delta_t);
+		if (config_info -> momentum_diff_v == 1)
+		{
+			vert_momentum_diffusion(state, irreversible_quantities, grid);
+		}
+		// calculation of the dissipative heating rate
+		if (config_info -> dissipative_heating == 1)
+		{
+			simple_dissipation_rate(state, irreversible_quantities, grid);
+		}
 		// Due to condensates, the friction acceleration needs to get a deceleration factor.
 		if (config_info -> assume_lte == 0)
 		{
 			scalar_times_vector(irreversible_quantities -> pressure_gradient_decel_factor, irreversible_quantities -> friction_acc, irreversible_quantities -> friction_acc, grid);
 		}
     }
-	if (config_info -> momentum_diff_h == 1 && config_info -> dissipative_heating == 1)
-	{
-		simple_dissipation_rate(state, irreversible_quantities, grid);
-	}
 	
     // Now the explicit forces are added up.
     int layer_index, h_index;

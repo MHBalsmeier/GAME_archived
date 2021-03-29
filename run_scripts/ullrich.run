@@ -25,6 +25,7 @@ orography_layers=23 # number of layers following orography (only relevent if typ
 cfl_margin=0.55 # The sound time step will be calculated as follows (delta t) = (delta t from horizontal CFL)*(1 - cfl_margin). 0.55 can be considered a safe standard value.
 adv_sound_ratio=1 # the ratio of the advective to the sound time step
 momentum_diff_h=1 # turn on if you want horizontal momentum diffusion
+momentum_diff_v=0 # turn on if you want vertical momentum diffusion
 dissipative_heating=1 # turn on if you want a dissipative heating rate
 diff_h_smag_fac=0.13 # horizontal diffusion Smagorinsky factor
 shear_bg=1.5e-5 # assumed background (minimum) shear
@@ -36,7 +37,6 @@ mass_dry_diff_h=0 # turn on if you want horizontal dry mass diffusion
 mass_dry_diff_v=0 # turn on if you want vetical dry mass diffusion
 temperature_diff_h=0 # turn on if you want horizontal temperature diffusion
 temperature_diff_v=0 # turn on if you want vetical temperature diffusion
-momentum_diff_v=0 # turn on if you want vertical momentum diffusion
 damping_start_height_over_toa=0.53 # Swamp layer boundary in relation to the TOA.
 damping_coeff_max=0.25 # maximum swamp layer damping coefficient
 rad_on=0 # turn on if you want radiation

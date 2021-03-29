@@ -11,7 +11,6 @@ Github repository: https://github.com/AUN4GFD/game
 
 int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid, double delta_t)
 {
-	// Firstly the diffusion.
 	// Evaluating necessary differential operators.
 	divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
 	grad_hor(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
@@ -26,6 +25,34 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	hori_viscosity_eff(state, irrev -> viscosity_eff, grid, diagnostics, config_info, delta_t);
 	// multiplying by the viscosity
 	vector_times_vector(irrev -> viscosity_eff, irrev -> friction_acc, irrev -> friction_acc);
+	return 0;
+}
+
+int vert_momentum_diffusion(State *state, Irreversible_quantities *irrev, Grid *grid)
+{
+	// some parameters
+	double bndr_lr_height = 1e3; // boundary layer height
+	double bndr_lr_visc_max = 5.8e-5; // maximum friction coefficient in the boundary layer
+	int layer_index, h_index, vector_index;
+	double z_agl;
+	#pragma omp parallel for private(layer_index, h_index, vector_index, z_agl)
+	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
+	{
+		layer_index = i/NO_OF_VECTORS_H;
+		h_index = i - layer_index*NO_OF_VECTORS_H;
+		vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
+		// height above ground level
+		z_agl = grid -> z_vector[vector_index]
+		- 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[h_index]]
+		+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[h_index]]);
+		// adding the boundary layer friction
+		if (z_agl < bndr_lr_height)
+		{
+			irrev -> friction_acc[vector_index]
+			+= -bndr_lr_visc_max*(1 - z_agl/bndr_lr_height)
+			*state -> velocity_gas[vector_index];
+		}
+	}
 	return 0;
 }
 

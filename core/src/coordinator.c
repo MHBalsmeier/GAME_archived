@@ -272,6 +272,22 @@ int main(int argc, char *argv[])
 	{
 		printf("Horizontal momentum diffusion is turned on.\n");
 	}
+	if (config_info -> momentum_diff_v == 0)
+	{
+		printf("Vertical momentum diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Vertical momentum diffusion is turned on.\n");
+	}
+	if (config_info -> dissipative_heating == 0)
+	{
+		printf("Dissipative heating is turned off.\n");
+	}
+	else
+	{
+		printf("Dissipative heating is turned on.\n");
+	}
 	printf("mass advection order: %d\n", config_info -> mass_advection_order);
 	printf("entropy advection order: %d\n", config_info -> entropy_advection_order);
 	printf("%s", stars);
@@ -308,22 +324,6 @@ int main(int argc, char *argv[])
 	else
 	{
 		printf("Vertical temperature diffusion is turned on.\n");
-	}
-	if (config_info -> momentum_diff_v == 0)
-	{
-		printf("Vertical momentum diffusion is turned off.\n");
-	}
-	else
-	{
-		printf("Vertical momentum diffusion is turned on.\n");
-	}
-	if (config_info -> dissipative_heating == 0)
-	{
-		printf("Dissipative heating is turned off.\n");
-	}
-	else
-	{
-		printf("Dissipative heating is turned on.\n");
 	}
 	printf("Horizontal diffusion Smagorinsky factor: %lf.\n", config_info -> diff_h_smag_fac);
 	printf("Background shear: %lf 1/s.\n", config_info -> shear_bg);
