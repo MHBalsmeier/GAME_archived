@@ -32,7 +32,7 @@ int vert_momentum_diffusion(State *state, Irreversible_quantities *irrev, Grid *
 {
 	// some parameters
 	double bndr_lr_height = 1e3; // boundary layer height
-	double bndr_lr_visc_max = 5.8e-5; // maximum friction coefficient in the boundary layer
+	double bndr_lr_visc_max = 1.2e-5; // maximum friction coefficient in the boundary layer
 	int layer_index, h_index, vector_index;
 	double z_agl;
 	#pragma omp parallel for private(layer_index, h_index, vector_index, z_agl)
