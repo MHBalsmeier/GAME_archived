@@ -50,7 +50,7 @@ int vert_momentum_diffusion(State *state, Irreversible_quantities *irrev, Grid *
 		if (z_agl < bndr_lr_height)
 		{
 			irrev -> friction_acc[vector_index]
-			+= -bndr_lr_visc_max*exp(-z_agl/bndr_lr_height)
+			+= -bndr_lr_visc_max*exp(-z_agl/(0.5*bndr_lr_height))
 			*state -> velocity_gas[vector_index];
 		}
 	}
