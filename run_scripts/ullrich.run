@@ -31,14 +31,14 @@ diff_h_smag_fac=0.13 # horizontal diffusion Smagorinsky factor
 shear_bg=1.5e-5 # assumed background (minimum) shear
 mass_advection_order=2 # set this to 2 or 3 (convergence order of the mass advection)
 entropy_advection_order=2 # set this to 2 or 3 (convergence order of the entropy advection)
-
-# "physics" configuration
 mass_dry_diff_h=0 # turn on if you want horizontal dry mass diffusion
 mass_dry_diff_v=0 # turn on if you want vetical dry mass diffusion
 temperature_diff_h=0 # turn on if you want horizontal temperature diffusion
 temperature_diff_v=0 # turn on if you want vetical temperature diffusion
 damping_start_height_over_toa=0.53 # Swamp layer boundary in relation to the TOA.
 damping_coeff_max=0.25 # maximum swamp layer damping coefficient
+
+# "physics" configuration
 rad_on=0 # turn on if you want radiation
 radiation_delta_t=10800 # every how many seconds the radiation fluxes wil be updated
 assume_lte=1 # set this to one if you do not want to assign individual temperatures to tracers
