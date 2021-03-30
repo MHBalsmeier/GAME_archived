@@ -61,15 +61,19 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Irreversi
 	}
 	// averaging the diffusion coefficient from edges to cells
 	edges_to_cells(irreversible_quantities -> viscosity_eff, irreversible_quantities -> scalar_diffusion_coeff_numerical_h, grid);
-	double rho_g, c_g_v;
-	#pragma omp parallel for private (rho_g, c_g_v)
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	// calculating the vertical temperature diffusion coefficient
+	if (config_info -> temperature_diff_v == 1)
 	{
-		rho_g = density_gas(state, i);
-		c_g_v = spec_heat_cap_diagnostics_v(state, i, config_info);
-	    irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i] = rho_g*c_g_v* irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i];
-	    // vertical Eddy viscosity is about two orders of magnitude smaller
-	    irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i] = 0.01*irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i];
+		double rho_g, c_g_v;
+		#pragma omp parallel for private (rho_g, c_g_v)
+		for (int i = 0; i < NO_OF_SCALARS; ++i)
+		{
+			rho_g = density_gas(state, i);
+			c_g_v = spec_heat_cap_diagnostics_v(state, i, config_info);
+			irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i] = rho_g*c_g_v* irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i];
+			// vertical Eddy viscosity is about two orders of magnitude smaller
+			irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i] = 0.01*irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i];
+		}
 	}
 	return 0;
 }
