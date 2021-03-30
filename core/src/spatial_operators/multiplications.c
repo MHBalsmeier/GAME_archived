@@ -95,12 +95,12 @@ int advection_3rd_order(Scalar_field tracer, Vector_field mass_flux_density, Vec
 	This function calculates third order scalar tracer advection.
 	*/
 	grad_hor(tracer, gradient, grid);
-    int layer_index, h_index, lower_index, upper_index, i;
+    int layer_index, h_index, lower_index, upper_index;
     // determining the sign for the upstream correction
     int sign = -1 + 2*rk_substep;
     double tracer_value, tangential_wind_value, tangential_gradient_value;
-	#pragma omp parallel for private (layer_index, h_index, lower_index, upper_index, i, tracer_value, tangential_wind_value, tangential_gradient_value)
-    for (i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
+	#pragma omp parallel for private (layer_index, h_index, lower_index, upper_index, tracer_value, tangential_wind_value, tangential_gradient_value)
+    for (int i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
@@ -156,12 +156,12 @@ int advection_3rd_order(Scalar_field tracer, Vector_field mass_flux_density, Vec
     return 0;
 }
 
-int scalar_times_vector_scalar_h_v(Scalar_field in_field_h, Scalar_field in_field_v, Vector_field vector_field, Vector_field out_field, Grid *grid)
+int scalar_times_vector_scalar_h(Scalar_field in_field_h, Vector_field vector_field, Vector_field out_field, Grid *grid)
 {
-    int layer_index, h_index, lower_index, upper_index, i;
+    int layer_index, h_index;
     double scalar_value;
-    #pragma omp parallel for private (layer_index, h_index, lower_index, upper_index, i, scalar_value)
-    for (i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
+    #pragma omp parallel for private (layer_index, h_index, scalar_value)
+    for (int i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
@@ -171,16 +171,30 @@ int scalar_times_vector_scalar_h_v(Scalar_field in_field_h, Scalar_field in_fiel
             = 0.5*(
             in_field_h[grid -> to_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H]
             + in_field_h[grid -> from_index[h_index - NO_OF_SCALARS_H] + layer_index*NO_OF_SCALARS_H]);
+        	out_field[i] = scalar_value*vector_field[i];
         }
-        else
+    }
+    return 0;
+}
+
+int scalar_times_vector_scalar_v(Scalar_field in_field_v, Vector_field vector_field, Vector_field out_field, Grid *grid)
+{
+    int layer_index, h_index, lower_index, upper_index, i;
+    double scalar_value;
+    #pragma omp parallel for private (layer_index, h_index, lower_index, upper_index, i, scalar_value)
+    for (i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
+    {
+        layer_index = i/NO_OF_VECTORS_PER_LAYER;
+        h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
+        if (h_index < NO_OF_SCALARS_H)
         {
             lower_index = h_index + layer_index*NO_OF_SCALARS_H;
             upper_index = h_index + (layer_index - 1)*NO_OF_SCALARS_H;
             scalar_value = 0.5*(
             in_field_v[upper_index]
             + in_field_v[lower_index]);
+        	out_field[i] = scalar_value*vector_field[i];
         }
-        out_field[i] = scalar_value*vector_field[i];
     }
     // linear extrapolation to the TOA
     #pragma omp parallel for private(scalar_value)
@@ -209,8 +223,6 @@ int scalar_times_vector_scalar_h_v(Scalar_field in_field_h, Scalar_field in_fiel
     }
     return 0;
 }
-
-
 
 
 
