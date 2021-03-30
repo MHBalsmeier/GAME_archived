@@ -10,7 +10,7 @@
 # See handbook for more information.
 
 oro_id=3 # The orography ID.
-rescale_factor=0.3 # rescale factor for the orography
+rescale_factor=1.0 # rescale factor for the orography
 valgrind_check=0 # set this to 1, if you want to check the code with Valgrind
 export OMP_NUM_THREADS=1 # relevant only for OMP
 number_of_cpus=1 # relevant only for MPI
