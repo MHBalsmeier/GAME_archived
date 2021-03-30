@@ -114,7 +114,6 @@ Condensed_density_temperatures condensed_density_temperatures;
 typedef struct diagnostics {
 Vector_field flux_density;
 Scalar_field flux_density_divv;
-Vector_field temperature_gradient;
 Scalar_field pressure_gradient_1_prefactor;
 Scalar_field temperature_gas_explicit;
 Curl_field rel_vort;

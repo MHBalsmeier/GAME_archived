@@ -54,13 +54,14 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Irreversi
 	/*
 	This function computes the viscous temperature diffusion coefficient (including Eddys).
 	*/
-	double rho_g, c_g_v;
 	// The Eddy viscosity coefficient only has to be calculated if it has not yet been done.
-	if (config_info -> momentum_diff_h == 1)
+	if (config_info -> momentum_diff_h == 0)
 	{
 		hori_viscosity_eff(state, irreversible_quantities -> viscosity_eff, grid, diagnostics, config_info, delta_t);
 	}
+	// averaging the diffusion coefficient from edges to cells
 	edges_to_cells(irreversible_quantities -> viscosity_eff, irreversible_quantities -> scalar_diffusion_coeff_numerical_h, grid);
+	double rho_g, c_g_v;
 	#pragma omp parallel for private (rho_g, c_g_v)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{

@@ -87,13 +87,17 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 			// Now we need to calculate the temperature diffusion coefficients.
 		    calc_temp_diffusion_coeffs(state_new, config_info, irreversible_quantities, diagnostics, delta_t, grid);
 		    // The diffusion of the temperature depends on its gradient.
-			grad(state_new -> temperature_gas, diagnostics -> temperature_gradient, grid);
+			grad(state_new -> temperature_gas, diagnostics -> vector_field_placeholder, grid);
 			// Now the diffusive temperature flux density can be obtained.
 		    scalar_times_vector_scalar_h_v(irreversible_quantities -> scalar_diffusion_coeff_numerical_h, irreversible_quantities -> scalar_diffusion_coeff_numerical_v,
-		    diagnostics -> temperature_gradient, diagnostics -> flux_density, grid);
+		    diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid);
 		    // The divergence of the diffusive temperature flux density is the diffusive temperature heating.
 		    divv_h(diagnostics -> flux_density, irreversible_quantities -> temperature_diffusion_heating, grid);
-		    add_vertical_divv(diagnostics -> flux_density, irreversible_quantities -> temperature_diffusion_heating, grid);
+		    // the vertical divergence is only needed if the vertical temperature diffusion is switched on
+		    if (config_info -> temperature_diff_v == 1)
+		    {
+		    	add_vertical_divv(diagnostics -> flux_density, irreversible_quantities -> temperature_diffusion_heating, grid);
+			}
 		}
 		if (i == 0)
 		{
