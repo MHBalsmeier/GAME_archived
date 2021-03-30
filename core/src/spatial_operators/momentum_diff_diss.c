@@ -33,7 +33,8 @@ int vert_momentum_diffusion(State *state, Irreversible_quantities *irrev, Grid *
 {
 	// some parameters
 	double bndr_lr_height = 1e3; // boundary layer height
-	double bndr_lr_visc_max = 1.2e-5; // maximum friction coefficient in the boundary layer
+	double bndr_lr_visc_max = 1.0/86400; // maximum friction coefficient in the boundary layer
+	double e_folding_height = 0.5*bndr_lr_height;
 	int layer_index, h_index, vector_index;
 	double z_agl;
 	#pragma omp parallel for private(layer_index, h_index, vector_index, z_agl)
@@ -50,7 +51,8 @@ int vert_momentum_diffusion(State *state, Irreversible_quantities *irrev, Grid *
 		if (z_agl < bndr_lr_height)
 		{
 			irrev -> friction_acc[vector_index]
-			+= -bndr_lr_visc_max*exp(-z_agl/(0.5*bndr_lr_height))
+			+= -bndr_lr_visc_max*(exp(-z_agl/e_folding_height) - exp(-bndr_lr_height/e_folding_height))
+			/(1 - exp(-bndr_lr_height/e_folding_height))
 			*state -> velocity_gas[vector_index];
 		}
 	}
