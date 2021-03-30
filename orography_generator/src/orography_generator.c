@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
    		printf("Error: oro_id must not be smaller than one or larger than 3.\n");
    		exit(1);
 	}
+   	double rescale_factor = strtof(argv[2], NULL);
 	sprintf(OUTPUT_FILE_PRE, "orographies/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
 	OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
 	free(OUTPUT_FILE_PRE);
@@ -40,11 +41,11 @@ int main(int argc, char *argv[])
 	oro = malloc(NO_OF_SCALARS_H*sizeof(double));
     int GEO_PROP_FILE_LENGTH = 100;
     char *GEO_PROP_FILE_PRE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(GEO_PROP_FILE_PRE, "../grid_generator/grids/B%dL26T30000_O0_OL17_SCVT.nc", RES_ID);
+    sprintf(GEO_PROP_FILE_PRE, "../grid_generator/grids/B%dL26T30000_O0_OL23_SCVT.nc", RES_ID);
     GEO_PROP_FILE_LENGTH = strlen(GEO_PROP_FILE_PRE);
     free(GEO_PROP_FILE_PRE);
     char *GEO_PROP_FILE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(GEO_PROP_FILE, "../grid_generator/grids/B%dL26T30000_O0_OL17_SCVT.nc", RES_ID);
+    sprintf(GEO_PROP_FILE, "../grid_generator/grids/B%dL26T30000_O0_OL23_SCVT.nc", RES_ID);
 	int retval;
     double *latitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
     double *longitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -163,7 +164,7 @@ int main(int argc, char *argv[])
 			oro[i] = 0;
 			for (j = 0; j < no_of_avg_points; ++j)
 			{
-				oro[i] += z_in_vector[min_indices_vector[j]]*weights_vector[j]/weights_sum;
+				oro[i] += rescale_factor*z_in_vector[min_indices_vector[j]]*weights_vector[j]/weights_sum;
 			}
 			if (oro[i] < -600 || oro[i] > 5700)
 			{

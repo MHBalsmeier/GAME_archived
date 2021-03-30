@@ -8,6 +8,7 @@ Github repository: https://github.com/AUN4GFD/game
 #include "../diagnostics/diagnostics.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid, double delta_t)
 {
@@ -49,7 +50,7 @@ int vert_momentum_diffusion(State *state, Irreversible_quantities *irrev, Grid *
 		if (z_agl < bndr_lr_height)
 		{
 			irrev -> friction_acc[vector_index]
-			+= -bndr_lr_visc_max*(1 - z_agl/bndr_lr_height)
+			+= -bndr_lr_visc_max*exp(-z_agl/bndr_lr_height)
 			*state -> velocity_gas[vector_index];
 		}
 	}

@@ -6,11 +6,11 @@
 echo "***** OROGRAPHY FILE CREATION *****"
 if [ $valgrind_check -eq 0 ]
 then
-mpirun -np $number_of_cpus ./orography_generator $oro_id
+mpirun -np $number_of_cpus ./orography_generator $oro_id $rescale_factor
 else
 if [ $valgrind_check -eq 1 ]
 then
-valgrind ./orography_generator $oro_id
+valgrind ./orography_generator $oro_id $rescale_factor
 fi
 fi
 if [ $? -ne 0 ]
