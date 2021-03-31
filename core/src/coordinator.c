@@ -290,9 +290,6 @@ int main(int argc, char *argv[])
 	}
 	printf("mass advection order: %d\n", config_info -> mass_advection_order);
 	printf("entropy advection order: %d\n", config_info -> entropy_advection_order);
-	printf("%s", stars);
-	
-	printf("Physics configuration:\n");
 	if (config_info -> mass_diff_h == 0)
 	{
 		printf("Horizontal mass diffusion is turned off.\n");
@@ -329,6 +326,9 @@ int main(int argc, char *argv[])
 	printf("Background shear: %lf 1/s.\n", config_info -> shear_bg);
 	printf("Swamp layer starts at %lf m.\n", config_info -> damping_start_height_over_toa*toa);
 	printf("Maximum swamp layer damping coefficient: %lf 1/s.\n", config_info -> damping_coeff_max);
+	printf("%s", stars);
+	
+	printf("Physics configuration:\n");
 	if (config_info -> assume_lte == 0)
 	{
 		printf("Not Assuming local thermodynamic equilibrium.\n");
