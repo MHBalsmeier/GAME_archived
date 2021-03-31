@@ -13,6 +13,7 @@ init_month=${BASH_ARGV[5]} # month of the start of the model run
 init_day=${BASH_ARGV[6]} # day of the start of the model run
 init_hr=${BASH_ARGV[7]} # hour of the start of the model run
 plot_interval=${BASH_ARGV[8]} # the interval between plots in seconds
+start_time_since_init=${BASH_ARGV[9]} # when to begin plotting reative to the model initialization
 disp_shortname_list=(
 2t surface_wind prmsl gh gh
 2t surface_wind prmsl gh gh

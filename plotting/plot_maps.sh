@@ -12,6 +12,7 @@ init_year=2000 # year of the start of the model run
 init_month=1 # month of the start of the model run
 init_day=1 # day of the start of the model run
 init_hr=0 # hour of the start of the model run
+start_time_since_init=0 # when to begin plotting reative to the model initialization
 disp_shortname_list=(
 sp) # short names according to grib as an array 
 disp_level_list=(
