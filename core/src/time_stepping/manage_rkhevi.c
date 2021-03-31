@@ -84,10 +84,10 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		// Temperature diffusion gets updated here, but only at the first RK step and if heat conduction is switched on.
 		if (i == 0 && (config_info -> temperature_diff_h == 1 || config_info -> temperature_diff_v == 1))
 		{
-			// Now we need to calculate the temperature diffusion coefficients.
-		    calc_temp_diffusion_coeffs(state_new, config_info, irreversible_quantities, diagnostics, delta_t, grid);
 		    // The diffusion of the temperature depends on its gradient.
 			grad(state_new -> temperature_gas, diagnostics -> vector_field_placeholder, grid);
+			// Now we need to calculate the temperature diffusion coefficients.
+		    calc_temp_diffusion_coeffs(state_new, config_info, irreversible_quantities, diagnostics, delta_t, grid);
 			// Now the diffusive temperature flux density can be obtained.
 		    scalar_times_vector_scalar_h(irreversible_quantities -> scalar_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid);
 		    if (config_info -> temperature_diff_v == 1)
