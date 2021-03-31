@@ -6,11 +6,11 @@ import numpy as np;
 from colorama import Fore;
 from colorama import Style;
 
-def gid_return_extended(filename, short_name, step, level):
+def scan_for_gid(filename, short_name, time_since_init, level):
     filee = open(filename, "rb");
     for j in np.arange(0, ec.codes_count_in_file(filee)):
-        gid = ec.codes_grib_new_from_file(filee, headers_only = False);
-        if ec.codes_get(gid, "shortName") == short_name and ec.codes_get(gid, "forecastTime") == step and ec.codes_get(gid, "level") == level:
+        gid = ec.codes_grib_new_from_file(filee, headers_only = True);
+        if ec.codes_get(gid, "shortName") == short_name and ec.codes_get(gid, "forecastTime") == time_since_init and ec.codes_get(gid, "level") == level:
             filee.close();
             return gid;
         else:
@@ -18,8 +18,8 @@ def gid_return_extended(filename, short_name, step, level):
     filee.close();
     exit(1);
 
-def gid_read_values(filename, short_name, step, level):
-    gid = gid_return_extended(filename, short_name, step, level);
+def read_grib_array(filename, short_name, time_since_init, level):
+    gid = scan_for_gid(filename, short_name, time_since_init, level);
     return_array = ec.codes_get_array(gid, "values");
     ec.codes_release(gid);
     return return_array;
@@ -31,11 +31,11 @@ def vector_2_array(vector, no_of_lines, no_of_columns):
             array[i, j] = vector[i*no_of_columns + j];
     return array;
 
-def fetch_model_output(input_file, step, short_name, level):
+def fetch_model_output(input_file, time_since_init, short_name, level):
 	file = open(input_file, "rb");
 	gid = ec.codes_grib_new_from_file(file);
 	file.close();
-	values = gid_read_values(input_file, short_name, step, level);
+	values = read_grib_array(input_file, short_name, time_since_init, level);
 	lat = np.deg2rad(ec.codes_get_array(gid, "latitudes"));
 	lon = np.deg2rad(ec.codes_get_array(gid, "longitudes"));
 	no_of_columns = ec.codes_get_long(gid, "Ni");

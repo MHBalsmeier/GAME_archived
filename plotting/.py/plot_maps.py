@@ -177,11 +177,11 @@ if surface_bool == 1:
 
 if on_pressure_bool == 0:
 	if surface_bool == 1:
-		input_file = grib_dir_name + "/" + run_id + "+0s_surface.grb2";
+		input_file = grib_dir_name + "/" + run_id + "+" + str(start_time_since_init) + "s_surface.grb2";
 	else:
-		input_file = grib_dir_name + "/" + run_id + "+0s.grb2";
+		input_file = grib_dir_name + "/" + run_id + "+" + str(start_time_since_init) + "s.grb2";
 else:
-	input_file = grib_dir_name + "/" + run_id + "+0s_pressure_levels.grb2";
+	input_file = grib_dir_name + "/" + run_id + "+" + str(start_time_since_init) + "s_pressure_levels.grb2";
 
 if short_name == "surface_wind":
 	lat, lon, values_pre = rmo.fetch_model_output(input_file, start_time_since_init, "gust", level);
@@ -190,15 +190,15 @@ if short_name == "surface_wind":
 else:
 	lat, lon, values_pre = rmo.fetch_model_output(input_file, start_time_since_init, short_name, level);
 
-values = np.zeros([len(lat), len(lon), int(run_span/plot_interval) + 1]);
+values = np.zeros([len(lat), len(lon), int((run_span - start_time_since_init)/plot_interval) + 1]);
 values[:, :, 0] = rescale*values_pre + shift;
 if short_name == "surface_wind":
-	values_10u = np.zeros([len(lat), len(lon), int(run_span/plot_interval) + 1]);
+	values_10u = np.zeros([len(lat), len(lon), int((run_span - start_time_since_init)/plot_interval) + 1]);
 	values_10u[:, :, 0] = rescale*values_pre_10u + shift;
-	values_10v = np.zeros([len(lat), len(lon), int(run_span/plot_interval) + 1]);
+	values_10v = np.zeros([len(lat), len(lon), int((run_span - start_time_since_init)/plot_interval) + 1]);
 	values_10v[:, :, 0] = rescale*values_pre_10v + shift;
 
-for i in np.arange(1, int(run_span/plot_interval) + 1):
+for i in np.arange(1, int((run_span - start_time_since_init)/plot_interval) + 1):
 	time_after_init = start_time_since_init + i*plot_interval;
 	if on_pressure_bool == 0:
 		if surface_bool == 1:
