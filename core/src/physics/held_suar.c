@@ -9,6 +9,7 @@ Calculates the Held-Suarez radiative forcing.
 
 #include "../enum_and_typedefs.h"
 #include "../settings.h"
+#include "stdio.h"
 
 double t_eq(double, double);
 double k_T(double, double);
@@ -30,8 +31,8 @@ double t_eq(double latitude, double pressure)
 {
 	double delta_t_y = 60;
 	double delta_theta_z = 10;
-	double result = 315;
 	double kappa = 2.0/7;
+	double result = 315;
 	result = result - delta_t_y*pow(sin(latitude), 2);
 	result = result - delta_theta_z*log(pressure/P_0)*pow(cos(latitude), 2);
 	result = result*pow(pressure/P_0, kappa);
@@ -45,8 +46,7 @@ double k_T(double latitude, double pressure)
 	double k_s = 1.0/4*1.0/86400;
 	double sigma_b = 0.7;
 	double sigma = pressure/P_0;
-	double result = k_a;
-	result = result + (k_s - k_a)*fmax(0, (sigma - sigma_b)/(1 - sigma_b))*pow(cos(latitude), 4);
+	double result = k_a + (k_s - k_a)*fmax(0, (sigma - sigma_b)/(1 - sigma_b))*pow(cos(latitude), 4);
 	return result;
 }
 
