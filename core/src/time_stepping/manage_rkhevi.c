@@ -66,19 +66,26 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		// 2.) Explicit component of the generalized density equations.
 		// ------------------------------------------------------------
 	    // Radiation is updated here.
-		if (config_info -> rad_on == 1 && config_info -> rad_update == 1 && i == 0)
+		if (config_info -> rad_on > 0 && config_info -> rad_update == 1 && i == 0)
 		{
 			printf("Starting update of radiative fluxes ...\n");
 			// Fortran needs pointers, this is why this is necessary
-			int no_of_scalars = NO_OF_SCALARS;
-			int no_of_vectors = NO_OF_VECTORS;
-			int no_of_vectors_per_layer = NO_OF_VECTORS_PER_LAYER;
-			int no_of_constituents = NO_OF_CONSTITUENTS;
-			int no_of_condensed_constituents = NO_OF_CONDENSED_CONSTITUENTS;
-			int no_of_layers = NO_OF_LAYERS;
-			calc_radiative_flux_convergence(grid -> latitude_scalar, grid -> longitude_scalar, grid -> z_scalar, grid -> z_vector,
-			state_new -> mass_densities, state_new -> temperature_gas, radiation_tendency, &no_of_scalars, &no_of_vectors, &no_of_vectors_per_layer, &no_of_layers, &no_of_constituents, 
-			&no_of_condensed_constituents, &time_coordinate);
+			if (config_info -> rad_on == 1)
+			{
+				int no_of_scalars = NO_OF_SCALARS;
+				int no_of_vectors = NO_OF_VECTORS;
+				int no_of_vectors_per_layer = NO_OF_VECTORS_PER_LAYER;
+				int no_of_constituents = NO_OF_CONSTITUENTS;
+				int no_of_condensed_constituents = NO_OF_CONDENSED_CONSTITUENTS;
+				int no_of_layers = NO_OF_LAYERS;
+				calc_radiative_flux_convergence(grid -> latitude_scalar, grid -> longitude_scalar, grid -> z_scalar, grid -> z_vector,
+				state_new -> mass_densities, state_new -> temperature_gas, radiation_tendency, &no_of_scalars, &no_of_vectors, &no_of_vectors_per_layer, &no_of_layers, &no_of_constituents, 
+				&no_of_condensed_constituents, &time_coordinate);
+			}
+			if (config_info -> rad_on == 2)
+			{
+				held_suar(grid -> latitude_scalar, grid -> z_scalar, state_new -> mass_densities, state_new -> temperature_gas, radiation_tendency);
+			}
 			printf("Update of radiative fluxes completed.\n");
 		}
 		// Temperature diffusion gets updated here, but only at the first RK step and if heat conduction is switched on.

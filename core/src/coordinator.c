@@ -341,9 +341,13 @@ int main(int argc, char *argv[])
 	{
 		printf("Radiation is turned off.\n");
 	}
-	else
+	if (config_info -> rad_on == 1)
 	{
 		printf("Radiation is turned on.\n");
+	}
+	if (config_info -> rad_on == 2)
+	{
+		printf("Held-Suarez-forcing is turned on.\n");
 	}
 	
 	printf("%s", stars);

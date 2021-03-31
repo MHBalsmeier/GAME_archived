@@ -9,6 +9,7 @@ Github repository: https://github.com/AUN4GFD/game
 #include "diagnostics.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 int calc_diffusion_coeff(double temperature, double particle_mass, double denstiy, double particle_radius, double *result);
 
