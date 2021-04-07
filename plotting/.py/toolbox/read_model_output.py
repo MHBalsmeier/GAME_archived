@@ -40,6 +40,7 @@ def fetch_model_output(input_file, time_since_init, short_name, level):
 	lon = np.deg2rad(ec.codes_get_array(gid, "longitudes"));
 	no_of_columns = ec.codes_get_long(gid, "Ni");
 	no_of_lines = ec.codes_get_long(gid, "Nj");
+	ec.codes_release(gid);
 	lat_vector = np.zeros([no_of_lines]);
 	lon_vector = np.zeros([no_of_columns]);
 	for i in range(no_of_lines):
