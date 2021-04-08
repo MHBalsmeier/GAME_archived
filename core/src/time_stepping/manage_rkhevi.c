@@ -75,7 +75,6 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 			printf("Starting update of radiative fluxes ...\n");
 			if (config_info -> rad_on == 1)
 			{
-				config_info -> no_of_rad_blocks = 12;
 				int no_of_scalars = NO_OF_SCALARS/config_info -> no_of_rad_blocks;
 				int no_of_vectors = NO_OF_VECTORS/config_info -> no_of_rad_blocks;
 				int no_of_vectors_per_layer = NO_OF_VECTORS_PER_LAYER/config_info -> no_of_rad_blocks;
@@ -306,7 +305,7 @@ int create_rad_array_vector(double in[], double out[], int no_of_rad_blocks, int
 	{
 		layer_index = i/(NO_OF_SCALARS_H/no_of_rad_blocks);
 		h_index = i - layer_index*(NO_OF_SCALARS_H/no_of_rad_blocks);
-		out[i] = in[rad_block_index*(NO_OF_SCALARS_H/no_of_rad_blocks) + h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
+		out[h_index + layer_index*(NO_OF_VECTORS_PER_LAYER/no_of_rad_blocks)] = in[rad_block_index*(NO_OF_SCALARS_H/no_of_rad_blocks) + h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
 	}
 	return 0;
 }

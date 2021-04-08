@@ -41,6 +41,7 @@ damping_coeff_max=0.25 # maximum swamp layer damping coefficient
 # "physics" configuration
 rad_on=0 # turn on if you want radiation
 radiation_delta_t=10800 # every how many seconds the radiation fluxes wil be updated
+no_of_rad_blocks=12 # no of blocks into which the fields will be split up for the radiation calculation
 assume_lte=1 # set this to one if you do not want to assign individual temperatures to tracers
 
 # I/O

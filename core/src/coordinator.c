@@ -107,6 +107,7 @@ int main(int argc, char *argv[])
 	config_info -> damping_coeff_max = strtof(argv[39], NULL);
 	config_info -> mass_advection_order = strtof(argv[40], NULL);
 	config_info -> entropy_advection_order = strtof(argv[41], NULL);
+	config_info -> no_of_rad_blocks = strtof(argv[42], NULL);
 	
 	/*
 	Checking user input for correctness:
