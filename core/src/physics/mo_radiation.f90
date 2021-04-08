@@ -289,7 +289,7 @@ module radiation
     
     ! short wave first
     ! filling up the arrays restricted to day points
-    do j_day =  1,no_of_day_points
+    do j_day = 1,no_of_day_points
       temperature_rad_day(j_day,:)       = temperature_rad(day_indices(j_day),:)
       pressure_rad_day(j_day,:)          = pressure_rad(day_indices(j_day),:)
       pressure_interface_rad_day(j_day,:)= pressure_interface_rad(day_indices(j_day),:)
@@ -559,7 +559,7 @@ module radiation
       ! the default
       vol_mix_ratio(:,:) = 0.0_wp
       select case (gases_lowercase(ji))
-        ! reading the VMRs from atmosptracers library
+        ! reading the VMRs from atmostracers library
         case("n2")
           vol_mix_ratio(:,:) = molar_fraction_in_dry_air(2)
         case("o2")

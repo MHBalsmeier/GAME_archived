@@ -522,10 +522,10 @@ int main(int argc, char *argv[])
 		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
 	}
     config_info -> rad_update = 1;
-	if (config_info -> rad_on == 1)
-	{
-		radiation_init();
-	}
+    if (config_info -> rad_on == 1)
+    {
+    	radiation_init();
+    }
 	
 	/*
 	Preparation of the actual integration.
