@@ -138,11 +138,9 @@ module radiation
     ! number of points where it is day
     integer                          :: no_of_day_points
     ! loop indices
-    integer                          :: ji, j_day, j_night, jk
+    integer                          :: ji, j_day, jk
     ! the indices of columns where it is day
     integer                          :: day_indices(no_of_scalars/no_of_layers)
-    ! the indices of columns where it is night
-    integer                          :: night_indices(no_of_scalars/no_of_layers)
     ! number of scalars per layer (number of columns)
     integer                          :: no_of_scalars_h
     ! the resulting clear sky fluxes
@@ -266,15 +264,12 @@ module radiation
     
     ! calculating the zenith angle, and counting day and night points
     j_day =  0
-    j_night =  0
     do ji = 1,no_of_scalars_h
       mu_0(ji) =  coszenith(latitude_scalar(ji), longitude_scalar(ji), time_coord)
-      if (mu_0(ji) > 0) then
+      ! it should be > 0, but this would lead to problems with the slicing procedure
+      if (mu_0(ji) >= 0) then
         j_day  = j_day + 1
         day_indices(j_day)    = ji
-      else
-        j_night =  j_night + 1
-        night_indices(j_night) =  ji
       endif
     enddo
     
@@ -290,12 +285,12 @@ module radiation
     ! short wave first
     ! filling up the arrays restricted to day points
     do j_day = 1,no_of_day_points
-      temperature_rad_day(j_day,:)       = temperature_rad(day_indices(j_day),:)
-      pressure_rad_day(j_day,:)          = pressure_rad(day_indices(j_day),:)
-      pressure_interface_rad_day(j_day,:)= pressure_interface_rad(day_indices(j_day),:)
-      mu_0_day(j_day)                    = mu_0(day_indices(j_day)) 
-      albedo_dir_day(:,j_day)            = albedo_dir(:,day_indices(j_day))  
-      albedo_dif_day(:,j_day)            = albedo_dif(:,day_indices(j_day))   
+      temperature_rad_day(j_day,:)       = temperature_rad(j_day,:)
+      pressure_rad_day(j_day,:)          = pressure_rad(j_day,:)
+      pressure_interface_rad_day(j_day,:)= pressure_interface_rad(j_day,:)
+      mu_0_day(j_day)                    = mu_0(j_day) 
+      albedo_dir_day(:,j_day)            = albedo_dir(:,j_day)  
+      albedo_dif_day(:,j_day)            = albedo_dif(:,j_day)   
     end do
     
     ! setting the volume mixing ratios of the gases for the short wave calculation
@@ -507,7 +502,7 @@ module radiation
     trans_earth2sun(3,2) = -sin(rot_angle)*sin(obliquity)
     ! the z vector of the earth fixed coordinate system in solar coordinates
     trans_earth2sun(1,3) = sin(obliquity)
-    trans_earth2sun(2,3) = 0
+    trans_earth2sun(2,3) = 0._wp
     trans_earth2sun(3,3) = cos(obliquity)
     
     ! transforming the normal vector of the place to solar coordinates
@@ -515,14 +510,14 @@ module radiation
     
     sun_2_earth             (1) = cos(omega_rev*t_transformed + phi_0_earth_around_sun)
     sun_2_earth             (2) = sin(omega_rev*t_transformed + phi_0_earth_around_sun)
-    sun_2_earth             (3) = 0
+    sun_2_earth             (3) = 0._wp
     
     ! the result
     coszenith = DOT_PRODUCT(normal_vector_rel2_sun, -sun_2_earth)
     
     ! the night case
-    if (coszenith < 0) then
-      coszenith =  0
+    if (coszenith < 0._wp) then
+      coszenith = 0._wp
     endif
   
   end function coszenith
