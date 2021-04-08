@@ -159,6 +159,7 @@ int delta_t_between_analyses;
 int dissipative_heating;
 int mass_advection_order;
 int entropy_advection_order;
+int no_of_rad_blocks;
 double diff_h_smag_fac;
 double shear_bg;
 double damping_start_height_over_toa;

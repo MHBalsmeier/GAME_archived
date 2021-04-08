@@ -374,9 +374,6 @@ module radiation
     call free_fluxes(fluxes_clearsky)
     call free_fluxes(fluxes_allsky)
     
-    write(*,*) "maximum of radiative power density: ", MAXVAL(radiation_tendency)
-    write(*,*) "minimum of radiative power density: ", MINVAL(radiation_tendency)
-    
   end subroutine calc_radiative_flux_convergence
     
   subroutine calc_power_density(day_only, no_of_scalars, no_of_vectors, &
