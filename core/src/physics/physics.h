@@ -4,5 +4,5 @@ Github repository: https://github.com/AUN4GFD/game
 */
 
 void radiation_init();
-void calc_radiative_flux_convergence(double [], double [], double [], double [], double [], double [], double [], int *, int *, int *, int *, int *, int *, double *);
+void calc_radiative_flux_convergence(double [], double [], double [], double [], double [], double [], double [], int *, int *, int *, int *, double *);
 int held_suar(double [], double [], double [], double [], double []);

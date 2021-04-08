@@ -97,8 +97,7 @@ module radiation
   subroutine calc_radiative_flux_convergence(latitude_scalar, longitude_scalar, &
   z_scalar, z_vector, &
   mass_densities, temperature_gas, radiation_tendency, &
-  no_of_scalars, no_of_vectors, no_of_vectors_per_layer, &
-  no_of_layers, no_of_constituents, no_of_condensed_constituents, &
+  no_of_scalars, no_of_layers, no_of_constituents, no_of_condensed_constituents, &
   time_coord) &
   
   ! This is the function that is called by the dynamical core. The dycore hands over
@@ -109,10 +108,6 @@ module radiation
     
     ! the number of scalar points of the model grid
     integer, intent(in)              ::                    no_of_scalars
-    ! the number of vector points of the model grid
-    integer, intent(in)              ::                    no_of_vectors
-    ! the number of vectors points of the model grid per layer
-    integer, intent(in)              ::                    no_of_vectors_per_layer
     ! the number of layers of the model grid
     integer, intent(in)              ::                    no_of_layers
     ! the number of constituents of the model atmosphere
@@ -256,10 +251,10 @@ module radiation
           ! delta z
           (z_scalar(ji+(jk-3)*no_of_scalars_h)-z_scalar(ji+(jk-2)*no_of_scalars_h)) &
           ! delta z
-          *(z_vector(no_of_layers*no_of_vectors_per_layer+ji)-z_scalar(ji+(jk-2)*no_of_scalars_h))
+          *(z_vector(no_of_layers*no_of_scalars_h+ji)-z_scalar(ji+(jk-2)*no_of_scalars_h))
           ! surface pressure
           pressure_interface_rad   (ji,jk) =  pressure_rad   (ji,jk-1) &
-          *EXP(-(z_vector(no_of_layers*no_of_vectors_per_layer+ji) &
+          *EXP(-(z_vector(no_of_layers*no_of_scalars_h+ji) &
           -z_scalar(ji+(jk-2)*no_of_scalars_h))/scale_height)
         else
           ! just the arithmetic mean
@@ -328,12 +323,12 @@ module radiation
     
     ! short wave result (in Wm^-3)
     ! clear sky
-    call calc_power_density(.true., no_of_scalars, no_of_vectors, &
-    no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
+    call calc_power_density(.true., no_of_scalars, &
+    no_of_layers, no_of_scalars_h, no_of_day_points, day_indices, &
     fluxes_clearsky_day, z_vector, radiation_tendency)
     ! all sky (not yet implemented)
-    !call calc_power_density(.true., no_of_scalars, no_of_vectors, &
-    !no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
+    !call calc_power_density(.true., no_of_scalars, &
+    !no_of_layers, no_of_scalars_h, no_of_scalars_h, no_of_day_points, day_indices, &
     !fluxes_allsky_day, z_vector, radiation_tendency)
     
     ! freeing the short wave fluxes
@@ -362,12 +357,12 @@ module radiation
    
     ! add long wave result (in Wm^-3)
     ! clear sky
-    call calc_power_density(.false., no_of_scalars, no_of_vectors, &
-    no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
+    call calc_power_density(.false., no_of_scalars, &
+    no_of_layers, no_of_scalars_h, no_of_day_points, day_indices, &
     fluxes_clearsky, z_vector, radiation_tendency)
     ! all sky (not yet implemented)
-    !call calc_power_density(.false., no_of_scalars, no_of_vectors, &
-    !no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
+    !call calc_power_density(.false., no_of_scalars, &
+    !no_of_layers, no_of_scalars_h, no_of_scalars_h, no_of_day_points, day_indices, &
     !fluxes_allsky, z_vector, radiation_tendency)
     
     ! freeing the long wave fluxes
@@ -376,8 +371,8 @@ module radiation
     
   end subroutine calc_radiative_flux_convergence
     
-  subroutine calc_power_density(day_only, no_of_scalars, no_of_vectors, &
-  no_of_layers, no_of_scalars_h, no_of_vectors_per_layer, no_of_day_points, day_indices, &
+  subroutine calc_power_density(day_only, no_of_scalars, &
+  no_of_layers, no_of_scalars_h, no_of_day_points, day_indices, &
   fluxes, z_vector, radiation_tendency)
   
     ! this is essentially the negative vertical divergence operator
@@ -387,20 +382,16 @@ module radiation
     ! as usual
     integer, intent(in)              :: no_of_scalars
     ! as usual
-    integer, intent(in)              :: no_of_vectors
-    ! as usual
     integer, intent(in)              :: no_of_layers
     ! as usual
     integer, intent(in)              :: no_of_scalars_h
-    ! as usual
-    integer, intent(in)              :: no_of_vectors_per_layer
     ! as usual
     integer, intent(in)              :: no_of_day_points
     ! the indices of the columns where it is day
     integer, intent(in)              :: day_indices(no_of_scalars_h)
     type(ty_fluxes_byband), intent(in):: fluxes
     ! as usual
-    real(8), intent(in)              :: z_vector(no_of_vectors)
+    real(8), intent(in)              :: z_vector(no_of_scalars + no_of_scalars_h)
     ! the result (in W/m^3)
     real(8), intent(inout)           :: radiation_tendency(no_of_scalars)
   
@@ -446,7 +437,7 @@ module radiation
         - fluxes%flux_dn(j_column,ji+1))&
         ! dividing by the column thickness (the shallow atmosphere
         ! approximation is made at this point)
-        /(z_vector((ji-1)*no_of_vectors_per_layer+jk) - z_vector(ji*no_of_vectors_per_layer+jk))
+        /(z_vector((ji-1)*no_of_scalars_h+jk) - z_vector(ji*no_of_scalars_h+jk))
       enddo
     enddo
   

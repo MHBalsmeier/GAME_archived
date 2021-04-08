@@ -77,8 +77,6 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 			if (config_info -> rad_on == 1)
 			{
 				int no_of_scalars = NO_OF_SCALARS_RAD;
-				int no_of_vectors = NO_OF_VECTORS_RAD;
-				int no_of_vectors_per_layer = NO_OF_VECTORS_RAD_PER_LAYER;
 				int no_of_constituents = NO_OF_CONSTITUENTS;
 				int no_of_condensed_constituents = NO_OF_CONDENSED_CONSTITUENTS;
 				int no_of_layers = NO_OF_LAYERS;
@@ -100,7 +98,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 					radiation -> mass_den_rad,
 					radiation -> temp_rad,
 					radiation -> rad_tend_rad,
-					&no_of_scalars, &no_of_vectors, &no_of_vectors_per_layer, &no_of_layers,
+					&no_of_scalars, &no_of_layers,
 					&no_of_constituents, &no_of_condensed_constituents,
 					&time_coordinate);
 					// filling the actual radiation tendency
@@ -311,7 +309,7 @@ int create_rad_array_vector(double in[], double out[], int rad_block_index)
 	{
 		layer_index = i/NO_OF_SCALARS_RAD_PER_LAYER;
 		h_index = i - layer_index*NO_OF_SCALARS_RAD_PER_LAYER;
-		out[h_index + layer_index*NO_OF_VECTORS_RAD_PER_LAYER] = in[rad_block_index*NO_OF_SCALARS_RAD_PER_LAYER + h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
+		out[i] = in[rad_block_index*NO_OF_SCALARS_RAD_PER_LAYER + h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
 	}
 	return 0;
 }
