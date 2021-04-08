@@ -21,6 +21,8 @@ NO_OF_LAYERS = 26,
 // The number of layers affected by orography. This also has to conform with the grid file and the initialization state file.
 NO_OF_GASEOUS_CONSTITUENTS = 1,
 NO_OF_CONDENSED_CONSTITUENTS = 0,
+// the number of blocks into which the arrays will be split up for the radiation calculation
+NO_OF_RAD_BLOCKS = 12,
 // Nothing should be changed by the user below this line.
 NO_OF_CONSTITUENTS = (NO_OF_GASEOUS_CONSTITUENTS + NO_OF_CONDENSED_CONSTITUENTS),
 NO_OF_BASIC_TRIANGLES = 20,
@@ -36,6 +38,10 @@ NO_OF_VECTORS_PER_LAYER = NO_OF_VECTORS_H + NO_OF_SCALARS_H,
 NO_OF_TRIANGLES = (int) (NO_OF_BASIC_TRIANGLES*(pow(4, RES_ID))),
 NO_OF_SCALARS = NO_OF_SCALARS_H*NO_OF_LAYERS,
 NO_OF_VECTORS = NO_OF_H_VECTORS + NO_OF_V_VECTORS,
+NO_OF_SCALARS_RAD = NO_OF_SCALARS/NO_OF_RAD_BLOCKS,
+NO_OF_SCALARS_RAD_PER_LAYER = NO_OF_SCALARS_RAD/NO_OF_LAYERS,
+NO_OF_VECTORS_RAD = NO_OF_VECTORS/NO_OF_RAD_BLOCKS,
+NO_OF_VECTORS_RAD_PER_LAYER = NO_OF_VECTORS_PER_LAYER/NO_OF_RAD_BLOCKS,
 NO_OF_DUAL_SCALARS_H = NO_OF_TRIANGLES,
 NO_OF_DUAL_H_VECTORS = NO_OF_LEVELS*NO_OF_VECTORS_H,
 NO_OF_DUAL_V_VECTORS = NO_OF_LAYERS*NO_OF_DUAL_SCALARS_H,
@@ -134,6 +140,18 @@ Scalar_field v_at_cell;
 Vector_field shear;
 } Diagnostics;
 
+// anything connected to radiation
+typedef struct radiation {
+double lat_scal_rad[NO_OF_SCALARS_RAD_PER_LAYER];
+double lon_scal_rad[NO_OF_SCALARS_RAD_PER_LAYER];
+double z_scal_rad[NO_OF_SCALARS_RAD];
+double z_vect_rad[NO_OF_VECTORS_RAD];
+double mass_den_rad[NO_OF_CONSTITUENTS*NO_OF_SCALARS_RAD];
+double temp_rad[NO_OF_SCALARS_RAD];
+double rad_tend_rad[NO_OF_SCALARS_RAD];
+Scalar_field radiation_tendency;
+} Radiation;
+
 // Collects forcings.
 typedef struct forcings {
 Vector_field pressure_gradient_acc_expl;
@@ -159,7 +177,6 @@ int delta_t_between_analyses;
 int dissipative_heating;
 int mass_advection_order;
 int entropy_advection_order;
-int no_of_rad_blocks;
 double diff_h_smag_fac;
 double shear_bg;
 double damping_start_height_over_toa;

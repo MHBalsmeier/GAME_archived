@@ -14,12 +14,13 @@ Github repository: https://github.com/AUN4GFD/game
 #include <stdio.h>
 
 int temperature_step(State *, State *, State *, Diagnostics *, Config_info *, double, int);
-int create_rad_array_scalar(double [], double [], int, int);
-int create_rad_array_mass_den(double [], double [], int, int);
-int create_rad_array_vector(double [], double [], int, int);
-int remap_to_original(double [], double [], int, int);
+int create_rad_array_scalar(double [], double [], int);
+int create_rad_array_scalar_h(double [], double [], int);
+int create_rad_array_mass_den(double [], double [], int);
+int create_rad_array_vector(double [], double [], int);
+int remap_to_original(double [], double [], int);
 
-int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrapolation_info, Grid *grid, Dualgrid *dualgrid, Scalar_field radiation_tendency, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, double delta_t, double time_coordinate, int total_step_counter)
+int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrapolation_info, Grid *grid, Dualgrid *dualgrid, Radiation *radiation, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irreversible_quantities, Config_info *config_info, double delta_t, double time_coordinate, int total_step_counter)
 {
 	// slow terms (momentum advection and diffusion) update switch
 	int slow_update_bool = 0;
@@ -75,48 +76,40 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 			printf("Starting update of radiative fluxes ...\n");
 			if (config_info -> rad_on == 1)
 			{
-				int no_of_scalars = NO_OF_SCALARS/config_info -> no_of_rad_blocks;
-				int no_of_vectors = NO_OF_VECTORS/config_info -> no_of_rad_blocks;
-				int no_of_vectors_per_layer = NO_OF_VECTORS_PER_LAYER/config_info -> no_of_rad_blocks;
+				int no_of_scalars = NO_OF_SCALARS_RAD;
+				int no_of_vectors = NO_OF_VECTORS_RAD;
+				int no_of_vectors_per_layer = NO_OF_VECTORS_RAD_PER_LAYER;
 				int no_of_constituents = NO_OF_CONSTITUENTS;
 				int no_of_condensed_constituents = NO_OF_CONDENSED_CONSTITUENTS;
 				int no_of_layers = NO_OF_LAYERS;
-				double lat_scal_rad[no_of_scalars];
-				double lon_scal_rad[no_of_scalars];
-				double z_scal_rad[no_of_scalars];
-				double z_vect_rad[no_of_vectors];
-				double mass_den_rad[NO_OF_CONSTITUENTS*no_of_scalars];
-				double temp_rad[no_of_scalars];
-				double rad_tend_rad[no_of_scalars];
 				// loop over all radiation blocks
-				for (int rad_block_index = 0; rad_block_index < config_info -> no_of_rad_blocks; ++rad_block_index)
+				for (int rad_block_index = 0; rad_block_index < NO_OF_RAD_BLOCKS; ++rad_block_index)
 				{
 					// remapping all the arrays
-					create_rad_array_scalar(grid -> latitude_scalar, lat_scal_rad, config_info -> no_of_rad_blocks, rad_block_index);
-					create_rad_array_scalar(grid -> longitude_scalar, lon_scal_rad, config_info -> no_of_rad_blocks, rad_block_index);
-					create_rad_array_scalar(grid -> z_scalar, z_scal_rad, config_info -> no_of_rad_blocks, rad_block_index);
-					create_rad_array_vector(grid -> z_vector, z_vect_rad, config_info -> no_of_rad_blocks, rad_block_index);
-					create_rad_array_mass_den(state_new -> mass_densities, mass_den_rad, config_info -> no_of_rad_blocks, rad_block_index);
-					create_rad_array_scalar(state_new -> temperature_gas, temp_rad, config_info -> no_of_rad_blocks, rad_block_index);
-					create_rad_array_scalar(radiation_tendency, rad_tend_rad, config_info -> no_of_rad_blocks, rad_block_index);
+					create_rad_array_scalar_h(grid -> latitude_scalar, radiation -> lat_scal_rad, rad_block_index);
+					create_rad_array_scalar_h(grid -> longitude_scalar, radiation -> lon_scal_rad, rad_block_index);
+					create_rad_array_scalar(grid -> z_scalar, radiation -> z_scal_rad, rad_block_index);
+					create_rad_array_vector(grid -> z_vector, radiation -> z_vect_rad, rad_block_index);
+					create_rad_array_mass_den(state_new -> mass_densities, radiation -> mass_den_rad, rad_block_index);
+					create_rad_array_scalar(state_new -> temperature_gas, radiation -> temp_rad, rad_block_index);
 					// calling the radiation routine
-					calc_radiative_flux_convergence(lat_scal_rad,
-					lon_scal_rad,
-					z_scal_rad,
-					z_vect_rad,
-					mass_den_rad,
-					temp_rad,
-					rad_tend_rad,
+					calc_radiative_flux_convergence(radiation -> lat_scal_rad,
+					radiation -> lon_scal_rad,
+					radiation -> z_scal_rad,
+					radiation -> z_vect_rad,
+					radiation -> mass_den_rad,
+					radiation -> temp_rad,
+					radiation -> rad_tend_rad,
 					&no_of_scalars, &no_of_vectors, &no_of_vectors_per_layer, &no_of_layers,
 					&no_of_constituents, &no_of_condensed_constituents,
 					&time_coordinate);
 					// filling the actual radiation tendency
-					remap_to_original(rad_tend_rad, radiation_tendency, config_info -> no_of_rad_blocks, rad_block_index);
+					remap_to_original(radiation -> rad_tend_rad, radiation -> radiation_tendency, rad_block_index);
 				}
 			}
 			if (config_info -> rad_on == 2)
 			{
-				held_suar(grid -> latitude_scalar, grid -> z_scalar, state_new -> mass_densities, state_new -> temperature_gas, radiation_tendency);
+				held_suar(grid -> latitude_scalar, grid -> z_scalar, state_new -> mass_densities, state_new -> temperature_gas, radiation -> radiation_tendency);
 			}
 			printf("Update of radiative fluxes completed.\n");
 		}
@@ -143,11 +136,11 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		}
 		if (i == 0)
 		{
-			scalar_tendencies_expl(state_new, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, state_old -> velocity_gas);
+			scalar_tendencies_expl(state_new, state_tendency, grid, dualgrid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, state_old -> velocity_gas);
 		}
 		if (i == 1)
 		{	
-			scalar_tendencies_expl(state_new, state_tendency, grid, dualgrid, delta_t, radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, state_new -> velocity_gas);
+			scalar_tendencies_expl(state_new, state_tendency, grid, dualgrid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irreversible_quantities, config_info, i, state_new -> velocity_gas);
 		}
 		
 		// 3.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies (including diabatic forcings).
@@ -257,23 +250,36 @@ int temperature_step(State *state_old, State *state_new, State *state_tendency, 
 }
 
 
-int create_rad_array_scalar(double in[], double out[], int no_of_rad_blocks, int rad_block_index)
+int create_rad_array_scalar(double in[], double out[], int rad_block_index)
 {
 	/*
 	cuts out a slice of a scalar field for hand-over to the radiation routine (done for RAM efficiency reasons)
 	*/
 	int layer_index, h_index;
 	// loop over all elements of the resulting array
-	for (int i = 0; i < NO_OF_SCALARS/no_of_rad_blocks; ++i)
+	for (int i = 0; i < NO_OF_SCALARS_RAD; ++i)
 	{
-		layer_index = i/(NO_OF_SCALARS_H/no_of_rad_blocks);
-		h_index = i - layer_index*(NO_OF_SCALARS_H/no_of_rad_blocks);
-		out[i] = in[rad_block_index*(NO_OF_SCALARS_H/no_of_rad_blocks) + h_index + layer_index*NO_OF_SCALARS_H];
+		layer_index = i/NO_OF_SCALARS_RAD_PER_LAYER;
+		h_index = i - layer_index*NO_OF_SCALARS_RAD_PER_LAYER;
+		out[i] = in[rad_block_index*NO_OF_SCALARS_RAD_PER_LAYER + h_index + layer_index*NO_OF_SCALARS_H];
 	}
 	return 0;
 }
 
-int create_rad_array_mass_den(double in[], double out[], int no_of_rad_blocks, int rad_block_index)
+int create_rad_array_scalar_h(double in[], double out[], int rad_block_index)
+{
+	/*
+	cuts out a slice of a horizontal scalar field for hand-over to the radiation routine (done for RAM efficiency reasons)
+	*/
+	// loop over all elements of the resulting array
+	for (int i = 0; i < NO_OF_SCALARS_RAD_PER_LAYER; ++i)
+	{
+		out[i] = in[rad_block_index*NO_OF_SCALARS_RAD_PER_LAYER + i];
+	}
+	return 0;
+}
+
+int create_rad_array_mass_den(double in[], double out[], int rad_block_index)
 {
 	/*
 	same thing as create_rad_array_scalar, only for a mass density field
@@ -282,18 +288,18 @@ int create_rad_array_mass_den(double in[], double out[], int no_of_rad_blocks, i
 	for (int const_id = 0; const_id < NO_OF_CONSTITUENTS; ++const_id)
 	{
 		// loop over all elements of the resulting array
-		for (int i = 0; i < NO_OF_SCALARS/no_of_rad_blocks; ++i)
+		for (int i = 0; i < NO_OF_SCALARS_RAD; ++i)
 		{
-			layer_index = i/(NO_OF_SCALARS_H/no_of_rad_blocks);
-			h_index = i - layer_index*(NO_OF_SCALARS_H/no_of_rad_blocks);
-			out[const_id*(NO_OF_SCALARS/no_of_rad_blocks) + i]
-			= in[const_id*NO_OF_SCALARS + rad_block_index*(NO_OF_SCALARS_H/no_of_rad_blocks) + h_index + layer_index*NO_OF_SCALARS_H];
+			layer_index = i/NO_OF_SCALARS_RAD_PER_LAYER;
+			h_index = i - layer_index*NO_OF_SCALARS_RAD_PER_LAYER;
+			out[const_id*NO_OF_SCALARS_RAD + i]
+			= in[const_id*NO_OF_SCALARS + rad_block_index*NO_OF_SCALARS_RAD_PER_LAYER + h_index + layer_index*NO_OF_SCALARS_H];
 		}
 	}
 	return 0;
 }
 
-int create_rad_array_vector(double in[], double out[], int no_of_rad_blocks, int rad_block_index)
+int create_rad_array_vector(double in[], double out[], int rad_block_index)
 {
 	/*
 	cuts out a slice of a vector field for hand-over to the radiation routine (done for RAM efficiency reasons),
@@ -301,27 +307,27 @@ int create_rad_array_vector(double in[], double out[], int no_of_rad_blocks, int
 	*/
 	int layer_index, h_index;
 	// loop over all elements of the resulting array
-	for (int i = 0; i < (NO_OF_SCALARS + NO_OF_SCALARS_H)/no_of_rad_blocks; ++i)
+	for (int i = 0; i < NO_OF_SCALARS_RAD + NO_OF_SCALARS_RAD_PER_LAYER; ++i)
 	{
-		layer_index = i/(NO_OF_SCALARS_H/no_of_rad_blocks);
-		h_index = i - layer_index*(NO_OF_SCALARS_H/no_of_rad_blocks);
-		out[h_index + layer_index*(NO_OF_VECTORS_PER_LAYER/no_of_rad_blocks)] = in[rad_block_index*(NO_OF_SCALARS_H/no_of_rad_blocks) + h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
+		layer_index = i/NO_OF_SCALARS_RAD_PER_LAYER;
+		h_index = i - layer_index*NO_OF_SCALARS_RAD_PER_LAYER;
+		out[h_index + layer_index*NO_OF_VECTORS_RAD_PER_LAYER] = in[rad_block_index*NO_OF_SCALARS_RAD_PER_LAYER + h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
 	}
 	return 0;
 }
 
-int remap_to_original(double in[], double out[], int no_of_rad_blocks, int rad_block_index)
+int remap_to_original(double in[], double out[], int rad_block_index)
 {
 	/*
 	reverses what create_rad_array_scalar has done
 	*/
 	int layer_index, h_index;
 	// loop over all elements of the resulting array
-	for (int i = 0; i < NO_OF_SCALARS/no_of_rad_blocks; ++i)
+	for (int i = 0; i < NO_OF_SCALARS_RAD; ++i)
 	{
-		layer_index = i/(NO_OF_SCALARS_H/no_of_rad_blocks);
-		h_index = i - layer_index*(NO_OF_SCALARS_H/no_of_rad_blocks);
-		out[rad_block_index*(NO_OF_SCALARS_H/no_of_rad_blocks) + h_index + layer_index*NO_OF_SCALARS_H] = in[i];
+		layer_index = i/NO_OF_SCALARS_RAD_PER_LAYER;
+		h_index = i - layer_index*NO_OF_SCALARS_RAD_PER_LAYER;
+		out[rad_block_index*NO_OF_SCALARS_RAD_PER_LAYER + h_index + layer_index*NO_OF_SCALARS_H] = in[i];
 	}
 	return 0;
 }

@@ -107,7 +107,6 @@ int main(int argc, char *argv[])
 	config_info -> damping_coeff_max = strtof(argv[39], NULL);
 	config_info -> mass_advection_order = strtof(argv[40], NULL);
 	config_info -> entropy_advection_order = strtof(argv[41], NULL);
-	config_info -> no_of_rad_blocks = strtof(argv[42], NULL);
 	
 	/*
 	Checking user input for correctness:
@@ -540,7 +539,7 @@ int main(int argc, char *argv[])
     Irreversible_quantities *irrev = calloc(1, sizeof(Irreversible_quantities));
     State *state_new = calloc(1, sizeof(State));
     linear_combine_two_states(state_old, state_old, state_new, 1, 0);
-	Scalar_field *radiation_tendency = calloc(1, sizeof(Scalar_field));
+	Radiation *radiation = calloc(1, sizeof(Radiation));
     State *state_write = calloc(1, sizeof(State));
     
     /*
@@ -570,7 +569,7 @@ int main(int argc, char *argv[])
     	}
     	
     	// Time step integration.
-    	manage_rkhevi(state_old, state_new, extrapolation_info, grid, dualgrid, *radiation_tendency, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
+    	manage_rkhevi(state_old, state_new, extrapolation_info, grid, dualgrid, radiation, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
     	// This switch can be set to zero now and remains there.
     	config_info -> totally_first_step_bool = 0;
 		time_step_counter += 1;
@@ -692,7 +691,7 @@ int main(int argc, char *argv[])
     free(extrapolation_info);
     free(forcings);
     free(state_tendency);
-    free(radiation_tendency);
+    free(radiation);
     free(grid);
     free(dualgrid);
     free(state_old);

@@ -3,7 +3,7 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
-int manage_rkhevi(State *, State *, Extrapolation_info *, Grid *, Dualgrid *, Scalar_field, State *, Diagnostics *, Forcings *, Irreversible_quantities *, Config_info *, double, double, int);
+int manage_rkhevi(State *, State *, Extrapolation_info *, Grid *, Dualgrid *, Radiation *, State *, Diagnostics *, Forcings *, Irreversible_quantities *, Config_info *, double, double, int);
 int vector_tendencies_expl(State *, State *, Grid *, Dualgrid *, Diagnostics *, Forcings *, Irreversible_quantities *, Config_info *, int, int, double);
 int scalar_tendencies_expl(State *, State *, Grid *, Dualgrid *, double, Scalar_field, Diagnostics *, Forcings *, Irreversible_quantities *, Config_info *, int, Vector_field);
 int three_band_solver_gen_densitites(State *, State *, State *, Diagnostics *, Config_info *, double, Grid *);
