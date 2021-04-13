@@ -33,7 +33,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	// This is the standard extrapolation.
 	else
 	{
-		hor_pgrad_sound_extrapolation = get_impl_thermo_weight();
+		hor_pgrad_sound_extrapolation = get_impl_thermo_weight() - 0.5;
 		old_hor_pgrad_sound_weight = -hor_pgrad_sound_extrapolation;
 		new_hor_pgrad_sound_weight = 1 - old_hor_pgrad_sound_weight;
 	}
