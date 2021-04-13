@@ -22,7 +22,7 @@ int calc_deformations(State *state, Diagnostics *diagnostics, Grid *grid)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		// diagnostics -> deform_diag[i] = -2.0/3*diagnostics -> velocity_gas_divv[i];
-		diagnostics -> deform_diag[i] = diagnostics -> velocity_gas_divv[i];
+		diagnostics -> deform_diag[i] = 4.0/3*diagnostics -> velocity_gas_divv[i];
 	}
 	
 	// off-diagonal component
