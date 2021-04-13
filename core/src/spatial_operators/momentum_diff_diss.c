@@ -12,20 +12,51 @@ Github repository: https://github.com/AUN4GFD/game
 
 int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid, double delta_t)
 {
-	// Evaluating necessary differential operators.
-	divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
-	grad_hor(diagnostics -> velocity_gas_divv, irrev -> velocity_grad_div, grid);
+	/*
+	This is the horizontal momentum diffusion operator.
+	*/
+	
+	// Firstly, the deformations need to be calculated.
+    calc_deformations(state, diagnostics, grid);
+    
+    // Calculating the effective horizontal kinematic viscosity (Eddy viscosity).
+	hori_viscosity_eff(state, irrev, grid, diagnostics, config_info, delta_t);
+	
+	/*
+	gradient of divergence component
+	*/
+	scalar_times_scalar(irrev -> viscosity_eff, diagnostics -> velocity_gas_divv, diagnostics -> velocity_gas_divv);
+	grad_hor(diagnostics -> velocity_gas_divv, diagnostics -> vector_field_placeholder, grid);
+    
+    /*
+    curl of vorticity component
+    */
+	int layer_index, h_index;
+	#pragma omp parallel for private(layer_index, h_index)
+	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
+	{
+		layer_index = i/NO_OF_VECTORS_H;
+		h_index = i - layer_index*NO_OF_VECTORS_H;
+		// averaging the diffusion coefficient to the edges and multiplying by the relative vorticity
+    	// diagnostics -> rel_vort is a misuse of name
+		diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index] = 0.5*
+		(irrev -> viscosity_eff[layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]]
+		+ irrev -> viscosity_eff[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]])
+		*diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index];
+	}
     curl_of_vorticity(diagnostics -> rel_vort, diagnostics -> curl_of_vorticity, grid, dualgrid, config_info);
-	// adding the curl term to the divergence term
-	#pragma omp parallel for
+	
+	// adding up the two components of the momentum diffusion acceleration and dividing by the density at edge
+	#pragma omp parallel for private(layer_index, h_index)
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
-		irrev -> friction_acc[i] = irrev -> velocity_grad_div[i] - diagnostics -> curl_of_vorticity[i];
+		layer_index = i/NO_OF_VECTORS_PER_LAYER;
+		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
+		irrev -> friction_acc[i] =
+		(diagnostics -> vector_field_placeholder[i] - diagnostics -> curl_of_vorticity[i])
+		/(0.5*(density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index - NO_OF_SCALARS_H])
+		+ density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index - NO_OF_SCALARS_H])));
 	}
-    // Calculating the effective horizontal kinematic viscosity (Eddy viscosity).
-	hori_viscosity_eff(state, irrev -> viscosity_eff, grid, diagnostics, config_info, delta_t);
-	// multiplying by the viscosity
-	vector_times_vector(irrev -> viscosity_eff, irrev -> friction_acc, irrev -> friction_acc);
 	return 0;
 }
 

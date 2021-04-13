@@ -131,11 +131,13 @@ Scalar_field velocity_gas_divv;
 Vector_field curl_of_vorticity;
 Scalar_field scalar_field_placeholder;
 Vector_field vector_field_placeholder;
+Scalar_field deform_diag;
+Vector_field deform_off_diag;
+Vector_field deform_off_diag_squared;
 Vector_field u_at_edge;
 Vector_field v_at_edge;
 Scalar_field u_at_cell;
 Scalar_field v_at_cell;
-Vector_field shear;
 } Diagnostics;
 
 // anything connected to radiation
@@ -196,8 +198,7 @@ Scalar_field scalar_diffusion_coeff_numerical_v;
 Scalar_field pressure_gradient_decel_factor;
 double constituent_mass_source_rates[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
 double constituent_heat_source_rates[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS];
-Vector_field viscosity_eff;
-Vector_field velocity_grad_div;
+Scalar_field viscosity_eff;
 } Irreversible_quantities;
 
 // Info on input and output is collected here.
