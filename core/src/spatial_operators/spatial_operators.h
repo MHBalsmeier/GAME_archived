@@ -32,6 +32,5 @@ int curl_field_to_cells(Curl_field, Scalar_field, Grid *);
 int edges_to_cells(Vector_field, Scalar_field, Grid *);
 int hori_momentum_diffusion(State *, Diagnostics *, Irreversible_quantities*, Config_info *, Grid *, Dualgrid *, double);
 int vert_momentum_diffusion(State *, Irreversible_quantities*, Grid *);
-int curl_of_vorticity(Curl_field, Vector_field, Grid *, Dualgrid *, Config_info *);
 int calc_deformations(State *, Diagnostics *, Grid *);
 int simple_dissipation_rate(State *, Irreversible_quantities *, Grid *);

@@ -10,6 +10,8 @@ Github repository: https://github.com/AUN4GFD/game
 #include <stdio.h>
 #include <math.h>
 
+int calc_hor_shear_stress_divergence(Curl_field, Vector_field, Grid *, Dualgrid *, Config_info *);
+
 int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid, double delta_t)
 {
 	/*
@@ -44,7 +46,7 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		+ irrev -> viscosity_eff[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]])
 		*diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index];
 	}
-    curl_of_vorticity(diagnostics -> rel_vort, diagnostics -> curl_of_vorticity, grid, dualgrid, config_info);
+    calc_hor_shear_stress_divergence(diagnostics -> rel_vort, diagnostics -> curl_of_vorticity, grid, dualgrid, config_info);
 	
 	// adding up the two components of the momentum diffusion acceleration and dividing by the density at edge
 	#pragma omp parallel for private(layer_index, h_index)
@@ -90,38 +92,35 @@ int vert_momentum_diffusion(State *state, Irreversible_quantities *irrev, Grid *
 	return 0;
 }
 
-int curl_of_vorticity(Curl_field vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid, Config_info *config_info)
+int calc_hor_shear_stress_divergence(Curl_field vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid, Config_info *config_info)
 {
-	// Calculates the negative curl of the vertical vorticity.
-	int layer_index, h_index;
-	#pragma omp parallel for private(layer_index, h_index)
-	for (int i = 0; i < NO_OF_VECTORS; ++i)
+	// Calculates the horizontal shear stress divergence.
+	int layer_index, h_index, vector_index;
+	#pragma omp parallel for private(layer_index, h_index, vector_index)
+	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
 	{
-		layer_index = i/NO_OF_VECTORS_PER_LAYER;
-		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-		out_field[i] = 0;
 		// Remember: (curl(zeta))*e_x = dzeta_z/dy - dzeta_y/dz = (dz*dzeta_z - dy*dzeta_y)/(dy*dz) = (dz*dzeta_z - dy*dzeta_y)/area (Stokes' Theorem, which is used here)
-		if (h_index >= NO_OF_SCALARS_H)
+		layer_index = i/NO_OF_VECTORS_H;
+		h_index = i - layer_index*NO_OF_VECTORS_H;
+		vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
+		// horizontal difference of vertical vorticity (dzeta_z*dz)
+		// An averaging over three rhombi must be done.
+		for (int j = 0; j < 3; ++j)
 		{
-			// horizontal difference of vertical vorticity (dzeta_z*dz)
-			// An averaging over three rhombi must be done.
-			for (int j = 0; j < 3; ++j)
-			{
-				out_field[i] = out_field[i]
-				// This prefactor accounts for the fact that we average over three rhombi.
-				+ 1.0/3*(
-				// vertical length at the to_index_dual point
-				dualgrid -> normal_distance[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> to_index[h_index - NO_OF_SCALARS_H]]
-				// vorticity at the to_index_dual point
-				*vorticity[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + dualgrid -> adjacent_vector_indices_h[3*dualgrid -> to_index[h_index - NO_OF_SCALARS_H] + j]]
-				// vertical length at the from_index_dual point
-				- dualgrid -> normal_distance[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> from_index[h_index - NO_OF_SCALARS_H]]
-				// vorticity at the from_index_dual point
-				*vorticity[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + dualgrid -> adjacent_vector_indices_h[3*dualgrid -> from_index[h_index - NO_OF_SCALARS_H] + j]]);
-			}
+			out_field[vector_index] = out_field[vector_index]
+			// This prefactor accounts for the fact that we average over three rhombi.
+			+ 1.0/3*(
+			// vertical length at the to_index_dual point
+			dualgrid -> normal_distance[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> to_index[h_index]]
+			// vorticity at the to_index_dual point
+			*vorticity[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + dualgrid -> adjacent_vector_indices_h[3*dualgrid -> to_index[h_index] + j]]
+			// vertical length at the from_index_dual point
+			- dualgrid -> normal_distance[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> from_index[h_index]]
+			// vorticity at the from_index_dual point
+			*vorticity[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + dualgrid -> adjacent_vector_indices_h[3*dualgrid -> from_index[h_index] + j]]);
 		}
 		// Dividing by the area.
-		out_field[i] = out_field[i]/grid -> area[i];
+		out_field[vector_index] = out_field[vector_index]/grid -> area[vector_index];
 	}
 	return 0;
 }
