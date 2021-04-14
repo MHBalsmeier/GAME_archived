@@ -23,7 +23,7 @@ orography_layers=23 # number of layers following orography (only relevent if typ
 
 # dynamics settings
 cfl_margin=0.55 # The sound time step will be calculated as follows (delta t) = (delta t from horizontal CFL)*(1 - cfl_margin). 0.55 can be considered a standard value.
-adv_sound_ratio=4 # the ratio of the advective to the sound time step
+adv_sound_ratio=3 # the ratio of the advective to the sound time step
 momentum_diff_h=1 # turn on if you want horizontal momentum diffusion
 momentum_diff_v=0 # turn on if you want vertical momentum diffusion
 dissipative_heating=1 # turn on if you want a dissipative heating rate
