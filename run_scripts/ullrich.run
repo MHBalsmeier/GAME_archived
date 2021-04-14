@@ -35,7 +35,7 @@ mass_dry_diff_h=0 # turn on if you want horizontal dry mass diffusion
 mass_dry_diff_v=0 # turn on if you want vetical dry mass diffusion
 temperature_diff_h=0 # turn on if you want horizontal temperature diffusion
 temperature_diff_v=0 # turn on if you want vetical temperature diffusion
-damping_start_height_over_toa=0.53 # Swamp layer boundary in relation to the TOA.
+damping_start_height_over_toa=0.53 # swamp layer boundary in relation to the TOA
 damping_coeff_max=0.25 # maximum swamp layer damping coefficient
 
 # "physics" configuration
