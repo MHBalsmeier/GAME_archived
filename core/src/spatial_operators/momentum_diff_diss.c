@@ -41,12 +41,12 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		h_index = i - layer_index*NO_OF_VECTORS_H;
 		// averaging the diffusion coefficient to the edges and multiplying by the relative vorticity
     	// diagnostics -> rel_vort is a misuse of name
-		diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index] = 0.5*
+		diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index] = -0.5*
 		(irrev -> viscosity_eff[layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]]
 		+ irrev -> viscosity_eff[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]])
 		*diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index];
 	}
-    calc_hor_shear_stress_divergence(diagnostics -> rel_vort, diagnostics -> curl_of_vorticity, grid, dualgrid, config_info);
+    calc_hor_shear_stress_divergence(diagnostics -> rel_vort, diagnostics -> shear_stress_acc, grid, dualgrid, config_info);
 	
 	// adding up the two components of the momentum diffusion acceleration and dividing by the density at edge
 	#pragma omp parallel for private(layer_index, h_index)
@@ -55,7 +55,7 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		layer_index = i/NO_OF_VECTORS_PER_LAYER;
 		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
 		irrev -> friction_acc[i] =
-		(diagnostics -> vector_field_placeholder[i] - diagnostics -> curl_of_vorticity[i])
+		(diagnostics -> vector_field_placeholder[i] + diagnostics -> shear_stress_acc[i])
 		/(0.5*(density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index - NO_OF_SCALARS_H])
 		+ density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index - NO_OF_SCALARS_H])));
 	}

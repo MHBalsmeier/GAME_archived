@@ -128,7 +128,7 @@ Scalar_field e_kin;
 Vector_field cpgradt;
 Vector_field tgrads;
 Scalar_field velocity_gas_divv;
-Vector_field curl_of_vorticity;
+Vector_field shear_stress_acc;
 Scalar_field scalar_field_placeholder;
 Vector_field vector_field_placeholder;
 Scalar_field deform_diag;
