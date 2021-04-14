@@ -79,6 +79,8 @@ int hori_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *grid,
 	double mean_particle_mass = mean_particle_masses_gas(0);
 	// the minimum "background" diffusion coefficient
 	double min_diff_h_coeff_turb = grid -> mean_area_cell*config_info -> diff_h_smag_fac*config_info -> shear_bg;
+	// the maximum diffusion coefficient (stability constraint)
+	double max_diff_h_coeff_turb = 0.125*grid -> mean_area_cell/delta_t;
 	double molecular_viscosity;
 	
 	// averaging the off-diagonal deformations to the cell centers
@@ -100,6 +102,12 @@ int hori_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *grid,
 		if (irrev -> viscosity_eff[i] < min_diff_h_coeff_turb)
 		{
 			irrev -> viscosity_eff[i] = min_diff_h_coeff_turb;
+		}
+		
+		// maximum (stability constraint)
+		if (irrev -> viscosity_eff[i] > max_diff_h_coeff_turb)
+		{
+			irrev -> viscosity_eff[i] = max_diff_h_coeff_turb;
 		}
 		
 		// multiplying by the mass density of the gas phase
