@@ -58,21 +58,21 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Irreversi
 	// The Eddy viscosity coefficient only has to be calculated if it has not yet been done.
 	if (config_info -> momentum_diff_h == 0)
 	{
-		hori_viscosity_eff(state, irreversible_quantities, grid, diagnostics, config_info, delta_t);
+		hori_strain_viscosity_eff(state, irreversible_quantities, grid, diagnostics, config_info, delta_t);
 	}
 	double c_g_v;
 	#pragma omp parallel for private (c_g_v)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		c_g_v = spec_heat_cap_diagnostics_v(state, i, config_info);
-		irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i] = c_g_v*irreversible_quantities -> viscosity_eff[i];
+		irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i] = c_g_v*irreversible_quantities -> viscosity_strain_eff[i];
 		// vertical Eddy viscosity is about two orders of magnitude smaller
 		irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i] = 0.01*irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i];
 	}
 	return 0;
 }
 
-int hori_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
+int hori_strain_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
 {
 	// these things are hardly ever modified
 	double eff_particle_radius = 130e-12;
@@ -83,35 +83,84 @@ int hori_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *grid,
 	double max_diff_h_coeff_turb = 0.125*grid -> mean_area_cell/delta_t;
 	double molecular_viscosity;
 	
-	// averaging the off-diagonal deformations to the cell centers
-	edges_to_cells(diagnostics -> deform_off_diag_squared, irrev -> viscosity_eff, grid);
-	
 	#pragma omp parallel for private(molecular_viscosity)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		// preliminary result
-		irrev -> viscosity_eff[i] = grid -> mean_area_cell*config_info -> diff_h_smag_fac
-		*sqrt(irrev -> viscosity_eff[i] + pow(diagnostics -> deform_diag[i], 2));
+		irrev -> viscosity_strain_eff[i] = 4*grid -> mean_area_cell*config_info -> diff_h_smag_fac
+		*fabs(diagnostics -> deform_diag[i]);
 		
 		// calculating and adding the molecular viscosity
 		calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i],
 		eff_particle_radius, &molecular_viscosity);
-		irrev -> viscosity_eff[i] += molecular_viscosity;
+		irrev -> viscosity_strain_eff[i] += molecular_viscosity;
 		
 		// turbulent minimum
-		if (irrev -> viscosity_eff[i] < min_diff_h_coeff_turb)
+		if (irrev -> viscosity_strain_eff[i] < min_diff_h_coeff_turb)
 		{
-			irrev -> viscosity_eff[i] = min_diff_h_coeff_turb;
+			irrev -> viscosity_strain_eff[i] = min_diff_h_coeff_turb;
 		}
 		
 		// maximum (stability constraint)
-		if (irrev -> viscosity_eff[i] > max_diff_h_coeff_turb)
+		if (irrev -> viscosity_strain_eff[i] > max_diff_h_coeff_turb)
 		{
-			irrev -> viscosity_eff[i] = max_diff_h_coeff_turb;
+			irrev -> viscosity_strain_eff[i] = max_diff_h_coeff_turb;
 		}
 		
 		// multiplying by the mass density of the gas phase
-		irrev -> viscosity_eff[i] = density_gas(state, i)*irrev -> viscosity_eff[i];
+		irrev -> viscosity_strain_eff[i] = density_gas(state, i)*irrev -> viscosity_strain_eff[i];
+	}
+	return 0;
+}
+
+int hori_shear_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
+{
+	// these things are hardly ever modified
+	double eff_particle_radius = 130e-12;
+	double mean_particle_mass = mean_particle_masses_gas(0);
+	// the minimum "background" diffusion coefficient
+	double min_diff_h_coeff_turb = grid -> mean_area_cell*config_info -> diff_h_smag_fac*config_info -> shear_bg;
+	// the maximum diffusion coefficient (stability constraint)
+	double max_diff_h_coeff_turb = 0.125*grid -> mean_area_cell/delta_t;
+	double molecular_viscosity;
+	
+	int layer_index, h_index, scalar_index_from, scalar_index_to;
+	#pragma omp parallel for private(molecular_viscosity, layer_index, h_index, scalar_index_from, scalar_index_to)
+	for (int i = 0; i < NO_OF_VECTORS; ++i)
+	{
+		layer_index = i/NO_OF_VECTORS_PER_LAYER;
+		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
+		if (h_index >= NO_OF_SCALARS_H)
+		{
+			// preliminary result
+			irrev -> viscosity_shear_eff[i] = 0.25*grid -> mean_area_cell*config_info -> diff_h_smag_fac
+			*fabs(diagnostics -> deform_off_diag[i]);
+			
+			// calculating and adding the molecular viscosity
+			scalar_index_from = layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index - NO_OF_SCALARS_H];
+			scalar_index_to = layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index - NO_OF_SCALARS_H];
+			calc_diffusion_coeff(
+			0.5*(state -> temperature_gas[scalar_index_from] + state -> temperature_gas[scalar_index_to]),
+			mean_particle_mass,
+			0.5*(state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_from] + state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_to]),
+			eff_particle_radius, &molecular_viscosity);
+			irrev -> viscosity_shear_eff[i] += molecular_viscosity;
+			
+			// turbulent minimum
+			if (irrev -> viscosity_shear_eff[i] < min_diff_h_coeff_turb)
+			{
+				irrev -> viscosity_shear_eff[i] = min_diff_h_coeff_turb;
+			}
+			
+			// maximum (stability constraint)
+			if (irrev -> viscosity_shear_eff[i] > max_diff_h_coeff_turb)
+			{
+				irrev -> viscosity_shear_eff[i] = max_diff_h_coeff_turb;
+			}
+			
+			// multiplying by the mass density of the gas phase
+			irrev -> viscosity_shear_eff[i] = 0.5*(density_gas(state, scalar_index_from) + density_gas(state, scalar_index_to))*irrev -> viscosity_shear_eff[i];
+		}
 	}
 	return 0;
 }

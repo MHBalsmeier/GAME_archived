@@ -32,10 +32,7 @@ int calc_deformations(State *state, Diagnostics *diagnostics, Grid *grid)
 		layer_index = i/NO_OF_VECTORS_H;
 		h_index = i - layer_index*NO_OF_VECTORS_H;
 		diagnostics -> deform_off_diag[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
-		= diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index];
-		// this is a preparation for computing the diffusion coefficient
-		diagnostics -> deform_off_diag_squared[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
-		= pow(diagnostics -> deform_off_diag[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index], 2);
+		= -diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index];
 	}
 	return 0;
 }
