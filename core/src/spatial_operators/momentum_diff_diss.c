@@ -9,8 +9,9 @@ Github repository: https://github.com/AUN4GFD/game
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "geos95.h"
 
-int calc_curl_of_vorticity(Curl_field, Vector_field, Grid *, Dualgrid *, Config_info *);
+int hor_calc_curl_of_vorticity(Curl_field, Vector_field, Grid *, Dualgrid *, Config_info *);
 
 int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid, double delta_t)
 {
@@ -39,24 +40,27 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	{
 		layer_index = i/NO_OF_VECTORS_H;
 		h_index = i - layer_index*NO_OF_VECTORS_H;
-		// averaging the diffusion coefficient to the edges and multiplying by the relative vorticity
+		// multiplying the diffusion coefficient by the relative vorticity
     	// diagnostics -> rel_vort is a misuse of name
 		diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index]
 		= irrev -> viscosity_curl_eff[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
 		*diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index];
 	}
-    calc_curl_of_vorticity(diagnostics -> rel_vort, diagnostics -> curl_of_vorticity, grid, dualgrid, config_info);
+    hor_calc_curl_of_vorticity(diagnostics -> rel_vort, diagnostics -> curl_of_vorticity, grid, dualgrid, config_info);
 	
 	// adding up the two components of the momentum diffusion acceleration and dividing by the density at edge
-	#pragma omp parallel for private(layer_index, h_index)
-	for (int i = 0; i < NO_OF_VECTORS; ++i)
+	int vector_index, scalar_index_from, scalar_index_to;
+	#pragma omp parallel for private(layer_index, h_index, vector_index, scalar_index_from, scalar_index_to)
+	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
 	{
-		layer_index = i/NO_OF_VECTORS_PER_LAYER;
-		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-		irrev -> friction_acc[i] =
-		(diagnostics -> vector_field_placeholder[i] - diagnostics -> curl_of_vorticity[i])
-		/(0.5*(density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index - NO_OF_SCALARS_H])
-		+ density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index - NO_OF_SCALARS_H])));
+		layer_index = i/NO_OF_VECTORS_H;
+		h_index = i - layer_index*NO_OF_VECTORS_H;
+		vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
+		scalar_index_from = layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index];
+		scalar_index_to = layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index];
+		irrev -> friction_acc[vector_index] =
+		(diagnostics -> vector_field_placeholder[vector_index] - diagnostics -> curl_of_vorticity[vector_index])
+		/(0.5*(density_gas(state, scalar_index_from) + density_gas(state, scalar_index_to)));
 	}
 	return 0;
 }
@@ -91,17 +95,19 @@ int vert_momentum_diffusion(State *state, Irreversible_quantities *irrev, Grid *
 	return 0;
 }
 
-int calc_curl_of_vorticity(Curl_field vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid, Config_info *config_info)
+int hor_calc_curl_of_vorticity(Curl_field vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid, Config_info *config_info)
 {
 	// Calculates the horizontal shear stress divergence.
-	int layer_index, h_index, vector_index;
-	#pragma omp parallel for private(layer_index, h_index, vector_index)
+	int layer_index, h_index, vector_index, upper_index_z, lower_index_z, upper_index_zeta, lower_index_zeta;
+	double delta_z, delta_x, tangential_slope, delta_zeta, dzeta_dz;
+	#pragma omp parallel for private(layer_index, h_index, vector_index, delta_z, delta_x, tangential_slope, dzeta_dz, upper_index_z, lower_index_z, upper_index_zeta, lower_index_zeta)
 	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
 	{
 		// Remember: (curl(zeta))*e_x = dzeta_z/dy - dzeta_y/dz = (dz*dzeta_z - dy*dzeta_y)/(dy*dz) = (dz*dzeta_z - dy*dzeta_y)/area (Stokes' Theorem, which is used here)
 		layer_index = i/NO_OF_VECTORS_H;
 		h_index = i - layer_index*NO_OF_VECTORS_H;
 		vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
+		delta_z = 0;
 		// horizontal difference of vertical vorticity (dzeta_z*dz)
 		// An averaging over three rhombi must be done.
 		for (int j = 0; j < 3; ++j)
@@ -117,9 +123,48 @@ int calc_curl_of_vorticity(Curl_field vorticity, Vector_field out_field, Grid *g
 			- dualgrid -> normal_distance[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> from_index[h_index]]
 			// vorticity at the from_index_dual point
 			*vorticity[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + dualgrid -> adjacent_vector_indices_h[3*dualgrid -> from_index[h_index] + j]]);
+			// preparation of the tangential slope
+			delta_z += 1.0/3*(
+			grid -> z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> adjacent_vector_indices_h[3*dualgrid -> to_index[h_index] + j]]
+			- grid -> z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> adjacent_vector_indices_h[3*dualgrid -> from_index[h_index] + j]]);
+			
 		}
 		// Dividing by the area.
 		out_field[vector_index] = out_field[vector_index]/grid -> area[vector_index];
+		
+		/*
+		terrain-following correction
+		*/
+		if (layer_index >= NO_OF_LAYERS - grid -> no_of_oro_layers)
+		{
+			// calculating the tangential slope
+			delta_x = dualgrid -> normal_distance[NO_OF_DUAL_VECTORS - NO_OF_VECTORS_H + h_index];
+			delta_x = delta_x*(RADIUS + grid -> z_vector[vector_index])/RADIUS;
+			tangential_slope = delta_z/delta_x;
+			
+			// calculating the vertical gradient of the vertical vorticity
+			upper_index_z = NO_OF_SCALARS_H + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER + h_index;
+			lower_index_z = NO_OF_SCALARS_H + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER + h_index;
+			upper_index_zeta = NO_OF_VECTORS_H + (layer_index - 1)*2*NO_OF_VECTORS_H + h_index;
+			lower_index_zeta = NO_OF_VECTORS_H + (layer_index + 1)*2*NO_OF_VECTORS_H + h_index;
+			if (layer_index == 0)
+			{
+				upper_index_z = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
+				upper_index_zeta = NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + h_index;
+			}
+			if (layer_index == NO_OF_LAYERS - 1)
+			{
+				lower_index_z = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
+				lower_index_zeta = NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + h_index;
+			}
+			
+			delta_zeta = vorticity[upper_index_zeta] - vorticity[lower_index_zeta];
+			delta_z = grid -> z_vector[upper_index_z] - grid -> z_vector[lower_index_z];
+			
+			// the result
+			dzeta_dz = delta_zeta/delta_z;
+			out_field[vector_index] -= tangential_slope*dzeta_dz;
+		}
 	}
 	return 0;
 }
