@@ -57,7 +57,7 @@ netcdf_output_switch=0 # If set to 1, output will be written to netcdf files on 
 delta_t_between_analyses=-1 # the time difference between two analyses, only relevant in NWP mode
 
 # parallelization
-export OMP_NUM_THREADS=6 # relevant only for OMP
+export OMP_NUM_THREADS=2 # relevant only for OMP
 number_of_cpus=1 # relevant only for MPI
 
 # that's it, now the basic run script will be sourced
