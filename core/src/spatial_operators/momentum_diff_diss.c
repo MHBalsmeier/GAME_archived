@@ -10,27 +10,24 @@ Github repository: https://github.com/AUN4GFD/game
 #include <stdio.h>
 #include <math.h>
 
-int calc_hor_shear_stress_divergence(Curl_field, Vector_field, Grid *, Dualgrid *, Config_info *);
+int calc_curl_of_vorticity(Curl_field, Vector_field, Grid *, Dualgrid *, Config_info *);
 
 int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid, double delta_t)
 {
 	/*
 	This is the horizontal momentum diffusion operator.
 	*/
-	
-	// Firstly, the deformations need to be calculated.
-    calc_deformations(state, diagnostics, grid);
     
-    // Calculating the effective horizontal kinematic viscosity acting on strain deformations (Eddy viscosity).
-	hori_strain_viscosity_eff(state, irrev, grid, diagnostics, config_info, delta_t);
+    // Calculating the effective horizontal kinematic viscosity acting on divergences (Eddy viscosity).
+	hori_div_viscosity_eff(state, irrev, grid, diagnostics, config_info, delta_t);
 	
-    // Calculating the effective horizontal kinematic viscosity acting on shear deformations (Eddy viscosity).
-	hori_shear_viscosity_eff(state, irrev, grid, diagnostics, config_info, delta_t);
+    // Calculating the effective horizontal kinematic viscosity acting on vorticities (Eddy viscosity).
+	hori_curl_viscosity_eff(state, irrev, grid, diagnostics, config_info, delta_t);
 	
 	/*
 	gradient of divergence component
 	*/
-	scalar_times_scalar(irrev -> viscosity_strain_eff, diagnostics -> velocity_gas_divv, diagnostics -> velocity_gas_divv);
+	scalar_times_scalar(irrev -> viscosity_div_eff, diagnostics -> velocity_gas_divv, diagnostics -> velocity_gas_divv);
 	grad_hor(diagnostics -> velocity_gas_divv, diagnostics -> vector_field_placeholder, grid);
     
     /*
@@ -45,10 +42,10 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		// averaging the diffusion coefficient to the edges and multiplying by the relative vorticity
     	// diagnostics -> rel_vort is a misuse of name
 		diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index]
-		= irrev -> viscosity_shear_eff[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
-		*diagnostics -> deform_off_diag[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+		= irrev -> viscosity_curl_eff[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
+		*diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index];
 	}
-    calc_hor_shear_stress_divergence(diagnostics -> rel_vort, diagnostics -> shear_stress_acc, grid, dualgrid, config_info);
+    calc_curl_of_vorticity(diagnostics -> rel_vort, diagnostics -> curl_of_vorticity, grid, dualgrid, config_info);
 	
 	// adding up the two components of the momentum diffusion acceleration and dividing by the density at edge
 	#pragma omp parallel for private(layer_index, h_index)
@@ -57,7 +54,7 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		layer_index = i/NO_OF_VECTORS_PER_LAYER;
 		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
 		irrev -> friction_acc[i] =
-		(diagnostics -> vector_field_placeholder[i] + diagnostics -> shear_stress_acc[i])
+		(diagnostics -> vector_field_placeholder[i] - diagnostics -> curl_of_vorticity[i])
 		/(0.5*(density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index - NO_OF_SCALARS_H])
 		+ density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index - NO_OF_SCALARS_H])));
 	}
@@ -94,7 +91,7 @@ int vert_momentum_diffusion(State *state, Irreversible_quantities *irrev, Grid *
 	return 0;
 }
 
-int calc_hor_shear_stress_divergence(Curl_field vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid, Config_info *config_info)
+int calc_curl_of_vorticity(Curl_field vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid, Config_info *config_info)
 {
 	// Calculates the horizontal shear stress divergence.
 	int layer_index, h_index, vector_index;
