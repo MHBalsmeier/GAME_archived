@@ -332,5 +332,3 @@ int remap_to_original(double in[], double out[], int rad_block_index)
 
 
 
-
-

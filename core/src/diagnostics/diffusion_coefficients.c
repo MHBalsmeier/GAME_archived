@@ -87,7 +87,7 @@ int hori_strain_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		// preliminary result
-		irrev -> viscosity_strain_eff[i] = 4*grid -> mean_area_cell*config_info -> diff_h_smag_fac
+		irrev -> viscosity_strain_eff[i] = 8*grid -> mean_area_cell*config_info -> diff_h_smag_fac
 		*fabs(diagnostics -> deform_diag[i]);
 		
 		// calculating and adding the molecular viscosity

@@ -67,7 +67,7 @@ Everything is easy and quick to install.
 * CMake (Ubuntu: sudo apt-get install cmake)
 * [atmostracers](https://github.com/AUN4GFD/atmostracers)
 * clone the DCMIP2016 repository: git clone https://github.com/ClimateGlobalChange/DCMIP2016.git
-* clone the RTE+RRTMGP repository: git clone https://github.com/earth-system-radiation/rte-rrtmgp
+* clone the RTE+RRTMGP repository: git clone --branch 1.2.1 https://github.com/earth-system-radiation/rte-rrtmgp
 
 #### For using the plotting routines
 
