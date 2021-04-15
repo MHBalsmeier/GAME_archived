@@ -87,7 +87,7 @@ int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *g
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		// preliminary result
-		irrev -> viscosity_div_eff[i] = 12*grid -> mean_area_cell*config_info -> diff_h_smag_fac
+		irrev -> viscosity_div_eff[i] = 8*grid -> mean_area_cell*config_info -> diff_h_smag_fac
 		*fabs(5.0/3*diagnostics -> velocity_gas_divv[i]);
 		
 		// calculating and adding the molecular viscosity
