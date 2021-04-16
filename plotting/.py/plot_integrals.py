@@ -35,7 +35,7 @@ if write_out_entropy_integral == 1:
 	fig = plt.figure(figsize = (fig_size, fig_size));
 	ax = plt.axes();
 	ax.grid();
-	plt.title("Entropy", fontsize = 16);
+	plt.title("Entropy");
 	plt.xlabel("time since init / hr");
 	plt.ylabel("change relative to init value / %");
 	data = np.genfromtxt(output_dir + "/entropy");
@@ -55,7 +55,7 @@ if write_out_energy_integral == 1:
 	fig = plt.figure(figsize = (fig_size, fig_size));
 	plt.title("Energy");
 	plt.xlabel("time since init / hr");
-	plt.ylabel("relative to init value of total energy / %");
+	plt.ylabel("change relative to init value of total energy / %");
 	data = np.genfromtxt(output_dir + "/energy");
 	time_vector = 1/3600*delta_t*(data[:, 0] - data[0, 0]);
 	plt.xlim([min(time_vector), max(time_vector)]);
