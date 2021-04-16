@@ -35,7 +35,7 @@ if write_out_entropy_integral == 1:
 	fig = plt.figure(figsize = (fig_size, fig_size));
 	ax = plt.axes();
 	ax.grid();
-	plt.title("GAME", fontsize = 16);
+	plt.title("Entropy", fontsize = 16);
 	plt.xlabel("time since init / hr");
 	plt.ylabel("change relative to init value / %");
 	data = np.genfromtxt(output_dir + "/entropy");
