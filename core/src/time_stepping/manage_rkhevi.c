@@ -163,7 +163,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
     {
     	linear_combine_two_states(state_old, state_new, state_new, 1 - delta_t_small/delta_t, delta_t_small/delta_t);
     }
-	// this is for thermodynamic consistency
+	// this is for stability
 	temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t_small, 1);
     
     return 0;
