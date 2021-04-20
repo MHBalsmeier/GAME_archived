@@ -30,8 +30,8 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Irreversi
 	{
 		c_g_v = spec_heat_cap_diagnostics_v(state, i, config_info);
 		irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i] = c_g_v*(irreversible_quantities -> viscosity_div_eff[i] + diagnostics -> scalar_field_placeholder[i]);
-		// vertical Eddy viscosity is about three orders of magnitude smaller
-		irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i] = 0.001*irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i];
+		// vertical Eddy viscosity is about four orders of magnitude smaller
+		irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i] = 0.0001*irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i];
 	}
 	return 0;
 }
