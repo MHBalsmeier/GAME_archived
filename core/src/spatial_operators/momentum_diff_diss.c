@@ -65,8 +65,27 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	return 0;
 }
 
-int vert_momentum_diffusion(State *state, Irreversible_quantities *irrev, Grid *grid)
+int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Grid *grid, double delta_t)
 {
+	/*
+	This is the vertical momentum diffusion.
+	*/
+	// resetting the placeholder field
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		diagnostics -> scalar_field_placeholder[i] = 0;
+	}
+	// computing something like dw/dz
+	add_vertical_divv(state -> velocity_gas, diagnostics -> scalar_field_placeholder, grid);
+	// computing and multiplying by the respective diffusion coefficient
+	vert_w_viscosity_eff(state, grid, diagnostics, delta_t);
+	// taking the second derivative to compute the diffusive tendency
+	grad_vert_cov(diagnostics -> scalar_field_placeholder, irrev -> friction_acc, grid);
+	
+	/*
+	This is an explicit friction ansatz in the boundary layer.
+	*/
 	// some parameters
 	double bndr_lr_height = 1e3; // boundary layer height
 	double bndr_lr_visc_max = 1.0/86400; // maximum friction coefficient in the boundary layer
@@ -92,6 +111,7 @@ int vert_momentum_diffusion(State *state, Irreversible_quantities *irrev, Grid *
 			*state -> velocity_gas[vector_index];
 		}
 	}
+	
 	return 0;
 }
 
