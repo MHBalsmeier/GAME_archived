@@ -65,11 +65,60 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	return 0;
 }
 
-int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Grid *grid, double delta_t)
+int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Grid *grid, Config_info *config_info, double delta_t)
 {
 	/*
-	This is the vertical momentum diffusion.
+	This is the vertical momentum diffusion. The horizontal diffusion has already been called at this points, so we can add the new quantities.
 	*/
+	// 1.) vertical diffusion of horizontal velocity
+	// ---------------------------------------------
+	// firstly, the respective diffusion coefficient needs to be computed
+	int layer_index, h_index;
+	// calculating the vertical gradient of the horizontal velocity on half levels
+	#pragma omp parallel for private(layer_index, h_index)
+	for (int i = 0; i < NO_OF_H_VECTORS - NO_OF_VECTORS_H; ++i)
+	{
+		layer_index = i/NO_OF_VECTORS_H;
+		h_index = i - layer_index*NO_OF_VECTORS_H;
+		diagnostics -> prep_for_vert_diffusion[i] = (state -> velocity_gas[NO_OF_SCALARS_H + h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
+		- state -> velocity_gas[NO_OF_SCALARS_H + h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER])
+		/(grid -> z_vector[NO_OF_SCALARS_H + h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
+		- grid -> z_vector[NO_OF_SCALARS_H + h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER]);
+	}
+	// calculating the respective diffusion coefficient
+	vert_hor_mom_viscosity(state, irrev, diagnostics, config_info, grid, delta_t);
+	// now, the second derivative needs to be taken
+	int vector_index;
+	double z_upper, z_lower, delta_z;
+	#pragma omp parallel for private(layer_index, h_index, vector_index, z_upper, z_lower, delta_z)
+	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
+	{
+		layer_index = i/NO_OF_VECTORS_H;
+		h_index = i - layer_index*NO_OF_VECTORS_H;
+		vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
+		z_upper = 0.5*(grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]]
+		+ grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index]]);
+		z_lower = 0.5*(grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]]
+		+ grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]]);
+		delta_z = z_upper - z_lower;
+		if (layer_index == 0)
+		{
+			irrev -> friction_acc[vector_index] += -irrev -> vert_hor_viscosity_eff[i]*diagnostics -> prep_for_vert_diffusion[i]/delta_z;
+		}
+		else if (layer_index == NO_OF_LAYERS - 1)
+		{
+			irrev -> friction_acc[vector_index] += irrev -> vert_hor_viscosity_eff[i - NO_OF_VECTORS_H]*diagnostics -> prep_for_vert_diffusion[i - NO_OF_VECTORS_H]/delta_z;
+		}
+		else
+		{
+			irrev -> friction_acc[vector_index] +=
+			(irrev -> vert_hor_viscosity_eff[i - NO_OF_VECTORS_H]*diagnostics -> prep_for_vert_diffusion[i - NO_OF_VECTORS_H]
+			- irrev -> vert_hor_viscosity_eff[i]*diagnostics -> prep_for_vert_diffusion[i])/delta_z;
+		}
+	}
+	
+	// 2.) vertical diffusion of vertical velocity
+	// -------------------------------------------
 	// resetting the placeholder field
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
@@ -83,32 +132,88 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	// taking the second derivative to compute the diffusive tendency
 	grad_vert_cov(diagnostics -> scalar_field_placeholder, irrev -> friction_acc, grid);
 	
-	/*
-	This is an explicit friction ansatz in the boundary layer.
-	*/
-	// some parameters
-	double bndr_lr_height = 1e3; // boundary layer height
-	double bndr_lr_visc_max = 1.0/86400; // maximum friction coefficient in the boundary layer
-	double e_folding_height = 0.5*bndr_lr_height;
-	int layer_index, h_index, vector_index;
-	double z_agl;
-	#pragma omp parallel for private(layer_index, h_index, vector_index, z_agl)
+	// 3.) horizontal diffusion of vertical velocity
+	// ---------------------------------------------
+	// the diffusion coefficient is the same as the one for vertical diffusion of horizontal velocity
+	// averaging the vertical velocity vertically to cell centers, using the inner product weights
+	#pragma omp parallel for private(layer_index, h_index)
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		layer_index = i/NO_OF_SCALARS_H;
+		h_index = i - layer_index*NO_OF_SCALARS_H;
+		diagnostics -> scalar_field_placeholder[i] =
+		grid -> inner_product_weights[8*i + 6]*state -> velocity_gas[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
+		+ grid -> inner_product_weights[8*i + 7]*state -> velocity_gas[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
+	}
+	// computing the horizontal gradient of the vertical velocity field
+	grad_hor(diagnostics -> scalar_field_placeholder, diagnostics -> vector_field_placeholder, grid);
+	// multiplying by the already computed diffusion coefficient
+	#pragma omp parallel for private(layer_index, h_index, vector_index)
 	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
 	{
 		layer_index = i/NO_OF_VECTORS_H;
 		h_index = i - layer_index*NO_OF_VECTORS_H;
-		vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
-		// height above ground level
-		z_agl = grid -> z_vector[vector_index]
-		- 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[h_index]]
-		+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[h_index]]);
-		// adding the boundary layer friction
-		if (z_agl < bndr_lr_height)
+		vector_index = NO_OF_SCALARS_H + h_index + layer_index*NO_OF_VECTORS_PER_LAYER;
+		if (layer_index == 0)
 		{
-			irrev -> friction_acc[vector_index]
-			+= -bndr_lr_visc_max*(exp(-z_agl/e_folding_height) - exp(-bndr_lr_height/e_folding_height))
-			/(1 - exp(-bndr_lr_height/e_folding_height))
-			*state -> velocity_gas[vector_index];
+			diagnostics -> vector_field_placeholder[vector_index] = 0.5*irrev -> vert_hor_viscosity_eff[layer_index*NO_OF_VECTORS_H + h_index]
+			*diagnostics -> vector_field_placeholder[vector_index];
+		}
+		else if (layer_index == NO_OF_LAYERS - 1)
+		{
+			diagnostics -> vector_field_placeholder[vector_index] = 0.5*irrev -> vert_hor_viscosity_eff[(layer_index - 1)*NO_OF_VECTORS_H + h_index]
+			*diagnostics -> vector_field_placeholder[vector_index];
+		}
+		else
+		{
+			diagnostics -> vector_field_placeholder[vector_index] = 0.5
+			*(irrev -> vert_hor_viscosity_eff[(layer_index - 1)*NO_OF_VECTORS_H + h_index] + irrev -> vert_hor_viscosity_eff[layer_index*NO_OF_VECTORS_H + h_index])
+			*diagnostics -> vector_field_placeholder[vector_index];
+		}
+	}
+	// the divergence of the diffusive flux density results in the diffusive acceleration
+	divv_h(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
+	#pragma omp parallel for private(layer_index, h_index, vector_index)
+	for (int i = 0; i < NO_OF_V_VECTORS - 2*NO_OF_SCALARS_H; ++i)
+	{
+		layer_index = i/NO_OF_SCALARS_H;
+		h_index = i - layer_index*NO_OF_SCALARS_H;
+		vector_index = h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER;
+		// finally adding the result
+		irrev -> friction_acc[vector_index] += 0.5*(
+		diagnostics -> scalar_field_placeholder[h_index + layer_index*NO_OF_SCALARS_H]
+		+ diagnostics -> scalar_field_placeholder[h_index + (layer_index + 1)*NO_OF_SCALARS_H]);
+	}
+	
+	/*
+	This is an explicit friction ansatz in the boundary layer, comparable to what is required in the Held-Suarez test.
+	It will probably be removed soon.
+	*/
+	if (config_info -> explicit_boundary_layer == 1)
+	{
+		// some parameters
+		double bndr_lr_height = 1e3; // boundary layer height
+		double bndr_lr_visc_max = 1.0/86400; // maximum friction coefficient in the boundary layer
+		double e_folding_height = 0.5*bndr_lr_height;
+		double z_agl;
+		#pragma omp parallel for private(layer_index, h_index, vector_index, z_agl)
+		for (int i = 0; i < NO_OF_H_VECTORS; ++i)
+		{
+			layer_index = i/NO_OF_VECTORS_H;
+			h_index = i - layer_index*NO_OF_VECTORS_H;
+			vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
+			// height above ground level
+			z_agl = grid -> z_vector[vector_index]
+			- 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[h_index]]
+			+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[h_index]]);
+			// adding the boundary layer friction
+			if (z_agl < bndr_lr_height)
+			{
+				irrev -> friction_acc[vector_index]
+				+= -bndr_lr_visc_max*(exp(-z_agl/e_folding_height) - exp(-bndr_lr_height/e_folding_height))
+				/(1 - exp(-bndr_lr_height/e_folding_height))
+				*state -> velocity_gas[vector_index];
+			}
 		}
 	}
 	

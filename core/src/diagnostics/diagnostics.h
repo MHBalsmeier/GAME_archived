@@ -17,3 +17,4 @@ double calc_condensates_density_sum(int, Mass_densities);
 double density_total(State *, int);
 double density_gas(State *, int);
 int calc_diffusion_coeff(double, double, double, double, double *);
+int vert_hor_mom_viscosity(State *, Irreversible_quantities *, Diagnostics *, Config_info *, Grid *, double);

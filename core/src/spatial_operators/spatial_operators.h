@@ -31,5 +31,5 @@ int horizontal_covariant(Vector_field, int, int, Grid *, double *);
 int curl_field_to_cells(Curl_field, Scalar_field, Grid *);
 int edges_to_cells(Vector_field, Scalar_field, Grid *);
 int hori_momentum_diffusion(State *, Diagnostics *, Irreversible_quantities*, Config_info *, Grid *, Dualgrid *, double);
-int vert_momentum_diffusion(State *, Diagnostics *, Irreversible_quantities*, Grid *, double);
+int vert_momentum_diffusion(State *, Diagnostics *, Irreversible_quantities*, Grid *, Config_info *, double);
 int simple_dissipation_rate(State *, Irreversible_quantities *, Grid *);

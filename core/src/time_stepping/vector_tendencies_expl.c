@@ -47,7 +47,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		hori_momentum_diffusion(state, diagnostics, irreversible_quantities, config_info, grid, dualgrid, delta_t);
 		if (config_info -> momentum_diff_v == 1)
 		{
-			vert_momentum_diffusion(state, diagnostics, irreversible_quantities, grid, delta_t);
+			vert_momentum_diffusion(state, diagnostics, irreversible_quantities, grid, config_info, delta_t);
 		}
 		// calculation of the dissipative heating rate
 		if (config_info -> dissipative_heating == 1)

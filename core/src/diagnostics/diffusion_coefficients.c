@@ -30,8 +30,8 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Irreversi
 	{
 		c_g_v = spec_heat_cap_diagnostics_v(state, i, config_info);
 		irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i] = c_g_v*(irreversible_quantities -> viscosity_div_eff[i] + diagnostics -> scalar_field_placeholder[i]);
-		// vertical Eddy viscosity is about two orders of magnitude smaller
-		irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i] = 0.01*irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i];
+		// vertical Eddy viscosity is about three orders of magnitude smaller
+		irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i] = 0.001*irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i];
 	}
 	return 0;
 }
@@ -164,6 +164,60 @@ int vert_w_viscosity_eff(State *state, Grid *grid, Diagnostics *diagnostics, dou
 		}
 		
 		diagnostics -> scalar_field_placeholder[i] = mom_diff_coeff*diagnostics -> scalar_field_placeholder[i];
+	}
+	return 0;
+}
+
+int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnostics *diagnostics, Config_info *config_info, Grid *grid, double delta_t)
+{
+	/*
+	This function computes the effective viscosity (Eddy + molecular viscosity) for the vertical diffusion of horizontal velocity.
+	To obey the symmetry of the stress tensor, the same coefficient must be used for the horizontal diffusion of vertical velocity.
+	*/
+	double eff_particle_radius = 130e-12;
+	double mean_particle_mass = mean_particle_masses_gas(0);
+	double max_diff_v_coeff_turb = 0.125*pow(
+	grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H]
+	, 2)/delta_t;
+	int layer_index, h_index;
+	double mom_diff_coeff, molecuar_viscosity, dwdz;
+	// loop over horizontal vector points at half levels
+	#pragma omp parallel for private(layer_index, h_index, mom_diff_coeff, molecuar_viscosity, dwdz)
+	for (int i = 0; i < NO_OF_H_VECTORS - NO_OF_VECTORS_H; ++i)
+	{
+		layer_index = i/NO_OF_VECTORS_H;
+		h_index = i - layer_index*NO_OF_VECTORS_H;
+		// calculating the vertical derivative of the vertical velocity
+		dwdz = 0.5*(state -> velocity_gas[grid -> from_index[h_index] + layer_index*NO_OF_VECTORS_PER_LAYER] - state -> velocity_gas[grid -> from_index[h_index] + (layer_index + 2)*NO_OF_VECTORS_PER_LAYER])/
+		(grid -> z_vector[grid -> from_index[h_index] + layer_index*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[grid -> from_index[h_index] + (layer_index + 2)*NO_OF_VECTORS_PER_LAYER]);
+		dwdz += 0.5*(state -> velocity_gas[grid -> to_index[h_index] + layer_index*NO_OF_VECTORS_PER_LAYER] - state -> velocity_gas[grid -> to_index[h_index] + (layer_index + 2)*NO_OF_VECTORS_PER_LAYER])/
+		(grid -> z_vector[grid -> to_index[h_index] + layer_index*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[grid -> to_index[h_index] + (layer_index + 2)*NO_OF_VECTORS_PER_LAYER]);
+		// the turbulent component
+		mom_diff_coeff = 0.11*pow(
+		grid -> z_vector[NO_OF_SCALARS_H + h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
+		- grid -> z_vector[NO_OF_SCALARS_H + h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER], 2)
+		*sqrt(2*pow(diagnostics -> prep_for_vert_diffusion[i], 2) + pow(dwdz, 2));
+		
+		// computing and adding the molecular viscosity
+		// therefore, the scalar variables need to be averaged to the vector points at half levels
+		calc_diffusion_coeff(0.25*(state -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]]
+		+ state -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]]
+		+ state -> temperature_gas[(layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]]
+		+ state -> temperature_gas[(layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]),
+		mean_particle_mass,
+		0.25*(state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]]
+		+ state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]]
+		+ state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]]
+		+ state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]), eff_particle_radius, &molecuar_viscosity);
+		mom_diff_coeff += molecuar_viscosity;
+		
+		// obeying the stability limit
+		if (mom_diff_coeff > max_diff_v_coeff_turb)
+		{
+			mom_diff_coeff = max_diff_v_coeff_turb;
+		}
+		
+		irrev -> vert_hor_viscosity_eff[i] = mom_diff_coeff;
 	}
 	return 0;
 }

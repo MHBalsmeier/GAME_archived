@@ -135,6 +135,7 @@ Vector_field u_at_edge;
 Vector_field v_at_edge;
 Scalar_field u_at_cell;
 Scalar_field v_at_cell;
+double prep_for_vert_diffusion[NO_OF_H_VECTORS - NO_OF_VECTORS_H];
 } Diagnostics;
 
 // anything connected to radiation
@@ -174,6 +175,7 @@ int delta_t_between_analyses;
 int dissipative_heating;
 int mass_advection_order;
 int entropy_advection_order;
+int explicit_boundary_layer;
 double diff_h_smag_fac;
 double shear_bg;
 double damping_start_height_over_toa;
@@ -197,6 +199,7 @@ double constituent_mass_source_rates[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
 double constituent_heat_source_rates[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS];
 Scalar_field viscosity_div_eff;
 Vector_field viscosity_curl_eff;
+double vert_hor_viscosity_eff[NO_OF_H_VECTORS - NO_OF_VECTORS_H];
 } Irreversible_quantities;
 
 // Info on input and output is collected here.
