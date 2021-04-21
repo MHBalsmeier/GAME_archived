@@ -99,7 +99,7 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		z_upper = 0.5*(grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]]
 		+ grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index]]);
 		z_lower = 0.5*(grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]]
-		+ grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]]);
+		+ grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index]]);
 		delta_z = z_upper - z_lower;
 		if (layer_index == 0)
 		{
@@ -115,6 +115,9 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 			(irrev -> vert_hor_viscosity_eff[i - NO_OF_VECTORS_H]*diagnostics -> prep_for_vert_diffusion[i - NO_OF_VECTORS_H]
 			- irrev -> vert_hor_viscosity_eff[i]*diagnostics -> prep_for_vert_diffusion[i])/delta_z;
 		}
+		// dividing by the density at the edge
+		irrev -> friction_acc[vector_index] = irrev -> friction_acc[vector_index]
+		/(0.5*(density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]) + density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index])));
 	}
 	
 	// 2.) vertical diffusion of vertical velocity
@@ -131,6 +134,27 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	vert_w_viscosity_eff(state, grid, diagnostics, delta_t);
 	// taking the second derivative to compute the diffusive tendency
 	grad_vert_cov(diagnostics -> scalar_field_placeholder, irrev -> friction_acc, grid);
+	#pragma omp parallel for private(layer_index, h_index)
+	for (int i = 0; i < NO_OF_V_VECTORS; ++i)
+	{
+		layer_index = i/NO_OF_SCALARS_H;
+		h_index = i - layer_index*NO_OF_SCALARS_H;
+		if (layer_index == 0)
+		{
+			irrev -> friction_acc[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] = irrev -> friction_acc[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
+			/density_gas(state, h_index);
+		}
+		else if (layer_index == NO_OF_LAYERS)
+		{
+			irrev -> friction_acc[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] = irrev -> friction_acc[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
+			/density_gas(state, NO_OF_SCALARS - NO_OF_SCALARS_H + h_index);
+		}
+		else
+		{
+			irrev -> friction_acc[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] = irrev -> friction_acc[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
+			/(0.5*(density_gas(state, h_index + (layer_index - 1)*NO_OF_SCALARS_H) + density_gas(state, h_index + layer_index*NO_OF_SCALARS_H)));
+		}
+	}
 	
 	// 3.) horizontal diffusion of vertical velocity
 	// ---------------------------------------------
@@ -179,10 +203,11 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		layer_index = i/NO_OF_SCALARS_H;
 		h_index = i - layer_index*NO_OF_SCALARS_H;
 		vector_index = h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER;
-		// finally adding the result
+		// finally adding the result and dividing by the density
 		irrev -> friction_acc[vector_index] += 0.5*(
 		diagnostics -> scalar_field_placeholder[h_index + layer_index*NO_OF_SCALARS_H]
-		+ diagnostics -> scalar_field_placeholder[h_index + (layer_index + 1)*NO_OF_SCALARS_H]);
+		+ diagnostics -> scalar_field_placeholder[h_index + (layer_index + 1)*NO_OF_SCALARS_H])
+		/(0.5*(density_gas(state, h_index + layer_index*NO_OF_SCALARS_H) + density_gas(state, h_index + (layer_index + 1)*NO_OF_SCALARS_H)));
 	}
 	
 	/*
