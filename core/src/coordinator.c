@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
 	{
 		printf("Horizontal momentum diffusion is turned off.\n");
 	}
-	else
+	if (config_info -> momentum_diff_h == 1)
 	{
 		printf("Horizontal momentum diffusion is turned on.\n");
 	}
@@ -277,15 +277,23 @@ int main(int argc, char *argv[])
 	{
 		printf("Vertical momentum diffusion is turned off.\n");
 	}
-	else
+	if (config_info -> momentum_diff_v == 1)
 	{
 		printf("Vertical momentum diffusion is turned on.\n");
+	}
+	if (config_info -> explicit_boundary_layer == 0)
+	{
+		printf("Explicit boundary layer friction is turned off.\n");
+	}
+	if (config_info -> explicit_boundary_layer == 1)
+	{
+		printf("Explicit boundary layer friction is turned on.\n");
 	}
 	if (config_info -> dissipative_heating == 0)
 	{
 		printf("Dissipative heating is turned off.\n");
 	}
-	else
+	if (config_info -> dissipative_heating == 1)
 	{
 		printf("Dissipative heating is turned on.\n");
 	}
