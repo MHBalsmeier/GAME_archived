@@ -4,7 +4,6 @@ Github repository: https://github.com/AUN4GFD/game
 */
 
 #include "../enum_and_typedefs.h"
-#include "../diagnostics/diagnostics.h"
 #include "spatial_operators.h"
 #include <stdio.h>
 

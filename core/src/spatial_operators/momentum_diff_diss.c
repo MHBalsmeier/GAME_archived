@@ -5,7 +5,7 @@ Github repository: https://github.com/AUN4GFD/game
 
 #include "../enum_and_typedefs.h"
 #include "spatial_operators.h"
-#include "../diagnostics/diagnostics.h"
+#include "../thermodynamics/thermodynamics.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>

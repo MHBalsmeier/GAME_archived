@@ -7,8 +7,8 @@ Github repository: https://github.com/AUN4GFD/game
 #include "../settings.h"
 #include "../spatial_operators/spatial_operators.h"
 #include "time_stepping.h"
-#include "../physics/physics.h"
-#include "../diagnostics/diagnostics.h"
+#include "../radiation/radiation.h"
+#include "../thermodynamics/thermodynamics.h"
 #include <geos95.h>
 #include <stdlib.h>
 #include <stdio.h>

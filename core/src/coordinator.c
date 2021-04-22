@@ -15,8 +15,8 @@ The main organizes the model, manages the time stepping, calls model output, col
 #include "enum_and_typedefs.h"
 #include "io/io.h"
 #include "spatial_operators/spatial_operators.h"
-#include "diagnostics/diagnostics.h"
-#include "physics/physics.h"
+#include "thermodynamics/thermodynamics.h"
+#include "radiation/radiation.h"
 #include "time_stepping/time_stepping.h"
 #include <mpi.h>
 

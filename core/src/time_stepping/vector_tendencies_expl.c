@@ -11,7 +11,7 @@ In this source file, the calculation of the explicit part of the momentum equati
 #include "../enum_and_typedefs.h"
 #include "../settings.h"
 #include "../spatial_operators/spatial_operators.h"
-#include "../diagnostics/diagnostics.h"
+#include "../thermodynamics/thermodynamics.h"
 
 int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int update_advection, int no_rk_step, double delta_t)
 {

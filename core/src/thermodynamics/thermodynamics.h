@@ -7,7 +7,6 @@ int calc_temp_diffusion_coeffs(State *, Config_info *, Irreversible_quantities *
 int hori_div_viscosity_eff(State *, Irreversible_quantities *, Grid *, Diagnostics *, Config_info *, double);
 int hori_curl_viscosity_eff(State *, Irreversible_quantities *, Grid *, Diagnostics *, Config_info *, double);
 int vert_w_viscosity_eff(State *, Grid *, Diagnostics *, double);
-int remap_verpri2horpri_vector(Vector_field, int, int, double *, Grid *);
 int pot_temp_diagnostics_dry(State *, Scalar_field);
 double spec_heat_cap_diagnostics_p(State *, int, Config_info *);
 double spec_heat_cap_diagnostics_v(State *, int, Config_info *);

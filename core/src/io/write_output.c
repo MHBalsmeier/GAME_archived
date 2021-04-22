@@ -14,9 +14,8 @@ In addition to that, some postprocessing diagnostics are also calculated here.
 #include <time.h>
 #include <netcdf.h>
 #include "io.h"
-#include "../diagnostics/diagnostics.h"
+#include "../thermodynamics/thermodynamics.h"
 #include "../spatial_operators/spatial_operators.h"
-#include "../diagnostics/diagnostics.h"
 #include "../settings.h"
 #include "eccodes.h"
 #include "geos95.h"

@@ -9,7 +9,7 @@ Github repository: https://github.com/AUN4GFD/game
 #include "geos95.h"
 #include "../enum_and_typedefs.h"
 #include "../spatial_operators/spatial_operators.h"
-#include "../diagnostics/diagnostics.h"
+#include "../thermodynamics/thermodynamics.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
@@ -200,6 +200,10 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         grid -> latitude_scalar[i] = latitude_scalar[i];
         grid -> longitude_scalar[i] = longitude_scalar[i];
         grid -> no_of_shaded_points_scalar[i] = no_of_shaded_points_scalar[i];
+		// setting the surface albedos to 0.12 (compare Zdunkowski, Trautmann & Bott:
+		// Radiation in the Atmosphere, 2007, p. 444)
+        grid -> surface_albedo_dir[i] = 0.12;
+        grid -> surface_albedo_dif[i] = 0.12;
     }
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {

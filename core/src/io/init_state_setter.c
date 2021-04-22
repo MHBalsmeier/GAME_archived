@@ -7,7 +7,7 @@ Github repository: https://github.com/AUN4GFD/game
 #include <stdlib.h>
 #include "../enum_and_typedefs.h"
 #include "io.h"
-#include "../diagnostics/diagnostics.h"
+#include "../thermodynamics/thermodynamics.h"
 #include "../settings.h"
 #include <netcdf.h>
 #include "atmostracers.h"

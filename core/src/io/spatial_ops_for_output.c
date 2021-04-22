@@ -9,7 +9,6 @@ In this file, spatial operators are collected which are only needed for the outp
 
 #include "../enum_and_typedefs.h"
 #include "../spatial_operators/spatial_operators.h"
-#include "../diagnostics/diagnostics.h"
 #include <stdio.h>
 #include <stdlib.h>
 

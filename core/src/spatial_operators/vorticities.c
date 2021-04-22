@@ -9,7 +9,7 @@ Here, vorticities are calculated. The word "vorticity" hereby refers to both ver
 #include "../enum_and_typedefs.h"
 #include <stdio.h>
 #include "geos95.h"
-#include "../diagnostics/diagnostics.h"
+#include "../thermodynamics/thermodynamics.h"
 #include "spatial_operators.h"
 
 int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagnostics *diagnostics, Grid *grid, Dualgrid *dualgrid)

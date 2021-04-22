@@ -8,7 +8,7 @@ The vertical advection of horizontal momentum is organized here.
 #include "../settings.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "../diagnostics/diagnostics.h"
+#include "../thermodynamics/thermodynamics.h"
 #include <omp.h>
 #include "../spatial_operators/spatial_operators.h"
 

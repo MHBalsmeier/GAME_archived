@@ -11,7 +11,7 @@ This is the horizontal (explicit) part of the constituent integration.
 #include "atmostracers.h"
 #include "../settings.h"
 #include "../spatial_operators/spatial_operators.h"
-#include "../diagnostics/diagnostics.h"
+#include "../thermodynamics/thermodynamics.h"
 #include "stdio.h"
 #include "stdlib.h"
 
