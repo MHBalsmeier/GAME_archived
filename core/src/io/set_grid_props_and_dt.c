@@ -200,10 +200,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         grid -> latitude_scalar[i] = latitude_scalar[i];
         grid -> longitude_scalar[i] = longitude_scalar[i];
         grid -> no_of_shaded_points_scalar[i] = no_of_shaded_points_scalar[i];
-		// setting the surface albedos to 0.12 (compare Zdunkowski, Trautmann & Bott:
-		// Radiation in the Atmosphere, 2007, p. 444)
-        grid -> surface_albedo_dir[i] = 0.12;
-        grid -> surface_albedo_dif[i] = 0.12;
     }
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {

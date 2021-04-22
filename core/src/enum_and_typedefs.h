@@ -89,8 +89,6 @@ double density_to_rhombus_weights[4*NO_OF_VECTORS_H];
 double trsk_weights[10*NO_OF_VECTORS_H];
 int latlon_interpol_indices[3*NO_OF_LATLON_IO_POINTS];
 double latlon_interpol_weights[3*NO_OF_LATLON_IO_POINTS];
-double surface_albedo_dir[NO_OF_SCALARS_H];
-double surface_albedo_dif[NO_OF_SCALARS_H];
 double stretching_parameter;
 double mean_area_cell;
 } Grid;
