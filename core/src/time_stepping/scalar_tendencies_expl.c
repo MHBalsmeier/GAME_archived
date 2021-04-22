@@ -17,7 +17,10 @@ This is the horizontal (explicit) part of the constituent integration.
 
 int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step, Vector_field wind_advect_tracer)
 {
-
+	/*
+	Firstly, some things need to prepared.
+	--------------------------------------
+	*/
 	// declaring needed variables
     int h_index, layer_index;
     double c_v_cond;
@@ -31,9 +34,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     }
 	old_weight = 1 - new_weight;
     
-	/*
-	phase transitions are only updated at the first RK step
-	*/
+	// phase transitions are only updated at the first RK step
 	if (NO_OF_CONSTITUENTS == 4)
 	{
 	    calc_h2otracers_source_rates(
@@ -69,6 +70,10 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		}
 	}
 	
+	/*
+	Now, the actual scalar tendencies can be computed.
+	--------------------------------------------------
+	*/
 	// loop over all constituents
 	for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
 	{
@@ -226,6 +231,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 			}
 		}
 	} // constituent loop
+	
 	return 0;
 }
 
