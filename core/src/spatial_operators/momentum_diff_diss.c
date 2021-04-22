@@ -16,7 +16,7 @@ int hor_calc_curl_of_vorticity(Curl_field, Vector_field, Grid *, Dualgrid *, Con
 int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid, double delta_t)
 {
 	/*
-	This is the horizontal momentum diffusion operator.
+	This is the horizontal momentum diffusion operator (horizontal diffusion of horizontal velocity).
 	*/
     
     // Calculating the effective horizontal kinematic viscosity acting on divergences (Eddy viscosity).
@@ -210,38 +210,18 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		/(0.5*(density_gas(state, h_index + layer_index*NO_OF_SCALARS_H) + density_gas(state, h_index + (layer_index + 1)*NO_OF_SCALARS_H)));
 	}
 	
-	/*
-	This is an explicit friction ansatz in the boundary layer, comparable to what is required in the Held-Suarez test.
-	It will probably be removed soon.
-	*/
-	if (config_info -> explicit_boundary_layer == 1)
+	return 0;
+}
+
+int simple_dissipation_rate(State *state, Irreversible_quantities *irrev, Grid *grid)
+{
+	// simplified dissipation
+	inner_product(state -> velocity_gas, irrev -> friction_acc, irrev -> heating_diss, grid, 1);
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		// some parameters
-		double bndr_lr_height = 1e3; // boundary layer height
-		double bndr_lr_visc_max = 1.0/86400; // maximum friction coefficient in the boundary layer
-		double e_folding_height = 0.5*bndr_lr_height;
-		double z_agl;
-		#pragma omp parallel for private(layer_index, h_index, vector_index, z_agl)
-		for (int i = 0; i < NO_OF_H_VECTORS; ++i)
-		{
-			layer_index = i/NO_OF_VECTORS_H;
-			h_index = i - layer_index*NO_OF_VECTORS_H;
-			vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
-			// height above ground level
-			z_agl = grid -> z_vector[vector_index]
-			- 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[h_index]]
-			+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[h_index]]);
-			// adding the boundary layer friction
-			if (z_agl < bndr_lr_height)
-			{
-				irrev -> friction_acc[vector_index]
-				+= -bndr_lr_visc_max*(exp(-z_agl/e_folding_height) - exp(-bndr_lr_height/e_folding_height))
-				/(1 - exp(-bndr_lr_height/e_folding_height))
-				*state -> velocity_gas[vector_index];
-			}
-		}
+		irrev -> heating_diss[i] = -density_gas(state, i)*irrev -> heating_diss[i];
 	}
-	
 	return 0;
 }
 
@@ -315,18 +295,6 @@ int hor_calc_curl_of_vorticity(Curl_field vorticity, Vector_field out_field, Gri
 			dzeta_dz = delta_zeta/delta_z;
 			out_field[vector_index] -= tangential_slope*dzeta_dz;
 		}
-	}
-	return 0;
-}
-
-int simple_dissipation_rate(State *state, Irreversible_quantities *irrev, Grid *grid)
-{
-	// simplified dissipation
-	inner_product(state -> velocity_gas, irrev -> friction_acc, irrev -> heating_diss, grid, 1);
-	#pragma omp parallel for
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
-	{
-		irrev -> heating_diss[i] = -density_gas(state, i)*irrev -> heating_diss[i];
 	}
 	return 0;
 }
