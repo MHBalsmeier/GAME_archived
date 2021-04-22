@@ -110,7 +110,7 @@ int vertical_contravariant_corr(Vector_field vector_field, int layer_index, int 
 int horizontal_covariant(Vector_field vector_field, int layer_index, int h_index, Grid *grid, double *result)
 {
 	/*
-	Calculates the horizontal covariant component of a vector field out of the horizontal contravariant and the vertical covariant components.
+	calculates the horizontal covariant component of a vector field out of the horizontal contravariant and the vertical covariant components
 	*/
 	double vertical_component;
 	remap_verpri2horpri_vector(vector_field, layer_index, h_index, &vertical_component, grid);

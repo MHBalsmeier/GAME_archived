@@ -71,9 +71,11 @@ int grad_vert_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
     return 0;
 }
 
-int grad_oro_corr(Vector_field con_to_cov_gradient_field, Grid *grid)
+int grad_oro_corr(Vector_field cov_to_con_gradient_field, Grid *grid)
 {
-    // correction for terrain
+    /*
+    this transforms an horizontal covariant gradient to a "truely horizontal" contravariant gradient
+    */
     int layer_index, h_index;
     double vertical_gradient;
 	#pragma omp parallel for private(layer_index, h_index, vertical_gradient)
@@ -83,8 +85,8 @@ int grad_oro_corr(Vector_field con_to_cov_gradient_field, Grid *grid)
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
         if (h_index >= NO_OF_SCALARS_H && layer_index >= NO_OF_LAYERS - grid -> no_of_oro_layers)
         {
-        	remap_verpri2horpri_vector(con_to_cov_gradient_field, layer_index, h_index - NO_OF_SCALARS_H, &vertical_gradient, grid);
-            con_to_cov_gradient_field[i] += -grid -> slope[i]*vertical_gradient;
+        	remap_verpri2horpri_vector(cov_to_con_gradient_field, layer_index, h_index - NO_OF_SCALARS_H, &vertical_gradient, grid);
+            cov_to_con_gradient_field[i] += -grid -> slope[i]*vertical_gradient;
         }
     }
     return 0;
@@ -93,7 +95,7 @@ int grad_oro_corr(Vector_field con_to_cov_gradient_field, Grid *grid)
 int grad_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
 {
 	/*
-	Calculates the covariant gradient.
+	calculates the covariant gradient
 	*/
 	grad_hor_cov(in_field, out_field, grid);
 	grad_vert_cov(in_field, out_field, grid);
@@ -103,7 +105,7 @@ int grad_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
 int grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
 {
 	/*
-	Calculates the gradient (horizontally contravariant, vertically covariant).
+	calculates the gradient (horizontally contravariant, vertically covariant)
 	*/
 	grad_cov(in_field, out_field, grid);
 	grad_oro_corr(out_field, grid);
