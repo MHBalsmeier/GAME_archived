@@ -19,10 +19,10 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	This is the horizontal momentum diffusion operator (horizontal diffusion of horizontal velocity).
 	*/
     
-    // Calculating the effective horizontal kinematic viscosity acting on divergences (Eddy viscosity).
+    // calculating the effective horizontal kinematic viscosity acting on divergences (Eddy viscosity)
 	hori_div_viscosity_eff(state, irrev, grid, diagnostics, config_info, delta_t);
 	
-    // Calculating the effective horizontal kinematic viscosity acting on vorticities (Eddy viscosity).
+    // calculating the effective horizontal kinematic viscosity acting on vorticities (Eddy viscosity)
 	hori_curl_viscosity_eff(state, irrev, grid, diagnostics, config_info, delta_t);
 	
 	/*
@@ -68,8 +68,9 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Grid *grid, Config_info *config_info, double delta_t)
 {
 	/*
-	This is the vertical momentum diffusion. The horizontal diffusion has already been called at this points, so we can add the new quantities.
+	This is the vertical momentum diffusion. The horizontal diffusion has already been called at this points, so we can add the new tendencies.
 	*/
+	
 	// 1.) vertical diffusion of horizontal velocity
 	// ---------------------------------------------
 	// firstly, the respective diffusion coefficient needs to be computed
@@ -197,6 +198,7 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	}
 	// the divergence of the diffusive flux density results in the diffusive acceleration
 	divv_h(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
+	// vertically averaging the divergence to half levels and dividing by the density
 	#pragma omp parallel for private(layer_index, h_index, vector_index)
 	for (int i = 0; i < NO_OF_V_VECTORS - 2*NO_OF_SCALARS_H; ++i)
 	{
@@ -213,21 +215,11 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	return 0;
 }
 
-int simple_dissipation_rate(State *state, Irreversible_quantities *irrev, Grid *grid)
-{
-	// simplified dissipation
-	inner_product(state -> velocity_gas, irrev -> friction_acc, irrev -> heating_diss, grid, 1);
-	#pragma omp parallel for
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
-	{
-		irrev -> heating_diss[i] = -density_gas(state, i)*irrev -> heating_diss[i];
-	}
-	return 0;
-}
-
 int hor_calc_curl_of_vorticity(Curl_field vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid, Config_info *config_info)
 {
-	// Calculates the horizontal shear stress divergence.
+	/*
+	calculates the curl of the vertical vorticity
+	*/
 	int layer_index, h_index, vector_index, upper_index_z, lower_index_z, upper_index_zeta, lower_index_zeta;
 	double delta_z, delta_x, tangential_slope, delta_zeta, dzeta_dz;
 	#pragma omp parallel for private(layer_index, h_index, vector_index, delta_z, delta_x, tangential_slope, dzeta_dz, upper_index_z, lower_index_z, upper_index_zeta, lower_index_zeta)
@@ -295,6 +287,20 @@ int hor_calc_curl_of_vorticity(Curl_field vorticity, Vector_field out_field, Gri
 			dzeta_dz = delta_zeta/delta_z;
 			out_field[vector_index] -= tangential_slope*dzeta_dz;
 		}
+	}
+	return 0;
+}
+
+int simple_dissipation_rate(State *state, Irreversible_quantities *irrev, Grid *grid)
+{
+	/*
+	calculates a simplified dissipation rate
+	*/
+	inner_product(state -> velocity_gas, irrev -> friction_acc, irrev -> heating_diss, grid, 1);
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		irrev -> heating_diss[i] = -density_gas(state, i)*irrev -> heating_diss[i];
 	}
 	return 0;
 }
