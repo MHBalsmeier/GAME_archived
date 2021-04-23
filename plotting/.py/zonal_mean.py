@@ -81,7 +81,10 @@ cb = plt.colorbar();
 cb.set_label(unit);
 plt.xlim([-90, 90]);
 plt.ylim([0, max(height_vector)]);
-plt.title("Zonal mean of " + short_name);
+if no_of_steps == 1:
+	plt.title("Zonal mean of " + short_name);
+else:
+	plt.title("Zonal and temporal mean of " + short_name);
 plt.xlabel("latitude / deg");
 plt.ylabel("height above MSL / m");
 plt.savefig(save_directory + "/" + run_id + "_" + short_name + ".png");
