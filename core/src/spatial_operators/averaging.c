@@ -14,7 +14,7 @@ This file contains functions that perform averagings.
 int remap_verpri2horpri_vector(Vector_field vector_field, int layer_index, int h_index, double *component, Grid *grid)
 {
 	/*
-	Reconstructs the certical vector component *component at edge h_index in layer layer_index.
+	reconstructs the vertical vector component *component at edge h_index in layer layer_index
 	*/
     *component
     // layer above
@@ -41,8 +41,8 @@ int remap_verpri2horpri_vector(Vector_field vector_field, int layer_index, int h
 int vertical_contravariant_corr(Vector_field vector_field, int layer_index, int h_index, Grid *grid, double *result)
 {
 	/*
-	Calculates (the vertical contravariant component - the vertical covariant component)
-	of a vector field out of the horizontal contravariant components.
+	calculates (the vertical contravariant component - the vertical covariant component)
+	of a vector field out of the horizontal contravariant components
 	*/
 	// Attention: adjacent_signs_h appears twice, thus does not need to be taken into account.
 	*result = 0;
@@ -81,7 +81,6 @@ int vertical_contravariant_corr(Vector_field vector_field, int layer_index, int 
     	}
     	else
     	{
-			scalar_index = layer_index*NO_OF_SCALARS_H + h_index;
 			for (int i = 0; i < no_of_edges; ++i)
 			{
 				scalar_index = (layer_index - 1)*NO_OF_SCALARS_H + h_index;

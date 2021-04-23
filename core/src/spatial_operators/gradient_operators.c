@@ -74,7 +74,7 @@ int grad_vert_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
 int grad_oro_corr(Vector_field cov_to_con_gradient_field, Grid *grid)
 {
     /*
-    this transforms an horizontal covariant gradient to a "truely horizontal" contravariant gradient
+    this transforms an horizontal covariant gradient to a "truly horizontal" contravariant gradient
     */
     int layer_index, h_index;
     double vertical_gradient;
