@@ -176,6 +176,7 @@ int dissipative_heating;
 int mass_advection_order;
 int entropy_advection_order;
 int explicit_boundary_layer;
+int regional_switch;
 double diff_h_smag_fac;
 double shear_bg;
 double damping_start_height_over_toa;

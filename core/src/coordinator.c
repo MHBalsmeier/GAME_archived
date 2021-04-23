@@ -108,6 +108,7 @@ int main(int argc, char *argv[])
 	config_info -> mass_advection_order = strtof(argv[40], NULL);
 	config_info -> entropy_advection_order = strtof(argv[41], NULL);
 	config_info -> explicit_boundary_layer = strtod(argv[42], NULL);
+	config_info -> regional_switch = 0;
 	
 	/*
 	Checking user input for correctness:

@@ -9,6 +9,7 @@ Github repository: https://github.com/AUN4GFD/game
 #include "time_stepping.h"
 #include "../radiation/radiation.h"
 #include "../thermodynamics/thermodynamics.h"
+#include "../io/io.h"
 #include <geos95.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -144,6 +145,12 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
     }
 	// this is for stability
 	temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t_small, 1);
+	
+	// nesting
+	if (config_info -> regional_switch == 1)
+	{
+		bc_setter();
+	}
     
     return 0;
 }

@@ -35,6 +35,7 @@ src/io/init_state_setter.c
 src/io/write_output.c
 src/io/set_grid_props_and_dt.c
 src/io/spatial_ops_for_output.c
+src/io/bc_setter.c
 src/subgrid_scale/effective_diff_coeffs.c
 src/subgrid_scale/gravity_waves.c
 src/subgrid_scale/convection.c
