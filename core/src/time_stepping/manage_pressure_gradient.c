@@ -3,6 +3,10 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
+/*
+In this file, the explicit component of the pressure gradient acceleration is managed.
+*/
+
 #include "../enum_and_typedefs.h"
 #include "../settings.h"
 #include <stdlib.h>
