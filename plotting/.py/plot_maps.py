@@ -1,6 +1,8 @@
 # This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 # Github repository: https://github.com/AUN4GFD/game
 
+# Thi file is for plotting maps.
+
 import numpy as np;
 import sys;
 import toolbox.read_model_output as rmo;
