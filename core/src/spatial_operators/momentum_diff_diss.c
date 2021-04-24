@@ -3,6 +3,10 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
+/*
+The momentum diffusion acceleration is computed here (apart from the diffusion coefficients).
+*/
+
 #include "../enum_and_typedefs.h"
 #include "spatial_operators.h"
 #include "../thermodynamics/thermodynamics.h"
@@ -21,6 +25,8 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
     
     // calculating the divergence of the wind field
     divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
+    // calculating the relative vorticity of the wind field
+	calc_rel_vort(state -> velocity_gas, diagnostics -> rel_vort, grid, dualgrid);
     
     // calculating the effective horizontal kinematic viscosity acting on divergences (Eddy viscosity)
 	hori_div_viscosity_eff(state, irrev, grid, diagnostics, config_info, delta_t);

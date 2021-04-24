@@ -2,6 +2,7 @@
 This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/AUN4GFD/game
 */
+
 /*
 Here, vorticities are calculated. The word "vorticity" hereby refers to both vertical and tangential components.
 */
@@ -18,19 +19,15 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagn
 	calc_rel_vort(velocity_field, diagnostics -> rel_vort, grid, dualgrid);
 	// pot_vort is a misuse of name here
 	add_f_to_rel_vort(diagnostics -> rel_vort, diagnostics -> pot_vort, dualgrid);
-    int i, layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index;
+    int layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index;
     double density_value;
     // determining the density value by which we need to divide
-    #pragma omp parallel for private (i, layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index, density_value)
-    for (i = 0; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
+    #pragma omp parallel for private (layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index, density_value)
+    for (int i = 0; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {
         layer_index = i/(2*NO_OF_VECTORS_H);
         h_index = i - layer_index*2*NO_OF_VECTORS_H;
-        
-        /*
-        Determination of the density value by which we have to divide.
-        */
-        // interpolation of the density to the center or the rhombi
+        // interpolation of the density to the center of the rhombus
         if (h_index >= NO_OF_VECTORS_H)
         {
 			edge_vector_index_h = h_index - NO_OF_VECTORS_H;
@@ -88,11 +85,12 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagn
 int add_f_to_rel_vort(Curl_field rel_vort, Curl_field out_field, Dualgrid *dualgrid)
 {
 	/*
-	Adding the Coriolis parameter to the relative vorticity.
+	qadding the Coriolis parameter to the relative vorticity
 	*/
-    int i, layer_index, h_index;
-    #pragma omp parallel for private(i, layer_index, h_index)
-    for (i = 0; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
+    
+    int layer_index, h_index;
+    #pragma omp parallel for private(layer_index, h_index)
+    for (int i = 0; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {
         layer_index = i/(2*NO_OF_VECTORS_H);
         h_index = i - layer_index*2*NO_OF_VECTORS_H;
@@ -157,13 +155,13 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
         // tangential vorticities
         else
         {
-        	// At the lower boundary, w vanishes. Furthermore, the covariant velocity at the surface is also zero.
+        	// At the lower boundary, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
             if (layer_index == NO_OF_LAYERS)
             {
                 index_2 = layer_index*NO_OF_VECTORS_PER_LAYER - NO_OF_VECTORS_H + h_index;
                 dist_2 = grid -> normal_distance[index_2];
                 horizontal_covariant(velocity_field, layer_index - 1, h_index, grid, &covar_2);
-                out_field[i] = 1/dualgrid -> area[layer_index*2*NO_OF_VECTORS_H + h_index]*dist_2*covar_2;
+                out_field[i] = 1/dualgrid -> area[i]*dist_2*covar_2;
             }
             else
             {

@@ -32,7 +32,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 			}
 		}
 		scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
-		// Now, the potential vorticity is evaluated.
+		// Now, the "potential vorticity" is evaluated.
 		calc_pot_vort(state -> velocity_gas, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
 		// Now, the generalized Coriolis term is evaluated.
 		vorticity_flux(diagnostics -> flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid, dualgrid);
@@ -119,7 +119,6 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     	// checking for shading
     	&& NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_vector[h_index - NO_OF_SCALARS_H])
     	|| (h_index < NO_OF_SCALARS_H
-    	// checking for shading
     	&& NO_OF_LAYERS - layer_index > grid -> no_of_shaded_points_scalar[h_index]))
 		{
     		state_tendency -> velocity_gas[i] =
