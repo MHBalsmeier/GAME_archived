@@ -19,6 +19,9 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	This is the horizontal momentum diffusion operator (horizontal diffusion of horizontal velocity).
 	*/
     
+    // calculating the divergence of the wind field
+    divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
+    
     // calculating the effective horizontal kinematic viscosity acting on divergences (Eddy viscosity)
 	hori_div_viscosity_eff(state, irrev, grid, diagnostics, config_info, delta_t);
 	
