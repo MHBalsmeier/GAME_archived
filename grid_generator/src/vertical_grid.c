@@ -82,9 +82,10 @@ int set_vector_shading_indices(int from_index[], int to_index[], int no_of_shade
 int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], double normal_distance[], double latitude_scalar[], double longitude_scalar[], int from_index[], int to_index[], double TOA, int VERT_GRID_TYPE, double z_surface[])
 {
 	/*
-	Calculates the vertical position of the vector points
-	as well as the normal distances of the primal grid.
+	calculates the vertical position of the vector points
+	as well as the normal distances of the primal grid
 	*/
+	
 	int layer_index, h_index, upper_index, lower_index;
 	double *lowest_thicknesses = malloc(NO_OF_SCALARS_H*sizeof(double));
     for (int i = 0; i < NO_OF_VECTORS; ++i)
@@ -96,8 +97,8 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], doubl
         {
         	// placing the vector vertically in the middle between the two adjacent scalar points
             z_vector[i]
-            = 0.5*(z_scalar[layer_index*NO_OF_SCALARS_H + to_index[h_index - NO_OF_SCALARS_H]]
-            + z_scalar[layer_index*NO_OF_SCALARS_H + from_index[h_index - NO_OF_SCALARS_H]]);
+            = 0.5*(z_scalar[layer_index*NO_OF_SCALARS_H + from_index[h_index - NO_OF_SCALARS_H]]
+            + z_scalar[layer_index*NO_OF_SCALARS_H + to_index[h_index - NO_OF_SCALARS_H]]);
             // calculating the horizontal distance
             normal_distance[i]
             = calculate_distance_h(
@@ -134,12 +135,13 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], doubl
 			// inner levels
             else
 			{
-				// placing the vertical vector in the middle between the two adjacent scalar points
                 normal_distance[i] = z_scalar[upper_index] - z_scalar[lower_index];
+				// placing the vertical vector in the middle between the two adjacent scalar points
 				z_vector[i] = z_scalar[lower_index] + 0.5*normal_distance[i];
 			}
         }
     }
+    // checks
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         if (normal_distance[i] <= 0)
@@ -173,6 +175,10 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], doubl
 
 int calculate_vertical_faces(double area[], double z_vector_dual[], double normal_distance_dual[], double TOA)
 {
+	/*
+	This function calculates the vertical faces.
+	*/
+	
 	int layer_index, h_index, dual_vector_index;
 	double base_distance, radius_0, radius_1;
     for (int i = 0; i < NO_OF_VECTORS; ++i)
@@ -188,6 +194,8 @@ int calculate_vertical_faces(double area[], double z_vector_dual[], double norma
             area[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
         }
     }
+    
+    // checks
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         if (area[i] <= 0)
@@ -196,8 +204,6 @@ int calculate_vertical_faces(double area[], double z_vector_dual[], double norma
 			exit(1);
 		}
     }
-    
-    // check
     double check_area, wished_result;
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
@@ -316,9 +322,12 @@ int set_z_scalar_dual(double z_scalar_dual[], double z_vector[], int from_index[
 	return 0;
 }
 
-int set_volume(double volume[], double z_scalar_dual[], double z_vector[], double area[], int from_index[], int to_index[], double TOA, int vorticity_indices_pre[])
+int set_volume(double volume[], double z_vector[], double area[], int from_index[], int to_index[], double TOA, int vorticity_indices_pre[])
 {
-	set_z_scalar_dual(z_scalar_dual, z_vector, from_index, to_index, vorticity_indices_pre, TOA);
+	/*
+	This function computes the volumes of the grid boxes.
+	*/
+	
     double volume_sum, volume_sum_ideal, radius_0, radius_1, base_area;
     volume_sum = 0;
     int layer_index, h_index;
@@ -332,6 +341,8 @@ int set_volume(double volume[], double z_scalar_dual[], double z_vector[], doubl
         volume[i] = find_volume(base_area, radius_0, radius_1);
         volume_sum += volume[i];
     }
+    
+    // checks
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         if (volume[i] <= 0)
@@ -421,6 +432,10 @@ int set_area_dual_pre(double area_dual_pre[], double z_vector_dual[], double nor
 
 int set_area_dual(double area_dual[], double z_vector[], int from_index_dual[], int to_index_dual[], double area_dual_pre[], double z_vector_dual[])
 {
+	/*
+	This function sets the areas of the dual grid.
+	*/
+	
 	int layer_index, h_index, primal_vector_index, dual_vector_index;
     double area_0, area_1, area_rescale_factor, area_ratio;
     for (int i = 0; i < NO_OF_DUAL_H_VECTORS + NO_OF_H_VECTORS; ++i)
@@ -498,6 +513,11 @@ int set_area_dual(double area_dual[], double z_vector[], int from_index_dual[], 
 
 int set_gravity_potential(double z_scalar[], double gravity_potential[], double GRAVITY_MEAN_SFC_ABS)
 {
+	/*
+	Thi finction computes the gravity potential.
+	*/
+	
+	#pragma omp parallel for
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	gravity_potential[i] = -GRAVITY_MEAN_SFC_ABS*(RADIUS*RADIUS/(RADIUS + z_scalar[i]) - RADIUS);
@@ -505,8 +525,12 @@ int set_gravity_potential(double z_scalar[], double gravity_potential[], double 
 	return 0;
 }
 
-int map_area_to_sphere(double area[], double z_vector[], double pent_hex_face_unity_sphere[])
+int map_hor_area_to_half_levels(double area[], double z_vector[], double pent_hex_face_unity_sphere[])
 {
+	/*
+	This function maps the horizontal areas from the surface of the unit sphere to the half-levels.
+	*/
+	
 	int layer_index, h_index;
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
@@ -532,7 +556,9 @@ int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double n
             upper_index = h_index - NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_SCALARS_H;
             lower_index = h_index - NO_OF_VECTORS_H + (layer_index + 1)*NO_OF_DUAL_SCALARS_H;
             normal_distance_dual[i] = z_scalar_dual[upper_index] - z_scalar_dual[lower_index];
-			z_vector_dual[i] = z_scalar_dual[lower_index] + 0.5*normal_distance_dual[i];
+			z_vector_dual[i] = 1.0/3*(z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + vorticity_indices_pre[3*(h_index - NO_OF_VECTORS_H) + 0]]
+			+ z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + vorticity_indices_pre[3*(h_index - NO_OF_VECTORS_H) + 1]]
+			+ z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + vorticity_indices_pre[3*(h_index - NO_OF_VECTORS_H) + 2]]);
         }
         else
         {
@@ -551,6 +577,8 @@ int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double n
             normal_distance_dual[i] = calculate_distance_h(latitude_scalar_dual[from_index_dual[h_index]], longitude_scalar_dual[from_index_dual[h_index]], latitude_scalar_dual[to_index_dual[h_index]], longitude_scalar_dual[to_index_dual[h_index]], RADIUS + z_vector_dual[i]);
         }
     }
+    
+    // checks
 	int index_vector_for_dual_scalar_z[3];
 	double check_sum;
     for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)

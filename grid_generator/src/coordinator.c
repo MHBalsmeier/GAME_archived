@@ -241,10 +241,13 @@ int main(int argc, char *argv[])
 	}
 	set_z_vector_and_normal_distance(z_vector, z_scalar, normal_distance, latitude_scalar, longitude_scalar, from_index, to_index, TOA, VERT_GRID_TYPE, z_surface);
 	printf("Mapping horizontal areas from unit sphere to model levels ... ");
-	map_area_to_sphere(area, z_vector, pent_hex_face_unity_sphere);
+	map_hor_area_to_half_levels(area, z_vector, pent_hex_face_unity_sphere);
+    printf(GREEN "finished.\n" RESET);
+	printf("Determining scalar z coordinates of the dual grid ... ");
+	set_z_scalar_dual(z_scalar_dual, z_vector, from_index, to_index, vorticity_indices_pre, TOA);
     printf(GREEN "finished.\n" RESET);
     printf("Calculating grid box volumes ... ");
-	set_volume(volume, z_scalar_dual, z_vector, area, from_index, to_index, TOA, vorticity_indices_pre);
+	set_volume(volume, z_vector, area, from_index, to_index, TOA, vorticity_indices_pre);
     printf(GREEN "finished.\n" RESET);
 	printf("Determining vector z coordinates of the dual grid and distances of the dual grid ... ");
 	calc_z_vector_dual_and_normal_distance_dual(z_vector_dual, normal_distance_dual, z_scalar_dual, TOA, from_index, to_index, z_vector, from_index_dual, to_index_dual, latitude_scalar_dual, longitude_scalar_dual, vorticity_indices_pre);
