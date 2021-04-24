@@ -130,7 +130,6 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
 		        if (layer_index >= NO_OF_LAYERS - grid -> no_of_oro_layers)
 		        {
             		length_rescale_factor = (RADIUS + grid -> z_vector[edge_vector_index])/(RADIUS + grid -> z_vector[index]);
-            		// In terrain following coordinates, a vertical interpolation onto the reference z coordinate must be made. Therefore, delta_z and vertical_gradient must be determined.
 		        	delta_z = grid -> z_vector[edge_vector_index] - grid -> z_vector[index];
 		        	if (delta_z > 0)
 		        	{
