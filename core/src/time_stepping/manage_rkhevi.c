@@ -58,6 +58,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		vector_tendencies_expl(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, irrev, config_info, slow_update_bool, i, delta_t);
 	    // time stepping for the horizontal momentum can be directly executed
 	    
+	    #pragma omp parallel for private(layer_index, h_index)
 	    for (int j = 0; j < NO_OF_VECTORS; ++j)
 	    {
 	    	layer_index = j/NO_OF_VECTORS_PER_LAYER;
