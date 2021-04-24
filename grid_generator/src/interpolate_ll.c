@@ -4,7 +4,7 @@ Github repository: https://github.com/AUN4GFD/game
 
 */
 /*
-In this file, interpolation indices and weights to the lat lon grid are computed.
+In this file, interpolation indices and weights to the lat-lon grid are computed.
 */
 
 #include "enum.h"
