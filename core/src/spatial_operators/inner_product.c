@@ -39,20 +39,5 @@ int inner_product(Vector_field in_field_0, Vector_field in_field_1, Scalar_field
     return 0;
 }
 
-int kinetic_energy(Vector_field in_field, Scalar_field out_field, Grid *grid)
-{
-	/*
-	This function computes the kinetic energy, if in_field is the wind field. Only this part is neeed for the 3D Lamb transformation.
-	*/
-	
-	inner_product(in_field, in_field, out_field, grid);
-	#pragma omp parallel for
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
-    {
-    	out_field[i] = 0.5*out_field[i];
-    }
-    return 0;
-}
-
 
 

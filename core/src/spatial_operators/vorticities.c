@@ -85,7 +85,7 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagn
 int add_f_to_rel_vort(Curl_field rel_vort, Curl_field out_field, Dualgrid *dualgrid)
 {
 	/*
-	qadding the Coriolis parameter to the relative vorticity
+	adding the Coriolis parameter to the relative vorticity
 	*/
     
     int layer_index, h_index;
@@ -102,8 +102,8 @@ int add_f_to_rel_vort(Curl_field rel_vort, Curl_field out_field, Dualgrid *dualg
 int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
     int layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, index_0, index_1, index_2, index_3;
-    double rhombus_circ, dist_0, dist_1, dist_2, dist_3, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient;
-	#pragma omp parallel for private(layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, index_0, index_1, index_2, index_3, rhombus_circ, dist_0, dist_1, dist_2, dist_3, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient)
+    double rhombus_circ, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient;
+	#pragma omp parallel for private(layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, index_0, index_1, index_2, index_3, rhombus_circ, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient)
     for (int i = NO_OF_VECTORS_H; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {
         layer_index = i/(2*NO_OF_VECTORS_H);
@@ -152,16 +152,15 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
         	}
         	out_field[i] = rhombus_circ/dualgrid -> area[i];
         }
-        // tangential vorticities
+        // tangential (horizontal) vorticities
         else
         {
         	// At the lower boundary, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
             if (layer_index == NO_OF_LAYERS)
             {
                 index_2 = layer_index*NO_OF_VECTORS_PER_LAYER - NO_OF_VECTORS_H + h_index;
-                dist_2 = grid -> normal_distance[index_2];
                 horizontal_covariant(velocity_field, layer_index - 1, h_index, grid, &covar_2);
-                out_field[i] = 1/dualgrid -> area[i]*dist_2*covar_2;
+                out_field[i] = 1/dualgrid -> area[i]*grid -> normal_distance[index_2]*covar_2;
             }
             else
             {
@@ -169,13 +168,13 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
                 index_1 = layer_index*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index];
                 index_2 = layer_index*NO_OF_VECTORS_PER_LAYER - NO_OF_VECTORS_H + h_index;
                 index_3 = layer_index*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index];
-                dist_0 = grid -> normal_distance[index_0];
-                dist_1 = grid -> normal_distance[index_1];
-                dist_2 = grid -> normal_distance[index_2];
-                dist_3 = grid -> normal_distance[index_3];
                 horizontal_covariant(velocity_field, layer_index, h_index, grid, &covar_0);
                 horizontal_covariant(velocity_field, layer_index - 1, h_index, grid, &covar_2);
-                out_field[i] = 1/dualgrid -> area[i]*(-dist_0*covar_0 + dist_1*velocity_field[index_1] + dist_2*covar_2 - dist_3*velocity_field[index_3]);
+                out_field[i] = 1/dualgrid -> area[i]*(
+                - grid -> normal_distance[index_0]*covar_0
+                + grid -> normal_distance[index_1]*velocity_field[index_1]
+                + grid -> normal_distance[index_2]*covar_2
+                - grid -> normal_distance[index_3]*velocity_field[index_3]);
             }
         }
     }

@@ -37,7 +37,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		// Now, the generalized Coriolis term is evaluated.
 		vorticity_flux(diagnostics -> flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid, dualgrid);
 		// Kinetic energy is prepared for the gradient term of the Lamb transformation.
-		kinetic_energy(state -> velocity_gas, diagnostics -> e_kin, grid);
+		inner_product(state -> velocity_gas, state -> velocity_gas, diagnostics -> e_kin, grid);
 		// Taking the gradient of the kinetic energy
 		grad(diagnostics -> e_kin, forcings -> e_kin_grad, grid);
     }
@@ -128,7 +128,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     		// generalized Coriolis term
     		+ forcings -> pot_vort_tend[i]
     		// kinetic energy term
-    		- forcings -> e_kin_grad[i]
+    		- 0.5*forcings -> e_kin_grad[i]
     		// gravity
     		- grid -> gravity_m[i]
     		// momentum diffusion

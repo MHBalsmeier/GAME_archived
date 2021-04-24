@@ -1542,7 +1542,7 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
     	double kinetic_integral, potential_integral, internal_integral;
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
     	Scalar_field *e_kin_density = malloc(sizeof(Scalar_field));
-    	kinetic_energy(state_write_out -> velocity_gas, *e_kin_density, grid);
+    	inner_product(state_write_out -> velocity_gas, state_write_out -> velocity_gas, *e_kin_density, grid);
 		#pragma omp parallel for
 		for (int i = 0; i< NO_OF_SCALARS; ++i)
 		{
@@ -1558,7 +1558,7 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
     	Scalar_field *int_energy_density = malloc(sizeof(Scalar_field));
     	scalar_times_scalar(diagnostics -> scalar_field_placeholder, state_write_out -> temperature_gas, *int_energy_density);
     	global_scalar_integrator(*int_energy_density, grid, &internal_integral);
-    	fprintf(global_integral_file, "%d\t%lf\t%lf\t%lf\n", step_counter, kinetic_integral, potential_integral, spec_heat_capacities_v_gas(0)*internal_integral);
+    	fprintf(global_integral_file, "%d\t%lf\t%lf\t%lf\n", step_counter, 0.5*kinetic_integral, potential_integral, spec_heat_capacities_v_gas(0)*internal_integral);
     	free(int_energy_density);
     	fclose(global_integral_file);
     }

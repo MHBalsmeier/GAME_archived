@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
 	vorticity_flux(diagnostics -> flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid, dualgrid);
 	free(dualgrid);
 	// Kinetic energy is prepared for the gradient term of the Lamb transformation.
-	kinetic_energy(state -> velocity_gas, diagnostics -> e_kin, grid);
+	inner_product(state -> velocity_gas, state -> velocity_gas, diagnostics -> e_kin, grid);
 	// Taking the gradient of the kinetic energy
 	grad(diagnostics -> e_kin, forcings -> e_kin_grad, grid);
     // density is determined out of the hydrostatic equation
@@ -306,7 +306,7 @@ int main(int argc, char *argv[])
         	delta_temperature = temperature[i] - temperature[i + NO_OF_SCALARS_H];
         	delta_z = grid -> z_scalar[i] - grid -> z_scalar[i + NO_OF_SCALARS_H];
         	delta_gravity_potential = grid -> gravity_potential[i] - grid -> gravity_potential[i + NO_OF_SCALARS_H]
-        	- delta_z*(forcings -> pot_vort_tend[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + h_index] - forcings -> e_kin_grad[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + h_index]);
+        	- delta_z*(forcings -> pot_vort_tend[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + h_index] - 0.5*forcings -> e_kin_grad[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + h_index]);
         	entropy_value = lower_entropy_value + (delta_gravity_potential + C_D_P*delta_temperature)/temperature_mean;
         	state -> mass_densities[i] = solve_specific_entropy_for_density(entropy_value, temperature[i]);
         }
