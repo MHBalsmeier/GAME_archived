@@ -71,27 +71,6 @@ int grad_vert_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
     return 0;
 }
 
-int grad_oro_corr(Vector_field cov_to_con_gradient_field, Grid *grid)
-{
-    /*
-    this transforms an horizontal covariant gradient to a "truly horizontal" contravariant gradient
-    */
-    int layer_index, h_index;
-    double vertical_gradient;
-	#pragma omp parallel for private(layer_index, h_index, vertical_gradient)
-    for (int i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
-    {
-        layer_index = i/NO_OF_VECTORS_PER_LAYER;
-        h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-        if (h_index >= NO_OF_SCALARS_H && layer_index >= NO_OF_LAYERS - grid -> no_of_oro_layers)
-        {
-        	remap_verpri2horpri_vector(cov_to_con_gradient_field, layer_index, h_index - NO_OF_SCALARS_H, &vertical_gradient, grid);
-            cov_to_con_gradient_field[i] += -grid -> slope[i]*vertical_gradient;
-        }
-    }
-    return 0;
-}
-
 int grad_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
 {
 	/*
@@ -108,17 +87,16 @@ int grad(Scalar_field in_field, Vector_field out_field, Grid *grid)
 	calculates the gradient (horizontally contravariant, vertically covariant)
 	*/
 	grad_cov(in_field, out_field, grid);
-	grad_oro_corr(out_field, grid);
+	vector_field_hor_cov_to_con(out_field, grid);
     return 0;
 }
 
 int grad_hor(Scalar_field in_field, Vector_field out_field, Grid *grid)
 {
 	/*
-	Calculates the horizontal contravariant gradient.
+	This function calculates the horizontal contravariant gradient.
 	*/
-	grad_cov(in_field, out_field, grid);
-	grad_oro_corr(out_field, grid);
+	grad(in_field, out_field, grid);
     int layer_index, h_index;
 	#pragma omp parallel for private(layer_index, h_index)
     for (int i = 0; i < NO_OF_VECTORS; ++i)

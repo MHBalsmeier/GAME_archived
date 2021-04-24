@@ -118,6 +118,28 @@ int horizontal_covariant(Vector_field vector_field, int layer_index, int h_index
 	return 0;
 }
 
+int vector_field_hor_cov_to_con(Vector_field cov_to_con_field, Grid *grid)
+{
+    /*
+    This function transforms the covariant horizontal measure numbers of a vector field to
+    contravariant measure numbers.
+    */
+    int layer_index, h_index;
+    double vertical_gradient;
+	#pragma omp parallel for private(layer_index, h_index, vertical_gradient)
+    for (int i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
+    {
+        layer_index = i/NO_OF_VECTORS_PER_LAYER;
+        h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
+        if (h_index >= NO_OF_SCALARS_H && layer_index >= NO_OF_LAYERS - grid -> no_of_oro_layers)
+        {
+        	remap_verpri2horpri_vector(cov_to_con_field, layer_index, h_index - NO_OF_SCALARS_H, &vertical_gradient, grid);
+            cov_to_con_field[i] += -grid -> slope[i]*vertical_gradient;
+        }
+    }
+    return 0;
+}
+
 int tangential_wind(Vector_field in_field, int layer_index, int h_index, double *component, Grid *grid)
 {
 	/*

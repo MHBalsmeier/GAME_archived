@@ -5,7 +5,7 @@ Github repository: https://github.com/AUN4GFD/game
 
 int grad_hor_cov(Scalar_field, Vector_field, Grid *);
 int grad_vert_cov(Scalar_field, Vector_field, Grid *);
-int grad_oro_corr(Vector_field, Grid *);
+int vector_field_hor_cov_to_con(Vector_field, Grid *);
 int grad_cov(Scalar_field, Vector_field, Grid *);
 int grad(Scalar_field, Vector_field, Grid *);
 int grad_hor(Scalar_field, Vector_field, Grid *);
