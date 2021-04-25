@@ -113,6 +113,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
     double expl_pgrad_sound_weight;
 	expl_pgrad_sound_weight = 1 - get_impl_thermo_weight();
 	int layer_index, h_index;
+	#pragma omp parallel for private(layer_index, h_index)
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
 		layer_index = i/NO_OF_VECTORS_PER_LAYER;

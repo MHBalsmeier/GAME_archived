@@ -35,7 +35,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 	damping_start_height = config_info -> damping_start_height_over_toa*grid -> z_vector[0];
 	
 	// loop over all columns
-	#pragma omp parallel for private(upper_index, lower_index, j, damping_coeff)
+	#pragma omp parallel for private(upper_index, lower_index, j, damping_coeff, z_above_damping)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// for meanings of these vectors look into the Kompendium
