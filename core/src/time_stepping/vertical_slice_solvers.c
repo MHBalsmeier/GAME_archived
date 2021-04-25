@@ -19,15 +19,22 @@ int thomas_algorithm(double [], double [], double [], double [], double [], int)
 
 int three_band_solver_ver_waves(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, Grid *grid, int rk_substep)
 {
-	double damping_coeff, damping_start_height, z_above_damping;
-	// This is for Klemp (2008).
-	damping_start_height = config_info -> damping_start_height_over_toa*grid -> z_vector[0];
+	/*
+	This is the implicit vertical solver for the main fluid constituent.
+	*/
+	
+	// declaring and defining some variables that will be needed later on
 	int upper_index, lower_index, j;
     int advect_sign = -1 + 2*rk_substep;
 	double impl_pgrad_weight = get_impl_thermo_weight();
 	double c_g_v = spec_heat_cap_diagnostics_v(state_old, NO_OF_SCALARS/2, config_info);
 	double c_g_p = spec_heat_cap_diagnostics_p(state_old, NO_OF_SCALARS/2, config_info);
 	double r_g = gas_constant_diagnostics(state_old, NO_OF_SCALARS/2, config_info);
+	// This is for Klemp (2008).
+	double damping_coeff, damping_start_height, z_above_damping;
+	damping_start_height = config_info -> damping_start_height_over_toa*grid -> z_vector[0];
+	
+	// loop over all columns
 	#pragma omp parallel for private(upper_index, lower_index, j, damping_coeff)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
@@ -246,7 +253,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			+ grid -> volume[i + j*NO_OF_SCALARS_H]*alpha[j]*(state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] - density_explicit[j])
 			+ grid -> volume[i + j*NO_OF_SCALARS_H]*beta[j]*(state_new -> entropy_densities[j*NO_OF_SCALARS_H + i] - entropy_density_explicit[j]);
 		}
-	}
+	} // end of the column (index i) loop
 	return 0;
 }
 
