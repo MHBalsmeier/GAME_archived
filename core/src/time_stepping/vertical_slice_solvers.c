@@ -54,6 +54,14 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		double temp_new_interface_values[NO_OF_LAYERS - 1];
 		double density_interface_old[NO_OF_LAYERS - 1];
 		double density_interface_explicit[NO_OF_LAYERS - 1];
+		double alpha_old[NO_OF_LAYERS];
+		double beta_old[NO_OF_LAYERS];
+		double gamma_old[NO_OF_LAYERS];
+		double delta_old[NO_OF_LAYERS];
+		double alpha_new[NO_OF_LAYERS];
+		double beta_new[NO_OF_LAYERS];
+		double gamma_new[NO_OF_LAYERS];
+		double delta_new[NO_OF_LAYERS];
 		double alpha[NO_OF_LAYERS];
 		double beta[NO_OF_LAYERS];
 		double gamma[NO_OF_LAYERS];
@@ -76,14 +84,27 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			entropy_density_new[j] = state_new -> entropy_densities[j*NO_OF_SCALARS_H + i];
 			// new specific entropy
 			spec_entropy_new[j] = entropy_density_new[j]/density_new[j];
-			// partial derivatives of T = T(rho, stilde)
-			alpha[j] = state_old -> temperature_gas[j*NO_OF_SCALARS_H + i]
+			// partial derivatives of T = T(rho, stilde) (old time step)
+			alpha_old[j] = state_old -> temperature_gas[j*NO_OF_SCALARS_H + i]
 			/(c_g_v*state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i])
 			*(r_g - state_old -> entropy_densities[j*NO_OF_SCALARS_H + i]/state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]);
-			beta[j] = state_old -> temperature_gas[j*NO_OF_SCALARS_H + i]/(c_g_v*state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]);
-			// partial derivatives of s = s(rho, stilde)
-			gamma[j] = -state_old -> entropy_densities[j*NO_OF_SCALARS_H + i]/pow(state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i], 2);
-			delta[j] = 1/state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+			beta_old[j] = state_old -> temperature_gas[j*NO_OF_SCALARS_H + i]/(c_g_v*state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]);
+			// partial derivatives of s = s(rho, stilde) (old time step)
+			gamma_old[j] = -state_old -> entropy_densities[j*NO_OF_SCALARS_H + i]/pow(state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i], 2);
+			delta_old[j] = 1/state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+			// partial derivatives of T = T(rho, stilde) (new time step)
+			alpha_new[j] = state_new -> temperature_gas[j*NO_OF_SCALARS_H + i]
+			/(c_g_v*state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i])
+			*(r_g - state_new -> entropy_densities[j*NO_OF_SCALARS_H + i]/state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]);
+			beta_new[j] = state_new -> temperature_gas[j*NO_OF_SCALARS_H + i]/(c_g_v*state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]);
+			// partial derivatives of s = s(rho, stilde) (new time step)
+			gamma_new[j] = -state_new -> entropy_densities[j*NO_OF_SCALARS_H + i]/pow(state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i], 2);
+			delta_new[j] = 1/state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+			// interpolation in time
+			alpha[j] = (1 - impl_pgrad_weight)*alpha_old[j] + impl_pgrad_weight*alpha_new[j];
+			beta[j] = (1 - impl_pgrad_weight)*beta_old[j] + impl_pgrad_weight*beta_new[j];
+			gamma[j] = (1 - impl_pgrad_weight)*gamma_old[j] + impl_pgrad_weight*gamma_new[j];
+			delta[j] = (1 - impl_pgrad_weight)*delta_old[j] + impl_pgrad_weight*delta_new[j];
 			// dividing by the volume
 			alpha[j] = alpha[j]/grid -> volume[i + j*NO_OF_SCALARS_H];
 			beta[j] = beta[j]/grid -> volume[i + j*NO_OF_SCALARS_H];
@@ -244,14 +265,6 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]
 			= (2*solution_vector[j]/grid -> area[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - density_interface_new*state_old -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i])
 			/density_interface_old[j];
-		}
-		// temperature
-		for (j = 0; j < NO_OF_LAYERS; ++j)
-		{
-			state_new -> temperature_gas[j*NO_OF_SCALARS_H + i]
-			= diagnostics -> temperature_gas_explicit[j*NO_OF_SCALARS_H + i]
-			+ grid -> volume[i + j*NO_OF_SCALARS_H]*alpha[j]*(state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] - density_explicit[j])
-			+ grid -> volume[i + j*NO_OF_SCALARS_H]*beta[j]*(state_new -> entropy_densities[j*NO_OF_SCALARS_H + i] - entropy_density_explicit[j]);
 		}
 	} // end of the column (index i) loop
 	return 0;
@@ -425,51 +438,58 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 
 int thomas_algorithm(double c_vector[], double d_vector[], double e_vector[], double r_vector[], double solution_vector[], int solution_length)
 {
-	// https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm
-	double c_prime_vector[solution_length - 1];
-	double d_prime_vector[solution_length];
+	/*
+	This function solves a system of linear equations with a three-band matrix.
+	*/
+	
+	double e_prime_vector[solution_length - 1];
+	double r_prime_vector[solution_length];
+	// downward sweep (matrix)
 	if (d_vector[0] != 0)
 	{
-		c_prime_vector[0] = e_vector[0]/d_vector[0];
+		e_prime_vector[0] = e_vector[0]/d_vector[0];
 	}
 	else
 	{
-		c_prime_vector[0] = 0;
+		e_prime_vector[0] = 0;
 	}
 	for (int j = 1; j < solution_length - 1; ++j)
 	{
-		if (d_vector[j] - c_prime_vector[j - 1]*c_vector[j - 1] != 0)
+		if (d_vector[j] - e_prime_vector[j - 1]*c_vector[j - 1] != 0)
 		{
-			c_prime_vector[j] = e_vector[j]/(d_vector[j] - c_prime_vector[j - 1]*c_vector[j - 1]);
+			e_prime_vector[j] = e_vector[j]/(d_vector[j] - e_prime_vector[j - 1]*c_vector[j - 1]);
 		}
 		else
 		{
-			c_prime_vector[j] = 0;
+			e_prime_vector[j] = 0;
 		}
 	}
+	// downward sweep (right-hand side)
 	if (d_vector[0] != 0)
 	{
-		d_prime_vector[0] = r_vector[0]/d_vector[0];
+		r_prime_vector[0] = r_vector[0]/d_vector[0];
 	}
 	else
 	{
-		d_prime_vector[0] = 0;
+		r_prime_vector[0] = 0;
 	}
 	for (int j = 1; j < solution_length; ++j)
 	{
-		if (d_vector[j] - c_prime_vector[j - 1]*c_vector[j - 1] != 0)
+		if (d_vector[j] - e_prime_vector[j - 1]*c_vector[j - 1] != 0)
 		{
-			d_prime_vector[j] = (r_vector[j] - d_prime_vector[j - 1]*c_vector[j - 1])/(d_vector[j] - c_prime_vector[j - 1]*c_vector[j - 1]);
+			r_prime_vector[j] = (r_vector[j] - r_prime_vector[j - 1]*c_vector[j - 1])/(d_vector[j] - e_prime_vector[j - 1]*c_vector[j - 1]);
 		}
 		else
 		{
-			d_prime_vector[j] = 0;
+			r_prime_vector[j] = 0;
 		}
 	}
-	solution_vector[solution_length - 1] = d_prime_vector[solution_length - 1];
+	
+	// upward sweep (final solution)
+	solution_vector[solution_length - 1] = r_prime_vector[solution_length - 1];
 	for (int j = solution_length - 2; j >= 0; --j)
 	{
-		solution_vector[j] = d_prime_vector[j] - c_prime_vector[j]*solution_vector[j + 1];
+		solution_vector[j] = r_prime_vector[j] - e_prime_vector[j]*solution_vector[j + 1];
 	}
 	return 0;
 }

@@ -120,18 +120,13 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		// horizontal case
 		if (h_index >= NO_OF_SCALARS_H)
 		{
-			forcings -> pressure_gradient_acc_expl[i] = 
-			// the old time step horizontal -c_p*grad(T)
-			old_hor_pgrad_sound_weight*extrapolation -> pgrad_acc_old[i]
-			// the new time step horizontal -c_p*grad(T)
+			forcings -> pressure_gradient_acc_expl[i] = old_hor_pgrad_sound_weight*extrapolation -> pgrad_acc_old[i]
 			+ new_hor_pgrad_sound_weight*(-diagnostics -> cpgradt[i] + diagnostics -> tgrads[i]);
 		}
 		// vertical case
 		else
 		{
-			forcings -> pressure_gradient_acc_expl[i] = 
-			// weighted -c_p*grad(T) part
-			expl_pgrad_sound_weight*(-diagnostics -> cpgradt[i] + diagnostics -> tgrads[i]);
+			forcings -> pressure_gradient_acc_expl[i] = expl_pgrad_sound_weight*(-diagnostics -> cpgradt[i] + diagnostics -> tgrads[i]);
 		}
 	}
 	

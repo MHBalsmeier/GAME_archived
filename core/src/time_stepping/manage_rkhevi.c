@@ -130,6 +130,8 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		// -------------------------------
 		three_band_solver_ver_waves(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid, i);
 		// Vertical velocity can be seen as updated from now on.
+		// this is for stability
+		temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, 1);
 		
 		// 5.) Solving the implicit component of the generalized density equations for tracers.
 		// ------------------------------------------------------------------------------------
@@ -143,9 +145,9 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
     if (slow_update_bool == 1 && config_info -> adv_sound_ratio > 1)
     {
     	linear_combine_two_states(state_old, state_new, state_new, 1 - delta_t_small/delta_t, delta_t_small/delta_t);
+		// this is for stability
+		temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t_small, 1);
     }
-	// this is for stability
-	temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t_small, 1);
 	
 	// nesting
 	if (config_info -> regional_switch == 1)
