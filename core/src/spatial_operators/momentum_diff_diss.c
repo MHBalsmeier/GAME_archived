@@ -16,7 +16,7 @@ The momentum diffusion acceleration is computed here (apart from the diffusion c
 #include <math.h>
 #include "geos95.h"
 
-int hor_calc_curl_of_vorticity(Curl_field, Vector_field, Grid *, Dualgrid *, Config_info *);
+int hor_calc_curl_of_vorticity(Curl_field, Vector_field, double [], Grid *, Dualgrid *, Config_info *);
 
 int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid, double delta_t)
 {
@@ -27,13 +27,15 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
     // calculating the divergence of the wind field
     divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
     // calculating the relative vorticity of the wind field
-	calc_rel_vort(state -> velocity_gas, diagnostics -> rel_vort, grid, dualgrid);
+	calc_rel_vort(state -> velocity_gas, diagnostics, grid, dualgrid);
     
     // calculating the effective horizontal kinematic viscosity acting on divergences (Eddy viscosity)
 	hori_div_viscosity_eff(state, irrev, grid, diagnostics, config_info, delta_t);
 	
-    // calculating the effective horizontal kinematic viscosity acting on vorticities (Eddy viscosity)
-	hori_curl_viscosity_eff(state, irrev, grid, diagnostics, config_info, delta_t);
+    // calculating the effective horizontal kinematic viscosity acting on vorticities on rhombi (Eddy viscosity)
+	hori_curl_viscosity_eff_rhombi(state, irrev, grid, diagnostics, config_info, delta_t);
+    // calculating the effective horizontal kinematic viscosity acting on vorticities on triangles (Eddy viscosity)
+	hori_curl_viscosity_eff_triangles(state, irrev, grid, dualgrid, diagnostics, config_info, delta_t);
 	
 	/*
 	gradient of divergence component
@@ -53,10 +55,15 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		// multiplying the diffusion coefficient by the relative vorticity
     	// diagnostics -> rel_vort is a misuse of name
 		diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index]
-		= irrev -> viscosity_curl_eff[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
+		= irrev -> viscosity_curl_eff_rhombi[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
 		*diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index];
 	}
-    hor_calc_curl_of_vorticity(diagnostics -> rel_vort, diagnostics -> curl_of_vorticity, grid, dualgrid, config_info);
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_DUAL_V_VECTORS; ++i)
+	{
+		diagnostics -> rel_vort_on_triangles[i] = irrev -> viscosity_curl_eff_triangles[i]*diagnostics -> rel_vort_on_triangles[i];
+	}
+    hor_calc_curl_of_vorticity(diagnostics -> rel_vort, diagnostics -> rel_vort_on_triangles, diagnostics -> curl_of_vorticity, grid, dualgrid, config_info);
 	
 	// adding up the two components of the momentum diffusion acceleration and dividing by the density at edge
 	int vector_index, scalar_index_from, scalar_index_to;
@@ -206,14 +213,14 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	return 0;
 }
 
-int hor_calc_curl_of_vorticity(Curl_field vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid, Config_info *config_info)
+int hor_calc_curl_of_vorticity(Curl_field vorticity, double rel_vort_on_triangles[], Vector_field out_field, Grid *grid, Dualgrid *dualgrid, Config_info *config_info)
 {
 	/*
 	calculates the curl of the vertical vorticity
 	*/
 	int layer_index, h_index, vector_index, upper_index_z, lower_index_z, upper_index_zeta, lower_index_zeta;
-	double delta_z, delta_x, tangential_slope, delta_zeta, dzeta_dz;
-	#pragma omp parallel for private(layer_index, h_index, vector_index, delta_z, delta_x, tangential_slope, dzeta_dz, upper_index_z, lower_index_z, upper_index_zeta, lower_index_zeta)
+	double delta_z, delta_x, tangential_slope, delta_zeta, dzeta_dz, checkerboard_damping_weight;
+	#pragma omp parallel for private(layer_index, h_index, vector_index, delta_z, delta_x, tangential_slope, dzeta_dz, upper_index_z, lower_index_z, upper_index_zeta, lower_index_zeta, checkerboard_damping_weight)
 	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
 	{
 		// Remember: (curl(zeta))*e_x = dzeta_z/dy - dzeta_y/dz = (dz*dzeta_z - dy*dzeta_y)/(dy*dz) = (dz*dzeta_z - dy*dzeta_y)/area (Stokes' Theorem, which is used here)
@@ -222,13 +229,18 @@ int hor_calc_curl_of_vorticity(Curl_field vorticity, Vector_field out_field, Gri
 		vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
 		out_field[vector_index] = 0;
 		delta_z = 0;
+		checkerboard_damping_weight =
+		fabs(rel_vort_on_triangles[layer_index*NO_OF_DUAL_SCALARS_H + dualgrid -> to_index[h_index]]
+		- rel_vort_on_triangles[layer_index*NO_OF_DUAL_SCALARS_H + dualgrid -> from_index[h_index]])
+		/(fabs(rel_vort_on_triangles[layer_index*NO_OF_DUAL_SCALARS_H + dualgrid -> to_index[h_index]])
+		+ fabs(rel_vort_on_triangles[layer_index*NO_OF_DUAL_SCALARS_H + dualgrid -> from_index[h_index]]) + EPSILON_SECURITY);
 		// horizontal difference of vertical vorticity (dzeta_z*dz)
 		// An averaging over three rhombi must be done.
 		for (int j = 0; j < 3; ++j)
 		{
 			out_field[vector_index] +=
 			// This prefactor accounts for the fact that we average over three rhombi.
-			+ 1.0/3*(
+			+ 1.0/3*(1 - checkerboard_damping_weight)*(
 			// vertical length at the to_index_dual point
 			dualgrid -> normal_distance[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> to_index[h_index]]
 			// vorticity at the to_index_dual point
@@ -241,8 +253,13 @@ int hor_calc_curl_of_vorticity(Curl_field vorticity, Vector_field out_field, Gri
 			delta_z += 1.0/3*(
 			grid -> z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> adjacent_vector_indices_h[3*dualgrid -> to_index[h_index] + j]]
 			- grid -> z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> adjacent_vector_indices_h[3*dualgrid -> from_index[h_index] + j]]);
-			
 		}
+		// adding the term damping the checkerboard pattern
+		out_field[vector_index] +=
+		checkerboard_damping_weight*(rel_vort_on_triangles[layer_index*NO_OF_DUAL_SCALARS_H + dualgrid -> to_index[h_index]]
+		*dualgrid -> normal_distance[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> to_index[h_index]]
+		- rel_vort_on_triangles[layer_index*NO_OF_DUAL_SCALARS_H + dualgrid -> from_index[h_index]]
+		*dualgrid -> normal_distance[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> from_index[h_index]]);
 		// Dividing by the area.
 		out_field[vector_index] = out_field[vector_index]/grid -> area[vector_index];
 		

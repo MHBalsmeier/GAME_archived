@@ -56,7 +56,7 @@ int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *g
 	return 0;
 }
 
-int hori_curl_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
+int hori_curl_viscosity_eff_rhombi(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
 {
 	// these things are hardly ever modified
 	double eff_particle_radius = 130e-12;
@@ -76,7 +76,7 @@ int hori_curl_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *
 		if (h_index >= NO_OF_SCALARS_H)
 		{
 			// preliminary result
-			irrev -> viscosity_curl_eff[i] = 0.35*grid -> mean_area_cell*config_info -> diff_h_smag_fac
+			irrev -> viscosity_curl_eff_rhombi[i] = 0.35*grid -> mean_area_cell*config_info -> diff_h_smag_fac
 			*fabs(diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index - NO_OF_SCALARS_H]);
 			
 			// calculating and adding the molecular viscosity
@@ -87,23 +87,84 @@ int hori_curl_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *
 			mean_particle_mass,
 			0.5*(state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_from] + state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_to]),
 			eff_particle_radius, &molecular_viscosity);
-			irrev -> viscosity_curl_eff[i] += molecular_viscosity;
+			irrev -> viscosity_curl_eff_rhombi[i] += molecular_viscosity;
 			
 			// turbulent minimum
-			if (irrev -> viscosity_curl_eff[i] < min_diff_h_coeff_turb)
+			if (irrev -> viscosity_curl_eff_rhombi[i] < min_diff_h_coeff_turb)
 			{
-				irrev -> viscosity_curl_eff[i] = min_diff_h_coeff_turb;
+				irrev -> viscosity_curl_eff_rhombi[i] = min_diff_h_coeff_turb;
 			}
 			
 			// maximum (stability constraint)
-			if (irrev -> viscosity_curl_eff[i] > max_diff_h_coeff_turb)
+			if (irrev -> viscosity_curl_eff_rhombi[i] > max_diff_h_coeff_turb)
 			{
-				irrev -> viscosity_curl_eff[i] = max_diff_h_coeff_turb;
+				irrev -> viscosity_curl_eff_rhombi[i] = max_diff_h_coeff_turb;
 			}
 			
 			// multiplying by the mass density of the gas phase
-			irrev -> viscosity_curl_eff[i] = 0.5*(density_gas(state, scalar_index_from) + density_gas(state, scalar_index_to))*irrev -> viscosity_curl_eff[i];
+			irrev -> viscosity_curl_eff_rhombi[i] = 0.5*(density_gas(state, scalar_index_from) + density_gas(state, scalar_index_to))*irrev -> viscosity_curl_eff_rhombi[i];
 		}
+	}
+	return 0;
+}
+
+int hori_curl_viscosity_eff_triangles(State *state, Irreversible_quantities *irrev, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
+{
+	// these things are hardly ever modified
+	double eff_particle_radius = 130e-12;
+	double mean_particle_mass = mean_particle_masses_gas(0);
+	// the minimum "background" diffusion coefficient
+	double min_diff_h_coeff_turb = grid -> mean_area_cell*config_info -> diff_h_smag_fac*config_info -> shear_bg;
+	// the maximum diffusion coefficient (stability constraint)
+	double max_diff_h_coeff_turb = 0.125*grid -> mean_area_cell/delta_t;
+	
+	int layer_index, h_index;
+	double molecular_viscosity, density_value;
+	#pragma omp parallel for private(molecular_viscosity, layer_index, h_index, density_value)
+	for (int i = 0; i < NO_OF_DUAL_V_VECTORS; ++i)
+	{
+		layer_index = i/NO_OF_DUAL_SCALARS_H;
+		h_index = i - layer_index*NO_OF_DUAL_SCALARS_H;
+		// preliminary result
+		irrev -> viscosity_curl_eff_triangles[i] = 0.35*grid -> mean_area_cell*config_info -> diff_h_smag_fac
+		*fabs(diagnostics -> rel_vort_on_triangles[layer_index*NO_OF_DUAL_SCALARS_H + h_index]);
+		
+		// calculating and adding the molecular viscosity
+		density_value =
+		1.0/6*(
+		state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> adjacent_vector_indices_h[3*h_index + 0]]]
+		+ state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> adjacent_vector_indices_h[3*h_index + 0]]]
+		+ state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> adjacent_vector_indices_h[3*h_index + 1]]]
+		+ state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> adjacent_vector_indices_h[3*h_index + 1]]]
+		+ state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> adjacent_vector_indices_h[3*h_index + 2]]]
+		+ state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> adjacent_vector_indices_h[3*h_index + 2]]]);
+		calc_diffusion_coeff(
+		1.0/6*(
+		state -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> adjacent_vector_indices_h[3*h_index + 0]]]
+		+ state -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> adjacent_vector_indices_h[3*h_index + 0]]]
+		+ state -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> adjacent_vector_indices_h[3*h_index + 1]]]
+		+ state -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> adjacent_vector_indices_h[3*h_index + 1]]]
+		+ state -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> adjacent_vector_indices_h[3*h_index + 2]]]
+		+ state -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> adjacent_vector_indices_h[3*h_index + 2]]]),
+		mean_particle_mass,
+		density_value,
+		eff_particle_radius, &molecular_viscosity);
+		irrev -> viscosity_curl_eff_triangles[i] += molecular_viscosity;
+		
+		// turbulent minimum
+		if (irrev -> viscosity_curl_eff_triangles[i] < min_diff_h_coeff_turb)
+		{
+			irrev -> viscosity_curl_eff_triangles[i] = min_diff_h_coeff_turb;
+		}
+		
+		// maximum (stability constraint)
+		if (irrev -> viscosity_curl_eff_triangles[i] > max_diff_h_coeff_turb)
+		{
+			irrev -> viscosity_curl_eff_triangles[i] = max_diff_h_coeff_turb;
+		}
+		
+		// multiplying by the mass density of the gas phase
+		irrev -> viscosity_curl_eff_triangles[i] = density_value*irrev -> viscosity_curl_eff_triangles[i];
 	}
 	return 0;
 }
@@ -216,10 +277,10 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Irreversi
 	if (config_info -> momentum_diff_h == 0)
 	{
 		hori_div_viscosity_eff(state, irreversible_quantities, grid, diagnostics, config_info, delta_t);
-		hori_curl_viscosity_eff(state, irreversible_quantities, grid, diagnostics, config_info, delta_t);
+		hori_curl_viscosity_eff_rhombi(state, irreversible_quantities, grid, diagnostics, config_info, delta_t);
 	}
 	// averaging the curl diffusion coefficient from edges to cells
-	edges_to_cells(irreversible_quantities -> viscosity_curl_eff, diagnostics -> scalar_field_placeholder, grid);
+	edges_to_cells(irreversible_quantities -> viscosity_curl_eff_rhombi, diagnostics -> scalar_field_placeholder, grid);
 	double c_g_v;
 	#pragma omp parallel for private (c_g_v)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)

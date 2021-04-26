@@ -384,7 +384,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, normal_distance_dual_id, "units", strlen("m"), "m")))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "area_dual", NC_DOUBLE, 1, &vector_dual_area_dimid, &area_dual_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "area_dual", NC_DOUBLE, 1, &vector_dual_dimid, &area_dual_id)))
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, area_dual_id, "units", strlen("m^2"), "m^2")))
         ERR(retval);
@@ -424,7 +424,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "adjacent_signs_h", NC_INT, 1, &scalar_h_dimid_6, &adjacent_signs_h_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "vorticity_signs", NC_INT, 1, &vector_h_dimid_4, &vorticity_signs_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "vorticity_signs", NC_INT, 1, &scalar_dual_h_dimid_3, &vorticity_signs_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "adjacent_vector_indices_dual_h", NC_INT, 1, &scalar_dual_h_dimid_3, &vorticity_indices_pre_id)))
         ERR(retval);
@@ -472,7 +472,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, normal_distance_dual_id, &normal_distance_dual[0])))
         ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, area_dual_id, &area_dual[0])))
+    if ((retval = nc_put_var_double(ncid_g_prop, area_dual_id, &area_dual_pre[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, f_vec_id, &f_vec[0])))
         ERR(retval);
@@ -506,7 +506,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, adjacent_signs_h_id, &adjacent_signs_h[0])))
         ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, vorticity_signs_id, &vorticity_signs[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, vorticity_signs_id, &vorticity_signs_pre[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, vorticity_indices_pre_id, &vorticity_indices_pre[0])))
         ERR(retval);

@@ -96,12 +96,12 @@ double mean_area_cell;
 // Contains properties of the dual grid.
 typedef struct dualgrid {
 Curl_field area;
+Dual_vector_field z_vector;
 Dual_vector_field normal_distance;
 int from_index[NO_OF_VECTORS_H];
 int to_index[NO_OF_VECTORS_H];
 int adjacent_vector_indices_h[3*NO_OF_DUAL_SCALARS_H];
-int vorticity_indices[4*NO_OF_VECTORS_H];
-int vorticity_signs[4*NO_OF_VECTORS_H];
+int adjacent_curl_signs_h[3*NO_OF_DUAL_SCALARS_H];
 double f_vec[2*NO_OF_VECTORS_H];
 } Dualgrid;
 
@@ -120,6 +120,7 @@ Vector_field flux_density;
 Scalar_field flux_density_divv;
 Scalar_field pressure_gradient_1_prefactor;
 Scalar_field temperature_gas_explicit;
+double rel_vort_on_triangles[NO_OF_DUAL_V_VECTORS];
 Curl_field rel_vort;
 Curl_field pot_vort;
 Scalar_field c_g_v_field;
@@ -199,7 +200,8 @@ Scalar_field pressure_gradient_decel_factor;
 double constituent_mass_source_rates[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
 double constituent_heat_source_rates[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS];
 Scalar_field viscosity_div_eff;
-Vector_field viscosity_curl_eff;
+Vector_field viscosity_curl_eff_rhombi;
+double viscosity_curl_eff_triangles[NO_OF_DUAL_V_VECTORS];
 double vert_hor_viscosity_eff[NO_OF_H_VECTORS - NO_OF_VECTORS_H];
 } Irreversible_quantities;
 

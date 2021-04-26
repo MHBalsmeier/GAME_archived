@@ -618,10 +618,9 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
     // Diagnostics of quantities that are not surface-specific.    
     Scalar_field *divv_h_all_layers = calloc(1, sizeof(Scalar_field));
 	divv_h(state_write_out -> velocity_gas, *divv_h_all_layers, grid);
-    Curl_field *rel_vort_edge = calloc(1, sizeof(Curl_field));
-	calc_rel_vort(state_write_out -> velocity_gas, *rel_vort_edge, grid, dualgrid);
+	calc_rel_vort(state_write_out -> velocity_gas, diagnostics, grid, dualgrid);
     Scalar_field *rel_vort = calloc(1, sizeof(Scalar_field));
-	curl_field_to_cells(*rel_vort_edge, *rel_vort, grid);
+	curl_field_to_cells(diagnostics -> rel_vort, *rel_vort, grid);
 	
 	// Diagnozing the u and v wind components at the vector points.
 	calc_uv_at_edge(state_write_out -> velocity_gas, diagnostics -> u_at_edge, diagnostics -> v_at_edge, grid);
@@ -1479,7 +1478,6 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 	}
 	free(grib_output_field);
 	free(divv_h_all_layers);
-	free(rel_vort_edge);
 	free(rel_vort);
 	free(rh);
 	free(epv);

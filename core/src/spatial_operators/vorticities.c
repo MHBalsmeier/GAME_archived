@@ -13,10 +13,12 @@ Here, vorticities are calculated. The word "vorticity" hereby refers to both ver
 #include "../thermodynamics/thermodynamics.h"
 #include "spatial_operators.h"
 
+int calc_rel_vort_on_triangles(Vector_field, double [], Grid *, Dualgrid *);
+
 int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagnostics *diagnostics, Grid *grid, Dualgrid *dualgrid)
 {
 	// It is called "potential vorticity", but it is not Ertel's potential vorticity. It is the absolute vorticity divided by the density.
-	calc_rel_vort(velocity_field, diagnostics -> rel_vort, grid, dualgrid);
+	calc_rel_vort(velocity_field, diagnostics, grid, dualgrid);
 	// pot_vort is a misuse of name here
 	add_f_to_rel_vort(diagnostics -> rel_vort, diagnostics -> pot_vort, dualgrid);
     int layer_index, h_index, edge_vector_index_h, upper_from_index, upper_to_index;
@@ -99,58 +101,31 @@ int add_f_to_rel_vort(Curl_field rel_vort, Curl_field out_field, Dualgrid *dualg
     return 0;
 }
 
-int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid, Dualgrid *dualgrid)
+int calc_rel_vort(Vector_field velocity_field, Diagnostics *diagnostics, Grid *grid, Dualgrid *dualgrid)
 {
-    int layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, index_0, index_1, index_2, index_3;
-    double rhombus_circ, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient;
-	#pragma omp parallel for private(layer_index, h_index, index, sign, index_for_vertical_gradient, edge_vector_index, edge_vector_index_h, index_0, index_1, index_2, index_3, rhombus_circ, delta_z, covar_0, covar_2, length_rescale_factor, velocity_value, vertical_gradient)
+	/*
+	This function averages the vorticities on triangles to rhombi and calculates horizontal (tangential) vorticities.
+	*/
+	
+	// calling the function which computes the relative vorticity on triangles
+	calc_rel_vort_on_triangles(velocity_field, diagnostics -> rel_vort_on_triangles, grid, dualgrid);
+    int layer_index, h_index, index_0, index_1, index_2, index_3;
+    double covar_0, covar_2;
+	#pragma omp parallel for private(layer_index, h_index, index_0, index_1, index_2, index_3, covar_0, covar_2)
     for (int i = NO_OF_VECTORS_H; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {
         layer_index = i/(2*NO_OF_VECTORS_H);
         h_index = i - layer_index*2*NO_OF_VECTORS_H;
-        // Rhombus vorticities (stand vertically)
+        // rhombus vorticities (stand vertically)
         if (h_index >= NO_OF_VECTORS_H)
         {
-			edge_vector_index_h = h_index - NO_OF_VECTORS_H;
-	        edge_vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + edge_vector_index_h;
-        	rhombus_circ = 0;
-        	// The rhombus has four edges.
-        	for (int k = 0; k < 4; ++k)
-        	{
-        		// This is the index of one of the rhombus edges.
-				index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> vorticity_indices[4*edge_vector_index_h + k];
-			    // This sign is positive for a positive sence of rotation.
-			    sign = dualgrid -> vorticity_signs[4*edge_vector_index_h + k];
-		    	// This is the value of the velocity at the rhombus edge.
-		    	velocity_value = velocity_field[index];
-		    	// length_rescale_factor corrects for terrain following coordinates
-		    	length_rescale_factor = 1;
-		        if (layer_index >= NO_OF_LAYERS - grid -> no_of_oro_layers)
-		        {
-            		length_rescale_factor = (RADIUS + grid -> z_vector[edge_vector_index])/(RADIUS + grid -> z_vector[index]);
-		        	delta_z = grid -> z_vector[edge_vector_index] - grid -> z_vector[index];
-		        	if (delta_z > 0)
-		        	{
-		        		index_for_vertical_gradient = index - NO_OF_VECTORS_PER_LAYER;
-	        		}
-		        	else
-		        	{
-		        		if (layer_index == NO_OF_LAYERS - 1)
-		        		{
-		        			index_for_vertical_gradient = index - NO_OF_VECTORS_PER_LAYER;
-	        			}
-		        		else
-		        		{
-		        			index_for_vertical_gradient = index + NO_OF_VECTORS_PER_LAYER;
-	        			}
-		        	}
-		        	vertical_gradient = (velocity_field[index] - velocity_field[index_for_vertical_gradient])/(grid -> z_vector[index] - grid -> z_vector[index_for_vertical_gradient]);
-		        	// Here, the vertical interpolation is made.
-		        	velocity_value += delta_z*vertical_gradient;
-    			}
-    			rhombus_circ += length_rescale_factor*grid -> normal_distance[index]*sign*velocity_value;
-        	}
-        	out_field[i] = rhombus_circ/dualgrid -> area[i];
+			diagnostics -> rel_vort[i] = (
+			dualgrid -> area[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> from_index[h_index - NO_OF_VECTORS_H]]
+			*diagnostics -> rel_vort_on_triangles[layer_index*NO_OF_DUAL_SCALARS_H + dualgrid -> from_index[h_index - NO_OF_VECTORS_H]]
+			+ dualgrid -> area[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> to_index[h_index - NO_OF_VECTORS_H]]
+			*diagnostics -> rel_vort_on_triangles[layer_index*NO_OF_DUAL_SCALARS_H + dualgrid -> to_index[h_index - NO_OF_VECTORS_H]])/(
+			dualgrid -> area[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> from_index[h_index - NO_OF_VECTORS_H]]
+			+ dualgrid -> area[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> to_index[h_index - NO_OF_VECTORS_H]]);
         }
         // tangential (horizontal) vorticities
         else
@@ -160,7 +135,7 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
             {
                 index_2 = layer_index*NO_OF_VECTORS_PER_LAYER - NO_OF_VECTORS_H + h_index;
                 horizontal_covariant(velocity_field, layer_index - 1, h_index, grid, &covar_2);
-                out_field[i] = 1/dualgrid -> area[i]*grid -> normal_distance[index_2]*covar_2;
+                diagnostics -> rel_vort[i] = 1/dualgrid -> area[h_index + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER]*grid -> normal_distance[index_2]*covar_2;
             }
             else
             {
@@ -170,7 +145,7 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
                 index_3 = layer_index*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index];
                 horizontal_covariant(velocity_field, layer_index, h_index, grid, &covar_0);
                 horizontal_covariant(velocity_field, layer_index - 1, h_index, grid, &covar_2);
-                out_field[i] = 1/dualgrid -> area[i]*(
+                diagnostics -> rel_vort[i] = 1/dualgrid -> area[h_index + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER]*(
                 - grid -> normal_distance[index_0]*covar_0
                 + grid -> normal_distance[index_1]*velocity_field[index_1]
                 + grid -> normal_distance[index_2]*covar_2
@@ -182,10 +157,70 @@ int calc_rel_vort(Vector_field velocity_field, Curl_field out_field, Grid *grid,
     #pragma omp parallel for
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
-    	out_field[i] = out_field[i + 2*NO_OF_VECTORS_H];
+    	diagnostics -> rel_vort[i] = diagnostics -> rel_vort[i + 2*NO_OF_VECTORS_H];
     }
     return 0;
 }
+
+int calc_rel_vort_on_triangles(Vector_field velocity_field, double result[], Grid *grid, Dualgrid * dualgrid)
+{
+	/*
+	This function calculates the vertical relative vorticity on triangles.
+	*/
+	
+	int layer_index, h_index, vector_index, index_for_vertical_gradient, sign;
+	double velocity_value, length_rescale_factor, vertical_gradient, delta_z;
+	// loop over all triangles
+	#pragma omp parallel for private(layer_index, h_index, velocity_value, length_rescale_factor, vector_index, index_for_vertical_gradient, sign, vertical_gradient, delta_z)
+	for (int i = 0; i < NO_OF_DUAL_V_VECTORS; ++i)
+	{
+		layer_index = i/NO_OF_DUAL_SCALARS_H;
+		h_index = i - layer_index*NO_OF_DUAL_SCALARS_H;
+		// clearing what has previously been here
+		result[i] = 0;
+		// loop over the three edges of the triangle at hand
+		for (int j = 0; j < 3; ++j)
+		{
+			vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> adjacent_vector_indices_h[3*h_index + j];
+		    sign = dualgrid -> adjacent_curl_signs_h[3*h_index + j];
+	    	velocity_value = velocity_field[vector_index];
+	    	// this corrects for terrain following coordinates
+	    	length_rescale_factor = 1;
+	        if (layer_index >= NO_OF_LAYERS - grid -> no_of_oro_layers)
+	        {
+        		length_rescale_factor = (RADIUS + dualgrid -> z_vector[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + h_index])/(RADIUS + grid -> z_vector[vector_index]);
+	        	delta_z = dualgrid -> z_vector[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + h_index] - grid -> z_vector[vector_index];
+	        	if (delta_z > 0)
+	        	{
+	        		index_for_vertical_gradient = vector_index - NO_OF_VECTORS_PER_LAYER;
+        		}
+	        	else
+	        	{
+	        		if (layer_index == NO_OF_LAYERS - 1)
+	        		{
+	        			index_for_vertical_gradient = vector_index - NO_OF_VECTORS_PER_LAYER;
+        			}
+
+	        		else
+	        		{
+	        			index_for_vertical_gradient = vector_index + NO_OF_VECTORS_PER_LAYER;
+        			}
+	        	}
+	        	vertical_gradient = (velocity_field[vector_index] - velocity_field[index_for_vertical_gradient])/(grid -> z_vector[vector_index] - grid -> z_vector[index_for_vertical_gradient]);
+	        	// Here, the vertical interpolation is made.
+	        	velocity_value += delta_z*vertical_gradient;
+			}
+			result[i] += length_rescale_factor*grid -> normal_distance[vector_index]*sign*velocity_value;
+		}
+		// dividing by the area (Stokes' Theorem)
+    	result[i] = result[i]/dualgrid -> area[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + h_index];
+	}
+	
+	return 0;
+}
+
+
+
 
 
 
