@@ -218,7 +218,7 @@ int temperature_step(State *state_old, State *state_new, State *state_tendency, 
     	// The temperature of the gas phase of the old time step.
     	temperature_0 = state_old -> temperature_gas[i];
     	
-		// Determining the thermodynamic properties of the gas phase.
+		// determining the thermodynamic properties of the gas phase
     	c_g_v = spec_heat_cap_diagnostics_v(state_old, i, config_info);
     	c_g_p = spec_heat_cap_diagnostics_p(state_old, i, config_info);
     	
