@@ -16,7 +16,7 @@ The momentum diffusion acceleration is computed here (apart from the diffusion c
 #include <math.h>
 #include "geos95.h"
 
-int hor_calc_curl_of_vorticity(Curl_field, Vector_field, double [], Grid *, Dualgrid *, Config_info *);
+int hor_calc_curl_of_vorticity(Curl_field, Vector_field, double [], Grid *, Dualgrid *);
 
 int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid, double delta_t)
 {
@@ -63,9 +63,9 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	{
 		diagnostics -> rel_vort_on_triangles[i] = irrev -> viscosity_curl_eff_triangles[i]*diagnostics -> rel_vort_on_triangles[i];
 	}
-    hor_calc_curl_of_vorticity(diagnostics -> rel_vort, diagnostics -> rel_vort_on_triangles, diagnostics -> curl_of_vorticity, grid, dualgrid, config_info);
+    hor_calc_curl_of_vorticity(diagnostics -> rel_vort, diagnostics -> rel_vort_on_triangles, diagnostics -> curl_of_vorticity, grid, dualgrid);
 	
-	// adding up the two components of the momentum diffusion acceleration and dividing by the density at edge
+	// adding up the two components of the momentum diffusion acceleration and dividing by the density at the edge
 	int vector_index, scalar_index_from, scalar_index_to;
 	#pragma omp parallel for private(layer_index, h_index, vector_index, scalar_index_from, scalar_index_to)
 	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
@@ -213,7 +213,7 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	return 0;
 }
 
-int hor_calc_curl_of_vorticity(Curl_field vorticity, double rel_vort_on_triangles[], Vector_field out_field, Grid *grid, Dualgrid *dualgrid, Config_info *config_info)
+int hor_calc_curl_of_vorticity(Curl_field vorticity, double rel_vort_on_triangles[], Vector_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
 	/*
 	calculates the curl of the vertical vorticity
