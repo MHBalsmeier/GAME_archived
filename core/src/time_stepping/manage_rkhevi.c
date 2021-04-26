@@ -90,8 +90,8 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 					create_rad_array_scalar_h(grid -> longitude_scalar, radiation -> lon_scal_rad, rad_block_index);
 					create_rad_array_scalar(grid -> z_scalar, radiation -> z_scal_rad, rad_block_index);
 					create_rad_array_vector(grid -> z_vector, radiation -> z_vect_rad, rad_block_index);
-					create_rad_array_mass_den(state_new -> mass_densities, radiation -> mass_den_rad, rad_block_index);
-					create_rad_array_scalar(state_new -> temperature_gas, radiation -> temp_rad, rad_block_index);
+					create_rad_array_mass_den(state_old -> mass_densities, radiation -> mass_den_rad, rad_block_index);
+					create_rad_array_scalar(state_old -> temperature_gas, radiation -> temp_rad, rad_block_index);
 					// calling the radiation routine
 					calc_radiative_flux_convergence(radiation -> lat_scal_rad,
 					radiation -> lon_scal_rad,
@@ -109,7 +109,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 			}
 			if (config_info -> rad_on == 2)
 			{
-				held_suar(grid -> latitude_scalar, grid -> z_scalar, state_new -> mass_densities, state_new -> temperature_gas, radiation -> radiation_tendency);
+				held_suar(grid -> latitude_scalar, grid -> z_scalar, state_old -> mass_densities, state_old -> temperature_gas, radiation -> radiation_tendency);
 			}
 			printf("Update of radiative fluxes completed.\n");
 		}
