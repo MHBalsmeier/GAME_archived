@@ -41,11 +41,11 @@ int main(int argc, char *argv[])
 	oro = malloc(NO_OF_SCALARS_H*sizeof(double));
     int GEO_PROP_FILE_LENGTH = 100;
     char *GEO_PROP_FILE_PRE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(GEO_PROP_FILE_PRE, "../grid_generator/grids/B%dL26T30000_O0_OL23_SCVT.nc", RES_ID);
+    sprintf(GEO_PROP_FILE_PRE, "../grid_generator/grids/B%dL26T41152_O0_OL23_SCVT.nc", RES_ID);
     GEO_PROP_FILE_LENGTH = strlen(GEO_PROP_FILE_PRE);
     free(GEO_PROP_FILE_PRE);
     char *GEO_PROP_FILE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
-    sprintf(GEO_PROP_FILE, "../grid_generator/grids/B%dL26T30000_O0_OL23_SCVT.nc", RES_ID);
+    sprintf(GEO_PROP_FILE, "../grid_generator/grids/B%dL26T41152_O0_OL23_SCVT.nc", RES_ID);
 	int retval;
     double *latitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
     double *longitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));

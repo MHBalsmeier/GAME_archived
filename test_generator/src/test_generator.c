@@ -256,6 +256,8 @@ int main(int argc, char *argv[])
             }
         }
     }
+    free(latitude_vector);
+    free(longitude_vector);
     // setting the vertical wind field equal to zero
     for (int i = 0; i < NO_OF_LEVELS; ++i)
     {
@@ -320,9 +322,6 @@ int main(int argc, char *argv[])
     	}
     }
     
-    free(latitude_vector);
-    free(longitude_vector);
-    free(state);
     free(forcings);
     int scalar_dimid, vector_dimid, temp_id, density_dry_id, wind_id, density_vapour_id, density_liquid_id, density_solid_id, temperature_liquid_id, temperature_solid_id, ncid, single_double_dimid, stretching_parameter_id;
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
@@ -389,6 +388,7 @@ int main(int argc, char *argv[])
         NCERR(retval);
     if ((retval = nc_close(ncid)))
     	NCERR(retval);
+    free(state);
     free(grid);
     free(pressure);
     free(temperature);
