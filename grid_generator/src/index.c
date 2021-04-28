@@ -3,6 +3,10 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
+/*
+This file collects functions that are relevant for the neighbourship relations of the grid cells and edges.
+*/
+
 #include "include.h"
 #include "enum.h"
 #include <stdlib.h>
@@ -16,6 +20,9 @@ Github repository: https://github.com/AUN4GFD/game
 
 int find_adjacent_vector_indices_h(int from_index[], int to_index[], int adjacent_signs_h[], int adjacent_vector_indices_h[])
 {
+	/*
+	This function finds the horizontal vectors that are adjacent to a grid cell.
+	*/
     int trouble_detected = 0;
     int counter;
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)

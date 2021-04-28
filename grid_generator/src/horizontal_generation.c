@@ -20,7 +20,9 @@ int generate_horizontal_generators(double latitude_ico[], double longitude_ico[]
 	{
 	    upscale_scalar_point(RES_ID, i, &test_index);
 	    if (test_index != i)
+	    {
 	        printf("problem with upscale_scalar_point detected\n");
+		}
 	}
 	for (int i = 0; i < NO_OF_PENTAGONS; ++i)
 	{
@@ -59,22 +61,26 @@ int generate_horizontal_generators(double latitude_ico[], double longitude_ico[]
 	                base_index_up_triangles = base_index_down_triangles + 4*points_per_edge + 3;
 	                for (int l = 0; l < coord_1; ++l)
 	                {
-	                    coord_0_points_amount = points_per_edge - l;
-	                    base_index_old += 2*coord_0_points_amount + 1;
-	                    base_index_down_triangles += 4*(2*coord_0_points_amount + 1);
-	                    base_index_up_triangles = base_index_down_triangles + 4*(points_per_edge - l) + 3;
+		                coord_0_points_amount = points_per_edge - l;
+		                base_index_old += 2*coord_0_points_amount + 1;
+		                base_index_down_triangles += 4*(2*coord_0_points_amount + 1);
+		                base_index_up_triangles = base_index_down_triangles + 4*(points_per_edge - l) + 3;
 	                }
 	                if (last_triangle_bool == 1)
 	                {
-	                    base_index_old += 3;
-	                    base_index_down_triangles += 12;
-	                    base_index_up_triangles = base_index_down_triangles + 3;
+		                base_index_old += 3;
+		                base_index_down_triangles += 12;
+		                base_index_up_triangles = base_index_down_triangles + 3;
 	                }
 	                old_triangle_on_line_index = k - base_index_old;
 	                if (points_downwards == 0)
+	                {
 	                    dual_scalar_on_face_index = base_index_down_triangles + 1 + 2*old_triangle_on_line_index;
+	                }
 	                else
-	                    dual_scalar_on_face_index = base_index_up_triangles + 2*old_triangle_on_line_index;
+	                {
+                    	dual_scalar_on_face_index = base_index_up_triangles + 2*old_triangle_on_line_index;
+	                }
 	                find_triangle_edge_points_from_dual_scalar_on_face_index(dual_scalar_on_face_index, i, j + 1, &point_0, &point_1, &point_2, face_vertices, face_edges, face_edges_reverse);
 	                upscale_scalar_point(j, edgepoint_0, &edgepoint_0);
 	                upscale_scalar_point(j, edgepoint_1, &edgepoint_1);
@@ -84,8 +90,10 @@ int generate_horizontal_generators(double latitude_ico[], double longitude_ico[]
 	                upscale_scalar_point(j + 1, point_2, &point_2);
 	                points_upwards = 1;
 	                if (points_downwards == 1)
+	                {
 	                    points_upwards = 0;
-	                write_scalar_coordinates(edgepoint_0, edgepoint_1, edgepoint_2, point_0, point_1, point_2, points_upwards, x_unity, y_unity, z_unity, latitude_scalar, longitude_scalar);
+					}
+					write_scalar_coordinates(edgepoint_0, edgepoint_1, edgepoint_2, point_0, point_1, point_2, points_upwards, x_unity, y_unity, z_unity, latitude_scalar, longitude_scalar);
 	            }
 	        }
 	    }
@@ -498,7 +506,8 @@ int direct_tangential_unity(double latitude_scalar_dual[], double longitude_scal
 int read_horizontal_explicit(double latitude_scalar[], double longitude_scalar[], int from_index[], int to_index[], int from_index_dual[], int to_index_dual[], char filename[], int *no_of_lloyd_cycles)
 {
 	/*
-	This function reads the arrays that fully define the horizontal grid.
+	This function reads the arrays that fully define the horizontal grid from a previously created grid file.
+	This is an optional feature.
 	*/
 	int ncid, latitude_scalar_id, longitude_scalar_id, retval, from_index_id, to_index_id, from_index_dual_id, to_index_dual_id, no_of_lloyd_cycles_id;
 	retval = 0;

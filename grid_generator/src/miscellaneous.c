@@ -3,6 +3,10 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
+/*
+This function is a collection of some helper functions that are needed for the grid generator.
+*/
+
 #include <netcdf.h>
 #include <math.h>
 #include <stdlib.h>
@@ -50,6 +54,10 @@ int find_angle_change(double angle_0, double angle_1, double *result)
 
 int set_orography(int RES_ID, int ORO_ID, double z_surface[])
 {
+	/*
+	This function reads the orography from a netcdf file.
+	*/
+
     if (ORO_ID != 0)
     {
     	int retval, z_surface_id, ncid;
@@ -81,6 +89,9 @@ int set_orography(int RES_ID, int ORO_ID, double z_surface[])
 
 int check_for_orthogonality(double direction[], double direction_dual[], double ORTH_CRITERION_DEG)
 {
+	/*
+	This function checks for orthogonality and aborts if this is not fulfilled.
+	*/
 	double direction_change;
 	#pragma omp parallel for private(direction_change)
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
@@ -139,17 +150,24 @@ int calc_vorticity_indices_pre(int from_index_dual[], int to_index_dual[], doubl
 
 int write_statistics_file(double pent_hex_face_unity_sphere[], double normal_distance[], double normal_distance_dual[], char statistics_file_name[])
 {
+	/*
+	This function writes out statistical properties of the grid to a text file.
+	*/
     double area_max, area_min, normal_distance_h_min, normal_distance_h_max, normal_distance_dual_h_min, normal_distance_dual_h_max;
     area_min = pent_hex_face_unity_sphere[find_min_index(pent_hex_face_unity_sphere, NO_OF_SCALARS_H)];
     area_max = pent_hex_face_unity_sphere[find_max_index(pent_hex_face_unity_sphere, NO_OF_SCALARS_H)];
     double *horizontal_distance = malloc(NO_OF_VECTORS_H*sizeof(double));
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+    {
     	horizontal_distance[i] = normal_distance[NO_OF_SCALARS_H + i];
+    }
     normal_distance_h_min = horizontal_distance[find_min_index(horizontal_distance, NO_OF_VECTORS_H)];
     normal_distance_h_max = horizontal_distance[find_max_index(horizontal_distance, NO_OF_VECTORS_H)];
     double *horizontal_distance_dual = malloc(NO_OF_VECTORS_H*sizeof(double));
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+    {
     	horizontal_distance_dual[i] = normal_distance_dual[i];
+    }
     normal_distance_dual_h_min = horizontal_distance_dual[find_min_index(horizontal_distance_dual, NO_OF_VECTORS_H)];
     normal_distance_dual_h_max = horizontal_distance_dual[find_max_index(horizontal_distance_dual, NO_OF_VECTORS_H)];
     FILE *statistics_file = fopen(statistics_file_name, "w");

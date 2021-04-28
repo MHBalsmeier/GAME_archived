@@ -517,6 +517,8 @@ int main(int argc, char *argv[])
     if ((retval = nc_close(ncid_g_prop)))
         ERR(retval);
     printf(GREEN "finished.\n" RESET);
+    
+    // freeing allocated memory
     free(SCALAR_H_FILE);
     free(no_of_shaded_points_scalar);
     free(no_of_shaded_points_vector);

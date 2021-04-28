@@ -3,6 +3,10 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
+/*
+This file contains functions that compute fundamental properties of the vertical grid.
+*/
+
 #include "include.h"
 #include "enum.h"
 #include <stdlib.h>
@@ -12,6 +16,9 @@ Github repository: https://github.com/AUN4GFD/game
 
 int set_z_scalar(double z_scalar[], double z_surface[], int NO_OF_ORO_LAYERS, double TOA, double stretching_parameter, int VERT_GRID_TYPE)
 {
+	/*
+	This function sets the z coordinates of the scalar data points.
+	*/
 	double z_vertical_vector_pre[NO_OF_LAYERS + 1];
 	int layer_index, h_index;
 	// the heights are defined according to z_k = A_k + B_k*z_surface with A_0 = TOA, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
@@ -343,6 +350,7 @@ int set_volume(double volume[], double z_vector[], double area[], int from_index
     }
     
     // checks
+    // 1.) grid box volumes always need to be positive
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         if (volume[i] <= 0)
@@ -351,9 +359,13 @@ int set_volume(double volume[], double z_vector[], double area[], int from_index
 			exit(1);
 		}
     }
+    
+    // 2.) check if the sum of all grid box volumes is the same as the volume of the whole model atmosphere
     volume_sum_ideal = 0;
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+    {
     	volume_sum_ideal += find_volume(area[NO_OF_VECTORS - NO_OF_SCALARS_H + i], RADIUS + z_vector[NO_OF_VECTORS- NO_OF_SCALARS_H + i], RADIUS + TOA);
+    }
     if (fabs(volume_sum/volume_sum_ideal - 1) > EPSILON_SECURITY)
 	{
         printf("Sum of volumes of grid boxes does not match volume of entire atmosphere.\n");
@@ -514,7 +526,7 @@ int set_area_dual(double area_dual[], double z_vector[], int from_index_dual[], 
 int set_gravity_potential(double z_scalar[], double gravity_potential[], double GRAVITY_MEAN_SFC_ABS)
 {
 	/*
-	Thi finction computes the gravity potential.
+	Thi function computes the gravity potential.
 	*/
 	
 	#pragma omp parallel for
@@ -614,10 +626,11 @@ int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double n
 int slopes(double z_scalar[], int from_index[], int to_index[], double normal_distance[], double slope[])
 {
 	/*
-	Calculates the slopes of the terrain following coordinates.
+	calculates the slopes of the terrain following coordinates
 	*/
 	int layer_index, h_index;
 	double delta_x, delta_z;
+	#pragma omp parallel for private(layer_index, h_index, delta_x, delta_z)
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
 		layer_index = i/NO_OF_VECTORS_PER_LAYER;
