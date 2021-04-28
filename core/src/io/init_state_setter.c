@@ -3,6 +3,10 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
+/*
+In this file, the initial state of the simulation is read in from a netcdf file.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "../enum_and_typedefs.h"
@@ -202,3 +206,9 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
     free(solid_water_temperature);
     return 0;
 }
+
+
+
+
+
+

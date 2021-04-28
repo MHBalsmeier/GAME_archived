@@ -3,6 +3,10 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
+/*
+This file contains functions for reading the grid properties as well as setting the time step.
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <netcdf.h>
@@ -12,40 +16,9 @@ Github repository: https://github.com/AUN4GFD/game
 #include "../thermodynamics/thermodynamics.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
+
 int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
 {
-    double *normal_distance = malloc(NO_OF_VECTORS*sizeof(double));
-    double *volume = malloc(NO_OF_SCALARS*sizeof(double));
-    double *area = malloc(NO_OF_VECTORS*sizeof(double));
-    double *z_scalar = malloc(NO_OF_SCALARS*sizeof(double));
-    double *z_vector = malloc(NO_OF_VECTORS*sizeof(double));
-    double *trsk_weights = malloc(10*NO_OF_VECTORS_H*sizeof(double));
-    double *f_vec = malloc(2*NO_OF_VECTORS_H*sizeof(double));
-    double *direction = malloc(NO_OF_VECTORS_H*sizeof(double));
-    double *gravity_potential = malloc(NO_OF_SCALARS*sizeof(double));
-    double *inner_product_weights = malloc(8*NO_OF_SCALARS*sizeof(double));
-    double *slope = malloc(NO_OF_VECTORS*sizeof(double));
-    double *density_to_rhombus_weights = malloc(4*NO_OF_VECTORS_H*sizeof(double));
-    double *normal_distance_dual = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
-    double *area_dual = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
-    double *z_vector_dual = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
-    double *latitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
-    double *longitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
-    double *interpol_weights = malloc(3*NO_OF_LATLON_IO_POINTS*sizeof(double));
-    int *from_index = malloc(NO_OF_VECTORS_H*sizeof(int));
-    int *to_index = malloc(NO_OF_VECTORS_H*sizeof(int));
-    int *from_index_dual = malloc(NO_OF_VECTORS_H*sizeof(int));
-    int *to_index_dual = malloc(NO_OF_VECTORS_H*sizeof(int));
-    int *trsk_indices = malloc(10*NO_OF_VECTORS_H*sizeof(int));
-    int *trsk_modified_curl_indices = malloc(10*NO_OF_VECTORS_H*sizeof(int));
-    int *adjacent_vector_indices_h = malloc(6*NO_OF_SCALARS_H*sizeof(int));
-    int *adjacent_vector_indices_dual_h = malloc(3*NO_OF_DUAL_SCALARS_H*sizeof(int));
-    int *adjacent_curl_signs_dual_h = malloc(3*NO_OF_DUAL_SCALARS_H*sizeof(int));
-    int *adjacent_signs_h = malloc(6*NO_OF_SCALARS_H*sizeof(int));
-    int *density_to_rhombus_indices = malloc(4*NO_OF_VECTORS_H*sizeof(int));
-    int *no_of_shaded_points_scalar = malloc(NO_OF_SCALARS_H*sizeof(int));
-    int *no_of_shaded_points_vector = malloc(NO_OF_VECTORS_H*sizeof(int));
-    int *interpol_indices = malloc(3*NO_OF_LATLON_IO_POINTS*sizeof(int));
     int ncid, retval;
     int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_weights_id, area_dual_id, z_vector_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, trsk_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, direction_id, gravity_potential_id, inner_product_weights_id, slope_id, density_to_rhombus_weights_id, density_to_rhombus_indices_id, normal_distance_dual_id, adjacent_vector_indices_dual_h_id, adjacent_curl_signs_dual_h_id, latitude_scalar_id, longitude_scalar_id, stretching_parameter_id, no_of_shaded_points_scalar_id, no_of_shaded_points_vector_id, interpol_indices_id, interpol_weights_id;
     double stretching_parameter;
@@ -120,187 +93,91 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     if ((retval = nc_get_var_double(ncid, stretching_parameter_id, &stretching_parameter)))
         ERR(retval);
     grid -> stretching_parameter = stretching_parameter;
-    if ((retval = nc_get_var_double(ncid, normal_distance_id, &normal_distance[0])))
+    if ((retval = nc_get_var_double(ncid, normal_distance_id, &(grid -> normal_distance[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, inner_product_weights_id, &inner_product_weights[0])))
+    if ((retval = nc_get_var_double(ncid, inner_product_weights_id, &(grid -> inner_product_weights[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, volume_id, &volume[0])))
+    if ((retval = nc_get_var_double(ncid, volume_id, &(grid -> volume[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, area_id, &area[0])))
+    if ((retval = nc_get_var_double(ncid, area_id, &(grid -> area[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, z_scalar_id, &z_scalar[0])))
+    if ((retval = nc_get_var_double(ncid, z_scalar_id, &(grid -> z_scalar[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, gravity_potential_id, &gravity_potential[0])))
+    if ((retval = nc_get_var_double(ncid, gravity_potential_id, &(grid -> gravity_potential[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, z_vector_id, &z_vector[0])))
+    if ((retval = nc_get_var_double(ncid, z_vector_id, &(grid -> z_vector[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, trsk_weights_id, &trsk_weights[0])))
+    if ((retval = nc_get_var_double(ncid, trsk_weights_id, &(grid -> trsk_weights[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, area_dual_id, &area_dual[0])))
+    if ((retval = nc_get_var_double(ncid, area_dual_id, &(dualgrid -> area[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, z_vector_dual_id, &z_vector_dual[0])))
+    if ((retval = nc_get_var_double(ncid, z_vector_dual_id, &(dualgrid -> z_vector[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, direction_id, &direction[0])))
+    if ((retval = nc_get_var_double(ncid, direction_id, &(grid -> direction[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, slope_id, &slope[0])))
+    if ((retval = nc_get_var_double(ncid, slope_id, &(grid -> slope[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, f_vec_id, &f_vec[0])))
+    if ((retval = nc_get_var_double(ncid, f_vec_id, &(dualgrid -> f_vec[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, density_to_rhombus_weights_id, &density_to_rhombus_weights[0])))
+    if ((retval = nc_get_var_double(ncid, density_to_rhombus_weights_id, &(grid -> density_to_rhombus_weights[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, normal_distance_dual_id, &normal_distance_dual[0])))
+    if ((retval = nc_get_var_double(ncid, normal_distance_dual_id, &(dualgrid -> normal_distance[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, latitude_scalar_id, &latitude_scalar[0])))
+    if ((retval = nc_get_var_double(ncid, latitude_scalar_id, &(grid -> latitude_scalar[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, longitude_scalar_id, &longitude_scalar[0])))
+    if ((retval = nc_get_var_double(ncid, longitude_scalar_id, &(grid -> longitude_scalar[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, interpol_weights_id, &interpol_weights[0])))
+    if ((retval = nc_get_var_double(ncid, interpol_weights_id, &(grid -> latlon_interpol_weights[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_int(ncid, from_index_id, &from_index[0])))
+    if ((retval = nc_get_var_int(ncid, from_index_id, &(grid -> from_index[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_int(ncid, to_index_id, &to_index[0])))
+    if ((retval = nc_get_var_int(ncid, to_index_id, &(grid -> to_index[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_int(ncid, from_index_dual_id, &from_index_dual[0])))
+    if ((retval = nc_get_var_int(ncid, from_index_dual_id, &(dualgrid -> from_index[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_int(ncid, to_index_dual_id, &to_index_dual[0])))
+    if ((retval = nc_get_var_int(ncid, to_index_dual_id, &(dualgrid -> to_index[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_int(ncid, adjacent_vector_indices_h_id, &adjacent_vector_indices_h[0])))
+    if ((retval = nc_get_var_int(ncid, adjacent_vector_indices_h_id, &(grid -> adjacent_vector_indices_h[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_int(ncid, adjacent_vector_indices_dual_h_id, &adjacent_vector_indices_dual_h[0])))
+    if ((retval = nc_get_var_int(ncid, adjacent_vector_indices_dual_h_id, &(dualgrid -> adjacent_vector_indices_h[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_int(ncid, adjacent_curl_signs_dual_h_id, &adjacent_curl_signs_dual_h[0])))
+    if ((retval = nc_get_var_int(ncid, adjacent_curl_signs_dual_h_id, &(dualgrid -> adjacent_curl_signs_h[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_int(ncid, trsk_indices_id, &trsk_indices[0])))
+    if ((retval = nc_get_var_int(ncid, trsk_indices_id, &(grid -> trsk_indices[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_int(ncid, trsk_modified_curl_indices_id, &trsk_modified_curl_indices[0])))
+    if ((retval = nc_get_var_int(ncid, trsk_modified_curl_indices_id, &(grid -> trsk_modified_curl_indices[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_int(ncid, adjacent_signs_h_id, &adjacent_signs_h[0])))
+    if ((retval = nc_get_var_int(ncid, adjacent_signs_h_id, &(grid -> adjacent_signs_h[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_int(ncid, density_to_rhombus_indices_id, &density_to_rhombus_indices[0])))
+    if ((retval = nc_get_var_int(ncid, density_to_rhombus_indices_id, &(grid -> density_to_rhombus_indices[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_int(ncid, no_of_shaded_points_scalar_id, &no_of_shaded_points_scalar[0])))
+    if ((retval = nc_get_var_int(ncid, no_of_shaded_points_scalar_id, &(grid -> no_of_shaded_points_scalar[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_int(ncid, no_of_shaded_points_vector_id, &no_of_shaded_points_vector[0])))
+    if ((retval = nc_get_var_int(ncid, no_of_shaded_points_vector_id, &(grid -> no_of_shaded_points_vector[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_int(ncid, interpol_indices_id, &interpol_indices[0])))
+    if ((retval = nc_get_var_int(ncid, interpol_indices_id, &(grid -> latlon_interpol_indices[0]))))
         ERR(retval);
     if ((retval = nc_close(ncid)))
         ERR(retval);
-    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+    for (int i = 0; i < 6*NO_OF_SCALARS_H; ++i)
     {
-        for (int j = 0; j < 6; ++j)
+        if (grid -> adjacent_vector_indices_h[i] == -1)
         {
-            grid -> adjacent_vector_indices_h[6*i + j] = adjacent_vector_indices_h[6*i + j];
-            if (grid -> adjacent_vector_indices_h[6*i + j] == -1)
-            {
-            	grid -> adjacent_vector_indices_h[6*i + j] = 0;
-            }
-            grid -> adjacent_signs_h[6*i + j] = adjacent_signs_h[6*i + j];
+        	grid -> adjacent_vector_indices_h[i] = 0;
         }
-        grid -> latitude_scalar[i] = latitude_scalar[i];
-        grid -> longitude_scalar[i] = longitude_scalar[i];
-        grid -> no_of_shaded_points_scalar[i] = no_of_shaded_points_scalar[i];
-    }
-    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-    {
-        for (int j = 0; j < 4; ++j)
-        {
-            grid -> density_to_rhombus_indices[4*i + j] = density_to_rhombus_indices[4*i + j];
-            grid -> density_to_rhombus_weights[4*i + j] = density_to_rhombus_weights[4*i + j];
-        }
-        grid -> to_index[i] = to_index[i];
-        grid -> from_index[i] = from_index[i];
-        grid -> direction[i] = direction[i];
-        dualgrid -> from_index[i] = from_index_dual[i];
-        dualgrid -> to_index[i] = to_index_dual[i];
-        grid -> no_of_shaded_points_vector[i] = no_of_shaded_points_vector[i];
-        for (int j = 0; j < 10; ++j)
-        {
-            grid -> trsk_indices[10*i + j] = trsk_indices[10*i + j];
-            grid -> trsk_modified_curl_indices[10*i + j] = trsk_modified_curl_indices[10*i + j];
-            grid -> trsk_weights[10*i + j] = trsk_weights[10*i + j];
-		}
-        for (int j = 0; j < 2; ++j)
-        {
-		    dualgrid -> f_vec[2*i + j] = f_vec[2*i + j];
-        }
-    }
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
-    {
-        grid -> volume[i] = volume[i];
-        grid -> z_scalar[i] = z_scalar[i];
-       	grid -> gravity_potential[i] = gravity_potential[i];
-       	for (int j = 0; j < 8; ++j)
-		{
-           grid -> inner_product_weights[8*i + j] = inner_product_weights[8*i + j];
-       	}
-    }
-    for (int i = 0; i < NO_OF_VECTORS; ++i)
-    {
-        grid -> normal_distance[i] = normal_distance[i];
-        grid -> area[i] = area[i];
-        grid -> z_vector[i] = z_vector[i];
-        grid -> slope[i] = slope[i];
-    }
-    for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
-    {
-        dualgrid -> normal_distance[i] = normal_distance_dual[i];
-        dualgrid -> area[i] = area_dual[i];
-        dualgrid -> z_vector[i] = z_vector_dual[i];
-    }
-    for (int i = 0; i < NO_OF_DUAL_SCALARS_H; ++i)
-    {
-    	for (int j = 0; j < 3; ++j)
-    	{
-		    dualgrid -> adjacent_vector_indices_h[3*i + j] = adjacent_vector_indices_dual_h[3*i + j];
-		    dualgrid -> adjacent_curl_signs_h[3*i + j] = adjacent_curl_signs_dual_h[3*i + j];
-        }
-    }
-    for (int i = 0; i < 3*NO_OF_LATLON_IO_POINTS; ++i)
-    {
-    	grid -> latlon_interpol_indices[i] = interpol_indices[i];
-    	grid -> latlon_interpol_weights[i] = interpol_weights[i];
     }
     // computing the gradient of the gravity potential
     grad(grid -> gravity_potential, grid -> gravity_m, grid);
     printf("stretching parameter of the vertical grid: %lf\n", stretching_parameter);
-    free(no_of_shaded_points_scalar);
-    free(no_of_shaded_points_vector);
-    free(latitude_scalar);
-    free(longitude_scalar);
-    free(normal_distance_dual);
-    free(density_to_rhombus_indices);
-    free(density_to_rhombus_weights);
-    free(slope);
-    free(inner_product_weights);
-    free(gravity_potential);
-    free(direction);
-    free(normal_distance);
-    free(volume);
-    free(area);
-    free(z_scalar);
-    free(z_vector);
-    free(trsk_weights);
-    free(area_dual);
-    free(z_vector_dual);
-    free(f_vec);
-    free(from_index);
-    free(to_index);
-    free(from_index_dual);
-    free(to_index_dual);
-    free(adjacent_vector_indices_h);
-    free(trsk_indices);
-    free(trsk_modified_curl_indices);
-    free(adjacent_signs_h);
-    free(adjacent_vector_indices_dual_h);
-    free(adjacent_curl_signs_dual_h);
-    free(interpol_indices);
-    free(interpol_weights);
     return 0;
 }
 
 int calc_delta_t_and_related(double cfl_margin, double *delta_t, Grid *grid, Dualgrid *dualgrid, State *state, Config_info *config_info)
 {
+	/*
+	This function sets the timestep of the model.
+	*/
+	
     double max_sound_speed = 0;
     double sound_speed_value;
     
@@ -341,6 +218,13 @@ int calc_delta_t_and_related(double cfl_margin, double *delta_t, Grid *grid, Dua
 	grid -> mean_area_cell = cell_area_sum/(NO_OF_LEVELS*NO_OF_SCALARS_H);
     return 1;
 }
+
+
+
+
+
+
+
 
 
 
