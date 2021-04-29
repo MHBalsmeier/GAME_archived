@@ -148,6 +148,7 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], doubl
 			}
         }
     }
+    
     // checks
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
@@ -229,88 +230,29 @@ int calculate_vertical_faces(double area[], double z_vector_dual[], double norma
     return 0;
 }
 
-int set_z_scalar_dual(double z_scalar_dual[], double z_vector[], int from_index[], int to_index[], int vorticity_indices_pre[], double TOA)
+int set_z_scalar_dual(double z_scalar_dual[], double z_vector[], int from_index[], int to_index[], int vorticity_indices_triangles[], double TOA)
 {
-	int layer_index, h_index, face_index, on_face_index, coord_0, coord_1, triangle_on_face_index, dual_scalar_index, dual_scalar_h_index, coord_0_points_amount;
-	int index_vector_for_dual_scalar_z[3];
-    for (int i = 0; i < NO_OF_VECTORS; ++i)
+	/*
+	This function sets the z coordinates of the dual scalar points.
+	*/
+	
+	int layer_index, h_index;
+	#pragma omp parallel for private(layer_index, h_index)
+    for (int i = 0; i < NO_OF_DUAL_SCALARS; ++i)
     {
-        layer_index = i/NO_OF_VECTORS_PER_LAYER;
-        h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-        if (h_index >= NO_OF_SCALARS_H)
-        {
-            if (h_index - NO_OF_SCALARS_H >= NO_OF_EDGES*(POINTS_PER_EDGE + 1))
-            {
-                face_index = (h_index - NO_OF_SCALARS_H - NO_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
-                on_face_index = h_index - NO_OF_SCALARS_H - (NO_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
-                triangle_on_face_index = on_face_index/3;
-                find_coords_from_triangle_on_face_index(triangle_on_face_index, RES_ID, &coord_0, &coord_1, &coord_0_points_amount);
-				dual_scalar_h_index = face_index*TRIANGLES_PER_FACE + 1 + 2*triangle_on_face_index + coord_1;
-                dual_scalar_index = layer_index*NO_OF_DUAL_SCALARS_H + dual_scalar_h_index;
-				find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index, index_vector_for_dual_scalar_z);
-                z_scalar_dual[dual_scalar_index]
-                = 1.0/3*(
-                z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
-                + z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
-                + z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
-				find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index - 1, index_vector_for_dual_scalar_z);
-                z_scalar_dual[dual_scalar_index - 1]
-                = 1.0/3*(
-                z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
-                + z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
-                + z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
-                if (layer_index == NO_OF_LAYERS - 1)
-                {
-					find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index, index_vector_for_dual_scalar_z);
-                	z_scalar_dual[dual_scalar_index + NO_OF_DUAL_SCALARS_H]
-                	= 1.0/3*(
-                	z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
-                	+ z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
-                	+ z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
-					find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index - 1, index_vector_for_dual_scalar_z);
-                	z_scalar_dual[dual_scalar_index + NO_OF_DUAL_SCALARS_H - 1]
-                	= 1.0/3*(
-                	z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
-                	+ z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
-                	+ z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
-                }
-                if (coord_0 == coord_0_points_amount - 1)
-                {
-					find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index + 1, index_vector_for_dual_scalar_z);
-                	z_scalar_dual[dual_scalar_index + 1]
-                	= 1.0/3*(
-                	z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
-                	+ z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
-                	+ z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
-                    if (layer_index == NO_OF_LAYERS - 1)
-                    {
-            			z_scalar_dual[dual_scalar_index + 1 + NO_OF_DUAL_SCALARS_H]
-            			= 1.0/3*(
-            			z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
-            			+ z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
-            			+ z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
-        			}
-                    if (coord_1 == POINTS_PER_EDGE - 1)
-                    {
-						find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, dual_scalar_h_index + 2, index_vector_for_dual_scalar_z);
-                		z_scalar_dual[dual_scalar_index + 2]
-                		= 1.0/3*(
-                		z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
-                		+ z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
-                		+ z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
-                        if (layer_index == NO_OF_LAYERS - 1)
-                        {
-            				z_scalar_dual[dual_scalar_index + 2 + NO_OF_DUAL_SCALARS_H]
-            				= 1.0/3*(
-            				z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
-            				+ z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
-            				+ z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]]);
-        				}
-                    }
-                }
-            }
-        }
+		layer_index = i/NO_OF_DUAL_SCALARS_H;
+		h_index = i - layer_index*NO_OF_DUAL_SCALARS_H;
+		z_scalar_dual[i]
+		= 1.0/6*(
+		z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + from_index[vorticity_indices_triangles[3*h_index + 0]]]
+		+ z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + from_index[vorticity_indices_triangles[3*h_index + 1]]]
+		+ z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + from_index[vorticity_indices_triangles[3*h_index + 2]]]
+		+ z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + to_index[vorticity_indices_triangles[3*h_index + 0]]]
+		+ z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + to_index[vorticity_indices_triangles[3*h_index + 1]]]
+		+ z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + to_index[vorticity_indices_triangles[3*h_index + 2]]]);
     }
+    
+    // checks
 	int min_oro_index = find_min_index(z_vector, NO_OF_VECTORS);
 	double min_oro = z_vector[min_oro_index];
 	for (int i = 0; i < NO_OF_DUAL_SCALARS; ++i)
@@ -329,7 +271,7 @@ int set_z_scalar_dual(double z_scalar_dual[], double z_vector[], int from_index[
 	return 0;
 }
 
-int set_volume(double volume[], double z_vector[], double area[], int from_index[], int to_index[], double TOA, int vorticity_indices_pre[])
+int set_volume(double volume[], double z_vector[], double area[], int from_index[], int to_index[], double TOA, int vorticity_indices_triangles[])
 {
 	/*
 	This function computes the volumes of the grid boxes.
@@ -556,7 +498,7 @@ int map_hor_area_to_half_levels(double area[], double z_vector[], double pent_he
 	return 0;
 }
 
-int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double normal_distance_dual[], double z_scalar_dual[], double TOA, int from_index[], int to_index[], double z_vector[], int from_index_dual[], int to_index_dual[], double latitude_scalar_dual[], double longitude_scalar_dual[], int vorticity_indices_pre[])
+int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double normal_distance_dual[], double z_scalar_dual[], double TOA, int from_index[], int to_index[], double z_vector[], int from_index_dual[], int to_index_dual[], double latitude_scalar_dual[], double longitude_scalar_dual[], int vorticity_indices_triangles[])
 {
 	int layer_index, h_index, upper_index, lower_index;
     for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
@@ -568,9 +510,9 @@ int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double n
             upper_index = h_index - NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_SCALARS_H;
             lower_index = h_index - NO_OF_VECTORS_H + (layer_index + 1)*NO_OF_DUAL_SCALARS_H;
             normal_distance_dual[i] = z_scalar_dual[upper_index] - z_scalar_dual[lower_index];
-			z_vector_dual[i] = 1.0/3*(z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + vorticity_indices_pre[3*(h_index - NO_OF_VECTORS_H) + 0]]
-			+ z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + vorticity_indices_pre[3*(h_index - NO_OF_VECTORS_H) + 1]]
-			+ z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + vorticity_indices_pre[3*(h_index - NO_OF_VECTORS_H) + 2]]);
+			z_vector_dual[i] = 1.0/3*(z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + vorticity_indices_triangles[3*(h_index - NO_OF_VECTORS_H) + 0]]
+			+ z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + vorticity_indices_triangles[3*(h_index - NO_OF_VECTORS_H) + 1]]
+			+ z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + vorticity_indices_triangles[3*(h_index - NO_OF_VECTORS_H) + 2]]);
         }
         else
         {
@@ -609,7 +551,7 @@ int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double n
 		{
 			check_sum += normal_distance_dual[i + NO_OF_VECTORS_H + j*NO_OF_DUAL_VECTORS_PER_LAYER];
 		}
-		find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_pre, i, index_vector_for_dual_scalar_z);
+		find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_triangles, i, index_vector_for_dual_scalar_z);
 		if (fabs(check_sum/(TOA
 		- 1.0/3*(z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
 		+ z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
