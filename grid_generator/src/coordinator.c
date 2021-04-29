@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
 	calc_inner_product(inner_product_weights, normal_distance, volume, to_index, from_index, area, z_scalar, z_vector, adjacent_vector_indices_h);
     printf(GREEN "finished.\n" RESET);
     
-    // setting indices related to the curl of a vector field
+    // setting indices and weights related to averaging of a scalar quantity to rhombi
     printf("Setting rhombus interpolation indices and weights ... ");
 	rhombus_averaging(vorticity_indices_triangles, vorticity_signs_triangles, from_index_dual,
 	to_index_dual, vorticity_indices_rhombi, density_to_rhombi_indices, from_index, to_index, area_dual,
