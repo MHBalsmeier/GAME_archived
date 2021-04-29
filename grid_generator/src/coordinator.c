@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
     double *z_vector_dual = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
     double *normal_distance_dual = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
     double *direction_dual = malloc(NO_OF_VECTORS_H*sizeof(double));
-    double *area_dual_pre = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
+    double *triangle_areas = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
     double *area_dual = malloc((NO_OF_DUAL_H_VECTORS + NO_OF_H_VECTORS)*sizeof(double));
     double *f_vec = malloc(2*NO_OF_VECTORS_H*sizeof(double));
     double *triangle_face_unit_sphere = malloc(NO_OF_DUAL_SCALARS_H*sizeof(double));
@@ -221,18 +221,27 @@ int main(int argc, char *argv[])
 	// Calculation of the horizontal coordinates of the vector points. The vector points are in the middle between the neighbouring scalar points.
 	set_vector_h_doubles(from_index, to_index, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, direction);
 	// Same as before but for dual vectors. They have the same positions as the primal vectors.
-	set_dual_vector_h_doubles(latitude_scalar_dual, latitude_vector, direction_dual, longitude_vector, to_index_dual, from_index_dual, longitude_scalar_dual, rel_on_line_dual);
-	direct_tangential_unity(latitude_scalar_dual, longitude_scalar_dual, direction, direction_dual, to_index_dual, from_index_dual, rel_on_line_dual, ORTH_CRITERION_DEG);
+	set_dual_vector_h_doubles(latitude_scalar_dual, latitude_vector, direction_dual, longitude_vector,
+	to_index_dual, from_index_dual, longitude_scalar_dual, rel_on_line_dual);
+	direct_tangential_unity(latitude_scalar_dual, longitude_scalar_dual, direction, direction_dual,
+	to_index_dual, from_index_dual, rel_on_line_dual, ORTH_CRITERION_DEG);
 	// Setting the Coriolis vector.
     set_f_vec(latitude_vector, direction, direction_dual, f_vec);
     printf(GREEN "Horizontal grid structure determined.\n" RESET);
-    calc_triangle_face_unity(triangle_face_unit_sphere, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
-	calc_vorticity_indices_triangles(from_index_dual, to_index_dual, direction, direction_dual, vorticity_indices_triangles, ORTH_CRITERION_DEG, vorticity_signs_triangles);
+    calc_triangle_face_unity(triangle_face_unit_sphere, latitude_scalar, longitude_scalar, face_edges,
+    face_edges_reverse, face_vertices, edge_vertices);
+	calc_vorticity_indices_triangles(from_index_dual, to_index_dual, direction, direction_dual,
+	vorticity_indices_triangles, ORTH_CRITERION_DEG, vorticity_signs_triangles);
 	check_for_orthogonality(direction, direction_dual, ORTH_CRITERION_DEG);
-	calc_cell_face_unity(pent_hex_face_unity_sphere, latitude_scalar_dual, longitude_scalar_dual, adjacent_vector_indices_h, vorticity_indices_triangles);
+	calc_cell_face_unity(pent_hex_face_unity_sphere, latitude_scalar_dual,
+	longitude_scalar_dual, adjacent_vector_indices_h, vorticity_indices_triangles);
 	
 	// building the vertical grid
 	set_z_scalar(z_scalar, z_surface, NO_OF_ORO_LAYERS, TOA, stretching_parameter, VERT_GRID_TYPE);
+    // gravity potential
+    printf("Setting gravity potential ... ");
+	set_gravity_potential(z_scalar, gravity_potential, GRAVITY_MEAN_SFC_ABS);
+    printf(GREEN "finished.\n" RESET);
 	if (VERT_GRID_TYPE == 1)
 	{
 		set_scalar_shading_indices(z_scalar, z_surface, no_of_shaded_points_scalar);
@@ -249,19 +258,20 @@ int main(int argc, char *argv[])
 	set_volume(volume, z_vector, area, from_index, to_index, TOA, vorticity_indices_triangles);
     printf(GREEN "finished.\n" RESET);
 	printf("Determining vector z coordinates of the dual grid and distances of the dual grid ... ");
-	calc_z_vector_dual_and_normal_distance_dual(z_vector_dual, normal_distance_dual, z_scalar_dual, TOA, from_index, to_index, z_vector, from_index_dual, to_index_dual, latitude_scalar_dual, longitude_scalar_dual, vorticity_indices_triangles);
+	calc_z_vector_dual_and_normal_distance_dual(z_vector_dual, normal_distance_dual, z_scalar_dual, TOA, from_index, to_index, z_vector,
+	from_index_dual, to_index_dual, latitude_scalar_dual, longitude_scalar_dual, vorticity_indices_triangles);
     printf(GREEN "finished.\n" RESET);
     printf("Determining coordinate slopes ...");
     slopes(z_scalar, from_index, to_index, normal_distance, slope);
     printf(GREEN "finished.\n" RESET);
     printf("Calculating dual areas, pre version ... ");
-	set_area_dual_pre(area_dual_pre, z_vector_dual, normal_distance, z_vector, from_index, to_index, triangle_face_unit_sphere, TOA);
+	set_triangle_areas(triangle_areas, z_vector_dual, normal_distance, z_vector, from_index, to_index, triangle_face_unit_sphere, TOA);
     printf(GREEN "finished.\n" RESET);
     printf("Calculating vertical faces, pre version ... ");
 	calculate_vertical_faces(area, z_vector_dual, normal_distance_dual, TOA);
     printf(GREEN "finished.\n" RESET);
     printf("Modifying dual areas for rhombus vorticity calculation ... ");
-	set_area_dual(area_dual, z_vector, from_index_dual, to_index_dual, area_dual_pre, z_vector_dual);
+	set_area_dual(area_dual, z_vector, from_index_dual, to_index_dual, triangle_areas, z_vector_dual);
     printf(GREEN "finished.\n" RESET);
     
     // interpolation to the lat-lon grid
@@ -269,24 +279,24 @@ int main(int argc, char *argv[])
     interpolate_ll(latitude_scalar, longitude_scalar, interpol_indices, interpol_weights);
     printf(GREEN "finished.\n" RESET);
     
-    // more advanced stuff: tangential vector reconstruction and inner product
+    // inner product
     printf("Calculating inner product weights ... ");
 	calc_inner_product(inner_product_weights, normal_distance, volume, to_index, from_index, area, z_scalar, z_vector, adjacent_vector_indices_h);
     printf(GREEN "finished.\n" RESET);
     
-    // modified TRSK
-    printf("Calculating Coriolis indices and weights ... ");
-	coriolis(from_index_dual, to_index_dual, trsk_modified_curl_indices, normal_distance, normal_distance_dual, to_index, area, z_scalar, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, latitude_scalar_dual, longitude_scalar_dual, trsk_weights, trsk_indices, from_index, adjacent_vector_indices_h, z_vector, z_vector_dual);
-    printf(GREEN "finished.\n" RESET);
-    
     // setting indices related to the curl of a vector field
     printf("Setting rhombus interpolation indices and weights ... ");
-	rhombus_averaging(vorticity_indices_triangles, vorticity_signs_triangles, from_index_dual, to_index_dual, vorticity_indices_rhombi, density_to_rhombi_indices, from_index, to_index, area_dual, z_vector, latitude_scalar_dual, longitude_scalar_dual, density_to_rhombi_weights, latitude_vector, longitude_vector, latitude_scalar, longitude_scalar);
+	rhombus_averaging(vorticity_indices_triangles, vorticity_signs_triangles, from_index_dual,
+	to_index_dual, vorticity_indices_rhombi, density_to_rhombi_indices, from_index, to_index, area_dual,
+	z_vector, latitude_scalar_dual, longitude_scalar_dual, density_to_rhombi_weights, latitude_vector,
+	longitude_vector, latitude_scalar, longitude_scalar);
     printf(GREEN "finished.\n" RESET);
     
-    // gravity potential
-    printf("Setting gravity potential ... ");
-	set_gravity_potential(z_scalar, gravity_potential, GRAVITY_MEAN_SFC_ABS);
+    // modified TRSK
+    printf("Calculating Coriolis indices and weights ... ");
+	coriolis(from_index_dual, to_index_dual, trsk_modified_curl_indices, normal_distance, normal_distance_dual,
+	to_index, area, z_scalar, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, latitude_scalar_dual,
+	longitude_scalar_dual, trsk_weights, trsk_indices, from_index, adjacent_vector_indices_h, z_vector, z_vector_dual);
     printf(GREEN "finished.\n" RESET);
     
     // A statistics file is created to compare the fundamental statistical properties of the grid with the literature.
@@ -469,7 +479,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, normal_distance_dual_id, &normal_distance_dual[0])))
         ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, area_dual_id, &area_dual_pre[0])))
+    if ((retval = nc_put_var_double(ncid_g_prop, area_dual_id, &triangle_areas[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, f_vec_id, &f_vec[0])))
         ERR(retval);
@@ -559,7 +569,7 @@ int main(int argc, char *argv[])
     free(trsk_modified_curl_indices);
     free(adjacent_signs_h);
     free(vorticity_signs_triangles);
-    free(area_dual_pre);
+    free(triangle_areas);
     free(area_dual);
 	free(z_surface);
 	free(interpol_indices);

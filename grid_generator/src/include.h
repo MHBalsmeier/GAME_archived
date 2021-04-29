@@ -43,7 +43,7 @@ int calc_vorticity_indices_triangles(int [], int [], double [], double [], int [
 int set_z_vector_and_normal_distance(double [], double [], double [], double [], double [], int [], int [], double, int, double []);
 int map_hor_area_to_half_levels(double [], double [], double []);
 int calc_z_vector_dual_and_normal_distance_dual(double [], double [], double [], double, int [], int [], double [], int [], int [], double [], double [], int []);
-int set_area_dual_pre(double [], double [], double [], double [], int [], int [], double [], double);
+int set_triangle_areas(double [], double [], double [], double [], int [], int [], double [], double);
 int optimize_to_scvt(double [], double [], double [], double [], int, int [][3], int [][3], int [][3], int [][2], int [], int [], int []);
 int read_horizontal_explicit(double [], double [], int [], int [], int [], int [], char [], int *);
 int slopes(double [], int [], int [], double [], double []);

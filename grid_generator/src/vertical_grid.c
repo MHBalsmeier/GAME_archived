@@ -19,14 +19,14 @@ int set_z_scalar(double z_scalar[], double z_surface[], int NO_OF_ORO_LAYERS, do
 	/*
 	This function sets the z coordinates of the scalar data points.
 	*/
+	
 	double z_vertical_vector_pre[NO_OF_LAYERS + 1];
-	int layer_index, h_index;
 	// the heights are defined according to z_k = A_k + B_k*z_surface with A_0 = TOA, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
 	double A, B, sigma_z, z_rel, max_oro;
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
+	// loop over all columns
+    for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
     {
-        layer_index = i/NO_OF_SCALARS_H;
-		h_index = i - layer_index*NO_OF_SCALARS_H;
+    	// filling up z_vertical_vector_pre
 		for (int j = 0; j < NO_OF_LAYERS + 1; ++j)
 		{
 			z_rel = 1 - (j + 0.0)/NO_OF_LAYERS; // z/TOA
@@ -43,18 +43,24 @@ int set_z_scalar(double z_scalar[], double z_surface[], int NO_OF_ORO_LAYERS, do
 			}
 			z_vertical_vector_pre[j] = A + B*z_surface[h_index];
 		}
-		if (i == 0 && VERT_GRID_TYPE == 0)
+		
+		// doing a check
+		if (h_index == 0 && VERT_GRID_TYPE == 0)
 		{
 			max_oro = z_surface[find_max_index(z_surface, NO_OF_SCALARS_H)];
-			if (max_oro > z_vertical_vector_pre[NO_OF_LAYERS - NO_OF_ORO_LAYERS])
+			if (max_oro >= z_vertical_vector_pre[NO_OF_LAYERS - NO_OF_ORO_LAYERS])
 			{
-				printf("Maximum of orography larger than height of lowest flat level.\n");
+				printf("Maximum of orography larger or equal to the height of the lowest flat level.\n");
 				printf("Aborting.\n");
 				exit(1);
 			}
 		}
-		// placing the scalar points in the middle between the pre values of the adjacent levels
-		z_scalar[i] = 0.5*(z_vertical_vector_pre[layer_index] + z_vertical_vector_pre[layer_index + 1]);
+		
+		// placing the scalar points in the middle between the preliminary values of the adjacent levels
+		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
+		{
+			z_scalar[layer_index*NO_OF_SCALARS_H + h_index] = 0.5*(z_vertical_vector_pre[layer_index] + z_vertical_vector_pre[layer_index + 1]);
+    	}
     }
     return 0;
 }
@@ -95,6 +101,7 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], doubl
 	
 	int layer_index, h_index, upper_index, lower_index;
 	double *lowest_thicknesses = malloc(NO_OF_SCALARS_H*sizeof(double));
+	#pragma omp parallel for private(layer_index, h_index, upper_index, lower_index)
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
@@ -189,6 +196,7 @@ int calculate_vertical_faces(double area[], double z_vector_dual[], double norma
 	
 	int layer_index, h_index, dual_vector_index;
 	double base_distance, radius_0, radius_1;
+	#pragma omp parallel for private(layer_index, h_index, dual_vector_index, base_distance, radius_0, radius_1)
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
@@ -316,7 +324,7 @@ int set_volume(double volume[], double z_vector[], double area[], int from_index
 	return 0;
 }
 
-int set_area_dual_pre(double area_dual_pre[], double z_vector_dual[], double normal_distance[], double z_vector[], int from_index[], int to_index[], double triangle_face_unit_sphere[], double TOA)
+int set_triangle_areas(double triangle_areas[], double z_vector_dual[], double normal_distance[], double z_vector[], int from_index[], int to_index[], double triangle_face_unit_sphere[], double TOA)
 {
 	int layer_index, h_index, primal_vector_index;
 	double radius_0, radius_1, base_distance;
@@ -326,7 +334,7 @@ int set_area_dual_pre(double area_dual_pre[], double z_vector_dual[], double nor
         h_index = i - layer_index*NO_OF_DUAL_VECTORS_PER_LAYER;
         if (h_index >= NO_OF_VECTORS_H)
         {
-            area_dual_pre[i] = pow(RADIUS + z_vector_dual[i], 2)*triangle_face_unit_sphere[h_index - NO_OF_VECTORS_H];
+            triangle_areas[i] = pow(RADIUS + z_vector_dual[i], 2)*triangle_face_unit_sphere[h_index - NO_OF_VECTORS_H];
         }
         else
         {
@@ -351,14 +359,14 @@ int set_area_dual_pre(double area_dual_pre[], double z_vector_dual[], double nor
 		        radius_1 = RADIUS + z_vector[primal_vector_index - NO_OF_VECTORS_PER_LAYER];
 		        base_distance = normal_distance[primal_vector_index];
         	}
-            area_dual_pre[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
+            triangle_areas[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
         }
     }
     for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
     {
-        if (area_dual_pre[i] <= 0)
+        if (triangle_areas[i] <= 0)
 		{
-            printf("area_dual_pre contains a non-positive value.\n");
+            printf("triangle_areas contains a non-positive value.\n");
 			exit(1);
 		}
     }
@@ -373,7 +381,7 @@ int set_area_dual_pre(double area_dual_pre[], double z_vector_dual[], double nor
     	check_area = 0;
     	for (int j = 0; j < NO_OF_LEVELS; ++j)
     	{
-    		check_area += area_dual_pre[i + j*NO_OF_DUAL_VECTORS_PER_LAYER];
+    		check_area += triangle_areas[i + j*NO_OF_DUAL_VECTORS_PER_LAYER];
     	}
     	if(fabs(check_area/wished_result - 1) > EPSILON_SECURITY)
     	{
@@ -384,7 +392,7 @@ int set_area_dual_pre(double area_dual_pre[], double z_vector_dual[], double nor
     return 0;
 }
 
-int set_area_dual(double area_dual[], double z_vector[], int from_index_dual[], int to_index_dual[], double area_dual_pre[], double z_vector_dual[])
+int set_area_dual(double area_dual[], double z_vector[], int from_index_dual[], int to_index_dual[], double triangle_areas[], double z_vector_dual[])
 {
 	/*
 	This function sets the areas of the dual grid.
@@ -399,18 +407,18 @@ int set_area_dual(double area_dual[], double z_vector[], int from_index_dual[], 
     	// these are the vertical areas
     	if (h_index < NO_OF_VECTORS_H)
     	{
-    		area_dual[i] = area_dual_pre[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + h_index];
+    		area_dual[i] = triangle_areas[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + h_index];
 		}
 		// these are the horizontal areas (calculation of rhombus areas)
     	else
     	{
     		primal_vector_index = NO_OF_SCALARS_H + h_index - NO_OF_VECTORS_H + layer_index*NO_OF_VECTORS_PER_LAYER;
     		dual_vector_index = NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + to_index_dual[h_index - NO_OF_VECTORS_H];
-    		area_0 = area_dual_pre[dual_vector_index];
+    		area_0 = triangle_areas[dual_vector_index];
     		area_rescale_factor = pow((RADIUS + z_vector[primal_vector_index])/(RADIUS + z_vector_dual[dual_vector_index]), 2);
     		area_0 = area_rescale_factor*area_0;
     		dual_vector_index = NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + from_index_dual[h_index - NO_OF_VECTORS_H];
-    		area_1 = area_dual_pre[dual_vector_index];
+    		area_1 = triangle_areas[dual_vector_index];
     		area_rescale_factor = pow((RADIUS + z_vector[primal_vector_index])/(RADIUS + z_vector_dual[dual_vector_index]), 2);
     		area_1 = area_rescale_factor*area_1;
     		area_ratio = area_0/area_1;
@@ -427,7 +435,8 @@ int set_area_dual(double area_dual[], double z_vector[], int from_index_dual[], 
 			exit(1);
 		}
     }
-    // Now come some additional checks.
+    
+    // checks
     double check_area, earth_surface;
     check_area = 0;
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
@@ -498,9 +507,15 @@ int map_hor_area_to_half_levels(double area[], double z_vector[], double pent_he
 	return 0;
 }
 
-int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double normal_distance_dual[], double z_scalar_dual[], double TOA, int from_index[], int to_index[], double z_vector[], int from_index_dual[], int to_index_dual[], double latitude_scalar_dual[], double longitude_scalar_dual[], int vorticity_indices_triangles[])
+int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double normal_distance_dual[], double z_scalar_dual[], double TOA, int from_index[],
+int to_index[], double z_vector[], int from_index_dual[], int to_index_dual[], double latitude_scalar_dual[], double longitude_scalar_dual[], int vorticity_indices_triangles[])
 {
+	/*
+	This function sets the z coordinates of the dual vector points as well as the normal distances of the dual grid.
+	*/
+	
 	int layer_index, h_index, upper_index, lower_index;
+	#pragma omp parallel for private(layer_index, h_index, upper_index, lower_index)
     for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
     {
         layer_index = i/NO_OF_DUAL_VECTORS_PER_LAYER;
@@ -528,7 +543,9 @@ int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double n
 			{
 				z_vector_dual[i] = 0.5*(z_vector[NO_OF_SCALARS_H + h_index + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER] + z_vector[NO_OF_SCALARS_H + h_index + layer_index*NO_OF_VECTORS_PER_LAYER]);
 			}
-            normal_distance_dual[i] = calculate_distance_h(latitude_scalar_dual[from_index_dual[h_index]], longitude_scalar_dual[from_index_dual[h_index]], latitude_scalar_dual[to_index_dual[h_index]], longitude_scalar_dual[to_index_dual[h_index]], RADIUS + z_vector_dual[i]);
+            normal_distance_dual[i] = calculate_distance_h(latitude_scalar_dual[from_index_dual[h_index]], longitude_scalar_dual[from_index_dual[h_index]],
+            latitude_scalar_dual[to_index_dual[h_index]], longitude_scalar_dual[to_index_dual[h_index]],
+            RADIUS + z_vector_dual[i]);
         }
     }
     
