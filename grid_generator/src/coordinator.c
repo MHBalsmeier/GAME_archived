@@ -161,8 +161,7 @@ int main(int argc, char *argv[])
     double *z_vector_dual = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
     double *normal_distance_dual = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
     double *direction_dual = malloc(NO_OF_VECTORS_H*sizeof(double));
-    double *triangle_areas = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
-    double *area_dual = malloc((NO_OF_DUAL_H_VECTORS + NO_OF_H_VECTORS)*sizeof(double));
+    double *area_dual = malloc(NO_OF_DUAL_VECTORS*sizeof(double));
     double *f_vec = malloc(2*NO_OF_VECTORS_H*sizeof(double));
     double *triangle_face_unit_sphere = malloc(NO_OF_DUAL_SCALARS_H*sizeof(double));
     double *pent_hex_face_unity_sphere = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -264,14 +263,11 @@ int main(int argc, char *argv[])
     printf("Determining coordinate slopes ...");
     slopes(z_scalar, from_index, to_index, normal_distance, slope);
     printf(GREEN "finished.\n" RESET);
-    printf("Calculating dual areas, pre version ... ");
-	set_triangle_areas(triangle_areas, z_vector_dual, normal_distance, z_vector, from_index, to_index, triangle_face_unit_sphere, TOA);
+    printf("Calculating dual areas ... ");
+	set_area_dual(area_dual, z_vector_dual, normal_distance, z_vector, from_index, to_index, triangle_face_unit_sphere, TOA);
     printf(GREEN "finished.\n" RESET);
     printf("Calculating vertical faces, pre version ... ");
 	calculate_vertical_faces(area, z_vector_dual, normal_distance_dual, TOA);
-    printf(GREEN "finished.\n" RESET);
-    printf("Modifying dual areas for rhombus vorticity calculation ... ");
-	set_area_dual(area_dual, z_vector, from_index_dual, to_index_dual, triangle_areas, z_vector_dual);
     printf(GREEN "finished.\n" RESET);
     
     // interpolation to the lat-lon grid
@@ -289,7 +285,7 @@ int main(int argc, char *argv[])
 	rhombus_averaging(vorticity_indices_triangles, vorticity_signs_triangles, from_index_dual,
 	to_index_dual, vorticity_indices_rhombi, density_to_rhombi_indices, from_index, to_index, area_dual,
 	z_vector, latitude_scalar_dual, longitude_scalar_dual, density_to_rhombi_weights, latitude_vector,
-	longitude_vector, latitude_scalar, longitude_scalar);
+	longitude_vector, latitude_scalar, longitude_scalar, TOA);
     printf(GREEN "finished.\n" RESET);
     
     // modified TRSK
@@ -479,7 +475,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, normal_distance_dual_id, &normal_distance_dual[0])))
         ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, area_dual_id, &triangle_areas[0])))
+    if ((retval = nc_put_var_double(ncid_g_prop, area_dual_id, &area_dual[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, f_vec_id, &f_vec[0])))
         ERR(retval);
@@ -569,7 +565,6 @@ int main(int argc, char *argv[])
     free(trsk_modified_curl_indices);
     free(adjacent_signs_h);
     free(vorticity_signs_triangles);
-    free(triangle_areas);
     free(area_dual);
 	free(z_surface);
 	free(interpol_indices);

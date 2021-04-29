@@ -13,7 +13,7 @@ In this file, remapping indices and weights are computed.
 #include <stdio.h>
 #include "geos95.h"
 
-int rhombus_averaging(int vorticity_indices_triangles[], int vorticity_signs_triangles[], int from_index_dual[], int to_index_dual[], int vorticity_indices_rhombi[], int density_to_rhombus_indices[], int from_index[], int to_index[], double area_dual[], double z_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], double density_to_rhombus_weights[], double latitude_vector[], double longitude_vector[], double latitude_scalar[], double longitude_scalar[])
+int rhombus_averaging(int vorticity_indices_triangles[], int vorticity_signs_triangles[], int from_index_dual[], int to_index_dual[], int vorticity_indices_rhombi[], int density_to_rhombus_indices[], int from_index[], int to_index[], double area_dual[], double z_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], double density_to_rhombus_weights[], double latitude_vector[], double longitude_vector[], double latitude_scalar[], double longitude_scalar[], double TOA)
 {
 	int counter;
     int indices_list_pre[6];
@@ -98,8 +98,8 @@ int rhombus_averaging(int vorticity_indices_triangles[], int vorticity_signs_tri
 		{
 			density_to_rhombus_indices[4*i + j] = density_to_rhombus_indices_pre[j];
 		}
-		// Now the weights.
-		rhombus_area = area_dual[NO_OF_VECTORS_H + i];
+		// now the weights
+		rhombus_area = area_dual[NO_OF_VECTORS_H + from_index_dual[i]] + area_dual[NO_OF_VECTORS_H + to_index_dual[i]];
 		// This is a sum over the four primal cells which are needed for the density interpolation.
 		first_case_counter = 0;
 		second_case_counter = 0;

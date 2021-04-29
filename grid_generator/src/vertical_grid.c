@@ -324,7 +324,7 @@ int set_volume(double volume[], double z_vector[], double area[], int from_index
 	return 0;
 }
 
-int set_triangle_areas(double triangle_areas[], double z_vector_dual[], double normal_distance[], double z_vector[], int from_index[], int to_index[], double triangle_face_unit_sphere[], double TOA)
+int set_area_dual(double area_dual[], double z_vector_dual[], double normal_distance[], double z_vector[], int from_index[], int to_index[], double triangle_face_unit_sphere[], double TOA)
 {
 	int layer_index, h_index, primal_vector_index;
 	double radius_0, radius_1, base_distance;
@@ -334,7 +334,7 @@ int set_triangle_areas(double triangle_areas[], double z_vector_dual[], double n
         h_index = i - layer_index*NO_OF_DUAL_VECTORS_PER_LAYER;
         if (h_index >= NO_OF_VECTORS_H)
         {
-            triangle_areas[i] = pow(RADIUS + z_vector_dual[i], 2)*triangle_face_unit_sphere[h_index - NO_OF_VECTORS_H];
+            area_dual[i] = pow(RADIUS + z_vector_dual[i], 2)*triangle_face_unit_sphere[h_index - NO_OF_VECTORS_H];
         }
         else
         {
@@ -359,14 +359,14 @@ int set_triangle_areas(double triangle_areas[], double z_vector_dual[], double n
 		        radius_1 = RADIUS + z_vector[primal_vector_index - NO_OF_VECTORS_PER_LAYER];
 		        base_distance = normal_distance[primal_vector_index];
         	}
-            triangle_areas[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
+            area_dual[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
         }
     }
     for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
     {
-        if (triangle_areas[i] <= 0)
+        if (area_dual[i] <= 0)
 		{
-            printf("triangle_areas contains a non-positive value.\n");
+            printf("area_dual contains a non-positive value.\n");
 			exit(1);
 		}
     }
@@ -381,7 +381,7 @@ int set_triangle_areas(double triangle_areas[], double z_vector_dual[], double n
     	check_area = 0;
     	for (int j = 0; j < NO_OF_LEVELS; ++j)
     	{
-    		check_area += triangle_areas[i + j*NO_OF_DUAL_VECTORS_PER_LAYER];
+    		check_area += area_dual[i + j*NO_OF_DUAL_VECTORS_PER_LAYER];
     	}
     	if(fabs(check_area/wished_result - 1) > EPSILON_SECURITY)
     	{
@@ -390,88 +390,6 @@ int set_triangle_areas(double triangle_areas[], double z_vector_dual[], double n
     	}
     }
     return 0;
-}
-
-int set_area_dual(double area_dual[], double z_vector[], int from_index_dual[], int to_index_dual[], double triangle_areas[], double z_vector_dual[])
-{
-	/*
-	This function sets the areas of the dual grid.
-	*/
-	
-	int layer_index, h_index, primal_vector_index, dual_vector_index;
-    double area_0, area_1, area_rescale_factor, area_ratio;
-    for (int i = 0; i < NO_OF_DUAL_H_VECTORS + NO_OF_H_VECTORS; ++i)
-    {
-    	layer_index = i/(2*NO_OF_VECTORS_H);
-    	h_index = i - layer_index*2*NO_OF_VECTORS_H;
-    	// these are the vertical areas
-    	if (h_index < NO_OF_VECTORS_H)
-    	{
-    		area_dual[i] = triangle_areas[layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + h_index];
-		}
-		// these are the horizontal areas (calculation of rhombus areas)
-    	else
-    	{
-    		primal_vector_index = NO_OF_SCALARS_H + h_index - NO_OF_VECTORS_H + layer_index*NO_OF_VECTORS_PER_LAYER;
-    		dual_vector_index = NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + to_index_dual[h_index - NO_OF_VECTORS_H];
-    		area_0 = triangle_areas[dual_vector_index];
-    		area_rescale_factor = pow((RADIUS + z_vector[primal_vector_index])/(RADIUS + z_vector_dual[dual_vector_index]), 2);
-    		area_0 = area_rescale_factor*area_0;
-    		dual_vector_index = NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + from_index_dual[h_index - NO_OF_VECTORS_H];
-    		area_1 = triangle_areas[dual_vector_index];
-    		area_rescale_factor = pow((RADIUS + z_vector[primal_vector_index])/(RADIUS + z_vector_dual[dual_vector_index]), 2);
-    		area_1 = area_rescale_factor*area_1;
-    		area_ratio = area_0/area_1;
-    		if (fabs(area_ratio - 1) > 0.3)
-    		{
-    			printf("Unrealistic area_ratio in rhombus area calculation, position 0.\n");
-    			exit(1);
-			}
-    		area_dual[i] = area_0 + area_1;
-    	}
-		if (area_dual[i] <= 0)
-		{
-			printf("It is area_dual <= 0 at some point.\n");
-			exit(1);
-		}
-    }
-    
-    // checks
-    double check_area, earth_surface;
-    check_area = 0;
-    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-    {
-    	check_area += area_dual[NO_OF_VECTORS_H + i];
-    }
-    earth_surface = 4*M_PI*pow(RADIUS + z_vector[NO_OF_SCALARS_H], 2);
-    if (fabs(check_area/earth_surface - 3) > EPSILON_SECURITY)
-    {
-    	printf("Problem with rhombus areas.\n");
-    	exit(1);
-    }
-    double area_sum, mean_z;
-    for (int i = 0; i < NO_OF_LAYERS; ++i)
-    {
-    	mean_z = 0;
-    	for (int j = 0; j < NO_OF_VECTORS_H; ++j)
-    	{
-    		mean_z += z_vector[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j];
-		}
-    	mean_z = mean_z/NO_OF_VECTORS_H;
-    	area_sum = 0;
-    	for (int j = 0; j < NO_OF_VECTORS_H; ++j)
-    	{
-    		area_sum += 1.0/3*area_dual[NO_OF_VECTORS_H + i*2*NO_OF_VECTORS_H + j];
-		}
-    	check_area = 4*M_PI*pow(RADIUS + mean_z, 2);
-    	area_ratio = check_area/area_sum;
-    	if (fabs(area_ratio - 1) > 0.00001)
-    	{
-    		printf("Unrealistic area_ratio in rhombus area calculation, position 1.\n");
-    		exit(1);
-    	}
-    }
-	return 0;
 }
 
 int set_gravity_potential(double z_scalar[], double gravity_potential[], double GRAVITY_MEAN_SFC_ABS)
