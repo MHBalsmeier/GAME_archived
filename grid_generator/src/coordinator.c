@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
 	double *z_surface = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *inner_product_weights = malloc(8*NO_OF_SCALARS*sizeof(double));
 	double *slope = malloc(NO_OF_VECTORS*sizeof(double));
-    double *density_to_rhombus_weights = malloc(4*NO_OF_VECTORS_H*sizeof(double));
+    double *density_to_rhombi_weights = malloc(4*NO_OF_VECTORS_H*sizeof(double));
     double *interpol_weights = malloc(3*NO_OF_LATLON_IO_POINTS*sizeof(double));
     int *to_index = malloc(NO_OF_VECTORS_H*sizeof(int));
     int *from_index = malloc(NO_OF_VECTORS_H*sizeof(int));
@@ -179,14 +179,13 @@ int main(int argc, char *argv[])
     int *no_of_shaded_points_scalar = calloc(NO_OF_SCALARS_H, sizeof(int));
     int *no_of_shaded_points_vector = calloc(NO_OF_VECTORS_H, sizeof(int));
     int *adjacent_vector_indices_h = malloc(6*NO_OF_SCALARS_H*sizeof(int));
-    int *vorticity_indices_pre = malloc(3*NO_OF_DUAL_SCALARS_H*sizeof(int));
-    int *vorticity_indices = malloc(4*NO_OF_VECTORS_H*sizeof(int));
+    int *vorticity_indices_triangles = malloc(3*NO_OF_DUAL_SCALARS_H*sizeof(int));
+    int *vorticity_indices_rhombi = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int *to_index_dual = malloc(NO_OF_VECTORS_H*sizeof(int));
     int *from_index_dual = malloc(NO_OF_VECTORS_H*sizeof(int));
     int *adjacent_signs_h = malloc(6*NO_OF_SCALARS_H*sizeof(int));
-    int *vorticity_signs_pre = malloc(3*NO_OF_DUAL_SCALARS_H*sizeof(int));
-    int *vorticity_signs = malloc(4*NO_OF_VECTORS_H*sizeof(int));
-    int *density_to_rhombus_indices = malloc(4*NO_OF_VECTORS_H*sizeof(int));
+    int *vorticity_signs_triangles = malloc(3*NO_OF_DUAL_SCALARS_H*sizeof(int));
+    int *density_to_rhombi_indices = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int *interpol_indices = malloc(3*NO_OF_LATLON_IO_POINTS*sizeof(int));
     printf(GREEN "finished.\n" RESET);
     printf("Reading orography data ... ");
@@ -228,9 +227,9 @@ int main(int argc, char *argv[])
     set_f_vec(latitude_vector, direction, direction_dual, f_vec);
     printf(GREEN "Horizontal grid structure determined.\n" RESET);
     calc_triangle_face_unity(triangle_face_unit_sphere, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
-	calc_vorticity_indices_pre(from_index_dual, to_index_dual, direction, direction_dual, vorticity_indices_pre, ORTH_CRITERION_DEG, vorticity_signs_pre);
+	calc_vorticity_indices_triangles(from_index_dual, to_index_dual, direction, direction_dual, vorticity_indices_triangles, ORTH_CRITERION_DEG, vorticity_signs_triangles);
 	check_for_orthogonality(direction, direction_dual, ORTH_CRITERION_DEG);
-	calc_cell_face_unity(pent_hex_face_unity_sphere, latitude_scalar_dual, longitude_scalar_dual, adjacent_vector_indices_h, vorticity_indices_pre);
+	calc_cell_face_unity(pent_hex_face_unity_sphere, latitude_scalar_dual, longitude_scalar_dual, adjacent_vector_indices_h, vorticity_indices_triangles);
 	
 	// building the vertical grid
 	set_z_scalar(z_scalar, z_surface, NO_OF_ORO_LAYERS, TOA, stretching_parameter, VERT_GRID_TYPE);
@@ -244,13 +243,13 @@ int main(int argc, char *argv[])
 	map_hor_area_to_half_levels(area, z_vector, pent_hex_face_unity_sphere);
     printf(GREEN "finished.\n" RESET);
 	printf("Determining scalar z coordinates of the dual grid ... ");
-	set_z_scalar_dual(z_scalar_dual, z_vector, from_index, to_index, vorticity_indices_pre, TOA);
+	set_z_scalar_dual(z_scalar_dual, z_vector, from_index, to_index, vorticity_indices_triangles, TOA);
     printf(GREEN "finished.\n" RESET);
     printf("Calculating grid box volumes ... ");
-	set_volume(volume, z_vector, area, from_index, to_index, TOA, vorticity_indices_pre);
+	set_volume(volume, z_vector, area, from_index, to_index, TOA, vorticity_indices_triangles);
     printf(GREEN "finished.\n" RESET);
 	printf("Determining vector z coordinates of the dual grid and distances of the dual grid ... ");
-	calc_z_vector_dual_and_normal_distance_dual(z_vector_dual, normal_distance_dual, z_scalar_dual, TOA, from_index, to_index, z_vector, from_index_dual, to_index_dual, latitude_scalar_dual, longitude_scalar_dual, vorticity_indices_pre);
+	calc_z_vector_dual_and_normal_distance_dual(z_vector_dual, normal_distance_dual, z_scalar_dual, TOA, from_index, to_index, z_vector, from_index_dual, to_index_dual, latitude_scalar_dual, longitude_scalar_dual, vorticity_indices_triangles);
     printf(GREEN "finished.\n" RESET);
     printf("Determining coordinate slopes ...");
     slopes(z_scalar, from_index, to_index, normal_distance, slope);
@@ -281,8 +280,8 @@ int main(int argc, char *argv[])
     printf(GREEN "finished.\n" RESET);
     
     // setting indices related to the curl of a vector field
-    printf("Setting vorticity indices and rhombus density interpolation indices and weights ... ");
-	set_vertical_vorticity_stuff(vorticity_indices_pre, vorticity_signs_pre, from_index_dual, to_index_dual, vorticity_indices, vorticity_signs, density_to_rhombus_indices, from_index, to_index, area_dual, z_vector, latitude_scalar_dual, longitude_scalar_dual, density_to_rhombus_weights, latitude_vector, longitude_vector, latitude_scalar, longitude_scalar);
+    printf("Setting rhombus interpolation indices and weights ... ");
+	rhombus_averaging(vorticity_indices_triangles, vorticity_signs_triangles, from_index_dual, to_index_dual, vorticity_indices_rhombi, density_to_rhombi_indices, from_index, to_index, area_dual, z_vector, latitude_scalar_dual, longitude_scalar_dual, density_to_rhombi_weights, latitude_vector, longitude_vector, latitude_scalar, longitude_scalar);
     printf(GREEN "finished.\n" RESET);
     
     // gravity potential
@@ -294,7 +293,7 @@ int main(int argc, char *argv[])
 	write_statistics_file(pent_hex_face_unity_sphere, normal_distance, normal_distance_dual, STATISTICS_FILE);
 	
 	// writing the result to a netcdf file
-    int retval, latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_weights_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, vorticity_indices_id, trsk_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, latlon_dimid_3, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_10, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, inner_product_weights_id, scalar_8_dimid, slope_id, scalar_2_dimid, vector_h_dual_dimid_2, density_to_rhombus_indices_id, density_to_rhombus_weights_id, vorticity_indices_pre_id, ncid_g_prop, single_double_dimid, stretching_parameter_id, no_of_shaded_points_vector_id, no_of_shaded_points_scalar_id, no_of_lloyd_cycles_id, single_int_dimid, interpol_indices_id, interpol_weights_id;
+    int retval, latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_weights_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, trsk_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_triangles_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, latlon_dimid_3, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_10, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, inner_product_weights_id, scalar_8_dimid, slope_id, scalar_2_dimid, vector_h_dual_dimid_2, density_to_rhombi_indices_id, density_to_rhombi_weights_id, vorticity_indices_triangles_id, ncid_g_prop, single_double_dimid, stretching_parameter_id, no_of_shaded_points_vector_id, no_of_shaded_points_scalar_id, no_of_lloyd_cycles_id, single_int_dimid, interpol_indices_id, interpol_weights_id;
     printf("Starting to write to output file ... ");
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
@@ -400,7 +399,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "inner_product_weights", NC_DOUBLE, 1, &scalar_8_dimid, &inner_product_weights_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "density_to_rhombus_weights", NC_DOUBLE, 1, &vector_h_dimid_4, &density_to_rhombus_weights_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "density_to_rhombi_weights", NC_DOUBLE, 1, &vector_h_dimid_4, &density_to_rhombi_weights_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "interpol_weights", NC_DOUBLE, 1, &latlon_dimid_3, &interpol_weights_id)))
         ERR(retval);
@@ -416,19 +415,17 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "interpol_indices", NC_INT, 1, &latlon_dimid_3, &interpol_indices_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "vorticity_indices", NC_INT, 1, &vector_h_dimid_4, &vorticity_indices_id)))
-        ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "trsk_indices", NC_INT, 1, &vector_h_dimid_10, &trsk_indices_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "trsk_modified_curl_indices", NC_INT, 1, &vector_h_dimid_10, &trsk_modified_curl_indices_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "adjacent_signs_h", NC_INT, 1, &scalar_h_dimid_6, &adjacent_signs_h_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "vorticity_signs", NC_INT, 1, &scalar_dual_h_dimid_3, &vorticity_signs_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "vorticity_signs_triangles", NC_INT, 1, &scalar_dual_h_dimid_3, &vorticity_signs_triangles_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "adjacent_vector_indices_dual_h", NC_INT, 1, &scalar_dual_h_dimid_3, &vorticity_indices_pre_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "vorticity_indices_triangles", NC_INT, 1, &scalar_dual_h_dimid_3, &vorticity_indices_triangles_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "density_to_rhombus_indices", NC_INT, 1, &vector_h_dimid_4, &density_to_rhombus_indices_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "density_to_rhombi_indices", NC_INT, 1, &vector_h_dimid_4, &density_to_rhombi_indices_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "no_of_shaded_points_scalar", NC_INT, 1, &scalar_h_dimid, &no_of_shaded_points_scalar_id)))
         ERR(retval);
@@ -484,7 +481,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, slope_id, &slope[0])))
         ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, density_to_rhombus_weights_id, &density_to_rhombus_weights[0])))
+    if ((retval = nc_put_var_double(ncid_g_prop, density_to_rhombi_weights_id, &density_to_rhombi_weights[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, interpol_weights_id, &interpol_weights[0])))
         ERR(retval);
@@ -498,19 +495,17 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, adjacent_vector_indices_h_id, &adjacent_vector_indices_h[0])))
         ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, vorticity_indices_id, &vorticity_indices[0])))
-        ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, trsk_indices_id, &trsk_indices[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, trsk_modified_curl_indices_id, &trsk_modified_curl_indices[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, adjacent_signs_h_id, &adjacent_signs_h[0])))
         ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, vorticity_signs_id, &vorticity_signs_pre[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, vorticity_signs_triangles_id, &vorticity_signs_triangles[0])))
         ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, vorticity_indices_pre_id, &vorticity_indices_pre[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, vorticity_indices_triangles_id, &vorticity_indices_triangles[0])))
         ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, density_to_rhombus_indices_id, &density_to_rhombus_indices[0])))
+    if ((retval = nc_put_var_int(ncid_g_prop, density_to_rhombi_indices_id, &density_to_rhombi_indices[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, interpol_indices_id, &interpol_indices[0])))
         ERR(retval);
@@ -530,8 +525,8 @@ int main(int argc, char *argv[])
     free(pent_hex_face_unity_sphere);
     free(triangle_face_unit_sphere);
     free(direction_dual);
-    free(density_to_rhombus_weights);
-    free(density_to_rhombus_indices);
+    free(density_to_rhombi_weights);
+    free(density_to_rhombi_indices);
     free(slope);
     free(rel_on_line_dual);
     free(inner_product_weights);
@@ -558,13 +553,12 @@ int main(int argc, char *argv[])
     free(to_index_dual);
     free(from_index_dual);
     free(adjacent_vector_indices_h);
-    free(vorticity_indices_pre);
-    free(vorticity_indices);
+    free(vorticity_indices_triangles);
+    free(vorticity_indices_rhombi);
     free(trsk_indices);
     free(trsk_modified_curl_indices);
     free(adjacent_signs_h);
-    free(vorticity_signs_pre);
-    free(vorticity_signs);
+    free(vorticity_signs_triangles);
     free(area_dual_pre);
     free(area_dual);
 	free(z_surface);

@@ -13,13 +13,11 @@ In this file, remapping indices and weights are computed.
 #include <stdio.h>
 #include "geos95.h"
 
-int set_vertical_vorticity_stuff(int vorticity_indices_pre[], int vorticity_signs_pre[], int from_index_dual[], int to_index_dual[], int vorticity_indices[], int vorticity_signs[], int density_to_rhombus_indices[], int from_index[], int to_index[], double area_dual[], double z_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], double density_to_rhombus_weights[], double latitude_vector[], double longitude_vector[], double latitude_scalar[], double longitude_scalar[])
+int rhombus_averaging(int vorticity_indices_triangles[], int vorticity_signs_triangles[], int from_index_dual[], int to_index_dual[], int vorticity_indices_rhombi[], int density_to_rhombus_indices[], int from_index[], int to_index[], double area_dual[], double z_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], double density_to_rhombus_weights[], double latitude_vector[], double longitude_vector[], double latitude_scalar[], double longitude_scalar[])
 {
 	int counter;
     int indices_list_pre[6];
-    int signs_list_pre[6];
     int indices_list[4];
-    int signs_list[4];
     int double_indices[2];
     int density_to_rhombus_indices_pre[4];
     int density_to_rhombus_index_candidate, check_counter, dual_scalar_h_index_0, dual_scalar_h_index_1, vector_h_index_0, vector_h_index_1, vector_h_index_0_found, vector_h_index_1_found, k, which_vertex_check_result, first_case_counter, second_case_counter;
@@ -30,13 +28,11 @@ int set_vertical_vorticity_stuff(int vorticity_indices_pre[], int vorticity_sign
     {
     	for (int j = 0; j < 3; ++j)
     	{
-			indices_list_pre[j] = vorticity_indices_pre[3*to_index_dual[i] + j];
-			signs_list_pre[j] = vorticity_signs_pre[3*to_index_dual[i] + j];
+			indices_list_pre[j] = vorticity_indices_triangles[3*to_index_dual[i] + j];
     	}
     	for (int j = 0; j < 3; ++j)
     	{
-			indices_list_pre[3 + j] = vorticity_indices_pre[3*from_index_dual[i] + j];
-			signs_list_pre[3 + j] = vorticity_signs_pre[3*from_index_dual[i] + j];
+			indices_list_pre[3 + j] = vorticity_indices_triangles[3*from_index_dual[i] + j];
     	}
 		for (int j = 0; j < 6; ++j)
 		{
@@ -55,27 +51,20 @@ int set_vertical_vorticity_stuff(int vorticity_indices_pre[], int vorticity_sign
     		if (j != double_indices[0] && j != double_indices[1])
     		{
 				indices_list[counter] = indices_list_pre[j];
-				signs_list[counter] = signs_list_pre[j];
 				counter++;
 			}
 		}
 		if (counter != 4)
 		{
-			printf("Error in vorticity_indices and vortictiy_signs creation from vorticity_indices_pre and vortictiy_signs_pre, position 1.\n");
+			printf("Error in vorticity_indices_rhombi and vortictiy_signs creation from vorticity_indices_triangles and vortictiy_signs_pre, position 1.\n");
 			exit(1);
 		}
     	for (int j = 0; j < 4; ++j)
     	{
-			vorticity_indices[4*i + j] = indices_list[j];
-			vorticity_signs[4*i + j] = signs_list[j];
-			if (vorticity_signs[4*i + j] != 1 && vorticity_signs[4*i + j] != -1)
+			vorticity_indices_rhombi[4*i + j] = indices_list[j];
+			if (vorticity_indices_rhombi[4*i + j] >= NO_OF_VECTORS_H || vorticity_indices_rhombi[4*i + j] < 0)
 			{
-				printf("Error in vorticity_indices and vortictiy_signs creation from vorticity_indices_pre and vortictiy_signs_pre, position 2.");
-				exit(1);
-			}
-			if (vorticity_indices[4*i + j] >= NO_OF_VECTORS_H || vorticity_indices[4*i + j] < 0)
-			{
-				printf("Error in vorticity_indices and vortictiy_signs creation from vorticity_indices_pre and vortictiy_signs_pre, position 3.");
+				printf("Error in vorticity_indices_rhombi and vortictiy_signs creation from vorticity_indices_triangles and vortictiy_signs_pre, position 3.");
 				exit(1);
 			}
 		}
@@ -87,13 +76,13 @@ int set_vertical_vorticity_stuff(int vorticity_indices_pre[], int vorticity_sign
 		check_counter = 0;
 		for (int j = 0; j < 4; ++j)
 		{
-			density_to_rhombus_index_candidate = from_index[vorticity_indices[4*i + j]];
+			density_to_rhombus_index_candidate = from_index[vorticity_indices_rhombi[4*i + j]];
 			if (in_bool_calculator(density_to_rhombus_index_candidate, density_to_rhombus_indices_pre, 4) == 0)
 			{
 				density_to_rhombus_indices_pre[check_counter] = density_to_rhombus_index_candidate;
 				++check_counter;
 			}
-			density_to_rhombus_index_candidate = to_index[vorticity_indices[4*i + j]];
+			density_to_rhombus_index_candidate = to_index[vorticity_indices_rhombi[4*i + j]];
 			if (in_bool_calculator(density_to_rhombus_index_candidate, density_to_rhombus_indices_pre, 4) == 0)
 			{
 				density_to_rhombus_indices_pre[check_counter] = density_to_rhombus_index_candidate;
@@ -124,10 +113,10 @@ int set_vertical_vorticity_stuff(int vorticity_indices_pre[], int vorticity_sign
 				k = 0;
 				while (vector_h_index_0_found == 0)
 				{
-					if (from_index[vorticity_indices[4*i + k]] == density_to_rhombus_indices[4*i + j] || to_index[vorticity_indices[4*i + k]] == density_to_rhombus_indices[4*i + j])
+					if (from_index[vorticity_indices_rhombi[4*i + k]] == density_to_rhombus_indices[4*i + j] || to_index[vorticity_indices_rhombi[4*i + k]] == density_to_rhombus_indices[4*i + j])
 					{
 						vector_h_index_0_found = 1;
-						vector_h_index_0 = vorticity_indices[4*i + k];
+						vector_h_index_0 = vorticity_indices_rhombi[4*i + k];
 					}
 					else
 					{
@@ -140,7 +129,7 @@ int set_vertical_vorticity_stuff(int vorticity_indices_pre[], int vorticity_sign
 				{
 					if (l != k)
 					{
-						if (from_index_dual[vorticity_indices[4*i + l]] == dual_scalar_h_index_0 || to_index_dual[vorticity_indices[4*i + l]] == dual_scalar_h_index_0)
+						if (from_index_dual[vorticity_indices_rhombi[4*i + l]] == dual_scalar_h_index_0 || to_index_dual[vorticity_indices_rhombi[4*i + l]] == dual_scalar_h_index_0)
 						{
 							which_vertex_check_result = 0;
 						}
@@ -156,10 +145,10 @@ int set_vertical_vorticity_stuff(int vorticity_indices_pre[], int vorticity_sign
 				k = 0;
 				while (vector_h_index_1_found == 0)
 				{
-					if ((from_index[vorticity_indices[4*i + k]] == density_to_rhombus_indices[4*i + j] || to_index[vorticity_indices[4*i + k]] == density_to_rhombus_indices[4*i + j]) && vorticity_indices[4*i + k] != vector_h_index_0)
+					if ((from_index[vorticity_indices_rhombi[4*i + k]] == density_to_rhombus_indices[4*i + j] || to_index[vorticity_indices_rhombi[4*i + k]] == density_to_rhombus_indices[4*i + j]) && vorticity_indices_rhombi[4*i + k] != vector_h_index_0)
 					{
 						vector_h_index_1_found = 1;
-						vector_h_index_1 = vorticity_indices[4*i + k];
+						vector_h_index_1 = vorticity_indices_rhombi[4*i + k];
 					}
 					else
 					{
@@ -172,7 +161,7 @@ int set_vertical_vorticity_stuff(int vorticity_indices_pre[], int vorticity_sign
 				{
 					if (l != k)
 					{
-						if (from_index_dual[vorticity_indices[4*i + l]] == dual_scalar_h_index_1 || to_index_dual[vorticity_indices[4*i + l]] == dual_scalar_h_index_1)
+						if (from_index_dual[vorticity_indices_rhombi[4*i + l]] == dual_scalar_h_index_1 || to_index_dual[vorticity_indices_rhombi[4*i + l]] == dual_scalar_h_index_1)
 						{
 							which_vertex_check_result = 0;
 						}
@@ -194,10 +183,10 @@ int set_vertical_vorticity_stuff(int vorticity_indices_pre[], int vorticity_sign
 				k = 0;
 				while (vector_h_index_0_found == 0)
 				{
-					if (from_index[vorticity_indices[4*i + k]] == density_to_rhombus_indices[4*i + j] || to_index[vorticity_indices[4*i + k]] == density_to_rhombus_indices[4*i + j])
+					if (from_index[vorticity_indices_rhombi[4*i + k]] == density_to_rhombus_indices[4*i + j] || to_index[vorticity_indices_rhombi[4*i + k]] == density_to_rhombus_indices[4*i + j])
 					{
 						vector_h_index_0_found = 1;
-						vector_h_index_0 = vorticity_indices[4*i + k];
+						vector_h_index_0 = vorticity_indices_rhombi[4*i + k];
 					}
 					else
 					{
@@ -210,7 +199,7 @@ int set_vertical_vorticity_stuff(int vorticity_indices_pre[], int vorticity_sign
 				{
 					if (l != k)
 					{
-						if (from_index_dual[vorticity_indices[4*i + l]] == dual_scalar_h_index_0 || to_index_dual[vorticity_indices[4*i + l]] == dual_scalar_h_index_0)
+						if (from_index_dual[vorticity_indices_rhombi[4*i + l]] == dual_scalar_h_index_0 || to_index_dual[vorticity_indices_rhombi[4*i + l]] == dual_scalar_h_index_0)
 						{
 							which_vertex_check_result = 0;
 						}
@@ -225,10 +214,10 @@ int set_vertical_vorticity_stuff(int vorticity_indices_pre[], int vorticity_sign
 				k = 0;
 				while (vector_h_index_1_found == 0)
 				{
-					if ((from_index[vorticity_indices[4*i + k]] == density_to_rhombus_indices[4*i + j] || to_index[vorticity_indices[4*i + k]] == density_to_rhombus_indices[4*i + j]) && vorticity_indices[4*i + k] != vector_h_index_0)
+					if ((from_index[vorticity_indices_rhombi[4*i + k]] == density_to_rhombus_indices[4*i + j] || to_index[vorticity_indices_rhombi[4*i + k]] == density_to_rhombus_indices[4*i + j]) && vorticity_indices_rhombi[4*i + k] != vector_h_index_0)
 					{
 						vector_h_index_1_found = 1;
-						vector_h_index_1 = vorticity_indices[4*i + k];
+						vector_h_index_1 = vorticity_indices_rhombi[4*i + k];
 					}
 					else
 					{
@@ -272,13 +261,13 @@ int set_vertical_vorticity_stuff(int vorticity_indices_pre[], int vorticity_sign
     	{
     		for (int k = 0; k < 4; ++k)
     		{
-    			if (vorticity_indices[4*j + k] == i)
+    			if (vorticity_indices_rhombi[4*j + k] == i)
     				++counter;
     		}
     	}
     	if (counter != 4)
     	{
-    		printf("Error in vorticity_indices, position 0.\n");
+    		printf("Error in vorticity_indices_rhombi, position 0.\n");
     		exit(1);
     	}
     }

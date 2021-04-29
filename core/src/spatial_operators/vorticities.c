@@ -37,8 +37,8 @@ int calc_pot_vort(Vector_field velocity_field, Scalar_field density_field, Diagn
 			for (int j = 0; j < 4; ++j)
 			{
 				density_value
-				+= grid -> density_to_rhombus_weights[4*edge_vector_index_h + j]
-				*density_field[layer_index*NO_OF_SCALARS_H + grid -> density_to_rhombus_indices[4*edge_vector_index_h + j]];
+				+= grid -> density_to_rhombi_weights[4*edge_vector_index_h + j]
+				*density_field[layer_index*NO_OF_SCALARS_H + grid -> density_to_rhombi_indices[4*edge_vector_index_h + j]];
 			}
         }
         // interpolation of the density to the half level edges
@@ -181,8 +181,8 @@ int calc_rel_vort_on_triangles(Vector_field velocity_field, double result[], Gri
 		// loop over the three edges of the triangle at hand
 		for (int j = 0; j < 3; ++j)
 		{
-			vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> adjacent_vector_indices_h[3*h_index + j];
-		    sign = dualgrid -> adjacent_curl_signs_h[3*h_index + j];
+			vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> vorticity_indices_triangles[3*h_index + j];
+		    sign = dualgrid -> vorticity_signs_triangles[3*h_index + j];
 	    	velocity_value = velocity_field[vector_index];
 	    	// this corrects for terrain following coordinates
 	    	length_rescale_factor = 1;

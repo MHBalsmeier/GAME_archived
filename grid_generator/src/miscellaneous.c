@@ -105,7 +105,7 @@ int check_for_orthogonality(double direction[], double direction_dual[], double 
     return 0;
 }
 
-int calc_vorticity_indices_pre(int from_index_dual[], int to_index_dual[], double direction[], double direction_dual[], int vorticity_indices_pre[], double ORTH_CRITERION_DEG, int vorticity_signs_pre[])
+int calc_vorticity_indices_triangles(int from_index_dual[], int to_index_dual[], double direction[], double direction_dual[], int vorticity_indices_triangles[], double ORTH_CRITERION_DEG, int vorticity_signs_pre[])
 {
 	int counter, sign;
 	double direction_change;
@@ -117,7 +117,7 @@ int calc_vorticity_indices_pre(int from_index_dual[], int to_index_dual[], doubl
         {
             if (from_index_dual[j] == i || to_index_dual[j] == i)
             {
-                vorticity_indices_pre[3*i + counter] = j;
+                vorticity_indices_triangles[3*i + counter] = j;
                 sign = 1;
                 if (from_index_dual[j] == i)
                 {
