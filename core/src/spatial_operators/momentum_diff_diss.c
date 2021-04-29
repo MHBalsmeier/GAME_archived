@@ -239,7 +239,7 @@ int hor_calc_curl_of_vorticity(Curl_field vorticity, double rel_vort_on_triangle
 		for (int j = 0; j < 3; ++j)
 		{
 			out_field[vector_index] +=
-			// This prefactor accounts for the fact that we average over three rhombi.
+			// This prefactor accounts for the fact that we average over three rhombi and the weighting of the triangle voritcities.
 			+ 1.0/3*(1 - checkerboard_damping_weight)*(
 			// vertical length at the to_index_dual point
 			dualgrid -> normal_distance[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> to_index[h_index]]
