@@ -20,6 +20,11 @@ This function is a collection of some helper functions that are needed for the g
 
 int set_f_vec(double latitude_vector[], double direction[], double direction_dual[], double f_vec[])
 {
+	/*
+	This function sets the Coriolis vector (vertical at horizontal primal vector points,
+	horizontal at horizontal dual vector points).
+	*/
+	
 	#pragma omp parallel for
     for (int i = 0; i < 2*NO_OF_VECTORS_H; ++i)
     {
