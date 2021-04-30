@@ -262,7 +262,9 @@ int rhombus_averaging(int vorticity_indices_triangles[], int vorticity_signs_tri
     		for (int k = 0; k < 4; ++k)
     		{
     			if (vorticity_indices_rhombi[4*j + k] == i)
+    			{
     				++counter;
+    			}
     		}
     	}
     	if (counter != 4)

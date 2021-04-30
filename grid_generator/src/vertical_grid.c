@@ -328,6 +328,7 @@ int set_area_dual(double area_dual[], double z_vector_dual[], double normal_dist
 {
 	int layer_index, h_index, primal_vector_index;
 	double radius_0, radius_1, base_distance;
+	#pragma omp parallel for private(layer_index, h_index, primal_vector_index, radius_0, radius_1, base_distance)
     for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
     {
         layer_index = i/NO_OF_DUAL_VECTORS_PER_LAYER;
@@ -362,6 +363,7 @@ int set_area_dual(double area_dual[], double z_vector_dual[], double normal_dist
             area_dual[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
         }
     }
+    #pragma omp parallel for
     for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
     {
         if (area_dual[i] <= 0)
@@ -371,6 +373,7 @@ int set_area_dual(double area_dual[], double z_vector_dual[], double normal_dist
 		}
     }
     double check_area, wished_result;
+    #pragma omp parallel for private(check_area, wished_result, radius_0, primal_vector_index, radius_1, base_distance)
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         radius_0 = RADIUS + 0.5*(z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + from_index[i]] + z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + to_index[i]]);
@@ -395,7 +398,7 @@ int set_area_dual(double area_dual[], double z_vector_dual[], double normal_dist
 int set_gravity_potential(double z_scalar[], double gravity_potential[], double GRAVITY_MEAN_SFC_ABS)
 {
 	/*
-	Thi function computes the gravity potential.
+	This function computes the gravity potential.
 	*/
 	
 	#pragma omp parallel for
@@ -413,6 +416,7 @@ int map_hor_area_to_half_levels(double area[], double z_vector[], double pent_he
 	*/
 	
 	int layer_index, h_index;
+	#pragma omp parallel for private(layer_index, h_index)
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
@@ -468,8 +472,7 @@ int to_index[], double z_vector[], int from_index_dual[], int to_index_dual[], d
     }
     
     // checks
-	int index_vector_for_dual_scalar_z[3];
-	double check_sum;
+    #pragma omp parallel for
     for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
     {
         if (normal_distance_dual[i] <= 0)
@@ -479,6 +482,8 @@ int to_index[], double z_vector[], int from_index_dual[], int to_index_dual[], d
 			exit(1);
 		}
 	}
+	int index_vector_for_dual_scalar_z[3];
+	double check_sum;
 	for (int i = 0; i < NO_OF_DUAL_SCALARS_H; ++i)
 	{
 		check_sum = 0;

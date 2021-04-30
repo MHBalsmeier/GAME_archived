@@ -417,6 +417,8 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 			}
 		}
 	}
+	
+	#pragma omp parallel for
 	for (int i = 0; i < 10*NO_OF_VECTORS_H; ++i)
 	{
 		if (trsk_indices[i] == -1)

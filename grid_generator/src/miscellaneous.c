@@ -69,6 +69,7 @@ int set_orography(int RES_ID, int ORO_ID, double z_surface[])
     }
     else
     {
+    	#pragma omp parallel for
     	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     	{
     		z_surface[i] = 0;
@@ -147,6 +148,7 @@ int write_statistics_file(double pent_hex_face_unity_sphere[], double normal_dis
     area_min = pent_hex_face_unity_sphere[find_min_index(pent_hex_face_unity_sphere, NO_OF_SCALARS_H)];
     area_max = pent_hex_face_unity_sphere[find_max_index(pent_hex_face_unity_sphere, NO_OF_SCALARS_H)];
     double *horizontal_distance = malloc(NO_OF_VECTORS_H*sizeof(double));
+    #pragma omp parallel for
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
     	horizontal_distance[i] = normal_distance[NO_OF_SCALARS_H + i];
@@ -154,6 +156,7 @@ int write_statistics_file(double pent_hex_face_unity_sphere[], double normal_dis
     normal_distance_h_min = horizontal_distance[find_min_index(horizontal_distance, NO_OF_VECTORS_H)];
     normal_distance_h_max = horizontal_distance[find_max_index(horizontal_distance, NO_OF_VECTORS_H)];
     double *horizontal_distance_dual = malloc(NO_OF_VECTORS_H*sizeof(double));
+    #pragma omp parallel for
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
     	horizontal_distance_dual[i] = normal_distance_dual[i];

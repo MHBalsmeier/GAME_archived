@@ -219,6 +219,7 @@ int calc_triangle_face_unity(double triangle_face_unit_sphere[], double latitude
 int set_vector_h_doubles(int from_index[], int to_index[], double latitude_scalar[], double longitude_scalar[], double latitude_vector[], double longitude_vector[], double direction[])
 {
 	double x_point_0, y_point_0, z_point_0, x_point_1, y_point_1, z_point_1, x_res, y_res, z_res, lat_res, lon_res;
+	#pragma omp parallel for private(x_point_0, y_point_0, z_point_0, x_point_1, y_point_1, z_point_1, x_res, y_res, z_res, lat_res, lon_res)
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         find_global_normal(latitude_scalar[from_index[i]], longitude_scalar[from_index[i]], &x_point_0, &y_point_0, &z_point_0);
@@ -235,6 +236,7 @@ int set_vector_h_doubles(int from_index[], int to_index[], double latitude_scala
 int set_from_to_index(int from_index[], int to_index[], int face_edges[][3], int face_edges_reverse[][3], int face_vertices[][3], int edge_vertices[][2])
 {
 	int edge_index, on_edge_index, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, small_triangle_edge_index;
+	#pragma omp parallel for private(edge_index, on_edge_index, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, small_triangle_edge_index)
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         if (i < NO_OF_EDGES*(POINTS_PER_EDGE + 1))
@@ -488,6 +490,7 @@ int direct_tangential_unity(double latitude_scalar_dual[], double longitude_scal
 	// ensuring e_y = k x e_z
 	int temp_index;
 	double direction_change;
+	#pragma omp parallel for private(temp_index, direction_change)
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
 	    find_turn_angle(direction[i], direction_dual[i], &direction_change);

@@ -34,14 +34,18 @@ int find_cell_cgs(double latitude_scalar[], double longitude_scalar[], double la
 	{
 		no_of_edges = 6;
 		if (i < NO_OF_PENTAGONS)
+		{
 			no_of_edges = 5;
+		}
 		double latitude_vertices[no_of_edges];
 		double longitude_vertices[no_of_edges];
 		int vertex_indices[no_of_edges];
 		int vertex_indices_resorted[no_of_edges];
 		int indices_resorted[no_of_edges];
 		for (int l = 0; l < no_of_edges; ++l)
+		{
 			vertex_indices[l] = -1;
+		}
 		counter = 0;
 		for (int j = 0; j < no_of_edges; ++j)
 		{
@@ -65,10 +69,14 @@ int find_cell_cgs(double latitude_scalar[], double longitude_scalar[], double la
 			}
 		}
 		if (counter != no_of_edges)
+		{
 			printf("Trouble in find_cell_cgs detected.\n");
+		}
 		sort_edge_indices(latitude_vertices, longitude_vertices, no_of_edges, indices_resorted);
 		for (int j = 0; j < no_of_edges; ++j)
+		{
 			vertex_indices_resorted[j] = vertex_indices[indices_resorted[j]];
+		}
 		x_res = 0;
 		y_res = 0;
 		z_res = 0;

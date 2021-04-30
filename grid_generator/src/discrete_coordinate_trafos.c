@@ -295,7 +295,9 @@ int upscale_scalar_point(int res_id, int old_index, int *new_index)
     find_points_per_edge(res_id, &points_per_edge);
     find_scalar_points_per_inner_face(res_id, &scalar_points_per_inner_face);
     if (old_index < NO_OF_PENTAGONS)
+    {
         *new_index = old_index;
+    }
     else if (old_index < NO_OF_PENTAGONS + NO_OF_EDGES*points_per_edge)
     {
         edge_index = (old_index - NO_OF_PENTAGONS)/points_per_edge;
