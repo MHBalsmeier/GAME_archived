@@ -49,7 +49,7 @@ def input_filename(time_step):
 # 2.) reading the model output
 
 # detecting the size of the fields
-latitudes_vector, longitudes_vector, dump = rmo.fetch_model_output(input_filename(0), 0, short_name, 0);
+latitudes_vector, longitudes_vector, dump = rmo.fetch_model_output(input_filename(0), begin_since_init, short_name, 0);
 
 # this array will contain the whole model output
 values = np.zeros([len(latitudes_vector), len(longitudes_vector), len(height_vector), no_of_steps]);
