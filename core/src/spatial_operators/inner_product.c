@@ -4,7 +4,7 @@ Github repository: https://github.com/AUN4GFD/game
 */
 
 /*
-In this file, the inner product as well as the kinetic energy is computed.
+In this file, the inner product of two vector fields is computed.
 */
 
 #include "../enum_and_typedefs.h"

@@ -3,6 +3,10 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
+/*
+This file contains the gradient operators.
+*/
+
 #include "../enum_and_typedefs.h"
 #include "spatial_operators.h"
 #include <stdio.h>

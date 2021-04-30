@@ -2,8 +2,9 @@
 This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 Github repository: https://github.com/AUN4GFD/game
 */
+
 /*
-In this source file algebraic conversions and calculations of thermodynamic quantities of a moist atmosphere are collected.
+In this file, algebraic conversions and calculations of thermodynamic quantities of a moist atmosphere are collected.
 indices as usual:
 d:	dry
 v:	water vapour
