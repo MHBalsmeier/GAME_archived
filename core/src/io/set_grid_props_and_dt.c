@@ -20,7 +20,7 @@ This file contains functions for reading the grid properties as well as setting 
 int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
 {
     int ncid, retval;
-    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_weights_id, area_dual_id, z_vector_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, trsk_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, direction_id, gravity_potential_id, inner_product_weights_id, slope_id, density_to_rhombi_weights_id, density_to_rhombi_indices_id, normal_distance_dual_id, vorticity_indices_triangles_id, vorticity_signs_triangles_id, latitude_scalar_id, longitude_scalar_id, stretching_parameter_id, no_of_shaded_points_scalar_id, no_of_shaded_points_vector_id, interpol_indices_id, interpol_weights_id;
+    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_weights_id, area_dual_id, z_vector_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, trsk_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, direction_id, gravity_potential_id, inner_product_weights_id, density_to_rhombi_weights_id, density_to_rhombi_indices_id, normal_distance_dual_id, vorticity_indices_triangles_id, vorticity_signs_triangles_id, latitude_scalar_id, longitude_scalar_id, stretching_parameter_id, no_of_shaded_points_scalar_id, no_of_shaded_points_vector_id, interpol_indices_id, interpol_weights_id;
     double stretching_parameter;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
@@ -70,8 +70,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "inner_product_weights", &inner_product_weights_id)))
         ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "slope", &slope_id)))
-        ERR(retval);
     if ((retval = nc_inq_varid(ncid, "density_to_rhombi_weights", &density_to_rhombi_weights_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "density_to_rhombi_indices", &density_to_rhombi_indices_id)))
@@ -114,8 +112,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     if ((retval = nc_get_var_double(ncid, z_vector_dual_id, &(dualgrid -> z_vector[0]))))
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, direction_id, &(grid -> direction[0]))))
-        ERR(retval);
-    if ((retval = nc_get_var_double(ncid, slope_id, &(grid -> slope[0]))))
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, f_vec_id, &(dualgrid -> f_vec[0]))))
         ERR(retval);
@@ -166,6 +162,8 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         	grid -> adjacent_vector_indices_h[i] = 0;
         }
     }
+    // determining coordinate slopes
+    grad_hor_cov(grid -> z_scalar, grid -> slope, grid);
     // computing the gradient of the gravity potential
     grad(grid -> gravity_potential, grid -> gravity_m, grid);
     printf("stretching parameter of the vertical grid: %lf\n", stretching_parameter);

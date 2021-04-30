@@ -500,42 +500,6 @@ int to_index[], double z_vector[], int from_index_dual[], int to_index_dual[], d
 	return 0;
 }
 
-int slopes(double z_scalar[], int from_index[], int to_index[], double normal_distance[], double slope[])
-{
-	/*
-	calculates the slopes of the terrain following coordinates
-	*/
-	int layer_index, h_index;
-	double delta_x, delta_z;
-	#pragma omp parallel for private(layer_index, h_index, delta_x, delta_z)
-	for (int i = 0; i < NO_OF_VECTORS; ++i)
-	{
-		layer_index = i/NO_OF_VECTORS_PER_LAYER;
-		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-		// At the vertical vector points, the slopes are set to zero.
-		if (h_index < NO_OF_SCALARS_H)
-		{
-			slope[i] = 0;
-		}
-		else
-		{
-			delta_x = normal_distance[layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
-			delta_z
-			= z_scalar[layer_index*NO_OF_SCALARS_H + to_index[h_index - NO_OF_SCALARS_H]]
-			- z_scalar[layer_index*NO_OF_SCALARS_H + from_index[h_index - NO_OF_SCALARS_H]];
-			slope[i] = delta_z/delta_x;
-			// Checking for unrealistic values.
-			if (fabs(slope[i]) > 1)
-			{
-				printf("Problem with slopes.\n");
-				printf("Aborting.\n");
-				exit(1);
-			}
-		}
-	}
-	return 0;
-}
-
 
 
 

@@ -44,7 +44,6 @@ int calc_z_vector_dual_and_normal_distance_dual(double [], double [], double [],
 int set_area_dual(double [], double [], double [], double [], int [], int [], double [], double);
 int optimize_to_scvt(double [], double [], double [], double [], int, int [][3], int [][3], int [][3], int [][2], int [], int [], int []);
 int read_horizontal_explicit(double [], double [], int [], int [], int [], int [], char [], int *);
-int slopes(double [], int [], int [], double [], double []);
 int write_statistics_file(double [], double [], double [], char []);
 int set_scalar_shading_indices(double [], double [], int []);
 int set_vector_shading_indices(int [], int [], int [], int []);
