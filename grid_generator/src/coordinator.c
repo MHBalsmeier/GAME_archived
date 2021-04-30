@@ -186,13 +186,14 @@ int main(int argc, char *argv[])
     int *density_to_rhombi_indices = malloc(4*NO_OF_VECTORS_H*sizeof(int));
     int *interpol_indices = malloc(3*NO_OF_LATLON_IO_POINTS*sizeof(int));
     printf(GREEN "finished.\n" RESET);
+    
+    // now we will read the orography
     printf("Reading orography data ... ");
 	set_orography(RES_ID, ORO_ID, z_surface);
     printf(GREEN "finished.\n" RESET);
-    if (NO_OF_VECTORS_H != NO_OF_VECTORS_H)
-    {
-        printf("It is NO_OF_VECTORS_H != NO_OF_VECTORS_H.\n");
-    }
+    
+    // now, the horizontal grid structure will be established
+    // firstly the explicit quantities
     printf("Establishing horizontal grid structure ... \n");
    	int no_of_lloyd_cycles = 0;
     if (USE_SCALAR_H_FILE == 0)
@@ -208,7 +209,10 @@ int main(int argc, char *argv[])
     {
     	read_horizontal_explicit(latitude_scalar, longitude_scalar, from_index, to_index, from_index_dual, to_index_dual, SCALAR_H_FILE, &no_of_lloyd_cycles);
     }
+    
+    // now the implicit quantities
 	find_adjacent_vector_indices_h(from_index, to_index, adjacent_signs_h, adjacent_vector_indices_h);
+	// optimization
 	if (OPTIMIZE_BOOL == 1)
 	{
 		optimize_to_scvt(latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, N_ITERATIONS, face_edges, face_edges_reverse, face_vertices, edge_vertices, adjacent_vector_indices_h, from_index_dual, to_index_dual);
@@ -225,18 +229,24 @@ int main(int argc, char *argv[])
 	to_index_dual, from_index_dual, rel_on_line_dual, ORTH_CRITERION_DEG);
 	// Setting the Coriolis vector.
     set_f_vec(latitude_vector, direction, direction_dual, f_vec);
-    printf(GREEN "Horizontal grid structure determined.\n" RESET);
+    // calculating the dual cells on the unity sphere
     calc_triangle_face_unity(triangle_face_unit_sphere, latitude_scalar, longitude_scalar, face_edges,
     face_edges_reverse, face_vertices, edge_vertices);
+    // finding the vorticity indices
 	calc_vorticity_indices_triangles(from_index_dual, to_index_dual, direction, direction_dual,
 	vorticity_indices_triangles, ORTH_CRITERION_DEG, vorticity_signs_triangles);
+	// checking if the grid is orthogonal
 	check_for_orthogonality(direction, direction_dual, ORTH_CRITERION_DEG);
+	// calculating the cell faces on the unity sphere
 	calc_cell_face_unity(pent_hex_face_unity_sphere, latitude_scalar_dual,
 	longitude_scalar_dual, adjacent_vector_indices_h, vorticity_indices_triangles);
+    printf(GREEN "Horizontal grid structure determined.\n" RESET);
 	
-	// building the vertical grid
+	/*
+	building the vertical grid
+	*/
 	set_z_scalar(z_scalar, z_surface, NO_OF_ORO_LAYERS, TOA, stretching_parameter, VERT_GRID_TYPE);
-    // gravity potential
+    // setting the gravity potential
     printf("Setting gravity potential ... ");
 	set_gravity_potential(z_scalar, gravity_potential, GRAVITY_MEAN_SFC_ABS);
     printf(GREEN "finished.\n" RESET);
@@ -266,16 +276,17 @@ int main(int argc, char *argv[])
 	calculate_vertical_faces(area, z_vector_dual, normal_distance_dual, TOA);
     printf(GREEN "finished.\n" RESET);
     
+    /*
+    Noe come the derived quantities, which are needed for differential operators.
+    */
     // interpolation to the lat-lon grid
     printf("Calculating interpolation to the lat-lon grid ... ");
     interpolate_ll(latitude_scalar, longitude_scalar, interpol_indices, interpol_weights);
     printf(GREEN "finished.\n" RESET);
-    
     // inner product
     printf("Calculating inner product weights ... ");
 	calc_inner_product(inner_product_weights, normal_distance, volume, to_index, from_index, area, z_scalar, z_vector, adjacent_vector_indices_h);
     printf(GREEN "finished.\n" RESET);
-    
     // setting indices and weights related to averaging of a scalar quantity to rhombi
     printf("Setting rhombus interpolation indices and weights ... ");
 	rhombus_averaging(vorticity_indices_triangles, vorticity_signs_triangles, from_index_dual,
@@ -283,7 +294,6 @@ int main(int argc, char *argv[])
 	z_vector, latitude_scalar_dual, longitude_scalar_dual, density_to_rhombi_weights, latitude_vector,
 	longitude_vector, latitude_scalar, longitude_scalar, TOA);
     printf(GREEN "finished.\n" RESET);
-    
     // modified TRSK
     printf("Calculating Coriolis indices and weights ... ");
 	coriolis(from_index_dual, to_index_dual, trsk_modified_curl_indices, normal_distance, normal_distance_dual,
@@ -294,7 +304,9 @@ int main(int argc, char *argv[])
     // A statistics file is created to compare the fundamental statistical properties of the grid with the literature.
 	write_statistics_file(pent_hex_face_unity_sphere, normal_distance, normal_distance_dual, STATISTICS_FILE);
 	
-	// writing the result to a netcdf file
+	/*
+	writing the result to a netcdf file
+    */
     int retval, latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_weights_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, trsk_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_triangles_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, latlon_dimid_3, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_10, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, inner_product_weights_id, scalar_8_dimid, scalar_2_dimid, vector_h_dual_dimid_2, density_to_rhombi_indices_id, density_to_rhombi_weights_id, vorticity_indices_triangles_id, ncid_g_prop, single_double_dimid, stretching_parameter_id, no_of_shaded_points_vector_id, no_of_shaded_points_scalar_id, no_of_lloyd_cycles_id, single_int_dimid, interpol_indices_id, interpol_weights_id;
     printf("Starting to write to output file ... ");
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
