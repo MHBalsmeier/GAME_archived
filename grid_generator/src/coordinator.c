@@ -187,13 +187,18 @@ int main(int argc, char *argv[])
     int *interpol_indices = malloc(3*NO_OF_LATLON_IO_POINTS*sizeof(int));
     printf(GREEN "finished.\n" RESET);
     
-    // now we will read the orography
+    /*
+    1.) reading the orography
+        ---------------------
+    */
     printf("Reading orography data ... ");
 	set_orography(RES_ID, ORO_ID, z_surface);
     printf(GREEN "finished.\n" RESET);
     
-    // now, the horizontal grid structure will be established
-    // firstly the explicit quantities
+    /*
+	2.) creating or reading the properties that determine the horizontal grid
+	    ---------------------------------------------------------------------
+	*/
     printf("Establishing horizontal grid structure ... \n");
    	int no_of_lloyd_cycles = 0;
     if (USE_SCALAR_H_FILE == 0)
@@ -210,14 +215,26 @@ int main(int argc, char *argv[])
     	read_horizontal_explicit(latitude_scalar, longitude_scalar, from_index, to_index, from_index_dual, to_index_dual, SCALAR_H_FILE, &no_of_lloyd_cycles);
     }
     
-    // now the implicit quantities
+    /*
+    3.) finding the neighbouring vector points of the cells
+        ---------------------------------------------------
+    */
 	find_adjacent_vector_indices_h(from_index, to_index, adjacent_signs_h, adjacent_vector_indices_h);
-	// optimization
+	
+	/*
+	4.) grid optimization
+	    -----------------
+	*/
 	if (OPTIMIZE_BOOL == 1)
 	{
 		optimize_to_scvt(latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, N_ITERATIONS, face_edges, face_edges_reverse, face_vertices, edge_vertices, adjacent_vector_indices_h, from_index_dual, to_index_dual);
 		no_of_lloyd_cycles = no_of_lloyd_cycles + N_ITERATIONS;
 	}
+	
+	/*
+	5.) determining implicit quantities of the horizontal grid
+	    ------------------------------------------------------
+	*/
 	// Calculation of the horizontal coordinates of the dual scalar points. The dual scalar points are the vertices of the Voronoi mesh of the primal grid.
 	set_scalar_h_dual_coords(latitude_scalar_dual, longitude_scalar_dual, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
 	// Calculation of the horizontal coordinates of the vector points. The vector points are in the middle between the neighbouring scalar points.
@@ -243,9 +260,17 @@ int main(int argc, char *argv[])
     printf(GREEN "Horizontal grid structure determined.\n" RESET);
 	
 	/*
-	building the vertical grid
+	6.) setting the explicit property of the vertical grid
+	    --------------------------------------------------
 	*/
+    printf("Setting the vertical coordinates of the scalar data points ... ");
 	set_z_scalar(z_scalar, z_surface, NO_OF_ORO_LAYERS, TOA, stretching_parameter, VERT_GRID_TYPE);
+    printf(GREEN "finished.\n" RESET);
+	
+	/*
+	7.) setting the implicit quantities of the vertical grid
+	    ----------------------------------------------------
+	*/
     // setting the gravity potential
     printf("Setting gravity potential ... ");
 	set_gravity_potential(z_scalar, gravity_potential, GRAVITY_MEAN_SFC_ABS);
@@ -277,7 +302,8 @@ int main(int argc, char *argv[])
     printf(GREEN "finished.\n" RESET);
     
     /*
-    Noe come the derived quantities, which are needed for differential operators.
+    8.) Now come the derived quantities, which are needed for differential operators.
+        -----------------------------------------------------------------------------
     */
     // interpolation to the lat-lon grid
     printf("Calculating interpolation to the lat-lon grid ... ");
