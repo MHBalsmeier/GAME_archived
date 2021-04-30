@@ -490,7 +490,7 @@ int direct_tangential_unity(double latitude_scalar_dual[], double longitude_scal
 	double direction_change;
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
-	    find_angle_change(direction[i], direction_dual[i], &direction_change);
+	    find_turn_angle(direction[i], direction_dual[i], &direction_change);
 	    if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
 	    {
 	    	temp_index = from_index_dual[i];

@@ -42,21 +42,6 @@ int set_f_vec(double latitude_vector[], double direction[], double direction_dua
  	return 0;   
 }
 
-int find_angle_change(double angle_0, double angle_1, double *result)
-{
-    double result_pre = angle_1 - angle_0;
-    if (result_pre > M_PI)
-    {
-		result_pre = result_pre - 2*M_PI;
-	}
-    if (result_pre < -M_PI)
-    {
-        result_pre = result_pre + 2*M_PI;
-	}
-    *result = result_pre;
-    return 0;
-}
-
 int set_orography(int RES_ID, int ORO_ID, double z_surface[])
 {
 	/*
@@ -101,7 +86,7 @@ int check_for_orthogonality(double direction[], double direction_dual[], double 
 	#pragma omp parallel for private(direction_change)
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
-        find_angle_change(direction[i], direction_dual[i], &direction_change);
+        find_turn_angle(direction[i], direction_dual[i], &direction_change);
         if (fabs(rad2deg(direction_change)) < ORTH_CRITERION_DEG || fabs(rad2deg(direction_change)) > 90 + (90 - ORTH_CRITERION_DEG))
 		{
             printf("Grid non-orthogonal: Intersection angle of %lf degrees detected.\n", fabs(rad2deg(direction_change)));
@@ -126,7 +111,7 @@ int calc_vorticity_indices_triangles(int from_index_dual[], int to_index_dual[],
                 sign = 1;
                 if (from_index_dual[j] == i)
                 {
-                    find_angle_change(direction_dual[j], direction[j], &direction_change);
+                    find_turn_angle(direction_dual[j], direction[j], &direction_change);
                     if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
                     {
                         sign = -1;
@@ -134,7 +119,7 @@ int calc_vorticity_indices_triangles(int from_index_dual[], int to_index_dual[],
                 }
                 if (to_index_dual[j] == i)
                 {
-                    find_angle_change(direction_dual[j], direction[j], &direction_change);
+                    find_turn_angle(direction_dual[j], direction[j], &direction_change);
                     if (rad2deg(direction_change) > ORTH_CRITERION_DEG)
                     {
                         sign = -1;
