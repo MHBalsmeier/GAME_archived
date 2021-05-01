@@ -15,6 +15,10 @@ In this file, remapping indices and weights are computed.
 
 int rhombus_averaging(int vorticity_indices_triangles[], int vorticity_signs_triangles[], int from_index_dual[], int to_index_dual[], int vorticity_indices_rhombi[], int density_to_rhombus_indices[], int from_index[], int to_index[], double area_dual[], double z_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], double density_to_rhombus_weights[], double latitude_vector[], double longitude_vector[], double latitude_scalar[], double longitude_scalar[], double TOA)
 {
+	/*
+	This function implements the averaging of scalar quantities to rhombi. Indices and weights are computed here for the highest layer but remain unchanged elsewhere.
+	*/
+
 	int counter;
     int indices_list_pre[6];
     int indices_list[4];
@@ -22,10 +26,11 @@ int rhombus_averaging(int vorticity_indices_triangles[], int vorticity_signs_tri
     int density_to_rhombus_indices_pre[4];
     int density_to_rhombus_index_candidate, check_counter, dual_scalar_h_index_0, dual_scalar_h_index_1, vector_h_index_0, vector_h_index_1, vector_h_index_0_found, vector_h_index_1_found, k, which_vertex_check_result, first_case_counter, second_case_counter;
     double triangle_0, triangle_1, triangle_2, triangle_3, rhombus_area, check_sum;
-    double_indices[0] = -1;
-    double_indices[1] = -1;
+    #pragma omp parallel for private(counter, indices_list_pre, indices_list, double_indices, density_to_rhombus_indices_pre, density_to_rhombus_index_candidate, check_counter, dual_scalar_h_index_0, dual_scalar_h_index_1, vector_h_index_0, vector_h_index_1, vector_h_index_0_found, vector_h_index_1_found, k, which_vertex_check_result, first_case_counter, second_case_counter, triangle_0, triangle_1, triangle_2, triangle_3, rhombus_area, check_sum)
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
+		double_indices[0] = -1;
+		double_indices[1] = -1;
     	for (int j = 0; j < 3; ++j)
     	{
 			indices_list_pre[j] = vorticity_indices_triangles[3*to_index_dual[i] + j];
@@ -253,25 +258,6 @@ int rhombus_averaging(int vorticity_indices_triangles[], int vorticity_signs_tri
 			printf("Error in density_to_rhombus_weights, position 0. Coefficient which should be one has value %lf.\n", check_sum);
 			exit(1);
 		}
-    }
-    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-    {
-    	counter = 0;
-    	for (int j = 0; j < NO_OF_VECTORS_H; ++j)
-    	{
-    		for (int k = 0; k < 4; ++k)
-    		{
-    			if (vorticity_indices_rhombi[4*j + k] == i)
-    			{
-    				++counter;
-    			}
-    		}
-    	}
-    	if (counter != 4)
-    	{
-    		printf("Error in vorticity_indices_rhombi, position 0.\n");
-    		exit(1);
-    	}
     }
 	return 0;
 }

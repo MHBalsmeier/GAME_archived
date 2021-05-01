@@ -301,6 +301,7 @@ int set_volume(double volume[], double z_vector[], double area[], int from_index
     
     // checks
     // 1.) grid box volumes always need to be positive
+    #pragma omp parallel for
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         if (volume[i] <= 0)
@@ -484,6 +485,7 @@ int to_index[], double z_vector[], int from_index_dual[], int to_index_dual[], d
 	}
 	int index_vector_for_dual_scalar_z[3];
 	double check_sum;
+	#pragma omp parallel for private(index_vector_for_dual_scalar_z, check_sum)
 	for (int i = 0; i < NO_OF_DUAL_SCALARS_H; ++i)
 	{
 		check_sum = 0;

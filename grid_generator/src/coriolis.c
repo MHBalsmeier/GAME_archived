@@ -18,14 +18,13 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 	/*
 	This function implements the modified TRSK scheme proposed by Gassmann (2018). Indices and weights are computed here for the highest layer but remain unchanged elsewhere.
 	*/
-	int *from_or_to_index = malloc(NO_OF_VECTORS_H*sizeof(int));
+	
 	int offset, sign_0, sign_1, no_of_edges, index_offset, vertex_index_candidate_0, vertex_index_candidate_1, counter, check_result, first_index, last_index;
-	double check_sum, triangle_0, triangle_1;
+	double check_sum, triangle_0, triangle_1, sum_of_weights;
 	double rescale_for_z_offset_1d = (RADIUS + z_scalar[0])/(RADIUS + z_vector[0]);
 	double rescale_for_z_offset_2d = pow(rescale_for_z_offset_1d, 2);
-	double sum_of_weights = 0;
-	offset = 0;
 	// loop over all edges
+	#pragma omp parallel for private(offset, sign_0, sign_1, no_of_edges, index_offset, vertex_index_candidate_0, vertex_index_candidate_1, counter, check_result, first_index, last_index, check_sum, triangle_0, triangle_1, sum_of_weights)
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
 		/*
@@ -34,8 +33,11 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 		sign_1: n_{e', i}
 		trsk_weights: w
 		*/
+		int *from_or_to_index = malloc(NO_OF_VECTORS_H*sizeof(int));
+		offset = 0;
 		first_index = -1;
 		last_index = -1;
+		sum_of_weights = 0;
 		// loop over all edges that are relevant for the reconstruction
 		for (int k = 0; k < 10; ++k)
 		{
@@ -382,10 +384,13 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 				}
 			}
 		}
+		free(from_or_to_index);
     }
-    int second_index, k;
+    
+    int second_index;
     // This checks Eq. (39) of the first TRSK paper (Thuburn et al., 2009).
 	double value_0, value_1;
+	#pragma omp parallel for private(first_index, value_0, second_index, value_1, check_sum)
 	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 	{
 		for (int j = 0; j < 10; ++j)
@@ -395,7 +400,7 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 			{
 				value_0 = normal_distance[NO_OF_SCALARS_H + i]/(rescale_for_z_offset_1d*normal_distance_dual[first_index])*trsk_weights[10*i + j];
 				second_index = -1;
-				for (k = 0; k < 10; ++k)
+				for (int k = 0; k < 10; ++k)
 				{
 					if (trsk_indices[10*first_index + k] == i)
 					{
@@ -426,7 +431,6 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 			trsk_indices[i] = 0;
 		}
 	}
-	free(from_or_to_index);
 	return 0;
 }
 
