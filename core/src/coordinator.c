@@ -114,6 +114,12 @@ int main(int argc, char *argv[])
 	Checking user input for correctness:
 	------------------------------------
 	*/
+    if (grid -> no_of_oro_layers < 0 || grid -> no_of_oro_layers >= NO_OF_LAYERS)
+    {
+    	printf("It must be 0 <= orography_layers < NO_OF_LAYERS.\n");
+    	printf("Aborting.\n");
+    	exit(1);
+    }
     if (WRITE_OUT_INTERVAL < 900)
     {
     	printf("It is WRITE_OUT_INTERVAL < 900.\n");

@@ -83,6 +83,14 @@ int main(int argc, char *argv[])
     	exit(1);
     }
     
+    // checking if the NO_OF_ORO_LAYERS is valid
+    if (NO_OF_ORO_LAYERS < 0 || NO_OF_ORO_LAYERS >= NO_OF_LAYERS)
+    {
+    	printf("It must be 0 <= orography_layers < NO_OF_LAYERS.\n");
+    	printf("Aborting.\n");
+    	exit(1);
+    }
+    
     // cechking wether the stretching parameter is in a valid range
     if (stretching_parameter < 1)
     {
