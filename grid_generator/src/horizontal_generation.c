@@ -489,6 +489,10 @@ int set_dual_vector_h_doubles(double latitude_scalar_dual[], double latitude_vec
 
 int direct_tangential_unity(double latitude_scalar_dual[], double longitude_scalar_dual[], double direction[], double direction_dual[], int to_index_dual[], int from_index_dual[], double rel_on_line_dual[], double ORTH_CRITERION_DEG)
 {
+	/*
+	This function determines the directions of the dual vectors.
+	*/
+	
 	// ensuring e_y = k x e_z
 	int temp_index;
 	double direction_change;
@@ -504,6 +508,17 @@ int direct_tangential_unity(double latitude_scalar_dual[], double longitude_scal
 	        rel_on_line_dual[i] = 1 - rel_on_line_dual[i];
         	direction_dual[i] = find_geodetic_direction(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], rel_on_line_dual[i]);
 	    }
+    }
+
+	// checking for orthogonality
+	#pragma omp parallel for private(direction_change)
+    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+    {
+        find_turn_angle(direction[i], direction_dual[i], &direction_change);
+        if (fabs(rad2deg(direction_change)) < ORTH_CRITERION_DEG || fabs(rad2deg(direction_change)) > 90 + (90 - ORTH_CRITERION_DEG))
+		{
+            printf("Grid non-orthogonal: Intersection angle of %lf degrees detected.\n", fabs(rad2deg(direction_change)));
+		}
     }
     return 0;
 }

@@ -78,24 +78,6 @@ int set_orography(int RES_ID, int ORO_ID, double z_surface[])
 	return 0;
 }
 
-int check_for_orthogonality(double direction[], double direction_dual[], double ORTH_CRITERION_DEG)
-{
-	/*
-	This function checks for orthogonality and aborts if this is not fulfilled.
-	*/
-	double direction_change;
-	#pragma omp parallel for private(direction_change)
-    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-    {
-        find_turn_angle(direction[i], direction_dual[i], &direction_change);
-        if (fabs(rad2deg(direction_change)) < ORTH_CRITERION_DEG || fabs(rad2deg(direction_change)) > 90 + (90 - ORTH_CRITERION_DEG))
-		{
-            printf("Grid non-orthogonal: Intersection angle of %lf degrees detected.\n", fabs(rad2deg(direction_change)));
-		}
-    }
-    return 0;
-}
-
 int calc_vorticity_indices_triangles(int from_index_dual[], int to_index_dual[], double direction[], double direction_dual[], int vorticity_indices_triangles[], double ORTH_CRITERION_DEG, int vorticity_signs_pre[])
 {
 	int counter, sign;

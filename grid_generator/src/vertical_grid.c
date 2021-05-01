@@ -166,31 +166,6 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], doubl
     return 0;
 }
 
-int calculate_vertical_faces(double area[], double z_vector_dual[], double normal_distance_dual[], double TOA)
-{
-	/*
-	This function calculates the vertical faces.
-	*/
-	
-	int layer_index, h_index, dual_vector_index;
-	double base_distance, radius_0, radius_1;
-	#pragma omp parallel for private(layer_index, h_index, dual_vector_index, base_distance, radius_0, radius_1)
-    for (int i = 0; i < NO_OF_VECTORS; ++i)
-    {
-        layer_index = i/NO_OF_VECTORS_PER_LAYER;
-        h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-        if (h_index >= NO_OF_SCALARS_H)
-        {
-            dual_vector_index = (layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H;
-            radius_0 = RADIUS + z_vector_dual[dual_vector_index];
-            radius_1 = RADIUS + z_vector_dual[dual_vector_index - NO_OF_DUAL_VECTORS_PER_LAYER];
-            base_distance = normal_distance_dual[dual_vector_index];
-            area[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
-        }
-    }
-    return 0;
-}
-
 int set_z_scalar_dual(double z_scalar_dual[], double z_vector[], int from_index[], int to_index[], int vorticity_indices_triangles[], double TOA)
 {
 	/*
@@ -292,14 +267,15 @@ int set_gravity_potential(double z_scalar[], double gravity_potential[], double 
 	return 0;
 }
 
-int map_hor_area_to_half_levels(double area[], double z_vector[], double pent_hex_face_unity_sphere[])
+int set_area(double area[], double z_vector[], double z_vector_dual[], double normal_distance_dual[], double pent_hex_face_unity_sphere[])
 {
 	/*
-	This function maps the horizontal areas from the surface of the unit sphere to the half-levels.
+	This function sets the areas of the grid boxes.
 	*/
 	
-	int layer_index, h_index;
-	#pragma omp parallel for private(layer_index, h_index)
+	int layer_index, h_index, dual_vector_index;
+	double base_distance, radius_0, radius_1;
+	#pragma omp parallel for private(layer_index, h_index, dual_vector_index, base_distance, radius_0, radius_1)
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
@@ -308,7 +284,16 @@ int map_hor_area_to_half_levels(double area[], double z_vector[], double pent_he
         {
             area[i] = pent_hex_face_unity_sphere[h_index]*pow(RADIUS + z_vector[i], 2);
         }
+        else
+        {
+            dual_vector_index = (layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H;
+            radius_0 = RADIUS + z_vector_dual[dual_vector_index];
+            radius_1 = RADIUS + z_vector_dual[dual_vector_index - NO_OF_DUAL_VECTORS_PER_LAYER];
+            base_distance = normal_distance_dual[dual_vector_index];
+            area[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
+        }
     }
+    
 	return 0;
 }
 

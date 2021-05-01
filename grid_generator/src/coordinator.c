@@ -243,25 +243,31 @@ int main(int argc, char *argv[])
 	5.) determining implicit quantities of the horizontal grid
 	    ------------------------------------------------------
 	*/
-	// Calculation of the horizontal coordinates of the dual scalar points. The dual scalar points are the vertices of the Voronoi mesh of the primal grid.
+	// calculation of the horizontal coordinates of the dual scalar points
 	set_scalar_h_dual_coords(latitude_scalar_dual, longitude_scalar_dual, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
-	// Calculation of the horizontal coordinates of the vector points. The vector points are in the middle between the neighbouring scalar points.
+	
+	// calculation of the horizontal coordinates of the vector points
 	set_vector_h_doubles(from_index, to_index, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, direction);
-	// Same as before but for dual vectors. They have the same positions as the primal vectors.
+	
+	// Same as before, but for dual vectors. They have the same positions as the primal vectors.
 	set_dual_vector_h_doubles(latitude_scalar_dual, latitude_vector, direction_dual, longitude_vector,
 	to_index_dual, from_index_dual, longitude_scalar_dual, rel_on_line_dual);
+	
+	// determining the directions of the dual vectors
 	direct_tangential_unity(latitude_scalar_dual, longitude_scalar_dual, direction, direction_dual,
 	to_index_dual, from_index_dual, rel_on_line_dual, ORTH_CRITERION_DEG);
-	// Setting the Coriolis vector.
+	
+	// setting the Coriolis vector
     set_f_vec(latitude_vector, direction, direction_dual, f_vec);
+    
     // calculating the dual cells on the unity sphere
     calc_triangle_face_unity(triangle_face_unit_sphere, latitude_scalar, longitude_scalar, face_edges,
     face_edges_reverse, face_vertices, edge_vertices);
+    
     // finding the vorticity indices
 	calc_vorticity_indices_triangles(from_index_dual, to_index_dual, direction, direction_dual,
 	vorticity_indices_triangles, ORTH_CRITERION_DEG, vorticity_signs_triangles);
-	// checking if the grid is orthogonal
-	check_for_orthogonality(direction, direction_dual, ORTH_CRITERION_DEG);
+	
 	// calculating the cell faces on the unity sphere
 	calc_cell_face_unity(pent_hex_face_unity_sphere, latitude_scalar_dual,
 	longitude_scalar_dual, adjacent_vector_indices_h, vorticity_indices_triangles);
@@ -279,60 +285,64 @@ int main(int argc, char *argv[])
 	7.) setting the implicit quantities of the vertical grid
 	    ----------------------------------------------------
 	*/
-    // setting the gravity potential
-    printf("Setting gravity potential ... ");
-	set_gravity_potential(z_scalar, gravity_potential, GRAVITY_MEAN_SFC_ABS);
-    printf(GREEN "finished.\n" RESET);
 	if (VERT_GRID_TYPE == 1)
 	{
 		set_scalar_shading_indices(z_scalar, z_surface, no_of_shaded_points_scalar);
 		set_vector_shading_indices(from_index, to_index, no_of_shaded_points_scalar, no_of_shaded_points_vector);
 	}
+	
+	printf("Determining vector z coordinates and normal distances of the primal grid ... ");
 	set_z_vector_and_normal_distance(z_vector, z_scalar, normal_distance, latitude_scalar, longitude_scalar, from_index, to_index, TOA, VERT_GRID_TYPE, z_surface);
-	printf("Mapping horizontal areas from unit sphere to model levels ... ");
-	map_hor_area_to_half_levels(area, z_vector, pent_hex_face_unity_sphere);
-    printf(GREEN "finished.\n" RESET);
+    printf(GREEN "finished.\n" RESET);	
+	
 	printf("Determining scalar z coordinates of the dual grid ... ");
 	set_z_scalar_dual(z_scalar_dual, z_vector, from_index, to_index, vorticity_indices_triangles, TOA);
     printf(GREEN "finished.\n" RESET);
-    printf("Calculating grid box volumes ... ");
-	set_volume(volume, z_vector, area, from_index, to_index, TOA, vorticity_indices_triangles);
-    printf(GREEN "finished.\n" RESET);
+	
 	printf("Determining vector z coordinates of the dual grid and distances of the dual grid ... ");
 	calc_z_vector_dual_and_normal_distance_dual(z_vector_dual, normal_distance_dual, z_scalar_dual, TOA, from_index, to_index, z_vector,
 	from_index_dual, to_index_dual, latitude_scalar_dual, longitude_scalar_dual, vorticity_indices_triangles);
     printf(GREEN "finished.\n" RESET);
+	
+	printf("Calculating areas ... ");
+	set_area(area, z_vector, z_vector_dual, normal_distance_dual, pent_hex_face_unity_sphere);
+    printf(GREEN "finished.\n" RESET);
+    
     printf("Calculating dual areas ... ");
 	set_area_dual(area_dual, z_vector_dual, normal_distance, z_vector, from_index, to_index, triangle_face_unit_sphere, TOA);
     printf(GREEN "finished.\n" RESET);
-    printf("Calculating vertical faces ... ");
-	calculate_vertical_faces(area, z_vector_dual, normal_distance_dual, TOA);
+    
+    printf("Calculating grid box volumes ... ");
+	set_volume(volume, z_vector, area, from_index, to_index, TOA, vorticity_indices_triangles);
     printf(GREEN "finished.\n" RESET);
     
     /*
     8.) Now come the derived quantities, which are needed for differential operators.
         -----------------------------------------------------------------------------
     */
-    // interpolation to the lat-lon grid
-    printf("Calculating interpolation to the lat-lon grid ... ");
-    interpolate_ll(latitude_scalar, longitude_scalar, interpol_indices, interpol_weights);
+    printf("Setting gravity potential ... ");
+	set_gravity_potential(z_scalar, gravity_potential, GRAVITY_MEAN_SFC_ABS);
     printf(GREEN "finished.\n" RESET);
-    // inner product
+    
     printf("Calculating inner product weights ... ");
 	calc_inner_product(inner_product_weights, normal_distance, volume, to_index, from_index, area, z_scalar, z_vector, adjacent_vector_indices_h);
     printf(GREEN "finished.\n" RESET);
-    // setting indices and weights related to averaging of a scalar quantity to rhombi
+    
     printf("Setting rhombus interpolation indices and weights ... ");
 	rhombus_averaging(vorticity_indices_triangles, vorticity_signs_triangles, from_index_dual,
 	to_index_dual, vorticity_indices_rhombi, density_to_rhombi_indices, from_index, to_index, area_dual,
 	z_vector, latitude_scalar_dual, longitude_scalar_dual, density_to_rhombi_weights, latitude_vector,
 	longitude_vector, latitude_scalar, longitude_scalar, TOA);
     printf(GREEN "finished.\n" RESET);
-    // modified TRSK
+    
     printf("Calculating Coriolis indices and weights ... ");
 	coriolis(from_index_dual, to_index_dual, trsk_modified_curl_indices, normal_distance, normal_distance_dual,
 	to_index, area, z_scalar, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, latitude_scalar_dual,
 	longitude_scalar_dual, trsk_weights, trsk_indices, from_index, adjacent_vector_indices_h, z_vector, z_vector_dual);
+    printf(GREEN "finished.\n" RESET);
+    
+    printf("Calculating interpolation to the lat-lon grid ... ");
+    interpolate_ll(latitude_scalar, longitude_scalar, interpol_indices, interpol_weights);
     printf(GREEN "finished.\n" RESET);
     
     // A statistics file is created to compare the fundamental statistical properties of the grid with the literature.
