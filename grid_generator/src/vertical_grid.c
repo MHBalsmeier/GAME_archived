@@ -253,20 +253,6 @@ int set_area_dual(double area_dual[], double z_vector_dual[], double normal_dist
     return 0;
 }
 
-int set_gravity_potential(double z_scalar[], double gravity_potential[], double GRAVITY_MEAN_SFC_ABS)
-{
-	/*
-	This function computes the gravity potential.
-	*/
-	
-	#pragma omp parallel for
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
-    {
-    	gravity_potential[i] = -GRAVITY_MEAN_SFC_ABS*(RADIUS*RADIUS/(RADIUS + z_scalar[i]) - RADIUS);
-    }
-	return 0;
-}
-
 int set_area(double area[], double z_vector[], double z_vector_dual[], double normal_distance_dual[], double pent_hex_face_unity_sphere[])
 {
 	/*

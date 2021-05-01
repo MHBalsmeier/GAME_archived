@@ -11,10 +11,10 @@ Github repository: https://github.com/AUN4GFD/game
 
 int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
-    int layer_index, h_index, h_index_shifted, i, number_of_edges, j;
+    int layer_index, h_index, h_index_shifted, number_of_edges;
     double vert_weight;
-	#pragma omp parallel for private(layer_index, h_index, i, number_of_edges, vert_weight, j, h_index_shifted)
-    for (i = 0; i < NO_OF_VECTORS; ++i)
+	#pragma omp parallel for private(layer_index, h_index, number_of_edges, vert_weight, h_index_shifted)
+    for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
@@ -34,7 +34,7 @@ int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vec
 			// From_index comes before to_index as usual.
 			if (grid -> from_index[h_index_shifted] < NO_OF_PENTAGONS)
 			{
-				for (j = 0; j < 4; ++j)
+				for (int j = 0; j < 4; ++j)
 				{
 					out_field[i] +=
 					grid -> trsk_weights[10*h_index_shifted + j]
@@ -44,7 +44,7 @@ int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vec
 			}
 			else
 			{
-				for (j = 0; j < 5; ++j)
+				for (int j = 0; j < 5; ++j)
 				{
 					if (j == 2)
 					{
@@ -66,7 +66,7 @@ int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vec
 			}
 			if (grid -> to_index[h_index_shifted] < NO_OF_PENTAGONS)	
 			{
-				for (j = 5; j < 9; ++j)
+				for (int j = 5; j < 9; ++j)
 				{
 					out_field[i] +=
 					grid -> trsk_weights[10*h_index_shifted + j]
@@ -76,7 +76,7 @@ int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vec
 			}
 			else
 			{
-				for (j = 5; j < 10; ++j)
+				for (int j = 5; j < 10; ++j)
 				{
 					if (j == 7)
 					{
@@ -148,7 +148,7 @@ int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vec
 			}
 			if (layer_index >= 1)
 			{
-				for (j = 0; j < number_of_edges; ++j)
+				for (int j = 0; j < number_of_edges; ++j)
 				{
 					out_field[i] +=
 					vert_weight
@@ -159,7 +159,7 @@ int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vec
 			}
 			if (layer_index <= NO_OF_LAYERS - 1)
 			{
-				for (j = 0; j < number_of_edges; ++j)
+				for (int j = 0; j < number_of_edges; ++j)
 				{
 					out_field[i] +=
 					vert_weight
