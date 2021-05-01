@@ -35,7 +35,12 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
         }
         if (layer_index == 0)
         {
-			comp_v = 0;
+            contra_lower = 0;
+            if (layer_index >= NO_OF_LAYERS - grid -> no_of_oro_layers - 1)
+            {
+                vertical_contravariant_corr(in_field, layer_index + 1, h_index, grid, &contra_lower);
+            }
+            comp_v = contra_lower*grid -> area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
         }
         else if (layer_index == NO_OF_LAYERS - 1)
         {
