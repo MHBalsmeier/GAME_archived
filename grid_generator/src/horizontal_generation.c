@@ -323,14 +323,15 @@ int set_scalar_h_dual_coords(double latitude_scalar_dual[], double longitude_sca
 
 int set_from_to_index_dual(int from_index_dual[], int to_index_dual[], int face_edges [][3], int face_edges_reverse[][3])
 {
-	int coord_0, coord_1, on_face_index, on_edge_index, edge_index, small_triangle_edge_index, coord_0_points_amount, first_face_found, face_index, triangle_on_face_index;
-    int edge_rel_to_face_0 = 0;
-    int edge_rel_to_face_1 = 0;
-    int face_index_0 = 0;
-    int face_index_1 = 0;
-    triangle_on_face_index = 0;
+	int coord_0, coord_1, on_face_index, on_edge_index, edge_index, small_triangle_edge_index, coord_0_points_amount, first_face_found, face_index;
+    #pragma omp parallel for private(coord_0, coord_1, on_face_index, on_edge_index, edge_index, small_triangle_edge_index, coord_0_points_amount, first_face_found, face_index)
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
+    	int edge_rel_to_face_0 = 0;
+    	int edge_rel_to_face_1 = 0;
+    	int face_index_0 = 0;
+    	int face_index_1 = 0;
+    	int triangle_on_face_index = 0;
         if (i < NO_OF_EDGES*(POINTS_PER_EDGE + 1))
         {
             edge_index = i/(POINTS_PER_EDGE + 1);
@@ -473,6 +474,7 @@ int set_from_to_index_dual(int from_index_dual[], int to_index_dual[], int face_
 
 int set_dual_vector_h_doubles(double latitude_scalar_dual[], double latitude_vector[], double direction_dual[], double longitude_vector[], int to_index_dual[], int from_index_dual[], double longitude_scalar_dual[], double rel_on_line_dual[])
 {
+	#pragma omp parallel for
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         find_min_dist_rel_on_line(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], latitude_vector[i], longitude_vector[i], &rel_on_line_dual[i]);

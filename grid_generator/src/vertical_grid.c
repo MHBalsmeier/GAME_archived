@@ -68,6 +68,7 @@ int set_z_scalar(double z_scalar[], double z_surface[], int NO_OF_ORO_LAYERS, do
 int set_scalar_shading_indices(double z_scalar[], double z_surface[], int no_of_shaded_points_scalar[])
 {
 	int counter;
+	#pragma omp parallel for private(counter)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		counter = 0;
@@ -85,6 +86,7 @@ int set_scalar_shading_indices(double z_scalar[], double z_surface[], int no_of_
 
 int set_vector_shading_indices(int from_index[], int to_index[], int no_of_shaded_points_scalar[], int no_of_shaded_points_vector[])
 {
+	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 	{
 		no_of_shaded_points_vector[i] = fmax(no_of_shaded_points_scalar[from_index[i]], no_of_shaded_points_scalar[to_index[i]]);
@@ -155,30 +157,6 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], doubl
 			}
         }
     }
-    
-    // checks
-    for (int i = 0; i < NO_OF_VECTORS; ++i)
-    {
-        if (normal_distance[i] <= 0)
-		{
-            printf("normal_distance contains a non-positive value.\n");
-			exit(1);
-		}
-    }
-	double check_sum;
-	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-	{
-		check_sum = 0;
-		for (int j = 0; j < NO_OF_LEVELS; ++j)
-		{
-			check_sum += normal_distance[i + j*NO_OF_VECTORS_PER_LAYER];
-		}
-		if (fabs(check_sum/(TOA - z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]) - 1) > EPSILON_SECURITY)
-		{
-			printf("Problem 0 with vertical grid structure.\n");
-			exit(1);
-		}
-	}
 	double max_thick, min_thick, thick_rel;
 	min_thick = lowest_thicknesses[find_min_index(lowest_thicknesses, NO_OF_SCALARS_H)];
 	max_thick = z_vector[0] - z_vector[NO_OF_VECTORS_PER_LAYER];
@@ -210,31 +188,6 @@ int calculate_vertical_faces(double area[], double z_vector_dual[], double norma
             area[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
         }
     }
-    
-    // checks
-    for (int i = 0; i < NO_OF_VECTORS; ++i)
-    {
-        if (area[i] <= 0)
-		{
-            printf("It is area <= 0 at some point, position 0.\n");
-			exit(1);
-		}
-    }
-    double check_area, wished_result;
-    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-    {
-    	wished_result = calculate_vertical_face(normal_distance_dual[NO_OF_LAYERS*NO_OF_DUAL_VECTORS_PER_LAYER + i], RADIUS + z_vector_dual[NO_OF_LAYERS*NO_OF_DUAL_VECTORS_PER_LAYER + i], RADIUS + TOA);
-    	check_area = 0;
-    	for (int j = 0; j < NO_OF_LAYERS; ++j)
-    	{
-    		check_area += area[NO_OF_SCALARS_H + i + j*NO_OF_VECTORS_PER_LAYER];
-    	}
-    	if(fabs(check_area/wished_result - 1) > EPSILON_SECURITY)
-    	{
-    		printf("Error with vertical faces. Coefficient which should be zero has value %lf.\n", check_area/wished_result - 1);
-    		exit(1);
-    	}
-    }
     return 0;
 }
 
@@ -259,23 +212,6 @@ int set_z_scalar_dual(double z_scalar_dual[], double z_vector[], int from_index[
 		+ z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + to_index[vorticity_indices_triangles[3*h_index + 1]]]
 		+ z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + to_index[vorticity_indices_triangles[3*h_index + 2]]]);
     }
-    
-    // checks
-	int min_oro_index = find_min_index(z_vector, NO_OF_VECTORS);
-	double min_oro = z_vector[min_oro_index];
-	for (int i = 0; i < NO_OF_DUAL_SCALARS; ++i)
-	{
-		if (z_scalar_dual[i] > TOA)
-		{
-			printf("z_scalar_dual has a point above top of atmosphere.\n");
-			exit(1);
-		}
-		if (z_scalar_dual[i] < min_oro)
-		{
-			printf("z_scalar_dual has a point below minimum of orography.\n");
-			exit(1);
-		}
-	}
 	return 0;
 }
 
@@ -285,9 +221,9 @@ int set_volume(double volume[], double z_vector[], double area[], int from_index
 	This function computes the volumes of the grid boxes.
 	*/
 	
-    double volume_sum, volume_sum_ideal, radius_0, radius_1, base_area;
-    volume_sum = 0;
     int layer_index, h_index;
+    double radius_0, radius_1, base_area;
+    #pragma omp parallel for private(layer_index, h_index, radius_0, radius_1, base_area)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         layer_index = i/NO_OF_SCALARS_H;
@@ -296,32 +232,7 @@ int set_volume(double volume[], double z_vector[], double area[], int from_index
         radius_0 = RADIUS + z_vector[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
         radius_1 = RADIUS + z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
         volume[i] = find_volume(base_area, radius_0, radius_1);
-        volume_sum += volume[i];
     }
-    
-    // checks
-    // 1.) grid box volumes always need to be positive
-    #pragma omp parallel for
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
-    {
-        if (volume[i] <= 0)
-		{
-            printf("volume contains a non-positive value.\n");
-			exit(1);
-		}
-    }
-    
-    // 2.) check if the sum of all grid box volumes is the same as the volume of the whole model atmosphere
-    volume_sum_ideal = 0;
-    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-    {
-    	volume_sum_ideal += find_volume(area[NO_OF_VECTORS - NO_OF_SCALARS_H + i], RADIUS + z_vector[NO_OF_VECTORS- NO_OF_SCALARS_H + i], RADIUS + TOA);
-    }
-    if (fabs(volume_sum/volume_sum_ideal - 1) > EPSILON_SECURITY)
-	{
-        printf("Sum of volumes of grid boxes does not match volume of entire atmosphere.\n");
-		exit(1);
-	}
 	return 0;
 }
 
@@ -363,35 +274,6 @@ int set_area_dual(double area_dual[], double z_vector_dual[], double normal_dist
         	}
             area_dual[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
         }
-    }
-    #pragma omp parallel for
-    for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
-    {
-        if (area_dual[i] <= 0)
-		{
-            printf("area_dual contains a non-positive value.\n");
-			exit(1);
-		}
-    }
-    double check_area, wished_result;
-    #pragma omp parallel for private(check_area, wished_result, radius_0, primal_vector_index, radius_1, base_distance)
-    for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-    {
-        radius_0 = RADIUS + 0.5*(z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + from_index[i]] + z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + to_index[i]]);
-        primal_vector_index = NO_OF_SCALARS_H + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i;
-        radius_1 = RADIUS + z_vector[primal_vector_index];
-        base_distance = normal_distance[primal_vector_index]*radius_0/radius_1;
-    	wished_result = calculate_vertical_face(base_distance, radius_0, RADIUS + TOA);
-    	check_area = 0;
-    	for (int j = 0; j < NO_OF_LEVELS; ++j)
-    	{
-    		check_area += area_dual[i + j*NO_OF_DUAL_VECTORS_PER_LAYER];
-    	}
-    	if(fabs(check_area/wished_result - 1) > EPSILON_SECURITY)
-    	{
-    		printf("Error with dual vertical faces. Coefficient which should be zero has value %lf.\n", check_area/wished_result - 1);
-    		exit(1);
-    	}
     }
     return 0;
 }
@@ -471,39 +353,6 @@ int to_index[], double z_vector[], int from_index_dual[], int to_index_dual[], d
             RADIUS + z_vector_dual[i]);
         }
     }
-    
-    // checks
-    #pragma omp parallel for
-    for (int i = 0; i < NO_OF_DUAL_VECTORS; ++i)
-    {
-        if (normal_distance_dual[i] <= 0)
-		{
-            printf("normal_distance_dual contains a non-positive value.\n");
-            printf("Aborting.\n");
-			exit(1);
-		}
-	}
-	int index_vector_for_dual_scalar_z[3];
-	double check_sum;
-	#pragma omp parallel for private(index_vector_for_dual_scalar_z, check_sum)
-	for (int i = 0; i < NO_OF_DUAL_SCALARS_H; ++i)
-	{
-		check_sum = 0;
-		for (int j = 0; j < NO_OF_LAYERS; ++j)
-		{
-			check_sum += normal_distance_dual[i + NO_OF_VECTORS_H + j*NO_OF_DUAL_VECTORS_PER_LAYER];
-		}
-		find_v_vector_indices_for_dual_scalar_z(from_index, to_index, vorticity_indices_triangles, i, index_vector_for_dual_scalar_z);
-		if (fabs(check_sum/(TOA
-		- 1.0/3*(z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[0]]
-		+ z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[1]]
-		+ z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + index_vector_for_dual_scalar_z[2]])) - 1) > EPSILON_SECURITY)
-		{
-			printf("Problem 1 with vertical grid structure.\n");
-			printf("Aborting.\n");
-			exit(1);
-		}
-	}
 	return 0;
 }
 

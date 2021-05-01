@@ -25,6 +25,7 @@ int find_adjacent_vector_indices_h(int from_index[], int to_index[], int adjacen
 	*/
     int trouble_detected = 0;
     int counter;
+    #pragma omp parallel for private(trouble_detected, counter)
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
         counter = 0;

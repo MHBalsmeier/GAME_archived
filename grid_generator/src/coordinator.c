@@ -305,7 +305,7 @@ int main(int argc, char *argv[])
     printf("Calculating dual areas ... ");
 	set_area_dual(area_dual, z_vector_dual, normal_distance, z_vector, from_index, to_index, triangle_face_unit_sphere, TOA);
     printf(GREEN "finished.\n" RESET);
-    printf("Calculating vertical faces, pre version ... ");
+    printf("Calculating vertical faces ... ");
 	calculate_vertical_faces(area, z_vector_dual, normal_distance_dual, TOA);
     printf(GREEN "finished.\n" RESET);
     
