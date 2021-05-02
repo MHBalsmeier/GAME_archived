@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 3.10)
 set(version_major 0)
 set(version_minor 3)
-set(version_patch 8)
+set(version_patch 9)
 set(version ${version_major}.${version_minor}.${version_patch})
 project(game VERSION ${version})
 set(CMAKE_C_COMPILER mpicc)
