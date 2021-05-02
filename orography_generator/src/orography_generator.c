@@ -102,9 +102,8 @@ int main(int argc, char *argv[])
 	}
     double *z_in_vector = malloc(no_of_lat_points*no_of_lon_points*sizeof(double));
     int lat_index, lon_index;
-    int i;
 	#pragma omp parallel for private (lat_index, lon_index)
-    for (i = 0; i < no_of_lat_points*no_of_lon_points; ++i)
+    for (int i = 0; i < no_of_lat_points*no_of_lon_points; ++i)
     {
     	lat_index = i/no_of_lon_points;
     	lon_index = i - lat_index*no_of_lon_points;
@@ -128,9 +127,8 @@ int main(int argc, char *argv[])
     }
     // executing the actual interpolation
     double weights_sum, sigma_mountain;
-    int j;
-	#pragma omp parallel for private(j, distance, latitude, lat_index, lon_index, weights_sum)
-	for (i = 0; i < NO_OF_SCALARS_H; ++i)
+	#pragma omp parallel for private(distance, latitude, lat_index, lon_index, weights_sum)
+	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		double distance_vector[no_of_lat_points*no_of_lon_points];
 		int min_indices_vector[no_of_avg_points];
@@ -148,25 +146,25 @@ int main(int argc, char *argv[])
 		}
 		if (ORO_ID == 3)
 		{
-			for (j = 0; j < no_of_lat_points*no_of_lon_points; ++j)
+			for (int j = 0; j < no_of_lat_points*no_of_lon_points; ++j)
 			{
 				lat_index = j/no_of_lon_points;
 				lon_index = j - lat_index*no_of_lon_points;
 				distance_vector[j] = calculate_distance_h(deg2rad(latitude_input[lat_index]), deg2rad(longitude_input[lon_index]), latitude_scalar[i], longitude_scalar[i], 1);
 			}
-			for (j = 0; j < no_of_avg_points; ++j)
+			for (int j = 0; j < no_of_avg_points; ++j)
 			{
 				min_indices_vector[j] = -1;
 			}
 			weights_sum = 0;
-			for (j = 0; j < no_of_avg_points; ++j)
+			for (int j = 0; j < no_of_avg_points; ++j)
 			{
 				min_indices_vector[j] = find_min_index_exclude(distance_vector, no_of_lat_points*no_of_lon_points, min_indices_vector, no_of_avg_points);
 				weights_vector[j] = 1/(distance_vector[min_indices_vector[j]] + 0.01);
 				weights_sum += weights_vector[j];
 			}
 			oro[i] = 0;
-			for (j = 0; j < no_of_avg_points; ++j)
+			for (int j = 0; j < no_of_avg_points; ++j)
 			{
 				oro[i] += rescale_factor*z_in_vector[min_indices_vector[j]]*weights_vector[j]/weights_sum;
 			}
