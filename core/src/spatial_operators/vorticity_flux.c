@@ -3,6 +3,10 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
+/*
+In this file, the vorticity flux term of the Lamb tansformation gets computed.
+*/
+
 #include "../enum_and_typedefs.h"
 #include "../thermodynamics/thermodynamics.h"
 #include <stdlib.h>
@@ -11,6 +15,10 @@ Github repository: https://github.com/AUN4GFD/game
 
 int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
+	/*
+	This function computes the vorticity flux term.
+	*/
+	
     int layer_index, h_index, h_index_shifted, number_of_edges;
     double vert_weight;
 	#pragma omp parallel for private(layer_index, h_index, number_of_edges, vert_weight, h_index_shifted)

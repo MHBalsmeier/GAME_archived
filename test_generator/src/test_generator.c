@@ -3,6 +3,10 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
+/*
+With this program, ideal input states for GAME can be produced.
+*/
+
 #include <stdlib.h>
 #include "../../core/src/enum_and_typedefs.h"
 #include "../../core/src/thermodynamics/thermodynamics.h"
@@ -404,7 +408,9 @@ int main(int argc, char *argv[])
 
 int find_pressure_value(double lat, double z_height, double *result)
 {
-	// this function finds the pressure at a given height (as a function of latitude) for the JW test by iterative calls to the function find_z_from_p_jw
+	/*
+	This function finds the pressure at a given height (as a function of latitude) for the JW test by iterative calls to the function find_z_from_p_jw.
+    */
     double p = P_0/2;
     double precision = 0.0001;
     double z;

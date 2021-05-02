@@ -3,6 +3,10 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
+/*
+With this program, orographies can be produced.
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <netcdf.h>
@@ -20,7 +24,7 @@ const double MOUNTAIN_HEIGHT = 10e3;
 const double MOUNTAIN_FWHM = 1000e3;
 
 int main(int argc, char *argv[])
-{	
+{
 	int OUTPUT_FILE_LENGTH = 100;
 	char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
 	int ORO_ID;

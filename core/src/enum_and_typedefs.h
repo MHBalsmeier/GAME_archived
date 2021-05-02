@@ -3,6 +3,10 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
+/*
+In this file, constants and types are defined.
+*/
+
 #include <math.h>
 // some fundamental constants
 #define K_B (1.380649e-23)
@@ -123,7 +127,6 @@ Scalar_field temperature_gas_explicit;
 double rel_vort_on_triangles[NO_OF_DUAL_V_VECTORS];
 Curl_field rel_vort;
 Curl_field pot_vort;
-Scalar_field c_g_v_field;
 Scalar_field c_g_p_field;
 Scalar_field e_kin;
 Vector_field cpgradt;

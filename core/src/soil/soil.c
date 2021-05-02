@@ -4,5 +4,5 @@ Github repository: https://github.com/AUN4GFD/game
 */
 
 /*
-This function contains the soil component of GAME.
+This file contains the soil component of GAME.
 */

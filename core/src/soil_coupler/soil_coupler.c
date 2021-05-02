@@ -4,5 +4,5 @@ Github repository: https://github.com/AUN4GFD/game
 */
 
 /*
-This function couples the atmospheric dynamical core of GAME to the internal or an external soil model.
+This file couples the atmospheric dynamical core of GAME to the internal or an external soil model.
 */

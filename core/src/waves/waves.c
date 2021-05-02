@@ -4,5 +4,5 @@ Github repository: https://github.com/AUN4GFD/game
 */
 
 /*
-This function contains the (ocean surface) wave component of GAME.
+This file contains the (ocean surface) wave component of GAME.
 */

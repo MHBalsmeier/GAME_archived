@@ -3,6 +3,10 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
+/*
+This file manages the RKHEVI time stepping.
+*/
+
 #include "../enum_and_typedefs.h"
 #include "../settings.h"
 #include "../spatial_operators/spatial_operators.h"
