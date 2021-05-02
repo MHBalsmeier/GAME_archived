@@ -4,7 +4,7 @@ Github repository: https://github.com/AUN4GFD/game
 */
 
 /*
-In this file, remapping indices and weights are computed.
+In this file, remapping indices and weights to rhombi are computed.
 */
 
 #include "include.h"

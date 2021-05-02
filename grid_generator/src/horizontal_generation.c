@@ -3,6 +3,10 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
+/*
+In this file, the horizontal grid generation procedure is stored.
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <netcdf.h>

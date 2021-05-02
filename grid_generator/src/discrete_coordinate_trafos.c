@@ -3,6 +3,10 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
+/*
+This file contains discrete coordinate transformations on the icosahedral grid.
+*/
+
 #include "include.h"
 #include "enum.h"
 #include <stdlib.h>

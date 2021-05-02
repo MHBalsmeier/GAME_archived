@@ -4,7 +4,7 @@ Github repository: https://github.com/AUN4GFD/game
 */
 
 /*
-This file contains functions that compute fundamental properties of the vertical grid.
+This file contains functions that compute properties of the vertical grid.
 */
 
 #include "include.h"
