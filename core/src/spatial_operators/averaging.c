@@ -128,17 +128,17 @@ int vector_field_hor_cov_to_con(Vector_field cov_to_con_field, Grid *grid)
     contravariant measure numbers.
     */
     
-    int layer_index, h_index;
+    int layer_index, h_index, vector_index;
     double vertical_gradient;
     // loop over all horizontal vector points in the orography layers
-	#pragma omp parallel for private(layer_index, h_index, vertical_gradient)
+	#pragma omp parallel for private(layer_index, h_index, vertical_gradient, vector_index)
     for (int i = 0; i < grid -> no_of_oro_layers*NO_OF_VECTORS_H; ++i)
     {
         layer_index = i/NO_OF_VECTORS_H;
         h_index = i - layer_index*NO_OF_VECTORS_H;
     	remap_verpri2horpri_vector(cov_to_con_field, layer_index + (NO_OF_LAYERS - grid -> no_of_oro_layers), h_index, &vertical_gradient, grid);
-        cov_to_con_field[i] += -grid -> slope[NO_OF_SCALARS_H + (NO_OF_LAYERS - grid -> no_of_oro_layers + layer_index)*NO_OF_VECTORS_PER_LAYER + h_index]
-        *vertical_gradient;
+    	vector_index = NO_OF_SCALARS_H + (NO_OF_LAYERS - grid -> no_of_oro_layers + layer_index)*NO_OF_VECTORS_PER_LAYER + h_index;
+        cov_to_con_field[vector_index] += -grid -> slope[vector_index]*vertical_gradient;
     }
     return 0;
 }

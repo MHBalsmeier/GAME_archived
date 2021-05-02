@@ -16,16 +16,17 @@ int grad_hor_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
 	/*
 	calculates the horizontal covariant gradient
     */
-    int layer_index, h_index;
-	#pragma omp parallel for private(layer_index, h_index)
+    int layer_index, h_index, vector_index;
+	#pragma omp parallel for private(layer_index, h_index, vector_index)
     for (int i = 0; i < NO_OF_H_VECTORS; ++i)
     {
         layer_index = i/NO_OF_VECTORS_H;
         h_index = i - layer_index*NO_OF_VECTORS_H;
-        out_field[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
+        vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
+        out_field[vector_index]
         = (in_field[grid -> to_index[h_index] + layer_index*NO_OF_SCALARS_H]
         - in_field[grid -> from_index[h_index] + layer_index*NO_OF_SCALARS_H])
-        /grid -> normal_distance[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index];
+        /grid -> normal_distance[vector_index];
     }
     return 0;
 }
@@ -35,17 +36,18 @@ int grad_vert_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
 	/*
 	calculates the vertical covariant gradient
     */
-    int layer_index, h_index, lower_index, upper_index;
+    int layer_index, h_index, lower_index, upper_index, vector_index;
     // loop over the inner grid points
-	#pragma omp parallel for private(layer_index, h_index, lower_index, upper_index)
+	#pragma omp parallel for private(layer_index, h_index, lower_index, upper_index, vector_index)
     for (int i = NO_OF_SCALARS_H; i < NO_OF_V_VECTORS - NO_OF_SCALARS_H; ++i)
     {
         layer_index = i/NO_OF_SCALARS_H;
         h_index = i - layer_index*NO_OF_SCALARS_H;
         lower_index = h_index + layer_index*NO_OF_SCALARS_H;
         upper_index = h_index + (layer_index - 1)*NO_OF_SCALARS_H;
-        out_field[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
-        = (in_field[upper_index] - in_field[lower_index])/grid -> normal_distance[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
+        vector_index = h_index + layer_index*NO_OF_VECTORS_PER_LAYER;
+        out_field[vector_index]
+        = (in_field[upper_index] - in_field[lower_index])/grid -> normal_distance[vector_index];
     }
     // linear extrapolation to the TOA
     #pragma omp parallel for
