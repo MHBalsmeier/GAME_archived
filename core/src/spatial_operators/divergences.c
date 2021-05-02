@@ -13,10 +13,10 @@ In this file, divergences get computed.
 
 int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
 {
-    int layer_index, h_index, no_of_edges, i, j;
+    int layer_index, h_index, no_of_edges;
     double contra_upper, contra_lower, comp_h, comp_v;
-	#pragma omp parallel for private(layer_index, h_index, no_of_edges, i, j, contra_upper, contra_lower, comp_h, comp_v)
-    for (i = 0; i < NO_OF_SCALARS; ++i)
+	#pragma omp parallel for private(layer_index, h_index, no_of_edges, contra_upper, contra_lower, comp_h, comp_v)
+    for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         layer_index = i/NO_OF_SCALARS_H;
         h_index = i - layer_index*NO_OF_SCALARS_H;
@@ -26,7 +26,7 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
         	no_of_edges = 5;
         }
         comp_h = 0;
-        for (j = 0; j < no_of_edges; ++j)
+        for (int j = 0; j < no_of_edges; ++j)
         {
 			comp_h
 			+= in_field[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]
@@ -61,10 +61,10 @@ int add_vertical_divv(Vector_field in_field, Scalar_field out_field, Grid *grid)
 	/*
 	This adds the divergence of the vertical component of a vector field to the input scalar field.	
 	*/
-    int layer_index, h_index, i;
+    int layer_index, h_index;
     double contra_upper, contra_lower, comp_v;
-	#pragma omp parallel for private (layer_index, h_index, i, contra_upper, contra_lower, comp_v)
-    for (i = 0; i < NO_OF_SCALARS; ++i)
+	#pragma omp parallel for private (layer_index, h_index, contra_upper, contra_lower, comp_v)
+    for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         layer_index = i/NO_OF_SCALARS_H;
         h_index = i - layer_index*NO_OF_SCALARS_H;
