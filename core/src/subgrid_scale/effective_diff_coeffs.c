@@ -97,7 +97,7 @@ int hori_curl_viscosity_eff_rhombi(State *state, Irreversible_quantities *irrev,
 		// maximum (stability constraint)
 		if (irrev -> viscosity_curl_eff_rhombi[vector_index] > max_diff_h_coeff_turb)
 		{
-			irrev -> viscosity_curl_eff_rhombi[i] = max_diff_h_coeff_turb;
+			irrev -> viscosity_curl_eff_rhombi[vector_index] = max_diff_h_coeff_turb;
 		}
 		
 		// multiplying by the mass density of the gas phase
