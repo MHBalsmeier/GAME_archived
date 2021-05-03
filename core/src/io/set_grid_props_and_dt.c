@@ -214,7 +214,7 @@ int calc_delta_t_and_related(double cfl_margin, double *delta_t, Grid *grid, Dua
 		cell_area_sum += grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
 	}
 	grid -> mean_area_cell = cell_area_sum/(NO_OF_LEVELS*NO_OF_SCALARS_H);
-    return 1;
+    return 0;
 }
 
 
