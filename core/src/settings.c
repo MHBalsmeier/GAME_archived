@@ -11,8 +11,6 @@ In this file, the model run and I/O configurations can be set, which are not acc
 #include "settings.h"
 #include "enum_and_typedefs.h"
 
-int get_gas_contituents_ids(int);
-
 int get_gas_contituents_ids(int gas_constituent_id)
 {
 	// This defines the constituents of the gas phase.

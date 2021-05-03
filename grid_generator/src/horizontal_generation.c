@@ -219,7 +219,6 @@ int calc_triangle_face_unity(double triangle_face_unit_sphere[], double latitude
     return 0;
 }
 
-
 int set_vector_h_doubles(int from_index[], int to_index[], double latitude_scalar[], double longitude_scalar[], double latitude_vector[], double longitude_vector[], double direction[])
 {
 	double x_point_0, y_point_0, z_point_0, x_point_1, y_point_1, z_point_1, x_res, y_res, z_res, lat_res, lon_res;

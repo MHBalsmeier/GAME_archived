@@ -169,7 +169,6 @@ double calc_condensates_density_sum(int scalar_gridpoint_index, Mass_densities m
 	return result;
 }
 
-
 int calc_diffusion_coeff(double temperature, double particle_mass, double density, double particle_radius, double *result)
 {
 	/*
@@ -182,6 +181,11 @@ int calc_diffusion_coeff(double temperature, double particle_mass, double densit
     *result = 1.0/3.0*thermal_velocity*mean_free_path;
     return 0;
 }
+
+
+
+
+
 
 
 

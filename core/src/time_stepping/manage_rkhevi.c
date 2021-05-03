@@ -240,7 +240,6 @@ int temperature_step(State *state_old, State *state_new, State *state_tendency, 
     return 0;
 }
 
-
 int create_rad_array_scalar(double in[], double out[], int rad_block_index)
 {
 	/*
@@ -322,6 +321,9 @@ int remap_to_original(double in[], double out[], int rad_block_index)
 	}
 	return 0;
 }
+
+
+
 
 
 
