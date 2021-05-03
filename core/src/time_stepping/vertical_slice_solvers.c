@@ -17,7 +17,7 @@ This file contains the implicit vertical solvers.
 
 int thomas_algorithm(double [], double [], double [], double [], double [], int);
 
-int three_band_solver_ver_waves(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, Grid *grid, int rk_substep)
+int three_band_solver_ver_waves(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, Grid *grid)
 {
 	/*
 	This is the implicit vertical solver for the main fluid constituent.
@@ -25,7 +25,6 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 	
 	// declaring and defining some variables that will be needed later on
 	int upper_index, lower_index, j;
-    int advect_sign = -1 + 2*rk_substep;
 	double impl_pgrad_weight = get_impl_thermo_weight();
 	double c_g_v = spec_heat_cap_diagnostics_v(state_old, NO_OF_SCALARS/2, config_info);
 	double c_g_p = spec_heat_cap_diagnostics_p(state_old, NO_OF_SCALARS/2, config_info);
@@ -132,22 +131,6 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			spec_entropy_interface_new[j]
 			= 0.5*(spec_entropy_new[j]
 			+ spec_entropy_new[j + 1]);
-			// vertical third order entropy advection
-			if (config_info -> entropy_advection_order == 3)
-			{
-				// first RK step
-				if (rk_substep == 0)
-				{
-					spec_entropy_interface_new[j] += advect_sign*0.5*delta_t*state_old -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]
-					*(spec_entropy_new[j] - spec_entropy_new[j + 1])/(grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H]);
-				}
-				// second RK step
-				if (rk_substep == 1)
-				{
-					spec_entropy_interface_new[j] += advect_sign*0.5*delta_t*state_new -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]
-					*(spec_entropy_new[j] - spec_entropy_new[j + 1])/(grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H]);
-				}
-			}
 		}
 		
 		// filling up the coefficient vectors

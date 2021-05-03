@@ -87,27 +87,23 @@ int main(int argc, char *argv[])
 	ORO_ID = strtod(argv[21], NULL);
     int IDEAL_INPUT_ID;
     IDEAL_INPUT_ID = strtod(argv[22], NULL);
-	config_info -> mass_diff_h = strtod(argv[23], NULL);
-	config_info -> mass_diff_v = strtod(argv[24], NULL);
     Io_config *io_config = calloc(1, sizeof(Io_config));
-	io_config -> grib_output_switch = strtod(argv[25], NULL);
-	io_config -> netcdf_output_switch = strtod(argv[26], NULL);
-	io_config -> pressure_level_output_switch = strtod(argv[27], NULL);
-	io_config -> model_level_output_switch = strtod(argv[28], NULL);
-	io_config -> surface_output_switch = strtod(argv[29], NULL);
-	grid -> no_of_oro_layers = strtod(argv[30], NULL);
-	int VERT_GRID_TYPE = strtod(argv[31], NULL);
-	config_info -> assume_lte = strtod(argv[32], NULL);
-	config_info -> adv_sound_ratio = strtod(argv[33], NULL);
-	config_info -> delta_t_between_analyses = strtod(argv[34], NULL);
-	config_info -> dissipative_heating = strtod(argv[35], NULL);
-	config_info -> diff_h_smag_fac = strtof(argv[36], NULL);
-	config_info -> shear_bg = strtof(argv[37], NULL);
-	config_info -> damping_start_height_over_toa = strtof(argv[38], NULL);
-	config_info -> damping_coeff_max = strtof(argv[39], NULL);
-	config_info -> mass_advection_order = strtof(argv[40], NULL);
-	config_info -> entropy_advection_order = strtof(argv[41], NULL);
-	config_info -> explicit_boundary_layer = strtod(argv[42], NULL);
+	io_config -> grib_output_switch = strtod(argv[23], NULL);
+	io_config -> netcdf_output_switch = strtod(argv[24], NULL);
+	io_config -> pressure_level_output_switch = strtod(argv[25], NULL);
+	io_config -> model_level_output_switch = strtod(argv[26], NULL);
+	io_config -> surface_output_switch = strtod(argv[27], NULL);
+	grid -> no_of_oro_layers = strtod(argv[28], NULL);
+	int VERT_GRID_TYPE = strtod(argv[29], NULL);
+	config_info -> assume_lte = strtod(argv[30], NULL);
+	config_info -> adv_sound_ratio = strtod(argv[31], NULL);
+	config_info -> delta_t_between_analyses = strtod(argv[32], NULL);
+	config_info -> dissipative_heating = strtod(argv[33], NULL);
+	config_info -> diff_h_smag_fac = strtof(argv[34], NULL);
+	config_info -> shear_bg = strtof(argv[35], NULL);
+	config_info -> damping_start_height_over_toa = strtof(argv[36], NULL);
+	config_info -> damping_coeff_max = strtof(argv[37], NULL);
+	config_info -> explicit_boundary_layer = strtod(argv[38], NULL);
 	config_info -> regional_switch = 0;
 	
 	/*
@@ -146,18 +142,6 @@ int main(int argc, char *argv[])
 	if (config_info -> momentum_diff_h == 0 && config_info -> momentum_diff_v == 1)
 	{
 		printf("Horizontal momentum diffusion cannot be off if vertical momentum diffusion is on.\n");
-    	printf("Aborting.\n");
-		exit(1);
-	}
-	if (config_info -> mass_advection_order != 2 && config_info -> mass_advection_order != 3)
-	{
-		printf("Mass advection order must be set to 2 or 3.\n");
-    	printf("Aborting.\n");
-		exit(1);
-	}
-	if (config_info -> entropy_advection_order != 2 && config_info -> entropy_advection_order != 3)
-	{
-		printf("Entropy advection order must be set to 2 or 3.\n");
     	printf("Aborting.\n");
 		exit(1);
 	}
@@ -303,24 +287,6 @@ int main(int argc, char *argv[])
 	if (config_info -> dissipative_heating == 1)
 	{
 		printf("Dissipative heating is turned on.\n");
-	}
-	printf("mass advection order: %d\n", config_info -> mass_advection_order);
-	printf("entropy advection order: %d\n", config_info -> entropy_advection_order);
-	if (config_info -> mass_diff_h == 0)
-	{
-		printf("Horizontal mass diffusion is turned off.\n");
-	}
-	else
-	{
-		printf("Horizontal dry mass diffusion is turned on.\n");
-	}
-	if (config_info -> mass_diff_v == 0)
-	{
-		printf("Vertical mass diffusion is turned off.\n");
-	}
-	else
-	{
-		printf("Vertical dry mass diffusion is turned on.\n");
 	}
 	if (config_info -> temperature_diff_h == 0)
 	{

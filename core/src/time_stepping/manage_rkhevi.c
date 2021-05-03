@@ -132,7 +132,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 
 		// 4.) Vertical sound wave solver.
 		// -------------------------------
-		three_band_solver_ver_waves(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid, i);
+		three_band_solver_ver_waves(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid);
 		// Vertical velocity can be seen as updated from now on.
 		// this is for stability
 		temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, 1);

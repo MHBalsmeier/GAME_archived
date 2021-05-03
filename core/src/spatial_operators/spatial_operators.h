@@ -17,7 +17,6 @@ int divv_h(Vector_field, Scalar_field, Grid *);
 int add_vertical_divv(Vector_field, Scalar_field, Grid *);
 int scalar_times_scalar(Scalar_field, Scalar_field, Scalar_field);
 int scalar_times_vector(Scalar_field, Vector_field, Vector_field, Grid *);
-int advection_3rd_order(Scalar_field, Vector_field, Vector_field, Vector_field, Vector_field, Grid *, int, double);
 int scalar_times_vector_scalar_h(Scalar_field, Vector_field, Vector_field, Grid *);
 int scalar_times_vector_scalar_v(Scalar_field, Vector_field, Vector_field, Grid *);
 int vector_times_vector(Vector_field, Vector_field, Vector_field);

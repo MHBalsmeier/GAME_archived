@@ -87,16 +87,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
         
         // This is the mass advection, which needs to be carried out for all constituents.
         // -------------------------------------------------------------------------------
-		// calling mass advection according to user input
-		if (config_info -> mass_advection_order == 2)
-		{
-			scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
-		}
-		if (config_info -> mass_advection_order == 3)
-		{
-			advection_3rd_order(diagnostics -> scalar_field_placeholder, state -> velocity_gas, wind_advect_tracer,
-			diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid, no_rk_step, delta_t);
-		}
+		scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
         divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 		// adding the tendencies in all grid boxes
 		#pragma omp parallel for private(layer_index, h_index)
@@ -136,16 +127,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 					diagnostics -> scalar_field_placeholder[j] = 0;
 				}
 			}
-			// calling entropy advection according to user input
-			if (config_info -> entropy_advection_order == 2)
-			{
-				scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
-			}
-			if (config_info -> mass_advection_order == 3)
-			{
-				advection_3rd_order(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, wind_advect_tracer,
-				diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid, no_rk_step, delta_t);
-			}
+			scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
 			divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			// adding the tendencies in all grid boxes
 			#pragma omp parallel for private(layer_index, h_index, tracer_heating, density_gas_weight, density_total_weight)

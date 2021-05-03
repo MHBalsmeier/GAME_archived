@@ -164,8 +164,6 @@ Vector_field pot_vort_tend;
 // Info on the run configuration is collected here.
 typedef struct config_info {
 int totally_first_step_bool;
-int mass_diff_h;
-int mass_diff_v;
 int temperature_diff_h;
 int temperature_diff_v;
 int momentum_diff_h;
@@ -177,8 +175,6 @@ int adv_sound_ratio;
 int nwp_mode;
 int delta_t_between_analyses;
 int dissipative_heating;
-int mass_advection_order;
-int entropy_advection_order;
 int explicit_boundary_layer;
 int regional_switch;
 double diff_h_smag_fac;
