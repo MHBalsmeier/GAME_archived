@@ -24,7 +24,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 	*/
 	
 	// declaring and defining some variables that will be needed later on
-	int upper_index, lower_index, j;
+	int upper_index, lower_index;
 	double impl_pgrad_weight = get_impl_thermo_weight();
 	double c_g_v = spec_heat_cap_diagnostics_v(state_old, NO_OF_SCALARS/2, config_info);
 	double c_g_p = spec_heat_cap_diagnostics_p(state_old, NO_OF_SCALARS/2, config_info);
@@ -34,7 +34,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 	damping_start_height = config_info -> damping_start_height_over_toa*grid -> z_vector[0];
 	
 	// loop over all columns
-	#pragma omp parallel for private(upper_index, lower_index, j, damping_coeff, z_above_damping)
+	#pragma omp parallel for private(upper_index, lower_index, damping_coeff, z_above_damping)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// for meanings of these vectors look into the Kompendium
@@ -67,7 +67,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		double delta[NO_OF_LAYERS];
 		double density_interface_new;
 		// determining the properties of the gas phase in the grid boxes and explicit quantities
-		for (j = 0; j < NO_OF_LAYERS; ++j)
+		for (int j = 0; j < NO_OF_LAYERS; ++j)
 		{
 			// explicit density
 			density_explicit[j] = state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
@@ -112,7 +112,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		}
 		
 		// determining the interface values
-		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
+		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
 			upper_index = i + j*NO_OF_SCALARS_H;
 			lower_index = i + (j + 1)*NO_OF_SCALARS_H;
@@ -134,7 +134,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		}
 		
 		// filling up the coefficient vectors
-		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
+		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{			
 			// main diagonal
 			d_vector[j]
@@ -158,7 +158,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			+ c_g_p/delta_t*(diagnostics -> temperature_gas_explicit[i + j*NO_OF_SCALARS_H] - diagnostics -> temperature_gas_explicit[i + (j + 1)*NO_OF_SCALARS_H])
 			- temp_new_interface_values[j]/delta_t*(spec_entropy_explicit[j] - spec_entropy_explicit[j + 1]);
 		}
-		for (j = 0; j < NO_OF_LAYERS - 2; ++j)
+		for (int j = 0; j < NO_OF_LAYERS - 2; ++j)
 		{
 			// under the main diagonal
 			c_vector[j]
@@ -201,7 +201,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		--------------------------------------
 		*/
 		// mass density
-		for (j = 0; j < NO_OF_LAYERS; ++j)
+		for (int j = 0; j < NO_OF_LAYERS; ++j)
 		{
 			if (j == 0)
 			{
@@ -220,7 +220,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			}
 		}
 		// entropy density
-		for (j = 0; j < NO_OF_LAYERS; ++j)
+		for (int j = 0; j < NO_OF_LAYERS; ++j)
 		{
 			if (j == 0)
 			{
@@ -240,7 +240,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			}
 		}
 		// vertical velocity
-		for (j = 0; j < NO_OF_LAYERS - 1; ++j)
+		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
 			density_interface_new
 			= 0.5*(state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
@@ -304,10 +304,10 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 					double vertical_flux_vector_rhs[NO_OF_LAYERS - 1];
 					double solution_vector[NO_OF_LAYERS];
 					double density_old_at_interface, area;
-					int j, lower_index, upper_index;
+					int lower_index, upper_index;
 					
 					// diagnozing the vertical fluxes
-					for (j = 0; j < NO_OF_LAYERS - 1; ++j)
+					for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 					{
 						vertical_flux_vector_impl[j] = state_old -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
 						vertical_flux_vector_rhs[j] = state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i];
@@ -335,12 +335,12 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 					Now we proceed to solve the vertical tridiagonal problems.
 					*/
 					// filling up the original vectors
-					for (j = 0; j < NO_OF_LAYERS - 1; ++j)
+					for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 					{
 						c_vector[j] = impl_weight*0.5*delta_t/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j];
 						e_vector[j] = -impl_weight*0.5*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j];
 					}
-					for (j = 0; j < NO_OF_LAYERS; ++j)
+					for (int j = 0; j < NO_OF_LAYERS; ++j)
 					{
 						if (j == 0)
 						{
@@ -392,7 +392,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 					thomas_algorithm(c_vector, d_vector, e_vector, r_vector, solution_vector, NO_OF_LAYERS);
 					
 					// writing the result into the new state
-					for (j = 0; j < NO_OF_LAYERS; ++j)
+					for (int j = 0; j < NO_OF_LAYERS; ++j)
 					{
 						// limiter: none of the densities may be negative
 						if (solution_vector[j] < 0)

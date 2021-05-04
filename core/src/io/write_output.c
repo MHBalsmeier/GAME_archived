@@ -1645,10 +1645,14 @@ double calc_std_dev(double vector_for_std_deviation[], int no_of_values)
 {
 	double mean = 0;
 	for (int i = 0; i < no_of_values; ++i)
+	{
 		mean += 1.0/no_of_values*vector_for_std_deviation[i];
+	}
 	double result = 0;
 	for (int i = 0; i < no_of_values; ++i)
+	{
 		result += pow(vector_for_std_deviation[i] - mean, 2);
+	}
 	result = 1/sqrt(no_of_values)*sqrt(result);
 	return result;
 }
