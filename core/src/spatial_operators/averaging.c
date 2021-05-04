@@ -189,8 +189,8 @@ int curl_field_to_cells(Curl_field in_field, Scalar_field out_field, Grid *grid)
 	/*
 	This function averages a curl field from edges to cell centers.
 	*/
-	int layer_index, h_index, j, no_of_edges;
-	#pragma omp parallel for private (j, layer_index, h_index, no_of_edges)
+	int layer_index, h_index, no_of_edges;
+	#pragma omp parallel for private (layer_index, h_index, no_of_edges)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	layer_index = i/NO_OF_SCALARS_H;
@@ -204,7 +204,7 @@ int curl_field_to_cells(Curl_field in_field, Scalar_field out_field, Grid *grid)
         	no_of_edges = 5;
         }
         // loop over all edges of the respective cell
-        for (j = 0; j < no_of_edges; ++j)
+        for (int j = 0; j < no_of_edges; ++j)
         {
         	out_field[i] += 0.5
         	*grid -> inner_product_weights[8*i + j]
@@ -219,8 +219,8 @@ int edges_to_cells(Vector_field in_field, Scalar_field out_field, Grid *grid)
 	/*
 	This function averages a vector field from edges to cell centers.
 	*/
-	int layer_index, h_index, j, no_of_edges;
-	#pragma omp parallel for private (j, layer_index, h_index, no_of_edges)
+	int layer_index, h_index, no_of_edges;
+	#pragma omp parallel for private (layer_index, h_index, no_of_edges)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	layer_index = i/NO_OF_SCALARS_H;
@@ -234,7 +234,7 @@ int edges_to_cells(Vector_field in_field, Scalar_field out_field, Grid *grid)
         	no_of_edges = 5;
         }
         // loop over all cell edges
-        for (j = 0; j < no_of_edges; ++j)
+        for (int j = 0; j < no_of_edges; ++j)
         {
         	out_field[i] += 0.5
         	*grid -> inner_product_weights[8*i + j]
@@ -243,6 +243,16 @@ int edges_to_cells(Vector_field in_field, Scalar_field out_field, Grid *grid)
     }
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
 
 
 
