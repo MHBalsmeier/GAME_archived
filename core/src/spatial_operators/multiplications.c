@@ -41,6 +41,7 @@ int scalar_times_vector(Scalar_field scalar_field, Vector_field vector_field, Ve
     scalar_times_vector_scalar_v(scalar_field, vector_field, out_field, grid);
     return 0;
 }
+
 int scalar_times_vector_scalar_h(Scalar_field in_field_h, Vector_field vector_field, Vector_field out_field, Grid *grid)
 {
     int layer_index, h_index, vector_index;
@@ -62,10 +63,10 @@ int scalar_times_vector_scalar_h(Scalar_field in_field_h, Vector_field vector_fi
 
 int scalar_times_vector_scalar_v(Scalar_field in_field_v, Vector_field vector_field, Vector_field out_field, Grid *grid)
 {
-    int layer_index, h_index, lower_index, upper_index, i;
+    int layer_index, h_index, lower_index, upper_index;
     double scalar_value;
-    #pragma omp parallel for private (layer_index, h_index, lower_index, upper_index, i, scalar_value)
-    for (i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
+    #pragma omp parallel for private (layer_index, h_index, lower_index, upper_index, scalar_value)
+    for (int i = NO_OF_SCALARS_H; i < NO_OF_VECTORS - NO_OF_SCALARS_H; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
@@ -81,7 +82,7 @@ int scalar_times_vector_scalar_v(Scalar_field in_field_v, Vector_field vector_fi
     }
     // linear extrapolation to the TOA
     #pragma omp parallel for private(scalar_value)
-    for (i = 0; i < NO_OF_SCALARS_H; ++i)
+    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
         scalar_value
         = in_field_v[i]
@@ -92,7 +93,7 @@ int scalar_times_vector_scalar_v(Scalar_field in_field_v, Vector_field vector_fi
     }
     // linear extrapolation to the surface
     #pragma omp parallel for private(layer_index, h_index, upper_index, scalar_value)
-    for (i = NO_OF_VECTORS - NO_OF_SCALARS_H; i < NO_OF_VECTORS; ++i)
+    for (int i = NO_OF_VECTORS - NO_OF_SCALARS_H; i < NO_OF_VECTORS; ++i)
     {
         layer_index = i/NO_OF_VECTORS_PER_LAYER;
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
@@ -106,6 +107,11 @@ int scalar_times_vector_scalar_v(Scalar_field in_field_v, Vector_field vector_fi
     }
     return 0;
 }
+
+
+
+
+
 
 
 
