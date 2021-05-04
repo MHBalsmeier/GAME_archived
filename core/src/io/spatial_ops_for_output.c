@@ -20,9 +20,9 @@ int epv_diagnostics(Curl_field pot_vort, Scalar_field pot_temp, Scalar_field epv
 	// allocating memory for quantities we need in order to determine the EPV
 	Vector_field *grad_pot_temp = calloc(1, sizeof(Vector_field));
 	Vector_field *pot_vort_as_mod_vector_field = calloc(1, sizeof(Vector_field));
-	int layer_index, h_index, scalar_index, j;
+	int layer_index, h_index, scalar_index;
 	double upper_weight, lower_weight, layer_thickness;
-	#pragma omp parallel for private(layer_index, h_index, scalar_index, upper_weight, lower_weight, layer_thickness, j)
+	#pragma omp parallel for private(layer_index, h_index, scalar_index, upper_weight, lower_weight, layer_thickness)
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
 		layer_index = i/NO_OF_VECTORS_PER_LAYER;
@@ -70,7 +70,7 @@ int epv_diagnostics(Curl_field pot_vort, Scalar_field pot_temp, Scalar_field epv
 			// highest layer
 			if (layer_index == 0)
 			{
-				for (j = 0; j < 6; ++j)
+				for (int j = 0; j < 6; ++j)
 				{
 					scalar_index = h_index;
 				    (*pot_vort_as_mod_vector_field)[i] +=
@@ -81,7 +81,7 @@ int epv_diagnostics(Curl_field pot_vort, Scalar_field pot_temp, Scalar_field epv
 			// lowest layer
 			else if (layer_index == NO_OF_LAYERS)
 			{
-				for (j = 0; j < 6; ++j)
+				for (int j = 0; j < 6; ++j)
 				{
 					scalar_index = (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + h_index;
 				    (*pot_vort_as_mod_vector_field)[i] +=
@@ -93,7 +93,7 @@ int epv_diagnostics(Curl_field pot_vort, Scalar_field pot_temp, Scalar_field epv
 			else
 			{
 				// contribution of upper cell
-				for (j = 0; j < 6; ++j)
+				for (int j = 0; j < 6; ++j)
 				{
 					scalar_index = (layer_index - 1)*NO_OF_SCALARS_H + h_index;
 				    (*pot_vort_as_mod_vector_field)[i] +=
@@ -101,7 +101,7 @@ int epv_diagnostics(Curl_field pot_vort, Scalar_field pot_temp, Scalar_field epv
 				    *pot_vort[NO_OF_VECTORS_H + (layer_index - 1)*2*NO_OF_VECTORS_H + grid -> adjacent_vector_indices_h[6*h_index + j]];
 				}
 				// contribution of lower cell
-				for (j = 0; j < 6; ++j)
+				for (int j = 0; j < 6; ++j)
 				{
 					scalar_index = layer_index*NO_OF_SCALARS_H + h_index;
 				    (*pot_vort_as_mod_vector_field)[i] +=
@@ -124,17 +124,17 @@ int inner_product_tangential(Vector_field in_field_0, Vector_field in_field_1, S
 {
     /*
     This function computes the inner product of the two vector fields in_field_0 and in_field_1.
-    The difference to the normal inner product is, that the components are given as tangential components.
+    The difference to the normal inner product is, that in_field_0 is given in tangential components.
     */
-    int layer_index, h_index, j;
+    int layer_index, h_index;
     double tangential_wind_value;
-    #pragma omp parallel for private (j, layer_index, h_index)
+    #pragma omp parallel for private (layer_index, h_index)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 	    layer_index = i/NO_OF_SCALARS_H;
 	    h_index = i - layer_index*NO_OF_SCALARS_H;
 	    out_field[i] = 0;
-	    for (j = 0; j < 6; ++j)
+	    for (int j = 0; j < 6; ++j)
 	    {
 			tangential_wind(in_field_1, layer_index, grid -> adjacent_vector_indices_h[6*h_index + j], &tangential_wind_value, grid);
 	        out_field[i] +=
