@@ -128,7 +128,7 @@ int inner_product_tangential(Vector_field in_field_0, Vector_field in_field_1, S
     */
     int layer_index, h_index;
     double tangential_wind_value;
-    #pragma omp parallel for private (layer_index, h_index)
+    #pragma omp parallel for private (layer_index, h_index, tangential_wind_value)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 	    layer_index = i/NO_OF_SCALARS_H;
@@ -153,15 +153,14 @@ int interpolate_to_ll(double in_field[], double out_field[], Grid *grid)
 	/*
 	This function interpolates a single-layer scalar field to a lat-lon grid.
 	*/
-	int i, j;
 	// loop over all output points
-	#pragma omp parallel for private(i, j)
-	for (i = 0; i < NO_OF_LATLON_IO_POINTS; ++i)
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_LATLON_IO_POINTS; ++i)
 	{
 		// initializing the result with zero
 		out_field[i] = 0;
 		// 1/r-average
-		for (j = 0; j < 3; ++j)
+		for (int j = 0; j < 3; ++j)
 		{
 			out_field[i] += grid -> latlon_interpol_weights[3*i + j]*in_field[grid -> latlon_interpol_indices[3*i + j]];
 		}
@@ -174,8 +173,8 @@ int edges_to_cells_lowest_layer(double in_field[NO_OF_VECTORS_H], double out_fie
 	/*
 	This function averages a horizontal vector field (defined in the lowest layer) from edges to centers.
 	*/
-	int j, no_of_edges;
-	#pragma omp parallel for private (j, no_of_edges)
+	int no_of_edges;
+	#pragma omp parallel for private (no_of_edges)
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
     	// initializing the result with zero
@@ -187,7 +186,7 @@ int edges_to_cells_lowest_layer(double in_field[NO_OF_VECTORS_H], double out_fie
         	no_of_edges = 5;
         }
         // loop over all edges of the respective cell
-        for (j = 0; j < no_of_edges; ++j)
+        for (int j = 0; j < no_of_edges; ++j)
         {
         	out_field[i] += 0.5
         	*grid -> inner_product_weights[8*(NO_OF_SCALARS - NO_OF_SCALARS_H + i) + j]
