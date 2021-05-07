@@ -3,8 +3,8 @@
 # This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 # Github repository: https://github.com/AUN4GFD/game
 
-game_home_dir=/home/max/compiled/game_dev # the home directory of GAME
-run_id=ullrich # the run id which you want to plot
+game_home_dir=/home/max/compiled/game # the home directory of GAME
+run_id=ideal # the run id which you want to plot
 run_span=$((8*86400)) # the length of the run
 output_dir=$game_home_dir/output/$run_id # the directory where the grib files are stored
 fig_save_path=/home/max/figs/game_output # the path to which the figures will be saved
