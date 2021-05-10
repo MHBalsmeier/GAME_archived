@@ -26,7 +26,7 @@ NO_OF_LAYERS = 26,
 NO_OF_GASEOUS_CONSTITUENTS = 1,
 NO_OF_CONDENSED_CONSTITUENTS = 0,
 // the number of blocks into which the arrays will be split up for the radiation calculation
-NO_OF_RAD_BLOCKS = 12,
+NO_OF_RAD_BLOCKS = 18,
 // Nothing should be changed by the user below this line.
 NO_OF_CONSTITUENTS = (NO_OF_GASEOUS_CONSTITUENTS + NO_OF_CONDENSED_CONSTITUENTS),
 NO_OF_BASIC_TRIANGLES = 20,
