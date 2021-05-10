@@ -9,14 +9,14 @@ import numpy as np;
 import toolbox.conversions as conv;
 import math as mat;
 
-game_output_dir = "/home/max/compiled/game_dev/output";
+game_output_dir = "~/compiled/game/output";
 run_id = "held_suarez";
-save_directory = "/home/max/held_suarez_output";
+save_directory = "~/figs/game_output";
 short_name = "t";
 no_of_layers = 26;
-run_span = 1200*86400; # run length
+run_span = 1250*86400; # run length
 dt_data = 86400; # output time step
-begin_since_init = 200*86400; #  when to begin computing the zonal average
+begin_since_init = 250*86400; #  when to begin computing the zonal average
 stretching_parameter = 1.3; # stretching parameter of the vertical grid
 toa = 41152; # top of atmosphere
 
