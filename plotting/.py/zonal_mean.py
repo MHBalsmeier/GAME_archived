@@ -87,7 +87,7 @@ else:
 	plt.title("Zonal and temporal mean of " + short_name);
 plt.xlabel("latitude / deg");
 plt.ylabel("height above MSL / m");
-plt.savefig(save_directory + "/" + run_id + "_" + short_name + ".png");
+plt.savefig(save_directory + "/" + run_id + "_" + "zonal_mean" + "_" + short_name + ".png");
 plt.close("all");
 
 
