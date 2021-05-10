@@ -9,9 +9,9 @@ import numpy as np;
 import toolbox.conversions as conv;
 import math as mat;
 
-game_output_dir = "~/compiled/game/output";
+game_output_dir = "/home/max/compiled/game/output";
 run_id = "held_suarez";
-save_directory = "~/figs/game_output";
+save_directory = "/home/max/figs/game_output";
 short_name = "t";
 no_of_layers = 26;
 run_span = 1250*86400; # run length
