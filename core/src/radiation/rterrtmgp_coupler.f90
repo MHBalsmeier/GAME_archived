@@ -33,7 +33,7 @@ module radiation
   ! the gas concentrations (object holding all information on the composition
   ! of the gas phase)
   type(ty_gas_concs)                 :: gas_concentrations_sw
-  type(ty_gas_concs)                 :: gas_concentrations
+  type(ty_gas_concs)                 :: gas_concentrations_lw
   
   type(ty_gas_optics_rrtmgp)         :: k_dist_sw, k_dist_lw
 
@@ -85,12 +85,12 @@ module radiation
     end do
     ! here, the names of the gases are written to the gas_concentrations object
     call handle_error(gas_concentrations_sw%init(gases_lowercase))
-    call handle_error(gas_concentrations%init(gases_lowercase))
+    call handle_error(gas_concentrations_lw%init(gases_lowercase))
     
     ! loading the short wave radiation properties
     call load_and_init(k_dist_sw, rrtmgp_coefficients_file_sw, gas_concentrations_sw)
     ! loading the long wave radiation properties
-    call load_and_init(k_dist_lw, rrtmgp_coefficients_file_lw, gas_concentrations)
+    call load_and_init(k_dist_lw, rrtmgp_coefficients_file_lw, gas_concentrations_lw)
     
   end subroutine radiation_init
   
@@ -345,7 +345,7 @@ module radiation
     call init_fluxes(fluxes_allsky,   no_of_scalars_h, no_of_layers+1, no_of_lw_bands)
     
     ! calculate longwave radiative fluxes
-    call handle_error(rte_lw(k_dist_lw, gas_concentrations, pressure_rad(:,:), &
+    call handle_error(rte_lw(k_dist_lw, gas_concentrations_lw, pressure_rad(:,:), &
     temperature_rad(:,:), pressure_interface_rad(:,:), temperature_interface_rad(:,no_of_layers+1), &
     surface_emissivity(:,:), cloud_optics_lw, fluxes_allsky, fluxes_clearsky, &
     t_lev = temperature_interface_rad(:,:)))
@@ -598,7 +598,7 @@ module radiation
       if (sw_bool) then
         call handle_error(gas_concentrations_sw%set_vmr(gases_lowercase(ji), vol_mix_ratio(1:no_of_day_points,:)))
       else
-        call handle_error(gas_concentrations%set_vmr(gases_lowercase(ji), vol_mix_ratio(:,:)))
+        call handle_error(gas_concentrations_lw%set_vmr(gases_lowercase(ji), vol_mix_ratio(:,:)))
       endif
     enddo
   
