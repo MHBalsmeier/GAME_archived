@@ -72,8 +72,8 @@ ${RTERRTMGPDIR}/examples/mo_simple_netcdf.F90
 ${RTERRTMGPDIR}/extensions/mo_rrtmgp_clr_all_sky.F90
 )
 find_package(OpenMP)
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS} -O1 -Wall")
-SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS} -lgfortran -O1")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O1 -Wall -Wno-unknown-pragmas")
+SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -lgfortran -O1")
                                                 # insert output of 'nf-config --fflags --flibs' here
 SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -I/usr/include -L/usr/lib/x86_64-linux-gnu -lnetcdff -Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now -lnetcdf -lnetcdf -ldl -lm")
 target_link_libraries(game eccodes m netcdf netcdff geos95 atmostracers)
