@@ -80,23 +80,24 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		if (config_info -> rad_on > 0 && config_info -> rad_update == 1 && i == 0)
 		{
 			printf("Starting update of radiative fluxes ...\n");
-			if (config_info -> rad_on == 1)
+			int no_of_scalars = NO_OF_SCALARS_RAD;
+			int no_of_constituents = NO_OF_CONSTITUENTS;
+			int no_of_condensed_constituents = NO_OF_CONDENSED_CONSTITUENTS;
+			int no_of_layers = NO_OF_LAYERS;
+			// loop over all radiation blocks
+			for (int rad_block_index = 0; rad_block_index < NO_OF_RAD_BLOCKS; ++rad_block_index)
 			{
-				int no_of_scalars = NO_OF_SCALARS_RAD;
-				int no_of_constituents = NO_OF_CONSTITUENTS;
-				int no_of_condensed_constituents = NO_OF_CONDENSED_CONSTITUENTS;
-				int no_of_layers = NO_OF_LAYERS;
-				// loop over all radiation blocks
-				for (int rad_block_index = 0; rad_block_index < NO_OF_RAD_BLOCKS; ++rad_block_index)
+				// remapping all the arrays
+				create_rad_array_scalar_h(grid -> latitude_scalar, radiation -> lat_scal_rad, rad_block_index);
+				create_rad_array_scalar_h(grid -> longitude_scalar, radiation -> lon_scal_rad, rad_block_index);
+				create_rad_array_scalar(grid -> z_scalar, radiation -> z_scal_rad, rad_block_index);
+				create_rad_array_vector(grid -> z_vector, radiation -> z_vect_rad, rad_block_index);
+				create_rad_array_mass_den(state_old -> mass_densities, radiation -> mass_den_rad, rad_block_index);
+				create_rad_array_scalar(state_old -> temperature_gas, radiation -> temp_rad, rad_block_index);
+				// calling the radiation routine
+				// RTE+RRTMGP
+				if (config_info -> rad_on == 1)
 				{
-					// remapping all the arrays
-					create_rad_array_scalar_h(grid -> latitude_scalar, radiation -> lat_scal_rad, rad_block_index);
-					create_rad_array_scalar_h(grid -> longitude_scalar, radiation -> lon_scal_rad, rad_block_index);
-					create_rad_array_scalar(grid -> z_scalar, radiation -> z_scal_rad, rad_block_index);
-					create_rad_array_vector(grid -> z_vector, radiation -> z_vect_rad, rad_block_index);
-					create_rad_array_mass_den(state_old -> mass_densities, radiation -> mass_den_rad, rad_block_index);
-					create_rad_array_scalar(state_old -> temperature_gas, radiation -> temp_rad, rad_block_index);
-					// calling the radiation routine
 					calc_radiative_flux_convergence(radiation -> lat_scal_rad,
 					radiation -> lon_scal_rad,
 					radiation -> z_scal_rad,
@@ -107,13 +108,14 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 					&no_of_scalars, &no_of_layers,
 					&no_of_constituents, &no_of_condensed_constituents,
 					&time_coordinate);
-					// filling the actual radiation tendency
-					remap_to_original(radiation -> rad_tend_rad, radiation -> radiation_tendency, rad_block_index);
 				}
-			}
-			if (config_info -> rad_on == 2)
-			{
-				held_suar(grid -> latitude_scalar, grid -> z_scalar, state_old -> mass_densities, state_old -> temperature_gas, radiation -> radiation_tendency);
+				// Held-Suarez
+				if (config_info -> rad_on == 2)
+				{
+					held_suar(radiation -> lat_scal_rad, radiation -> z_scal_rad, radiation -> mass_den_rad, radiation -> temp_rad, radiation -> rad_tend_rad);
+				}
+				// filling the actual radiation tendency
+				remap_to_original(radiation -> rad_tend_rad, radiation -> radiation_tendency, rad_block_index);
 			}
 			printf("Update of radiative fluxes completed.\n");
 		}
