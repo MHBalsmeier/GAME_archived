@@ -134,7 +134,7 @@ module radiation
     
     ! local variables
     ! solar zenith angle
-    real(8)	                         :: mu_0(no_of_scalars/no_of_layers)
+    real(8)                          :: mu_0(no_of_scalars/no_of_layers)
     ! number of points where it is day
     integer                          :: no_of_day_points
     ! loop indices
@@ -158,7 +158,7 @@ module radiation
     ! surface albedo for diffusive radiation (day points only)
     real(8)                          :: albedo_dif_day    (no_of_sw_bands, no_of_scalars/no_of_layers)
     ! solar zenith angle (day points only)
-    real(8)	                         :: mu_0_day(no_of_scalars/no_of_layers)
+    real(8)                          :: mu_0_day(no_of_scalars/no_of_layers)
     ! reformatted temperature field
     real(8)                          :: temperature_rad           (no_of_scalars/no_of_layers, no_of_layers)
     ! reformatted pressure field
