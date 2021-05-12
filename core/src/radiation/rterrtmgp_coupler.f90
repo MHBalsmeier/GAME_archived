@@ -317,14 +317,9 @@ module radiation
     fluxes_allsky_day, fluxes_clearsky_day))
     
     ! short wave result (in Wm^-3)
-    ! clear sky
     call calc_power_density(.true., no_of_scalars, &
     no_of_layers, no_of_scalars_h, no_of_day_points, day_indices, &
-    fluxes_clearsky_day, z_vector, radiation_tendency)
-    ! all sky (not yet implemented)
-    !call calc_power_density(.true., no_of_scalars, &
-    !no_of_layers, no_of_scalars_h, no_of_scalars_h, no_of_day_points, day_indices, &
-    !fluxes_allsky_day, z_vector, radiation_tendency)
+    fluxes_allsky_day, z_vector, radiation_tendency)
     
     ! freeing the short wave fluxes
     call free_fluxes(fluxes_clearsky_day)
@@ -351,14 +346,9 @@ module radiation
     t_lev = temperature_interface_rad(:,:)))
    
     ! add long wave result (in Wm^-3)
-    ! clear sky
     call calc_power_density(.false., no_of_scalars, &
     no_of_layers, no_of_scalars_h, no_of_day_points, day_indices, &
-    fluxes_clearsky, z_vector, radiation_tendency)
-    ! all sky (not yet implemented)
-    !call calc_power_density(.false., no_of_scalars, &
-    !no_of_layers, no_of_scalars_h, no_of_scalars_h, no_of_day_points, day_indices, &
-    !fluxes_allsky, z_vector, radiation_tendency)
+    fluxes_allsky, z_vector, radiation_tendency)
     
     ! freeing the long wave fluxes
     call free_fluxes(fluxes_clearsky)
