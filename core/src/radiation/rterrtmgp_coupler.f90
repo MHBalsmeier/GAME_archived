@@ -183,7 +183,7 @@ module radiation
     no_of_scalars_h =  no_of_scalars/no_of_layers
     
     ! set the surface emissivity (a longwave property) to a standard value
-    surface_emissivity(:,:) =  0.95_wp
+    surface_emissivity(:,:) =  0.98_wp
     
     ! setting the surface albedos to 0.12 (compare Zdunkowski, Trautmann & Bott:
     ! Radiation in the Atmosphere, 2007, p. 444)
