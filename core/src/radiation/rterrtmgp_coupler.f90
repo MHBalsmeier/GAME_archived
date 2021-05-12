@@ -143,10 +143,8 @@ module radiation
     integer                          :: day_indices(no_of_scalars/no_of_layers)
     ! number of scalars per layer (number of columns)
     integer                          :: no_of_scalars_h
-    ! the resulting clear sky fluxes
-    type(ty_fluxes_byband)           :: fluxes_clearsky, fluxes_clearsky_day
-    ! the resulting all sky fluxes
-    type(ty_fluxes_byband)           :: fluxes_allsky, fluxes_allsky_day
+    ! the resulting fluxes
+    type(ty_fluxes_byband)           :: fluxes, fluxes_day
     ! the surface emissivity
     real(8)                          :: surface_emissivity(no_of_lw_bands, no_of_scalars/no_of_layers)
     ! surface albedo for direct radiation
@@ -305,8 +303,7 @@ module radiation
     cloud_optics_sw%g   = 0._wp
     
     ! initializing the short wave fluxes
-    call init_fluxes(fluxes_clearsky_day, no_of_day_points, no_of_layers+1, no_of_sw_bands)
-    call init_fluxes(fluxes_allsky_day,   no_of_day_points, no_of_layers+1, no_of_sw_bands)
+    call init_fluxes(fluxes_day,   no_of_day_points, no_of_layers+1, no_of_sw_bands)
     
     ! calculate shortwave radiative fluxes (only the day points are handed over
     ! for efficiency)
@@ -314,16 +311,15 @@ module radiation
     temperature_rad_day(1:no_of_day_points,:), pressure_interface_rad_day(1:no_of_day_points,:), &
     mu_0_day(1:no_of_day_points), albedo_dir_day(:,1:no_of_day_points), &
     albedo_dif_day(:,1:no_of_day_points), cloud_optics_sw, &
-    fluxes_allsky_day, fluxes_clearsky_day))
+    fluxes_day))
     
     ! short wave result (in Wm^-3)
     call calc_power_density(.true., no_of_scalars, &
     no_of_layers, no_of_scalars_h, no_of_day_points, day_indices, &
-    fluxes_allsky_day, z_vector, radiation_tendency)
+    fluxes_day, z_vector, radiation_tendency)
     
     ! freeing the short wave fluxes
-    call free_fluxes(fluxes_clearsky_day)
-    call free_fluxes(fluxes_allsky_day)
+    call free_fluxes(fluxes_day)
     
     ! now long wave
     ! setting the volume mixing ratios of the gases for the long wave calculation
@@ -336,23 +332,21 @@ module radiation
     cloud_optics_lw%tau = 0.0_wp
     
     ! initializing the long wave fluxes
-    call init_fluxes(fluxes_clearsky, no_of_scalars_h, no_of_layers+1, no_of_lw_bands)
-    call init_fluxes(fluxes_allsky,   no_of_scalars_h, no_of_layers+1, no_of_lw_bands)
+    call init_fluxes(fluxes,   no_of_scalars_h, no_of_layers+1, no_of_lw_bands)
     
     ! calculate longwave radiative fluxes
     call handle_error(rte_lw(k_dist_lw, gas_concentrations_lw, pressure_rad(:,:), &
     temperature_rad(:,:), pressure_interface_rad(:,:), temperature_interface_rad(:,no_of_layers+1), &
-    surface_emissivity(:,:), cloud_optics_lw, fluxes_allsky, fluxes_clearsky, &
+    surface_emissivity(:,:), cloud_optics_lw, fluxes, &
     t_lev = temperature_interface_rad(:,:)))
    
     ! add long wave result (in Wm^-3)
     call calc_power_density(.false., no_of_scalars, &
     no_of_layers, no_of_scalars_h, no_of_day_points, day_indices, &
-    fluxes_allsky, z_vector, radiation_tendency)
+    fluxes, z_vector, radiation_tendency)
     
     ! freeing the long wave fluxes
-    call free_fluxes(fluxes_clearsky)
-    call free_fluxes(fluxes_allsky)
+    call free_fluxes(fluxes)
     
   end subroutine calc_radiative_flux_convergence
     
