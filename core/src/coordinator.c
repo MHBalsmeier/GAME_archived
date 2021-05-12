@@ -18,6 +18,7 @@ The main organizes the model, manages the time stepping, calls model output, col
 #include "thermodynamics/thermodynamics.h"
 #include "radiation/radiation.h"
 #include "time_stepping/time_stepping.h"
+#include "soil/soil.h"
 #include <mpi.h>
 
 int main(int argc, char *argv[])

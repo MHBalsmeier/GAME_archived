@@ -14,6 +14,7 @@ This file manages the RKHEVI time stepping.
 #include "../radiation/radiation.h"
 #include "../thermodynamics/thermodynamics.h"
 #include "../io/io.h"
+#include "../soil/soil.h"
 #include <geos95.h>
 #include <stdlib.h>
 #include <stdio.h>
