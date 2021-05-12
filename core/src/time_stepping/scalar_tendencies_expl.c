@@ -16,7 +16,7 @@ This is the horizontal (explicit) part of the constituent integration.
 #include "stdio.h"
 #include "stdlib.h"
 
-int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step, Vector_field wind_advect_tracer)
+int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step, Vector_field wind_advect_tracer)
 {
 	/*
 	Firstly, some things need to prepared.
@@ -175,6 +175,14 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 					// phase transitions
 					+ tracer_heating*state -> mass_densities[i*NO_OF_SCALARS + j]/density_gas_weight
 					/state -> temperature_gas[j]);
+					// sensible heat in the lowest layer
+					if (layer_index == NO_OF_LAYERS - 1 - grid -> no_of_shaded_points_scalar[h_index])
+					{
+						state_tendency -> entropy_densities[(i - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j]
+						// the minus-sign is correct (the quantity itself refers to soil)
+						-= soil -> power_flux_density_sensible[j + NO_OF_SCALARS_H - NO_OF_SCALARS]/state -> temperature_gas[j]
+						/(grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H + h_index] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index]);
+					}
 				 }
 			}
 		}

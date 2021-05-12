@@ -147,6 +147,11 @@ double prep_for_vert_diffusion[NO_OF_H_VECTORS - NO_OF_VECTORS_H];
 typedef struct radiation {
 double lat_scal_rad[NO_OF_SCALARS_RAD_PER_LAYER];
 double lon_scal_rad[NO_OF_SCALARS_RAD_PER_LAYER];
+double sfc_sw_in[NO_OF_SCALARS_H];
+double sfc_lw_out[NO_OF_SCALARS_H];
+double sfc_sw_in_rad[NO_OF_SCALARS_RAD_PER_LAYER];
+double sfc_lw_out_rad[NO_OF_SCALARS_RAD_PER_LAYER];
+double temp_sfc_rad[NO_OF_SCALARS_RAD_PER_LAYER];
 double z_scal_rad[NO_OF_SCALARS_RAD];
 double z_vect_rad[NO_OF_SCALARS_RAD + NO_OF_SCALARS_RAD_PER_LAYER];
 double mass_den_rad[NO_OF_CONSTITUENTS*NO_OF_SCALARS_RAD];
@@ -188,6 +193,12 @@ double damping_coeff_max;
 typedef struct extrapolation_info {
 Vector_field pgrad_acc_old;
 } Extrapolation_info;
+
+// soil information
+typedef struct soil {
+double temperature[NO_OF_SCALARS_H];
+double power_flux_density_sensible[NO_OF_SCALARS_H];
+} Soil;
 
 // Contains everything on turbulence parametrizations as well as constituent-related quantities.
 typedef struct irreversible_quantities {

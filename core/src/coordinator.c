@@ -522,6 +522,8 @@ int main(int argc, char *argv[])
     State *state_new = calloc(1, sizeof(State));
     linear_combine_two_states(state_old, state_old, state_new, 1, 0);
 	Radiation *radiation = calloc(1, sizeof(Radiation));
+	Soil *soil = calloc(1, sizeof(Soil));
+	init_soil(soil, state_old);
     State *state_write = calloc(1, sizeof(State));
     
     /*
@@ -551,7 +553,7 @@ int main(int argc, char *argv[])
     	}
     	
     	// Time step integration.
-    	manage_rkhevi(state_old, state_new, extrapolation_info, grid, dualgrid, radiation, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
+    	manage_rkhevi(state_old, state_new, soil, extrapolation_info, grid, dualgrid, radiation, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
     	// This switch can be set to zero now and remains there.
     	config_info -> totally_first_step_bool = 0;
 		time_step_counter += 1;

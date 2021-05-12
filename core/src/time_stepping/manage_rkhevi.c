@@ -24,8 +24,9 @@ int create_rad_array_scalar_h(double [], double [], int);
 int create_rad_array_mass_den(double [], double [], int);
 int create_rad_array_vector(double [], double [], int);
 int remap_to_original(double [], double [], int);
+int remap_to_original_scalar_h(double [], double [], int);
 
-int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrapolation_info, Grid *grid, Dualgrid *dualgrid, Radiation *radiation, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, double delta_t, double time_coordinate, int total_step_counter)
+int manage_rkhevi(State *state_old, State *state_new, Soil *soil,Extrapolation_info *extrapolation_info, Grid *grid, Dualgrid *dualgrid, Radiation *radiation, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, double delta_t, double time_coordinate, int total_step_counter)
 {
 	// slow terms (momentum advection and diffusion) update switch
 	int slow_update_bool = 0;
@@ -38,6 +39,12 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 		slow_update_bool = 1;
 		// delta_t is the large time step for the advection integration
 		delta_t = config_info -> adv_sound_ratio*delta_t_small;
+    }
+       
+    // interaction with soil (only useful if real radiation is on)
+    if (config_info -> rad_on == 1)
+    {
+    	soil_interaction(soil, state_old, radiation, delta_t);
     }
     
 	/*
@@ -90,6 +97,7 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 				// remapping all the arrays
 				create_rad_array_scalar_h(grid -> latitude_scalar, radiation -> lat_scal_rad, rad_block_index);
 				create_rad_array_scalar_h(grid -> longitude_scalar, radiation -> lon_scal_rad, rad_block_index);
+				create_rad_array_scalar_h(soil -> temperature, radiation -> temp_sfc_rad, rad_block_index);
 				create_rad_array_scalar(grid -> z_scalar, radiation -> z_scal_rad, rad_block_index);
 				create_rad_array_vector(grid -> z_vector, radiation -> z_vect_rad, rad_block_index);
 				create_rad_array_mass_den(state_old -> mass_densities, radiation -> mass_den_rad, rad_block_index);
@@ -105,6 +113,9 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 					radiation -> mass_den_rad,
 					radiation -> temp_rad,
 					radiation -> rad_tend_rad,
+					radiation -> temp_sfc_rad,
+					radiation -> sfc_sw_in_rad,
+					radiation -> sfc_lw_out_rad,
 					&no_of_scalars, &no_of_layers,
 					&no_of_constituents, &no_of_condensed_constituents,
 					&time_coordinate);
@@ -116,16 +127,18 @@ int manage_rkhevi(State *state_old, State *state_new, Extrapolation_info *extrap
 				}
 				// filling the actual radiation tendency
 				remap_to_original(radiation -> rad_tend_rad, radiation -> radiation_tendency, rad_block_index);
+				remap_to_original_scalar_h(radiation -> sfc_sw_in_rad, radiation -> sfc_sw_in, rad_block_index);
+				remap_to_original_scalar_h(radiation -> sfc_lw_out_rad, radiation -> sfc_lw_out, rad_block_index);
 			}
 			printf("Update of radiative fluxes completed.\n");
 		}
 		if (i == 0)
 		{
-			scalar_tendencies_expl(state_new, state_tendency, grid, dualgrid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irrev, config_info, i, state_old -> velocity_gas);
+			scalar_tendencies_expl(state_new, state_tendency, soil, grid, dualgrid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irrev, config_info, i, state_old -> velocity_gas);
 		}
 		if (i == 1)
 		{	
-			scalar_tendencies_expl(state_new, state_tendency, grid, dualgrid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irrev, config_info, i, state_new -> velocity_gas);
+			scalar_tendencies_expl(state_new, state_tendency, soil, grid, dualgrid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irrev, config_info, i, state_new -> velocity_gas);
 		}
 		
 		// 3.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies (including diabatic forcings).
@@ -320,6 +333,20 @@ int remap_to_original(double in[], double out[], int rad_block_index)
 		layer_index = i/NO_OF_SCALARS_RAD_PER_LAYER;
 		h_index = i - layer_index*NO_OF_SCALARS_RAD_PER_LAYER;
 		out[rad_block_index*NO_OF_SCALARS_RAD_PER_LAYER + h_index + layer_index*NO_OF_SCALARS_H] = in[i];
+	}
+	return 0;
+}
+
+
+int remap_to_original_scalar_h(double in[], double out[], int rad_block_index)
+{
+	/*
+	reverses what create_rad_array_scalar_h has done
+	*/
+	// loop over all elements of the resulting array
+	for (int i = 0; i < NO_OF_SCALARS_RAD_PER_LAYER; ++i)
+	{
+		out[rad_block_index*NO_OF_SCALARS_RAD_PER_LAYER + i] = in[i];
 	}
 	return 0;
 }

@@ -97,6 +97,7 @@ module radiation
   subroutine calc_radiative_flux_convergence(latitude_scalar, longitude_scalar, &
   z_scalar, z_vector, &
   mass_densities, temperature_gas, radiation_tendency, &
+  temp_sfc, sfc_sw_in, sfc_lw_out, &
   no_of_scalars, no_of_layers, no_of_constituents, no_of_condensed_constituents, &
   time_coord) &
   
@@ -131,6 +132,12 @@ module radiation
     real(8), intent(in)              :: temperature_gas   (no_of_scalars)
     ! the result (in W/m^3)
     real(8), intent(inout)           :: radiation_tendency(no_of_scalars)
+    ! surface temperature
+    real(8), intent(in)              :: temp_sfc          (no_of_scalars/no_of_layers)
+    ! surface shortwave in
+    real(8), intent(inout)           :: sfc_sw_in         (no_of_scalars/no_of_layers)
+    ! surface longwave out
+    real(8), intent(inout)           :: sfc_lw_out        (no_of_scalars/no_of_layers)
     
     ! local variables
     ! solar zenith angle
@@ -238,16 +245,9 @@ module radiation
           *EXP(-(z_vector(ji)-z_scalar(ji+(jk-1)*no_of_scalars_h))/scale_height)
         ! values at the surface
         elseif (jk == no_of_layers+1) then
-          ! temperature at the surface (linear extrapolation)
+          ! temperature at the surfac
           ! the value in the lowest layer
-          temperature_interface_rad(ji,jk) =  temperature_rad(ji,jk-1) &
-          ! the gradient
-          ! delta T
-          + (temperature_rad(ji,jk-2) - temperature_rad(ji,jk-1))/     &
-          ! delta z
-          (z_scalar(ji+(jk-3)*no_of_scalars_h)-z_scalar(ji+(jk-2)*no_of_scalars_h)) &
-          ! delta z
-          *(z_vector(no_of_layers*no_of_scalars_h+ji)-z_scalar(ji+(jk-2)*no_of_scalars_h))
+          temperature_interface_rad(ji,jk) = temp_sfc(ji)
           ! surface pressure
           pressure_interface_rad   (ji,jk) =  pressure_rad   (ji,jk-1) &
           *EXP(-(z_vector(no_of_layers*no_of_scalars_h+ji) &
@@ -303,7 +303,7 @@ module radiation
     cloud_optics_sw%g   = 0._wp
     
     ! initializing the short wave fluxes
-    call init_fluxes(fluxes_day,   no_of_day_points, no_of_layers+1, no_of_sw_bands)
+    call init_fluxes(fluxes_day, no_of_day_points, no_of_layers+1, no_of_sw_bands)
     
     ! calculate shortwave radiative fluxes (only the day points are handed over
     ! for efficiency)
@@ -317,6 +317,11 @@ module radiation
     call calc_power_density(.true., no_of_scalars, &
     no_of_layers, no_of_scalars_h, no_of_day_points, day_indices, &
     fluxes_day, z_vector, radiation_tendency)
+    
+    ! saving the surface shortwave inward radiative flux density
+    do ji = 1,no_of_day_points
+      sfc_sw_in(day_indices(ji)) = fluxes_day%flux_dn(ji,no_of_layers+1)
+    enddo
     
     ! freeing the short wave fluxes
     call free_fluxes(fluxes_day)
@@ -336,7 +341,7 @@ module radiation
     
     ! calculate longwave radiative fluxes
     call handle_error(rte_lw(k_dist_lw, gas_concentrations_lw, pressure_rad(:,:), &
-    temperature_rad(:,:), pressure_interface_rad(:,:), temperature_interface_rad(:,no_of_layers+1), &
+    temperature_rad(:,:), pressure_interface_rad(:,:), temp_sfc(:), &
     surface_emissivity(:,:), cloud_optics_lw, fluxes, &
     t_lev = temperature_interface_rad(:,:)))
    
@@ -344,6 +349,11 @@ module radiation
     call calc_power_density(.false., no_of_scalars, &
     no_of_layers, no_of_scalars_h, no_of_day_points, day_indices, &
     fluxes, z_vector, radiation_tendency)
+    
+    ! saving the surface longwave outward radiative flux density
+    do ji = 1,no_of_scalars_h
+      sfc_lw_out(ji) = fluxes%flux_up(ji,no_of_layers+1)
+    enddo
     
     ! freeing the long wave fluxes
     call free_fluxes(fluxes)
