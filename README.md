@@ -65,7 +65,7 @@ Everything is easy and quick to install.
 * [geos95](https://github.com/AUN4GFD/geos95)
 * [atmostracers](https://github.com/AUN4GFD/atmostracers)
 * clone the DCMIP2016 repository: git clone https://github.com/ClimateGlobalChange/DCMIP2016.git
-* clone the RTE+RRTMGP repository: git clone https://github.com/MHBalsmeier/rte-rrtmgp && cd rte-rrtmgp && git checkout omp_disabled && cd ..
+* clone the RTE+RRTMGP repository: git clone https://github.com/MHBalsmeier/rte-rrtmgp && cd rte-rrtmgp && git checkout rad_for_game && cd ..
 
 #### For using the plotting routines
 
