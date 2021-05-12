@@ -300,9 +300,9 @@ module radiation
     ! setting the short wave optical properties of clouds
     call handle_error(cloud_optics_sw%alloc_2str(no_of_day_points, no_of_layers, k_dist_sw, &
     name = "shortwave cloud optics"))
-    cloud_optics_sw%tau =  1
-    cloud_optics_sw%ssa = 1
-    cloud_optics_sw%g  = 0
+    cloud_optics_sw%tau =  0._wp
+    cloud_optics_sw%ssa = 0._wp
+    cloud_optics_sw%g  = 0._wp
     
     ! initializing the short wave fluxes
     call init_fluxes(fluxes_clearsky_day, no_of_day_points, no_of_layers+1, no_of_sw_bands)
