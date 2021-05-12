@@ -285,12 +285,12 @@ module radiation
     ! short wave first
     ! filling up the arrays restricted to day points
     do j_day = 1,no_of_day_points
-      temperature_rad_day(j_day,:)       = temperature_rad(j_day,:)
-      pressure_rad_day(j_day,:)          = pressure_rad(j_day,:)
-      pressure_interface_rad_day(j_day,:)= pressure_interface_rad(j_day,:)
-      mu_0_day(j_day)                    = mu_0(j_day) 
-      albedo_dir_day(:,j_day)            = albedo_dir(:,j_day)  
-      albedo_dif_day(:,j_day)            = albedo_dif(:,j_day)   
+      temperature_rad_day(j_day,:)       = temperature_rad(day_indices(j_day),:)
+      pressure_rad_day(j_day,:)          = pressure_rad(day_indices(j_day),:)
+      pressure_interface_rad_day(j_day,:)= pressure_interface_rad(day_indices(j_day),:)
+      mu_0_day(j_day)                    = mu_0(day_indices(j_day)) 
+      albedo_dir_day(:,j_day)            = albedo_dir(:,day_indices(j_day))  
+      albedo_dif_day(:,j_day)            = albedo_dif(:,day_indices(j_day))   
     end do
     
     ! setting the volume mixing ratios of the gases for the short wave calculation
@@ -300,9 +300,9 @@ module radiation
     ! setting the short wave optical properties of clouds
     call handle_error(cloud_optics_sw%alloc_2str(no_of_day_points, no_of_layers, k_dist_sw, &
     name = "shortwave cloud optics"))
-    cloud_optics_sw%tau =  0._wp
+    cloud_optics_sw%tau = 0._wp
     cloud_optics_sw%ssa = 0._wp
-    cloud_optics_sw%g  = 0._wp
+    cloud_optics_sw%g   = 0._wp
     
     ! initializing the short wave fluxes
     call init_fluxes(fluxes_clearsky_day, no_of_day_points, no_of_layers+1, no_of_sw_bands)
