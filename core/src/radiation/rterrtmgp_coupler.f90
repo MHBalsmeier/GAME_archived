@@ -356,7 +356,7 @@ module radiation
     ! allocating the long wave optical properties
     call handle_error(optical_props_lw%alloc_1scl(no_of_scalars_h, no_of_layers, k_dist_lw))
     
-    ! setting the long wave soruce function
+    ! allocating the long wave source function
     call handle_error(sources_lw%alloc(no_of_scalars_h, no_of_layers, k_dist_lw))
     
     ! setting the long wave optical properties
