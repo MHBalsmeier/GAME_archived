@@ -575,7 +575,7 @@ module radiation
     ! loop indices
     integer                          :: ji,jk,jl
     
-    ! setting the volume mixing ratios of the gases for the long wave calculation
+    ! setting the volume mixing ratios of the gases
     do ji = 1,size(active_gases)
       ! the default
       vol_mix_ratio(:,:) = 0.0_wp
@@ -621,12 +621,13 @@ module radiation
             enddo
           endif
         end select
+      ! finally setting the VMRs to the gas_concentrations objects
       if (sw_bool) then
         call handle_error(gas_concentrations_sw%set_vmr(gases_lowercase(ji), vol_mix_ratio(1:no_of_day_points,:)))
       else
         call handle_error(gas_concentrations_lw%set_vmr(gases_lowercase(ji), vol_mix_ratio(:,:)))
       endif
-    enddo
+    enddo ! ji
   
   end subroutine set_vol_mix_ratios
   
