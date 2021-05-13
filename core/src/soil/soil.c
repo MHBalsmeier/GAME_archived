@@ -11,9 +11,9 @@ This file contains the soil component of GAME.
 #include <stdio.h>
 
 // some for now constant parameters
-const double thickness = 1000; // very large for now
+const double thickness = 10;
 // approximately the properties of water
-const double density = 10;
+const double density = 1000;
 const double c_v = 4184;
 const double heat_trans_coeff = 50;
 
