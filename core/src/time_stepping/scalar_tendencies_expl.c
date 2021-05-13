@@ -180,7 +180,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 					{
 						state_tendency -> entropy_densities[(i - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j]
 						// the minus-sign is correct (the quantity itself refers to soil)
-						-= soil -> power_flux_density_sensible[j + NO_OF_SCALARS_H - NO_OF_SCALARS]/state -> temperature_gas[j]
+						-= new_weight*soil -> power_flux_density_sensible[j + NO_OF_SCALARS_H - NO_OF_SCALARS]/state -> temperature_gas[j]
 						/(grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H + h_index] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index]);
 					}
 				 }
