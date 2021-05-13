@@ -11,11 +11,12 @@ module radiation
   use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
   use mo_load_coefficients,  only: load_and_init
   use mo_gas_concentrations, only: ty_gas_concs
-  use mo_fluxes_byband,      only: ty_fluxes_byband
-  use mo_rrtmgp_clr_all_sky, only: rte_sw
-  use mo_rrtmgp_clr_all_sky, only: rte_lw
-  use mo_optical_props,      only: ty_optical_props_2str, &
-                                   ty_optical_props_1scl
+  use mo_fluxes_byband,      only: ty_fluxes_broadband
+  use mo_source_functions,   only: ty_source_func_lw
+  use mo_rte_sw,             only: rte_sw
+  use mo_rte_lw,             only: rte_lw
+  use mo_optical_props,      only: ty_optical_props_1scl, &
+                                   ty_optical_props_2str
   
   implicit none
   
@@ -151,7 +152,15 @@ module radiation
     ! number of scalars per layer (number of columns)
     integer                          :: no_of_scalars_h
     ! the resulting fluxes
-    type(ty_fluxes_byband)           :: fluxes, fluxes_day
+    type(ty_fluxes_broadband)        :: fluxes, fluxes_day
+    ! short wave optical properties
+    type(ty_optical_props_2str)      :: optical_props_sw
+    ! long wave optical properties
+    type(ty_optical_props_1scl)      :: optical_props_lw
+    ! top of atmosphere short wave flux
+    real(wp), dimension(:,:), allocatable          :: toa_flux ! no_of_day_points, no_of_sw_g_points
+    ! long wave source function
+    type(ty_source_func_lw)          :: sources_lw
     ! the surface emissivity
     real(8)                          :: surface_emissivity(no_of_lw_bands, no_of_scalars/no_of_layers)
     ! surface albedo for direct radiation
@@ -164,6 +173,8 @@ module radiation
     real(8)                          :: albedo_dif_day    (no_of_sw_bands, no_of_scalars/no_of_layers)
     ! solar zenith angle (day points only)
     real(8)                          :: mu_0_day(no_of_scalars/no_of_layers)
+    ! temperature at the surface (day points only)
+    real(8)                          :: temp_sfc_day(no_of_scalars/no_of_layers)
     ! reformatted temperature field
     real(8)                          :: temperature_rad           (no_of_scalars/no_of_layers, no_of_layers)
     ! reformatted pressure field
@@ -178,9 +189,6 @@ module radiation
     real(8)                          :: pressure_rad_day          (no_of_scalars/no_of_layers, no_of_layers)
     ! pressure at cell interfaces restricted to day points
     real(8)                          :: pressure_interface_rad_day(no_of_scalars/no_of_layers, no_of_layers+1)
-    ! cloud optical properties
-    type(ty_optical_props_2str)      :: cloud_optics_sw
-    type(ty_optical_props_1scl)      :: cloud_optics_lw
     ! scale height of the atmosphere
     real(8), parameter               :: scale_height = 8.e3_wp
     
@@ -286,7 +294,8 @@ module radiation
       temperature_rad_day(j_day,:)       = temperature_rad(day_indices(j_day),:)
       pressure_rad_day(j_day,:)          = pressure_rad(day_indices(j_day),:)
       pressure_interface_rad_day(j_day,:)= pressure_interface_rad(day_indices(j_day),:)
-      mu_0_day(j_day)                    = mu_0(day_indices(j_day)) 
+      mu_0_day(j_day)                    = mu_0(day_indices(j_day))
+      temp_sfc_day(j_day)                = temp_sfc(day_indices(j_day))
       albedo_dir_day(:,j_day)            = albedo_dir(:,day_indices(j_day))  
       albedo_dif_day(:,j_day)            = albedo_dif(:,day_indices(j_day))   
     end do
@@ -295,23 +304,32 @@ module radiation
     call set_vol_mix_ratios(mass_densities, .true., no_of_day_points, no_of_scalars_h, &
     no_of_layers, no_of_scalars, no_of_condensed_constituents, day_indices)
     
-    ! setting the short wave optical properties of clouds
-    call handle_error(cloud_optics_sw%alloc_2str(no_of_day_points, no_of_layers, k_dist_sw, &
-    name = "shortwave cloud optics"))
-    cloud_optics_sw%tau = 0._wp
-    cloud_optics_sw%ssa = 0._wp
-    cloud_optics_sw%g   = 0._wp
-    
     ! initializing the short wave fluxes
     call init_fluxes(fluxes_day, no_of_day_points, no_of_layers+1, no_of_sw_bands)
     
+    ! allocating the short wave optical properties
+    call handle_error(optical_props_sw%alloc_2str(no_of_day_points, no_of_layers, k_dist_sw))
+    
+    ! allocating the TOA flux
+    allocate(toa_flux(no_of_day_points, k_dist_sw%get_ngpt()))
+    
+    ! setting the short wave optical properties
+    call handle_error(k_dist_sw%gas_optics(pressure_rad_day(1:no_of_day_points,:),           &
+                                           pressure_interface_rad_day(1:no_of_day_points,:), &
+                                           temperature_rad_day(1:no_of_day_points,:),        &
+                                           gas_concentrations_sw,                            &
+                                           optical_props_sw,                                 &
+                                           toa_flux))
+    
     ! calculate shortwave radiative fluxes (only the day points are handed over
     ! for efficiency)
-    call handle_error(rte_sw(k_dist_sw, gas_concentrations_sw, pressure_rad_day(1:no_of_day_points,:), &
-    temperature_rad_day(1:no_of_day_points,:), pressure_interface_rad_day(1:no_of_day_points,:), &
-    mu_0_day(1:no_of_day_points), albedo_dir_day(:,1:no_of_day_points), &
-    albedo_dif_day(:,1:no_of_day_points), cloud_optics_sw, &
-    fluxes_day))
+    call handle_error(rte_sw(optical_props_sw,                     &
+                             .true.,                               &
+                             mu_0_day(1:no_of_day_points),         &
+                             toa_flux,                             &
+                             albedo_dir_day(:,1:no_of_day_points), &
+                             albedo_dif_day(:,1:no_of_day_points), &
+                             fluxes_day))
     
     ! short wave result (in Wm^-3)
     call calc_power_density(.true., no_of_scalars, &
@@ -331,22 +349,34 @@ module radiation
     call set_vol_mix_ratios(mass_densities, .false., no_of_day_points, no_of_scalars_h, &
     no_of_layers, no_of_scalars, no_of_condensed_constituents, day_indices)
     
-    ! setting the long wave cloud optical properties
-    call handle_error(cloud_optics_lw%alloc_1scl(no_of_scalars_h, no_of_layers, k_dist_lw, &
-    name = "longwave cloud optics"))
-    cloud_optics_lw%tau = 0.0_wp
-    
     ! initializing the long wave fluxes
     call init_fluxes(fluxes,   no_of_scalars_h, no_of_layers+1, no_of_lw_bands)
     
+    ! allocating the long wave optical properties
+    call handle_error(optical_props_lw%alloc_1scl(no_of_scalars_h, no_of_layers, k_dist_lw))
+    
+    ! setting the long wave soruce function
+    call handle_error(sources_lw%alloc(no_of_scalars_h, no_of_layers, k_dist_lw))
+    
+    ! setting the long wave optical properties
+    call handle_error(k_dist_lw%gas_optics(pressure_rad,                      &
+                                           pressure_interface_rad,            &
+                                           temperature_rad,                   &
+                                           temp_sfc,                          &
+                                           gas_concentrations_lw,             &
+                                           optical_props_lw,                  &
+                                           sources_lw,                        &
+                                           tlev = temperature_interface_rad))
+    
     ! calculate longwave radiative fluxes
-    call handle_error(rte_lw(k_dist_lw, gas_concentrations_lw, pressure_rad(:,:), &
-    temperature_rad(:,:), pressure_interface_rad(:,:), temp_sfc(:), &
-    surface_emissivity(:,:), cloud_optics_lw, fluxes, &
-    t_lev = temperature_interface_rad(:,:)))
+    call handle_error(rte_lw(optical_props_lw,   &
+                             .true.,             &
+                             sources_lw,         &
+                             surface_emissivity, &
+                             fluxes))
    
     ! add long wave result (in Wm^-3)
-    call calc_power_density(.false., no_of_scalars, &
+    call calc_power_density(.false., no_of_scalars,               &
     no_of_layers, no_of_scalars_h, no_of_day_points, day_indices, &
     fluxes, z_vector, radiation_tendency)
     
@@ -360,7 +390,7 @@ module radiation
     
   end subroutine calc_radiative_flux_convergence
     
-  subroutine calc_power_density(day_only, no_of_scalars, &
+  subroutine calc_power_density(day_only, no_of_scalars,        &
   no_of_layers, no_of_scalars_h, no_of_day_points, day_indices, &
   fluxes, z_vector, radiation_tendency)
   
@@ -378,7 +408,7 @@ module radiation
     integer, intent(in)              :: no_of_day_points
     ! the indices of the columns where it is day
     integer, intent(in)              :: day_indices(no_of_scalars_h)
-    type(ty_fluxes_byband), intent(in):: fluxes
+    type(ty_fluxes_broadband), intent(in):: fluxes
     ! as usual
     real(8), intent(in)              :: z_vector(no_of_scalars + no_of_scalars_h)
     ! the result (in W/m^3)
@@ -602,7 +632,7 @@ module radiation
   
     ! initializing a flux object
     ! the fluxes to initialize
-    type(ty_fluxes_byband), intent(inout) :: fluxes
+    type(ty_fluxes_broadband), intent(inout) :: fluxes
     ! the number of columns
     integer, intent(in)                   :: n_hor
     ! the number of levels
@@ -614,11 +644,6 @@ module radiation
     allocate(fluxes%flux_up (n_hor, n_vert))
     allocate(fluxes%flux_dn (n_hor, n_vert))
     allocate(fluxes%flux_net(n_hor, n_vert))
-  
- 	! band-by-band fluxes
-    allocate(fluxes%bnd_flux_up (n_hor, n_vert, n_bands))
-    allocate(fluxes%bnd_flux_dn (n_hor, n_vert, n_bands))
-    allocate(fluxes%bnd_flux_net(n_hor, n_vert, n_bands))
     
     call reset_fluxes(fluxes)
     
@@ -628,7 +653,7 @@ module radiation
 
     ! resets all fluxes to zero
 
-    type(ty_fluxes_byband), intent(inout) :: fluxes
+    type(ty_fluxes_broadband), intent(inout) :: fluxes
 
     ! reset broadband fluxes
     fluxes%flux_up(:,:) =  0._wp
@@ -636,28 +661,18 @@ module radiation
     fluxes%flux_net(:,:) =  0._wp
     if (associated(fluxes%flux_dn_dir)) fluxes%flux_dn_dir(:,:) =  0._wp
 
-    ! reset band-by-band fluxes
-    fluxes%bnd_flux_up(:,:,:) =  0._wp
-    fluxes%bnd_flux_dn(:,:,:) =  0._wp
-    fluxes%bnd_flux_net(:,:,:) =  0._wp
-    if (associated(fluxes%bnd_flux_dn_dir)) fluxes%bnd_flux_dn_dir(:,:,:) =  0._wp
-
   end subroutine reset_fluxes
   
   subroutine free_fluxes(fluxes)
   
     ! freeing a flux object
     ! the fluxes to free
-    type(ty_fluxes_byband), intent(inout) :: fluxes
+    type(ty_fluxes_broadband), intent(inout) :: fluxes
     
     if (associated(fluxes%flux_up)) deallocate(fluxes%flux_up)
     if (associated(fluxes%flux_dn)) deallocate(fluxes%flux_dn)
     if (associated(fluxes%flux_net)) deallocate(fluxes%flux_net)
     if (associated(fluxes%flux_dn_dir)) deallocate(fluxes%flux_dn_dir)
-    if (associated(fluxes%bnd_flux_up)) deallocate(fluxes%bnd_flux_up)
-    if (associated(fluxes%bnd_flux_dn)) deallocate(fluxes%bnd_flux_dn)
-    if (associated(fluxes%bnd_flux_net)) deallocate(fluxes%bnd_flux_net)
-    if (associated(fluxes%bnd_flux_dn_dir)) deallocate(fluxes%bnd_flux_dn_dir)
   
   end subroutine free_fluxes
   
