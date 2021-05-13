@@ -350,7 +350,7 @@ module radiation
     no_of_layers, no_of_scalars, no_of_condensed_constituents, day_indices)
     
     ! initializing the long wave fluxes
-    call init_fluxes(fluxes,   no_of_scalars_h, no_of_layers+1, no_of_lw_bands)
+    call init_fluxes(fluxes, no_of_scalars_h, no_of_layers+1, no_of_lw_bands)
     
     ! allocating the long wave optical properties
     call handle_error(optical_props_lw%alloc_1scl(no_of_scalars_h, no_of_layers, k_dist_lw))
@@ -440,20 +440,20 @@ module radiation
         else
           jk = j_column
         endif
-        radiation_tendency((ji-1)*no_of_scalars_h+jk) =  &
+        radiation_tendency((ji-1)*no_of_scalars_h+jk) = &
         ! this function is called four times, therefore we need to
         ! add up the tendencies
-        radiation_tendency((ji-1)*no_of_scalars_h+jk) +&
+        radiation_tendency((ji-1)*no_of_scalars_h+jk) + &
         ! this is a sum of four fluxes
         ( &
         ! upward flux (going in)
-        fluxes%flux_up  (j_column,ji+1) &
+        fluxes%flux_up  (j_column,ji+1)                 &
         ! upward flux (going out)
-        - fluxes%flux_up(j_column,ji  ) &
+        - fluxes%flux_up(j_column,ji  )                 &
         ! downward flux (going in)
-        + fluxes%flux_dn(j_column,ji)   &
+        + fluxes%flux_dn(j_column,ji)                   &
         ! downward flux (going out)
-        - fluxes%flux_dn(j_column,ji+1))&
+        - fluxes%flux_dn(j_column,ji+1))                &
         ! dividing by the column thickness (the shallow atmosphere
         ! approximation is made at this point)
         /(z_vector((ji-1)*no_of_scalars_h+jk) - z_vector(ji*no_of_scalars_h+jk))
