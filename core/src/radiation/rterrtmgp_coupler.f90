@@ -339,6 +339,7 @@ module radiation
     ! saving the surface shortwave inward radiative flux density
     do ji = 1,no_of_day_points
       sfc_sw_in(day_indices(ji)) = fluxes_day%flux_dn(ji,no_of_layers+1)
+                                 - fluxes_day%flux_up(ji,no_of_layers+1)
     enddo
     
     ! freeing the short wave fluxes
@@ -382,7 +383,8 @@ module radiation
     
     ! saving the surface longwave outward radiative flux density
     do ji = 1,no_of_scalars_h
-      sfc_lw_out(ji) = fluxes%flux_up(ji,no_of_layers+1)
+      sfc_lw_out(ji) = fluxes%flux_up(ji,no_of_layers+1) &
+                     - fluxes%flux_dn(ji,no_of_layers+1)
     enddo
     
     ! freeing the long wave fluxes
