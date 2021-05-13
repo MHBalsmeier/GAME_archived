@@ -63,6 +63,11 @@ module radiation
       implicit none
       integer(C_INT), value :: gas_number
     end function molar_fraction_in_dry_air
+    real(C_DOUBLE) function calc_o3_vmr(z_height) bind(c, name = "calc_o3_vmr")
+      use, intrinsic::iso_c_binding
+      implicit none
+      real(C_DOUBLE), value :: z_height
+    end function calc_o3_vmr
   end interface
   
   contains
@@ -302,7 +307,7 @@ module radiation
     
     ! setting the volume mixing ratios of the gases for the short wave calculation
     call set_vol_mix_ratios(mass_densities, .true., no_of_day_points, no_of_scalars_h, &
-    no_of_layers, no_of_scalars, no_of_condensed_constituents, day_indices)
+    no_of_layers, no_of_scalars, no_of_condensed_constituents, day_indices, z_scalar)
     
     ! initializing the short wave fluxes
     call init_fluxes(fluxes_day, no_of_day_points, no_of_layers+1, no_of_sw_bands)
@@ -348,7 +353,7 @@ module radiation
     ! now long wave
     ! setting the volume mixing ratios of the gases for the long wave calculation
     call set_vol_mix_ratios(mass_densities, .false., no_of_day_points, no_of_scalars_h, &
-    no_of_layers, no_of_scalars, no_of_condensed_constituents, day_indices)
+    no_of_layers, no_of_scalars, no_of_condensed_constituents, day_indices, z_scalar)
     
     ! initializing the long wave fluxes
     call init_fluxes(fluxes, no_of_scalars_h, no_of_layers+1, no_of_lw_bands)
@@ -549,7 +554,7 @@ module radiation
   end function coszenith
   
   subroutine set_vol_mix_ratios(mass_densities, sw_bool, no_of_day_points, no_of_scalars_h, &
-  no_of_layers, no_of_scalars, no_of_condensed_constituents, day_indices)
+  no_of_layers, no_of_scalars, no_of_condensed_constituents, day_indices, z_scalar)
     
     ! computes volume mixing ratios out of the model variables
     
@@ -569,6 +574,8 @@ module radiation
     integer, intent(in)              :: no_of_condensed_constituents
     ! the indices of the points where it is day
     integer, intent(in)              :: day_indices(no_of_scalars/no_of_layers)
+    ! z coordinates of scalar data points
+    real(8), intent(in)              :: z_scalar(no_of_scalars)
     
     ! the volume mixing ratio of a gas
     real(8)                          :: vol_mix_ratio(no_of_scalars_h, no_of_layers)
@@ -588,7 +595,19 @@ module radiation
         case("ch4")
           vol_mix_ratio(:,:) = molar_fraction_in_dry_air(8)
         case("o3")
-          vol_mix_ratio(:,:) = molar_fraction_in_dry_air(10)
+          if (sw_bool) then
+            do jk=1,no_of_day_points
+              do jl=1,no_of_layers
+                vol_mix_ratio(jk,jl) = calc_o3_vmr(z_scalar(day_indices(jk)+(jl-1)*no_of_scalars_h))
+              enddo
+            enddo
+          else
+            do jk=1,no_of_scalars_h
+              do jl=1,no_of_layers
+                vol_mix_ratio(jk,jl) = calc_o3_vmr(z_scalar(jk+(jl-1)*no_of_scalars_h))
+              enddo
+            enddo
+          endif
         case("co2")
           vol_mix_ratio(:,:) = molar_fraction_in_dry_air(5)
         case("co")
