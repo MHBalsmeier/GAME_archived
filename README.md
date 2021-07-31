@@ -61,17 +61,17 @@ It is recommended to run the model on Linux. We will not help people who have pr
 
 Everything is easy and quick to install.
 
-* eccodes library (installation manual: https://mhbalsmeier.github.io/tutorials/eccodes_on_ubuntu.html)
+* eccodes library (installation manual: https://gist.github.com/MHBalsmeier/a01ad4e07ecf467c90fad2ac7719844a)
 * [geos95](https://github.com/OpenNWP/geos95)
 * [atmostracers](https://github.com/OpenNWP/atmostracers)
 * clone the DCMIP2016 repository: git clone https://github.com/ClimateGlobalChange/DCMIP2016.git
-* clone the RTE+RRTMGP repository: git clone https://github.com/MHBalsmeier/rte-rrtmgp && cd rte-rrtmgp && git checkout rad_for_game && cd ..
+* clone the RTE+RRTMGP repository: `git clone https://github.com/earth-system-radiation/rte-rrtmgp && cd rte-rrtmgp && git checkout rad_for_game && cd ..`
 
 #### For using the plotting routines
 
 The following packages are additionally required if you want to make use of the plotting routines:
 
-* Python and the visualization library scitools-iris (installation manual: https://mhbalsmeier.github.io/tutorials/iris_on_ubuntu.html)
+* Python and the visualization library scitools-iris (installation manual: https://scitools-iris.readthedocs.io/en/latest/installing.html#installing-from-source-without-conda-on-debian-based-linux-distros-developers)
 * FFMPEG (Ubuntu: sudo apt-get install ffmpeg)
 
 #### For developing
