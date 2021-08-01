@@ -11,7 +11,7 @@ set(CMAKE_C_COMPILER mpicc)
 set(CMAKE_Fortran_COMPILER mpifort)
 enable_language(Fortran)
                  # insert the root directory of RTE+RRTMGP here
-set(RTERRTMGPDIR /home/max/code/rte-rrtmgp)
+set(RTERRTMGPDIR /home/max/code/rte-rrtmgp_game)
 add_executable(
 game
 src/coordinator.c
