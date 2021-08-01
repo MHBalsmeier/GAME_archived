@@ -43,8 +43,8 @@ What GAME does what other models do not do and why:
 
 I only have my free time to do NWP model development, and this model architecture requires much more. Therefore I do not continue the work on this model. However, these are the two most important things I would change immediately if I had time or if I could develop the model again:
 
-* I would use the potential temperature as a prognostic variable and not the entropy. This is because the potential temperature is not less fundamental than the entropy and has an easier Poisson bracket strucutre in an ideal gas.
-* I would introduce a hydrostatic background state to achieve more stability in terrain following coordinates, which is necessary for realistic NWP scenarios. This diminishes the self-consistency properties of the Poisson brackets a bit, but this is true only for the spatial discretization. Through the decreased truncation errors in the horizontal gradients, however, the accuracy and possibly even the self-consistency will be increased by a hydrostatic background state when looking at the combination of spatial and temporal discretizaion.
+* I would use the potential temperature as a prognostic variable and not the entropy. This is because the potential temperature is not less fundamental than the entropy and has an easier Poisson bracket structure in an ideal gas.
+* I would introduce a hydrostatic background state to achieve more stability in terrain following coordinates, which is necessary for realistic NWP scenarios. This diminishes the self-consistency properties of the Poisson brackets a bit, but this is true only for the spatial discretization. Through the decreased truncation errors in the horizontal gradients, however, the accuracy and possibly even the self-consistency will be increased by a hydrostatic background state when looking at the combination of spatial and temporal discretization.
 
 ## Documents
 
