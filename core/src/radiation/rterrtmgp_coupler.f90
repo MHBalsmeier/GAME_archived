@@ -44,10 +44,10 @@ module radiation
   
   character(len = *), parameter      :: rrtmgp_coefficients_file_sw =  &
   ! insert the name of the short wave data file here
-  "/home/max/code/rte-rrtmgp_game/rrtmgp/data/rrtmgp-data-sw-g224-2018-12-04.nc"
+  "/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-sw-g224-2018-12-04.nc"
   character(len = *), parameter      :: rrtmgp_coefficients_file_lw =  &
   ! insert the name of the long wave data file here
-  "/home/max/code/rte-rrtmgp_game/rrtmgp/data/rrtmgp-data-lw-g256-2018-12-04.nc"
+  "/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-lw-g256-2018-12-04.nc"
   ! the gases in lowercase
   character(len = 32), dimension(size(active_gases)) :: gases_lowercase
   
