@@ -24,7 +24,7 @@ According to my understanding, a hexagonal C-grid is the only discretization whe
 
 What GAME does what other models do not do and why:
 
-* It uses the entropy as a prognostic variable. Usually, models use the potential temperature as a prognostic variable which is a conserved quantity and therefore the only forcings are the diabatic forcings rendering it a suitable variable for modeling. However, the same is true for the real entropy (connected to the density times the logarithm of the potential temperature), and this last quantitiy is the more fundamental physical property.
+
 * It employs the modified TRSK scheme.
 * It can assign individual densities (instead of mixing ratios) to constituents as well as individual temperatures and sink velocities.
 * It has different options for the complexity of the physics to make it useful for a wide range of applications.
@@ -38,6 +38,13 @@ What GAME does what other models do not do and why:
 * a way to construct Voronoi meshes on an ellipsoid
 * a nesting option
 * ocean dynamics and physics
+
+## What I would do differently if I developed the model again
+
+I only have my free time to do NWP model development, and this model architecture requires much more. Therefore I do not continue the work on this model. However, these are the two most important things I would change immediately if I had time or if I could develop the model again:
+
+* I would use the potential temperature as a prognostic variable and not the entropy. This is because the potential temperature is not less fundamental than the entropy and has an easier Poisson bracket strucutre in an ideal gas.
+* I would introduce a hydrostatic background state to achieve more stability in terrain following coordinates, which is necessary for realistic NWP scenarios. This diminishes the self-consistency properties of the Poisson brackets a bit, but this is true only for the spatial discretization. Through the decreased truncation errors in the horizontal gradients, however, the accuracy and possibly even the self-consistency will be increased by a hydrostatic background state when looking at the combination of spatial and temporal discretizaion.
 
 ## Documents
 
