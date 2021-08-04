@@ -49,26 +49,6 @@ int grad_vert_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
         out_field[vector_index]
         = (in_field[upper_index] - in_field[lower_index])/grid -> normal_distance[vector_index];
     }
-    // linear extrapolation to the TOA
-    #pragma omp parallel for
-    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-    {
-        out_field[i] =
-        out_field[i + NO_OF_VECTORS_PER_LAYER]
-        + (out_field[i + NO_OF_VECTORS_PER_LAYER] - out_field[i + 2*NO_OF_VECTORS_PER_LAYER])/
-        (grid -> z_vector[i + NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[i + 2*NO_OF_VECTORS_PER_LAYER])
-        *(grid -> z_vector[i] - grid -> z_vector[i + NO_OF_VECTORS_PER_LAYER]);
-    }
-    // linear extrapolation to the surface
-    #pragma omp parallel for
-    for (int i = NO_OF_VECTORS - NO_OF_SCALARS_H; i < NO_OF_VECTORS; ++i)
-    {
-        out_field[i] =
-        out_field[i - NO_OF_VECTORS_PER_LAYER]
-        + (out_field[i - 2*NO_OF_VECTORS_PER_LAYER] - out_field[i - NO_OF_VECTORS_PER_LAYER])/
-        (grid -> z_vector[i - 2*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[i - NO_OF_VECTORS_PER_LAYER])
-        *(grid -> z_vector[i] - grid -> z_vector[i - NO_OF_VECTORS_PER_LAYER]);
-    }
     return 0;
 }
 

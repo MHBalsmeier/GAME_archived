@@ -80,31 +80,6 @@ int scalar_times_vector_scalar_v(Scalar_field in_field_v, Vector_field vector_fi
         	out_field[i] = scalar_value*vector_field[i];
         }
     }
-    // linear extrapolation to the TOA
-    #pragma omp parallel for private(scalar_value)
-    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-    {
-        scalar_value
-        = in_field_v[i]
-        + (in_field_v[i] - in_field_v[i + NO_OF_SCALARS_H])
-        /(grid -> z_scalar[i] - grid -> z_scalar[i + NO_OF_SCALARS_H])
-        *(grid -> z_vector[i] - grid -> z_scalar[i]);
-        out_field[i] = scalar_value*vector_field[i];
-    }
-    // linear extrapolation to the surface
-    #pragma omp parallel for private(layer_index, h_index, upper_index, scalar_value)
-    for (int i = NO_OF_VECTORS - NO_OF_SCALARS_H; i < NO_OF_VECTORS; ++i)
-    {
-        layer_index = i/NO_OF_VECTORS_PER_LAYER;
-        h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-        upper_index = h_index + (layer_index - 1)*NO_OF_SCALARS_H;
-        scalar_value
-        = in_field_v[upper_index]
-        + (in_field_v[upper_index - NO_OF_SCALARS_H] - in_field_v[upper_index])
-        /(grid -> z_scalar[upper_index - NO_OF_SCALARS_H] - grid -> z_scalar[upper_index])
-        *(grid -> z_vector[i] - grid -> z_scalar[upper_index]);
-        out_field[i] = scalar_value*vector_field[i];
-    }
     return 0;
 }
 
