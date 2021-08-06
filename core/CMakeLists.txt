@@ -79,7 +79,6 @@ SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -I/usr/include -L/usr/lib/x86_64
 target_link_libraries(game eccodes m netcdf netcdff geos95 atmostracers)
 install(TARGETS game DESTINATION core)
 install(FILES run.sh DESTINATION core)
-enable_testing()
 
 
 
