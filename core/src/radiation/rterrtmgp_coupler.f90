@@ -122,7 +122,7 @@ module radiation
     ! the vertical positions of the scalar data points
     real(8),intent(in)              :: z_scalar           (no_of_scalars)
     ! the vertical positions of the vector data points
-    real(8),intent(in)              :: z_vector           (no_of_scalars)
+    real(8),intent(in)              :: z_vector           (no_of_scalars+no_of_scalars/no_of_layers)
     ! the mass densities of the model atmosphere
     real(8),intent(in)              :: mass_densities    &
     (no_of_constituents*no_of_scalars)
