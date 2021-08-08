@@ -79,11 +79,11 @@ Everything is easy and quick to install.
 The following packages are additionally required if you want to make use of the plotting routines:
 
 * Python and the visualization library scitools-iris (installation manual: https://scitools-iris.readthedocs.io/en/latest/installing.html#installing-from-source-without-conda-on-debian-based-linux-distros-developers)
-* FFMPEG (Ubuntu: sudo apt-get install ffmpeg)
+* FFMPEG (Ubuntu: `sudo apt-get install ffmpeg`)
 
 #### For developing
 
-* Valgrind (Ubuntu: sudo apt-get install valgrind, for doing checks)
+* Valgrind (Ubuntu: `sudo apt-get install valgrind`, for doing checks)
 
 ### Download
 
