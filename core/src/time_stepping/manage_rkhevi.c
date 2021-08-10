@@ -19,7 +19,6 @@ This file manages the RKHEVI time stepping.
 #include <stdlib.h>
 #include <stdio.h>
 
-int temperature_step(State *, State *, State *, Diagnostics *, Config_info *, double, int);
 int create_rad_array_scalar(double [], double [], int);
 int create_rad_array_scalar_h(double [], double [], int);
 int create_rad_array_mass_den(double [], double [], int);
@@ -141,19 +140,12 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil,Extrapolation_i
 		{	
 			scalar_tendencies_expl(state_new, state_tendency, soil, grid, dualgrid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irrev, config_info, i, state_new -> velocity_gas);
 		}
-		
-		// 3.) A pre-conditioned new temperature field, only containing explicit entropy and mass density tendencies (including diabatic forcings).
-		// ----------------------------------------------------------------------------------------------------------------------------------------
-		temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, 0);
 
-		// 4.) Vertical sound wave solver.
+		// 3.) Vertical sound wave solver.
 		// -------------------------------
 		three_band_solver_ver_waves(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid);
-		// Vertical velocity can be seen as updated from now on.
-		// this is for stability
-		temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, 1);
 		
-		// 5.) Solving the implicit component of the generalized density equations for tracers.
+		// 4.) Solving the implicit component of the generalized density equations for tracers.
 		// ------------------------------------------------------------------------------------
 		if (NO_OF_CONSTITUENTS > 1)
 		{
@@ -165,8 +157,6 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil,Extrapolation_i
     if (slow_update_bool == 1 && config_info -> adv_sound_ratio > 1)
     {
     	linear_combine_two_states(state_old, state_new, state_new, 1 - delta_t_small/delta_t, delta_t_small/delta_t);
-		// this is for stability
-		temperature_step(state_old, state_new, state_tendency, diagnostics, config_info, delta_t_small, 1);
     }
 	
 	// nesting
@@ -175,84 +165,6 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil,Extrapolation_i
 		bc_setter();
 	}
     
-    return 0;
-}
-
-int temperature_step(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, int write2new)
-{
-	// temperature step based on linearization of internal energy
-    double nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_gas_0, density_gas_1, delta_density_gas, delta_entropy_density, temperature_0, specific_entropy_gas_0, specific_entropy_gas_1, c_g_v, c_g_p;
-    double beta = get_impl_thermo_weight();
-    double alpha = 1 - beta;
-	#pragma omp parallel for private(nominator, denominator, entropy_density_gas_0, entropy_density_gas_1, density_gas_0, density_gas_1, delta_density_gas, delta_entropy_density, temperature_0, specific_entropy_gas_0, specific_entropy_gas_1, c_g_v, c_g_p)
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
-    {
-    	// Difference of the mass densities of the gas phase.
-    	density_gas_0 = 0;
-    	density_gas_1 = 0;
-		int no_of_relevant_constituents = 0;
-		if (config_info -> assume_lte == 0)
-		{
-			no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
-		}
-		if (config_info -> assume_lte == 1)
-		{
-			no_of_relevant_constituents = 1;
-		}
-    	for (int j = 0; j < no_of_relevant_constituents; ++j)
-    	{
-			density_gas_0 += state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
-			if (write2new == 0)
-			{
-				density_gas_1 += state_old -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i]
-				+ delta_t*state_tendency -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
-			}
-			if (write2new == 1)
-			{
-				density_gas_1 += state_new -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + j)*NO_OF_SCALARS + i];
-			}
-    	}
-    	delta_density_gas = density_gas_1 - density_gas_0;
-    	
-    	entropy_density_gas_0 = 0;
-    	entropy_density_gas_1 = 0;
-    	for (int j = 0; j < no_of_relevant_constituents; ++j)
-    	{
-			entropy_density_gas_0 += state_old -> entropy_densities[j*NO_OF_SCALARS + i];
-			if (write2new == 0)
-			{
-				entropy_density_gas_1 += state_old -> entropy_densities[j*NO_OF_SCALARS + i]
-				+ delta_t*state_tendency -> entropy_densities[j*NO_OF_SCALARS + i];
-			}
-			if (write2new == 1)
-			{
-				entropy_density_gas_1 += state_new -> entropy_densities[j*NO_OF_SCALARS + i];
-			}
-    	}
-    	delta_entropy_density = entropy_density_gas_1 - entropy_density_gas_0;
-    	
-    	// Specific entropies of the gas phase of the two time steps.
-    	specific_entropy_gas_0 = entropy_density_gas_0/density_gas_0;
-    	specific_entropy_gas_1 = entropy_density_gas_1/density_gas_1;
-    	
-    	// The temperature of the gas phase of the old time step.
-    	temperature_0 = state_old -> temperature_gas[i];
-    	
-		// determining the thermodynamic properties of the gas phase
-    	c_g_v = spec_heat_cap_diagnostics_v(state_old, i, config_info);
-    	c_g_p = spec_heat_cap_diagnostics_p(state_old, i, config_info);
-    	
-    	nominator = c_g_v*density_gas_0*temperature_0 + (alpha*c_g_p*temperature_0 - alpha*specific_entropy_gas_0*temperature_0)*delta_density_gas + alpha*temperature_0*delta_entropy_density;
-    	denominator = c_g_v*density_gas_0 + (c_g_v + beta*specific_entropy_gas_1 - beta*c_g_p)*delta_density_gas - beta*delta_entropy_density;
-    	if (write2new == 0)
-    	{
-			diagnostics -> temperature_gas_explicit[i] = nominator/denominator;
-		}
-    	if (write2new == 1)
-    	{
-			state_new -> temperature_gas[i] = nominator/denominator;
-		}
-    }
     return 0;
 }
 
