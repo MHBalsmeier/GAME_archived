@@ -88,7 +88,9 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 		}
     }
     
+    // determining the mass densities
     int layer_index, h_index;
+    double pressure, pot_temp;
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		layer_index = i/NO_OF_SCALARS_H;
@@ -130,16 +132,21 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 				}
 		    }
 	    }
+		pressure = init_state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*specific_gas_constants(0)*temperature_gas[i];
+		pot_temp = temperature_gas[i]*pow(P_0/pressure, specific_gas_constants(0)/spec_heat_capacities_p_gas(0));
+		init_state -> rhotheta[i] = init_state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*pot_temp;
+		init_state -> theta_pert[i] = pot_temp - grid -> theta_bg[i];
+		init_state -> exner_pert[i] = temperature_gas[i]/(grid -> theta_bg[i] + init_state -> theta_pert[i]) - grid -> exner_bg[i];
 	}
 	
-    double pressure, pot_temp;
+    // determining the temperatures of the condensates
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		layer_index = i/NO_OF_SCALARS_H;
 		h_index = i - layer_index*NO_OF_SCALARS_H;
 		if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 		{
-			for (int j = 0; j < NO_OF_CONSTITUENTS; ++j)
+			for (int j = 0; j < NO_OF_CONDENSED_CONSTITUENTS; ++j)
 			{
 				if (j == NO_OF_CONDENSED_CONSTITUENTS - 2)
 				{
@@ -149,23 +156,7 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 				{
 					init_state -> condensed_density_temperatures[NO_OF_SCALARS + i] = liquid_water_density[i]*liquid_water_temperature[i];
 				}
-				if (j >= NO_OF_CONDENSED_CONSTITUENTS)
-				{
-					if (init_state -> rho[j*NO_OF_SCALARS + i] == 0)
-					{
-						init_state -> rhotheta[(j - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i] = 0;
-					}
-					else
-					{
-						pressure = init_state -> rho[j*NO_OF_SCALARS + i]*specific_gas_constants(j - NO_OF_CONDENSED_CONSTITUENTS)*temperature_gas[i];
-						pot_temp = temperature_gas[i]*pow(P_0/pressure, specific_gas_constants(j - NO_OF_CONDENSED_CONSTITUENTS)/spec_heat_capacities_p_gas(j - NO_OF_CONDENSED_CONSTITUENTS));
-						init_state -> rhotheta[(j - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i]
-						= init_state -> rho[j*NO_OF_SCALARS + i]*pot_temp;
-					}
-				}
 			}
-			init_state -> theta_pert[i] = init_state -> rhotheta[i]/init_state -> rho[i] - grid -> theta_bg[i];
-			init_state -> exner_pert[i] = temperature_gas[i]/(grid -> theta_bg[i] + init_state -> theta_pert[i]) - grid -> exner_bg[i];
 	    }
 	}
 	

@@ -24,6 +24,8 @@ int linear_combine_two_states(State *state_0, State *state_1, State *state_out, 
         }
         
         state_out -> rhotheta[i] = coeff_0*state_0 -> rhotheta[i] + coeff_1*state_1 -> rhotheta[i];
+        state_out -> theta_pert[i] = coeff_0*state_0 -> theta_pert[i] + coeff_1*state_1 -> theta_pert[i];
+        state_out -> exner_pert[i] = coeff_0*state_0 -> exner_pert[i] + coeff_1*state_1 -> exner_pert[i];
         
         for (int j = 0; j < NO_OF_CONDENSED_CONSTITUENTS; ++j)
         {
