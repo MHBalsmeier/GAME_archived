@@ -16,18 +16,13 @@ It is known that the forecast skill of a NWP model depends more on physics and d
 * no stability problems with terrain following coordinates
 * ellipsoidal grid geometry
 * a capable and flexible framework for coupling to physics and to other components of an Earth system model
-* consistency also in the presence of multiple constituents and radiation
+* good self-consistency also in the presence of multiple constituents and radiation
 
-According to my understanding, a hexagonal C-grid is the only discretization where all this can be achieved.
+According to my understanding, a hexagonal C-grid is the only discretization where all this can be achieved globally.
 
-### GAME's principles a.k.a. why a new model is necessary
+### GAME's principles
 
-What GAME does what other models do not do and why:
-
-
-* It employs the modified TRSK scheme.
-* It can assign individual densities (instead of mixing ratios) to constituents as well as individual temperatures and sink velocities.
-* It has different options for the complexity of the physics to make it useful for a wide range of applications.
+We try to find a good balance of accuracy, efficiency and self-consistency. Generally speaking, GAME focuses more on self-consistency than other models.
 
 ### Things to be done
 
@@ -39,18 +34,11 @@ What GAME does what other models do not do and why:
 * a nesting option
 * ocean dynamics and physics
 
-## What I would do differently if I developed the model again
-
-I only have my free time to do NWP model development, and this model architecture requires much more. Therefore I do not continue the work on this model. However, these are the two most important things I would change immediately if I had time or if I could develop the model again:
-
-* I would use the potential temperature as a prognostic variable and not the entropy. This is because the potential temperature is not less fundamental than the entropy and has an easier Poisson bracket structure in an ideal gas.
-* I would introduce a hydrostatic background state to achieve more stability in terrain following coordinates, which is necessary for realistic NWP scenarios. This diminishes the self-consistency properties of the Poisson brackets a bit, but this is true only for the spatial discretization. Through the decreased truncation errors in the horizontal gradients, however, the accuracy and possibly even the self-consistency will be increased by a hydrostatic background state when looking at the combination of spatial and temporal discretization.
-
 ## Documents
 
 ### Scientific derivations
 
-The derivations of both the continuous equations as well as of the discretization techniques can be found in my textbook on theoretical meteorology (in German): [Kompendium Theoretische Meteorologie](https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf). The most fundamental numerical techniques have firstly been published in the literature cited below.
+The derivations of both the continuous equations as well as of the discretization techniques can be found in my textbook on theoretical meteorology (in German): [Kompendium Theoretische Meteorologie](https://raw.githubusercontent.com/MHBalsmeier/kompendium/main/kompendium.pdf). The most fundamental numerical techniques have firstly been published in the literature cited below.
 
 ### Documentation
 
