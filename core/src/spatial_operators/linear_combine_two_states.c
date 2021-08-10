@@ -17,17 +17,13 @@ int linear_combine_two_states(State *state_0, State *state_1, State *state_out, 
 	#pragma omp parallel for
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-        state_out -> temperature_gas[i] = coeff_0*state_0 -> temperature_gas[i] + coeff_1*state_1 -> temperature_gas[i];
         
         for (int j = 0; j < NO_OF_CONSTITUENTS; ++j)
         {
-            state_out -> mass_densities[j*NO_OF_SCALARS + i] = coeff_0*state_0 -> mass_densities[j*NO_OF_SCALARS + i] + coeff_1*state_1 -> mass_densities[j*NO_OF_SCALARS + i];
+            state_out -> rho[j*NO_OF_SCALARS + i] = coeff_0*state_0 -> rho[j*NO_OF_SCALARS + i] + coeff_1*state_1 -> rho[j*NO_OF_SCALARS + i];
         }
         
-        for (int j = 0; j < NO_OF_GASEOUS_CONSTITUENTS; ++j)
-        {
-            state_out -> entropy_densities[j*NO_OF_SCALARS + i] = coeff_0*state_0 -> entropy_densities[j*NO_OF_SCALARS + i] + coeff_1*state_1 -> entropy_densities[j*NO_OF_SCALARS + i];
-        }
+        state_out -> rhotheta[i] = coeff_0*state_0 -> rhotheta[i] + coeff_1*state_1 -> rhotheta[i];
         
         for (int j = 0; j < NO_OF_CONDENSED_CONSTITUENTS; ++j)
         {
