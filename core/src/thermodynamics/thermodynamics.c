@@ -18,24 +18,6 @@ h:	humid
 #include <stdio.h>
 #include <stdlib.h>
 
-int pot_temp_diagnostics_dry(State *state, Scalar_field pot_temp)
-{
-	/*
-	This is only needed for the output.
-	*/
-	double condensates_density_sum, density_d_value, r_d, c_d_p;
-	#pragma omp parallel for private (condensates_density_sum, density_d_value, r_d, c_d_p)
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
-    {
-    	condensates_density_sum = calc_condensates_density_sum(i, state -> rho);
-    	density_d_value = calc_micro_density(state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], condensates_density_sum);
-    	r_d = specific_gas_constants(0);
-    	c_d_p = spec_heat_capacities_p_gas(0);
-    	pot_temp[i] = state -> temperature_gas[i]*pow(P_0/(density_d_value*r_d*state -> temperature_gas[i]), r_d/c_d_p);
-	}
-    return 0;
-}
-
 double spec_heat_cap_diagnostics_v(State *state, int grid_point_index, Config_info *config_info)
 {
 	double rho_g = 0;
