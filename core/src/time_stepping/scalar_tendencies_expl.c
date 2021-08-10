@@ -168,7 +168,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 					// radiation
 					+ radiation_tendency[j]
 					// this has to be divided by the temperature (we ware in the entropy equation)
-					)/diagnostics -> temperature_gas[j]
+					)/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j]))
 					// phase transitions
 					+ tracer_heating*state -> rho[i*NO_OF_SCALARS + j]/density_gas_weight
 					/diagnostics -> temperature_gas[j]);

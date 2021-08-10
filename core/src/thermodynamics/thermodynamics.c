@@ -18,6 +18,19 @@ h:	humid
 #include <stdio.h>
 #include <stdlib.h>
 
+int temperature_diagnostics(State *state, Grid *grid, Diagnostics *diagnostics)
+{
+	/*
+	This function diagnoses the temperature of the gas phase.
+	*/
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		diagnostics -> temperature_gas[i] = (grid -> theta_bg[i] + state -> theta_pert[i])*(grid -> exner_bg[i] + state -> exner_pert[i]);
+	}
+	return 0;
+}
+
 double spec_heat_cap_diagnostics_v(State *state, int grid_point_index, Config_info *config_info)
 {
 	double rho_g = 0;

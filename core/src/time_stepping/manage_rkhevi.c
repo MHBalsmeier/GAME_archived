@@ -58,8 +58,11 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 		At i == 0, it is state_old == state_new.
 		*/
 		
-		// 1.) Explicit component of the momentum equation.
-		// ------------------------------------------------
+		// 0.) diagnosing the temperature
+		temperature_diagnostics(state_new, grid, diagnostics);
+		
+		// 1.) explicit component of the momentum equation
+		// -----------------------------------------------
 		// Update of the pressure gradient.
 		if (i == 0)
 		{

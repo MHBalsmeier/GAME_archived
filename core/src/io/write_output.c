@@ -64,6 +64,9 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 	
 	double *grib_output_field = malloc(NO_OF_LATLON_IO_POINTS*sizeof(double));
 	
+	// diagnosing the temperature
+	temperature_diagnostics(state_write_out, grid, diagnostics);
+	
 	/*
 	Surface output including diagnostics.
 	-------------------------------------
