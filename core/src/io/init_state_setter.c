@@ -164,6 +164,8 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 					}
 				}
 			}
+			init_state -> theta_pert[i] = init_state -> rhotheta[i]/init_state -> rho[i] - grid -> theta_bg[i];
+			init_state -> exner_pert[i] = temperature_gas[i]/(grid -> theta_bg[i] + init_state -> theta_pert[i]) - grid -> exner_bg[i];
 	    }
 	}
 	
