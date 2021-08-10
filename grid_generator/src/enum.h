@@ -8,6 +8,7 @@ Github repository: https://github.com/AUN4GFD/game
 #define SEMIMAJOR 6378137.0
 #define SEMIMINOR 6356752.314
 #define EPSILON_SECURITY (1e-10)
+#define P_0 1e5
 
 enum grid_integers {
 RES_ID = 5,

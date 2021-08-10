@@ -13,6 +13,7 @@ This file contains functions that compute properties of the vertical grid.
 #include <stdio.h>
 #include <math.h>
 #include "geos95.h"
+#include "../../shared/shared.h"
 
 int set_z_scalar(double z_scalar[], double z_surface[], int NO_OF_ORO_LAYERS, double TOA, double stretching_parameter, int VERT_GRID_TYPE)
 {
@@ -333,10 +334,38 @@ int set_background_state(double z_scalar[], double gravity_potential[], double t
 	This sets the hydrostatic background state.
 	*/
 	
-	#pragma omp parallel for
+	double c_p = 1005.0;
+	double r_d = 287.057811;
+	int scalar_index, h_index;
+	double temperature, pressure, b, c;
+	#pragma omp parallel for private(scalar_index, h_index, temperature, pressure, b, c)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
-		
+		// integrating from bottom to top
+		for (int layer_index = NO_OF_LAYERS - 1; layer_index >= 0; --layer_index)
+		{
+			h_index = i - layer_index*NO_OF_SCALARS_H;
+			scalar_index = layer_index*NO_OF_SCALARS_H + h_index;
+			temperature = standard_temp(z_scalar[scalar_index]);
+			// lowest layer
+			if (layer_index == NO_OF_LAYERS - 1)
+			{
+				pressure = standard_pres(z_scalar[scalar_index]);
+				theta_bg[scalar_index] = temperature*pow(pressure/P_0, r_d/c_p);
+				exner_bg[scalar_index] = temperature/theta_bg[scalar_index];
+			}
+			// other layers
+			else
+			{
+				// solving a quadratic equation for the Exner pressure
+				b = -0.5*exner_bg[scalar_index + NO_OF_SCALARS_H]/standard_temp(z_scalar[scalar_index + NO_OF_SCALARS_H])
+				*(temperature - standard_temp(z_scalar[scalar_index + NO_OF_SCALARS_H])
+				+ 2/c_p*(gravity_potential[scalar_index] - gravity_potential[scalar_index + NO_OF_SCALARS_H]));
+				c = pow(exner_bg[scalar_index + NO_OF_SCALARS_H], 2)*temperature/standard_temp(z_scalar[scalar_index + NO_OF_SCALARS_H]);
+				exner_bg[scalar_index] = b + pow((pow(b, 2) + c), 0.5);
+				theta_bg[scalar_index] = temperature/exner_bg[scalar_index];
+			}
+		}
 	}
 	
 	return 0;
