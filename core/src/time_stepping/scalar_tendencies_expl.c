@@ -109,18 +109,15 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 	    
 		// explicit entropy integrations
 		// -----------------------------
-		if ((config_info -> assume_lte == 1 && i == NO_OF_CONDENSED_CONSTITUENTS)
-		|| (config_info -> assume_lte == 0 && i >= NO_OF_CONDENSED_CONSTITUENTS))
+		if (i == NO_OF_CONDENSED_CONSTITUENTS)
 		{
 			// Determining the specific entropy of the constituent at hand.
 			#pragma omp parallel for
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
-				if (state -> mass_densities[i*NO_OF_SCALARS + j] != 0)
+				if (state -> rho[i*NO_OF_SCALARS + j] != 0)
 				{
-					diagnostics -> scalar_field_placeholder[j] =
-					state -> entropy_densities[(i - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j]
-					/state -> mass_densities[i*NO_OF_SCALARS + j];
+					diagnostics -> scalar_field_placeholder[j] = grid -> theta_bg[j] + state -> theta_pert[j];
 				}
 				else
 				{
@@ -156,8 +153,8 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 							tracer_heating += irrev -> constituent_heat_source_rates[k*NO_OF_SCALARS + j];
 						}
 					}
-					state_tendency -> entropy_densities[(i - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j]
-					= old_weight*state_tendency -> entropy_densities[(i - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j]
+					state_tendency -> rhotheta[j]
+					= old_weight*state_tendency -> rhotheta[j]
 					+ new_weight*(
 					// the advection (resolved transport)
 					-diagnostics -> flux_density_divv[j]
@@ -178,7 +175,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 					// sensible heat in the lowest layer
 					if (layer_index == NO_OF_LAYERS - 1 - grid -> no_of_shaded_points_scalar[h_index])
 					{
-						state_tendency -> entropy_densities[(i - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + j]
+						state_tendency -> rhotheta[j]
 						// the minus-sign is correct (the quantity itself refers to soil)
 						-= new_weight*soil -> power_flux_density_sensible[j + NO_OF_SCALARS_H - NO_OF_SCALARS]/state -> temperature_gas[j]
 						/(grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H + h_index] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index]);

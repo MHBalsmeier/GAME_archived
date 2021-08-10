@@ -40,7 +40,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		new_hor_pgrad_sound_weight = 1 - old_hor_pgrad_sound_weight;
 	}
 	
-	// 2.) The first pressure gradient term (-c_p*grad(T)).
+	// 2.) the nonlinear pressure gradient term
 	// Before calculating the pressure gradient acceleration, the old one must be saved for extrapolation.
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
@@ -48,65 +48,28 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		extrapolation -> pgrad_acc_old[i] =	forcings -> pressure_gradient_acc_nl_expl[i] + forcings -> pressure_gradient_acc_l_expl[i];
 	}
 	
-	// diagnozing c_g_p
+	// diagnozing c_g_p and multiplying by the full potential tempertature
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		diagnostics -> c_g_p_field[i] = spec_heat_cap_diagnostics_p(state, i, config_info);
+		diagnostics -> scalar_field_placeholder[i] = diagnostics -> c_g_p_field[i]*(grid -> theta_bg[i] + state -> theta_pert[i]);
 	}
 	// multiplying c_g_p by the temperature gradient
-	grad(state -> temperature_gas, diagnostics -> cpgradt, grid);
-	scalar_times_vector(diagnostics -> c_g_p_field, diagnostics -> cpgradt, diagnostics -> cpgradt, grid);
+	grad(state -> exner_pert, forcings -> pressure_gradient_acc_nl_expl, grid);
+	scalar_times_vector(diagnostics -> scalar_field_placeholder, forcings -> pressure_gradient_acc_nl_expl, forcings -> pressure_gradient_acc_nl_expl, grid);
 		
-	// 3.) the second pressure gradient term
+	// 3.) the linear pressure gradient term
 	// -------------------------------------
-	// cleaning
+	// cleaning and diagnozing c_g_p*theta_pert
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
-		diagnostics -> tgrads[i] = 0;
+		forcings -> pressure_gradient_acc_l_expl[i] = grid -> exner_bg_grad[i];
+		diagnostics -> scalar_field_placeholder[i] = diagnostics -> c_g_p_field[i]*state -> theta_pert[i];
 	}
-	// Each constitutent of the gas phase gets an individual term.
-	int no_of_relevant_constituents;
-	if (config_info -> assume_lte == 0)
-	{
-		no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
-	}
-	if (config_info -> assume_lte == 1)
-	{
-		no_of_relevant_constituents = 1;
-	}
-	for (int j = 0; j < no_of_relevant_constituents; ++j)
-	{
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_SCALARS; ++i)
-		{
-			// determining the specific entropies of the dry air as well as of the water vapour
-			if (state -> mass_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i] != 0)
-			{
-				diagnostics -> scalar_field_placeholder[i] = state -> entropy_densities[j*NO_OF_SCALARS + i]/
-				state -> mass_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i];
-			}
-			else
-			{
-				diagnostics -> scalar_field_placeholder[i] = 0;
-			}
-			// the second pressure gradient term prefactors for dry air as well as water vapour
-			diagnostics -> pressure_gradient_1_prefactor[i] =
-			// damping term for small densities
-			pressure_gradient_1_damping_factor(state -> mass_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i])
-			// the physical term
-			*state -> temperature_gas[i]
-			*state -> mass_densities[(j + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i]/density_gas(state, i);
-		}
-		grad(diagnostics -> scalar_field_placeholder, diagnostics -> vector_field_placeholder, grid);
-		scalar_times_vector(diagnostics -> pressure_gradient_1_prefactor, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_VECTORS; ++i)
-		{
-			diagnostics -> tgrads[i] += diagnostics -> vector_field_placeholder[i];
-		}
-	}
+	scalar_times_vector(diagnostics -> scalar_field_placeholder, forcings -> pressure_gradient_acc_l_expl, forcings -> pressure_gradient_acc_l_expl, grid);
+	
 	
 	// 4.) Here, the explicit part of the pressure gradient acceleration is added up.
 	// --------------------------------------------------------------------------------

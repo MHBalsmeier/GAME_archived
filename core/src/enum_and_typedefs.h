@@ -77,6 +77,7 @@ Vector_field gravity_m;
 Vector_field slope;
 Scalar_field theta_bg;
 Scalar_field exner_bg;
+Vector_field exner_bg_grad;
 int trsk_indices[10*NO_OF_VECTORS_H];
 int trsk_modified_curl_indices[10*NO_OF_VECTORS_H];
 int from_index[NO_OF_VECTORS_H];
