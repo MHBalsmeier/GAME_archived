@@ -327,7 +327,7 @@ int main(int argc, char *argv[])
     printf(GREEN "finished.\n" RESET);
     
     printf("Setting the hydrostatic background state ... ");
-	set_background_state(z_scalar, gravity_potential, exner_bg, theta_bg);
+	set_background_state(z_scalar, gravity_potential, theta_bg, exner_bg);
     printf(GREEN "finished.\n" RESET);
     
     printf("Calculating inner product weights ... ");
@@ -357,7 +357,7 @@ int main(int argc, char *argv[])
 	/*
 	writing the result to a netcdf file
     */
-    int retval, latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_weights_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, trsk_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_triangles_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, latlon_dimid_3, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_10, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, inner_product_weights_id, scalar_8_dimid, scalar_2_dimid, vector_h_dual_dimid_2, density_to_rhombi_indices_id, density_to_rhombi_weights_id, vorticity_indices_triangles_id, ncid_g_prop, single_double_dimid, stretching_parameter_id, no_of_shaded_points_vector_id, no_of_shaded_points_scalar_id, no_of_lloyd_cycles_id, single_int_dimid, interpol_indices_id, interpol_weights_id, exner_bg_id, theta_bg_id;
+    int retval, latitude_scalar_id, longitude_scalar_id, direction_id, latitude_vector_id, longitude_vector_id, latitude_scalar_dual_id, longitude_scalar_dual_id, z_scalar_id, z_vector_id, normal_distance_id, volume_id, area_id, trsk_weights_id, z_vector_dual_id, normal_distance_dual_id, area_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, trsk_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, vorticity_signs_triangles_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, latlon_dimid_3, scalar_h_dimid_6, vector_h_dimid, vector_h_dimid_10, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid, inner_product_weights_id, scalar_8_dimid, scalar_2_dimid, vector_h_dual_dimid_2, density_to_rhombi_indices_id, density_to_rhombi_weights_id, vorticity_indices_triangles_id, ncid_g_prop, single_double_dimid, stretching_parameter_id, no_of_shaded_points_vector_id, no_of_shaded_points_scalar_id, no_of_lloyd_cycles_id, single_int_dimid, interpol_indices_id, interpol_weights_id, theta_bg_id, exner_bg_id;
     printf("Starting to write to output file ... ");
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
@@ -415,11 +415,11 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, z_scalar_id, "units", strlen("m"), "m")))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "exner_bg", NC_DOUBLE, 1, &scalar_dimid, &exner_bg_id)))
-        ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "theta_bg", NC_DOUBLE, 1, &scalar_dimid, &theta_bg_id)))
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, theta_bg_id, "units", strlen("K"), "K")))
+        ERR(retval);
+    if ((retval = nc_def_var(ncid_g_prop, "exner_bg", NC_DOUBLE, 1, &scalar_dimid, &exner_bg_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "gravity_potential", NC_DOUBLE, 1, &scalar_dimid, &gravity_potential_id)))
         ERR(retval);
@@ -519,9 +519,9 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, z_scalar_id, &z_scalar[0])))
         ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, exner_bg_id, &exner_bg[0])))
-        ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, theta_bg_id, &theta_bg[0])))
+        ERR(retval);
+    if ((retval = nc_put_var_double(ncid_g_prop, exner_bg_id, &exner_bg[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, gravity_potential_id, &gravity_potential[0])))
         ERR(retval);

@@ -13,14 +13,22 @@ Github repository: https://github.com/AUN4GFD/game
 #define R_D (R/M_D)
 #define P_0 100000.0
 
+const double T_SFC = 273.15 + 15;
+const double TEMP_GRADIENT = -0.65/100;
+// constants that are specific to the ICAO standard atmosphere
+const double P_0_STANDARD = 101325;
+const double TROPO_HEIGHT_STANDARD = 11e3;
+const double INVERSE_HEIGHT_STANDARD = 20e3;
+const double TEMP_GRADIENT_INV_STANDARD = 0.1/100;
+
 int find_z_from_p_jw(double lat, double p, double *result)
 {
+	const double G = 9.80616;
 	const double ETA_0 = 0.252;
 	const double ETA_T = 0.2;
 	const double DELTA_T = 4.8e5;
 	const double U_0 = 35;
 	double GAMMA = 0.005;
-	const double G = 9.80616;
 	double T_0 = 288;
 	// this function converts a preessure value into a geomtrical height (as a function of latitude) for the JW test
     double z;
@@ -110,6 +118,67 @@ int lu_5band_solver(double a_vector[], double b_vector[], double c_vector[], dou
 	}
 	return 0;
 }
+
+double standard_temp(double z_height)
+{
+    // temperature in the standard atmosphere
+    const double TROPO_TEMP_STANDARD = T_SFC + TROPO_HEIGHT_STANDARD*TEMP_GRADIENT;
+    double temperature;
+    if (z_height < TROPO_HEIGHT_STANDARD)
+    {
+        temperature = T_SFC + z_height*TEMP_GRADIENT;
+    }
+    else if (z_height < INVERSE_HEIGHT_STANDARD)
+    {
+        temperature = TROPO_TEMP_STANDARD;
+    }
+    else
+    {
+    	temperature = TROPO_TEMP_STANDARD + TEMP_GRADIENT_INV_STANDARD*(z_height - INVERSE_HEIGHT_STANDARD);
+    }
+    return temperature;
+}
+
+double standard_pres(double z_height)
+{
+    // pressure in the standard atmosphere
+	const double G = 9.80616;
+    const double TROPO_TEMP_STANDARD = T_SFC + TROPO_HEIGHT_STANDARD*TEMP_GRADIENT;
+    double pressure, pressure_at_inv_standard;
+    if (z_height < TROPO_HEIGHT_STANDARD)
+    {
+        pressure = P_0_STANDARD*pow(1 + TEMP_GRADIENT*z_height/T_SFC, -G/(R_D*TEMP_GRADIENT));
+    }
+    else if (z_height < INVERSE_HEIGHT_STANDARD)
+    {
+        pressure = P_0_STANDARD*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT_STANDARD/T_SFC, -G/(R_D*TEMP_GRADIENT))*exp(-G*(z_height - TROPO_HEIGHT_STANDARD)/(R_D*TROPO_TEMP_STANDARD));
+    }
+    else
+    {
+    	pressure_at_inv_standard = P_0_STANDARD*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT_STANDARD/T_SFC, -G/(R_D*TEMP_GRADIENT))*exp(-G*(INVERSE_HEIGHT_STANDARD - TROPO_HEIGHT_STANDARD)/(R_D*TROPO_TEMP_STANDARD));
+        pressure = pressure_at_inv_standard*pow(1 + TEMP_GRADIENT*(z_height - INVERSE_HEIGHT_STANDARD)/T_SFC, -G/(R_D*TEMP_GRADIENT));
+    }
+    return pressure;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

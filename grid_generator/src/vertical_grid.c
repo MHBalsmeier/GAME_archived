@@ -327,7 +327,7 @@ int to_index[], double z_vector[], int from_index_dual[], int to_index_dual[], d
 	return 0;
 }
 
-int set_background_state(double z_scalar[], double gravity_potential[], double exner_bg[], double theta_bg[])
+int set_background_state(double z_scalar[], double gravity_potential[], double theta_bg[], double exner_bg[])
 {
 	/*
 	This sets the hydrostatic background state.
@@ -341,8 +341,6 @@ int set_background_state(double z_scalar[], double gravity_potential[], double e
 	
 	return 0;
 }
-
-
 
 
 

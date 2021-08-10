@@ -25,22 +25,14 @@ With this program, ideal input states for GAME can be produced.
 #define K_B (1.380649e-23)
 
 // constants needed for the JW test state
-const double G = 9.80616;
 const double TROPO_HEIGHT = 12e3;
-const double T_SFC = 273.15 + 15;
 double T_0 = 288;
-const double TEMP_GRADIENT = -0.65/100;
 double GAMMA = 0.005;
+const double G = 9.80616;
 const double DELTA_T = 4.8e5;
 const double ETA_T = 0.2;
 const double U_0 = 35;
 const double ETA_0 = 0.252;
-
-// constants that are specific to the ICAO standard atmosphere
-const double P_0_STANDARD = 101325;
-const double TROPO_HEIGHT_STANDARD = 11e3;
-const double INVERSE_HEIGHT_STANDARD = 20e3;
-const double TEMP_GRADIENT_INV_STANDARD = 0.1/100;
 
 int find_pressure_value(double, double, double *);
 
@@ -103,9 +95,8 @@ int main(int argc, char *argv[])
     double *solid_water_density = malloc(NO_OF_SCALARS*sizeof(double));
     double *liquid_water_temp = malloc(NO_OF_SCALARS*sizeof(double));
     double *solid_water_temp = malloc(NO_OF_SCALARS*sizeof(double));
-    const double TROPO_TEMP_STANDARD = T_SFC + TROPO_HEIGHT_STANDARD*TEMP_GRADIENT;
     double z_height;
-    double lat, lon, u, v, eta, eta_v, T_perturb, distance, pressure_value, pressure_at_inv_standard, specific_humidity, total_density;
+    double lat, lon, u, v, eta, eta_v, T_perturb, distance, pressure_value, specific_humidity, total_density;
     double u_p = 1.0;
     double distance_scale = RADIUS/10;
     double lat_perturb = 2*M_PI/9;
@@ -137,22 +128,8 @@ int main(int argc, char *argv[])
         // standard atmosphere
         if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 12)
         {
-            if (z_height < TROPO_HEIGHT_STANDARD)
-            {
-                temperature[i] = T_SFC + z_height*TEMP_GRADIENT;
-                pressure[i] = P_0_STANDARD*pow(1 + TEMP_GRADIENT*z_height/T_SFC, -G/(R_D*TEMP_GRADIENT));
-            }
-            else if (z_height < INVERSE_HEIGHT_STANDARD)
-            {
-                temperature[i] = TROPO_TEMP_STANDARD;
-                pressure[i] = P_0_STANDARD*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT_STANDARD/T_SFC, -G/(R_D*TEMP_GRADIENT))*exp(-G*(z_height - TROPO_HEIGHT_STANDARD)/(R_D*TROPO_TEMP_STANDARD));
-            }
-            else
-            {
-            	temperature[i] = TROPO_TEMP_STANDARD + TEMP_GRADIENT_INV_STANDARD*(z_height - INVERSE_HEIGHT_STANDARD);
-            	pressure_at_inv_standard = P_0_STANDARD*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT_STANDARD/T_SFC, -G/(R_D*TEMP_GRADIENT))*exp(-G*(INVERSE_HEIGHT_STANDARD - TROPO_HEIGHT_STANDARD)/(R_D*TROPO_TEMP_STANDARD));
-                pressure[i] = pressure_at_inv_standard*pow(1 + TEMP_GRADIENT*(z_height - INVERSE_HEIGHT_STANDARD)/T_SFC, -G/(R_D*TEMP_GRADIENT));
-            }
+            temperature[i] = standard_temp(z_height);
+            pressure[i] = standard_pres(z_height);
         }
         // JW test
         if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6 || TEST_ID == 7)
