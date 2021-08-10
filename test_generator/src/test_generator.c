@@ -360,7 +360,7 @@ int main(int argc, char *argv[])
         NCERR(retval);
     if ((retval = nc_put_var_double(ncid, temp_id, &temperature[0])))
         NCERR(retval);
-    if ((retval = nc_put_var_double(ncid, density_dry_id, &state -> rho[0])))
+    if ((retval = nc_put_var_double(ncid, density_dry_id, &diagnostics -> scalar_field_placeholder[0])))
         NCERR(retval);
     if ((retval = nc_put_var_double(ncid, wind_id, &state -> wind[0])))
         NCERR(retval);    
