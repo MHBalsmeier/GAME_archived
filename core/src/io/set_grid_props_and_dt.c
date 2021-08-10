@@ -191,7 +191,7 @@ int calc_delta_t_and_related(double cfl_margin, double *delta_t, Grid *grid, Dua
     {
     	sound_speed_value = pow(gas_constant_diagnostics(state, i, config_info)
     	*spec_heat_cap_diagnostics_p(state, i, config_info)/spec_heat_cap_diagnostics_v(state, i, config_info)
-    	*state -> temperature_gas[i], 0.5);
+    	*(grid -> exner_bg[i] + state -> exner_pert[i])*(grid -> theta_bg[i] + state -> theta_pert[i]), 0.5);
     	if (sound_speed_value > max_sound_speed)
     	{
     		max_sound_speed = sound_speed_value;

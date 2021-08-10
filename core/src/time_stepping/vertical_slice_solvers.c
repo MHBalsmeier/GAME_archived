@@ -25,7 +25,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 	
 	// declaring and defining some variables that will be needed later on
 	int upper_index, lower_index;
-	double impl_pgrad_weight = get_impl_thermo_weight();
+	double impl_weight = get_impl_thermo_weight();
 	double c_g_v = spec_heat_cap_diagnostics_v(state_old, NO_OF_SCALARS/2, config_info);
 	double c_g_p = spec_heat_cap_diagnostics_p(state_old, NO_OF_SCALARS/2, config_info);
 	double r_g = gas_constant_diagnostics(state_old, NO_OF_SCALARS/2, config_info);
@@ -56,15 +56,12 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		double alpha_old[NO_OF_LAYERS];
 		double beta_old[NO_OF_LAYERS];
 		double gamma_old[NO_OF_LAYERS];
-		double delta_old[NO_OF_LAYERS];
 		double alpha_new[NO_OF_LAYERS];
 		double beta_new[NO_OF_LAYERS];
 		double gamma_new[NO_OF_LAYERS];
-		double delta_new[NO_OF_LAYERS];
 		double alpha[NO_OF_LAYERS];
 		double beta[NO_OF_LAYERS];
 		double gamma[NO_OF_LAYERS];
-		double delta[NO_OF_LAYERS];
 		double density_interface_new;
 		// determining the properties of the gas phase in the grid boxes and explicit quantities
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
@@ -84,31 +81,23 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			// new specific entropy
 			spec_entropy_new[j] = entropy_density_new[j]/density_new[j];
 			// partial derivatives of T = T(rho, stilde) (old time step)
-			alpha_old[j] = state_old -> temperature_gas[j*NO_OF_SCALARS_H + i]
-			/(c_g_v*state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i])
-			*(r_g - state_old -> entropy_densities[j*NO_OF_SCALARS_H + i]/state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]);
-			beta_old[j] = state_old -> temperature_gas[j*NO_OF_SCALARS_H + i]/(c_g_v*state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]);
+			alpha_old[j] = 0;
+			beta_old[j] = 0;
 			// partial derivatives of s = s(rho, stilde) (old time step)
-			gamma_old[j] = -state_old -> entropy_densities[j*NO_OF_SCALARS_H + i]/pow(state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i], 2);
-			delta_old[j] = 1/state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+			gamma_old[j] = 0;
 			// partial derivatives of T = T(rho, stilde) (new time step)
-			alpha_new[j] = state_new -> temperature_gas[j*NO_OF_SCALARS_H + i]
-			/(c_g_v*state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i])
-			*(r_g - state_new -> entropy_densities[j*NO_OF_SCALARS_H + i]/state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]);
-			beta_new[j] = state_new -> temperature_gas[j*NO_OF_SCALARS_H + i]/(c_g_v*state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]);
+			alpha_new[j] = 0;
+			beta_new[j] = 0;
 			// partial derivatives of s = s(rho, stilde) (new time step)
-			gamma_new[j] = -state_new -> entropy_densities[j*NO_OF_SCALARS_H + i]/pow(state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i], 2);
-			delta_new[j] = 1/state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+			gamma_new[j] = 0;
 			// interpolation in time
-			alpha[j] = (1 - impl_pgrad_weight)*alpha_old[j] + impl_pgrad_weight*alpha_new[j];
-			beta[j] = (1 - impl_pgrad_weight)*beta_old[j] + impl_pgrad_weight*beta_new[j];
-			gamma[j] = (1 - impl_pgrad_weight)*gamma_old[j] + impl_pgrad_weight*gamma_new[j];
-			delta[j] = (1 - impl_pgrad_weight)*delta_old[j] + impl_pgrad_weight*delta_new[j];
+			alpha[j] = (1 - impl_weight)*alpha_old[j] + impl_weight*alpha_new[j];
+			beta[j] = (1 - impl_weight)*beta_old[j] + impl_weight*beta_new[j];
+			gamma[j] = (1 - impl_weight)*gamma_old[j] + impl_weight*gamma_new[j];
 			// dividing by the volume
 			alpha[j] = alpha[j]/grid -> volume[i + j*NO_OF_SCALARS_H];
 			beta[j] = beta[j]/grid -> volume[i + j*NO_OF_SCALARS_H];
 			gamma[j] = gamma[j]/grid -> volume[i + j*NO_OF_SCALARS_H];
-			delta[j] = delta[j]/grid -> volume[i + j*NO_OF_SCALARS_H];
 		}
 		
 		// determining the interface values
@@ -142,19 +131,17 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			- c_g_p*(beta[j] + beta[j + 1])*spec_entropy_interface_new[j]
 			- c_g_p*alpha[j + 1]
 			+ temp_new_interface_values[j]*gamma[j]
-			+ temp_new_interface_values[j]*delta[j]*spec_entropy_interface_new[j]
 			- (grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])
-			/(impl_pgrad_weight*pow(delta_t, 2)*density_interface_old[j])*2/grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]
+			/(impl_weight*pow(delta_t, 2)*density_interface_old[j])*2/grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]
 			+ temp_new_interface_values[j]*gamma[j + 1]
-			+ temp_new_interface_values[j]*delta[j + 1]*spec_entropy_interface_new[j]
-			+ (grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_pgrad_weight*delta_t*density_interface_old[j])
+			+ (grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_weight*delta_t*density_interface_old[j])
 			*state_old -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*(0.5/grid -> volume[i + j*NO_OF_SCALARS_H] - 0.5/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]);
 			// right hand side
 			r_vector[j]
-			= -(grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_pgrad_weight*pow(delta_t, 2))
+			= -(grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_weight*pow(delta_t, 2))
 			*density_interface_explicit[j]*state_old -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/density_interface_old[j]
 			- (state_old -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] + delta_t*state_tendency -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER])
-			*(grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_pgrad_weight*pow(delta_t, 2))
+			*(grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_weight*pow(delta_t, 2))
 			+ c_g_p/delta_t*(diagnostics -> temperature_gas_explicit[i + j*NO_OF_SCALARS_H] - diagnostics -> temperature_gas_explicit[i + (j + 1)*NO_OF_SCALARS_H])
 			- temp_new_interface_values[j]/delta_t*(spec_entropy_explicit[j] - spec_entropy_explicit[j + 1]);
 		}
@@ -165,16 +152,14 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			= c_g_p*alpha[j + 1]
 			+ c_g_p*beta[j + 1]*spec_entropy_interface_new[j]
 			- temp_new_interface_values[j + 1]*gamma[j + 1]
-			- temp_new_interface_values[j + 1]*delta[j + 1]*spec_entropy_interface_new[j]
-			- (grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 2)*NO_OF_SCALARS_H])/(impl_pgrad_weight*delta_t)
+			- (grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 2)*NO_OF_SCALARS_H])/(impl_weight*delta_t)
 			*state_old -> velocity_gas[i + (j + 2)*NO_OF_VECTORS_PER_LAYER]*0.5/(grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*density_interface_old[j + 1]);
 			// above the main diagonal
 			e_vector[j]
 			= c_g_p*alpha[j + 1]
 			+ c_g_p*beta[j + 1]*spec_entropy_interface_new[j + 1]
 			- temp_new_interface_values[j]*gamma[j + 1]
-			- temp_new_interface_values[j]*delta[j + 1]*spec_entropy_interface_new[j + 1]
-			+ (grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_pgrad_weight*delta_t)
+			+ (grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_weight*delta_t)
 			*state_old -> velocity_gas[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*0.5/(grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*density_interface_old[j]);
 		}
 		

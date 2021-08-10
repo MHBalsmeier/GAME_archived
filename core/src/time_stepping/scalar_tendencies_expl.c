@@ -41,7 +41,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 	    calc_h2otracers_source_rates(
 	    irrev -> constituent_mass_source_rates,
 	    irrev -> constituent_heat_source_rates,
-	    state -> mass_densities,
+	    state -> rho,
 	    state -> condensed_density_temperatures,
 	    state -> temperature_gas,
 	    NO_OF_SCALARS,
@@ -82,7 +82,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 		#pragma omp parallel for
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
 		{
-		    diagnostics -> scalar_field_placeholder[j] = state -> mass_densities[i*NO_OF_SCALARS + j];
+		    diagnostics -> scalar_field_placeholder[j] = state -> rho[i*NO_OF_SCALARS + j];
 	    }
         
         // This is the mass advection, which needs to be carried out for all constituents.
@@ -97,8 +97,8 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 			h_index = j - layer_index*NO_OF_SCALARS_H;
 			if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 			{
-				state_tendency -> mass_densities[i*NO_OF_SCALARS + j]
-				= old_weight*state_tendency -> mass_densities[i*NO_OF_SCALARS + j]
+				state_tendency -> rho[i*NO_OF_SCALARS + j]
+				= old_weight*state_tendency -> rho[i*NO_OF_SCALARS + j]
 				+ new_weight*(
 				// the advection
 				-diagnostics -> flux_density_divv[j]
@@ -149,8 +149,8 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 					}
 					if (config_info -> assume_lte == 1)
 					{
-						density_gas_weight = state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j];
-						density_total_weight = state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j];
+						density_gas_weight = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j];
+						density_total_weight = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j];
 						for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS + 1; ++k)
 						{
 							tracer_heating += irrev -> constituent_heat_source_rates[k*NO_OF_SCALARS + j];
@@ -163,7 +163,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 					-diagnostics -> flux_density_divv[j]
 					// the diabatic forcings
 					// weighting factor
-					+ state -> mass_densities[i*NO_OF_SCALARS + j]/density_total_weight*(
+					+ state -> rho[i*NO_OF_SCALARS + j]/density_total_weight*(
 					// dissipation of molecular + turbulent momentum diffusion
 					irrev -> heating_diss[j]
 					// molecular + turbulent heat transport
@@ -173,7 +173,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 					// this has to be divided by the temperature (we ware in the entropy equation)
 					)/state -> temperature_gas[j]
 					// phase transitions
-					+ tracer_heating*state -> mass_densities[i*NO_OF_SCALARS + j]/density_gas_weight
+					+ tracer_heating*state -> rho[i*NO_OF_SCALARS + j]/density_gas_weight
 					/state -> temperature_gas[j]);
 					// sensible heat in the lowest layer
 					if (layer_index == NO_OF_LAYERS - 1 - grid -> no_of_shaded_points_scalar[h_index])
@@ -207,14 +207,14 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 				h_index = j - layer_index*NO_OF_SCALARS_H;
 				if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 				{
-					c_v_cond = ret_c_v_cond(i, 0, state -> condensed_density_temperatures[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + state -> mass_densities[i*NO_OF_SCALARS + j]));
+					c_v_cond = ret_c_v_cond(i, 0, state -> condensed_density_temperatures[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + state -> rho[i*NO_OF_SCALARS + j]));
 					state_tendency -> condensed_density_temperatures[i*NO_OF_SCALARS + j]
 					= old_weight*state_tendency -> condensed_density_temperatures[i*NO_OF_SCALARS + j]
 					+ new_weight*(
 					// the advection
 					-diagnostics -> flux_density_divv[j]
 					// the source terms
-					+ state -> mass_densities[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state, j))
+					+ state -> rho[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state, j))
 					*(irrev -> temperature_diffusion_heating[j] + irrev -> heating_diss[j] + radiation_tendency[j])
 					+ 1/c_v_cond*irrev -> constituent_heat_source_rates[i*NO_OF_SCALARS + j]
 					+ diagnostics -> scalar_field_placeholder[j]*(irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]));

@@ -61,8 +61,6 @@ typedef double Dual_vector_field[NO_OF_DUAL_VECTORS];
 typedef double Curl_field[NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H];
 // all constituents have a mass density
 typedef double Mass_densities[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
-// only the gaseous constituents have an entropy density
-typedef double Entropy_densities[NO_OF_GASEOUS_CONSTITUENTS*NO_OF_SCALARS];
 // only the condensed constituents have a density x temperature field
 typedef double Condensed_density_temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS];
 
@@ -113,19 +111,21 @@ double f_vec[2*NO_OF_VECTORS_H];
 } Dualgrid;
 
 typedef struct state {
-Scalar_field temperature_gas;
-Vector_field velocity_gas;
+// scalar variables
 // density order: solid, liquid, vapour
-Mass_densities mass_densities;
-Entropy_densities entropy_densities;
+Mass_densities rho;
+Scalar_field rhotheta;
+Scalar_field theta_pert;
+Scalar_field exner_pert;
 Condensed_density_temperatures condensed_density_temperatures;
+// wind
+Vector_field velocity_gas;
 } State;
 
 // Collects diagnostic quantities. Note: in fact, forcings are also diagnostic quantities.
 typedef struct diagnostics {
 Vector_field flux_density;
 Scalar_field flux_density_divv;
-Scalar_field pressure_gradient_1_prefactor;
 Scalar_field temperature_gas_explicit;
 double rel_vort_on_triangles[NO_OF_DUAL_V_VECTORS];
 Curl_field rel_vort;
@@ -164,7 +164,8 @@ Scalar_field radiation_tendency;
 
 // Collects forcings.
 typedef struct forcings {
-Vector_field pressure_gradient_acc_expl;
+Vector_field pressure_gradient_acc_nl_expl;
+Vector_field pressure_gradient_acc_l_expl;
 Vector_field e_kin_grad;
 Vector_field pot_vort_tend;
 } Forcings;

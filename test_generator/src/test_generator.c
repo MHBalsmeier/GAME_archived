@@ -18,7 +18,6 @@ With this program, ideal input states for GAME can be produced.
 #include <math.h>
 #include <netcdf.h>
 #include "geos95.h"
-#include "atmostracers.h"
 #include "../../shared/shared.h"
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 #define N_A (6.0221409e23)
@@ -39,8 +38,6 @@ int find_pressure_value(double, double, double *);
 int main(int argc, char *argv[])
 {
 	// some thermodynamical quantities
-	double R_D = specific_gas_constants_lookup(0);
-	double C_D_P = spec_heat_capacities_p_gas_lookup(0);
 	int TEST_ID;
    	TEST_ID = strtod(argv[1], NULL);
    	int NO_OF_ORO_LAYERS = strtod(argv[2], NULL);
@@ -138,10 +135,10 @@ int main(int argc, char *argv[])
             pressure[i] = pressure_value;
             eta = pressure[i]/P_0;
             eta_v = (eta - ETA_0)*M_PI/2;
-            T_perturb = 3.0/4.0*eta*M_PI*U_0/R_D*sin(eta_v)*pow(cos(eta_v), 0.5)*((-2*pow(sin(lat), 6)*(pow(cos(lat), 2) + 1.0/3.0) + 10.0/63.0)*2*U_0*pow(cos(eta_v), 1.5) + RADIUS*OMEGA*(8.0/5.0*pow(cos(lat), 3)*(pow(sin(lat), 2) + 2.0/3.0) - M_PI/4.0));
+            T_perturb = 3.0/4.0*eta*M_PI*U_0/spec_heat_capacities_p_gas(0)*sin(eta_v)*pow(cos(eta_v), 0.5)*((-2*pow(sin(lat), 6)*(pow(cos(lat), 2) + 1.0/3.0) + 10.0/63.0)*2*U_0*pow(cos(eta_v), 1.5) + RADIUS*OMEGA*(8.0/5.0*pow(cos(lat), 3)*(pow(sin(lat), 2) + 2.0/3.0) - M_PI/4.0));
             if (eta >= ETA_T)
             {
-                temperature[i] = T_0*pow(eta, R_D*GAMMA/G) + T_perturb;
+                temperature[i] = T_0*pow(eta, spec_heat_capacities_p_gas(0)*GAMMA/G) + T_perturb;
                 if (TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 7)
                 {
                     rel_humidity[i] = 0.7;
@@ -153,7 +150,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                temperature[i] = T_0*pow(eta, R_D*GAMMA/G) + DELTA_T*pow(ETA_T - eta, 5) + T_perturb;
+                temperature[i] = T_0*pow(eta, spec_heat_capacities_p_gas(0)*GAMMA/G) + DELTA_T*pow(ETA_T - eta, 5) + T_perturb;
             }
         }
         // dry Ullrich test
@@ -265,7 +262,7 @@ int main(int argc, char *argv[])
     // this is the density which has not yet been hydrostatically balanced
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		diagnostics -> scalar_field_placeholder[i] = pressure[i]/(R_D*temperature[i]);
+		diagnostics -> scalar_field_placeholder[i] = pressure[i]/(specific_gas_constants(0)*temperature[i]);
 	}
 	scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
 	// Now, the potential vorticity is evaluated.
@@ -278,36 +275,40 @@ int main(int argc, char *argv[])
 	// Taking the gradient of the kinetic energy
 	grad(diagnostics -> e_kin, forcings -> e_kin_grad, grid);
     // density is determined out of the hydrostatic equation
-    double entropy_value, temperature_mean, delta_temperature, delta_gravity_potential, lower_entropy_value, delta_z;
-    for (int i = NO_OF_SCALARS - 1; i >= 0; --i)
-    {
-    	layer_index = i/NO_OF_SCALARS_H;
-    	h_index = i - layer_index*NO_OF_SCALARS_H;
-    	// at the lowest layer the density is set using the equation of state, can be considered a boundary condition
-    	if (layer_index == NO_OF_LAYERS - 1)
-    	{
-        	state -> mass_densities[i] = pressure[i]/(R_D*temperature[i]);
-        }
-        else
-        {
-        	lower_entropy_value = spec_entropy_from_temp(state -> mass_densities[i + NO_OF_SCALARS_H], temperature[i + NO_OF_SCALARS_H]);
-        	temperature_mean = 0.5*(temperature[i] + temperature[i + NO_OF_SCALARS_H]);
-        	delta_temperature = temperature[i] - temperature[i + NO_OF_SCALARS_H];
-        	delta_z = grid -> z_scalar[i] - grid -> z_scalar[i + NO_OF_SCALARS_H];
-        	delta_gravity_potential = grid -> gravity_potential[i] - grid -> gravity_potential[i + NO_OF_SCALARS_H]
-        	- delta_z*(forcings -> pot_vort_tend[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + h_index] - 0.5*forcings -> e_kin_grad[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + h_index]);
-        	entropy_value = lower_entropy_value + (delta_gravity_potential + C_D_P*delta_temperature)/temperature_mean;
-        	state -> mass_densities[i] = solve_specific_entropy_for_density(entropy_value, temperature[i]);
-        }
-        if (TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 7)
-        {
-		    water_vapour_density[i] = water_vapour_density_from_rel_humidity(rel_humidity[i], temperature[i], state -> mass_densities[i]);
-		    if (water_vapour_density[i] < 0)
-		    {
-		    	printf("water_vapour_density negative.\n.");
+    int scalar_index;
+    double b, c;
+	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
+	{
+		// integrating from bottom to top
+		for (int layer_index = NO_OF_LAYERS - 1; layer_index >= 0; --layer_index)
+		{
+			scalar_index = layer_index*NO_OF_SCALARS_H + h_index;
+			// lowest layer
+			if (layer_index == NO_OF_LAYERS - 1)
+			{
+				pressure = standard_pres(grid -> z_scalar[scalar_index]);
+				state -> theta_pert[scalar_index] = temperature[scalar_index]*pow(pressure/P_0, specific_gas_constants(0)/spec_heat_capacities_p_gas(0));
+				state -> exner_pert[scalar_index] = temperature[scalar_index]/state -> theta_pert[scalar_index];
 			}
-    	}
-    }
+			// other layers
+			else
+			{
+				// solving a quadratic equation for the Exner pressure
+				b = -0.5*state -> exner_pert[scalar_index + NO_OF_SCALARS_H]/standard_temp(grid -> z_scalar[scalar_index + NO_OF_SCALARS_H])
+				*(temperature[scalar_index] - standard_temp(grid -> z_scalar[scalar_index + NO_OF_SCALARS_H])
+				+ 2/spec_heat_capacities_p_gas(0)*(gravity_potential[scalar_index] - gravity_potential[scalar_index + NO_OF_SCALARS_H]));
+				c = pow(state -> exner_pert[scalar_index + NO_OF_SCALARS_H], 2)*temperature[scalar_index]/standard_temp(grid -> z_scalar[scalar_index + NO_OF_SCALARS_H]);
+				state -> exner_pert[scalar_index] = b + pow((pow(b, 2) + c), 0.5);
+				state -> theta_pert[scalar_index] = temperature[scalar_index]/state -> exner_pert[scalar_index];
+			}
+		}
+	}
+	
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		state -> theta_pert[i] = state -> theta_pert[i] - grid -> theta_bg[i];
+		state -> exner_pert[i] = state -> exner_pert[i] - grid -> exner_bg[i];
+	}
     
     free(forcings);
     int scalar_dimid, vector_dimid, temp_id, density_dry_id, wind_id, density_vapour_id, density_liquid_id, density_solid_id, temperature_liquid_id, temperature_solid_id, ncid, single_double_dimid, stretching_parameter_id;
@@ -359,7 +360,7 @@ int main(int argc, char *argv[])
         NCERR(retval);
     if ((retval = nc_put_var_double(ncid, temp_id, &temperature[0])))
         NCERR(retval);
-    if ((retval = nc_put_var_double(ncid, density_dry_id, &state -> mass_densities[0])))
+    if ((retval = nc_put_var_double(ncid, density_dry_id, &state -> rho[0])))
         NCERR(retval);
     if ((retval = nc_put_var_double(ncid, wind_id, &state -> velocity_gas[0])))
         NCERR(retval);    

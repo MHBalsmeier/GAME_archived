@@ -100,7 +100,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil,Extrapolation_i
 				create_rad_array_scalar_h(soil -> temperature, radiation -> temp_sfc_rad, rad_block_index);
 				create_rad_array_scalar(grid -> z_scalar, radiation -> z_scal_rad, rad_block_index);
 				create_rad_array_vector(grid -> z_vector, radiation -> z_vect_rad, rad_block_index);
-				create_rad_array_mass_den(state_old -> mass_densities, radiation -> mass_den_rad, rad_block_index);
+				create_rad_array_mass_den(state_old -> rho, radiation -> mass_den_rad, rad_block_index);
 				create_rad_array_scalar(state_old -> temperature_gas, radiation -> temp_rad, rad_block_index);
 				// calling the radiation routine
 				// RTE+RRTMGP
@@ -110,7 +110,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil,Extrapolation_i
 					radiation -> lon_scal_rad,
 					radiation -> z_scal_rad,
 					radiation -> z_vect_rad,
-					radiation -> mass_den_rad,
+					radiation -> rho,
 					radiation -> temp_rad,
 					radiation -> rad_tend_rad,
 					radiation -> temp_sfc_rad,

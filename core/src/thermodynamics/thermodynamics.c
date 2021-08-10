@@ -27,8 +27,8 @@ int pot_temp_diagnostics_dry(State *state, Scalar_field pot_temp)
 	#pragma omp parallel for private (condensates_density_sum, density_d_value, r_d, c_d_p)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-    	condensates_density_sum = calc_condensates_density_sum(i, state -> mass_densities);
-    	density_d_value = calc_micro_density(state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], condensates_density_sum);
+    	condensates_density_sum = calc_condensates_density_sum(i, state -> rho);
+    	density_d_value = calc_micro_density(state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], condensates_density_sum);
     	r_d = specific_gas_constants(0);
     	c_d_p = spec_heat_capacities_p_gas(0);
     	pot_temp[i] = state -> temperature_gas[i]*pow(P_0/(density_d_value*r_d*state -> temperature_gas[i]), r_d/c_d_p);
@@ -48,12 +48,12 @@ double spec_heat_cap_diagnostics_v(State *state, int grid_point_index, Config_in
 	if (config_info -> assume_lte == 1)
 	{
 		no_of_relevant_constituents = 1;
-		rho_g = state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index];
+		rho_g = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index];
 	}
 	double result = 0;
 	for (int i = 0; i < no_of_relevant_constituents; ++i)
 	{
-		result += state -> mass_densities[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*spec_heat_capacities_v_gas(i);
+		result += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*spec_heat_capacities_v_gas(i);
 	}
 	return result;
 }
@@ -70,12 +70,12 @@ double spec_heat_cap_diagnostics_p(State *state, int grid_point_index, Config_in
 	if (config_info -> assume_lte == 1)
 	{
 		no_of_relevant_constituents = 1;
-		rho_g = state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index];
+		rho_g = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index];
 	}
 	double result = 0;
 	for (int i = 0; i < no_of_relevant_constituents; ++i)
 	{
-		result += state -> mass_densities[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*spec_heat_capacities_p_gas(i);
+		result += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*spec_heat_capacities_p_gas(i);
 	}
 	return result;
 }
@@ -92,12 +92,12 @@ double gas_constant_diagnostics(State *state, int grid_point_index, Config_info 
 	if (config_info -> assume_lte == 1)
 	{
 		no_of_relevant_constituents = 1;
-		rho_g = state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index];
+		rho_g = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index];
 	}
 	double result = 0;
 	for (int i = 0; i < no_of_relevant_constituents; ++i)
 	{
-		result += state -> mass_densities[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*specific_gas_constants(i);
+		result += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*specific_gas_constants(i);
 	}
 	return result;
 }
@@ -107,7 +107,7 @@ double density_total(State *state, int grid_point_index)
 	double result = 0;
 	for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
 	{
-		result += state -> mass_densities[i*NO_OF_SCALARS + grid_point_index];
+		result += state -> rho[i*NO_OF_SCALARS + grid_point_index];
 	}
 	return result;
 }
@@ -118,7 +118,7 @@ double density_gas(State *state, int grid_point_index)
 	// < 1 is temporary, normally it should be < NO_OF_GASEOUS_CONSTITUENTS
 	for (int i = 0; i < 1; ++i)
 	{
-		result += state -> mass_densities[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index];
+		result += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index];
 	}
 	return result;
 }
