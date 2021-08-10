@@ -73,8 +73,9 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			if (i == 0)
 			{
 				// old time step partial derivatives of rho*theta and Pi (divided by the volume)
-				alpha[j] = -state_old -> rhotheta[i + j*NO_OF_SCALARS_H]/pow(state_old -> rho[i + j*NO_OF_SCALARS_H], 2)/grid -> volume[i + j*NO_OF_SCALARS_H];
-				beta[j] = 1/state_old -> rho[i + j*NO_OF_SCALARS_H]/grid -> volume[i + j*NO_OF_SCALARS_H];
+				alpha[j] = -state_old -> rhotheta[i + j*NO_OF_SCALARS_H]/pow(state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H], 2)
+				/grid -> volume[i + j*NO_OF_SCALARS_H];
+				beta[j] = 1/state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H]/grid -> volume[i + j*NO_OF_SCALARS_H];
 				gamma[j] = r_d/(c_v*state_old -> rhotheta[i + j*NO_OF_SCALARS_H])
 				*(grid -> exner_bg[i + j*NO_OF_SCALARS_H] + state_old -> exner_pert[i + j*NO_OF_SCALARS_H])/grid -> volume[i + j*NO_OF_SCALARS_H];
 			}
@@ -82,7 +83,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			{
 				// old time step partial derivatives of rho*theta and Pi
 				alpha_old[j] = -state_new -> rhotheta[i + j*NO_OF_SCALARS_H]/pow(state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H], 2);
-				beta_old[j] = 1/state_old -> rho[i + j*NO_OF_SCALARS_H];
+				beta_old[j] = 1/state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H];
 				gamma_old[j] = 
 				gamma[j] = r_d/(c_v*state_old -> rhotheta[i + j*NO_OF_SCALARS_H])*(grid -> exner_bg[i + j*NO_OF_SCALARS_H] + state_old -> exner_pert[i + j*NO_OF_SCALARS_H]);
 				// new time step partial derivatives of rho*theta and Pi
@@ -94,8 +95,10 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 				beta[j] = ((1 - impl_weight)*beta_old[j] + impl_weight*beta_new[j])/grid -> volume[i + j*NO_OF_SCALARS_H];
 				gamma[j] = ((1 - impl_weight)*gamma_old[j] + impl_weight*gamma_new[j])/grid -> volume[i + j*NO_OF_SCALARS_H];
 			}
+			// explicit potential temperature perturbation
 			theta_pert_expl[j] = state_old -> theta_pert[i + j*NO_OF_SCALARS_H] + delta_t*grid -> volume[i + j*NO_OF_SCALARS_H]*(
 			alpha[j]*state_tendency -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] + beta[j]*state_tendency -> rhotheta[j*NO_OF_SCALARS_H + i]);
+			// explicit Exner pressure perturbation
 			exner_pert_expl[j] = state_old -> exner_pert[i + j*NO_OF_SCALARS_H] + delta_t*grid -> volume[i + j*NO_OF_SCALARS_H]*gamma[j]*state_tendency -> rhotheta[j*NO_OF_SCALARS_H + i];
 		}
 		
@@ -104,13 +107,11 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		{
 			upper_index = i + j*NO_OF_SCALARS_H;
 			lower_index = i + (j + 1)*NO_OF_SCALARS_H;
-			rho_int_old[j]
-			= 0.5*(state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + upper_index]
-			+ state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + lower_index]);
+			rho_int_old[j] = 0.5*(state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + upper_index] + state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + lower_index]);
 			rho_int_expl[j] = 0.5*(rho_expl[j] + rho_expl[j + 1]);
-			theta_int_expl[j] = 0.5*(rhotheta_expl[j]/rho_expl[j] + rhotheta_expl[j + 1]/rho_expl[j + 1]);
-			theta_int_new[j] = 0.5*(state_new -> rhotheta[j*NO_OF_SCALARS_H + i]/state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
-			+ state_new -> rhotheta[(j + 1)*NO_OF_SCALARS_H + i]/state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (j + 1)*NO_OF_SCALARS_H + i]);
+			theta_int_expl[j] = 0.5*(grid -> theta_bg[upper_index] + theta_pert_expl[j] + grid -> theta_bg[lower_index] + theta_pert_expl[j + 1]);
+			theta_int_new[j] = 0.5*(state_new -> rhotheta[upper_index]/state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + upper_index]
+			+ state_new -> rhotheta[lower_index]/state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + lower_index]);
 		}
 		
 		// filling up the coefficient vectors
