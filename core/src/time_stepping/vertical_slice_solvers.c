@@ -81,13 +81,13 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			else
 			{
 				// old time step partial derivatives of rho*theta and Pi
-				alpha_old[j] = -state_new -> rhotheta[i + j*NO_OF_SCALARS_H]/pow(state_new -> rho[i + j*NO_OF_SCALARS_H], 2);
+				alpha_old[j] = -state_new -> rhotheta[i + j*NO_OF_SCALARS_H]/pow(state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H], 2);
 				beta_old[j] = 1/state_old -> rho[i + j*NO_OF_SCALARS_H];
 				gamma_old[j] = 
 				gamma[j] = r_d/(c_v*state_old -> rhotheta[i + j*NO_OF_SCALARS_H])*(grid -> exner_bg[i + j*NO_OF_SCALARS_H] + state_old -> exner_pert[i + j*NO_OF_SCALARS_H]);
 				// new time step partial derivatives of rho*theta and Pi
-				alpha_new[j] = -state_new -> rhotheta[i + j*NO_OF_SCALARS_H]/pow(state_new -> rho[i + j*NO_OF_SCALARS_H], 2);
-				beta_new[j] = 1/state_new -> rho[i + j*NO_OF_SCALARS_H];
+				alpha_new[j] = -state_new -> rhotheta[i + j*NO_OF_SCALARS_H]/pow(state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H], 2);
+				beta_new[j] = 1/state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H];
 				gamma_new[j] = r_d/(c_v*state_new -> rhotheta[i + j*NO_OF_SCALARS_H])*(grid -> exner_bg[i + j*NO_OF_SCALARS_H] + state_new -> exner_pert[i + j*NO_OF_SCALARS_H]);
 				// interpolation in time and dividing by the volume
 				alpha[j] = ((1 - impl_weight)*alpha_old[j] + impl_weight*alpha_new[j])/grid -> volume[i + j*NO_OF_SCALARS_H];
@@ -109,8 +109,8 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			+ state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + lower_index]);
 			rho_int_expl[j] = 0.5*(rho_expl[j] + rho_expl[j + 1]);
 			theta_int_expl[j] = 0.5*(rhotheta_expl[j]/rho_expl[j] + rhotheta_expl[j + 1]/rho_expl[j + 1]);
-			theta_int_new[j] = 0.5*(state_new -> rhotheta[j*NO_OF_SCALARS_H + i]/state_new -> rho[j*NO_OF_SCALARS_H + i]
-			+ state_new -> rhotheta[(j + 1)*NO_OF_SCALARS_H + i]/state_new -> rho[(j + 1)*NO_OF_SCALARS_H + i]);
+			theta_int_new[j] = 0.5*(state_new -> rhotheta[j*NO_OF_SCALARS_H + i]/state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
+			+ state_new -> rhotheta[(j + 1)*NO_OF_SCALARS_H + i]/state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (j + 1)*NO_OF_SCALARS_H + i]);
 		}
 		
 		// filling up the coefficient vectors
@@ -227,7 +227,8 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		// potential temperature perturbation
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
 		{
-			state_new -> theta_pert[j*NO_OF_SCALARS_H + i] = state_new -> rhotheta[j*NO_OF_SCALARS_H + i]/state_new -> rho[j*NO_OF_SCALARS_H + i]
+			state_new -> theta_pert[j*NO_OF_SCALARS_H + i] = state_new -> rhotheta[j*NO_OF_SCALARS_H + i]
+			/state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
 			- grid -> theta_bg[j*NO_OF_SCALARS_H + i];
 		}
 		
