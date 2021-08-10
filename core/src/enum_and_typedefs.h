@@ -120,7 +120,7 @@ Scalar_field theta_pert;
 Scalar_field exner_pert;
 Condensed_density_temperatures condensed_density_temperatures;
 // wind
-Vector_field velocity_gas;
+Vector_field wind;
 } State;
 
 // Collects diagnostic quantities. Note: in fact, forcings are also diagnostic quantities.
@@ -133,7 +133,7 @@ Curl_field pot_vort;
 Scalar_field temperature_gas;
 Scalar_field c_g_p_field;
 Scalar_field e_kin;
-Scalar_field velocity_gas_divv;
+Scalar_field wind_divv;
 Vector_field curl_of_vorticity;
 Scalar_field scalar_field_placeholder;
 Vector_field vector_field_placeholder;

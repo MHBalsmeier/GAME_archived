@@ -32,13 +32,13 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 				diagnostics -> scalar_field_placeholder[i] = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
 			}
 		}
-		scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
+		scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> wind, diagnostics -> flux_density, grid);
 		// Now, the "potential vorticity" is evaluated.
-		calc_pot_vort(state -> velocity_gas, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
+		calc_pot_vort(state -> wind, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
 		// Now, the generalized Coriolis term is evaluated.
 		vorticity_flux(diagnostics -> flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid, dualgrid);
 		// Kinetic energy is prepared for the gradient term of the Lamb transformation.
-		inner_product(state -> velocity_gas, state -> velocity_gas, diagnostics -> e_kin, grid);
+		inner_product(state -> wind, state -> wind, diagnostics -> e_kin, grid);
 		// Taking the gradient of the kinetic energy
 		grad(diagnostics -> e_kin, forcings -> e_kin_grad, grid);
     }
@@ -81,7 +81,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 					irrev -> friction_acc[vector_index]
 					+= -bndr_lr_visc_max*(exp(-z_agl/e_folding_height) - exp(-bndr_lr_height/e_folding_height))
 					/(1 - exp(-bndr_lr_height/e_folding_height))
-					*state -> velocity_gas[vector_index];
+					*state -> wind[vector_index];
 				}
 			}
 		}
@@ -130,7 +130,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     	// upper and lower boundary
         if (i < NO_OF_SCALARS_H || i >= NO_OF_VECTORS - NO_OF_SCALARS_H)
         {
-            state_tendency -> velocity_gas[i] = 0;
+            state_tendency -> wind[i] = 0;
         }
         else if ((h_index >= NO_OF_SCALARS_H
     	// checking for shading
@@ -138,8 +138,8 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     	|| (h_index < NO_OF_SCALARS_H
     	&& NO_OF_LAYERS - layer_index > grid -> no_of_shaded_points_scalar[h_index]))
 		{
-    		state_tendency -> velocity_gas[i] =
-    		old_weight*state_tendency -> velocity_gas[i] + new_weight*(
+    		state_tendency -> wind[i] =
+    		old_weight*state_tendency -> wind[i] + new_weight*(
     		// explicit component of pressure gradient acceleration
     		// old time step component
     		old_hor_pgrad_sound_weight*forcings -> pgrad_acc_old[i]

@@ -76,7 +76,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 	    	h_index = j - layer_index*NO_OF_VECTORS_PER_LAYER;
 	    	if (h_index >= NO_OF_SCALARS_H)
 	    	{
-	    		state_new -> velocity_gas[j] = state_old -> velocity_gas[j] + delta_t*state_tendency -> velocity_gas[j];
+	    		state_new -> wind[j] = state_old -> wind[j] + delta_t*state_tendency -> wind[j];
 	    	}
 	    }
 		// Horizontal velocity can be considered to be updated from now on.
@@ -134,11 +134,11 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 		}
 		if (i == 0)
 		{
-			scalar_tendencies_expl(state_new, state_tendency, soil, grid, dualgrid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irrev, config_info, i, state_old -> velocity_gas);
+			scalar_tendencies_expl(state_new, state_tendency, soil, grid, dualgrid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irrev, config_info, i, state_old -> wind);
 		}
 		if (i == 1)
 		{	
-			scalar_tendencies_expl(state_new, state_tendency, soil, grid, dualgrid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irrev, config_info, i, state_new -> velocity_gas);
+			scalar_tendencies_expl(state_new, state_tendency, soil, grid, dualgrid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irrev, config_info, i, state_new -> wind);
 		}
 
 		// 3.) Vertical sound wave solver.

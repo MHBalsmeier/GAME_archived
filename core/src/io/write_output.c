@@ -616,13 +616,13 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
     
     // Diagnostics of quantities that are not surface-specific.    
     Scalar_field *divv_h_all_layers = calloc(1, sizeof(Scalar_field));
-	divv_h(state_write_out -> velocity_gas, *divv_h_all_layers, grid);
-	calc_rel_vort(state_write_out -> velocity_gas, diagnostics, grid, dualgrid);
+	divv_h(state_write_out -> wind, *divv_h_all_layers, grid);
+	calc_rel_vort(state_write_out -> wind, diagnostics, grid, dualgrid);
     Scalar_field *rel_vort = calloc(1, sizeof(Scalar_field));
 	curl_field_to_cells(diagnostics -> rel_vort, *rel_vort, grid);
 	
 	// Diagnozing the u and v wind components at the vector points.
-	calc_uv_at_edge(state_write_out -> velocity_gas, diagnostics -> u_at_edge, diagnostics -> v_at_edge, grid);
+	calc_uv_at_edge(state_write_out -> wind, diagnostics -> u_at_edge, diagnostics -> v_at_edge, grid);
 	// Averaging to cell centers for output.
 	edges_to_cells(diagnostics -> u_at_edge, diagnostics -> u_at_cell, grid);
 	edges_to_cells(diagnostics -> v_at_edge, diagnostics -> v_at_cell, grid);
@@ -643,7 +643,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 	{
 		diagnostics -> scalar_field_placeholder[i] = density_gas(state_write_out, i);
 	}
-    calc_pot_vort(state_write_out -> velocity_gas, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
+    calc_pot_vort(state_write_out -> wind, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
     epv_diagnostics(diagnostics -> pot_vort, state_write_out, *epv, grid, dualgrid);
     
 	// Pressure level output.
@@ -1283,7 +1283,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		{
 			for (int j = 0; j < NO_OF_SCALARS_H; j++)
 			{
-			    wind_w_h[j] = state_write_out -> velocity_gas[j + i*NO_OF_VECTORS_PER_LAYER];
+			    wind_w_h[j] = state_write_out -> wind[j + i*NO_OF_VECTORS_PER_LAYER];
 			}
 			set_basic_props2grib(handle_wind_w_h, data_date, data_time, t_write, t_init, 2, 9);
 			if ((retval = codes_set_long(handle_wind_w_h, "typeOfFirstFixedSurface", 26)))
@@ -1394,7 +1394,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, temp_liquid_id, &diagnostics -> temperature_gas[0])))
 			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, wind_id, &state_write_out -> velocity_gas[0])))
+		if ((retval = nc_put_var_double(ncid, wind_id, &state_write_out -> wind[0])))
 			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, rh_id, &(*rh)[0])))
 			NCERR(retval);
@@ -1536,7 +1536,7 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
     	double kinetic_integral, potential_integral, internal_integral;
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
     	Scalar_field *e_kin_density = malloc(sizeof(Scalar_field));
-    	inner_product(state_write_out -> velocity_gas, state_write_out -> velocity_gas, *e_kin_density, grid);
+    	inner_product(state_write_out -> wind, state_write_out -> wind, *e_kin_density, grid);
 		#pragma omp parallel for
 		for (int i = 0; i< NO_OF_SCALARS; ++i)
 		{

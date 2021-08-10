@@ -87,7 +87,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
         
         // This is the mass advection, which needs to be carried out for all constituents.
         // -------------------------------------------------------------------------------
-		scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
+		scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> wind, diagnostics -> flux_density, grid);
         divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 		// adding the tendencies in all grid boxes
 		#pragma omp parallel for private(layer_index, h_index)
@@ -194,7 +194,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 				diagnostics -> scalar_field_placeholder[j] = state -> condensed_density_temperatures[i*NO_OF_SCALARS + j];
 			}
 			// The constituent velocity has already been calculated.
-		    scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
+		    scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> wind, diagnostics -> flux_density, grid);
 		    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			// adding the tendencies in all grid boxes
 			#pragma omp parallel for private(layer_index, h_index, c_v_cond)

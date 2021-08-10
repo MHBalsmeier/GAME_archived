@@ -34,7 +34,7 @@ int linear_combine_two_states(State *state_0, State *state_1, State *state_out, 
     #pragma omp parallel for
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
-        state_out -> velocity_gas[i] = coeff_0*state_0 -> velocity_gas[i] + coeff_1*state_1 -> velocity_gas[i];
+        state_out -> wind[i] = coeff_0*state_0 -> wind[i] + coeff_1*state_1 -> wind[i];
     }
     return 0;
 }

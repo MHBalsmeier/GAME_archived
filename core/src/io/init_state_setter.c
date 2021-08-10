@@ -177,14 +177,14 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 		// check for shading
 		&& NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_vector[h_index - NO_OF_SCALARS_H])
 		{
-        	init_state -> velocity_gas[i] = wind[i];
+        	init_state -> wind[i] = wind[i];
     	}
     	// the vertical case
     	if (h_index < NO_OF_SCALARS_H
     	// check for shading
     	&& NO_OF_LAYERS - layer_index > grid -> no_of_shaded_points_scalar[h_index])
         {
-        	init_state -> velocity_gas[i] = wind[i];
+        	init_state -> wind[i] = wind[i];
     	}
     }
     free(density_dry);

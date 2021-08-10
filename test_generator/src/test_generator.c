@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
             // standard atmosphere: no wind
             if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 12)
             {
-                state -> velocity_gas[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = 0;
+                state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = 0;
             }
             // JW test: specific wind field
             if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6 || TEST_ID == 7)
@@ -214,29 +214,29 @@ int main(int argc, char *argv[])
                     distance = calculate_distance_h(lat, lon, lat_perturb, lon_perturb, RADIUS);
                     u += u_p*exp(-pow(distance/distance_scale, 2));
                 }
-                state -> velocity_gas[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]);
+                state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]);
             }
             // dry Ullrich test
             if (TEST_ID == 8 || TEST_ID == 10 || TEST_ID == 13)
             {
         		baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
-                state -> velocity_gas[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
+                state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
             }
             if (TEST_ID == 15)
             {
         		baroclinic_wave_test(&one, &zero, &two, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
-                state -> velocity_gas[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
+                state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
             }
             if (TEST_ID == 14)
             {
         		baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
-                state -> velocity_gas[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = -(u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]));
+                state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = -(u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]));
             }
             // moist Ullrich test
             if (TEST_ID == 9 || TEST_ID == 11)
             {
         		baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
-                state -> velocity_gas[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
+                state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
             }
         }
     }
@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
             z_height = grid -> z_vector[j + i*NO_OF_VECTORS_PER_LAYER];
             if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 8 || TEST_ID == 9 || TEST_ID == 10 || TEST_ID == 11 || TEST_ID == 12 || TEST_ID == 13 || TEST_ID == 14 || TEST_ID == 15)
             {
-                state -> velocity_gas[i*NO_OF_VECTORS_PER_LAYER + j] = 0;
+                state -> wind[i*NO_OF_VECTORS_PER_LAYER + j] = 0;
             }
         }
     }    
@@ -264,14 +264,14 @@ int main(int argc, char *argv[])
 	{
 		diagnostics -> scalar_field_placeholder[i] = pressure[i]/(specific_gas_constants(0)*temperature[i]);
 	}
-	scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
+	scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> wind, diagnostics -> flux_density, grid);
 	// Now, the potential vorticity is evaluated.
-	calc_pot_vort(state -> velocity_gas, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
+	calc_pot_vort(state -> wind, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
 	// Now, the generalized Coriolis term is evaluated.
 	vorticity_flux(diagnostics -> flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid, dualgrid);
 	free(dualgrid);
 	// Kinetic energy is prepared for the gradient term of the Lamb transformation.
-	inner_product(state -> velocity_gas, state -> velocity_gas, diagnostics -> e_kin, grid);
+	inner_product(state -> wind, state -> wind, diagnostics -> e_kin, grid);
 	// Taking the gradient of the kinetic energy
 	grad(diagnostics -> e_kin, forcings -> e_kin_grad, grid);
     // density is determined out of the hydrostatic equation
@@ -362,7 +362,7 @@ int main(int argc, char *argv[])
         NCERR(retval);
     if ((retval = nc_put_var_double(ncid, density_dry_id, &state -> rho[0])))
         NCERR(retval);
-    if ((retval = nc_put_var_double(ncid, wind_id, &state -> velocity_gas[0])))
+    if ((retval = nc_put_var_double(ncid, wind_id, &state -> wind[0])))
         NCERR(retval);    
     if ((retval = nc_put_var_double(ncid, density_vapour_id, &water_vapour_density[0])))
         NCERR(retval);    

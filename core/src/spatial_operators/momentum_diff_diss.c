@@ -25,9 +25,9 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	*/
     
     // calculating the divergence of the wind field
-    divv_h(state -> velocity_gas, diagnostics -> velocity_gas_divv, grid);
+    divv_h(state -> wind, diagnostics -> wind_divv, grid);
     // calculating the relative vorticity of the wind field
-	calc_rel_vort(state -> velocity_gas, diagnostics, grid, dualgrid);
+	calc_rel_vort(state -> wind, diagnostics, grid, dualgrid);
     
     // calculating the effective horizontal kinematic viscosity acting on divergences (Eddy viscosity)
 	hori_div_viscosity_eff(state, irrev, grid, diagnostics, config_info, delta_t);
@@ -40,8 +40,8 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	/*
 	gradient of divergence component
 	*/
-	scalar_times_scalar(irrev -> viscosity_div_eff, diagnostics -> velocity_gas_divv, diagnostics -> velocity_gas_divv);
-	grad_hor(diagnostics -> velocity_gas_divv, diagnostics -> vector_field_placeholder, grid);
+	scalar_times_scalar(irrev -> viscosity_div_eff, diagnostics -> wind_divv, diagnostics -> wind_divv);
+	grad_hor(diagnostics -> wind_divv, diagnostics -> vector_field_placeholder, grid);
     
     /*
     curl of vorticity component
@@ -98,8 +98,8 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	{
 		layer_index = i/NO_OF_VECTORS_H;
 		h_index = i - layer_index*NO_OF_VECTORS_H;
-		diagnostics -> prep_for_vert_diffusion[i] = (state -> velocity_gas[NO_OF_SCALARS_H + h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
-		- state -> velocity_gas[NO_OF_SCALARS_H + h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER])
+		diagnostics -> prep_for_vert_diffusion[i] = (state -> wind[NO_OF_SCALARS_H + h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
+		- state -> wind[NO_OF_SCALARS_H + h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER])
 		/(grid -> z_vector[NO_OF_SCALARS_H + h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
 		- grid -> z_vector[NO_OF_SCALARS_H + h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER]);
 	}
@@ -147,7 +147,7 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		diagnostics -> scalar_field_placeholder[i] = 0;
 	}
 	// computing something like dw/dz
-	add_vertical_divv(state -> velocity_gas, diagnostics -> scalar_field_placeholder, grid);
+	add_vertical_divv(state -> wind, diagnostics -> scalar_field_placeholder, grid);
 	// computing and multiplying by the respective diffusion coefficient
 	vert_w_viscosity_eff(state, grid, diagnostics, delta_t);
 	// taking the second derivative to compute the diffusive tendency
@@ -163,8 +163,8 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		layer_index = i/NO_OF_SCALARS_H;
 		h_index = i - layer_index*NO_OF_SCALARS_H;
 		diagnostics -> scalar_field_placeholder[i] =
-		grid -> inner_product_weights[8*i + 6]*state -> velocity_gas[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
-		+ grid -> inner_product_weights[8*i + 7]*state -> velocity_gas[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
+		grid -> inner_product_weights[8*i + 6]*state -> wind[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
+		+ grid -> inner_product_weights[8*i + 7]*state -> wind[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
 	}
 	// computing the horizontal gradient of the vertical velocity field
 	grad_hor(diagnostics -> scalar_field_placeholder, diagnostics -> vector_field_placeholder, grid);
@@ -305,7 +305,7 @@ int simple_dissipation_rate(State *state, Irreversible_quantities *irrev, Grid *
 	/*
 	calculates a simplified dissipation rate
 	*/
-	inner_product(state -> velocity_gas, irrev -> friction_acc, irrev -> heating_diss, grid);
+	inner_product(state -> wind, irrev -> friction_acc, irrev -> heating_diss, grid);
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{

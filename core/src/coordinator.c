@@ -465,8 +465,8 @@ int main(int argc, char *argv[])
 		= 0.5*(grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]]
 		+ grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index]]) + 10
 		- grid -> z_vector[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index];		
-		wind_closest = state_old -> velocity_gas[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
-		wind_second_closest = state_old -> velocity_gas[NO_OF_SCALARS_H + second_closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
+		wind_closest = state_old -> wind[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
+		wind_second_closest = state_old -> wind[NO_OF_SCALARS_H + second_closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
 		// calculating the vertical gradient of the horizontal wind
 		wind_gradient = (wind_closest - wind_second_closest)
 		/(grid -> z_vector[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index] - grid -> z_vector[NO_OF_SCALARS_H + second_closest_index*NO_OF_VECTORS_PER_LAYER + h_index]);
@@ -615,9 +615,9 @@ int main(int argc, char *argv[])
 					+ grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index]]) + 10
 					- grid -> z_vector[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
 					// wind in the closest layer
-					wind_closest = state_old -> velocity_gas[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
+					wind_closest = state_old -> wind[NO_OF_SCALARS_H + closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
 					// wind in the other layer
-					wind_second_closest = state_old -> velocity_gas[NO_OF_SCALARS_H + second_closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
+					wind_second_closest = state_old -> wind[NO_OF_SCALARS_H + second_closest_index*NO_OF_VECTORS_PER_LAYER + h_index];
 					// calculating the vertical gradient of the horizontal wind
 					wind_gradient = (wind_closest - wind_second_closest)
 					// the vertical distance between the two layers used for calculating the gradient

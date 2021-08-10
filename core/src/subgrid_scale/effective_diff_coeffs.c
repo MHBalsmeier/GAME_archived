@@ -31,7 +31,7 @@ int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *g
 	{
 		// preliminary result
 		irrev -> viscosity_div_eff[i] = 7*grid -> mean_area_cell*config_info -> diff_h_smag_fac
-		*fabs(5.0/3*diagnostics -> velocity_gas_divv[i]);
+		*fabs(5.0/3*diagnostics -> wind_divv[i]);
 		
 		// calculating and adding the molecular viscosity
 		calc_diffusion_coeff(diagnostics -> temperature_gas[i], mean_particle_mass, state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i],
@@ -188,9 +188,9 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 		layer_index = i/NO_OF_VECTORS_H;
 		h_index = i - layer_index*NO_OF_VECTORS_H;
 		// calculating the vertical derivative of the vertical velocity
-		dwdz = 0.5*(state -> velocity_gas[grid -> from_index[h_index] + layer_index*NO_OF_VECTORS_PER_LAYER] - state -> velocity_gas[grid -> from_index[h_index] + (layer_index + 2)*NO_OF_VECTORS_PER_LAYER])/
+		dwdz = 0.5*(state -> wind[grid -> from_index[h_index] + layer_index*NO_OF_VECTORS_PER_LAYER] - state -> wind[grid -> from_index[h_index] + (layer_index + 2)*NO_OF_VECTORS_PER_LAYER])/
 		(grid -> z_vector[grid -> from_index[h_index] + layer_index*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[grid -> from_index[h_index] + (layer_index + 2)*NO_OF_VECTORS_PER_LAYER]);
-		dwdz += 0.5*(state -> velocity_gas[grid -> to_index[h_index] + layer_index*NO_OF_VECTORS_PER_LAYER] - state -> velocity_gas[grid -> to_index[h_index] + (layer_index + 2)*NO_OF_VECTORS_PER_LAYER])/
+		dwdz += 0.5*(state -> wind[grid -> to_index[h_index] + layer_index*NO_OF_VECTORS_PER_LAYER] - state -> wind[grid -> to_index[h_index] + (layer_index + 2)*NO_OF_VECTORS_PER_LAYER])/
 		(grid -> z_vector[grid -> to_index[h_index] + layer_index*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[grid -> to_index[h_index] + (layer_index + 2)*NO_OF_VECTORS_PER_LAYER]);
 		// the turbulent component
 		mom_diff_coeff = 1e-3*0.11*pow(
