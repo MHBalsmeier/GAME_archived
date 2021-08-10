@@ -132,7 +132,7 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 	    }
 	}
 	
-    double pressure, pot_temp, specific_entropy;
+    double pressure, pot_temp;
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		layer_index = i/NO_OF_SCALARS_H;
@@ -159,9 +159,8 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 					{
 						pressure = init_state -> rho[j*NO_OF_SCALARS + i]*specific_gas_constants(j - NO_OF_CONDENSED_CONSTITUENTS)*temperature_gas[i];
 						pot_temp = temperature_gas[i]*pow(P_0/pressure, specific_gas_constants(j - NO_OF_CONDENSED_CONSTITUENTS)/spec_heat_capacities_p_gas(j - NO_OF_CONDENSED_CONSTITUENTS));
-						specific_entropy = spec_heat_capacities_p_gas(j - NO_OF_CONDENSED_CONSTITUENTS)*log(pot_temp);
 						init_state -> rhotheta[(j - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i]
-						= init_state -> rho[j*NO_OF_SCALARS + i]*specific_entropy;
+						= init_state -> rho[j*NO_OF_SCALARS + i]*pot_temp;
 					}
 				}
 			}
