@@ -45,7 +45,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
-		extrapolation -> pgrad_acc_old[i] =	-diagnostics -> cpgradt[i] + diagnostics -> tgrads[i];
+		extrapolation -> pgrad_acc_old[i] =	forcings -> pressure_gradient_acc_nl_expl[i] + forcings -> pressure_gradient_acc_l_expl[i];
 	}
 	
 	// diagnozing c_g_p

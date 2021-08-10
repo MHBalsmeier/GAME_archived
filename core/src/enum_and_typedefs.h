@@ -126,15 +126,12 @@ Vector_field velocity_gas;
 typedef struct diagnostics {
 Vector_field flux_density;
 Scalar_field flux_density_divv;
-Scalar_field temperature_gas_explicit;
 double rel_vort_on_triangles[NO_OF_DUAL_V_VECTORS];
 Curl_field rel_vort;
 Curl_field pot_vort;
 Scalar_field temperature_gas;
 Scalar_field c_g_p_field;
 Scalar_field e_kin;
-Vector_field cpgradt;
-Vector_field tgrads;
 Scalar_field velocity_gas_divv;
 Vector_field curl_of_vorticity;
 Scalar_field scalar_field_placeholder;
