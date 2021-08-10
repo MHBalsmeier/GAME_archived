@@ -143,7 +143,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 
 		// 3.) Vertical sound wave solver.
 		// -------------------------------
-		three_band_solver_ver_waves(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid);
+		three_band_solver_ver_waves(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid, i);
 		
 		// 4.) Solving the implicit component of the generalized density equations for tracers.
 		// ------------------------------------------------------------------------------------
