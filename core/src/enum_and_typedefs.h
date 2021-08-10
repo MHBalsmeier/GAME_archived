@@ -112,14 +112,11 @@ double f_vec[2*NO_OF_VECTORS_H];
 } Dualgrid;
 
 typedef struct state {
-// scalar variables
-// density order: solid, liquid, vapour
-Mass_densities rho;
+Mass_densities rho; // density order: solid, liquid, vapour
 Scalar_field rhotheta;
 Scalar_field theta_pert;
 Scalar_field exner_pert;
 Condensed_density_temperatures condensed_density_temperatures;
-// wind
 Vector_field wind;
 } State;
 

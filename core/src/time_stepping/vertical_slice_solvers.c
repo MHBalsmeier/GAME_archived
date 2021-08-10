@@ -188,7 +188,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 				= rho_expl[j] + delta_t*(-solution_vector[j - 1] + solution_vector[j])/grid -> volume[j*NO_OF_SCALARS_H + i];
 			}
 		}
-		// entropy density
+		// potential temperature density
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
 		{
 			if (j == 0)
@@ -218,6 +218,19 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			= (2*solution_vector[j]/grid -> area[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - density_interface_new*state_old -> wind[(j + 1)*NO_OF_VECTORS_PER_LAYER + i])
 			/rho_int_old[j];
 		}
+		// Exner pressure perturbation
+		for (int j = 0; j < NO_OF_LAYERS; ++j)
+		{
+			state_new -> exner_pert[j*NO_OF_SCALARS_H + i] = state_old -> exner_pert[j*NO_OF_SCALARS_H + i] + grid -> volume[j*NO_OF_SCALARS_H + i]
+			*gamma[j]*(state_new -> rhotheta[j*NO_OF_SCALARS_H + i] - state_old -> rhotheta[j*NO_OF_SCALARS_H + i]);
+		}
+		// potential temperature perturbation
+		for (int j = 0; j < NO_OF_LAYERS; ++j)
+		{
+			state_new -> theta_pert[j*NO_OF_SCALARS_H + i] = state_new -> rhotheta[j*NO_OF_SCALARS_H + i]/state_new -> rho[j*NO_OF_SCALARS_H + i]
+			- grid -> theta_bg[j*NO_OF_SCALARS_H + i];
+		}
+		
 	} // end of the column (index i) loop
 	return 0;
 }
