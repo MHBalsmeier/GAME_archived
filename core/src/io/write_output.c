@@ -70,8 +70,6 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 	*/
 	if (io_config -> surface_output_switch == 1)
 	{
-		Scalar_field *pot_temperature = calloc(1, sizeof(Scalar_field));
-		pot_temp_diagnostics_dry(state_write_out, *pot_temperature);
 		double *mslp = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *surface_p = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *t2 = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -85,7 +83,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 		{
 			// Now the aim is to determine the value of the MSLP.
-		    temp_lowest_layer = state_write_out -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		    temp_lowest_layer = diagnostics -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		    pressure_value = density_gas(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i)
 		    *gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i, config_info)
 		    *temp_lowest_layer;
@@ -112,8 +110,8 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 				second_closest_index = closest_index + 1;
 			}
 		    delta_z_temp = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i] + 2 - grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H];
-		    temp_closest = state_write_out -> temperature_gas[closest_index*NO_OF_SCALARS_H + i];
-		    temp_second_closest = state_write_out -> temperature_gas[second_closest_index*NO_OF_SCALARS_H + i];
+		    temp_closest = diagnostics -> temperature_gas[closest_index*NO_OF_SCALARS_H + i];
+		    temp_second_closest = diagnostics -> temperature_gas[second_closest_index*NO_OF_SCALARS_H + i];
 		    // calculating the vertical temperature gradient that will be used for the extrapolation
 		    temperature_gradient = (temp_closest - temp_second_closest)/(grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] - grid -> z_scalar[i + second_closest_index*NO_OF_SCALARS_H]);
 		    // performing the interpolation / extrapolation to two meters above the surface
@@ -123,16 +121,18 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		    cape[i] = 0;
 		    if (NO_OF_CONSTITUENTS >= 4)
 		    {
-				density_v = state_write_out -> mass_densities[3*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+				density_v = state_write_out -> rho[3*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 				density_h = density_gas(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i);
-				theta_v_prime = (*pot_temperature)[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]*(1 + density_v/density_h*(mean_particle_masses_gas(0)/mean_particle_masses_gas(1) - 1));
+				theta_v_prime = grid -> theta_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
+				+ state_write_out -> theta_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]*(1 + density_v/density_h*(mean_particle_masses_gas(0)/mean_particle_masses_gas(1) - 1));
 				layer_index = NO_OF_LAYERS - 1;
 				cape[i] = 0;
 				while (z_height < z_tropopause)
 				{
-					density_v = state_write_out -> mass_densities[3*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + i];
+					density_v = state_write_out -> rho[3*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + i];
 					density_h = density_gas(state_write_out, layer_index*NO_OF_SCALARS_H + i);
-				    theta_v = (*pot_temperature)[layer_index*NO_OF_SCALARS_H + i]*(1 + density_v/density_h*(mean_particle_masses_gas(0)/mean_particle_masses_gas(1) - 1));
+				    theta_v = grid -> theta_bg[layer_index*NO_OF_SCALARS_H + i]
+				    + state_write_out -> theta_pert[layer_index*NO_OF_SCALARS_H + i]*(1 + density_v/density_h*(mean_particle_masses_gas(0)/mean_particle_masses_gas(1) - 1));
 					delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + i];
 					z_height += delta_z;
 					cape_integrand = grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i]*(theta_v_prime - theta_v)/theta_v;
@@ -150,8 +150,8 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
         		cloudy_box_counter = 0;
     	        for (int k = 0; k < NO_OF_LAYERS; ++k)
 			    {
-			        if (state_write_out -> mass_densities[k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX
-			        || state_write_out -> mass_densities[NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX)
+			        if (state_write_out -> rho[k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX
+			        || state_write_out -> rho[NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX)
 			        {
 			    		cloudy_box_counter += 1;
 		            }
@@ -167,7 +167,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		    for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS/2; ++k)
 		    {
 		    	// sink velocity is one, value must be positive
-		        sprate[i] += state_write_out -> mass_densities[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		        sprate[i] += state_write_out -> rho[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
 	        if (sprate[i] < EPSILON_SECURITY)
 	        {
@@ -178,14 +178,13 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		    for (int k = NO_OF_CONDENSED_CONSTITUENTS/2; k < NO_OF_CONDENSED_CONSTITUENTS; ++k)
 		    {
 		    	// sink velocity is one, value must be positive
-		        rprate[i] += state_write_out -> mass_densities[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		        rprate[i] += state_write_out -> rho[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
 	        if (rprate[i] < EPSILON_SECURITY)
 	        {
 	        	rprate[i] = 0;
 	        }
 		}
-		free(pot_temperature);
 		
 		/*
 		10 m wind diagnostics
@@ -628,27 +627,24 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 	edges_to_cells(diagnostics -> u_at_edge, diagnostics -> u_at_cell, grid);
 	edges_to_cells(diagnostics -> v_at_edge, diagnostics -> v_at_cell, grid);
     Scalar_field *rh = calloc(1, sizeof(Scalar_field));
-	Scalar_field *pot_temp = calloc(1, sizeof(Scalar_field));
     Scalar_field *epv = calloc(1, sizeof(Scalar_field));
     Scalar_field *pressure = calloc(1, sizeof(Scalar_field));
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {    
 	    if (NO_OF_CONSTITUENTS >= 4)
 	    {
-    		(*rh)[i] = 100*rel_humidity(state_write_out -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i], state_write_out -> temperature_gas[i]);
+    		(*rh)[i] = 100*rel_humidity(state_write_out -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i], diagnostics -> temperature_gas[i]);
     	}
-    	(*pressure)[i] = density_gas(state_write_out, i)*gas_constant_diagnostics(state_write_out, i, config_info)*state_write_out -> temperature_gas[i];
+    	(*pressure)[i] = density_gas(state_write_out, i)*gas_constant_diagnostics(state_write_out, i, config_info)*diagnostics -> temperature_gas[i];
     }
     
-	pot_temp_diagnostics_dry(state_write_out, *pot_temp);
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		diagnostics -> scalar_field_placeholder[i] = density_gas(state_write_out, i);
 	}
     calc_pot_vort(state_write_out -> velocity_gas, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
-    epv_diagnostics(diagnostics -> pot_vort, *pot_temp, *epv, grid, dualgrid);
-    free(pot_temp);
+    epv_diagnostics(diagnostics -> pot_vort, state_write_out, *epv, grid, dualgrid);
     
 	// Pressure level output.
 	double closest_weight;
@@ -710,8 +706,8 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 					geopotential_height[i][j] = closest_weight*grid -> gravity_potential[closest_index*NO_OF_SCALARS_H + i]
 					+ (1 - closest_weight)*grid -> gravity_potential[second_closest_index*NO_OF_SCALARS_H + i];
 					geopotential_height[i][j] = geopotential_height[i][j]/GRAVITY_MEAN;
-					t_on_pressure_levels[i][j] = closest_weight*state_write_out -> temperature_gas[closest_index*NO_OF_SCALARS_H + i]
-					+ (1 - closest_weight)*state_write_out -> temperature_gas[second_closest_index*NO_OF_SCALARS_H + i];
+					t_on_pressure_levels[i][j] = closest_weight*diagnostics -> temperature_gas[closest_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*diagnostics -> temperature_gas[second_closest_index*NO_OF_SCALARS_H + i];
 					rh_on_pressure_levels[i][j] = closest_weight*(*rh)[closest_index*NO_OF_SCALARS_H + i]
 					+ (1 - closest_weight)*(*rh)[second_closest_index*NO_OF_SCALARS_H + i];
 					epv_on_pressure_levels[i][j] = closest_weight*(*epv)[closest_index*NO_OF_SCALARS_H + i]
@@ -1108,7 +1104,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		{
 			for (int j = 0; j < NO_OF_SCALARS_H; ++j)
 			{
-				temperature_h[j] = state_write_out -> temperature_gas[i*NO_OF_SCALARS_H + j];
+				temperature_h[j] = diagnostics -> temperature_gas[i*NO_OF_SCALARS_H + j];
 				pressure_h[j] = (*pressure)[i*NO_OF_SCALARS_H + j];
 				rh_h[j] = (*rh)[i*NO_OF_SCALARS_H + j];
 			}
@@ -1392,11 +1388,11 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		// setting the variables
 		if ((retval = nc_put_var_double(ncid, stretching_parameter_id, &grid -> stretching_parameter)))
 			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, temp_id, &state_write_out -> temperature_gas[0])))
+		if ((retval = nc_put_var_double(ncid, temp_id, &diagnostics -> temperature_gas[0])))
 			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, temp_solid_id, &state_write_out -> temperature_gas[0])))
+		if ((retval = nc_put_var_double(ncid, temp_solid_id, &diagnostics -> temperature_gas[0])))
 			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, temp_liquid_id, &state_write_out -> temperature_gas[0])))
+		if ((retval = nc_put_var_double(ncid, temp_liquid_id, &diagnostics -> temperature_gas[0])))
 			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, wind_id, &state_write_out -> velocity_gas[0])))
 			NCERR(retval);
@@ -1410,7 +1406,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
-			diagnostics -> scalar_field_placeholder[i] = state_write_out -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
+			diagnostics -> scalar_field_placeholder[i] = state_write_out -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
 		}
 		if ((retval = nc_put_var_double(ncid, density_dry_id, &diagnostics -> scalar_field_placeholder[0])))
 			NCERR(retval);
@@ -1420,7 +1416,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 			#pragma omp parallel for
 			for (int i = 0; i < NO_OF_SCALARS; ++i)
 			{
-				diagnostics -> scalar_field_placeholder[i] = state_write_out -> mass_densities[i];
+				diagnostics -> scalar_field_placeholder[i] = state_write_out -> rho[i];
 			}
 		}
 		else
@@ -1439,7 +1435,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 			#pragma omp parallel for
 			for (int i = 0; i < NO_OF_SCALARS; ++i)
 			{
-				diagnostics -> scalar_field_placeholder[i] = state_write_out -> mass_densities[NO_OF_SCALARS + i];
+				diagnostics -> scalar_field_placeholder[i] = state_write_out -> rho[NO_OF_SCALARS + i];
 			}
 		}
 		else
@@ -1458,7 +1454,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 			#pragma omp parallel for
 			for (int i = 0; i < NO_OF_SCALARS; ++i)
 			{
-				diagnostics -> scalar_field_placeholder[i] = state_write_out -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i];
+				diagnostics -> scalar_field_placeholder[i] = state_write_out -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i];
 			}
 		}
 		else
@@ -1517,7 +1513,7 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
 		#pragma omp parallel for
 		for (int i = 0; i< NO_OF_SCALARS; ++i)
 		{
-			diagnostics -> scalar_field_placeholder[i] = state_write_out -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
+			diagnostics -> scalar_field_placeholder[i] = state_write_out -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
 		}
     	global_scalar_integrator(diagnostics -> scalar_field_placeholder, grid, &global_integral);
     	fprintf(global_integral_file, "%d\t%lf\n", step_counter, global_integral);
@@ -1529,7 +1525,7 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
 		#pragma omp parallel for
 		for (int i = 0; i< NO_OF_SCALARS; ++i)
 		{
-			diagnostics -> scalar_field_placeholder[i] = state_write_out -> entropy_densities[i];
+			diagnostics -> scalar_field_placeholder[i] = state_write_out -> rhotheta[i];
 		}
     	global_scalar_integrator(diagnostics -> scalar_field_placeholder, grid, &global_integral);
     	fprintf(global_integral_file, "%d\t%lf\n", step_counter, global_integral);
@@ -1544,7 +1540,7 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
 		#pragma omp parallel for
 		for (int i = 0; i< NO_OF_SCALARS; ++i)
 		{
-			diagnostics -> scalar_field_placeholder[i] = state_write_out -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
+			diagnostics -> scalar_field_placeholder[i] = state_write_out -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
 		}
     	scalar_times_scalar(diagnostics -> scalar_field_placeholder, *e_kin_density, *e_kin_density);
     	global_scalar_integrator(*e_kin_density, grid, &kinetic_integral);
@@ -1554,26 +1550,10 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
     	global_scalar_integrator(*pot_energy_density, grid, &potential_integral);
     	free(pot_energy_density);
     	Scalar_field *int_energy_density = malloc(sizeof(Scalar_field));
-    	scalar_times_scalar(diagnostics -> scalar_field_placeholder, state_write_out -> temperature_gas, *int_energy_density);
+    	scalar_times_scalar(diagnostics -> scalar_field_placeholder, diagnostics -> temperature_gas, *int_energy_density);
     	global_scalar_integrator(*int_energy_density, grid, &internal_integral);
     	fprintf(global_integral_file, "%d\t%lf\t%lf\t%lf\n", step_counter, 0.5*kinetic_integral, potential_integral, spec_heat_capacities_v_gas(0)*internal_integral);
     	free(int_energy_density);
-    	fclose(global_integral_file);
-    }
-    if (integral_id == 3)
-    {
-    	global_integral_file = fopen(INTEGRAL_FILE, "a");
-    	Scalar_field *pot_temp = malloc(sizeof(Scalar_field));
-		pot_temp_diagnostics_dry(state_write_out, *pot_temp);
-    	Scalar_field *linear_entropy = malloc(sizeof(Scalar_field));
-    	for (int i = 0; i < NO_OF_SCALARS; ++i)
-    	{
-    		(*linear_entropy)[i] = spec_heat_capacities_p_gas(0)*state_write_out -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*(*pot_temp)[i];
-    	}
-    	global_scalar_integrator(*linear_entropy, grid, &global_integral);
-    	fprintf(global_integral_file, "%d\t%lf\n", step_counter, global_integral);
-    	free(linear_entropy);
-    	free(pot_temp);
     	fclose(global_integral_file);
     }
     free(INTEGRAL_FILE);

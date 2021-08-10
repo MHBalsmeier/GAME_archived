@@ -34,7 +34,7 @@ int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *g
 		*fabs(5.0/3*diagnostics -> velocity_gas_divv[i]);
 		
 		// calculating and adding the molecular viscosity
-		calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass, state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i],
+		calc_diffusion_coeff(diagnostics -> temperature_gas[i], mean_particle_mass, state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i],
 		eff_particle_radius, &molecular_viscosity);
 		irrev -> viscosity_div_eff[i] += molecular_viscosity;
 		
@@ -82,9 +82,9 @@ int hori_curl_viscosity_eff_rhombi(State *state, Irreversible_quantities *irrev,
 		scalar_index_from = layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index];
 		scalar_index_to = layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index];
 		calc_diffusion_coeff(
-		0.5*(state -> temperature_gas[scalar_index_from] + state -> temperature_gas[scalar_index_to]),
+		0.5*(diagnostics -> temperature_gas[scalar_index_from] + diagnostics -> temperature_gas[scalar_index_to]),
 		mean_particle_mass,
-		0.5*(state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_from] + state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_to]),
+		0.5*(state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_from] + state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_to]),
 		eff_particle_radius, &molecular_viscosity);
 		irrev -> viscosity_curl_eff_rhombi[vector_index] += molecular_viscosity;
 		
@@ -130,20 +130,20 @@ int hori_curl_viscosity_eff_triangles(State *state, Irreversible_quantities *irr
 		// calculating and adding the molecular viscosity
 		density_value =
 		1.0/6*(
-		state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
-		+ state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
-		+ state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
-		+ state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
-		+ state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]
-		+ state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]);
+		state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
+		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
+		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
+		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
+		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]
+		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]);
 		calc_diffusion_coeff(
 		1.0/6*(
-		state -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
-		+ state -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
-		+ state -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
-		+ state -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
-		+ state -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]
-		+ state -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]),
+		diagnostics -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
+		+ diagnostics -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
+		+ diagnostics -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
+		+ diagnostics -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
+		+ diagnostics -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]
+		+ diagnostics -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]),
 		mean_particle_mass,
 		density_value,
 		eff_particle_radius, &molecular_viscosity);
@@ -200,15 +200,15 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 		
 		// computing and adding the molecular viscosity
 		// therefore, the scalar variables need to be averaged to the vector points at half levels
-		calc_diffusion_coeff(0.25*(state -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]]
-		+ state -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]]
-		+ state -> temperature_gas[(layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]]
-		+ state -> temperature_gas[(layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]),
+		calc_diffusion_coeff(0.25*(diagnostics -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]]
+		+ diagnostics -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]]
+		+ diagnostics -> temperature_gas[(layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]]
+		+ diagnostics -> temperature_gas[(layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]),
 		mean_particle_mass,
-		0.25*(state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]]
-		+ state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]]
-		+ state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]]
-		+ state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]), eff_particle_radius, &molecuar_viscosity);
+		0.25*(state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]]
+		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]]
+		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]]
+		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]), eff_particle_radius, &molecuar_viscosity);
 		mom_diff_coeff += molecuar_viscosity;
 		
 		// obeying the stability limit
@@ -252,8 +252,8 @@ int vert_w_viscosity_eff(State *state, Grid *grid, Diagnostics *diagnostics, dou
 		, 2)
 		*fabs(diagnostics -> scalar_field_placeholder[i]);
 		// computing and adding the molecular momentum diffusion
-		calc_diffusion_coeff(state -> temperature_gas[i], mean_particle_mass,
-		state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &molecuar_viscosity);
+		calc_diffusion_coeff(diagnostics -> temperature_gas[i], mean_particle_mass,
+		state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &molecuar_viscosity);
 		mom_diff_coeff += molecuar_viscosity;
 		// this is the stability criterion
 		if (mom_diff_coeff > max_diff_v_coeff_turb)

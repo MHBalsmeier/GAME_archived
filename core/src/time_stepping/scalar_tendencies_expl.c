@@ -43,7 +43,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 	    irrev -> constituent_heat_source_rates,
 	    state -> rho,
 	    state -> condensed_density_temperatures,
-	    state -> temperature_gas,
+	    diagnostics -> temperature_gas,
 	    NO_OF_SCALARS,
 	    delta_t,
 	    config_info -> assume_lte);
@@ -53,7 +53,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 	if (no_rk_step == 0 && (config_info -> temperature_diff_h == 1 || config_info -> temperature_diff_v == 1))
 	{
 	    // The diffusion of the temperature depends on its gradient.
-		grad(state -> temperature_gas, diagnostics -> vector_field_placeholder, grid);
+		grad(diagnostics -> temperature_gas, diagnostics -> vector_field_placeholder, grid);
 		// Now we need to calculate the temperature diffusion coefficients.
 	    calc_temp_diffusion_coeffs(state, config_info, irrev, diagnostics, delta_t, grid);
 		// Now the diffusive temperature flux density can be obtained.
@@ -168,16 +168,16 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 					// radiation
 					+ radiation_tendency[j]
 					// this has to be divided by the temperature (we ware in the entropy equation)
-					)/state -> temperature_gas[j]
+					)/diagnostics -> temperature_gas[j]
 					// phase transitions
 					+ tracer_heating*state -> rho[i*NO_OF_SCALARS + j]/density_gas_weight
-					/state -> temperature_gas[j]);
+					/diagnostics -> temperature_gas[j]);
 					// sensible heat in the lowest layer
 					if (layer_index == NO_OF_LAYERS - 1 - grid -> no_of_shaded_points_scalar[h_index])
 					{
 						state_tendency -> rhotheta[j]
 						// the minus-sign is correct (the quantity itself refers to soil)
-						-= new_weight*soil -> power_flux_density_sensible[j + NO_OF_SCALARS_H - NO_OF_SCALARS]/state -> temperature_gas[j]
+						-= new_weight*soil -> power_flux_density_sensible[j + NO_OF_SCALARS_H - NO_OF_SCALARS]/diagnostics -> temperature_gas[j]
 						/(grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H + h_index] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index]);
 					}
 				 }

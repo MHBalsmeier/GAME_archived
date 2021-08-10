@@ -163,8 +163,9 @@ Scalar_field radiation_tendency;
 
 // Collects forcings.
 typedef struct forcings {
-Vector_field pressure_gradient_acc_nl_expl;
-Vector_field pressure_gradient_acc_l_expl;
+Vector_field pgrad_acc_old;
+Vector_field pressure_gradient_acc_nl;
+Vector_field pressure_gradient_acc_l;
 Vector_field e_kin_grad;
 Vector_field pot_vort_tend;
 } Forcings;
@@ -190,11 +191,6 @@ double shear_bg;
 double damping_start_height_over_toa;
 double damping_coeff_max;
 } Config_info;
-
-// This is necessary for stability of horizontally propagating sound waves.
-typedef struct extrapolation_info {
-Vector_field pgrad_acc_old;
-} Extrapolation_info;
 
 // soil information
 typedef struct soil {

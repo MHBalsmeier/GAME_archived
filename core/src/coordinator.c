@@ -518,13 +518,12 @@ int main(int argc, char *argv[])
     int wind_10_m_step_counter = 0;
     MPI_Init(&argc, &argv);
     State *state_tendency = calloc(1, sizeof(State));
-    Extrapolation_info *extrapolation_info = calloc(1, sizeof(Extrapolation_info));
     Irreversible_quantities *irrev = calloc(1, sizeof(Irreversible_quantities));
     State *state_new = calloc(1, sizeof(State));
     linear_combine_two_states(state_old, state_old, state_new, 1, 0);
 	Radiation *radiation = calloc(1, sizeof(Radiation));
 	Soil *soil = calloc(1, sizeof(Soil));
-	init_soil(soil, state_old);
+	init_soil(soil, diagnostics);
     State *state_write = calloc(1, sizeof(State));
     
     /*
@@ -554,7 +553,7 @@ int main(int argc, char *argv[])
     	}
     	
     	// Time step integration.
-    	manage_rkhevi(state_old, state_new, soil, extrapolation_info, grid, dualgrid, radiation, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
+    	manage_rkhevi(state_old, state_new, soil, grid, dualgrid, radiation, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
     	// This switch can be set to zero now and remains there.
     	config_info -> totally_first_step_bool = 0;
 		time_step_counter += 1;
@@ -673,7 +672,6 @@ int main(int argc, char *argv[])
     free(config_info);
     free(io_config);
     free(diagnostics);
-    free(extrapolation_info);
     free(forcings);
     free(state_tendency);
     free(radiation);

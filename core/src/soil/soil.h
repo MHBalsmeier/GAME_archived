@@ -3,5 +3,5 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/AUN4GFD/game
 */
 
-int init_soil(Soil *, State *);
-int soil_interaction(Soil *, State *, Radiation *, double);
+int init_soil(Soil *, Diagnostics *);
+int soil_interaction(Soil *, Diagnostics *, Radiation *, double);

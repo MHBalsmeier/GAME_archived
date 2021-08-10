@@ -17,35 +17,18 @@ In this file, the explicit component of the pressure gradient acceleration is ma
 
 double pressure_gradient_1_damping_factor(double);
 
-int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Extrapolation_info *extrapolation, Irreversible_quantities *irrev, Config_info *config_info)
+int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info)
 {
 	/*
 	This function computes the pressure gradient acceleration.
 	*/
-	
-	// 1.) The weights for the horizontal pressure gradient acceleration extrapolation.
-	// --------------------------------------------------------------------------------
-	double hor_pgrad_sound_extrapolation, old_hor_pgrad_sound_weight, new_hor_pgrad_sound_weight;
-	// In the case of the first time step, no extrapolation is possible.
-	if (config_info -> totally_first_step_bool == 1)
-	{
-		old_hor_pgrad_sound_weight = 0;
-		new_hor_pgrad_sound_weight = 1;
-	}
-	// This is the standard extrapolation.
-	else
-	{
-		hor_pgrad_sound_extrapolation = get_impl_thermo_weight() - 0.5;
-		old_hor_pgrad_sound_weight = -hor_pgrad_sound_extrapolation;
-		new_hor_pgrad_sound_weight = 1 - old_hor_pgrad_sound_weight;
-	}
 	
 	// 2.) the nonlinear pressure gradient term
 	// Before calculating the pressure gradient acceleration, the old one must be saved for extrapolation.
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
-		extrapolation -> pgrad_acc_old[i] =	forcings -> pressure_gradient_acc_nl_expl[i] + forcings -> pressure_gradient_acc_l_expl[i];
+		forcings -> pgrad_acc_old[i] =	forcings -> pressure_gradient_acc_nl[i] + forcings -> pressure_gradient_acc_l[i];
 	}
 	
 	// diagnozing c_g_p and multiplying by the full potential tempertature
@@ -56,8 +39,8 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		diagnostics -> scalar_field_placeholder[i] = diagnostics -> c_g_p_field[i]*(grid -> theta_bg[i] + state -> theta_pert[i]);
 	}
 	// multiplying c_g_p by the temperature gradient
-	grad(state -> exner_pert, forcings -> pressure_gradient_acc_nl_expl, grid);
-	scalar_times_vector(diagnostics -> scalar_field_placeholder, forcings -> pressure_gradient_acc_nl_expl, forcings -> pressure_gradient_acc_nl_expl, grid);
+	grad(state -> exner_pert, forcings -> pressure_gradient_acc_nl, grid);
+	scalar_times_vector(diagnostics -> scalar_field_placeholder, forcings -> pressure_gradient_acc_nl, forcings -> pressure_gradient_acc_nl, grid);
 		
 	// 3.) the linear pressure gradient term
 	// -------------------------------------
@@ -65,36 +48,12 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
-		forcings -> pressure_gradient_acc_l_expl[i] = grid -> exner_bg_grad[i];
+		forcings -> pressure_gradient_acc_l[i] = grid -> exner_bg_grad[i];
 		diagnostics -> scalar_field_placeholder[i] = diagnostics -> c_g_p_field[i]*state -> theta_pert[i];
 	}
-	scalar_times_vector(diagnostics -> scalar_field_placeholder, forcings -> pressure_gradient_acc_l_expl, forcings -> pressure_gradient_acc_l_expl, grid);
+	scalar_times_vector(diagnostics -> scalar_field_placeholder, forcings -> pressure_gradient_acc_l, forcings -> pressure_gradient_acc_l, grid);
 	
-	
-	// 4.) Here, the explicit part of the pressure gradient acceleration is added up.
-	// --------------------------------------------------------------------------------
-    double expl_pgrad_sound_weight;
-	expl_pgrad_sound_weight = 1 - get_impl_thermo_weight();
-	int layer_index, h_index;
-	#pragma omp parallel for private(layer_index, h_index)
-	for (int i = 0; i < NO_OF_VECTORS; ++i)
-	{
-		layer_index = i/NO_OF_VECTORS_PER_LAYER;
-		h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-		// horizontal case
-		if (h_index >= NO_OF_SCALARS_H)
-		{
-			forcings -> pressure_gradient_acc_expl[i] = old_hor_pgrad_sound_weight*extrapolation -> pgrad_acc_old[i]
-			+ new_hor_pgrad_sound_weight*(-diagnostics -> cpgradt[i] + diagnostics -> tgrads[i]);
-		}
-		// vertical case
-		else
-		{
-			forcings -> pressure_gradient_acc_expl[i] = expl_pgrad_sound_weight*(-diagnostics -> cpgradt[i] + diagnostics -> tgrads[i]);
-		}
-	}
-	
-	// 5.) The pressure gradient has to get a deceleration factor due to condensates.
+	// 4.) The pressure gradient has to get a deceleration factor due to condensates.
 	// --------------------------------------------------------------------------------
 	if (config_info -> assume_lte == 0)
 	{
@@ -103,7 +62,8 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		{
 			irrev -> pressure_gradient_decel_factor[i] = density_gas(state, i)/density_total(state, i);
 		}
-		scalar_times_vector(irrev -> pressure_gradient_decel_factor, forcings -> pressure_gradient_acc_expl, forcings -> pressure_gradient_acc_expl, grid);
+		scalar_times_vector(irrev -> pressure_gradient_decel_factor, forcings -> pressure_gradient_acc_nl, forcings -> pressure_gradient_acc_nl, grid);
+		scalar_times_vector(irrev -> pressure_gradient_decel_factor, forcings -> pressure_gradient_acc_l, forcings -> pressure_gradient_acc_l, grid);
 	}
 	
 	return 0;

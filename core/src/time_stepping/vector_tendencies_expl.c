@@ -29,7 +29,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 			}
 			else
 			{
-				diagnostics -> scalar_field_placeholder[i] = state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
+				diagnostics -> scalar_field_placeholder[i] = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
 			}
 		}
 		scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> velocity_gas, diagnostics -> flux_density, grid);
@@ -97,6 +97,22 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		}
     }
 	
+	// the weights for the horizontal pressure gradient acceleration extrapolation
+	double hor_pgrad_sound_extrapolation, old_hor_pgrad_sound_weight, new_hor_pgrad_sound_weight;
+	// In the case of the first time step, no extrapolation is possible.
+	if (config_info -> totally_first_step_bool == 1)
+	{
+		old_hor_pgrad_sound_weight = 0;
+		new_hor_pgrad_sound_weight = 1;
+	}
+	// This is the standard extrapolation.
+	else
+	{
+		hor_pgrad_sound_extrapolation = get_impl_thermo_weight() - 0.5;
+		old_hor_pgrad_sound_weight = -hor_pgrad_sound_extrapolation;
+		new_hor_pgrad_sound_weight = 1 - old_hor_pgrad_sound_weight;
+	}
+	
     // Now the explicit forces are added up.
     int layer_index, h_index;
     double old_weight, new_weight;
@@ -125,7 +141,10 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     		state_tendency -> velocity_gas[i] =
     		old_weight*state_tendency -> velocity_gas[i] + new_weight*(
     		// explicit component of pressure gradient acceleration
-    		+ forcings -> pressure_gradient_acc_expl[i]
+    		// old time step component
+    		old_hor_pgrad_sound_weight*forcings -> pgrad_acc_old[i]
+    		// new time step component
+    		+ new_hor_pgrad_sound_weight*(forcings -> pressure_gradient_acc_nl[i] + forcings -> pressure_gradient_acc_l[i])
     		// generalized Coriolis term
     		+ forcings -> pot_vort_tend[i]
     		// kinetic energy term

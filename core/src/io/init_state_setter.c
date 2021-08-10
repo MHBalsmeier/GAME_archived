@@ -89,16 +89,6 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
     }
     
     int layer_index, h_index;
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
-    {
-		layer_index = i/NO_OF_SCALARS_H;
-		h_index = i - layer_index*NO_OF_SCALARS_H;
-		if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
-		{
-        	init_state -> temperature_gas[i] = temperature_gas[i];
-    	}
-    }
-    
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		layer_index = i/NO_OF_SCALARS_H;
@@ -107,34 +97,34 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 		{
 		    if (NO_OF_CONSTITUENTS >= 4)
 		    {
-				init_state -> mass_densities[i] = solid_water_density[i];
-				if (init_state -> mass_densities[i] < 0)
+				init_state -> rho[i] = solid_water_density[i];
+				if (init_state -> rho[i] < 0)
 				{
-					printf("Error: init_state -> mass_densities < 0 somewhere.\n");
+					printf("Error: init_state -> rho < 0 somewhere.\n");
 					printf("Aborting.\n");
 					exit(1);
 				}
-				init_state -> mass_densities[NO_OF_SCALARS + i] = liquid_water_density[i];
-				if (init_state -> mass_densities[NO_OF_SCALARS + i] < 0)
+				init_state -> rho[NO_OF_SCALARS + i] = liquid_water_density[i];
+				if (init_state -> rho[NO_OF_SCALARS + i] < 0)
 				{
-					printf("Error: init_state -> mass_densities < 0 somewhere.\n");
+					printf("Error: init_state -> rho < 0 somewhere.\n");
 					printf("Aborting.\n");
 					exit(1);
 				}
 		    }
-		    init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = density_dry[i];
-		    if (init_state -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] < 0)
+		    init_state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = density_dry[i];
+		    if (init_state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] < 0)
 		    {
-		    	printf("Error: init_state -> mass_densities < 0 somewhere.\n");
+		    	printf("Error: init_state -> rho < 0 somewhere.\n");
 		    	printf("Aborting.\n");
 		    	exit(1);
 		    }
 		    if (NO_OF_CONSTITUENTS >= 4)
 		    {
-				init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = water_vapour_density[i];
-				if (init_state -> mass_densities[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] < 0)
+				init_state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = water_vapour_density[i];
+				if (init_state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] < 0)
 				{
-					printf("Error: init_state -> mass_densities < 0 somewhere.\n");
+					printf("Error: init_state -> rho < 0 somewhere.\n");
 					printf("Aborting.\n");
 					exit(1);
 				}
@@ -161,17 +151,17 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 				}
 				if (j >= NO_OF_CONDENSED_CONSTITUENTS)
 				{
-					if (init_state -> mass_densities[j*NO_OF_SCALARS + i] == 0)
+					if (init_state -> rho[j*NO_OF_SCALARS + i] == 0)
 					{
-						init_state -> entropy_densities[(j - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i] = 0;
+						init_state -> rhotheta[(j - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i] = 0;
 					}
 					else
 					{
-						pressure = init_state -> mass_densities[j*NO_OF_SCALARS + i]*specific_gas_constants(j - NO_OF_CONDENSED_CONSTITUENTS)*temperature_gas[i];
+						pressure = init_state -> rho[j*NO_OF_SCALARS + i]*specific_gas_constants(j - NO_OF_CONDENSED_CONSTITUENTS)*temperature_gas[i];
 						pot_temp = temperature_gas[i]*pow(P_0/pressure, specific_gas_constants(j - NO_OF_CONDENSED_CONSTITUENTS)/spec_heat_capacities_p_gas(j - NO_OF_CONDENSED_CONSTITUENTS));
 						specific_entropy = spec_heat_capacities_p_gas(j - NO_OF_CONDENSED_CONSTITUENTS)*log(pot_temp);
-						init_state -> entropy_densities[(j - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i]
-						= init_state -> mass_densities[j*NO_OF_SCALARS + i]*specific_entropy;
+						init_state -> rhotheta[(j - NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + i]
+						= init_state -> rho[j*NO_OF_SCALARS + i]*specific_entropy;
 					}
 				}
 			}

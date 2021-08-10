@@ -17,7 +17,7 @@ const double density = 1000;
 const double c_v = 4184;
 const double heat_trans_coeff = 50;
 
-int soil_interaction(Soil *soil, State *state, Radiation *radiation, double delta_t)
+int soil_interaction(Soil *soil, Diagnostics *diagnostics, Radiation *radiation, double delta_t)
 {
 	/*
 	This function computes the interaction of the dynamical core with the soil; 
@@ -28,7 +28,7 @@ int soil_interaction(Soil *soil, State *state, Radiation *radiation, double delt
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// sensible heat flux density through the surface
-		soil -> power_flux_density_sensible[i] = heat_trans_coeff*(state -> temperature_gas[NO_OF_SCALARS - NO_OF_SCALARS_H + i] - soil -> temperature[i]);
+		soil -> power_flux_density_sensible[i] = heat_trans_coeff*(diagnostics -> temperature_gas[NO_OF_SCALARS - NO_OF_SCALARS_H + i] - soil -> temperature[i]);
 		
 		// summing up the power densities and transforming into a temperature change
 		soil -> temperature[i]
@@ -44,7 +44,7 @@ int soil_interaction(Soil *soil, State *state, Radiation *radiation, double delt
 	return 0;
 }
 
-int init_soil(Soil *soil, State *state)
+int init_soil(Soil *soil, Diagnostics *diagnostics)
 {
 	/*
 	This function initializes the soil state.
@@ -54,7 +54,7 @@ int init_soil(Soil *soil, State *state)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// setting the soil temperature equal to the temperature in the lowest layer
-		soil -> temperature[i] = state -> temperature_gas[NO_OF_SCALARS - NO_OF_SCALARS_H + i];
+		soil -> temperature[i] = diagnostics -> temperature_gas[NO_OF_SCALARS - NO_OF_SCALARS_H + i];
 	}
 	
 	return 0;

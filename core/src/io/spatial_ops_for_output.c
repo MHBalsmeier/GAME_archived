@@ -14,7 +14,7 @@ In this file, spatial operators are collected which are only needed for the outp
 
 int inner_product_tangential(Vector_field, Vector_field, Scalar_field, Grid *, Dualgrid *);
 
-int epv_diagnostics(Curl_field pot_vort, Scalar_field pot_temp, Scalar_field epv, Grid *grid, Dualgrid *dualgrid)
+int epv_diagnostics(Curl_field pot_vort, State *state, Scalar_field epv, Grid *grid, Dualgrid *dualgrid)
 {
 	// diagnozing Ertel's potential vorticity (EPV)
 	// allocating memory for quantities we need in order to determine the EPV
@@ -112,7 +112,16 @@ int epv_diagnostics(Curl_field pot_vort, Scalar_field pot_temp, Scalar_field epv
 		}
 	}
 	// taking the gradient of the potential temperature
-	grad(pot_temp, *grad_pot_temp, grid);
+	// misuse of name
+	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+	{
+		state -> theta_pert[i] += grid -> theta_bg[i];
+	}
+	grad(state -> theta_pert, *grad_pot_temp, grid);
+	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+	{
+		state -> theta_pert[i] -= grid -> theta_bg[i];
+	}
 	inner_product_tangential(*pot_vort_as_mod_vector_field, *grad_pot_temp, epv, grid, dualgrid);
 	// freeing the memory
 	free(pot_vort_as_mod_vector_field);

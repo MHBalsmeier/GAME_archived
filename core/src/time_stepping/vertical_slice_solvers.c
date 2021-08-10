@@ -67,17 +67,17 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
 		{
 			// explicit density
-			density_explicit[j] = state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
-			+ delta_t*state_tendency -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+			density_explicit[j] = state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
+			+ delta_t*state_tendency -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
 			// explicit entropy density
-			entropy_density_explicit[j] = state_old -> entropy_densities[j*NO_OF_SCALARS_H + i]
-			+ delta_t*state_tendency -> entropy_densities[j*NO_OF_SCALARS_H + i];
+			entropy_density_explicit[j] = state_old -> rhotheta[j*NO_OF_SCALARS_H + i]
+			+ delta_t*state_tendency -> rhotheta[j*NO_OF_SCALARS_H + i];
 			// specific entropy
 			spec_entropy_explicit[j] = entropy_density_explicit[j]/density_explicit[j];
 			// new density
-			density_new[j] = state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+			density_new[j] = state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
 			// new entropy density
-			entropy_density_new[j] = state_new -> entropy_densities[j*NO_OF_SCALARS_H + i];
+			entropy_density_new[j] = state_new -> rhotheta[j*NO_OF_SCALARS_H + i];
 			// new specific entropy
 			spec_entropy_new[j] = entropy_density_new[j]/density_new[j];
 			// partial derivatives of T = T(rho, stilde) (old time step)
@@ -107,16 +107,16 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			lower_index = i + (j + 1)*NO_OF_SCALARS_H;
 			// interface values
 			temp_new_interface_values[j]
-			= 0.5*(state_new -> temperature_gas[upper_index]
-			+ state_new -> temperature_gas[lower_index]);
+			= 0.5*(diagnostics -> temperature_gas[upper_index]
+			+ diagnostics -> temperature_gas[lower_index]);
 			density_interface_old[j]
-			= 0.5*(state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + upper_index]
-			+ state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + lower_index]);
+			= 0.5*(state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + upper_index]
+			+ state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + lower_index]);
 			density_interface_explicit[j]
-			= 0.5*((state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + upper_index]
-			+ delta_t*state_tendency -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + upper_index])
-			+ (state_old -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + lower_index]
-			+ delta_t*state_tendency -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + lower_index]));
+			= 0.5*((state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + upper_index]
+			+ delta_t*state_tendency -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + upper_index])
+			+ (state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + lower_index]
+			+ delta_t*state_tendency -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + lower_index]));
 			spec_entropy_interface_new[j]
 			= 0.5*(spec_entropy_new[j]
 			+ spec_entropy_new[j + 1]);
@@ -203,8 +203,8 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 		{
 			density_interface_new
-			= 0.5*(state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
-			+ state_new -> mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (j + 1)*NO_OF_SCALARS_H + i]);
+			= 0.5*(state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
+			+ state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (j + 1)*NO_OF_SCALARS_H + i]);
 			state_new -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]
 			= (2*solution_vector[j]/grid -> area[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - density_interface_new*state_old -> velocity_gas[(j + 1)*NO_OF_VECTORS_PER_LAYER + i])
 			/density_interface_old[j];
@@ -286,8 +286,8 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						vertical_flux_vector_rhs[j] = area*vertical_flux_vector_rhs[j];
 						// old density at the interface
 						density_old_at_interface
-						= 0.5*(state_old -> mass_densities[k*NO_OF_SCALARS + upper_index]
-						+ state_old -> mass_densities[k*NO_OF_SCALARS + lower_index]);
+						= 0.5*(state_old -> rho[k*NO_OF_SCALARS + upper_index]
+						+ state_old -> rho[k*NO_OF_SCALARS + lower_index]);
 						vertical_flux_vector_rhs[j] = density_old_at_interface*vertical_flux_vector_rhs[j];
 					}
 					
@@ -323,8 +323,8 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						if (quantity_id == 0)
 						{
 							r_vector[j] =
-							state_old -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
-							+ delta_t*state_tendency -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
+							state_old -> rho[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
+							+ delta_t*state_tendency -> rho[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
 						}
 						// density x temperatures
 						if (quantity_id == 1)
@@ -363,7 +363,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						// mass densities
 						if (quantity_id == 0)
 						{
-							state_new -> mass_densities[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = solution_vector[j];
+							state_new -> rho[k*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i] = solution_vector[j];
 						}
 						
 						// density x temperature fields

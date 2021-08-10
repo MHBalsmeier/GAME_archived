@@ -26,7 +26,7 @@ int create_rad_array_vector(double [], double [], int);
 int remap_to_original(double [], double [], int);
 int remap_to_original_scalar_h(double [], double [], int);
 
-int manage_rkhevi(State *state_old, State *state_new, Soil *soil,Extrapolation_info *extrapolation_info, Grid *grid, Dualgrid *dualgrid, Radiation *radiation, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, double delta_t, double time_coordinate, int total_step_counter)
+int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Dualgrid *dualgrid, Radiation *radiation, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, double delta_t, double time_coordinate, int total_step_counter)
 {
 	// slow terms (momentum advection and diffusion) update switch
 	int slow_update_bool = 0;
@@ -44,7 +44,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil,Extrapolation_i
     // interaction with soil (only useful if real radiation is on)
     if (config_info -> rad_on == 1)
     {
-    	soil_interaction(soil, state_old, radiation, delta_t);
+    	soil_interaction(soil, diagnostics, radiation, delta_t);
     }
     
 	/*
@@ -63,7 +63,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil,Extrapolation_i
 		// Update of the pressure gradient.
 		if (i == 0)
 		{
-			manage_pressure_gradient(state_new, grid, dualgrid, diagnostics, forcings, extrapolation_info, irrev, config_info);
+			manage_pressure_gradient(state_new, grid, dualgrid, diagnostics, forcings, irrev, config_info);
 		}
 		// Only the horizontal momentum is a forward tendency.
 		vector_tendencies_expl(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, irrev, config_info, slow_update_bool, i, delta_t);
