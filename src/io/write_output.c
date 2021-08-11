@@ -8,7 +8,7 @@ Here, the output is written to grib and/or netcdf files and integrals are writte
 In addition to that, some postprocessing diagnostics are also calculated here.
 */
 
-#include "../../../core/src/enum_and_typedefs.h"
+#include "../enum_and_typedefs.h"
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
