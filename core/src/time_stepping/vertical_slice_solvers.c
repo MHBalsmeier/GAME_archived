@@ -118,17 +118,17 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		{			
 			// main diagonal
 			d_vector[j] = -pow(theta_int_new[j], 2)*(gamma[j] + gamma[j + 1])
-			+ 0.5*(grid -> exner_bg[j*NO_OF_SCALARS_H + i]-grid -> exner_bg[(j + 1)*NO_OF_SCALARS_H + i])
-			*(alpha[j]-alpha[j + 1]+theta_int_new[j]*(beta[j + 1] - beta[j]))
+			+ 0.5*(grid -> exner_bg[j*NO_OF_SCALARS_H + i] - grid -> exner_bg[(j + 1)*NO_OF_SCALARS_H + i])
+			*(alpha[j + 1] - alpha[j] + theta_int_new[j]*(beta[j + 1] - beta[j]))
 			- (grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i])/(impl_weight*pow(delta_t, 2)*c_p*rho_int_old[j])
-			*(2/grid -> area[(j + 1)*NO_OF_VECTORS_PER_LAYER + i])-delta_t*state_old -> wind[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]*0.5
+			*(2/grid -> area[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]) - delta_t*state_old -> wind[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]*0.5
 			*(1/grid -> volume[j*NO_OF_SCALARS_H + i] + 1/grid -> volume[(j + 1)*NO_OF_SCALARS_H + i]);
 			// right hand side
-			r_vector[j] = -(state_old -> wind[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]+delta_t*state_tendency -> wind[(j + 1)*NO_OF_VECTORS_PER_LAYER + i])*
-			(grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i])
+			r_vector[j] = -(state_old -> wind[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + delta_t*state_tendency -> wind[(j + 1)*NO_OF_VECTORS_PER_LAYER + i])
+			*(grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i])
 			/(impl_weight*pow(delta_t, 2)*c_p)
-			+ theta_int_expl[j]*(exner_pert_expl[j]-exner_pert_expl[j + 1])/delta_t
-			+ 0.5/delta_t*(theta_pert_expl[j]+theta_pert_expl[j + 1])*(grid -> exner_bg[j*NO_OF_SCALARS_H + i]-grid -> exner_bg[(j + 1)*NO_OF_SCALARS_H + i])
+			+ theta_int_expl[j]*(exner_pert_expl[j] - exner_pert_expl[j + 1])/delta_t
+			+ 0.5/delta_t*(theta_pert_expl[j] + theta_pert_expl[j + 1])*(grid -> exner_bg[j*NO_OF_SCALARS_H + i] - grid -> exner_bg[(j + 1)*NO_OF_SCALARS_H + i])
 			- (grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i])/(impl_weight*pow(delta_t, 2)*c_p)
 			*state_old -> wind[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]*rho_int_expl[j]/rho_int_old[j];
 		}
@@ -150,14 +150,14 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		{
 			// lower diagonal
 			c_vector[j] = theta_int_new[j + 1]*gamma[j + 1]*theta_int_new[j]
-			+ 0.5*(grid -> exner_bg[(j + 1)*NO_OF_SCALARS_H + i]-grid -> exner_bg[(j + 2)*NO_OF_SCALARS_H + i])
+			+ 0.5*(grid -> exner_bg[(j + 1)*NO_OF_SCALARS_H + i] - grid -> exner_bg[(j + 2)*NO_OF_SCALARS_H + i])
 			*(alpha[j + 1] + beta[j + 1]*theta_int_new[j])
 			- (grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 2)*NO_OF_SCALARS_H + i])/(impl_weight*delta_t*c_p)*0.5
 			*state_old -> wind[(j + 2)*NO_OF_VECTORS_PER_LAYER + i]/(grid -> volume[(j + 1)*NO_OF_SCALARS_H + i]*rho_int_old[j + 1]);
 			// upper diagonal
 			e_vector[j] = theta_int_new[j]*gamma[j + 1]*theta_int_new[j + 1]
-			- 0.5*(grid -> exner_bg[j*NO_OF_SCALARS_H + i]-grid -> exner_bg[(j + 1)*NO_OF_SCALARS_H + i])
-			*(alpha[j + 1]+beta[j + 1]*theta_int_new[j + 1])
+			- 0.5*(grid -> exner_bg[j*NO_OF_SCALARS_H + i] - grid -> exner_bg[(j + 1)*NO_OF_SCALARS_H + i])
+			*(alpha[j + 1] + beta[j + 1]*theta_int_new[j + 1])
 			+ (grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i])/(impl_weight*delta_t*c_p)*0.5
 			*state_old -> wind[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]/(grid -> volume[(j + 1)*NO_OF_SCALARS_H + i]*rho_int_old[j]);
 		}
