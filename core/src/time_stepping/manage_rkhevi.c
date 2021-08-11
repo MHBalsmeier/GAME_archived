@@ -147,7 +147,6 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 		{
 			three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid);
 		}
-		// exit(1);
     }
 
 	// in this case, a large time step has been taken, which we modify into a small step here    

@@ -46,7 +46,6 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		
 	// 3.) the linear pressure gradient term
 	// -------------------------------------
-	// cleaning and diagnozing c_g_p*theta_pert
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
