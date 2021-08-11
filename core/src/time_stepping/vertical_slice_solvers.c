@@ -221,7 +221,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		// Exner pressure perturbation
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
 		{
-			state_new -> exner_pert[j*NO_OF_SCALARS_H + i] = theta_pert_expl[j] + grid -> volume[j*NO_OF_SCALARS_H + i]
+			state_new -> exner_pert[j*NO_OF_SCALARS_H + i] = exner_pert_expl[j] + grid -> volume[j*NO_OF_SCALARS_H + i]
 			*gamma[j]*(state_new -> rhotheta[j*NO_OF_SCALARS_H + i] - rhotheta_expl[j]);
 		}
 		// potential temperature perturbation

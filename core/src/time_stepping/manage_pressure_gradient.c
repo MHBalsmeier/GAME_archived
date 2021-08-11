@@ -25,10 +25,13 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	
 	// 2.) the nonlinear pressure gradient term
 	// Before calculating the pressure gradient acceleration, the old one must be saved for extrapolation.
-	#pragma omp parallel for
-	for (int i = 0; i < NO_OF_VECTORS; ++i)
+	if (config_info -> totally_first_step_bool == 0)
 	{
-		forcings -> pgrad_acc_old[i] =	forcings -> pressure_gradient_acc_neg_nl[i] + forcings -> pressure_gradient_acc_neg_l[i];
+		#pragma omp parallel for
+		for (int i = 0; i < NO_OF_VECTORS; ++i)
+		{
+			forcings -> pgrad_acc_old[i] = -forcings -> pressure_gradient_acc_neg_nl[i] - forcings -> pressure_gradient_acc_neg_l[i];
+		}
 	}
 	
 	// diagnozing c_g_p and multiplying by the full potential tempertature
@@ -38,7 +41,6 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		diagnostics -> c_g_p_field[i] = spec_heat_cap_diagnostics_p(state, i, config_info);
 		diagnostics -> scalar_field_placeholder[i] = diagnostics -> c_g_p_field[i]*(grid -> theta_bg[i] + state -> theta_pert[i]);
 	}
-	// multiplying c_g_p by the temperature gradient
 	grad(state -> exner_pert, forcings -> pressure_gradient_acc_neg_nl, grid);
 	scalar_times_vector(diagnostics -> scalar_field_placeholder, forcings -> pressure_gradient_acc_neg_nl, forcings -> pressure_gradient_acc_neg_nl, grid);
 		
@@ -46,7 +48,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	// -------------------------------------
 	// cleaning and diagnozing c_g_p*theta_pert
 	#pragma omp parallel for
-	for (int i = 0; i < NO_OF_VECTORS; ++i)
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		diagnostics -> scalar_field_placeholder[i] = diagnostics -> c_g_p_field[i]*state -> theta_pert[i];
 	}
@@ -63,6 +65,16 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		}
 		scalar_times_vector(irrev -> pressure_gradient_decel_factor, forcings -> pressure_gradient_acc_neg_nl, forcings -> pressure_gradient_acc_neg_nl, grid);
 		scalar_times_vector(irrev -> pressure_gradient_decel_factor, forcings -> pressure_gradient_acc_neg_l, forcings -> pressure_gradient_acc_neg_l, grid);
+	}
+	
+	// at the very fist step, the old time step pressure gradient acceleration must be saved here
+	if (config_info -> totally_first_step_bool == 1)
+	{
+		#pragma omp parallel for
+		for (int i = 0; i < NO_OF_VECTORS; ++i)
+		{
+			forcings -> pgrad_acc_old[i] = -forcings -> pressure_gradient_acc_neg_nl[i] - forcings -> pressure_gradient_acc_neg_l[i];
+		}
 	}
 	return 0;
 }
