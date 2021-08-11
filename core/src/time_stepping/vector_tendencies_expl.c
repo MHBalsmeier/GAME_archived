@@ -122,11 +122,19 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     	new_weight = 0.5;
     }
 	old_weight = 1 - new_weight;
+	// vertical pressure gradient weight
+	double expl_p_grad_weight;
     #pragma omp parallel for private(layer_index, h_index)
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
     	layer_index = i/NO_OF_VECTORS_PER_LAYER;
     	h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
+    	// calculating the vertical pressure gradient weight
+    	expl_p_grad_weight = 1;
+    	if (h_index < NO_OF_SCALARS_H)
+    	{
+    		expl_p_grad_weight = 1 - get_impl_thermo_weight();
+    	}
     	// upper and lower boundary
         if (i < NO_OF_SCALARS_H || i >= NO_OF_VECTORS - NO_OF_SCALARS_H)
         {
@@ -142,15 +150,13 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     		old_weight*state_tendency -> wind[i] + new_weight*(
     		// explicit component of pressure gradient acceleration
     		// old time step component
-    		old_hor_pgrad_sound_weight*forcings -> pgrad_acc_old[i]
+    		expl_p_grad_weight*old_hor_pgrad_sound_weight*forcings -> pgrad_acc_old[i]
     		// new time step component
-    		+ new_hor_pgrad_sound_weight*(forcings -> pressure_gradient_acc_nl[i] + forcings -> pressure_gradient_acc_l[i])
+    		+ expl_p_grad_weight*new_hor_pgrad_sound_weight*(forcings -> pressure_gradient_acc_nl[i] + forcings -> pressure_gradient_acc_l[i])
     		// generalized Coriolis term
     		+ forcings -> pot_vort_tend[i]
     		// kinetic energy term
     		- 0.5*forcings -> e_kin_grad[i]
-    		// gravity
-    		- grid -> gravity_m[i]
     		// momentum diffusion
     		+ irrev -> friction_acc[i]);
 		}

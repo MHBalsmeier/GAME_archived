@@ -171,7 +171,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 					)/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j]))
 					// phase transitions
 					+ tracer_heating*state -> rho[i*NO_OF_SCALARS + j]/density_gas_weight
-					/diagnostics -> temperature_gas[j]);
+					/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j])));
 					// sensible heat in the lowest layer
 					if (layer_index == NO_OF_LAYERS - 1 - grid -> no_of_shaded_points_scalar[h_index])
 					{
