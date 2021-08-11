@@ -277,6 +277,7 @@ int main(int argc, char *argv[])
     // density is determined out of the hydrostatic equation
     int scalar_index;
     double b, c;
+    // theta_pert and exner_pert are a misuse of name here, they contain the full values here
 	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
 	{
 		// integrating from bottom to top
@@ -299,15 +300,11 @@ int main(int argc, char *argv[])
 				+ 2/spec_heat_capacities_p_gas(0)*(grid -> gravity_potential[scalar_index] - grid -> gravity_potential[scalar_index + NO_OF_SCALARS_H]));
 				c = pow(state -> exner_pert[scalar_index + NO_OF_SCALARS_H], 2)*temperature[scalar_index]/standard_temp(grid -> z_scalar[scalar_index + NO_OF_SCALARS_H]);
 				state -> exner_pert[scalar_index] = b + pow((pow(b, 2) + c), 0.5);
-				state -> theta_pert[scalar_index] = temperature[scalar_index]/state -> exner_pert[scalar_index];
 			}
+			// this is what will be written into the netcdf file (gas density)
+			diagnostics -> scalar_field_placeholder[scalar_index] = P_0*pow(state -> exner_pert[scalar_index],
+			spec_heat_capacities_p_gas(0)/specific_gas_constants(0))/(specific_gas_constants(0)*temperature[scalar_index]);
 		}
-	}
-	
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
-	{
-		state -> theta_pert[i] = state -> theta_pert[i] - grid -> theta_bg[i];
-		state -> exner_pert[i] = state -> exner_pert[i] - grid -> exner_bg[i];
 	}
     
     free(forcings);

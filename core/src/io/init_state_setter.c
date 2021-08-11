@@ -135,7 +135,9 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 		pressure = init_state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*specific_gas_constants(0)*temperature_gas[i];
 		pot_temp = temperature_gas[i]*pow(P_0/pressure, specific_gas_constants(0)/spec_heat_capacities_p_gas(0));
 		init_state -> rhotheta[i] = init_state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*pot_temp;
+		// calculating the potential temperature perturbation
 		init_state -> theta_pert[i] = pot_temp - grid -> theta_bg[i];
+		// calculating the Exner pressure perturbation
 		init_state -> exner_pert[i] = temperature_gas[i]/(grid -> theta_bg[i] + init_state -> theta_pert[i]) - grid -> exner_bg[i];
 	}
 	
