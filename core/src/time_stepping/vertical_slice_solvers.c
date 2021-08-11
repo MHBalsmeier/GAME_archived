@@ -70,7 +70,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			+ delta_t*state_tendency -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i];
 			// explicit potential temperature density
 			rhotheta_expl[j] = state_old -> rhotheta[j*NO_OF_SCALARS_H + i] + delta_t*state_tendency -> rhotheta[j*NO_OF_SCALARS_H + i];
-			if (i == 0)
+			if (rk_step == 0)
 			{
 				// old time step partial derivatives of rho*theta and Pi (divided by the volume)
 				alpha[j] = -state_old -> rhotheta[i + j*NO_OF_SCALARS_H]/pow(state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H], 2)
@@ -144,7 +144,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			{
 				damping_coeff = config_info -> damping_coeff_max*pow(sin(0.5*M_PI*z_above_damping/(grid -> z_vector[0] - damping_start_height)), 2);
 			}
-			d_vector[j] = d_vector[j]*(1 + delta_t*damping_coeff);
+			d_vector[j] = (1 + delta_t*damping_coeff)*d_vector[j];
 		}
 		for (int j = 0; j < NO_OF_LAYERS - 2; ++j)
 		{

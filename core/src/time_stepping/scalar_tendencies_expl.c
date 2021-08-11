@@ -16,7 +16,7 @@ This is the horizontal (explicit) part of the constituent integration.
 #include "stdio.h"
 #include "stdlib.h"
 
-int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step, Vector_field wind_advect_tracer)
+int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step)
 {
 	/*
 	Firstly, some things need to prepared.

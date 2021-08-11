@@ -135,14 +135,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 			}
 			printf("Update of radiative fluxes completed.\n");
 		}
-		if (i == 0)
-		{
-			scalar_tendencies_expl(state_new, state_tendency, soil, grid, dualgrid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irrev, config_info, i, state_old -> wind);
-		}
-		if (i == 1)
-		{	
-			scalar_tendencies_expl(state_new, state_tendency, soil, grid, dualgrid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irrev, config_info, i, state_new -> wind);
-		}
+		scalar_tendencies_expl(state_new, state_tendency, soil, grid, dualgrid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irrev, config_info, i);
 
 		// 3.) Vertical sound wave solver.
 		// -------------------------------
@@ -154,6 +147,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 		{
 			three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid);
 		}
+		// exit(1);
     }
 
 	// in this case, a large time step has been taken, which we modify into a small step here    

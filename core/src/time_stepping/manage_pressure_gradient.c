@@ -28,7 +28,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
-		forcings -> pgrad_acc_old[i] =	forcings -> pressure_gradient_acc_nl[i] + forcings -> pressure_gradient_acc_l[i];
+		forcings -> pgrad_acc_old[i] =	forcings -> pressure_gradient_acc_neg_nl[i] + forcings -> pressure_gradient_acc_neg_l[i];
 	}
 	
 	// diagnozing c_g_p and multiplying by the full potential tempertature
@@ -39,8 +39,8 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		diagnostics -> scalar_field_placeholder[i] = diagnostics -> c_g_p_field[i]*(grid -> theta_bg[i] + state -> theta_pert[i]);
 	}
 	// multiplying c_g_p by the temperature gradient
-	grad(state -> exner_pert, forcings -> pressure_gradient_acc_nl, grid);
-	scalar_times_vector(diagnostics -> scalar_field_placeholder, forcings -> pressure_gradient_acc_nl, forcings -> pressure_gradient_acc_nl, grid);
+	grad(state -> exner_pert, forcings -> pressure_gradient_acc_neg_nl, grid);
+	scalar_times_vector(diagnostics -> scalar_field_placeholder, forcings -> pressure_gradient_acc_neg_nl, forcings -> pressure_gradient_acc_neg_nl, grid);
 		
 	// 3.) the linear pressure gradient term
 	// -------------------------------------
@@ -48,10 +48,9 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_VECTORS; ++i)
 	{
-		forcings -> pressure_gradient_acc_l[i] = grid -> exner_bg_grad[i];
 		diagnostics -> scalar_field_placeholder[i] = diagnostics -> c_g_p_field[i]*state -> theta_pert[i];
 	}
-	scalar_times_vector(diagnostics -> scalar_field_placeholder, forcings -> pressure_gradient_acc_l, forcings -> pressure_gradient_acc_l, grid);
+	scalar_times_vector(diagnostics -> scalar_field_placeholder, grid -> exner_bg_grad, forcings -> pressure_gradient_acc_neg_l, grid);
 	
 	// 4.) The pressure gradient has to get a deceleration factor due to condensates.
 	// --------------------------------------------------------------------------------
@@ -62,10 +61,9 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		{
 			irrev -> pressure_gradient_decel_factor[i] = density_gas(state, i)/density_total(state, i);
 		}
-		scalar_times_vector(irrev -> pressure_gradient_decel_factor, forcings -> pressure_gradient_acc_nl, forcings -> pressure_gradient_acc_nl, grid);
-		scalar_times_vector(irrev -> pressure_gradient_decel_factor, forcings -> pressure_gradient_acc_l, forcings -> pressure_gradient_acc_l, grid);
+		scalar_times_vector(irrev -> pressure_gradient_decel_factor, forcings -> pressure_gradient_acc_neg_nl, forcings -> pressure_gradient_acc_neg_nl, grid);
+		scalar_times_vector(irrev -> pressure_gradient_decel_factor, forcings -> pressure_gradient_acc_neg_l, forcings -> pressure_gradient_acc_neg_l, grid);
 	}
-	
 	return 0;
 }
 

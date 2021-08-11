@@ -150,9 +150,9 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     		old_weight*state_tendency -> wind[i] + new_weight*(
     		// explicit component of pressure gradient acceleration
     		// old time step component
-    		expl_p_grad_weight*old_hor_pgrad_sound_weight*forcings -> pgrad_acc_old[i]
+    		-expl_p_grad_weight*old_hor_pgrad_sound_weight*forcings -> pgrad_acc_old[i]
     		// new time step component
-    		+ expl_p_grad_weight*new_hor_pgrad_sound_weight*(forcings -> pressure_gradient_acc_nl[i] + forcings -> pressure_gradient_acc_l[i])
+    		- expl_p_grad_weight*new_hor_pgrad_sound_weight*(forcings -> pressure_gradient_acc_neg_nl[i] + forcings -> pressure_gradient_acc_neg_l[i])
     		// generalized Coriolis term
     		+ forcings -> pot_vort_tend[i]
     		// kinetic energy term

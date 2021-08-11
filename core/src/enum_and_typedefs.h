@@ -161,8 +161,8 @@ Scalar_field radiation_tendency;
 // Collects forcings.
 typedef struct forcings {
 Vector_field pgrad_acc_old;
-Vector_field pressure_gradient_acc_nl;
-Vector_field pressure_gradient_acc_l;
+Vector_field pressure_gradient_acc_neg_nl;
+Vector_field pressure_gradient_acc_neg_l;
 Vector_field e_kin_grad;
 Vector_field pot_vort_tend;
 } Forcings;
