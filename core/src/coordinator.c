@@ -536,7 +536,7 @@ int main(int argc, char *argv[])
     double speed;
     while (t_0 < t_init + TOTAL_RUN_SPAN + 300)
     {
-    	linear_combine_two_states(state_new, state_new, state_old, 1, 0);
+    	state_old = state_new;
     	
     	/*
     	Checking if the radiative fluxes need to be updated:
