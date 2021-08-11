@@ -14,7 +14,7 @@ This file contains functions that compute properties of the vertical grid.
 #include <math.h>
 #include "geos95.h"
 #include "../../shared/shared.h"
-#include "../../core/src/settings.h"
+#include "../../src/settings.h"
 
 int set_z_scalar(double z_scalar[], double z_surface[], int NO_OF_ORO_LAYERS, double TOA, double stretching_parameter, int VERT_GRID_TYPE)
 {

@@ -8,11 +8,11 @@ With this program, ideal input states for GAME can be produced.
 */
 
 #include <stdlib.h>
-#include "../../core/src/enum_and_typedefs.h"
-#include "../../core/src/thermodynamics/thermodynamics.h"
-#include "../../core/src/settings.h"
-#include "../../core/src/spatial_operators/spatial_operators.h"
-#include "../../core/src/io/io.h"
+#include "../../src/enum_and_typedefs.h"
+#include "../../src/thermodynamics/thermodynamics.h"
+#include "../../src/settings.h"
+#include "../../src/spatial_operators/spatial_operators.h"
+#include "../../src/io/io.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
