@@ -71,7 +71,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			rhotheta_expl[j] = state_old -> rhotheta[j*NO_OF_SCALARS_H + i] + delta_t*state_tendency -> rhotheta[j*NO_OF_SCALARS_H + i];
 			if (rk_step == 0)
 			{
-				// old time step partial derivatives of rho*theta and Pi (divided by the volume)
+				// old time step partial derivatives of theta and Pi (divided by the volume)
 				alpha[j] = -state_old -> rhotheta[i + j*NO_OF_SCALARS_H]/pow(state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H], 2)
 				/grid -> volume[i + j*NO_OF_SCALARS_H];
 				beta[j] = 1/state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H]/grid -> volume[i + j*NO_OF_SCALARS_H];
@@ -80,11 +80,11 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			}
 			else
 			{
-				// old time step partial derivatives of rho*theta and Pi
+				// old time step partial derivatives of theta and Pi
 				alpha_old[j] = -state_old -> rhotheta[i + j*NO_OF_SCALARS_H]/pow(state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H], 2);
 				beta_old[j] = 1/state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H];
 				gamma_old[j] = r_d/(c_v*state_old -> rhotheta[i + j*NO_OF_SCALARS_H])*(grid -> exner_bg[i + j*NO_OF_SCALARS_H] + state_old -> exner_pert[i + j*NO_OF_SCALARS_H]);
-				// new time step partial derivatives of rho*theta and Pi
+				// new time step partial derivatives of theta and Pi
 				alpha_new[j] = -state_new -> rhotheta[i + j*NO_OF_SCALARS_H]/pow(state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H], 2);
 				beta_new[j] = 1/state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H];
 				gamma_new[j] = r_d/(c_v*state_new -> rhotheta[i + j*NO_OF_SCALARS_H])*(grid -> exner_bg[i + j*NO_OF_SCALARS_H] + state_new -> exner_pert[i + j*NO_OF_SCALARS_H]);
