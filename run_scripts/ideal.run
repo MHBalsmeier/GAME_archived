@@ -58,7 +58,7 @@ export OMP_NUM_THREADS=2 # relevant only for OMP
 number_of_cpus=1 # relevant only for MPI
 
 # that's it, now the basic run script will be sourced
-source run.sh
+source root_script.sh
 
 
 
