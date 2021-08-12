@@ -1,6 +1,6 @@
 /*
 This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
-Github repository: https://github.com/AUN4GFD/game
+Github repository: https://github.com/OpenNWP/GAME
 */
 
 /*
@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
     printf("*\t\t\tGeophysical Fluids Modeling Framework\t\t\t*\n");
     printf("*\t\t\t\t\t\t\t\t\t\t*\n");
     printf("%s", stars);
-    printf("Released under the MIT license, visit https://github.com/AUN4GFD/game for more information.\n");
+    printf("Released under the MIT license, visit https://github.com/OpenNWP/GAME for more information.\n");
     printf("%s", stars);
 	printf("what you want to do:\n");
 	printf("operator:\t\t\t%s\n", OPERATOR);

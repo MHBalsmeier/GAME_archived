@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
-# Github repository: https://github.com/AUN4GFD/game
+# Github repository: https://github.com/OpenNWP/GAME
 
 echo "***** TEST FILE CREATION *****"
 if [ $valgrind_check -eq 0 ]

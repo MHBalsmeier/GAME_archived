@@ -1,6 +1,6 @@
 /*
 This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
-Github repository: https://github.com/AUN4GFD/game
+Github repository: https://github.com/OpenNWP/GAME
 */
 
 int manage_rkhevi(State *, State *, Soil *, Grid *, Dualgrid *, Radiation *, State *, Diagnostics *, Forcings *, Irreversible_quantities *, Config_info *, double, double, int);

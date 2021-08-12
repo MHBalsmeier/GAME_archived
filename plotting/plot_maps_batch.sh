@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
-# Github repository: https://github.com/AUN4GFD/game
+# Github repository: https://github.com/OpenNWP/GAME
 
 game_home_dir=${BASH_ARGV[2]} # the home directory of GAME
 run_id=${BASH_ARGV[1]} # the run id which you want to plot
