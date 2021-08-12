@@ -5,7 +5,7 @@
 
 time_string=$(date --utc +%Y%m%d%H%M%S)
 
-output_dir=$game_home_dir/output/$run_id
+output_dir=../output
 if [ -d $output_dir ]
 then
 rm -r $output_dir
