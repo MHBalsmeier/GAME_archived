@@ -117,7 +117,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 			{
 				if (state -> rho[i*NO_OF_SCALARS + j] != 0)
 				{
-					diagnostics -> scalar_field_placeholder[j] = grid -> theta_bg[j] + state -> theta_pert[j];
+					diagnostics -> scalar_field_placeholder[j] = state -> rhotheta[j]/state -> rho[i*NO_OF_SCALARS + j];
 				}
 				else
 				{

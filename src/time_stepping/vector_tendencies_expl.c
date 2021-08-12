@@ -98,7 +98,6 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     }
 	
     // Now the explicit forces are added up.
-    int layer_index, h_index;
     double old_weight, new_weight;
     new_weight = 1;
     if (no_rk_step == 1)
@@ -109,7 +108,8 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 	// the weights for the pressure gradient
 	double old_hor_pgrad_weight, current_hor_pgrad_weight;
 	int hor_switch; // horizontal switch
-    #pragma omp parallel for private(layer_index, h_index)
+    int layer_index, h_index;
+    #pragma omp parallel for private(layer_index, h_index, old_hor_pgrad_weight, current_hor_pgrad_weight, hor_switch)
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
     	layer_index = i/NO_OF_VECTORS_PER_LAYER;
