@@ -81,9 +81,9 @@ The following packages are additionally required if you want to make use of the 
 
 ### Build and install
 
-Modify the file core/CMakeLists.txt (read the comments). If you want to use radiation, modify rrtmgp_coefficients_file_sw and rrtmgp_coefficients_file_lw in the file core/src/radiation/rterrtmgp_coupler.f90.
+Modify the file CMakeLists.txt (read the comments). If you want to use radiation, modify rrtmgp_coefficients_file_sw and rrtmgp_coefficients_file_lw in the file src/radiation/rterrtmgp_coupler.f90. Then run
 
-In the shell scripts controlling the build process (residing in the directory build\_scripts) change the variable aim\_dir to a place of your choice, then run the scripts. The files with the suffix \_dev are meant to install to a location where new versions can be tested. You also need to install the run scripts in order to have the run scripts of the model where they belong. Install the plotting routines if you want to make use of them.
+	./compile.sh
 
 ## Fundamental literature
 
