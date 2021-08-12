@@ -50,7 +50,6 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		double solution_vector[NO_OF_LAYERS - 1];
 		double rho_int_old[NO_OF_LAYERS - 1];
 		double rho_int_expl[NO_OF_LAYERS - 1];
-		double theta_int_expl[NO_OF_LAYERS - 1];
 		double alpha_old[NO_OF_LAYERS];
 		double beta_old[NO_OF_LAYERS];
 		double gamma_old[NO_OF_LAYERS];
@@ -108,7 +107,6 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			lower_index = i + (j + 1)*NO_OF_SCALARS_H;
 			rho_int_old[j] = 0.5*(state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + upper_index] + state_old -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + lower_index]);
 			rho_int_expl[j] = 0.5*(rho_expl[j] + rho_expl[j + 1]);
-			theta_int_expl[j] = 0.5*(grid -> theta_bg[upper_index] + theta_pert_expl[j] + grid -> theta_bg[lower_index] + theta_pert_expl[j + 1]);
 			theta_int_new[j] = 0.5*(state_new -> rhotheta[upper_index]/state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + upper_index]
 			+ state_new -> rhotheta[lower_index]/state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + lower_index]);
 		}
@@ -127,7 +125,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			r_vector[j] = -(state_old -> wind[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] + delta_t*state_tendency -> wind[(j + 1)*NO_OF_VECTORS_PER_LAYER + i])
 			*(grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i])
 			/(impl_weight*pow(delta_t, 2)*c_p)
-			+ theta_int_expl[j]*(exner_pert_expl[j] - exner_pert_expl[j + 1])/delta_t
+			+ theta_int_new[j]*(exner_pert_expl[j] - exner_pert_expl[j + 1])/delta_t
 			+ 0.5/delta_t*(theta_pert_expl[j] + theta_pert_expl[j + 1])*(grid -> exner_bg[j*NO_OF_SCALARS_H + i] - grid -> exner_bg[(j + 1)*NO_OF_SCALARS_H + i])
 			- (grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i])/(impl_weight*pow(delta_t, 2)*c_p)
 			*state_old -> wind[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]*rho_int_expl[j]/rho_int_old[j];
