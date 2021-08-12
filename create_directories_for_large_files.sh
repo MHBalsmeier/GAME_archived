@@ -20,4 +20,16 @@ if [ ! -d test_generator/test_states ]
 then
 mkdir test_generator/test_states
 fi
+if [ ! -d output ]
+then
+mkdir output
+fi
+if [ ! -d nwp_init ]
+then
+mkdir nwp_init
+fi
+if [ ! -d figs ]
+then
+mkdir figs
+fi
 echo "Complete."

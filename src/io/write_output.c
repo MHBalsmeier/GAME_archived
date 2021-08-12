@@ -276,11 +276,11 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		{
 			int OUTPUT_FILE_LENGTH = 300;
 			char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-			sprintf(OUTPUT_FILE_PRE, "output/%s/%s+%ds_surface.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
+			sprintf(OUTPUT_FILE_PRE, "%s+%ds_surface.nc", RUN_ID, (int) (t_write - t_init));
 			OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
 			free(OUTPUT_FILE_PRE);
 			char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-			sprintf(OUTPUT_FILE, "output/%s/%s+%ds_surface.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
+			sprintf(OUTPUT_FILE, "%s+%ds_surface.nc", RUN_ID, (int) (t_write - t_init));
 			int scalar_h_dimid, mslp_id, ncid, retval, surface_p_id, rprate_id, sprate_id, cape_id, tcdc_id, t2_id, u10_id, v10_id, gusts_id;
 			
 			if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
@@ -366,12 +366,12 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 			long unsigned cape_string_length = 5;
 			int OUTPUT_FILE_LENGTH = 300;
 			char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-			sprintf(OUTPUT_FILE_PRE, "output/%s/%s+%ds_surface.grb2", RUN_ID, RUN_ID, (int) (t_write - t_init));
+			sprintf(OUTPUT_FILE_PRE, "%s+%ds_surface.grb2", RUN_ID, (int) (t_write - t_init));
 			OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
 			free(OUTPUT_FILE_PRE);
 			char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-			sprintf(OUTPUT_FILE, "output/%s/%s+%ds_surface.grb2", RUN_ID, RUN_ID, (int) (t_write - t_init));
-			char *SAMPLE_FILENAME = "./input/grib_template.grb2";
+			sprintf(OUTPUT_FILE, "%s+%ds_surface.grb2", RUN_ID, (int) (t_write - t_init));
+			char *SAMPLE_FILENAME = "../../test_generator/test_states/grib_template.grb2";
 			FILE *SAMPLE_FILE;
 			if (t_init < 0)
 				exit(1);
@@ -730,11 +730,11 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		{
 			int OUTPUT_FILE_PRESSURE_LEVEL_LENGTH = 300;
 			char *OUTPUT_FILE_PRESSURE_LEVEL_PRE = malloc((OUTPUT_FILE_PRESSURE_LEVEL_LENGTH + 1)*sizeof(char));
-			sprintf(OUTPUT_FILE_PRESSURE_LEVEL_PRE, "output/%s/%s+%ds_pressure_levels.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
+			sprintf(OUTPUT_FILE_PRESSURE_LEVEL_PRE, "%s+%ds_pressure_levels.nc", RUN_ID, (int) (t_write - t_init));
 			OUTPUT_FILE_PRESSURE_LEVEL_LENGTH = strlen(OUTPUT_FILE_PRESSURE_LEVEL_PRE);
 			free(OUTPUT_FILE_PRESSURE_LEVEL_PRE);
 			char *OUTPUT_FILE_PRESSURE_LEVEL = malloc((OUTPUT_FILE_PRESSURE_LEVEL_LENGTH + 1)*sizeof(char));
-			sprintf(OUTPUT_FILE_PRESSURE_LEVEL, "output/%s/%s+%ds_pressure_levels.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
+			sprintf(OUTPUT_FILE_PRESSURE_LEVEL, "%s+%ds_pressure_levels.nc", RUN_ID, (int) (t_write - t_init));
 			int ncid_pressure_level, scalar_h_dimid, level_dimid, geopot_height_id, temp_pressure_level_id, rh_pressure_level_id, wind_u_pressure_level_id, wind_v_pressure_level_id, pressure_levels_id, epv_pressure_level_id, rel_vort_pressure_level_id;
 			if ((retval = nc_create(OUTPUT_FILE_PRESSURE_LEVEL, NC_CLOBBER, &ncid_pressure_level)))
 				NCERR(retval);
@@ -808,15 +808,15 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		// Grib output.
 		if (io_config -> grib_output_switch == 1)
 		{
-			char *SAMPLE_FILENAME = "./input/grib_template.grb2";
+			char *SAMPLE_FILENAME = "../../test_generator/test_states/grib_template.grb2";
 			FILE *SAMPLE_FILE;
 			int OUTPUT_FILE_PRESSURE_LEVEL_LENGTH = 300;
 			char *OUTPUT_FILE_PRESSURE_LEVEL_PRE = malloc((OUTPUT_FILE_PRESSURE_LEVEL_LENGTH + 1)*sizeof(char));
-			sprintf(OUTPUT_FILE_PRESSURE_LEVEL_PRE, "output/%s/%s+%ds_pressure_levels.grb2", RUN_ID, RUN_ID, (int) (t_write - t_init));
+			sprintf(OUTPUT_FILE_PRESSURE_LEVEL_PRE, "%s+%ds_pressure_levels.grb2", RUN_ID, (int) (t_write - t_init));
 			OUTPUT_FILE_PRESSURE_LEVEL_LENGTH = strlen(OUTPUT_FILE_PRESSURE_LEVEL_PRE);
 			free(OUTPUT_FILE_PRESSURE_LEVEL_PRE);
 			char *OUTPUT_FILE_PRESSURE_LEVEL = malloc((OUTPUT_FILE_PRESSURE_LEVEL_LENGTH + 1)*sizeof(char));
-			sprintf(OUTPUT_FILE_PRESSURE_LEVEL, "output/%s/%s+%ds_pressure_levels.grb2", RUN_ID, RUN_ID, (int) (t_write - t_init));
+			sprintf(OUTPUT_FILE_PRESSURE_LEVEL, "%s+%ds_pressure_levels.grb2", RUN_ID, (int) (t_write - t_init));
 			FILE *OUT_GRIB;
 			OUT_GRIB = fopen(OUTPUT_FILE_PRESSURE_LEVEL, "w+");
 			double *geopotential_height_pressure_level = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -1084,12 +1084,12 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		double *wind_w_h = malloc(NO_OF_SCALARS_H*sizeof(double));
 		int OUTPUT_FILE_LENGTH = 300;
 		char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-		sprintf(OUTPUT_FILE_PRE, "output/%s/%s+%ds.grb2", RUN_ID, RUN_ID, (int) (t_write - t_init));
+		sprintf(OUTPUT_FILE_PRE, "%s+%ds.grb2", RUN_ID, (int) (t_write - t_init));
 		OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
 		free(OUTPUT_FILE_PRE);
 		char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-		sprintf(OUTPUT_FILE, "output/%s/%s+%ds.grb2", RUN_ID, RUN_ID, (int) (t_write - t_init));
-		char *SAMPLE_FILENAME = "./input/grib_template.grb2";
+		sprintf(OUTPUT_FILE, "%s+%ds.grb2", RUN_ID, (int) (t_write - t_init));
+		char *SAMPLE_FILENAME = "../../test_generator/test_states/grib_template.grb2";
 		FILE *SAMPLE_FILE;
 		if (t_init < 0)
 			exit(1);
@@ -1315,11 +1315,11 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 	{
 		int OUTPUT_FILE_LENGTH = 300;
 		char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-		sprintf(OUTPUT_FILE_PRE, "output/%s/%s+%ds.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
+		sprintf(OUTPUT_FILE_PRE, "%s+%ds.nc", RUN_ID, (int) (t_write - t_init));
 		OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
 		free(OUTPUT_FILE_PRE);
 		char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-		sprintf(OUTPUT_FILE, "output/%s/%s+%ds.nc", RUN_ID, RUN_ID, (int) (t_write - t_init));
+		sprintf(OUTPUT_FILE, "%s+%ds.nc", RUN_ID, (int) (t_write - t_init));
 		int scalar_dimid, vector_h_dimid, vector_v_dimid, temp_id, temp_solid_id, temp_liquid_id, density_dry_id, density_solid_id, density_liquid_id, density_vapour_id, rh_id, ncid, retval, divv_h_all_layers_id, rel_vort_id, curl_field_dimid, stretching_parameter_id, single_double_dimid, vector_dimid, wind_id;
 		
 		if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
@@ -1484,7 +1484,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 	return 0;
 }
 
-int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, int integral_id)
+int write_out_integral(State *state_write_out, int step_counter, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, int integral_id)
 {
 	/*
 	integral_id:
@@ -1497,15 +1497,15 @@ int write_out_integral(State *state_write_out, int step_counter, char RUN_ID[], 
     int INTEGRAL_FILE_LENGTH = 200;
     char *INTEGRAL_FILE_PRE = malloc((INTEGRAL_FILE_LENGTH + 1)*sizeof(char));
     if (integral_id == 0)
-   		sprintf(INTEGRAL_FILE_PRE, "output/%s/%s", RUN_ID, "dry_mass");
+   		sprintf(INTEGRAL_FILE_PRE, "%s", "dry_mass");
     if (integral_id == 1)
-   		sprintf(INTEGRAL_FILE_PRE, "output/%s/%s", RUN_ID, "entropy");
+   		sprintf(INTEGRAL_FILE_PRE, "%s", "entropy");
     if (integral_id == 2)
-   		sprintf(INTEGRAL_FILE_PRE, "output/%s/%s", RUN_ID, "energy");
+   		sprintf(INTEGRAL_FILE_PRE, "%s", "energy");
     if (integral_id == 2)
-   		sprintf(INTEGRAL_FILE_PRE, "output/%s/%s", RUN_ID, "energy");
+   		sprintf(INTEGRAL_FILE_PRE, "%s", "energy");
     if (integral_id == 3)
-   		sprintf(INTEGRAL_FILE_PRE, "output/%s/%s", RUN_ID, "linearized_entropy");
+   		sprintf(INTEGRAL_FILE_PRE, "%s", "linearized_entropy");
     INTEGRAL_FILE_LENGTH = strlen(INTEGRAL_FILE_PRE);
     char *INTEGRAL_FILE = malloc((INTEGRAL_FILE_LENGTH + 1)*sizeof(char));
     sprintf(INTEGRAL_FILE, "%s", INTEGRAL_FILE_PRE);

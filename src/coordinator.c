@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
     ------------------------------------------------------------------------------
     */
     char GEO_PROP_FILE_PRE[200];
-	sprintf(GEO_PROP_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, toa, ORO_ID, grid -> no_of_oro_layers);
+	sprintf(GEO_PROP_FILE_PRE, "../../grid_generator/grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, toa, ORO_ID, grid -> no_of_oro_layers);
     char GEO_PROP_FILE[strlen(GEO_PROP_FILE_PRE) + 1];
     strcpy(GEO_PROP_FILE, GEO_PROP_FILE_PRE);
     
@@ -183,13 +183,13 @@ int main(int argc, char *argv[])
     if (IDEAL_INPUT_ID == -1)
     {
     	config_info -> nwp_mode = 1;
-    	sprintf(INIT_STATE_FILE_PRE, "input/%d%s%s%s_nwp_B%dL%dT%d_O%d_OL%d_SCVT.nc", year, month_string, day_string, hour_string, RES_ID, NO_OF_LAYERS, toa, ORO_ID, grid -> no_of_oro_layers);
+    	sprintf(INIT_STATE_FILE_PRE, "../../nwp_init/%d%s%s%s_nwp_B%dL%dT%d_O%d_OL%d_SCVT.nc", year, month_string, day_string, hour_string, RES_ID, NO_OF_LAYERS, toa, ORO_ID, grid -> no_of_oro_layers);
     }
     // The idealized input case.
     else
     {
     	config_info -> nwp_mode = 0;
-		sprintf(INIT_STATE_FILE_PRE, "input/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", IDEAL_INPUT_ID, RES_ID, NO_OF_LAYERS, toa, ORO_ID, grid -> no_of_oro_layers);
+		sprintf(INIT_STATE_FILE_PRE, "../../test_generator/test_states/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", IDEAL_INPUT_ID, RES_ID, NO_OF_LAYERS, toa, ORO_ID, grid -> no_of_oro_layers);
     }
     char INIT_STATE_FILE[strlen(INIT_STATE_FILE_PRE) + 1];
     strcpy(INIT_STATE_FILE, INIT_STATE_FILE_PRE);
@@ -490,19 +490,19 @@ int main(int argc, char *argv[])
     first_time = clock();
     if (write_out_dry_mass_integral == 1)
     {
-		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 0);
+		write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 0);
 	}
     if (write_out_entropy_integral == 1)
     {
-		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 1);
+		write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 1);
 	}
     if (write_out_energy_integral == 1)
     {
-		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 2);
+		write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 2);
 	}
     if (write_out_linearized_entropy_integral == 1)
     {
-		write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
+		write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 3);
 	}
     config_info -> rad_update = 1;
     if (config_info -> rad_on == 1)
@@ -564,19 +564,19 @@ int main(int argc, char *argv[])
 		*/
 		if (write_out_dry_mass_integral == 1)
         {
-			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 0);
+			write_out_integral(state_new, time_step_counter, grid, dualgrid, diagnostics, 0);
     	}
 		if (write_out_entropy_integral == 1)
         {
-			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 1);
+			write_out_integral(state_new, time_step_counter, grid, dualgrid, diagnostics, 1);
     	}
 		if (write_out_energy_integral == 1)
         {
-			write_out_integral(state_new, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 2);
+			write_out_integral(state_new, time_step_counter, grid, dualgrid, diagnostics, 2);
     	}
 		if (write_out_linearized_entropy_integral == 1)
         {
-			write_out_integral(state_old, time_step_counter, RUN_ID, grid, dualgrid, diagnostics, 3);
+			write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 3);
     	}
     	
     	/*
