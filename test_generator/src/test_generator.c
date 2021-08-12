@@ -287,7 +287,7 @@ int main(int argc, char *argv[])
 			// lowest layer
 			if (layer_index == NO_OF_LAYERS - 1)
 			{
-				pressure_value = standard_pres(grid -> z_scalar[scalar_index]);
+				pressure_value = pressure[scalar_index];
 				state -> theta_pert[scalar_index] = temperature[scalar_index]*pow(pressure_value/P_0, specific_gas_constants(0)/spec_heat_capacities_p_gas(0));
 				state -> exner_pert[scalar_index] = temperature[scalar_index]/state -> theta_pert[scalar_index];
 			}
@@ -295,10 +295,10 @@ int main(int argc, char *argv[])
 			else
 			{
 				// solving a quadratic equation for the Exner pressure
-				b = -0.5*state -> exner_pert[scalar_index + NO_OF_SCALARS_H]/standard_temp(grid -> z_scalar[scalar_index + NO_OF_SCALARS_H])
-				*(temperature[scalar_index] - standard_temp(grid -> z_scalar[scalar_index + NO_OF_SCALARS_H])
+				b = -0.5*state -> exner_pert[scalar_index + NO_OF_SCALARS_H]/temperature[scalar_index + NO_OF_SCALARS_H]
+				*(temperature[scalar_index] - temperature[scalar_index + NO_OF_SCALARS_H]
 				+ 2/spec_heat_capacities_p_gas(0)*(grid -> gravity_potential[scalar_index] - grid -> gravity_potential[scalar_index + NO_OF_SCALARS_H]));
-				c = pow(state -> exner_pert[scalar_index + NO_OF_SCALARS_H], 2)*temperature[scalar_index]/standard_temp(grid -> z_scalar[scalar_index + NO_OF_SCALARS_H]);
+				c = pow(state -> exner_pert[scalar_index + NO_OF_SCALARS_H], 2)*temperature[scalar_index]/temperature[scalar_index + NO_OF_SCALARS_H];
 				state -> exner_pert[scalar_index] = b + pow((pow(b, 2) + c), 0.5);
 			}
 			// this is what will be written into the netcdf file (gas density)
