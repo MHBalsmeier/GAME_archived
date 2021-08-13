@@ -89,11 +89,7 @@ int main(int argc, char *argv[])
     double *liquid_water_temp = malloc(NO_OF_SCALARS*sizeof(double));
     double *solid_water_temp = malloc(NO_OF_SCALARS*sizeof(double));
     double z_height;
-    double lat, lon, u, v, eta, eta_v, T_perturb, distance, pressure_value, specific_humidity, total_density;
-    double u_p = 1.0;
-    double distance_scale = RADIUS/10;
-    double lat_perturb = 2*M_PI/9;
-    double lon_perturb = M_PI/9;
+    double lat, lon, u, v, pressure_value, specific_humidity, total_density;
     // dummy arguments
     double dummy_0 = 0.0;
     double dummy_1 = 0.0;
@@ -108,7 +104,7 @@ int main(int argc, char *argv[])
     int one = 1;
     double one_double = 1;
     // 3D scalar fields determined here, apart from density
-    #pragma omp parallel for private(layer_index, h_index, lat, lon, z_height, eta, eta_v, T_perturb, pressure_value)
+    #pragma omp parallel for private(layer_index, h_index, lat, lon, z_height, pressure_value)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	layer_index = i/NO_OF_SCALARS_H;

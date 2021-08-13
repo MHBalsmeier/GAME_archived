@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
     float *latitude_input = malloc(no_of_lat_points*sizeof(double));
    	float *longitude_input = malloc(no_of_lon_points*sizeof(double));
     float (*z_input)[no_of_lon_points] = malloc(sizeof(float[no_of_lat_points][no_of_lon_points]));
-	if (ORO_ID == 3)
+	if (ORO_ID == 2)
 	{
 		int INPUT_FILE_LENGTH = 100;
 		char *INPUT_FILE_PRE = malloc((INPUT_FILE_LENGTH + 1)*sizeof(char));

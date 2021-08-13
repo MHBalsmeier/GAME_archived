@@ -11,5 +11,5 @@ if [ $? -ne 0 ]
 then
 echo -e ${RED}Test generator compilation failed.$NC
 else
-echo "Test generator compiled sucessfully."
+echo "Test generator compiled successfully."
 fi
