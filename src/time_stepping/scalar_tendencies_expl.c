@@ -24,16 +24,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 	*/
 	// declaring needed variables
     int h_index, layer_index;
-    double c_v_cond;
-    
-    // determining the weights for the RK stepping
-    double old_weight, new_weight, tracer_heating, density_gas_weight, density_total_weight;
-    new_weight = 1;
-    if (no_rk_step == 1)
-    {
-    	new_weight = 1;
-    }
-	old_weight = 1 - new_weight;
+    double c_v_cond, tracer_heating, density_gas_weight, density_total_weight;
     
 	// phase transitions are only updated at the first RK step
 	if (NO_OF_CONSTITUENTS == 4)
@@ -98,12 +89,11 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 			if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 			{
 				state_tendency -> rho[i*NO_OF_SCALARS + j]
-				= old_weight*state_tendency -> rho[i*NO_OF_SCALARS + j]
-				+ new_weight*(
+				=
 				// the advection
 				-diagnostics -> flux_density_divv[j]
 				// the phase transition rates
-				+ irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]);
+				+ irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j];
 		    }
 	    }
 	    
@@ -154,8 +144,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 						}
 					}
 					state_tendency -> rhotheta[j]
-					= old_weight*state_tendency -> rhotheta[j]
-					+ new_weight*(
+					= 
 					// the advection (resolved transport)
 					-diagnostics -> flux_density_divv[j]
 					// the diabatic forcings
@@ -171,13 +160,13 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 					)/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j]))
 					// phase transitions
 					+ tracer_heating*state -> rho[i*NO_OF_SCALARS + j]/density_gas_weight
-					/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j])));
+					/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j]));
 					// sensible heat in the lowest layer
 					if (layer_index == NO_OF_LAYERS - 1 - grid -> no_of_shaded_points_scalar[h_index])
 					{
 						state_tendency -> rhotheta[j]
 						// the minus-sign is correct (the quantity itself refers to soil)
-						-= new_weight*soil -> power_flux_density_sensible[j + NO_OF_SCALARS_H - NO_OF_SCALARS]/diagnostics -> temperature_gas[j]
+						-= soil -> power_flux_density_sensible[j + NO_OF_SCALARS_H - NO_OF_SCALARS]/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j]))
 						/(grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H + h_index] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index]);
 					}
 				 }
@@ -206,15 +195,14 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 				{
 					c_v_cond = ret_c_v_cond(i, 0, state -> condensed_density_temperatures[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + state -> rho[i*NO_OF_SCALARS + j]));
 					state_tendency -> condensed_density_temperatures[i*NO_OF_SCALARS + j]
-					= old_weight*state_tendency -> condensed_density_temperatures[i*NO_OF_SCALARS + j]
-					+ new_weight*(
+					= 
 					// the advection
 					-diagnostics -> flux_density_divv[j]
 					// the source terms
 					+ state -> rho[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state, j))
 					*(irrev -> temperature_diffusion_heating[j] + irrev -> heating_diss[j] + radiation_tendency[j])
 					+ 1/c_v_cond*irrev -> constituent_heat_source_rates[i*NO_OF_SCALARS + j]
-					+ diagnostics -> scalar_field_placeholder[j]*(irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]));
+					+ diagnostics -> scalar_field_placeholder[j]*(irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]);
 				}
 			}
 		}

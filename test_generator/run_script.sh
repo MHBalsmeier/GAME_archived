@@ -4,23 +4,16 @@
 # Github repository: https://github.com/OpenNWP/GAME
 
 # test_ids:
-# 0:	standard atmosphere without orography
-# 1:	standard atmosphere with Gaussian mountain
-# 2:	JW test, dry, balanced
-# 3:	JW test, dry, perturbed
-# 4:	JW test, moist, balanced
-# 5:	JW test, moist, perturbed
-# 6:	JW test, dry, balanced, with oro_id = 3
-# 7:	JW test, moist, balanced, with oro_id = 3
-# 8:	Ullrich test, dry, perturbed
-# 9:	Ullrich test, moist, perturbed
-# 10:	Ullrich test, dry, perturbed, with oro_id = 3
-# 11:	Ullrich test, moist, perturbed, with oro_id = 3
-# 12:	standard atmosphere with oro_id = 3
-# 13:	Ullrich test, dry, with Gaussian mountain
-# 14:	Ullrich test, dry, perturbed, with oro_id = 3 and reversed wind
+# 0:	standard atmosphere with oro_id = 0
+# 1:	standard atmosphere with oro_id = 1
+# 2:	standard atmosphere with oro_id = 2
+# 3:	Ullrich test, dry, perturbed
+# 4:	Ullrich test, moist, perturbed
+# 5:	Ullrich test, dry, perturbed, with oro_id = 3
+# 6:	Ullrich test, moist, perturbed, with oro_id = 3
+# 7:	Ullrich test, dry, with Gaussian mountain
 
-test_id=8
+test_id=3
 type_of_vertical_grid=0 # 0: terrain following coordinates, 1: block-like orography
 orography_layers=23 # number of layers following orography (only relevant if type_of_vertical_grid == 0)
 toa=41152 # height of the top of the atmosphere
