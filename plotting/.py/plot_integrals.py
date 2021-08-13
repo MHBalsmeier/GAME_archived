@@ -12,11 +12,10 @@ rcParams.update({'figure.autolayout': True})
 fig_save_path = sys.argv[1];
 output_dir = sys.argv[2];
 write_out_dry_mass_integral = int(sys.argv[3]);
-write_out_entropy_integral = int(sys.argv[4]);
+write_out_rhotheta_integral = int(sys.argv[4]);
 write_out_energy_integral = int(sys.argv[5]);
 run_id = sys.argv[6];
-write_out_linearized_entropy_integral = int(sys.argv[7]);
-delta_t = float(sys.argv[8]);
+delta_t = float(sys.argv[7]);
 
 fig_size = 6;
 if write_out_dry_mass_integral == 1:
@@ -33,24 +32,19 @@ if write_out_dry_mass_integral == 1:
 	fig.savefig(fig_save_path + "/" + run_id + "_dry_mass_integral.png", dpi = 500);
 	plt.close();
 	
-if write_out_entropy_integral == 1:
+if write_out_rhotheta_integral == 1:
 	fig = plt.figure(figsize = (fig_size, fig_size));
 	ax = plt.axes();
 	ax.grid();
-	plt.title("Entropy");
+	plt.title("Rho x theta");
 	plt.xlabel("time since init / hr");
 	plt.ylabel("change relative to init value / %");
-	data = np.genfromtxt(output_dir + "/entropy");
+	data = np.genfromtxt(output_dir + "/potential_temperature_density");
 	time_vector = 1/3600*delta_t*(data[:, 0] - data[0, 0]);
 	plt.xlim([min(time_vector), max(time_vector)]);
 	entropy_vector = data[:, 1];
 	plt.plot(time_vector, 100*(entropy_vector/entropy_vector[0] - 1));
-	if (write_out_linearized_entropy_integral == 1):
-		data = np.genfromtxt(output_dir + "/linearized_entropy");
-		linearized_entropy_vector = data[:, 1];
-		plt.plot(time_vector, 100*(linearized_entropy_vector/linearized_entropy_vector[0] - 1));
-		plt.legend(["entropy", "linearized entropy"], fontsize = 16);
-	fig.savefig(fig_save_path + "/" + run_id + "_entropy_integral.png", dpi = 500);
+	fig.savefig(fig_save_path + "/" + run_id + "_rhotheta_integral.png", dpi = 500);
 	plt.close();
 
 if write_out_energy_integral == 1:

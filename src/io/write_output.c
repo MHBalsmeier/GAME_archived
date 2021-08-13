@@ -91,13 +91,13 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		    *gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i, config_info)
 		    *temp_lowest_layer;
 		    temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
-		    mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]/
+		    mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i]/
 		    (gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i, config_info)*standard_vert_lapse_rate));
 		    mslp[i] = pressure_value/mslp_factor;
 		    
 			// Now the aim is to determine the value of the surface pressure.
 			temp_surface = temp_lowest_layer + standard_vert_lapse_rate*(grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i]);
-		    surface_p_factor = pow(1 - (temp_surface - temp_lowest_layer)/temp_surface, grid -> gravity_m[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]/
+		    surface_p_factor = pow(1 - (temp_surface - temp_lowest_layer)/temp_surface, grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i]/
 		    (gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i, config_info)*standard_vert_lapse_rate));
 			surface_p[i] = pressure_value/surface_p_factor;
 			
@@ -1499,19 +1499,16 @@ int write_out_integral(State *state_write_out, int step_counter, Grid *grid, Dua
     if (integral_id == 0)
    		sprintf(INTEGRAL_FILE_PRE, "%s", "dry_mass");
     if (integral_id == 1)
-   		sprintf(INTEGRAL_FILE_PRE, "%s", "entropy");
+   		sprintf(INTEGRAL_FILE_PRE, "%s", "potential_temperature_density");
     if (integral_id == 2)
    		sprintf(INTEGRAL_FILE_PRE, "%s", "energy");
-    if (integral_id == 2)
-   		sprintf(INTEGRAL_FILE_PRE, "%s", "energy");
-    if (integral_id == 3)
-   		sprintf(INTEGRAL_FILE_PRE, "%s", "linearized_entropy");
     INTEGRAL_FILE_LENGTH = strlen(INTEGRAL_FILE_PRE);
     char *INTEGRAL_FILE = malloc((INTEGRAL_FILE_LENGTH + 1)*sizeof(char));
     sprintf(INTEGRAL_FILE, "%s", INTEGRAL_FILE_PRE);
     free(INTEGRAL_FILE_PRE);
     if (integral_id == 0)
     {
+    	// dry mass
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
 		#pragma omp parallel for
 		for (int i = 0; i< NO_OF_SCALARS; ++i)
@@ -1524,13 +1521,9 @@ int write_out_integral(State *state_write_out, int step_counter, Grid *grid, Dua
     }
     if (integral_id == 1)
     {
+    	// density times potential temperature
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
-		#pragma omp parallel for
-		for (int i = 0; i< NO_OF_SCALARS; ++i)
-		{
-			diagnostics -> scalar_field_placeholder[i] = state_write_out -> rhotheta[i];
-		}
-    	global_scalar_integrator(diagnostics -> scalar_field_placeholder, grid, &global_integral);
+    	global_scalar_integrator(state_write_out -> rhotheta, grid, &global_integral);
     	fprintf(global_integral_file, "%d\t%lf\n", step_counter, global_integral);
     	fclose(global_integral_file);
     }

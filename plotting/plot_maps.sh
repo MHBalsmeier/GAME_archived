@@ -3,11 +3,11 @@
 # This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 # Github repository: https://github.com/OpenNWP/GAME
 
-game_home_dir=/home/max/compiled/game # the home directory of GAME
+game_home_dir=~/code/GAME # the home directory of GAME
 run_id=ideal # the run id which you want to plot
-run_span=$((8*86400)) # the length of the run
+run_span=$((10*86400)) # the length of the run
 output_dir=$game_home_dir/output/$run_id # the directory where the grib files are stored
-fig_save_path=/home/max/figs/game_output # the path to which the figures will be saved
+fig_save_path=$game_home_dir/figs # the directory in which the figures will be saved
 init_year=2000 # year of the start of the model run
 init_month=1 # month of the start of the model run
 init_day=1 # day of the start of the model run
