@@ -10,7 +10,7 @@ fi
 
 cd build
 
-cmake -DCMAKE_INSTALL_PREFIX=../output ..
+cmake ..
 make
 
 cd ..
