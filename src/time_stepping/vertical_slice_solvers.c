@@ -130,20 +130,6 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			- (grid -> z_scalar[j*NO_OF_SCALARS_H + i] - grid -> z_scalar[(j + 1)*NO_OF_SCALARS_H + i])/(impl_weight*pow(delta_t, 2)*c_p)
 			*state_old -> wind[(j + 1)*NO_OF_VECTORS_PER_LAYER + i]*rho_int_expl[j]/rho_int_old[j];
 		}
-		// Klemp (2008) upper boundary layer
-		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
-		{
-			z_above_damping = grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - damping_start_height;
-			if (z_above_damping < 0)
-			{
-				damping_coeff = 0;
-			}
-			else
-			{
-				damping_coeff = config_info -> damping_coeff_max*pow(sin(0.5*M_PI*z_above_damping/(grid -> z_vector[0] - damping_start_height)), 2);
-			}
-			d_vector[j] = (1 + delta_t*damping_coeff)*d_vector[j];
-		}
 		for (int j = 0; j < NO_OF_LAYERS - 2; ++j)
 		{
 			// lower diagonal
@@ -162,6 +148,21 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		
 		// calling the algorithm to solve the system of linear equations
 		thomas_algorithm(c_vector, d_vector, e_vector, r_vector, solution_vector, NO_OF_LAYERS - 1);
+		
+		// Klemp (2008) upper boundary layer
+		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
+		{
+			z_above_damping = grid -> z_vector[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - damping_start_height;
+			if (z_above_damping < 0)
+			{
+				damping_coeff = 0;
+			}
+			else
+			{
+				damping_coeff = config_info -> damping_coeff_max*pow(sin(0.5*M_PI*z_above_damping/(grid -> z_vector[0] - damping_start_height)), 2);
+			}
+			solution_vector[j] = solution_vector[j]/(1 + delta_t*damping_coeff);
+		}
 		
 		/*
 		Writing the result into the new state.
