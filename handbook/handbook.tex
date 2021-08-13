@@ -205,9 +205,8 @@ The grid generator needs to be recompiled for every specific resolution, top hei
 \begin{tabular}{|>{\centering}p{4.0 cm}|>{\centering}p{8 cm}|}
 \hline \textbf{\texttt{ORO\_ID}} & \textbf{Description} \tabularnewline
 \hline\hline 0 & no orography \tabularnewline
-\hline 1 & orography of JW test \tabularnewline
-\hline 2 & Gaussian mountain of 8 km height and 224 m standard deviation located ad 0 N / 0 E\tabularnewline
-\hline $\geq$ 3 & real orography \tabularnewline
+\hline 1 & Gaussian mountain of 8 km height and 224 m standard deviation located ad 0 N / 0 E\tabularnewline
+\hline $\geq$ 2 & real orography \tabularnewline
 \hline
 \end{tabular}
 \caption{Definition of orography IDs.}
@@ -231,19 +230,15 @@ These files are stored in the directory \texttt{orography\_generator/real}. An i
 \centering
 \begin{tabular}{|>{\centering}p{4.0 cm}|>{\centering}p{8 cm}|}
 \hline \textbf{\texttt{TEST\_ID}} & \textbf{Description} \tabularnewline
-\hline\hline 0 & standard atmosphere \tabularnewline
-\hline 1 & standard atmosphere with Gaussian mountain (\texttt{ORO\_ID} = 2) \tabularnewline
-\hline 2 & JW dry unperturbed \tabularnewline
-\hline 3 & JW dry perturbed \tabularnewline
-\hline 4 & JW moist unperturbed \tabularnewline
-\hline 5 & JW moist perturbed \tabularnewline
-\hline 6 & JW dry, balanced, with \texttt{ORO\_ID} = 3 \tabularnewline
-\hline 7 & JW moist, balanced, with \texttt{ORO\_ID} = 3 \tabularnewline
-\hline 8 & Ullrich dry \tabularnewline
-\hline 9 & Ullrich moist \tabularnewline
-\hline 10 & Ullrich dry with \texttt{ORO\_ID} = 3 \tabularnewline
-\hline 11 & Ullrich moist with \texttt{ORO\_ID} = 3 \tabularnewline
-\hline 12 & standard atmosphere \texttt{ORO\_ID} = 3 \tabularnewline
+\hline\hline 0 & standard atmosphere without orography (\texttt{ORO\_ID} = 0) \tabularnewline
+\hline 1 & standard atmosphere with Gaussian mountain (\texttt{ORO\_ID} = 1) \tabularnewline
+\hline 2 & standard atmosphere with real orography (\texttt{ORO\_ID} = 2) \tabularnewline
+\hline 3 & dry Ullrich test with \texttt{ORO\_ID} = 0 \tabularnewline
+\hline 4 & dry Ullrich test with \texttt{ORO\_ID} = 1 \tabularnewline
+\hline 5 & dry Ullrich test with \texttt{ORO\_ID} = 2 \tabularnewline
+\hline 6 & moist Ullrich test with \texttt{ORO\_ID} = 0 \tabularnewline
+\hline 7 & moist Ullrich test with \texttt{ORO\_ID} = 1 \tabularnewline
+\hline 8 & moist Ullrich test with \texttt{ORO\_ID} = 2 \tabularnewline
 \hline
 \end{tabular}
 \caption{Definition of test IDs.}

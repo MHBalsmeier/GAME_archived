@@ -7,11 +7,12 @@
 # 0:	standard atmosphere with oro_id = 0
 # 1:	standard atmosphere with oro_id = 1
 # 2:	standard atmosphere with oro_id = 2
-# 3:	Ullrich test, dry, perturbed
-# 4:	Ullrich test, moist, perturbed
-# 5:	Ullrich test, dry, perturbed, with oro_id = 3
-# 6:	Ullrich test, moist, perturbed, with oro_id = 3
-# 7:	Ullrich test, dry, with Gaussian mountain
+# 3:	dry Ullrich test with oro_id = 0
+# 4:	dry Ullrich test with oro_id = 1
+# 5:	dry Ullrich test with oro_id = 2
+# 6:	moist Ullrich test with oro_id = 0
+# 7:	moist Ullrich test with oro_id = 1
+# 8:	moist Ullrich test with oro_id = 2
 
 test_id=3
 type_of_vertical_grid=0 # 0: terrain following coordinates, 1: block-like orography
