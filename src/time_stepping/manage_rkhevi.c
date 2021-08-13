@@ -149,10 +149,10 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 		}
     }
 
-	// in this case, a large time step has been taken, which we modify into a small step here    
+	// in this case, a large time step has been taken, which we modify into a small step here
     if (slow_update_bool == 1 && config_info -> adv_sound_ratio > 1)
     {
-    	linear_combine_two_states(state_old, state_new, state_new, 1 - delta_t_small/delta_t, delta_t_small/delta_t);
+    	linear_combine_two_states(state_old, state_new, state_new, 1 - delta_t_small/delta_t, delta_t_small/delta_t, grid);
     }
 	
 	// nesting

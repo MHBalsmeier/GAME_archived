@@ -515,7 +515,7 @@ int main(int argc, char *argv[])
     State *state_tendency = calloc(1, sizeof(State));
     Irreversible_quantities *irrev = calloc(1, sizeof(Irreversible_quantities));
     State *state_new = calloc(1, sizeof(State));
-    linear_combine_two_states(state_old, state_old, state_new, 1, 0);
+    linear_combine_two_states(state_old, state_old, state_new, 1, 0, grid);
 	Radiation *radiation = calloc(1, sizeof(Radiation));
 	Soil *soil = calloc(1, sizeof(Soil));
 	init_soil(soil, diagnostics);
@@ -532,7 +532,7 @@ int main(int argc, char *argv[])
     while (t_0 < t_init + TOTAL_RUN_SPAN + 300)
     {
     	// copying the old state to the new state
-    	linear_combine_two_states(state_new, state_old, state_old, 1, 0);
+    	linear_combine_two_states(state_new, state_old, state_old, 1, 0, grid);
     	
     	/*
     	Checking if the radiative fluxes need to be updated:
@@ -582,7 +582,7 @@ int main(int argc, char *argv[])
     	*/
         if(t_0 + delta_t >= t_write && t_0 <= t_write)
         {
-            interpolation_t(state_old, state_new, state_write, t_0, t_0 + delta_t, t_write);
+            interpolation_t(state_old, state_new, state_write, t_0, t_0 + delta_t, t_write, grid);
     	}
         
         // 5 minutes before the output time, the wind in the lowest layer needs to be collected for 10 m wind diagnostics.

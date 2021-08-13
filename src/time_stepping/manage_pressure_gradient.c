@@ -35,11 +35,19 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	}
 	
 	// diagnozing c_g_p and multiplying by the full potential tempertature
+	double c_p = spec_heat_capacities_p_gas(0);
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		diagnostics -> c_g_p_field[i] = spec_heat_cap_diagnostics_p(state, i, config_info);
-		diagnostics -> scalar_field_placeholder[i] = diagnostics -> c_g_p_field[i]*(grid -> theta_bg[i] + state -> theta_pert[i]);
+		if (config_info -> assume_lte == 0)
+		{
+			diagnostics -> c_g_p_field[i] = spec_heat_cap_diagnostics_p(state, i, config_info);
+			diagnostics -> scalar_field_placeholder[i] = diagnostics -> c_g_p_field[i]*(grid -> theta_bg[i] + state -> theta_pert[i]);
+		}
+		else
+		{
+			diagnostics -> scalar_field_placeholder[i] = c_p*(grid -> theta_bg[i] + state -> theta_pert[i]);
+		}
 	}
 	grad(state -> exner_pert, forcings -> pressure_gradient_acc_neg_nl, grid);
 	scalar_times_vector(diagnostics -> scalar_field_placeholder, forcings -> pressure_gradient_acc_neg_nl, forcings -> pressure_gradient_acc_neg_nl, grid);
@@ -49,7 +57,14 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		diagnostics -> scalar_field_placeholder[i] = diagnostics -> c_g_p_field[i]*state -> theta_pert[i];
+		if (config_info -> assume_lte == 0)
+		{
+			diagnostics -> scalar_field_placeholder[i] = diagnostics -> c_g_p_field[i]*state -> theta_pert[i];
+		}
+		else
+		{
+			diagnostics -> scalar_field_placeholder[i] = c_p*state -> theta_pert[i];
+		}
 	}
 	scalar_times_vector(diagnostics -> scalar_field_placeholder, grid -> exner_bg_grad, forcings -> pressure_gradient_acc_neg_l, grid);
 	
