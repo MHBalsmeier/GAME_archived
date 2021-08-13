@@ -25,7 +25,7 @@ int get_gas_contituents_ids(int gas_constituent_id)
 double get_impl_thermo_weight()
 {
 	double impl_thermo_weight;
-	impl_thermo_weight = spec_heat_capacities_v_gas(0)/spec_heat_capacities_p_gas(0);
+	impl_thermo_weight = 0.75;
 	return impl_thermo_weight;
 }
 
