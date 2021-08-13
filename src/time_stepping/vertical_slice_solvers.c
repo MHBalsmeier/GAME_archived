@@ -34,7 +34,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 	damping_start_height = config_info -> damping_start_height_over_toa*grid -> z_vector[0];
 	
 	// partial derivatives new time step weight
-	double partial_impl_weight = c_v/c_p;
+	double partial_impl_weight = 0;
 	
 	// loop over all columns
 	#pragma omp parallel for private(upper_index, lower_index, damping_coeff, z_above_damping)
