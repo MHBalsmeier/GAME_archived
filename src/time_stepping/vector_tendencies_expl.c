@@ -106,41 +106,50 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     }
 	old_weight = 1 - new_weight;
 	// the weights for the pressure gradient
-	double old_hor_pgrad_weight, current_hor_pgrad_weight;
-	int hor_switch; // horizontal switch
+	double old_hor_pgrad_weight, current_hor_pgrad_weight, current_ver_pgrad_weight;
+	current_hor_pgrad_weight = 0.5 + get_impl_thermo_weight();
+	old_hor_pgrad_weight = 1 - current_hor_pgrad_weight;
+	current_ver_pgrad_weight = 1 - get_impl_thermo_weight();
     int layer_index, h_index;
-    #pragma omp parallel for private(layer_index, h_index, old_hor_pgrad_weight, current_hor_pgrad_weight, hor_switch)
+    #pragma omp parallel for private(layer_index, h_index)
     for (int i = 0; i < NO_OF_VECTORS; ++i)
     {
     	layer_index = i/NO_OF_VECTORS_PER_LAYER;
     	h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
-    	// calculating the pressure gradient weight
-    	current_hor_pgrad_weight = 0.5 + get_impl_thermo_weight();
-    	hor_switch = 1;
-    	if (h_index < NO_OF_SCALARS_H)
-    	{
-    		current_hor_pgrad_weight = 1 - get_impl_thermo_weight();
-    		hor_switch = 0;
-    	}
-    	old_hor_pgrad_weight = 1 - current_hor_pgrad_weight;
     	// upper and lower boundary
         if (i < NO_OF_SCALARS_H || i >= NO_OF_VECTORS - NO_OF_SCALARS_H)
         {
             state_tendency -> wind[i] = 0;
         }
-        else if ((h_index >= NO_OF_SCALARS_H
+        // horizontal case
+        else if (h_index >= NO_OF_SCALARS_H
     	// checking for shading
     	&& NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_vector[h_index - NO_OF_SCALARS_H])
-    	|| (h_index < NO_OF_SCALARS_H
-    	&& NO_OF_LAYERS - layer_index > grid -> no_of_shaded_points_scalar[h_index]))
-		{
+    	{
     		state_tendency -> wind[i] =
     		old_weight*state_tendency -> wind[i] + new_weight*(
     		// explicit component of pressure gradient acceleration
     		// old time step component
-    		hor_switch*old_hor_pgrad_weight*forcings -> pgrad_acc_old[i]
-    		// new time step component
+    		old_hor_pgrad_weight*forcings -> pgrad_acc_old[i]
+    		// current time step component
     		- current_hor_pgrad_weight*(forcings -> pressure_gradient_acc_neg_nl[i] + forcings -> pressure_gradient_acc_neg_l[i])
+    		// generalized Coriolis term
+    		+ forcings -> pot_vort_tend[i]
+    		// kinetic energy term
+    		- 0.5*forcings -> e_kin_grad[i]
+    		// momentum diffusion
+    		+ irrev -> friction_acc[i]);
+    	}
+        // vertical case
+    	else if (h_index < NO_OF_SCALARS_H
+    	// checking for shading
+    	&& NO_OF_LAYERS - layer_index > grid -> no_of_shaded_points_scalar[h_index])
+		{
+    		state_tendency -> wind[i] =
+    		old_weight*state_tendency -> wind[i] + new_weight*(
+    		// explicit component of pressure gradient acceleration
+    		// current time step component
+    		- current_ver_pgrad_weight*(forcings -> pressure_gradient_acc_neg_nl[i] + forcings -> pressure_gradient_acc_neg_l[i])
     		// generalized Coriolis term
     		+ forcings -> pot_vort_tend[i]
     		// kinetic energy term
