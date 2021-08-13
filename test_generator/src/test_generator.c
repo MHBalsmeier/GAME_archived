@@ -50,21 +50,17 @@ int main(int argc, char *argv[])
    	
    	// determining the orography ID as a function of the test ID
 	int ORO_ID;
-	if (TEST_ID == 0 || TEST_ID == 8 || TEST_ID == 9)
+	if (TEST_ID == 0 || TEST_ID == 3 || TEST_ID == 6)
 	{
 		ORO_ID = 0;
 	}
-	if (TEST_ID == 1 || TEST_ID == 13)
+	if (TEST_ID == 1 || TEST_ID == 4 || TEST_ID == 7)
 	{
 		ORO_ID = 1;
 	}
-	if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
+	if (TEST_ID == 2 || TEST_ID == 5 || TEST_ID == 8)
 	{
 		ORO_ID = 2;
-	}
-	if (TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 10 || TEST_ID == 11 || TEST_ID == 12 || TEST_ID == 14)
-	{
-		ORO_ID = 3;
 	}
     int FILE_NAME_LENGTH = 100;
     char *GEO_PROP_FILE_PRE = malloc((FILE_NAME_LENGTH + 1)*sizeof(char));
@@ -110,7 +106,6 @@ int main(int argc, char *argv[])
     int layer_index, h_index;
     int zero = 0;
     int one = 1;
-    int two = 2;
     double one_double = 1;
     // 3D scalar fields determined here, apart from density
     #pragma omp parallel for private(layer_index, h_index, lat, lon, z_height, eta, eta_v, T_perturb, pressure_value)
@@ -123,43 +118,18 @@ int main(int argc, char *argv[])
         z_height = grid -> z_scalar[i];
         rel_humidity[i] = 0;
         // standard atmosphere
-        if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 12)
+        if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2)
         {
             temperature[i] = standard_temp(z_height);
             pressure[i] = standard_pres(z_height);
         }
-        // JW test
-        if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6 || TEST_ID == 7)
-        {
-            find_pressure_value(lat, z_height, &pressure_value);
-            pressure[i] = pressure_value;
-            eta = pressure[i]/P_0;
-            eta_v = (eta - ETA_0)*M_PI/2;
-            T_perturb = 3.0/4.0*eta*M_PI*U_0/spec_heat_capacities_p_gas(0)*sin(eta_v)*pow(cos(eta_v), 0.5)*((-2*pow(sin(lat), 6)*(pow(cos(lat), 2) + 1.0/3.0) + 10.0/63.0)*2*U_0*pow(cos(eta_v), 1.5) + RADIUS*OMEGA*(8.0/5.0*pow(cos(lat), 3)*(pow(sin(lat), 2) + 2.0/3.0) - M_PI/4.0));
-            if (eta >= ETA_T)
-            {
-                temperature[i] = T_0*pow(eta, spec_heat_capacities_p_gas(0)*GAMMA/G) + T_perturb;
-                if (TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 7)
-                {
-                    rel_humidity[i] = 0.7;
-                }
-                else
-                {
-                    rel_humidity[i] = 0;
-                }
-            }
-            else
-            {
-                temperature[i] = T_0*pow(eta, spec_heat_capacities_p_gas(0)*GAMMA/G) + DELTA_T*pow(ETA_T - eta, 5) + T_perturb;
-            }
-        }
         // dry Ullrich test
-        if (TEST_ID == 8 || TEST_ID == 10 || TEST_ID == 13 || TEST_ID == 14 || TEST_ID == 15)
+        if (TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
         {
         	baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i], &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
         }
         // moist Ullrich test
-        if (TEST_ID == 9 || TEST_ID == 11)
+        if (TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 8)
         {
         	baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i], &dummy_2, &dummy_3, &dummy_4, &total_density, &specific_humidity);
         	water_vapour_density[i] = total_density*specific_humidity;
@@ -198,42 +168,18 @@ int main(int argc, char *argv[])
             lon = longitude_vector[j];
             z_height = grid -> z_vector[NO_OF_SCALARS_H + j + i*NO_OF_VECTORS_PER_LAYER];
             // standard atmosphere: no wind
-            if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 12)
+            if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2)
             {
                 state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = 0;
             }
-            // JW test: specific wind field
-            if (TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6 || TEST_ID == 7)
-            {
-                find_pressure_value(lat, z_height, &pressure_value);
-                eta = pressure_value/P_0;
-                eta_v = (eta - ETA_0)*M_PI/2; 
-                u = U_0*pow(cos(eta_v), 1.5)*pow(sin(2*lat), 2);
-                if (TEST_ID == 3 || TEST_ID == 5)
-                {
-                    distance = calculate_distance_h(lat, lon, lat_perturb, lon_perturb, RADIUS);
-                    u += u_p*exp(-pow(distance/distance_scale, 2));
-                }
-                state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]);
-            }
             // dry Ullrich test
-            if (TEST_ID == 8 || TEST_ID == 10 || TEST_ID == 13)
+            if (TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
             {
         		baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
                 state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
-            }
-            if (TEST_ID == 15)
-            {
-        		baroclinic_wave_test(&one, &zero, &two, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
-                state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
-            }
-            if (TEST_ID == 14)
-            {
-        		baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
-                state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = -(u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]));
             }
             // moist Ullrich test
-            if (TEST_ID == 9 || TEST_ID == 11)
+            if (TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 8)
             {
         		baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
                 state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
@@ -248,13 +194,7 @@ int main(int argc, char *argv[])
     	#pragma omp parallel for private(lat, lon, z_height)
         for (int j = 0; j < NO_OF_SCALARS_H; ++j)
         {
-            lat = grid -> latitude_scalar[j];
-            lon = grid -> longitude_scalar[j];
-            z_height = grid -> z_vector[j + i*NO_OF_VECTORS_PER_LAYER];
-            if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2 || TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5 || TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 8 || TEST_ID == 9 || TEST_ID == 10 || TEST_ID == 11 || TEST_ID == 12 || TEST_ID == 13 || TEST_ID == 14 || TEST_ID == 15)
-            {
-                state -> wind[i*NO_OF_VECTORS_PER_LAYER + j] = 0;
-            }
+            state -> wind[i*NO_OF_VECTORS_PER_LAYER + j] = 0;
         }
     }    
     
@@ -386,37 +326,6 @@ int main(int argc, char *argv[])
     free(OUTPUT_FILE);
     return 0;
 }
-
-int find_pressure_value(double lat, double z_height, double *result)
-{
-	/*
-	This function finds the pressure at a given height (as a function of latitude) for the JW test by iterative calls to the function find_z_from_p_jw.
-    */
-    double p = P_0/2;
-    double precision = 0.0001;
-    double z;
-    double current_max = P_0;
-    double current_min = 0;
-    find_z_from_p_jw(lat, p, &z);
-    while (fabs(z - z_height) > precision)
-    {
-        if (z < z_height)
-        {
-            current_max = p;
-            p = 0.5*(current_min + p);
-        }
-        else
-        {
-            current_min = p;
-            p = 0.5*(current_max + p);
-        }
-        find_z_from_p_jw(lat, p, &z);
-    }
-    *result = p;
-    return 0;
-}
-
-
 
 
 

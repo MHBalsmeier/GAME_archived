@@ -21,35 +21,6 @@ const double TROPO_HEIGHT_STANDARD = 11e3;
 const double INVERSE_HEIGHT_STANDARD = 20e3;
 const double TEMP_GRADIENT_INV_STANDARD = 0.1/100;
 
-int find_z_from_p_jw(double lat, double p, double *result)
-{
-	const double G = 9.80616;
-	const double ETA_0 = 0.252;
-	const double ETA_T = 0.2;
-	const double DELTA_T = 4.8e5;
-	const double U_0 = 35;
-	double GAMMA = 0.005;
-	double T_0 = 288;
-	// this function converts a preessure value into a geomtrical height (as a function of latitude) for the JW test
-    double z;
-    double eta = p/P_0;
-    double phi, phi_bg, phi_perturb;
-    double eta_v = (eta - ETA_0)*M_PI/2;
-    if (eta >= ETA_T)
-    {
-        phi_bg = T_0*G/GAMMA*(1 - pow(eta, R_D*GAMMA/G));
-    }
-    else
-    {
-        phi_bg = T_0*G/GAMMA*(1 - pow(eta, R_D*GAMMA/G)) - R_D*DELTA_T*((log(eta/ETA_T) + 137.0/60)*pow(ETA_T, 5) - 5*eta*pow(ETA_T, 4) + 5*pow(ETA_T, 3)*pow(eta, 2) - 10.0/3*pow(ETA_T, 2)*pow(eta, 3) + 5.0/4*ETA_T*pow(eta, 4) - 1.0/5*pow(eta, 5));
-    }
-    phi_perturb = U_0*pow(cos(eta_v), 1.5)*((-2*pow(sin(lat), 6)*(pow(cos(lat), 2) + 1.0/3) + 10.0/63)*U_0*pow(cos(eta_v), 1.5) + RADIUS*OMEGA*(8.0/5*pow(cos(lat), 3)*(pow(sin(lat), 2) + 2.0/3) - M_PI/4));
-    phi = phi_bg + phi_perturb;
-    z = phi/G;
-    *result = z;
-    return 0;
-}
-
 int lu_5band_solver(double a_vector[], double b_vector[], double c_vector[], double l_vector[], double u_vector[], double d_vector[], double solution_vector[], int solution_length)
 {
 	// Here the system of linear equations Ax = d is solved, using the LU decomposition.

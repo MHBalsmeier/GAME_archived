@@ -14,7 +14,6 @@ With this program, orographies can be produced.
 #include <string.h>
 #include "geos95.h"
 #include "enum.h"
-#include "../../shared/shared.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 #define UNIT "Z_SURFACE"
@@ -29,9 +28,9 @@ int main(int argc, char *argv[])
 	char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
 	int ORO_ID;
    	ORO_ID = strtod(argv[1], NULL);
-   	if (ORO_ID < 1 || ORO_ID > 3)
+   	if (ORO_ID < 1 || ORO_ID > 2)
    	{
-   		printf("Error: oro_id must not be smaller than one or larger than 3.\n");
+   		printf("Error: oro_id must not be smaller than one or larger than 2.\n");
    		exit(1);
 	}
    	double rescale_factor = strtof(argv[2], NULL);
@@ -41,7 +40,7 @@ int main(int argc, char *argv[])
 	char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
 	sprintf(OUTPUT_FILE, "orographies/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
 	int ncid, scalar_h_dimid, oro_id, latitude_scalar_id, longitude_scalar_id;
-	double *oro, latitude;
+	double *oro;
 	oro = malloc(NO_OF_SCALARS_H*sizeof(double));
     int GEO_PROP_FILE_LENGTH = 100;
     char *GEO_PROP_FILE_PRE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
@@ -127,7 +126,7 @@ int main(int argc, char *argv[])
     }
     // executing the actual interpolation
     double weights_sum, sigma_mountain;
-	#pragma omp parallel for private(distance, latitude, lat_index, lon_index, weights_sum)
+	#pragma omp parallel for private(distance, lat_index, lon_index, weights_sum)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		double distance_vector[no_of_lat_points*no_of_lon_points];
@@ -140,11 +139,6 @@ int main(int argc, char *argv[])
 			oro[i] = MOUNTAIN_HEIGHT*exp(-pow(distance, 2)/(2*pow(sigma_mountain, 2)));
 		}
 		if (ORO_ID == 2)
-		{
-			latitude = latitude_scalar[i];
-			find_z_from_p_jw(latitude, P_0, &oro[i]);
-		}
-		if (ORO_ID == 3)
 		{
 			for (int j = 0; j < no_of_lat_points*no_of_lon_points; ++j)
 			{

@@ -151,23 +151,18 @@ int main(int argc, char *argv[])
     This sets the ORO_ID (orography ID) as a function of the IDEAL_INPUT_ID.
     ---------------------------------------------------------------------------
     */
-	if (IDEAL_INPUT_ID == 0 || IDEAL_INPUT_ID == 8 || IDEAL_INPUT_ID == 9)
+	if (IDEAL_INPUT_ID == 0 || IDEAL_INPUT_ID == 3 || IDEAL_INPUT_ID == 6)
     {
 		ORO_ID = 0;
     }
-	if (IDEAL_INPUT_ID == 1 || IDEAL_INPUT_ID == 13)
+	if (IDEAL_INPUT_ID == 1 || IDEAL_INPUT_ID == 4 || IDEAL_INPUT_ID == 7)
     {
 		ORO_ID = 1;
     }
-	if (IDEAL_INPUT_ID == 2 || IDEAL_INPUT_ID == 3 || IDEAL_INPUT_ID == 4 || IDEAL_INPUT_ID == 5)
+	if (IDEAL_INPUT_ID == 2 || IDEAL_INPUT_ID == 5 || IDEAL_INPUT_ID == 8)
     {
 		ORO_ID = 2;
     }
-	if (IDEAL_INPUT_ID == 6 || IDEAL_INPUT_ID == 7 || IDEAL_INPUT_ID == 10 || IDEAL_INPUT_ID == 11 || IDEAL_INPUT_ID == 12 || IDEAL_INPUT_ID == 14)
-    {
-		ORO_ID = 3;
-    }
-    
     /*
 	Determining the name of the grid file from the RES_ID, NO_OF_LAYERS and so on.
     ------------------------------------------------------------------------------
