@@ -33,6 +33,9 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 	double damping_coeff, damping_start_height, z_above_damping;
 	damping_start_height = config_info -> damping_start_height_over_toa*grid -> z_vector[0];
 	
+	// partial derivatives new time step weight
+	double partial_impl_weight = 0;
+	
 	// loop over all columns
 	#pragma omp parallel for private(upper_index, lower_index, damping_coeff, z_above_damping)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
@@ -89,9 +92,9 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 				beta_new[j] = 1/state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i + j*NO_OF_SCALARS_H];
 				gamma_new[j] = r_d/(c_v*state_new -> rhotheta[i + j*NO_OF_SCALARS_H])*(grid -> exner_bg[i + j*NO_OF_SCALARS_H] + state_new -> exner_pert[i + j*NO_OF_SCALARS_H]);
 				// interpolation in time and dividing by the volume
-				alpha[j] = ((1 - impl_weight)*alpha_old[j] + impl_weight*alpha_new[j])/grid -> volume[i + j*NO_OF_SCALARS_H];
-				beta[j] = ((1 - impl_weight)*beta_old[j] + impl_weight*beta_new[j])/grid -> volume[i + j*NO_OF_SCALARS_H];
-				gamma[j] = ((1 - impl_weight)*gamma_old[j] + impl_weight*gamma_new[j])/grid -> volume[i + j*NO_OF_SCALARS_H];
+				alpha[j] = ((1 - partial_impl_weight)*alpha_old[j] + partial_impl_weight*alpha_new[j])/grid -> volume[i + j*NO_OF_SCALARS_H];
+				beta[j] = ((1 - partial_impl_weight)*beta_old[j] + partial_impl_weight*beta_new[j])/grid -> volume[i + j*NO_OF_SCALARS_H];
+				gamma[j] = ((1 - partial_impl_weight)*gamma_old[j] + partial_impl_weight*gamma_new[j])/grid -> volume[i + j*NO_OF_SCALARS_H];
 			}
 			// explicit potential temperature perturbation
 			theta_pert_expl[j] = state_old -> theta_pert[i + j*NO_OF_SCALARS_H] + delta_t*grid -> volume[i + j*NO_OF_SCALARS_H]*(
@@ -217,18 +220,18 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			= (2*solution_vector[j]/grid -> area[(j + 1)*NO_OF_VECTORS_PER_LAYER + i] - density_interface_new*state_old -> wind[(j + 1)*NO_OF_VECTORS_PER_LAYER + i])
 			/rho_int_old[j];
 		}
-		// Exner pressure perturbation
-		for (int j = 0; j < NO_OF_LAYERS; ++j)
-		{
-			state_new -> exner_pert[j*NO_OF_SCALARS_H + i] = exner_pert_expl[j] + grid -> volume[j*NO_OF_SCALARS_H + i]
-			*gamma[j]*(state_new -> rhotheta[j*NO_OF_SCALARS_H + i] - rhotheta_expl[j]);
-		}
 		// potential temperature perturbation
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
 		{
 			state_new -> theta_pert[j*NO_OF_SCALARS_H + i] = state_new -> rhotheta[j*NO_OF_SCALARS_H + i]
 			/state_new -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j*NO_OF_SCALARS_H + i]
 			- grid -> theta_bg[j*NO_OF_SCALARS_H + i];
+		}
+		// Exner pressure perturbation
+		for (int j = 0; j < NO_OF_LAYERS; ++j)
+		{
+			state_new -> exner_pert[j*NO_OF_SCALARS_H + i] = state_old -> exner_pert[j*NO_OF_SCALARS_H + i] + grid -> volume[j*NO_OF_SCALARS_H + i]
+			*gamma[j]*(state_new -> rhotheta[j*NO_OF_SCALARS_H + i] - state_old -> rhotheta[j*NO_OF_SCALARS_H + i]);
 		}
 		
 	} // end of the column (index i) loop
