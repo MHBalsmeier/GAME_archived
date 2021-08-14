@@ -122,8 +122,8 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			+ 0.5*(grid -> exner_bg[i + j*NO_OF_SCALARS_H] - grid -> exner_bg[i + (j + 1)*NO_OF_SCALARS_H])
 			*(alpha[j + 1] - alpha[j] + theta_int_new[j]*(beta[j + 1] - beta[j]))
 			- (grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_p_grad_weight*pow(delta_t, 2)*c_p*rho_int_old[j])
-			*(2/grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]) + delta_t*state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*0.5
-			*(-1/grid -> volume[i + j*NO_OF_SCALARS_H] + 1/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]);
+			*(2/grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] + delta_t*state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*0.5
+			*(-1/grid -> volume[i + j*NO_OF_SCALARS_H] + 1/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]));
 			// right hand side
 			r_vector[j] = -(state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] + delta_t*state_tendency -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER])
 			*(grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])
