@@ -10,5 +10,5 @@ fig_save_path=$game_home_dir/figs # the directory in which the figures will be s
 plot_mass_dry_integral=1 # set this to one if you want to plot the dry mass of the atmospheric domain
 plot_rhotheta_integral=1 # set this to one if you want to plot the rhotheta-integral of the atmospheric domain
 plot_energy_integral=1 # set this to one if you want to plot the energy forms of the atmospheric domain
-delta_t=233 # the time step of the integration to plot
+delta_t=116 # the time step of the integration to plot
 source $game_home_dir/plotting/.sh/integrals_root.sh # this is the script from which the python plot scripts are called
