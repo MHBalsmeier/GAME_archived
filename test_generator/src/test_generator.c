@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
     int one = 1;
     double one_double = 1;
     // 3D scalar fields determined here, apart from density
-    #pragma omp parallel for private(layer_index, h_index, lat, lon, z_height, pressure_value)
+    #pragma omp parallel for private(layer_index, h_index, lat, lon, z_height)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	layer_index = i/NO_OF_SCALARS_H;
@@ -135,7 +135,6 @@ int main(int argc, char *argv[])
         liquid_water_temp[i] = temperature[i];
         solid_water_temp[i] = temperature[i];
     }
-    Forcings *forcings = calloc(1, sizeof(Forcings));
     
     // reading the grid properties which are not part of the struct grid
     double *latitude_vector = malloc(NO_OF_VECTORS_H*sizeof(double));
@@ -195,6 +194,7 @@ int main(int argc, char *argv[])
     }    
     
     Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
+    Forcings *forcings = calloc(1, sizeof(Forcings));
     // this is the density which has not yet been hydrostatically balanced
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
