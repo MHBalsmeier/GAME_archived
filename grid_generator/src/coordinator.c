@@ -104,12 +104,12 @@ int main(int argc, char *argv[])
 		printf("It is NO_OF_ORO_LAYERS >= NO_OF_LAYERS.\n");
 		exit(1);
 	}
-		char OUTPUT_FILE_PRE[200];
-		char STATISTICS_FILE_PRE[200];
-		if (OPTIMIZE_BOOL == 1)
-		{
-			sprintf(OUTPUT_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
-			sprintf(STATISTICS_FILE_PRE, "statistics/B%dL%dT%d_O%d_OL%d_SCVT.txt", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
+	char OUTPUT_FILE_PRE[200];
+	char STATISTICS_FILE_PRE[200];
+	if (OPTIMIZE_BOOL == 1)
+	{
+		sprintf(OUTPUT_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
+		sprintf(STATISTICS_FILE_PRE, "statistics/B%dL%dT%d_O%d_OL%d_SCVT.txt", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
 	}
 	else
 	{

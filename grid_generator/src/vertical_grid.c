@@ -348,8 +348,8 @@ int set_background_state(double z_scalar[], double gravity_potential[], double t
 			if (layer_index == NO_OF_LAYERS - 1)
 			{
 				pressure = standard_pres(z_scalar[scalar_index]);
-				theta_bg[scalar_index] = temperature*pow(pressure/P_0, specific_gas_constants(0)/spec_heat_capacities_p_gas(0));
-				exner_bg[scalar_index] = temperature/theta_bg[scalar_index];
+				exner_bg[scalar_index] = pow(pressure/P_0, specific_gas_constants(0)/spec_heat_capacities_p_gas(0));
+				theta_bg[scalar_index] = temperature/exner_bg[scalar_index];
 			}
 			// other layers
 			else
