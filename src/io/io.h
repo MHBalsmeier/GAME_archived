@@ -12,4 +12,3 @@ int interpolation_t(State *, State *, State *, double, double, double, Grid *);
 int epv_diagnostics(Curl_field, State *, Scalar_field, Grid *, Dualgrid *);
 int interpolate_to_ll(double [], double [], Grid *);
 int edges_to_cells_lowest_layer(double [], double [], Grid *);
-int bc_setter();

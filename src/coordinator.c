@@ -105,7 +105,6 @@ int main(int argc, char *argv[])
 	config_info -> damping_start_height_over_toa = strtof(argv[36], NULL);
 	config_info -> damping_coeff_max = strtof(argv[37], NULL);
 	config_info -> explicit_boundary_layer = strtod(argv[38], NULL);
-	config_info -> regional_switch = 0;
 	
 	/*
 	Checking user input for correctness:

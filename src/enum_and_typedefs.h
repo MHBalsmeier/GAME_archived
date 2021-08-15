@@ -182,7 +182,6 @@ int nwp_mode;
 int delta_t_between_analyses;
 int dissipative_heating;
 int explicit_boundary_layer;
-int regional_switch;
 double diff_h_smag_fac;
 double shear_bg;
 double damping_start_height_over_toa;

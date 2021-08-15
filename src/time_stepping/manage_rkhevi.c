@@ -154,12 +154,6 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
     {
     	linear_combine_two_states(state_old, state_new, state_new, 1 - delta_t_small/delta_t, delta_t_small/delta_t, grid);
     }
-	
-	// nesting
-	if (config_info -> regional_switch == 1)
-	{
-		bc_setter();
-	}
     
     return 0;
 }
