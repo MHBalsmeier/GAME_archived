@@ -3,7 +3,6 @@ build
 *.nc
 *.mod
 *.png
-*.txt
 grid_generator/grid_generator
 test_generator/test_generator
 orography_generator/orography_generator
@@ -11,3 +10,4 @@ core/game
 output
 figs
 nwp_init
+grid_generator/statistics/*.txt
