@@ -97,7 +97,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 		    }
 	    }
 	    
-		// explicit entropy integrations
+		// explicit rho*theta integrations
 		// -----------------------------
 		if (i == NO_OF_CONDENSED_CONSTITUENTS)
 		{
