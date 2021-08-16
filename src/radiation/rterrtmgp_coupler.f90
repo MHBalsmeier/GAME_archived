@@ -69,17 +69,17 @@ module radiation
   contains
   
   subroutine radiation_init() &
-  bind(c,name =  "radiation_init")
+  bind(c,name = "radiation_init")
     
-    ! This is called only once,in the beginning.
+    ! This is called only once, in the beginning.
     
     ! local variables
     ! loop index
     integer                          :: ji
     
     ! formatting the gas names
-    do ji =  1,size(active_gases)
-      gases_lowercase(ji) =  trim(lower_case(active_gases(ji)))
+    do ji = 1,size(active_gases)
+      gases_lowercase(ji) = trim(lower_case(active_gases(ji)))
     end do
     ! here,the names of the gases are written to the gas_concentrations object
     call handle_error(gas_concentrations_sw%init(gases_lowercase))
