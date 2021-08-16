@@ -67,18 +67,6 @@ int vertical_contravariant_corr(Vector_field vector_field, int layer_index, int 
 				*vector_field[vector_index];
 			}
     	}
-    	else if (layer_index == NO_OF_LAYERS)
-    	{
-			for (int i = 0; i < no_of_edges; ++i)
-			{
-				scalar_index = (layer_index - 1)*NO_OF_SCALARS_H + h_index;
-				vector_index = NO_OF_SCALARS_H + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + i];
-				*result
-				+= -grid -> inner_product_weights[8*scalar_index + i]
-				*grid -> slope[vector_index]
-				*vector_field[vector_index];
-			}
-    	}
     	else
     	{
 			for (int i = 0; i < no_of_edges; ++i)
