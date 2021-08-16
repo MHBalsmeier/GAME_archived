@@ -25,7 +25,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 	
 	// declaring and defining some variables that will be needed later on
 	int upper_index, lower_index;
-	double impl_p_grad_weight = get_impl_thermo_weight();
+	double impl_weight = get_impl_thermo_weight();
 	double c_v = spec_heat_capacities_v_gas(0);
 	double c_p = spec_heat_capacities_p_gas(0);
 	double r_d = specific_gas_constants(0);
@@ -121,16 +121,16 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			d_vector[j] = -pow(theta_int_new[j], 2)*(gamma[j] + gamma[j + 1])
 			+ 0.5*(grid -> exner_bg[i + j*NO_OF_SCALARS_H] - grid -> exner_bg[i + (j + 1)*NO_OF_SCALARS_H])
 			*(alpha[j + 1] - alpha[j] + theta_int_new[j]*(beta[j + 1] - beta[j]))
-			- (grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_p_grad_weight*pow(delta_t, 2)*c_p*rho_int_old[j])
+			- (grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_weight*pow(delta_t, 2)*c_p*rho_int_old[j])
 			*(2/grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] + delta_t*state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*0.5
 			*(-1/grid -> volume[i + j*NO_OF_SCALARS_H] + 1/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]));
 			// right hand side
 			r_vector[j] = -(state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] + delta_t*state_tendency -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER])
 			*(grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])
-			/(impl_p_grad_weight*pow(delta_t, 2)*c_p)
+			/(impl_weight*pow(delta_t, 2)*c_p)
 			+ theta_int_new[j]*(exner_pert_expl[j] - exner_pert_expl[j + 1])/delta_t
 			+ 0.5/delta_t*(theta_pert_expl[j] + theta_pert_expl[j + 1])*(grid -> exner_bg[i + j*NO_OF_SCALARS_H] - grid -> exner_bg[i + (j + 1)*NO_OF_SCALARS_H])
-			- (grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_p_grad_weight*pow(delta_t, 2)*c_p)
+			- (grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_weight*pow(delta_t, 2)*c_p)
 			*state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*rho_int_expl[j]/rho_int_old[j];
 		}
 		for (int j = 0; j < NO_OF_LAYERS - 2; ++j)
@@ -139,13 +139,13 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			c_vector[j] = theta_int_new[j + 1]*gamma[j + 1]*theta_int_new[j]
 			+ 0.5*(grid -> exner_bg[i + (j + 1)*NO_OF_SCALARS_H] - grid -> exner_bg[(j + 2)*NO_OF_SCALARS_H + i])
 			*(alpha[j + 1] + beta[j + 1]*theta_int_new[j])
-			- (grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H] - grid -> z_scalar[(j + 2)*NO_OF_SCALARS_H + i])/(impl_p_grad_weight*delta_t*c_p)*0.5
+			- (grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H] - grid -> z_scalar[(j + 2)*NO_OF_SCALARS_H + i])/(impl_weight*delta_t*c_p)*0.5
 			*state_old -> wind[i + (j + 2)*NO_OF_VECTORS_PER_LAYER]/(grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*rho_int_old[j + 1]);
 			// upper diagonal
 			e_vector[j] = theta_int_new[j]*gamma[j + 1]*theta_int_new[j + 1]
 			- 0.5*(grid -> exner_bg[i + j*NO_OF_SCALARS_H] - grid -> exner_bg[i + (j + 1)*NO_OF_SCALARS_H])
 			*(alpha[j + 1] + beta[j + 1]*theta_int_new[j + 1])
-			+ (grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_p_grad_weight*delta_t*c_p)*0.5
+			+ (grid -> z_scalar[i + j*NO_OF_SCALARS_H] - grid -> z_scalar[i + (j + 1)*NO_OF_SCALARS_H])/(impl_weight*delta_t*c_p)*0.5
 			*state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/(grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*rho_int_old[j]);
 		}
 		
@@ -243,9 +243,9 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 	// Vertical advection of generalized densities (of tracers) with 3-band matrices.
 	// mass densities, density x temperatures
 	int no_of_relevant_constituents;
-	double impl_p_grad_weight, expl_weight;
-	impl_p_grad_weight = 0.5;
-	expl_weight = 1 - impl_p_grad_weight;
+	double impl_weight, expl_weight;
+	impl_weight = 0.5;
+	expl_weight = 1 - impl_weight;
 	for (int quantity_id = 0; quantity_id < 2; ++quantity_id)
 	{
 		no_of_relevant_constituents = 0;
@@ -253,7 +253,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 		if (quantity_id == 0)
 		{
 			// all constituents have a mass density
-			no_of_relevant_constituents = NO_OF_CONSTITUENTS - 1;
+			no_of_relevant_constituents = NO_OF_CONSTITUENTS; // the main gaseous constituent is excluded later
 		}
 		// density x temperature fields
 		if (quantity_id == 1)
@@ -322,25 +322,25 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 					// filling up the original vectors
 					for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 					{
-						c_vector[j] = impl_p_grad_weight*0.5*delta_t/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j];
-						e_vector[j] = -impl_p_grad_weight*0.5*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j];
+						c_vector[j] = impl_weight*0.5*delta_t/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j];
+						e_vector[j] = -impl_weight*0.5*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j];
 					}
 					for (int j = 0; j < NO_OF_LAYERS; ++j)
 					{
 						if (j == 0)
 						{
 							d_vector[j] = 1
-							- impl_p_grad_weight*0.5*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[0];
+							- impl_weight*0.5*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[0];
 						}
 						else if (j == NO_OF_LAYERS - 1)
 						{
 							d_vector[j] = 1
-							+ impl_p_grad_weight*0.5*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j - 1];
+							+ impl_weight*0.5*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j - 1];
 						}
 						else
 						{
 							d_vector[j] = 1
-							+ impl_p_grad_weight*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]
+							+ impl_weight*delta_t/grid -> volume[i + j*NO_OF_SCALARS_H]
 							*0.5*(vertical_flux_vector_impl[j - 1] - vertical_flux_vector_impl[j]);
 						}
 						// the explicit component

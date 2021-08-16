@@ -1497,7 +1497,7 @@ int write_out_integral(State *state_write_out, int step_counter, Grid *grid, Dua
     int INTEGRAL_FILE_LENGTH = 200;
     char *INTEGRAL_FILE_PRE = malloc((INTEGRAL_FILE_LENGTH + 1)*sizeof(char));
     if (integral_id == 0)
-   		sprintf(INTEGRAL_FILE_PRE, "%s", "dry_mass");
+   		sprintf(INTEGRAL_FILE_PRE, "%s", "masses");
     if (integral_id == 1)
    		sprintf(INTEGRAL_FILE_PRE, "%s", "potential_temperature_density");
     if (integral_id == 2)
@@ -1508,15 +1508,26 @@ int write_out_integral(State *state_write_out, int step_counter, Grid *grid, Dua
     free(INTEGRAL_FILE_PRE);
     if (integral_id == 0)
     {
-    	// dry mass
+    	// masses
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
-		#pragma omp parallel for
-		for (int i = 0; i< NO_OF_SCALARS; ++i)
-		{
-			diagnostics -> scalar_field_placeholder[i] = state_write_out -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
-		}
-    	global_scalar_integrator(diagnostics -> scalar_field_placeholder, grid, &global_integral);
-    	fprintf(global_integral_file, "%d\t%lf\n", step_counter, global_integral);
+		fprintf(global_integral_file, "%d\t", step_counter);
+    	for (int const_id = 0; const_id < NO_OF_CONSTITUENTS; ++const_id)
+    	{
+			#pragma omp parallel for
+			for (int i = 0; i< NO_OF_SCALARS; ++i)
+			{
+				diagnostics -> scalar_field_placeholder[i] = state_write_out -> rho[const_id*NO_OF_SCALARS + i];
+			}
+			global_scalar_integrator(diagnostics -> scalar_field_placeholder, grid, &global_integral);
+			if (const_id == NO_OF_CONSTITUENTS - 1)
+			{
+				fprintf(global_integral_file, "%lf\n", global_integral);
+    		}
+    		else
+    		{
+    			fprintf(global_integral_file, "%lf\t", global_integral);
+    		}
+    	}
     	fclose(global_integral_file);
     }
     if (integral_id == 1)

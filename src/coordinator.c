@@ -50,8 +50,8 @@ int main(int argc, char *argv[])
     len = strlen(argv[7]);
     char *OPERATOR = malloc((len + 1)*sizeof(char));
     strcpy(OPERATOR, argv[7]);
-    int write_out_dry_mass_integral;
-    write_out_dry_mass_integral = strtod(argv[8], NULL);
+    int write_out_mass_integrals;
+    write_out_mass_integrals = strtod(argv[8], NULL);
     int write_out_rhotheta_integral; 
     write_out_rhotheta_integral = strtod(argv[9], NULL);
     int write_out_energy_integral;
@@ -480,7 +480,7 @@ int main(int argc, char *argv[])
     int time_step_counter = 0;
     clock_t first_time, second_time;
     first_time = clock();
-    if (write_out_dry_mass_integral == 1)
+    if (write_out_mass_integrals == 1)
     {
 		write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 0);
 	}
@@ -551,7 +551,7 @@ int main(int argc, char *argv[])
 		Writing out integrals over the model domain if requested by the user.
 		---------------------------------------------------------------------
 		*/
-		if (write_out_dry_mass_integral == 1)
+		if (write_out_mass_integrals == 1)
         {
 			write_out_integral(state_new, time_step_counter, grid, dualgrid, diagnostics, 0);
     	}
