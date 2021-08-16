@@ -43,8 +43,7 @@ assume_lte=1 # set this to one if you do not want to assign individual temperatu
 # I/O
 write_out_interval=86400 # every how many seconds an output file will be created
 write_out_mass_dry_integral=1 # If set to 1, the total dry mass of the atmosphere will be written out at every time step.
-write_out_entropy_gas_integral=1 # If set to 1, the total entropy of the atmosphere will be written out at every time step.
-write_out_linearized_entropy_gas_integral=1 # If set to 1, the total linearized entropy (proportional to density times potential temperature) of the atmosphere will be written out at every time step.
+write_out_rhotheta_integral=1 # If set to 1, the total entropy of the atmosphere will be written out at every time step.
 write_out_energy_integral=1 # If set to 1, the total integrals of the energy forms of the atmosphere will be written out at every time step.
 model_level_output_switch=0 # If set to 1, variables will be written out on model levels.
 pressure_level_output_switch=1 # If set to 1, additional output on pressure_leveltical pressure levels will be created. The pressure levels can be set in the file core/src/settings.c. The number of pressure levels must be set in the file core/src/settings.h.

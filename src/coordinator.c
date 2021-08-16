@@ -52,8 +52,8 @@ int main(int argc, char *argv[])
     strcpy(OPERATOR, argv[7]);
     int write_out_dry_mass_integral;
     write_out_dry_mass_integral = strtod(argv[8], NULL);
-    int write_out_entropy_integral; 
-    write_out_entropy_integral = strtod(argv[9], NULL);
+    int write_out_rhotheta_integral; 
+    write_out_rhotheta_integral = strtod(argv[9], NULL);
     int write_out_energy_integral;
     write_out_energy_integral = strtod(argv[10], NULL);
     config_info -> temperature_diff_h = strtod(argv[11], NULL);
@@ -80,31 +80,29 @@ int main(int argc, char *argv[])
     len = strlen(argv[18]);
     char *RUN_ID = malloc((len + 1)*sizeof(char));
     strcpy(RUN_ID, argv[18]);
-    int write_out_linearized_entropy_integral;
-    write_out_linearized_entropy_integral = strtod(argv[19], NULL);
     int toa;
-	toa = strtod(argv[20], NULL);
+	toa = strtod(argv[19], NULL);
 	int ORO_ID;
-	ORO_ID = strtod(argv[21], NULL);
+	ORO_ID = strtod(argv[20], NULL);
     int IDEAL_INPUT_ID;
-    IDEAL_INPUT_ID = strtod(argv[22], NULL);
+    IDEAL_INPUT_ID = strtod(argv[21], NULL);
     Io_config *io_config = calloc(1, sizeof(Io_config));
-	io_config -> grib_output_switch = strtod(argv[23], NULL);
-	io_config -> netcdf_output_switch = strtod(argv[24], NULL);
-	io_config -> pressure_level_output_switch = strtod(argv[25], NULL);
-	io_config -> model_level_output_switch = strtod(argv[26], NULL);
-	io_config -> surface_output_switch = strtod(argv[27], NULL);
-	grid -> no_of_oro_layers = strtod(argv[28], NULL);
-	int VERT_GRID_TYPE = strtod(argv[29], NULL);
-	config_info -> assume_lte = strtod(argv[30], NULL);
-	config_info -> adv_sound_ratio = strtod(argv[31], NULL);
-	config_info -> delta_t_between_analyses = strtod(argv[32], NULL);
-	config_info -> dissipative_heating = strtod(argv[33], NULL);
-	config_info -> diff_h_smag_fac = strtof(argv[34], NULL);
-	config_info -> shear_bg = strtof(argv[35], NULL);
-	config_info -> damping_start_height_over_toa = strtof(argv[36], NULL);
-	config_info -> damping_coeff_max = strtof(argv[37], NULL);
-	config_info -> explicit_boundary_layer = strtod(argv[38], NULL);
+	io_config -> grib_output_switch = strtod(argv[22], NULL);
+	io_config -> netcdf_output_switch = strtod(argv[23], NULL);
+	io_config -> pressure_level_output_switch = strtod(argv[24], NULL);
+	io_config -> model_level_output_switch = strtod(argv[25], NULL);
+	io_config -> surface_output_switch = strtod(argv[26], NULL);
+	grid -> no_of_oro_layers = strtod(argv[27], NULL);
+	int VERT_GRID_TYPE = strtod(argv[28], NULL);
+	config_info -> assume_lte = strtod(argv[29], NULL);
+	config_info -> adv_sound_ratio = strtod(argv[30], NULL);
+	config_info -> delta_t_between_analyses = strtod(argv[31], NULL);
+	config_info -> dissipative_heating = strtod(argv[32], NULL);
+	config_info -> diff_h_smag_fac = strtof(argv[33], NULL);
+	config_info -> shear_bg = strtof(argv[34], NULL);
+	config_info -> damping_start_height_over_toa = strtof(argv[35], NULL);
+	config_info -> damping_coeff_max = strtof(argv[36], NULL);
+	config_info -> explicit_boundary_layer = strtod(argv[37], NULL);
 	
 	/*
 	Checking user input for correctness:
@@ -486,17 +484,13 @@ int main(int argc, char *argv[])
     {
 		write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 0);
 	}
-    if (write_out_entropy_integral == 1)
+    if (write_out_rhotheta_integral == 1)
     {
 		write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 1);
 	}
     if (write_out_energy_integral == 1)
     {
 		write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 2);
-	}
-    if (write_out_linearized_entropy_integral == 1)
-    {
-		write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 3);
 	}
     config_info -> rad_update = 1;
     if (config_info -> rad_on == 1)
@@ -561,17 +555,13 @@ int main(int argc, char *argv[])
         {
 			write_out_integral(state_new, time_step_counter, grid, dualgrid, diagnostics, 0);
     	}
-		if (write_out_entropy_integral == 1)
+		if (write_out_rhotheta_integral == 1)
         {
 			write_out_integral(state_new, time_step_counter, grid, dualgrid, diagnostics, 1);
     	}
 		if (write_out_energy_integral == 1)
         {
 			write_out_integral(state_new, time_step_counter, grid, dualgrid, diagnostics, 2);
-    	}
-		if (write_out_linearized_entropy_integral == 1)
-        {
-			write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 3);
     	}
     	
     	/*
