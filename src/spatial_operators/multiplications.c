@@ -37,12 +37,12 @@ int scalar_times_vector(Scalar_field scalar_field, Vector_field vector_field, Ve
 	/*
 	This function multiplies the vector field vector_field by the scalar field scalar_field.
 	*/
-    scalar_times_vector_scalar_h(scalar_field, vector_field, out_field, grid);
-    scalar_times_vector_scalar_v(scalar_field, vector_field, out_field, grid);
+    scalar_times_vector_h(scalar_field, vector_field, out_field, grid);
+    scalar_times_vector_v(scalar_field, vector_field, out_field, grid);
     return 0;
 }
 
-int scalar_times_vector_scalar_h(Scalar_field in_field_h, Vector_field vector_field, Vector_field out_field, Grid *grid)
+int scalar_times_vector_h(Scalar_field in_field_h, Vector_field vector_field, Vector_field out_field, Grid *grid)
 {
     int layer_index, h_index, vector_index;
     double scalar_value;
@@ -61,7 +61,7 @@ int scalar_times_vector_scalar_h(Scalar_field in_field_h, Vector_field vector_fi
     return 0;
 }
 
-int scalar_times_vector_scalar_v(Scalar_field in_field_v, Vector_field vector_field, Vector_field out_field, Grid *grid)
+int scalar_times_vector_v(Scalar_field in_field_v, Vector_field vector_field, Vector_field out_field, Grid *grid)
 {
     int layer_index, h_index, lower_index, upper_index;
     double scalar_value;

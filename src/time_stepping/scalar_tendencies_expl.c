@@ -48,10 +48,10 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 		// Now we need to calculate the temperature diffusion coefficients.
 	    calc_temp_diffusion_coeffs(state, config_info, irrev, diagnostics, delta_t, grid);
 		// Now the diffusive temperature flux density can be obtained.
-	    scalar_times_vector_scalar_h(irrev -> scalar_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid);
+	    scalar_times_vector_h(irrev -> scalar_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid);
 	    if (config_info -> temperature_diff_v == 1)
 	    {
-	    	scalar_times_vector_scalar_v(irrev -> scalar_diffusion_coeff_numerical_v, diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid);
+	    	scalar_times_vector_v(irrev -> scalar_diffusion_coeff_numerical_v, diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid);
 	    }
 	    // The divergence of the diffusive temperature flux density is the diffusive temperature heating.
 	    divv_h(diagnostics -> flux_density, irrev -> temperature_diffusion_heating, grid);
@@ -78,7 +78,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
         
         // This is the mass advection, which needs to be carried out for all constituents.
         // -------------------------------------------------------------------------------
-		scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> wind, diagnostics -> flux_density, grid);
+		scalar_times_vector_h(diagnostics -> scalar_field_placeholder, state -> wind, diagnostics -> flux_density, grid);
         divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 		// adding the tendencies in all grid boxes
 		#pragma omp parallel for private(layer_index, h_index)
@@ -97,8 +97,8 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 		    }
 	    }
 	    
-		// explicit rho*theta integrations
-		// -----------------------------
+		// explicit rho*theta integration
+		// ------------------------------
 		if (i == NO_OF_CONDENSED_CONSTITUENTS)
 		{
 			// Determining the specific entropy of the constituent at hand.
@@ -114,7 +114,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 					diagnostics -> scalar_field_placeholder[j] = 0;
 				}
 			}
-			scalar_times_vector(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
+			scalar_times_vector_h(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
 			divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			// adding the tendencies in all grid boxes
 			#pragma omp parallel for private(layer_index, h_index, tracer_heating, density_gas_weight, density_total_weight)
@@ -183,7 +183,7 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 				diagnostics -> scalar_field_placeholder[j] = state -> condensed_density_temperatures[i*NO_OF_SCALARS + j];
 			}
 			// The constituent velocity has already been calculated.
-		    scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> wind, diagnostics -> flux_density, grid);
+		    scalar_times_vector_h(diagnostics -> scalar_field_placeholder, state -> wind, diagnostics -> flux_density, grid);
 		    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			// adding the tendencies in all grid boxes
 			#pragma omp parallel for private(layer_index, h_index, c_v_cond)
