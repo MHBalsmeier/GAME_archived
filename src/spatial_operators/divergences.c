@@ -13,6 +13,10 @@ In this file, divergences get computed.
 
 int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
 {
+	/*
+	This computes the divergence of a horizontal vector field.
+	*/
+	
     int layer_index, h_index, no_of_edges;
     double contra_upper, contra_lower, comp_h, comp_v;
 	#pragma omp parallel for private(layer_index, h_index, no_of_edges, contra_upper, contra_lower, comp_h, comp_v)
@@ -57,11 +61,46 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
     return 0;
 }
 
+int divv_h_limited(Vector_field in_field, Scalar_field out_field, Grid *grid, Scalar_field current_value, double delta_t)
+{
+	/*
+	This is a limited version of the horizontal divergence operator.
+	*/
+	
+	divv_h(in_field, out_field, grid);
+	
+    int layer_index, h_index, no_of_edges;
+	double added_divergence, added_mass_rate;
+	#pragma omp parallel for private(layer_index, h_index, no_of_edges, added_divergence, added_mass_rate)
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		if (current_value[i] - delta_t*out_field[i] < 0)
+		{
+		    layer_index = i/NO_OF_SCALARS_H;
+		    h_index = i - layer_index*NO_OF_SCALARS_H;
+		    no_of_edges = 6;
+		    if (h_index < NO_OF_PENTAGONS)
+		    {
+		    	no_of_edges = 5;
+		    }
+			added_divergence = current_value[i]/delta_t - out_field[i];
+			out_field[i] += added_divergence;
+			added_mass_rate = -added_divergence*grid -> volume[i];
+			for (int j = 0; j < no_of_edges; ++j)
+			{
+				;
+			}
+		}
+	}
+	return 0;
+}
+
 int add_vertical_divv(Vector_field in_field, Scalar_field out_field, Grid *grid)
 {
 	/*
 	This adds the divergence of the vertical component of a vector field to the input scalar field.	
 	*/
+	
     int layer_index, h_index;
     double contra_upper, contra_lower, comp_v;
 	#pragma omp parallel for private (layer_index, h_index, contra_upper, contra_lower, comp_v)

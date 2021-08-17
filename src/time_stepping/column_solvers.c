@@ -243,7 +243,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 	// Vertical advection of generalized densities (of tracers) with 3-band matrices.
 	// mass densities, density x temperatures
 	int no_of_relevant_constituents;
-	double impl_weight, expl_weight;
+	double impl_weight, expl_weight, added_mass;
 	impl_weight = 0.5;
 	expl_weight = 1 - impl_weight;
 	for (int quantity_id = 0; quantity_id < 2; ++quantity_id)
@@ -376,15 +376,33 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 					// calling the algorithm to solve the system of linear equations
 					thomas_algorithm(c_vector, d_vector, e_vector, r_vector, solution_vector, NO_OF_LAYERS);
 					
+					
+					// limiter: none of the densities may be negative
+					for (int j = 0; j < NO_OF_LAYERS; ++j)
+					{
+						if (solution_vector[j] < 0)
+						{
+							added_mass = -solution_vector[j]*grid -> volume[i + j*NO_OF_SCALARS_H];
+							solution_vector[j] = 0;
+							if (j == 0)
+							{
+								solution_vector[j + 1] -= added_mass/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H];
+							}
+							else if (j == NO_OF_LAYERS - 1 && k >= NO_OF_CONDENSED_CONSTITUENTS)
+							{
+								solution_vector[j - 1] -= added_mass/grid -> volume[i + (j - 1)*NO_OF_SCALARS_H];
+							}
+							else
+							{
+								solution_vector[j - 1] -= 0.5*added_mass/grid -> volume[i + (j - 1)*NO_OF_SCALARS_H];
+								solution_vector[j + 1] -= 0.5*added_mass/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H];
+							}
+						}
+					}
+					
 					// writing the result into the new state
 					for (int j = 0; j < NO_OF_LAYERS; ++j)
 					{
-						// limiter: none of the densities may be negative
-						if (solution_vector[j] < 0)
-						{
-							solution_vector[j] = 0;
-						}
-						
 						// mass densities
 						if (quantity_id == 0)
 						{

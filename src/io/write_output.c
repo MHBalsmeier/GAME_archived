@@ -1514,7 +1514,7 @@ int write_out_integral(State *state_write_out, int step_counter, Grid *grid, Dua
     	for (int const_id = 0; const_id < NO_OF_CONSTITUENTS; ++const_id)
     	{
 			#pragma omp parallel for
-			for (int i = 0; i< NO_OF_SCALARS; ++i)
+			for (int i = 0; i < NO_OF_SCALARS; ++i)
 			{
 				diagnostics -> scalar_field_placeholder[i] = state_write_out -> rho[const_id*NO_OF_SCALARS + i];
 			}
@@ -1545,7 +1545,7 @@ int write_out_integral(State *state_write_out, int step_counter, Grid *grid, Dua
     	Scalar_field *e_kin_density = malloc(sizeof(Scalar_field));
     	inner_product(state_write_out -> wind, state_write_out -> wind, *e_kin_density, grid);
 		#pragma omp parallel for
-		for (int i = 0; i< NO_OF_SCALARS; ++i)
+		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
 			diagnostics -> scalar_field_placeholder[i] = state_write_out -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
 		}
