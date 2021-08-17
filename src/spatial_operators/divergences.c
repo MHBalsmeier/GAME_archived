@@ -106,7 +106,7 @@ int divv_h_limited(Vector_field in_field, Scalar_field out_field, Grid *grid, Sc
 			}
 			// now we want to reduce what flows out of the grid box
 			// out_flow_rate_sum - outflow_rate_factor*out_flow_rate_sum = added_mass_rate
-			outflow_rate_factor = 1 - added_mass_rate/out_flow_rate_sum;
+			outflow_rate_factor = added_mass_rate/out_flow_rate_sum;
 			for (int j = 0; j < no_of_edges; ++j)
 			{
 				// rescaling everything that flows out
@@ -117,7 +117,7 @@ int divv_h_limited(Vector_field in_field, Scalar_field out_field, Grid *grid, Sc
 					{
 						adjacent_scalar_index_h = grid -> from_index[grid -> adjacent_vector_indices_h[6*h_index  + j]];
 					}
-					out_field[layer_index*NO_OF_SCALARS_H + adjacent_scalar_index_h] += (1 - outflow_rate_factor)
+					out_field[layer_index*NO_OF_SCALARS_H + adjacent_scalar_index_h] += outflow_rate_factor
 					*in_field[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]
 					*grid -> adjacent_signs_h[6*h_index + j]
 					*grid -> area[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]

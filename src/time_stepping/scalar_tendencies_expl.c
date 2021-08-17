@@ -224,7 +224,7 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 	    state -> condensed_density_temperatures,
 	    diagnostics -> temperature_gas,
 	    NO_OF_SCALARS,
-	    delta_t,
+	    10*delta_t,
 	    config_info -> assume_lte);
 	    int layer_index, h_index;
 	    // loop over all constituents
@@ -241,7 +241,7 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 					// check for shading
 					if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 					{
-							state -> rho[i*NO_OF_SCALARS + j] = state -> rho[i*NO_OF_SCALARS + j] + delta_t*irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j];
+						state -> rho[i*NO_OF_SCALARS + j] = state -> rho[i*NO_OF_SCALARS + j] + delta_t*irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j];
 					}
 				}
 			}
