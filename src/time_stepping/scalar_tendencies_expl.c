@@ -16,7 +16,7 @@ This is the horizontal (explicit) part of the constituent integration.
 #include "stdio.h"
 #include "stdlib.h"
 
-int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Soil *soil, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step)
+int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Soil *soil, Grid *grid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step)
 {
 	/*
 	Firstly, some things need to prepared.
@@ -26,20 +26,6 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
     int h_index, layer_index;
     double c_v_cond, tracer_heating, density_gas_weight, density_total_weight;
     
-	// phase transitions are only updated at the first RK step
-	if (NO_OF_CONSTITUENTS == 4)
-	{
-	    calc_h2otracers_source_rates(
-	    irrev -> constituent_mass_source_rates,
-	    irrev -> constituent_heat_source_rates,
-	    state -> rho,
-	    state -> condensed_density_temperatures,
-	    diagnostics -> temperature_gas,
-	    NO_OF_SCALARS,
-	    2*delta_t,
-	    config_info -> assume_lte);
-	}
-	
 	// Temperature diffusion gets updated here, but only at the first RK step and if heat conduction is switched on.
 	if (no_rk_step == 0 && (config_info -> temperature_diff_h == 1 || config_info -> temperature_diff_v == 1))
 	{
@@ -98,9 +84,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 				state_tendency -> rho[i*NO_OF_SCALARS + j]
 				=
 				// the advection
-				-diagnostics -> flux_density_divv[j]
-				// the phase transition rates
-				+ irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j];
+				-diagnostics -> flux_density_divv[j];
 				// the horizontal brute-force limiter
 				if (state_old -> rho[i*NO_OF_SCALARS + j] + delta_t*state_tendency -> rho[i*NO_OF_SCALARS + j] < 0)
 				{
@@ -223,8 +207,48 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 	return 0;
 }
 
-
-
+int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid)
+{
+	/*
+	This function manages the calculation of the phase transition rates.
+	*/
+	
+	// Only if we have multiple constituents, moisture needs to be included.
+	if (NO_OF_CONSTITUENTS == 4)
+	{
+		// calculating the source rates
+	    calc_h2otracers_source_rates(
+	    irrev -> constituent_mass_source_rates,
+	    irrev -> constituent_heat_source_rates,
+	    state -> rho,
+	    state -> condensed_density_temperatures,
+	    diagnostics -> temperature_gas,
+	    NO_OF_SCALARS,
+	    delta_t,
+	    config_info -> assume_lte);
+	    int layer_index, h_index;
+	    // loop over all constituents
+		for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
+		{
+			// the main gaseous constituent has no source rates
+			if (i != NO_OF_CONDENSED_CONSTITUENTS)
+			{
+				#pragma omp parallel for private(layer_index, h_index)
+				for (int j = 0; j < NO_OF_SCALARS; ++j)
+				{
+					layer_index = j/NO_OF_SCALARS_H;
+					h_index = j - layer_index*NO_OF_SCALARS_H;
+					// check for shading
+					if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
+					{
+							state -> rho[i*NO_OF_SCALARS + j] = state -> rho[i*NO_OF_SCALARS + j] + delta_t*irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j];
+					}
+				}
+			}
+		}
+	}
+	return 0;	
+}
 
 
 

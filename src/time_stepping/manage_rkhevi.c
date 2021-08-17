@@ -84,7 +84,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 		{
 			call_radiation(state_old, soil, grid, dualgrid, radiation, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, time_coordinate);
 		}
-		scalar_tendencies_expl(state_old, state_new, state_tendency, soil, grid, dualgrid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irrev, config_info, i);
+		scalar_tendencies_expl(state_old, state_new, state_tendency, soil, grid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irrev, config_info, i);
 
 		// 3.) Vertical sound wave solver.
 		// -------------------------------
@@ -97,6 +97,9 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 			three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, config_info, delta_t, grid);
 		}
     }
+    
+    // saturation adjustment, calculation of latent heating rates
+    moisturizer(state_new, delta_t, diagnostics, irrev, config_info, grid);
 
 	// in this case, a large time step has been taken, which we modify into a small step here
     if (slow_update_bool == 1 && config_info -> adv_sound_ratio > 1)
