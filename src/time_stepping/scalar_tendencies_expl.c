@@ -19,6 +19,10 @@ This is the horizontal (explicit) part of the constituent integration.
 int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Soil *soil, Grid *grid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step)
 {
 	/*
+	This function manages the calculation of the explicit scalar tendencies.
+	*/
+	
+	/*
 	Firstly, some things need to prepared.
 	--------------------------------------
 	*/
@@ -236,6 +240,8 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 				#pragma omp parallel for private(layer_index, h_index)
 				for (int j = 0; j < NO_OF_SCALARS; ++j)
 				{
+					if (fabs(irrev -> constituent_mass_source_rates[j]+irrev -> constituent_mass_source_rates[NO_OF_SCALARS + j]+irrev -> constituent_mass_source_rates[2*NO_OF_SCALARS + j]) > 1e-14)
+						exit(1);
 					layer_index = j/NO_OF_SCALARS_H;
 					h_index = j - layer_index*NO_OF_SCALARS_H;
 					// check for shading
@@ -245,6 +251,7 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 						{
 							state -> rho[i*NO_OF_SCALARS + j] = state -> rho[i*NO_OF_SCALARS + j] + delta_t*irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j];
 						}
+						// for the gaseous constituents (apart from the main one), an index shift is necessary
 						else
 						{
 							state -> rho[i*NO_OF_SCALARS + j] = state -> rho[i*NO_OF_SCALARS + j] + delta_t*irrev -> constituent_mass_source_rates[(i - 1)*NO_OF_SCALARS + j];
