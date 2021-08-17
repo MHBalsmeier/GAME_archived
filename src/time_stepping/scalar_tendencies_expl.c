@@ -101,7 +101,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 		// ------------------------------
 		if (i == NO_OF_CONDENSED_CONSTITUENTS)
 		{
-			// Determining the specific entropy of the constituent at hand.
+			// Determining the potential temperature of the constituent at hand.
 			#pragma omp parallel for
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
@@ -240,8 +240,6 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 				#pragma omp parallel for private(layer_index, h_index)
 				for (int j = 0; j < NO_OF_SCALARS; ++j)
 				{
-					if (fabs(irrev -> constituent_mass_source_rates[j]+irrev -> constituent_mass_source_rates[NO_OF_SCALARS + j]+irrev -> constituent_mass_source_rates[2*NO_OF_SCALARS + j]) > 1e-14)
-						exit(1);
 					layer_index = j/NO_OF_SCALARS_H;
 					h_index = j - layer_index*NO_OF_SCALARS_H;
 					// check for shading
