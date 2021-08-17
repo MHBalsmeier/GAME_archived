@@ -16,7 +16,7 @@ This is the horizontal (explicit) part of the constituent integration.
 #include "stdio.h"
 #include "stdlib.h"
 
-int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step)
+int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Soil *soil, Grid *grid, Dualgrid *dualgrid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step)
 {
 	/*
 	Firstly, some things need to prepared.
@@ -101,6 +101,11 @@ int scalar_tendencies_expl(State *state, State *state_tendency, Soil *soil, Grid
 				-diagnostics -> flux_density_divv[j]
 				// the phase transition rates
 				+ irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j];
+				// the horizontal brute-force limiter
+				if (state_old -> rho[i*NO_OF_SCALARS + j] + delta_t*state_tendency -> rho[i*NO_OF_SCALARS + j] < 0)
+				{
+					state_tendency -> rho[i*NO_OF_SCALARS + j] = -state_old -> rho[i*NO_OF_SCALARS + j]/delta_t;
+				}
 		    }
 	    }
 	    

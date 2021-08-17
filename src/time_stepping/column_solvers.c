@@ -399,6 +399,14 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 							}
 						}
 					}
+					// the final brute-force limiter
+					for (int j = 0; j < NO_OF_LAYERS; ++j)
+					{
+						if (solution_vector[j] < 0)
+						{
+							solution_vector[j] = 0;
+						}
+					}
 					
 					// writing the result into the new state
 					for (int j = 0; j < NO_OF_LAYERS; ++j)

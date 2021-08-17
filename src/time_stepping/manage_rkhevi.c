@@ -135,7 +135,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 			}
 			printf("Update of radiative fluxes completed.\n");
 		}
-		scalar_tendencies_expl(state_new, state_tendency, soil, grid, dualgrid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irrev, config_info, i);
+		scalar_tendencies_expl(state_old, state_new, state_tendency, soil, grid, dualgrid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irrev, config_info, i);
 
 		// 3.) Vertical sound wave solver.
 		// -------------------------------
