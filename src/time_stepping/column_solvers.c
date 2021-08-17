@@ -366,6 +366,9 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						else if (j == NO_OF_LAYERS - 1)
 						{
 							r_vector[j] += -expl_weight*delta_t*vertical_flux_vector_rhs[j - 1]/grid -> volume[i + j*NO_OF_SCALARS_H];
+							// precipitation
+							r_vector[j] += -0.1*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
+							*grid -> area[i + NO_OF_VECTORS - NO_OF_SCALARS_H]/grid -> volume[i + j*NO_OF_SCALARS_H];
 						}
 						else
 						{
