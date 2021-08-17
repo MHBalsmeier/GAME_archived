@@ -128,13 +128,13 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 					{
 						density_gas_weight = density_gas(state, j);
 						density_total_weight = density_total(state, j);
-						tracer_heating = irrev -> constituent_heat_source_rates[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j];
+						tracer_heating = 0;
 					}
 					if (config_info -> assume_lte == 1)
 					{
 						density_gas_weight = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j];
 						density_total_weight = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j];
-						for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS + 1; ++k)
+						for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS; ++k)
 						{
 							tracer_heating += irrev -> constituent_heat_source_rates[k*NO_OF_SCALARS + j];
 						}
@@ -241,7 +241,14 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 					// check for shading
 					if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 					{
-						state -> rho[i*NO_OF_SCALARS + j] = state -> rho[i*NO_OF_SCALARS + j] + delta_t*irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j];
+						if (i < NO_OF_CONDENSED_CONSTITUENTS)
+						{
+							state -> rho[i*NO_OF_SCALARS + j] = state -> rho[i*NO_OF_SCALARS + j] + delta_t*irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j];
+						}
+						else
+						{
+							state -> rho[i*NO_OF_SCALARS + j] = state -> rho[i*NO_OF_SCALARS + j] + delta_t*irrev -> constituent_mass_source_rates[(i - 1)*NO_OF_SCALARS + j];
+						}
 					}
 				}
 			}
