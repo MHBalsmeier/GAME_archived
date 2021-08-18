@@ -16,11 +16,13 @@ const double thickness = 10;
 const double density = 1000;
 const double c_v = 4184;
 const double heat_trans_coeff = 50;
+const double t_min = 273.15 - 30;
+const double t_max = 273.15 + 50;
 
 int soil_interaction(Soil *soil, Diagnostics *diagnostics, Radiation *radiation, double delta_t)
 {
 	/*
-	This function computes the interaction of the dynamical core with the soil; 
+	This function computes the interaction of the dynamical core with the soil.
 	*/
 	
 	// loop over all horizontal cells
@@ -39,6 +41,16 @@ int soil_interaction(Soil *soil, Diagnostics *diagnostics, Radiation *radiation,
 		// longwave outbound radiation
 		- radiation -> sfc_lw_out[i])
 		/(thickness*c_v*density)*delta_t;
+		// clipping too low values
+		if (soil -> temperature[i] < t_min)
+		{
+			soil -> temperature[i] = t_min;
+		}
+		// clipping too high values
+		if (soil -> temperature[i] > t_max)
+		{
+			soil -> temperature[i] = t_max;
+		}
 	}
 		
 	return 0;

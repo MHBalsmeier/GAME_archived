@@ -72,11 +72,6 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 	-------------------------------------
 	*/
 	
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
-	{
-		diagnostics -> temperature_gas[i] = radiation -> radiation_tendency[i]/(spec_heat_cap_diagnostics_v(state_write_out, i, config_info)*density_gas(state_write_out, i)) + 273.15;
-	}
-	
 	if (io_config -> surface_output_switch == 1)
 	{
 		double *mslp = malloc(NO_OF_SCALARS_H*sizeof(double));

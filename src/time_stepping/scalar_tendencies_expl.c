@@ -166,7 +166,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 					{
 						state_tendency -> rhotheta[j]
 						// the minus-sign is correct (the quantity itself refers to soil)
-						-= soil -> power_flux_density_sensible[j + NO_OF_SCALARS_H - NO_OF_SCALARS]/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j]))
+						-= soil -> power_flux_density_sensible[h_index]/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j]))
 						/(grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H + h_index] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index]);
 					}
 				 }
