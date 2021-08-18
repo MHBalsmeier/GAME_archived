@@ -214,17 +214,17 @@ module radiation
     ! moving the temperature into the allowed area
     do ji = 1,no_of_scalars_h
       do jk = 1,no_of_layers
-        if (temperature_rad(ji,jk) > k_dist_lw%get_temp_max()) then
-          temperature_rad(ji,jk) = k_dist_lw%get_temp_max()
-        endif
-        if (temperature_rad(ji,jk) < k_dist_lw%get_temp_min()) then
-          temperature_rad(ji,jk) = k_dist_lw%get_temp_min()
-        endif
         if (temperature_rad(ji,jk) > k_dist_sw%get_temp_max()) then
           temperature_rad(ji,jk) = k_dist_sw%get_temp_max()
         endif
         if (temperature_rad(ji,jk) < k_dist_sw%get_temp_min()) then
           temperature_rad(ji,jk) = k_dist_sw%get_temp_min()
+        endif
+        if (temperature_rad(ji,jk) > k_dist_lw%get_temp_max()) then
+          temperature_rad(ji,jk) = k_dist_lw%get_temp_max()
+        endif
+        if (temperature_rad(ji,jk) < k_dist_lw%get_temp_min()) then
+          temperature_rad(ji,jk) = k_dist_lw%get_temp_min()
         endif
       enddo
     enddo
@@ -250,7 +250,7 @@ module radiation
           *EXP(-(z_vector(ji)-z_scalar(ji+(jk-1)*no_of_scalars_h))/scale_height)
         ! values at the surface
         elseif (jk == no_of_layers+1) then
-          ! temperature at the surfac
+          ! temperature at the surface
           ! the value in the lowest layer
           temperature_interface_rad(ji,jk) = temp_sfc(ji)
           ! surface pressure
@@ -440,7 +440,7 @@ module radiation
           jk = j_column
         endif
         radiation_tendency((ji-1)*no_of_scalars_h+jk) = &
-        ! this function is called four times,therefore we need to
+        ! this function is called four times, therefore we need to
         ! add up the tendencies
         radiation_tendency((ji-1)*no_of_scalars_h+jk) + &
         ! this is a sum of four fluxes
@@ -579,7 +579,7 @@ module radiation
       ! the default
       vol_mix_ratio(:,:) = 0.0_wp
       select case (gases_lowercase(ji))
-        ! reading the VMRs from atmostracers library
+        ! reading the VMRs from the atmostracers library
         case("n2")
           vol_mix_ratio(:,:) = molar_fraction_in_dry_air(2)
         case("o2")

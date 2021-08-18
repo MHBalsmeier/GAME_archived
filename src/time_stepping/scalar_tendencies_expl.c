@@ -156,7 +156,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 					+ irrev -> temperature_diffusion_heating[j]
 					// radiation
 					+ radiation_tendency[j]
-					// this has to be divided by the temperature (we ware in the entropy equation)
+					// this has to be divided by the c_p*exner
 					)/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j]))
 					// phase transitions
 					+ tracer_heating*state -> rho[i*NO_OF_SCALARS + j]/density_gas_weight
