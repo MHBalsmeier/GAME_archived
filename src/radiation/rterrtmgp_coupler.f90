@@ -34,7 +34,7 @@ module radiation
   
   type(ty_gas_optics_rrtmgp)         :: k_dist_sw,k_dist_lw
 
-  character(len = 3),dimension(8) :: active_gases =  (/ &
+  character(len = 3),dimension(wp) :: active_gases =  (/ &
    "N2 ","O2 ","CH4","O3 ","CO2","H2O","N2O","CO " &
    /)
   
@@ -99,11 +99,11 @@ module radiation
   no_of_scalars,no_of_layers,no_of_constituents,no_of_condensed_constituents,&
   time_coord) &
   
-  ! This is the function that is called by the dynamical core. The dycore hands over
-  ! the thermodynamic state as well as meta data (time stamp,coordinates) and gets
-  ! back radiative fux convergences in W/m^3.
+    ! This is the function that is called by the dynamical core. The dycore hands over
+    ! the thermodynamic state as well as meta data (time stamp,coordinates) and gets
+    ! back radiative fux convergences in W/m^3.
   
-  bind(c,name =  "calc_radiative_flux_convergence")
+    bind(c,name =  "calc_radiative_flux_convergence")
     
     ! the number of scalar points of the model grid
     integer,intent(in)              ::                    no_of_scalars
@@ -114,32 +114,32 @@ module radiation
     ! the numer of condensed constituents of the model atmosphere
     integer,intent(in)              ::                    no_of_condensed_constituents
     ! the time coordinate (UTC time stamp)
-    real(8)                          :: time_coord
+    real(wp)                          :: time_coord
     ! the latitude coordinates of the scalar data points
-    real(8),intent(in)              :: latitude_scalar    (no_of_scalars/no_of_layers)
+    real(wp),intent(in)              :: latitude_scalar    (no_of_scalars/no_of_layers)
     ! the longitude coordinates of the scalar data points
-    real(8),intent(in)              :: longitude_scalar   (no_of_scalars/no_of_layers)
+    real(wp),intent(in)              :: longitude_scalar   (no_of_scalars/no_of_layers)
     ! the vertical positions of the scalar data points
-    real(8),intent(in)              :: z_scalar           (no_of_scalars)
+    real(wp),intent(in)              :: z_scalar           (no_of_scalars)
     ! the vertical positions of the vector data points
-    real(8),intent(in)              :: z_vector           (no_of_scalars+no_of_scalars/no_of_layers)
+    real(wp),intent(in)              :: z_vector           (no_of_scalars+no_of_scalars/no_of_layers)
     ! the mass densities of the model atmosphere
-    real(8),intent(in)              :: mass_densities    &
+    real(wp),intent(in)              :: mass_densities    &
     (no_of_constituents*no_of_scalars)
     ! the temperature of the model atmosphere
-    real(8),intent(in)              :: temperature_gas   (no_of_scalars)
+    real(wp),intent(in)              :: temperature_gas   (no_of_scalars)
     ! the result (in W/m^3)
-    real(8),intent(inout)           :: radiation_tendency(no_of_scalars)
+    real(wp),intent(inout)           :: radiation_tendency(no_of_scalars)
     ! surface temperature
-    real(8),intent(in)              :: temp_sfc          (no_of_scalars/no_of_layers)
+    real(wp),intent(in)              :: temp_sfc          (no_of_scalars/no_of_layers)
     ! surface shortwave in
-    real(8),intent(inout)           :: sfc_sw_in         (no_of_scalars/no_of_layers)
+    real(wp),intent(inout)           :: sfc_sw_in         (no_of_scalars/no_of_layers)
     ! surface longwave out
-    real(8),intent(inout)           :: sfc_lw_out        (no_of_scalars/no_of_layers)
+    real(wp),intent(inout)           :: sfc_lw_out        (no_of_scalars/no_of_layers)
     
     ! local variables
     ! solar zenith angle
-    real(8)                          :: mu_0(no_of_scalars/no_of_layers)
+    real(wp)                          :: mu_0(no_of_scalars/no_of_layers)
     ! number of points where it is day
     integer                          :: no_of_day_points
     ! loop indices
@@ -159,35 +159,35 @@ module radiation
     ! long wave source function
     type(ty_source_func_lw)          :: sources_lw
     ! the surface emissivity
-    real(8)                          :: surface_emissivity(no_of_lw_bands,no_of_scalars/no_of_layers)
+    real(wp)                          :: surface_emissivity(no_of_lw_bands,no_of_scalars/no_of_layers)
     ! surface albedo for direct radiation
-    real(8)                          :: albedo_dir        (no_of_sw_bands,no_of_scalars/no_of_layers)
+    real(wp)                          :: albedo_dir        (no_of_sw_bands,no_of_scalars/no_of_layers)
     ! surface albedo for diffusive radiation
-    real(8)                          :: albedo_dif        (no_of_sw_bands,no_of_scalars/no_of_layers)
+    real(wp)                          :: albedo_dif        (no_of_sw_bands,no_of_scalars/no_of_layers)
     ! surface albedo for direct radiation (day points only)
-    real(8)                          :: albedo_dir_day    (no_of_sw_bands,no_of_scalars/no_of_layers)
+    real(wp)                          :: albedo_dir_day    (no_of_sw_bands,no_of_scalars/no_of_layers)
     ! surface albedo for diffusive radiation (day points only)
-    real(8)                          :: albedo_dif_day    (no_of_sw_bands,no_of_scalars/no_of_layers)
+    real(wp)                          :: albedo_dif_day    (no_of_sw_bands,no_of_scalars/no_of_layers)
     ! solar zenith angle (day points only)
-    real(8)                          :: mu_0_day(no_of_scalars/no_of_layers)
+    real(wp)                          :: mu_0_day(no_of_scalars/no_of_layers)
     ! temperature at the surface (day points only)
-    real(8)                          :: temp_sfc_day(no_of_scalars/no_of_layers)
+    real(wp)                          :: temp_sfc_day(no_of_scalars/no_of_layers)
     ! reformatted temperature field
-    real(8)                          :: temperature_rad           (no_of_scalars/no_of_layers,no_of_layers)
+    real(wp)                          :: temperature_rad           (no_of_scalars/no_of_layers,no_of_layers)
     ! reformatted pressure field
-    real(8)                          :: pressure_rad              (no_of_scalars/no_of_layers,no_of_layers)
+    real(wp)                          :: pressure_rad              (no_of_scalars/no_of_layers,no_of_layers)
     ! pressure at cell interfaces
-    real(8)                          :: pressure_interface_rad    (no_of_scalars/no_of_layers,no_of_layers+1)
+    real(wp)                          :: pressure_interface_rad    (no_of_scalars/no_of_layers,no_of_layers+1)
     ! temperature at cell interfaces
-    real(8)                          :: temperature_interface_rad (no_of_scalars/no_of_layers,no_of_layers+1)
+    real(wp)                          :: temperature_interface_rad (no_of_scalars/no_of_layers,no_of_layers+1)
     ! temperature at cells restricted to day points
-    real(8)                          :: temperature_rad_day       (no_of_scalars/no_of_layers,no_of_layers)
+    real(wp)                          :: temperature_rad_day       (no_of_scalars/no_of_layers,no_of_layers)
     ! pressure at cells restricted to day points
-    real(8)                          :: pressure_rad_day          (no_of_scalars/no_of_layers,no_of_layers)
+    real(wp)                          :: pressure_rad_day          (no_of_scalars/no_of_layers,no_of_layers)
     ! pressure at cell interfaces restricted to day points
-    real(8)                          :: pressure_interface_rad_day(no_of_scalars/no_of_layers,no_of_layers+1)
+    real(wp)                          :: pressure_interface_rad_day(no_of_scalars/no_of_layers,no_of_layers+1)
     ! scale height of the atmosphere
-    real(8),parameter               :: scale_height = 8.e3_wp
+    real(wp),parameter               :: scale_height = 8.e3_wp
     
     ! calculation of the number of columns
     no_of_scalars_h =  no_of_scalars/no_of_layers
@@ -409,9 +409,9 @@ module radiation
     integer,intent(in)              :: day_indices(no_of_scalars_h)
     type(ty_fluxes_broadband),intent(in):: fluxes
     ! as usual
-    real(8),intent(in)              :: z_vector(no_of_scalars + no_of_scalars_h)
+    real(wp),intent(in)              :: z_vector(no_of_scalars + no_of_scalars_h)
     ! the result (in W/m^3)
-    real(8),intent(inout)           :: radiation_tendency(no_of_scalars)
+    real(wp),intent(inout)           :: radiation_tendency(no_of_scalars)
   
     ! local variables
     ! the layer index
@@ -461,38 +461,38 @@ module radiation
   
   end subroutine calc_power_density
   
-  real(8) function coszenith(lat,lon,t)
+  real(wp) function coszenith(lat,lon,t)
   
     ! calculates the cosine of the zenith angle at a given
     ! point and time
   
   	! the coordinates of the place we look at
-    real(8),intent(in)              :: lat
-    real(8),intent(in)              :: lon
+    real(wp),intent(in)               :: lat
+    real(wp),intent(in)               :: lon
     ! the unix time stamp of the time
-    real(8),intent(in)              :: t
+    real(wp),intent(in)               :: t
     
     ! local variables
-    real(8)                          :: normal_vector_rel2_earth(3)
-    real(8)                          :: normal_vector_rel2_sun  (3)
-    real(8)                          :: sun_2_earth             (3)
+    real(wp)                          :: normal_vector_rel2_earth(3)
+    real(wp)                          :: normal_vector_rel2_sun  (3)
+    real(wp)                          :: sun_2_earth             (3)
     ! obliquity of the earth's axis
-    real(8)                          :: obliquity
+    real(wp)                          :: obliquity
     ! rotation speed of the earth
-    real(8)                          :: omega
+    real(wp)                          :: omega
     ! revolution speed of the earth around the sun
-    real(8)                          :: omega_rev
+    real(wp)                          :: omega_rev
     ! a reference time
-    real(8)                          :: t_0
+    real(wp)                          :: t_0
     ! a transformed time
-    real(8)                          :: t_transformed
+    real(wp)                          :: t_transformed
     ! the rotation angle of the earth
-    real(8)                          :: rot_angle
+    real(wp)                          :: rot_angle
     ! At the time t_0,the earth has been at an angle phi_0_earth_rotation
     ! around itself and at an angle phi_0_earth_around_sun around the sun.
-    real(8)                          :: phi_0_earth_around_sun
-    real(8)                          :: phi_0_earth_rotation
-    real(8)                          :: trans_earth2sun         (3,3)
+    real(wp)                          :: phi_0_earth_around_sun
+    real(wp)                          :: phi_0_earth_rotation
+    real(wp)                          :: trans_earth2sun         (3,3)
     
     omega                 = 7.292115e-5_wp
     omega_rev             = 1.99099e-7_wp
@@ -508,7 +508,7 @@ module radiation
     ! transformation of the time coordinate
     t_transformed =  t - t_0
     
-    rot_angle =  omega*t_transformed - phi_0_earth_rotation
+    rot_angle = omega*t_transformed - phi_0_earth_rotation
     
     ! the normal vector of the place we look at in earth fixed coordinates
     normal_vector_rel2_earth(1) =  cos(lat)*cos(lon)
@@ -531,9 +531,9 @@ module radiation
     ! transforming the normal vector of the place to solar coordinates
     normal_vector_rel2_sun = matmul(trans_earth2sun,normal_vector_rel2_earth)
     
-    sun_2_earth             (1) = cos(omega_rev*t_transformed + phi_0_earth_around_sun)
-    sun_2_earth             (2) = sin(omega_rev*t_transformed + phi_0_earth_around_sun)
-    sun_2_earth             (3) = 0._wp
+    sun_2_earth(1) = cos(omega_rev*t_transformed + phi_0_earth_around_sun)
+    sun_2_earth(2) = sin(omega_rev*t_transformed + phi_0_earth_around_sun)
+    sun_2_earth(3) = 0._wp
     
     ! the result
     coszenith = DOT_PRODUCT(normal_vector_rel2_sun,-sun_2_earth)
@@ -551,7 +551,7 @@ module radiation
     ! computes volume mixing ratios out of the model variables
     
     ! mass densities of the constituents
-    real(8),intent(in)              :: mass_densities(:)
+    real(wp),intent(in)              :: mass_densities(:)
     ! short wave switch
     logical,intent(in)              :: sw_bool
     ! as usual
@@ -567,10 +567,10 @@ module radiation
     ! the indices of the points where it is day
     integer,intent(in)              :: day_indices(no_of_scalars/no_of_layers)
     ! z coordinates of scalar data points
-    real(8),intent(in)              :: z_scalar(no_of_scalars)
+    real(wp),intent(in)              :: z_scalar(no_of_scalars)
     
     ! the volume mixing ratio of a gas
-    real(8)                          :: vol_mix_ratio(no_of_scalars_h,no_of_layers)
+    real(wp)                          :: vol_mix_ratio(no_of_scalars_h,no_of_layers)
     ! loop indices
     integer                          :: ji,jk,jl
     
@@ -585,7 +585,7 @@ module radiation
         case("o2")
           vol_mix_ratio(:,:) = molar_fraction_in_dry_air(3)
         case("ch4")
-          vol_mix_ratio(:,:) = molar_fraction_in_dry_air(8)
+          vol_mix_ratio(:,:) = molar_fraction_in_dry_air(wp)
         case("o3")
           if (sw_bool) then
             do jk=1,no_of_day_points

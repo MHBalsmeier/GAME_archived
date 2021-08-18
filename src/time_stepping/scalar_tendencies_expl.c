@@ -16,7 +16,7 @@ This is the horizontal (explicit) part of the constituent integration.
 #include "stdio.h"
 #include "stdlib.h"
 
-int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Soil *soil, Grid *grid, double delta_t, Scalar_field radiation_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step)
+int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Soil *soil, Grid *grid, double delta_t, Diagnostics *diagnostics, Forcings *forcings, Radiation *radiation, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step)
 {
 	/*
 	This function manages the calculation of the explicit scalar tendencies.
@@ -155,7 +155,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 					// molecular + turbulent heat transport
 					+ irrev -> temperature_diffusion_heating[j]
 					// radiation
-					+ radiation_tendency[j]
+					+ radiation -> radiation_tendency[j]
 					// this has to be divided by the c_p*exner
 					)/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j]))
 					// phase transitions
@@ -200,7 +200,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 					-diagnostics -> flux_density_divv[j]
 					// the source terms
 					+ state -> rho[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state, j))
-					*(irrev -> temperature_diffusion_heating[j] + irrev -> heating_diss[j] + radiation_tendency[j])
+					*(irrev -> temperature_diffusion_heating[j] + irrev -> heating_diss[j] + radiation -> radiation_tendency[j])
 					+ 1/c_v_cond*irrev -> constituent_heat_source_rates[i*NO_OF_SCALARS + j]
 					+ diagnostics -> scalar_field_placeholder[j]*(irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]);
 				}

@@ -39,9 +39,9 @@ int set_basic_props2grib(codes_handle *, long, long, long, long, long, long);
 double calc_std_dev(double [], int);
 int global_scalar_integrator(Scalar_field, Grid *, double *);
 
-int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Io_config *io_config, Config_info *config_info)
+int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Radiation *radiation, Io_config *io_config, Config_info *config_info)
 {
-	// Diagnostics and forcings are primarily handed over for checks.
+	// Diagnostics, forcings and radiation are primarily handed over for checks.
 	
 	// Time stuff.
     time_t t_init_t = (time_t) t_init;
@@ -71,6 +71,12 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 	Surface output including diagnostics.
 	-------------------------------------
 	*/
+	
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		diagnostics -> temperature_gas[i] = radiation -> radiation_tendency[i]/(spec_heat_cap_diagnostics_v(state_write_out, i, config_info)*density_gas(state_write_out, i)) + 273.15;
+	}
+	
 	if (io_config -> surface_output_switch == 1)
 	{
 		double *mslp = malloc(NO_OF_SCALARS_H*sizeof(double));

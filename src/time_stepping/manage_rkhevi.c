@@ -34,6 +34,9 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 		delta_t = config_info -> adv_sound_ratio*delta_t_small;
     }
        
+	// diagnosing the temperature
+	temperature_diagnostics(state_old, grid, diagnostics);
+    
     // interaction with soil (only useful if real radiation is on)
     if (config_info -> rad_on == 1)
     {
@@ -50,9 +53,6 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 		state_old remains unchanged the whole time.
 		At i == 0, it is state_old == state_new.
 		*/
-		
-		// 0.) diagnosing the temperature
-		temperature_diagnostics(state_new, grid, diagnostics);
 		
 		// 1.) explicit component of the momentum equation
 		// -----------------------------------------------
@@ -84,7 +84,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 		{
 			call_radiation(state_old, soil, grid, dualgrid, radiation, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, time_coordinate);
 		}
-		scalar_tendencies_expl(state_old, state_new, state_tendency, soil, grid, delta_t, radiation -> radiation_tendency, diagnostics, forcings, irrev, config_info, i);
+		scalar_tendencies_expl(state_old, state_new, state_tendency, soil, grid, delta_t, diagnostics, forcings, radiation, irrev, config_info, i);
 
 		// 3.) Vertical sound wave solver.
 		// -------------------------------

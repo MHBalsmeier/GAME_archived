@@ -471,8 +471,9 @@ int main(int argc, char *argv[])
     }
     Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
     Forcings *forcings = calloc(1, sizeof(Forcings));
+	Radiation *radiation = calloc(1, sizeof(Radiation));
     // writing out the initial state of the model run
-    write_out(state_old, wind_h_10m_array, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
+    write_out(state_old, wind_h_10m_array, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, radiation, io_config, config_info);
     t_write += WRITE_OUT_INTERVAL;
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     double t_0;
@@ -509,7 +510,6 @@ int main(int argc, char *argv[])
     Irreversible_quantities *irrev = calloc(1, sizeof(Irreversible_quantities));
     State *state_new = calloc(1, sizeof(State));
     linear_combine_two_states(state_old, state_old, state_new, 1, 0, grid);
-	Radiation *radiation = calloc(1, sizeof(Radiation));
 	Soil *soil = calloc(1, sizeof(Soil));
 	init_soil(soil, diagnostics);
     State *state_write = calloc(1, sizeof(State));
@@ -619,7 +619,7 @@ int main(int argc, char *argv[])
         if(t_0 + delta_t >= t_write + 300 && t_0 <= t_write + 300)
         {
         	// here, output is actually written
-            write_out(state_write, wind_h_10m_array, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
+            write_out(state_write, wind_h_10m_array, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, radiation, io_config, config_info);
             // setting the next output time
             t_write += WRITE_OUT_INTERVAL;
             
