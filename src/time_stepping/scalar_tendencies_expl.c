@@ -16,6 +16,8 @@ This is the horizontal (explicit) part of the constituent integration.
 #include "stdio.h"
 #include "stdlib.h"
 
+const int T_RAD_MIN = 273.15 - 70;
+
 int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Soil *soil, Grid *grid, double delta_t, Diagnostics *diagnostics, Forcings *forcings, Radiation *radiation, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step)
 {
 	/*
@@ -28,7 +30,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 	*/
 	// declaring needed variables
     int h_index, layer_index;
-    double c_v_cond, tracer_heating, density_gas_weight, density_total_weight;
+    double c_v_cond, tracer_heating, density_gas_weight, density_total_weight, rad_forcing;
     
 	// Temperature diffusion gets updated here, but only at the first RK step and if heat conduction is switched on.
 	if (no_rk_step == 0 && (config_info -> temperature_diff_h == 1 || config_info -> temperature_diff_v == 1))
@@ -117,7 +119,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 			scalar_times_vector_h(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
 			divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			// adding the tendencies in all grid boxes
-			#pragma omp parallel for private(layer_index, h_index, tracer_heating, density_gas_weight, density_total_weight)
+			#pragma omp parallel for private(layer_index, h_index, tracer_heating, density_gas_weight, density_total_weight, rad_forcing)
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
 				layer_index = j/NO_OF_SCALARS_H;
@@ -143,6 +145,12 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 							tracer_heating += irrev -> constituent_heat_source_rates[k*NO_OF_SCALARS + j];
 						}
 					}
+					rad_forcing = radiation -> radiation_tendency[j];
+					// clipping radiation forcing for too extreme temperatures
+					if (diagnostics -> temperature_gas[j] < T_RAD_MIN)
+					{
+						rad_forcing = 0;
+					}
 					state_tendency -> rhotheta[j]
 					= 
 					// the advection (resolved transport)
@@ -155,7 +163,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 					// molecular + turbulent heat transport
 					+ irrev -> temperature_diffusion_heating[j]
 					// radiation
-					+ radiation -> radiation_tendency[j]
+					+ rad_forcing
 					// this has to be divided by the c_p*exner
 					)/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j]))
 					// phase transitions

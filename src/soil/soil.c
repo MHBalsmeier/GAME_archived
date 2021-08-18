@@ -17,7 +17,6 @@ const double density = 1000;
 const double c_v = 4184;
 const double heat_trans_coeff = 50;
 const double t_min = 273.15 - 30;
-const double t_max = 273.15 + 50;
 
 int soil_interaction(Soil *soil, Diagnostics *diagnostics, Radiation *radiation, double delta_t)
 {
@@ -45,11 +44,6 @@ int soil_interaction(Soil *soil, Diagnostics *diagnostics, Radiation *radiation,
 		if (soil -> temperature[i] < t_min)
 		{
 			soil -> temperature[i] = t_min;
-		}
-		// clipping too high values
-		if (soil -> temperature[i] > t_max)
-		{
-			soil -> temperature[i] = t_max;
 		}
 	}
 		
