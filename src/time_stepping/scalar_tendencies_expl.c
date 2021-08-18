@@ -147,7 +147,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 					}
 					rad_forcing = radiation -> radiation_tendency[j];
 					// clipping radiation forcing for too extreme temperatures
-					if (diagnostics -> temperature_gas[j] < T_RAD_MIN)
+					if (diagnostics -> temperature_gas[j] < T_RAD_MIN && rad_forcing < 0)
 					{
 						rad_forcing = 0;
 					}
