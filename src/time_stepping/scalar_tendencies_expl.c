@@ -16,7 +16,7 @@ This is the horizontal (explicit) part of the constituent integration.
 #include "stdio.h"
 #include "stdlib.h"
 
-const int T_RAD_MIN = 273.15 - 100;
+const int T_RAD_MIN = 273.15 - 100; // The temperature below which the radiative forcing will be set to zero if it is negative.
 
 int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Soil *soil, Grid *grid, double delta_t, Diagnostics *diagnostics, Forcings *forcings, Radiation *radiation, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step)
 {
