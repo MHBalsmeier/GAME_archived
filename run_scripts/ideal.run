@@ -8,7 +8,7 @@ rfpet_home_dir=~/code/GAME # the directory of GAME
 operator=MHB # the ID of the person / group / institution running the model
 ideal_input_id=8 # specifies which test scenario to run
 run_id=ideal # run_id must only be set if ideal_input_id != -1 (otherwise it is chosen automatically)
-run_span=$((100*24*3600)) # how long the model is supposed to run
+run_span=$((31*24*3600)) # how long the model is supposed to run
 valgrind_check=0 # set this to 1, if you want to check the code with Valgrind
 start_year=2000 # defines the start time of the model run
 start_month=1 # defines the start time of the model run
@@ -22,7 +22,7 @@ orography_id=0 # ID of the orography field, for ideal_input_id > -1 orography_id
 orography_layers=23 # number of layers following orography (only relevent if type_of_vertical_grid == 0)
 
 # dynamics settings
-cfl_margin=0.21 # The sound time step will be calculated as follows: delta t = (1 - cfl_margin)*delta_x/c_s. 0.3 can be considered a standard value.
+cfl_margin=0.2 # The sound time step will be calculated as follows: delta t = (1 - cfl_margin)*delta_x/c_s. 0.2 can be considered a standard value.
 adv_sound_ratio=1 # the ratio of the advective to the sound time step
 momentum_diff_h=1 # turn on if you want horizontal momentum diffusion
 momentum_diff_v=0 # turn on if you want vertical momentum diffusion
@@ -36,7 +36,7 @@ damping_coeff_max=0.25 # maximum swamp layer damping coefficient
 explicit_boundary_layer=0 # switch for an additional simplified horizontal friction in the boundary layer
 
 # "physics" configuration
-rad_on=2 # turn on if you want radiation
+rad_on=1 # turn on if you want radiation
 radiation_delta_t=10800 # every how many seconds the radiation fluxes wil be updated
 assume_lte=1 # set this to one if you do not want to assign individual temperatures to tracers
 

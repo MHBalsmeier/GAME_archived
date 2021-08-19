@@ -18,14 +18,14 @@ int held_suar(double latitude_scalar[], double z_scalar[], double mass_densities
 {
 	int layer_index, h_index;
 	double pressure;
-	#pragma omp parallel for private(pressure, layer_index, h_index)
+	#pragma omp parallel for private(layer_index, h_index, pressure)
 	for (int i = 0; i < NO_OF_SCALARS_RAD; ++i)
 	{
 		layer_index = i/NO_OF_SCALARS_RAD_PER_LAYER;
 		h_index = i - layer_index*NO_OF_SCALARS_RAD_PER_LAYER;
-		pressure = mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS_RAD_PER_LAYER + i]*specific_gas_constants(0)*temperature_gas[i];
+		pressure = mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS_RAD + i]*specific_gas_constants(0)*temperature_gas[i];
 		radiation_tendency[i] = -k_T(latitude_scalar[h_index], pressure)*(temperature_gas[i] - t_eq(latitude_scalar[h_index], pressure));
-		radiation_tendency[i] = spec_heat_capacities_v_gas(0)*mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS_RAD_PER_LAYER + i]*radiation_tendency[i];
+		radiation_tendency[i] = spec_heat_capacities_v_gas(0)*mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS_RAD + i]*radiation_tendency[i];
 	}
 	return 0;
 }
