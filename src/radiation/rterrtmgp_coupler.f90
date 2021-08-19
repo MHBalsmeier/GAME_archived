@@ -265,6 +265,34 @@ module radiation
       enddo
     enddo
     
+    ! moving the interface temperature into the allowed area
+    do ji = 1,no_of_scalars_h
+      if (temperature_interface_rad(ji,1) > k_dist_sw%get_temp_max()) then
+         temperature_interface_rad(ji,1) = k_dist_sw%get_temp_max()
+      endif
+      if (temperature_interface_rad(ji,1) < k_dist_sw%get_temp_min()) then
+        temperature_interface_rad(ji,1) = k_dist_sw%get_temp_min()
+      endif
+      if (temperature_interface_rad(ji,1) > k_dist_lw%get_temp_max()) then
+        temperature_interface_rad(ji,1) = k_dist_lw%get_temp_max()
+      endif
+      if (temperature_interface_rad(ji,1) < k_dist_lw%get_temp_min()) then
+        temperature_interface_rad(ji,1) = k_dist_lw%get_temp_min()
+      endif
+      if (temperature_interface_rad(ji,no_of_layers+1) > k_dist_sw%get_temp_max()) then
+         temperature_interface_rad(ji,no_of_layers+1) = k_dist_sw%get_temp_max()
+      endif
+      if (temperature_interface_rad(ji,no_of_layers+1) < k_dist_sw%get_temp_min()) then
+        temperature_interface_rad(ji,no_of_layers+1) = k_dist_sw%get_temp_min()
+      endif
+      if (temperature_interface_rad(ji,no_of_layers+1) > k_dist_lw%get_temp_max()) then
+        temperature_interface_rad(ji,no_of_layers+1) = k_dist_lw%get_temp_max()
+      endif
+      if (temperature_interface_rad(ji,no_of_layers+1) < k_dist_lw%get_temp_min()) then
+        temperature_interface_rad(ji,no_of_layers+1) = k_dist_lw%get_temp_min()
+      endif
+    enddo
+    
     ! calculating the zenith angle,and counting day and night points
     j_day =  0
     do ji = 1,no_of_scalars_h
