@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.6.28)  13 AUG 2021 13:03
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.10.12)  19 AUG 2021 11:03
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -331,7 +331,7 @@ Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 \bibhang=\skip78
 \blx@bcfin=\read2
 \blx@bcfout=\write3
-\blx@langwohyphens=\language38
+\blx@langwohyphens=\language12
 \c@mincomprange=\count317
 \c@maxcomprange=\count318
 \c@mincompwidth=\count319
@@ -1053,18 +1053,18 @@ Package atveryend Info: Empty hook `AfterLastShipout' on input line 251.
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 251.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 251.
 Package rerunfilecheck Info: File `handbook.out' has not changed.
-(rerunfilecheck)             Checksum: 11B87E6B386F0E4E149496321D3F45F0;1031.
+(rerunfilecheck)             Checksum: 628F71044DE470515A17490FF9F935D7;1029.
 Package logreq Info: Writing requests to 'handbook.run.xml'.
 \openout1 = `handbook.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 16247 strings out of 482480
- 268711 string characters out of 5946190
- 936943 words of memory out of 5000000
- 31026 multiletter control sequences out of 15000+600000
+ 16247 strings out of 483057
+ 268709 string characters out of 5962300
+ 935568 words of memory out of 5000000
+ 30992 multiletter control sequences out of 15000+600000
  586144 words of font info for 98 fonts, out of 8000000 for 9000
- 395 hyphenation exceptions out of 8191
+ 59 hyphenation exceptions out of 8191
  38i,11n,45p,819b,743s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc} </home/max/.texli
 ve2019/texmf-var/fonts/pk/ljfour/jknappen/ec/ectc1000.600pk> </home/max/.texliv
@@ -1077,7 +1077,7 @@ fonts/type1/public/fourier/fourier-ms.pfb></usr/share/texlive/texmf-dist/fonts/
 type1/urw/ncntrsbk/uncb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/nc
 ntrsbk/uncr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncri
 8a.pfb>
-Output written on handbook.pdf (10 pages, 92839 bytes).
+Output written on handbook.pdf (10 pages, 93014 bytes).
 PDF statistics:
  289 PDF objects out of 1000 (max. 8388607)
  182 compressed objects within 2 object streams

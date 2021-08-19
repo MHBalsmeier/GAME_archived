@@ -36,7 +36,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
     new_weight = 1;
     if (no_rk_step == 1)
     {
-    	new_weight = 1;
+    	new_weight = 0.8;
     }
     old_weight = 1 - new_weight;
     

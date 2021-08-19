@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.2.9)  17 MAR 2021 07:54
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.10.12)  19 AUG 2021 11:00
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -296,7 +296,7 @@ Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 \bibhang=\skip76
 \blx@bcfin=\read2
 \blx@bcfout=\write3
-\blx@langwohyphens=\language40
+\blx@langwohyphens=\language12
 \c@mincomprange=\count309
 \c@maxcomprange=\count310
 \c@mincompwidth=\count311
@@ -1042,18 +1042,18 @@ Package atveryend Info: Empty hook `AfterLastShipout' on input line 192.
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 192.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 192.
 Package rerunfilecheck Info: File `doc.out' has not changed.
-(rerunfilecheck)             Checksum: 1D9CAED952E1942368576E3673BD6B67;1594.
+(rerunfilecheck)             Checksum: 30C61C3EC5C8524BF724F291CDFD7079;1592.
 Package logreq Info: Writing requests to 'doc.run.xml'.
 \openout1 = `doc.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 15159 strings out of 482457
- 255825 string characters out of 5945143
- 915302 words of memory out of 5000000
- 29935 multiletter control sequences out of 15000+600000
+ 15159 strings out of 483057
+ 255823 string characters out of 5962300
+ 913828 words of memory out of 5000000
+ 29894 multiletter control sequences out of 15000+600000
  591357 words of font info for 106 fonts, out of 8000000 for 9000
- 395 hyphenation exceptions out of 8191
+ 59 hyphenation exceptions out of 8191
  38i,11n,45p,1920b,1270s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc} </home/max/.texli
 ve2019/texmf-var/fonts/pk/ljfour/jknappen/ec/ectc1000.600pk> </home/max/.texliv
@@ -1066,7 +1066,7 @@ fonts/type1/public/fourier/fourier-ms.pfb></usr/share/texlive/texmf-dist/fonts/
 type1/urw/ncntrsbk/uncb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/nc
 ntrsbk/uncr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncri
 8a.pfb>
-Output written on doc.pdf (15 pages, 114867 bytes).
+Output written on doc.pdf (15 pages, 114800 bytes).
 PDF statistics:
  432 PDF objects out of 1000 (max. 8388607)
  300 compressed objects within 3 object streams
