@@ -36,7 +36,7 @@ damping_coeff_max=0.25 # maximum swamp layer damping coefficient
 explicit_boundary_layer=0 # switch for an additional simplified horizontal friction in the boundary layer
 
 # "physics" configuration
-rad_on=1 # turn on if you want radiation
+rad_on=2 # turn on if you want radiation
 radiation_delta_t=10800 # every how many seconds the radiation fluxes wil be updated
 assume_lte=1 # set this to one if you do not want to assign individual temperatures to tracers
 
