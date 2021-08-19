@@ -16,7 +16,7 @@ This is the horizontal (explicit) part of the constituent integration.
 #include "stdio.h"
 #include "stdlib.h"
 
-const int T_RAD_MIN = 273.15 - 70;
+const int T_RAD_MIN = 273.15 - 100;
 
 int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Soil *soil, Grid *grid, double delta_t, Diagnostics *diagnostics, Forcings *forcings, Radiation *radiation, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step)
 {
@@ -30,7 +30,15 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 	*/
 	// declaring needed variables
     int h_index, layer_index;
-    double c_v_cond, tracer_heating, density_gas_weight, density_total_weight, rad_forcing;
+    double c_v_cond, tracer_heating, density_gas_weight, density_total_weight, rad_forcing, old_weight, new_weight;
+    
+    // determining the RK weights
+    new_weight = 1;
+    if (no_rk_step == 1)
+    {
+    	new_weight = 0.5;
+    }
+    old_weight = 1 - new_weight;
     
 	// Temperature diffusion gets updated here, but only at the first RK step and if heat conduction is switched on.
 	if (no_rk_step == 0 && (config_info -> temperature_diff_h == 1 || config_info -> temperature_diff_v == 1))
@@ -88,9 +96,10 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 			if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 			{
 				state_tendency -> rho[i*NO_OF_SCALARS + j]
-				=
+				= old_weight*state_tendency -> rho[i*NO_OF_SCALARS + j]
+				+ new_weight*(
 				// the advection
-				-diagnostics -> flux_density_divv[j];
+				-diagnostics -> flux_density_divv[j]);
 				// the horizontal brute-force limiter
 				if (state_old -> rho[i*NO_OF_SCALARS + j] + delta_t*state_tendency -> rho[i*NO_OF_SCALARS + j] < 0)
 				{
@@ -152,7 +161,8 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 						rad_forcing = 0;
 					}
 					state_tendency -> rhotheta[j]
-					= 
+					= old_weight*state_tendency -> rhotheta[j]
+					+ new_weight*(
 					// the advection (resolved transport)
 					-diagnostics -> flux_density_divv[j]
 					// the diabatic forcings
@@ -168,7 +178,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 					)/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j]))
 					// phase transitions
 					+ tracer_heating*state -> rho[i*NO_OF_SCALARS + j]/density_gas_weight
-					/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j]));
+					/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j])));
 					// sensible heat in the lowest layer
 					if (layer_index == NO_OF_LAYERS - 1 - grid -> no_of_shaded_points_scalar[h_index])
 					{
@@ -203,14 +213,15 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 				{
 					c_v_cond = ret_c_v_cond(i, 0, state -> condensed_density_temperatures[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + state -> rho[i*NO_OF_SCALARS + j]));
 					state_tendency -> condensed_density_temperatures[i*NO_OF_SCALARS + j]
-					= 
+					= old_weight*state_tendency -> condensed_density_temperatures[i*NO_OF_SCALARS + j]
+					+ new_weight*(
 					// the advection
 					-diagnostics -> flux_density_divv[j]
 					// the source terms
 					+ state -> rho[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state, j))
 					*(irrev -> temperature_diffusion_heating[j] + irrev -> heating_diss[j] + radiation -> radiation_tendency[j])
 					+ 1/c_v_cond*irrev -> constituent_heat_source_rates[i*NO_OF_SCALARS + j]
-					+ diagnostics -> scalar_field_placeholder[j]*(irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]);
+					+ diagnostics -> scalar_field_placeholder[j]*(irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]));
 				}
 			}
 		}
