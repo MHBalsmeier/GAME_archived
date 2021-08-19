@@ -99,13 +99,14 @@ int horizontal_covariant(Vector_field vector_field, int layer_index, int h_index
 	/*
 	calculates the horizontal covariant component of a vector field out of the horizontal contravariant and the vertical covariant components
 	*/
-	double vertical_component = 0;
+	int vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
+	*result = vector_field[vector_index];
 	if (layer_index >= NO_OF_LAYERS - grid -> no_of_oro_layers)
 	{
+		double vertical_component = 0;
 		remap_verpri2horpri_vector(vector_field, layer_index, h_index, &vertical_component, grid);
+		*result += grid -> slope[vector_index]*vertical_component;
 	}
-	int vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
-	*result = vector_field[vector_index] + grid -> slope[vector_index]*vertical_component;
 	return 0;
 }
 

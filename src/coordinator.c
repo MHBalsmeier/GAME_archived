@@ -54,8 +54,8 @@ int main(int argc, char *argv[])
     write_out_mass_integrals = strtod(argv[8], NULL);
     int write_out_rhotheta_integral; 
     write_out_rhotheta_integral = strtod(argv[9], NULL);
-    int write_out_energy_integral;
-    write_out_energy_integral = strtod(argv[10], NULL);
+    int write_out_energy_integrals;
+    write_out_energy_integrals = strtod(argv[10], NULL);
     config_info -> temperature_diff_h = strtod(argv[11], NULL);
     double radiation_delta_t;
     radiation_delta_t = strtof(argv[12], NULL);
@@ -489,7 +489,7 @@ int main(int argc, char *argv[])
     {
 		write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 1);
 	}
-    if (write_out_energy_integral == 1)
+    if (write_out_energy_integrals == 1)
     {
 		write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 2);
 	}
@@ -545,7 +545,7 @@ int main(int argc, char *argv[])
     	manage_rkhevi(state_old, state_new, soil, grid, dualgrid, radiation, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
     	// This switch can be set to zero now and remains there.
     	config_info -> totally_first_step_bool = 0;
-		time_step_counter += 1;
+		time_step_counter += 1;	
 		
 		/*
 		Writing out integrals over the model domain if requested by the user.
@@ -559,7 +559,7 @@ int main(int argc, char *argv[])
         {
 			write_out_integral(state_new, time_step_counter, grid, dualgrid, diagnostics, 1);
     	}
-		if (write_out_energy_integral == 1)
+		if (write_out_energy_integrals == 1)
         {
 			write_out_integral(state_new, time_step_counter, grid, dualgrid, diagnostics, 2);
     	}
