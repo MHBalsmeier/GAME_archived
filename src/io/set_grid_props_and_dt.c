@@ -180,53 +180,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     return 0;
 }
 
-int calc_delta_t_and_related(double cfl_margin, double *delta_t, Grid *grid, Dualgrid *dualgrid, State *state, Config_info *config_info)
-{
-	/*
-	This function sets the timestep of the model.
-	*/
-	
-    double max_sound_speed = 0;
-    double sound_speed_value;
-    
-    for (int i = 0; i < NO_OF_SCALARS; ++i)
-    {
-    	sound_speed_value = pow(gas_constant_diagnostics(state, i, config_info)
-    	*spec_heat_cap_diagnostics_p(state, i, config_info)/spec_heat_cap_diagnostics_v(state, i, config_info)
-    	*(grid -> exner_bg[i] + state -> exner_pert[i])*(grid -> theta_bg[i] + state -> theta_pert[i]), 0.5);
-    	if (sound_speed_value > max_sound_speed)
-    	{
-    		max_sound_speed = sound_speed_value;
-    	}
-    }
-    // adding a safety margin
-    max_sound_speed = 1.1*max_sound_speed;
-    double min_dist_horizontal = RADIUS;
-    for (int i = 0; i < NO_OF_LAYERS; ++i)
-    {
-        for (int j = 0; j < NO_OF_VECTORS_H; ++j)
-        {
-            if (grid -> normal_distance[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] < min_dist_horizontal)
-            {
-                min_dist_horizontal = grid -> normal_distance[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j];
-    		}
-        }
-    }
-	*delta_t = (1 - cfl_margin)*min_dist_horizontal/max_sound_speed;
-	
-	// diffusion preparation
-	int layer_index, h_index;
-	double cell_area_sum = 0;
-	for (int i = 0; i < NO_OF_LEVELS*NO_OF_SCALARS_H; ++i)
-	{
-		layer_index = i/NO_OF_SCALARS_H;
-		h_index = i - layer_index*NO_OF_SCALARS_H;
-		cell_area_sum += grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
-	}
-	grid -> mean_area_cell = cell_area_sum/(NO_OF_LEVELS*NO_OF_SCALARS_H);
-    return 0;
-}
-
 
 
 

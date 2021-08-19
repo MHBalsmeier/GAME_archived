@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     strcpy(WRITE_OUT_INTERVAL_PRE, argv[2]);
     int WRITE_OUT_INTERVAL = strtol(WRITE_OUT_INTERVAL_PRE, NULL, 10);
     free(WRITE_OUT_INTERVAL_PRE);
-    double cfl_margin = strtof(argv[3], NULL);
+    double dt_parameter = strtof(argv[3], NULL);
     Config_info *config_info = calloc(1, sizeof(Config_info));
     config_info -> momentum_diff_h = strtod(argv[4], NULL);
     config_info -> momentum_diff_v = strtod(argv[5], NULL);
@@ -385,9 +385,28 @@ int main(int argc, char *argv[])
 	printf("%s", stars);
 	
 	printf("Calculating time step ...\n");
-    // delta_t is the sound time step
-    double delta_t;
-    calc_delta_t_and_related(cfl_margin, &delta_t, grid, dualgrid, state_old, config_info);
+    // calculating the average horizontal resolution
+	double eff_hor_res = 0;
+	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+	{
+		eff_hor_res += grid -> normal_distance[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i];
+	}
+	eff_hor_res = eff_hor_res/NO_OF_VECTORS_H;
+    // delta_t is the time step
+    double delta_t = dt_parameter*eff_hor_res*1e-3;
+    
+    // calculating the mean area of the cells
+	int layer_index, h_index;
+	double cell_area_sum = 0;
+	for (int i = 0; i < NO_OF_LEVELS*NO_OF_SCALARS_H; ++i)
+	{
+		layer_index = i/NO_OF_SCALARS_H;
+		h_index = i - layer_index*NO_OF_SCALARS_H;
+		cell_area_sum += grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
+	}
+	grid -> mean_area_cell = cell_area_sum/(NO_OF_LEVELS*NO_OF_SCALARS_H);
+    
+    // some more checks and info
     if (radiation_delta_t < delta_t)
     {
     	printf("It is radiation_delta_t < delta_t.\n");
@@ -397,13 +416,7 @@ int main(int argc, char *argv[])
 	printf("Time step set. Information on CFL-related quantities:\n");
     printf("fast dynamic modes time step: %lf s\n", delta_t);
     printf("slow dynamic modes time step: %lf s\n", config_info -> adv_sound_ratio*delta_t);
-    // calculating the average horizontal resolution
-	double eff_hor_res = 0;
-	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-	{
-		eff_hor_res += grid -> normal_distance[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i];
-	}
-	eff_hor_res = eff_hor_res/NO_OF_VECTORS_H;
+	
 	// finding the minimum horizontal grid distance
 	double normal_dist_min_hor = eff_hor_res;
 	for (int i = 0; i < NO_OF_VECTORS_H; ++i)

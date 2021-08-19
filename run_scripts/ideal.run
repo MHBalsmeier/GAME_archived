@@ -22,7 +22,7 @@ orography_id=0 # ID of the orography field, for ideal_input_id > -1 orography_id
 orography_layers=23 # number of layers following orography (only relevent if type_of_vertical_grid == 0)
 
 # dynamics settings
-cfl_margin=0.2 # The sound time step will be calculated as follows: delta t = (1 - cfl_margin)*delta_x/c_s. 0.2 can be considered a standard value.
+dt_parameter=1.7 # The sound time step will be calculated as follows: delta_t = dt_parameter*delta_x / km. 1.7 can be considered a standard value.
 adv_sound_ratio=1 # the ratio of the advective to the sound time step
 momentum_diff_h=1 # turn on if you want horizontal momentum diffusion
 momentum_diff_v=0 # turn on if you want vertical momentum diffusion
@@ -57,7 +57,7 @@ export OMP_NUM_THREADS=2 # relevant only for OMP
 number_of_cpus=1 # relevant only for MPI
 
 # that's it, now the basic run script will be sourced
-source root_script.sh
+source .sh/root_script.sh
 
 
 
