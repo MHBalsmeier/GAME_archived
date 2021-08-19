@@ -12,9 +12,9 @@ if [ ! -d grid_generator/statistics ]
 then
 mkdir grid_generator/statistics
 fi
-if [ ! -d orography_generator/orographies ]
+if [ ! -d surface_generator/surface_files ]
 then
-mkdir orography_generator/orographies
+mkdir surface_generator/surface_files
 fi
 if [ ! -d test_generator/test_states ]
 then

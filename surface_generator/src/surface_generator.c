@@ -33,12 +33,12 @@ int main(int argc, char *argv[])
    		printf("Error: oro_id must not be smaller than one or larger than 2.\n");
    		exit(1);
 	}
-   	double rescale_factor = strtof(argv[2], NULL);
-	sprintf(OUTPUT_FILE_PRE, "orographies/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
+   	double oro_rescale_factor = strtof(argv[2], NULL);
+	sprintf(OUTPUT_FILE_PRE, "surface_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
 	OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
 	free(OUTPUT_FILE_PRE);
 	char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
-	sprintf(OUTPUT_FILE, "orographies/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
+	sprintf(OUTPUT_FILE, "surface_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
 	int ncid, scalar_h_dimid, oro_id, latitude_scalar_id, longitude_scalar_id;
 	double *oro;
 	oro = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 			oro[i] = 0;
 			for (int j = 0; j < no_of_avg_points; ++j)
 			{
-				oro[i] += rescale_factor*z_in_vector[min_indices_vector[j]]*weights_vector[j]/weights_sum;
+				oro[i] += oro_rescale_factor*z_in_vector[min_indices_vector[j]]*weights_vector[j]/weights_sum;
 			}
 			if (oro[i] < -600 || oro[i] > 5700)
 			{
