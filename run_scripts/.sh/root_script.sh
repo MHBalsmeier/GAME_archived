@@ -3,7 +3,7 @@
 # This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 # Github repository: https://github.com/OpenNWP/GAME
 
-run_dir=../output/$run_id
+run_dir=$game_home_dir/output/$run_id
 if [ -d $run_dir ]
 then
 rm -r $run_dir
@@ -11,7 +11,7 @@ fi
 mkdir $run_dir
 cd $run_dir
 
-if [ ! -f ../../build/game ]
+if [ ! -f $game_home_dir/build/game ]
 then
 echo "Executable game missing. Compile first. Aborting run."
 cd - > /dev/null
@@ -23,7 +23,7 @@ then
 rm game
 fi
 
-cp ../../build/game .
+cp $game_home_dir/build/game .
 
 if [ $valgrind_check -eq 0 ]
 then
