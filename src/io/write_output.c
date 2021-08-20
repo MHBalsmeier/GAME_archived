@@ -170,8 +170,8 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		    sprate[i] = 0;
 		    for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS/2; ++k)
 		    {
-		    	// sink velocity is one, value must be positive
-		        sprate[i] += state_write_out -> rho[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		    	// sink velocity is 0.1, value must be positive
+		        sprate[i] += 0.1*state_write_out -> rho[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
 	        if (sprate[i] < EPSILON_SECURITY)
 	        {
