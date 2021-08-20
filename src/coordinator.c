@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
     if (IDEAL_INPUT_ID == -1)
     {
     	config_info -> nwp_mode = 1;
-    	sprintf(INIT_STATE_FILE_PRE, "../../nwp_init/%d%s%s%s_nwp_B%dL%dT%d_O%d_OL%d_SCVT.nc", year, month_string, day_string, hour_string, RES_ID, NO_OF_LAYERS, toa, ORO_ID, grid -> no_of_oro_layers);
+    	sprintf(INIT_STATE_FILE_PRE, "../../nwp_init/%d%s%s%s_B%dL%dT%d_O%d_OL%d_SCVT.nc", year, month_string, day_string, hour_string, RES_ID, NO_OF_LAYERS, toa, ORO_ID, grid -> no_of_oro_layers);
     }
     // The idealized input case.
     else
