@@ -16,8 +16,6 @@ This is the horizontal (explicit) part of the constituent integration.
 #include "stdio.h"
 #include "stdlib.h"
 
-const int T_RAD_MIN = 273.15 - 50; // The temperature below which the radiative forcing will be set to zero if it is negative.
-
 int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Soil *soil, Grid *grid, double delta_t, Diagnostics *diagnostics, Forcings *forcings, Radiation *radiation, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step)
 {
 	/*
@@ -30,7 +28,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 	*/
 	// declaring needed variables
     int h_index, layer_index;
-    double c_v_cond, tracer_heating, density_gas_weight, density_total_weight, rad_forcing, old_weight, new_weight;
+    double c_v_cond, tracer_heating, density_gas_weight, density_total_weight, old_weight, new_weight;
     
     // determining the RK weights
     new_weight = 1;
@@ -128,7 +126,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 			scalar_times_vector_h(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
 			divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			// adding the tendencies in all grid boxes
-			#pragma omp parallel for private(layer_index, h_index, tracer_heating, density_gas_weight, density_total_weight, rad_forcing)
+			#pragma omp parallel for private(layer_index, h_index, tracer_heating, density_gas_weight, density_total_weight)
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
 				layer_index = j/NO_OF_SCALARS_H;
@@ -154,12 +152,6 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 							tracer_heating += irrev -> constituent_heat_source_rates[k*NO_OF_SCALARS + j];
 						}
 					}
-					rad_forcing = radiation -> radiation_tendency[j];
-					// clipping radiation forcing for too extreme temperatures
-					if (diagnostics -> temperature_gas[j] < T_RAD_MIN && rad_forcing < 0)
-					{
-						rad_forcing = 0;
-					}
 					state_tendency -> rhotheta[j]
 					= old_weight*state_tendency -> rhotheta[j]
 					+ new_weight*(
@@ -173,7 +165,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 					// molecular + turbulent heat transport
 					+ irrev -> temperature_diffusion_heating[j]
 					// radiation
-					+ rad_forcing
+					+ radiation -> radiation_tendency[j]
 					// this has to be divided by the c_p*exner
 					)/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j]))
 					// phase transitions
