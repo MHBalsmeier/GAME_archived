@@ -4,7 +4,7 @@
 # Github repository: https://github.com/OpenNWP/GAME
 
 # basic run properties
-game_home_dir=$(pwd)
+game_home_dir=/home/max/code/GAME
 operator=MHB # the ID of the person / group / institution running the model
 ideal_input_id=8 # specifies which test scenario to run
 run_id=ideal # run_id must only be set if ideal_input_id != -1 (otherwise it is chosen automatically)
