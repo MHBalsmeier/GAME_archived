@@ -59,7 +59,7 @@ Everything is easy and quick to install.
 * [geos95](https://github.com/OpenNWP/geos95)
 * [atmostracers](https://github.com/OpenNWP/atmostracers)
 * Clone the DCMIP2016 repository: git clone https://github.com/ClimateGlobalChange/DCMIP2016.git
-* Clone the RTE+RRTMGP repository: `git clone https://github.com/earth-system-radiation/rte-rrtmgp`; then replace all `!$omp` with `!!$omp` in the subdirectories `rte`, `rrtmgp` as well as `extensions`. Use the netcdf files in `rrtmgp/data` from the `develop` branch.
+* Clone the RTE+RRTMGP repository: `git clone https://github.com/earth-system-radiation/rte-rrtmgp`; then replace all `!$omp` with `!!$omp` in all F90 files in the subdirectories `rte`, `rrtmgp` as well as `extensions`.
 
 #### For using the plotting routines
 
