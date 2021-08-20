@@ -75,7 +75,7 @@ The following packages are additionally required if you want to make use of the 
 ### Download
 
 	git clone https://github.com/OpenNWP/GAME.git
-	cd game
+	cd GAME
 	./create_directories_for_large_files.sh
 
 ### Build and install
