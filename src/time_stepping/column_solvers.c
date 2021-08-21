@@ -317,7 +317,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 					}
 					
 					/*
-					Now we proceed to solve the vertical tridiagonal problems.
+					Now we proceed to solving the vertical tridiagonal problems.
 					*/
 					// filling up the original vectors
 					for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
@@ -394,7 +394,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 							{
 								solution_vector[j + 1] -= added_mass/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H];
 							}
-							else if (j == NO_OF_LAYERS - 1 && k >= NO_OF_CONDENSED_CONSTITUENTS)
+							else if (j == NO_OF_LAYERS - 1)
 							{
 								solution_vector[j - 1] -= added_mass/grid -> volume[i + (j - 1)*NO_OF_SCALARS_H];
 							}

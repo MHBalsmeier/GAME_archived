@@ -67,6 +67,7 @@ ${RTERRTMGPDIR}/rte/kernels/mo_optical_props_kernels.F90
 ${RTERRTMGPDIR}/rte/kernels/mo_rte_solver_kernels.F90
 ${RTERRTMGPDIR}/extensions/mo_fluxes_byband.F90
 ${RTERRTMGPDIR}/extensions/mo_fluxes_byband_kernels.F90
+${RTERRTMGPDIR}/extensions/cloud_optics/mo_cloud_optics.F90
 ${RTERRTMGPDIR}/examples/mo_load_coefficients.F90
 ${RTERRTMGPDIR}/examples/mo_simple_netcdf.F90
 )

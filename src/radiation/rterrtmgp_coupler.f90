@@ -17,6 +17,7 @@ module radiation
   use mo_rte_lw,            only: rte_lw
   use mo_optical_props,     only: ty_optical_props_1scl,&
                                    ty_optical_props_2str
+  use mo_cloud_optics,      only: ty_cloud_optics
   
   implicit none
   
@@ -44,6 +45,12 @@ module radiation
   character(len = *),parameter      :: rrtmgp_coefficients_file_lw =  &
   ! insert the name of the long wave data file here
   "/home/max/code/rte-rrtmgp/rrtmgp/data/rrtmgp-data-lw-g256-2018-12-04.nc"
+  character(len = *),parameter      :: cloud_coefficients_file_sw =  &
+  ! insert the name of the short wave cloud optics file here
+  "/home/max/code/rte-rrtmgp/extensions/cloud_optics/rrtmgp-cloud-optics-coeffs-sw.nc"
+  character(len = *),parameter      :: cloud_coefficients_file_lw =  &
+  ! insert the name of the long wave cloud optics file here
+  "/home/max/code/rte-rrtmgp/extensions/cloud_optics/rrtmgp-cloud-optics-coeffs-lw.nc"
   ! the gases in lowercase
   character(len = 32),dimension(size(active_gases)) :: gases_lowercase
   
@@ -154,6 +161,8 @@ module radiation
     type(ty_optical_props_2str)      :: optical_props_sw
     ! long wave optical properties
     type(ty_optical_props_1scl)      :: optical_props_lw
+    ! optical properties of clouds
+    type(ty_cloud_optics)             :: cloud_optics
     ! top of atmosphere short wave flux
     real(wp),dimension(:,:),allocatable          :: toa_flux ! no_of_day_points,no_of_sw_g_points
     ! long wave source function
