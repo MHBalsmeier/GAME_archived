@@ -59,7 +59,7 @@ Everything is easy and quick to install.
 * [geos95](https://github.com/OpenNWP/geos95)
 * [atmostracers](https://github.com/OpenNWP/atmostracers)
 * Clone the DCMIP2016 repository: git clone https://github.com/ClimateGlobalChange/DCMIP2016.git
-* Clone the RTE+RRTMGP repository: `git clone https://github.com/earth-system-radiation/rte-rrtmgp`
+* Clone our fork of the RTE+RRTMGP repository: `git clone https://github.com/OpenNWP/rte-rrtmgp`
 
 #### For using the plotting routines
 
