@@ -18,6 +18,8 @@ module radiation
   use mo_optical_props,     only: ty_optical_props_1scl,&
                                    ty_optical_props_2str
   use mo_cloud_optics,      only: ty_cloud_optics
+  use mo_load_cloud_coefficients, &
+                            only: load_cld_lutcoeff, load_cld_padecoeff
   
   implicit none
   
