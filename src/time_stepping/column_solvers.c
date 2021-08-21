@@ -243,7 +243,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 	// Vertical advection of generalized densities (of tracers) with 3-band matrices.
 	// mass densities, density x temperatures
 	int no_of_relevant_constituents;
-	double impl_weight, expl_weight, added_mass;
+	double impl_weight, expl_weight;
 	impl_weight = 0.5;
 	expl_weight = 1 - impl_weight;
 	for (int quantity_id = 0; quantity_id < 2; ++quantity_id)
@@ -288,7 +288,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 					double vertical_flux_vector_impl[NO_OF_LAYERS - 1];
 					double vertical_flux_vector_rhs[NO_OF_LAYERS - 1];
 					double solution_vector[NO_OF_LAYERS];
-					double density_old_at_interface, area;
+					double density_old_at_interface, area, added_mass;
 					int lower_index, upper_index;
 					
 					// diagnozing the vertical fluxes
