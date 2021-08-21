@@ -19,7 +19,6 @@ The main organizes the model, manages the time stepping, calls model output, col
 #include "radiation/radiation.h"
 #include "time_stepping/time_stepping.h"
 #include "soil/soil.h"
-#include <mpi.h>
 
 int main(int argc, char *argv[])
 {
@@ -518,7 +517,6 @@ int main(int argc, char *argv[])
     */
     double t_rad_update = t_0;
     int wind_10_m_step_counter = 0;
-    MPI_Init(&argc, &argv);
     State *state_tendency = calloc(1, sizeof(State));
     Irreversible_quantities *irrev = calloc(1, sizeof(Irreversible_quantities));
     State *state_new = calloc(1, sizeof(State));
@@ -661,7 +659,6 @@ int main(int argc, char *argv[])
     Clean-up.
     ---------
     */
-    MPI_Finalize();
     free(month_string);
     free(day_string);
     free(hour_string);

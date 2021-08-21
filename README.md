@@ -59,7 +59,7 @@ Everything is easy and quick to install.
 * [geos95](https://github.com/OpenNWP/geos95)
 * [atmostracers](https://github.com/OpenNWP/atmostracers)
 * Clone the DCMIP2016 repository: git clone https://github.com/ClimateGlobalChange/DCMIP2016.git
-* Clone the RTE+RRTMGP repository: `git clone https://github.com/earth-system-radiation/rte-rrtmgp`; then replace all `!$omp` with `!!$omp` in all F90 files in the subdirectories `rte`, `rrtmgp` as well as `extensions`.
+* Clone the RTE+RRTMGP repository: `git clone https://github.com/earth-system-radiation/rte-rrtmgp`
 
 #### For using the plotting routines
 
@@ -80,7 +80,7 @@ The following packages are additionally required if you want to make use of the 
 
 ### Build and install
 
-Modify the file CMakeLists.txt (read the comments). If you want to use radiation, modify rrtmgp_coefficients_file_sw and rrtmgp_coefficients_file_lw in the file src/radiation/rterrtmgp_coupler.f90. Then run
+If you want to use radiation, modify the spectral properties filenames in the file src/radiation/rterrtmgp_coupler.f90. Then run
 
 	./compile.sh
 
