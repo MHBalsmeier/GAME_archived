@@ -425,7 +425,7 @@ module radiation
                                                    ice_eff_radius_day(1:no_of_day_points,:),       &
                                                    cloud_props_sw))
     
-    ! this seems to be just a check
+    ! this seems to have to do with scattering
     call handle_error(cloud_props_sw%delta_scale())
     
     ! adding the SW cloud properties to the gas properties to obtain the atmosphere's properties
