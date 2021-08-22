@@ -16,7 +16,8 @@ module radiation
   use mo_rte_sw,            only: rte_sw
   use mo_rte_lw,            only: rte_lw
   use mo_optical_props,     only: ty_optical_props_1scl,&
-                                   ty_optical_props_2str
+                                  ty_optical_props_2str,&
+                                  ty_optical_props_arry
   use mo_cloud_optics,      only: ty_cloud_optics
   use mo_load_cloud_coefficients, &
                             only: load_cld_lutcoeff, load_cld_padecoeff
@@ -24,18 +25,22 @@ module radiation
   implicit none
   
   ! the number of bands in the short wave region
-  integer,parameter                 :: no_of_sw_bands = 14
+  integer,parameter                        :: no_of_sw_bands = 14
   ! the number of bands in the long wave region
-  integer,parameter                 :: no_of_lw_bands = 16
+  integer,parameter                        :: no_of_lw_bands = 16
   ! used for C interoperability
-  integer                            :: zero = 0
-  integer                            :: one = 1
+  integer                                  :: zero = 0
+  integer                                  :: one = 1
   ! the gas concentrations (object holding all information on the composition
   ! of the gas phase)
-  type(ty_gas_concs)                 :: gas_concentrations_sw
-  type(ty_gas_concs)                 :: gas_concentrations_lw
+  type(ty_gas_concs)                       :: gas_concentrations_sw
+  type(ty_gas_concs)                       :: gas_concentrations_lw
+  ! the spectral properties of the gas phase
+  type(ty_gas_optics_rrtmgp)               :: k_dist_sw,k_dist_lw
+  ! the spectral properties of the clouds
+  type(ty_cloud_optics)                    :: cloud_optics_sw,cloud_optics_lw
   
-  type(ty_gas_optics_rrtmgp)         :: k_dist_sw,k_dist_lw
+  class(ty_optical_props_arry),allocatable :: atmos,clouds
 
   character(len = 3),dimension(wp) :: active_gases =  (/ &
    "N2 ","O2 ","CH4","O3 ","CO2","H2O","N2O","CO " &
@@ -99,6 +104,12 @@ module radiation
     ! loading the long wave radiation properties
     call load_and_init(k_dist_lw,trim(rrtmgp_coefficients_file_lw),gas_concentrations_lw)
     
+    ! reading the SW spectrai properties of clouds
+    call load_cld_lutcoeff(cloud_optics_sw,trim(cloud_coefficients_file_sw))
+    
+    ! reading the LW spectrai properties of clouds
+    call load_cld_lutcoeff(cloud_optics_lw,trim(cloud_coefficients_file_lw))
+    
   end subroutine radiation_init
   
   subroutine calc_radiative_flux_convergence(latitude_scalar,longitude_scalar,&
@@ -115,74 +126,72 @@ module radiation
     bind(c,name =  "calc_radiative_flux_convergence")
     
     ! the number of scalar points of the model grid
-    integer,intent(in)              ::                    no_of_scalars
+    integer,intent(in)                ::                    no_of_scalars
     ! the number of layers of the model grid
-    integer,intent(in)              ::                    no_of_layers
+    integer,intent(in)                ::                    no_of_layers
     ! the number of constituents of the model atmosphere
-    integer,intent(in)              ::                    no_of_constituents
+    integer,intent(in)                ::                    no_of_constituents
     ! the numer of condensed constituents of the model atmosphere
-    integer,intent(in)              ::                    no_of_condensed_constituents
+    integer,intent(in)                ::                    no_of_condensed_constituents
     ! the time coordinate (UTC time stamp)
     real(wp)                          :: time_coord
     ! the latitude coordinates of the scalar data points
-    real(wp),intent(in)              :: latitude_scalar    (no_of_scalars/no_of_layers)
+    real(wp),intent(in)               :: latitude_scalar    (no_of_scalars/no_of_layers)
     ! the longitude coordinates of the scalar data points
-    real(wp),intent(in)              :: longitude_scalar   (no_of_scalars/no_of_layers)
+    real(wp),intent(in)               :: longitude_scalar   (no_of_scalars/no_of_layers)
     ! the vertical positions of the scalar data points
-    real(wp),intent(in)              :: z_scalar           (no_of_scalars)
+    real(wp),intent(in)               :: z_scalar           (no_of_scalars)
     ! the vertical positions of the vector data points
-    real(wp),intent(in)              :: z_vector           (no_of_scalars+no_of_scalars/no_of_layers)
+    real(wp),intent(in)               :: z_vector           (no_of_scalars+no_of_scalars/no_of_layers)
     ! the mass densities of the model atmosphere
-    real(wp),intent(in)              :: mass_densities    &
+    real(wp),intent(in)               :: mass_densities    &
     (no_of_constituents*no_of_scalars)
     ! the temperature of the model atmosphere
-    real(wp),intent(in)              :: temperature_gas   (no_of_scalars)
+    real(wp),intent(in)               :: temperature_gas   (no_of_scalars)
     ! the result (in W/m^3)
-    real(wp),intent(inout)           :: radiation_tendency(no_of_scalars)
+    real(wp),intent(inout)            :: radiation_tendency(no_of_scalars)
     ! surface temperature
-    real(wp),intent(in)              :: temp_sfc          (no_of_scalars/no_of_layers)
+    real(wp),intent(in)               :: temp_sfc          (no_of_scalars/no_of_layers)
     ! surface shortwave in
-    real(wp),intent(inout)           :: sfc_sw_in         (no_of_scalars/no_of_layers)
+    real(wp),intent(inout)            :: sfc_sw_in         (no_of_scalars/no_of_layers)
     ! surface longwave out
-    real(wp),intent(inout)           :: sfc_lw_out        (no_of_scalars/no_of_layers)
+    real(wp),intent(inout)            :: sfc_lw_out        (no_of_scalars/no_of_layers)
     
     ! local variables
     ! solar zenith angle
     real(wp)                          :: mu_0(no_of_scalars/no_of_layers)
     ! number of points where it is day
-    integer                          :: no_of_day_points
+    integer                           :: no_of_day_points
     ! loop indices
-    integer                          :: ji,j_day,jk
+    integer                           :: ji,j_day,jk
     ! the indices of columns where it is day
-    integer                          :: day_indices(no_of_scalars/no_of_layers)
+    integer                           :: day_indices(no_of_scalars/no_of_layers)
     ! number of scalars per layer (number of columns)
-    integer                          :: no_of_scalars_h
+    integer                           :: no_of_scalars_h
     ! the resulting fluxes
-    type(ty_fluxes_broadband)        :: fluxes,fluxes_day
+    type(ty_fluxes_broadband)         :: fluxes,fluxes_day
     ! short wave optical properties
-    type(ty_optical_props_2str)      :: optical_props_sw
+    type(ty_optical_props_2str)       :: atmos_props_sw,cloud_props_sw
     ! long wave optical properties
-    type(ty_optical_props_1scl)      :: optical_props_lw
-    ! optical properties of clouds
-    type(ty_cloud_optics)             :: cloud_optics
+    type(ty_optical_props_1scl)       :: atmos_props_lw,cloud_props_lw
     ! top of atmosphere short wave flux
     real(wp),dimension(:,:),allocatable          :: toa_flux ! no_of_day_points,no_of_sw_g_points
     ! long wave source function
-    type(ty_source_func_lw)          :: sources_lw
+    type(ty_source_func_lw)           :: sources_lw
     ! the surface emissivity
     real(wp)                          :: surface_emissivity(no_of_lw_bands,no_of_scalars/no_of_layers)
     ! surface albedo for direct radiation
-    real(wp)                          :: albedo_dir        (no_of_sw_bands,no_of_scalars/no_of_layers)
+    real(wp)                          :: albedo_dir                (no_of_sw_bands,no_of_scalars/no_of_layers)
     ! surface albedo for diffusive radiation
-    real(wp)                          :: albedo_dif        (no_of_sw_bands,no_of_scalars/no_of_layers)
+    real(wp)                          :: albedo_dif                (no_of_sw_bands,no_of_scalars/no_of_layers)
     ! surface albedo for direct radiation (day points only)
-    real(wp)                          :: albedo_dir_day    (no_of_sw_bands,no_of_scalars/no_of_layers)
+    real(wp)                          :: albedo_dir_day            (no_of_sw_bands,no_of_scalars/no_of_layers)
     ! surface albedo for diffusive radiation (day points only)
-    real(wp)                          :: albedo_dif_day    (no_of_sw_bands,no_of_scalars/no_of_layers)
+    real(wp)                          :: albedo_dif_day            (no_of_sw_bands,no_of_scalars/no_of_layers)
     ! solar zenith angle (day points only)
-    real(wp)                          :: mu_0_day(no_of_scalars/no_of_layers)
+    real(wp)                          :: mu_0_day                  (no_of_scalars/no_of_layers)
     ! temperature at the surface (day points only)
-    real(wp)                          :: temp_sfc_day(no_of_scalars/no_of_layers)
+    real(wp)                          :: temp_sfc_day              (no_of_scalars/no_of_layers)
     ! reformatted temperature field
     real(wp)                          :: temperature_rad           (no_of_scalars/no_of_layers,no_of_layers)
     ! reformatted pressure field
@@ -197,8 +206,30 @@ module radiation
     real(wp)                          :: pressure_rad_day          (no_of_scalars/no_of_layers,no_of_layers)
     ! pressure at cell interfaces restricted to day points
     real(wp)                          :: pressure_interface_rad_day(no_of_scalars/no_of_layers,no_of_layers+1)
+    ! liquid water path in g/m^2
+    real(wp)                          :: liquid_water_path      (no_of_scalars/no_of_layers,no_of_layers)
+    ! ice water path g/m^2
+    real(wp)                          :: ice_water_path         (no_of_scalars/no_of_layers,no_of_layers)
+    ! liquid particles effective radius in micro meters 
+    real(wp)                          :: liquid_eff_radius         (no_of_scalars/no_of_layers,no_of_layers)
+    ! ice particles effective radius in micro meters 
+    real(wp)                          :: ice_eff_radius            (no_of_scalars/no_of_layers,no_of_layers)
+    ! liquid water path in g/m^2 restricted to the day points
+    real(wp)                          :: liquid_water_path_day  (no_of_scalars/no_of_layers,no_of_layers)
+    ! ice water path in g/m^2 restricted to the day points
+    real(wp)                          :: ice_water_path_day     (no_of_scalars/no_of_layers,no_of_layers)
+    ! liquid particles effective radius in micro meters restricted to the day points
+    real(wp)                          :: liquid_eff_radius_day     (no_of_scalars/no_of_layers,no_of_layers)
+    ! ice particles effective radius in micro meters restricted to the day points
+    real(wp)                          :: ice_eff_radius_day        (no_of_scalars/no_of_layers,no_of_layers)
     ! scale height of the atmosphere
-    real(wp),parameter               :: scale_height = 8.e3_wp
+    real(wp)                          :: scale_height = 8.e3_wp
+    ! representative value of liquid particle radius
+    real(wp)                          :: liquid_eff_radius_value
+    ! representative value of ice particle radius
+    real(wp)                          :: ice_eff_radius_value
+    ! layer thickness
+    real(wp)                          :: thickness
     
     ! calculation of the number of columns
     no_of_scalars_h =  no_of_scalars/no_of_layers
@@ -211,7 +242,7 @@ module radiation
     albedo_dir        (:,:) =  0.12_wp
     albedo_dif        (:,:) =  0.12_wp
     
-    ! reformatting the thermodynamical state for RTE+RRTMGP
+    ! reformatting the thermodynamical state of the gas phase for RTE+RRTMGP
     do ji = 1,no_of_scalars_h
       do jk = 1,no_of_layers
         temperature_rad(ji,jk) = temperature_gas((jk-1)*no_of_scalars_h+ji)
@@ -219,6 +250,19 @@ module radiation
         pressure_rad(ji,jk) = specific_gas_constants(0) &
         *mass_densities(no_of_condensed_constituents*no_of_scalars &
         + (jk-1)*no_of_scalars_h+ji)*temperature_rad(ji,jk)
+      enddo
+    enddo
+    
+    ! reformatting the clouds for RTE+RRTMGP
+    liquid_eff_radius_value = 0.5_wp*(cloud_optics_sw%get_min_radius_liq()+cloud_optics_sw%get_max_radius_liq())
+    ice_eff_radius_value    = 0.5_wp*(cloud_optics_sw%get_min_radius_ice()+cloud_optics_sw%get_max_radius_ice())
+    do ji = 1,no_of_scalars_h
+      do jk = 1,no_of_layers
+        thickness = z_vector(ji+(jk-1)*no_of_scalars_h)-z_vector(ji+jk*no_of_scalars_h)
+        liquid_water_path(ji,jk) = thickness*1000._wp*mass_densities(no_of_scalars+(jk-1)*no_of_scalars_h+ji)
+        ice_water_path(ji,jk) = thickness*1000._wp*mass_densities((jk-1)*no_of_scalars_h+ji)
+        liquid_eff_radius(ji,jk) = merge(liquid_eff_radius_value,0._wp,liquid_water_path(ji,jk) > 0._wp)
+        ice_eff_radius(ji,jk) = merge(ice_eff_radius_value,0._wp,ice_water_path(ji,jk) > 0._wp)
       enddo
     enddo
     
@@ -333,7 +377,11 @@ module radiation
       mu_0_day(j_day)                    = mu_0(day_indices(j_day))
       temp_sfc_day(j_day)                = temp_sfc(day_indices(j_day))
       albedo_dir_day(:,j_day)            = albedo_dir(:,day_indices(j_day))  
-      albedo_dif_day(:,j_day)            = albedo_dif(:,day_indices(j_day))   
+      albedo_dif_day(:,j_day)            = albedo_dif(:,day_indices(j_day))
+      liquid_water_path_day(j_day,:)     = liquid_water_path(day_indices(j_day),:)
+      ice_water_path_day(j_day,:)        = ice_water_path(day_indices(j_day),:)
+      liquid_eff_radius_day(j_day,:)     = liquid_eff_radius(day_indices(j_day),:)
+      ice_eff_radius_day(j_day,:)        = ice_eff_radius(day_indices(j_day),:)
     end do
     
     ! setting the volume mixing ratios of the gases for the short wave calculation
@@ -343,23 +391,40 @@ module radiation
     ! initializing the short wave fluxes
     call init_fluxes(fluxes_day,no_of_day_points,no_of_layers+1,no_of_sw_bands)
     
+    ! reading the SW spectral properties of clouds
+    call handle_error(cloud_props_sw%init(k_dist_sw%get_band_lims_wavenumber()))
+    
     ! allocating the short wave optical properties
-    call handle_error(optical_props_sw%alloc_2str(no_of_day_points,no_of_layers,k_dist_sw))
+    call handle_error(atmos_props_sw%alloc_2str(no_of_day_points,no_of_layers,k_dist_sw))
+    
+    ! allocating the short wave optical properties of the clouds
+    call handle_error(cloud_props_sw%alloc_2str(no_of_day_points,no_of_layers))
     
     ! allocating the TOA flux
     allocate(toa_flux(no_of_day_points,k_dist_sw%get_ngpt()))
     
-    ! setting the short wave optical properties
+    ! setting the short wave optical properties of the gas phase
     call handle_error(k_dist_sw%gas_optics(pressure_rad_day(1:no_of_day_points,:),          &
                                            pressure_interface_rad_day(1:no_of_day_points,:),&
                                            temperature_rad_day(1:no_of_day_points,:),       &
                                            gas_concentrations_sw,                           &
-                                           optical_props_sw,                                &
+                                           atmos_props_sw,                                &
                                            toa_flux))
+    
+    ! calculating the SW properties of the clouds
+    call handle_error(cloud_optics_sw%cloud_optics(liquid_water_path_day(1:no_of_day_points,:), &
+                                                   ice_water_path_day(1:no_of_day_points,:),    &
+                                                   liquid_eff_radius_day(1:no_of_day_points,:),    &
+                                                   ice_eff_radius_day(1:no_of_day_points,:),       &
+                                                   cloud_props_sw))
+    
+    ! adding the SW cloud properties to the gas properties to obtain the atmosphere's properties
+    call handle_error(cloud_props_sw%delta_scale())
+    call handle_error(cloud_props_sw%increment(atmos_props_sw))
     
     ! calculate shortwave radiative fluxes (only the day points are handed over
     ! for efficiency)
-    call handle_error(rte_sw(optical_props_sw,                    &
+    call handle_error(rte_sw(atmos_props_sw,                    &
                              .true.,                              &
                              mu_0_day(1:no_of_day_points),        &
                              toa_flux,                            &
@@ -389,24 +454,40 @@ module radiation
     ! initializing the long wave fluxes
     call init_fluxes(fluxes,no_of_scalars_h,no_of_layers+1,no_of_lw_bands)
     
-    ! allocating the long wave optical properties
-    call handle_error(optical_props_lw%alloc_1scl(no_of_scalars_h,no_of_layers,k_dist_lw))
+    ! reading the LW spectral properties of clouds
+    call handle_error(cloud_props_lw%init(k_dist_lw%get_band_lims_wavenumber()))
+    
+    ! allocating the long wave optical properties of the gas phase
+    call handle_error(atmos_props_lw%alloc_1scl(no_of_scalars_h,no_of_layers,k_dist_lw))
+    
+    ! allocating the long wave optical properties of the clouds
+    call handle_error(cloud_props_lw%alloc_1scl(no_of_scalars_h,no_of_layers))
     
     ! allocating the long wave source function
     call handle_error(sources_lw%alloc(no_of_scalars_h,no_of_layers,k_dist_lw))
     
-    ! setting the long wave optical properties
+    ! setting the long wave optical properties of the gas phase
     call handle_error(k_dist_lw%gas_optics(pressure_rad,                     &
                                            pressure_interface_rad,           &
                                            temperature_rad,                  &
                                            temp_sfc,                         &
                                            gas_concentrations_lw,            &
-                                           optical_props_lw,                 &
+                                           atmos_props_lw,                 &
                                            sources_lw,                       &
                                            tlev = temperature_interface_rad))
     
+    ! calculating the LW properties of the clouds
+    call handle_error(cloud_optics_lw%cloud_optics(liquid_water_path, &
+                                                   ice_water_path,    &
+                                                   liquid_eff_radius,    &
+                                                   ice_eff_radius,       &
+                                                   cloud_props_lw))
+    
+    ! adding the LW cloud properties to the gas properties to obtain the atmosphere's properties
+    call handle_error(cloud_props_lw%increment(atmos_props_lw))
+    
     ! calculate longwave radiative fluxes
-    call handle_error(rte_lw(optical_props_lw,  &
+    call handle_error(rte_lw(atmos_props_lw,  &
                              .true.,            &
                              sources_lw,        &
                              surface_emissivity,&
