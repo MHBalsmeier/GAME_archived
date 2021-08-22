@@ -264,16 +264,18 @@ if uniform_range == 1:
 	else:
 		total_min = np.min(values);
 		total_max = np.max(values);
+	if total_min == total_max:
+		total_max = total_min + 1;
+	if short_name == "tcc":
+		total_min = 0;
+		total_max = 100;
 	values_range_for_plot = total_max - total_min;
-	if (values_range_for_plot > 0.5):
-		total_min = np.floor(total_min);
-		total_max = np.ceil(total_max);
-		values_range_for_plot = total_max - total_min;
-	if (values_range_for_plot == 0):
-		values_range_for_plot = 0.1;
-	color_plot_dist = values_range_for_plot/80;
+	total_min = np.floor(total_min);
+	total_max = np.ceil(total_max);
+	values_range_for_plot = total_max - total_min;
+	color_plot_dist = values_range_for_plot/10;
 	bounds = np.arange(total_min, total_max + color_plot_dist, color_plot_dist);
-	color_bar_dist = values_range_for_plot/5;
+	color_bar_dist = values_range_for_plot/10;
 	cmap = plt.get_cmap(colormap);
 
 fig_size = 7;
@@ -286,15 +288,17 @@ for i in range(int((run_span - start_time_since_init)/plot_interval) + 1):
 			total_min = np.min(values[:, :, i]);
 			total_max = np.max(values[:, :, i]);
 		if total_min == total_max:
-			total_max = total_min + 0.001;
+			total_max = total_min + 1;
+		if short_name == "tcc":
+			total_min = 0;
+			total_max = 100;
 		values_range_for_plot = total_max - total_min;
-		if (values_range_for_plot > 0.5):
-			total_min = np.floor(total_min);
-			total_max = np.ceil(total_max);
-			values_range_for_plot = total_max - total_min;
-		color_plot_dist = values_range_for_plot/80;
+		total_min = np.floor(total_min);
+		total_max = np.ceil(total_max);
+		values_range_for_plot = total_max - total_min;
+		color_plot_dist = values_range_for_plot/10;
 		bounds = np.arange(total_min, total_max + color_plot_dist, color_plot_dist);
-		color_bar_dist = values_range_for_plot/5;
+		color_bar_dist = values_range_for_plot/10;
 		cmap = plt.get_cmap(colormap);
 	time_after_init =  start_time_since_init + i*plot_interval;
 	if surface_bool == 0:
