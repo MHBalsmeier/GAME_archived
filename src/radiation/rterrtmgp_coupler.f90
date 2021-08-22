@@ -254,17 +254,24 @@ module radiation
     enddo
     
     ! reformatting the clouds for RTE+RRTMGP
-    liquid_eff_radius_value = 0.5_wp*(cloud_optics_sw%get_min_radius_liq()+cloud_optics_sw%get_max_radius_liq())
-    ice_eff_radius_value    = 0.5_wp*(cloud_optics_sw%get_min_radius_ice()+cloud_optics_sw%get_max_radius_ice())
-    do ji = 1,no_of_scalars_h
-      do jk = 1,no_of_layers
-        thickness = z_vector(ji+(jk-1)*no_of_scalars_h)-z_vector(ji+jk*no_of_scalars_h)
-        liquid_water_path(ji,jk) = thickness*1000._wp*mass_densities(no_of_scalars+(jk-1)*no_of_scalars_h+ji)
-        ice_water_path(ji,jk) = thickness*1000._wp*mass_densities((jk-1)*no_of_scalars_h+ji)
-        liquid_eff_radius(ji,jk) = merge(liquid_eff_radius_value,0._wp,liquid_water_path(ji,jk) > 0._wp)
-        ice_eff_radius(ji,jk) = merge(ice_eff_radius_value,0._wp,ice_water_path(ji,jk) > 0._wp)
+    if (no_of_condensed_constituents > 1) then
+      liquid_eff_radius_value = 0.5_wp*(cloud_optics_sw%get_min_radius_liq()+cloud_optics_sw%get_max_radius_liq())
+      ice_eff_radius_value    = 0.5_wp*(cloud_optics_sw%get_min_radius_ice()+cloud_optics_sw%get_max_radius_ice())
+      do ji = 1,no_of_scalars_h
+        do jk = 1,no_of_layers
+          thickness = z_vector(ji+(jk-1)*no_of_scalars_h)-z_vector(ji+jk*no_of_scalars_h)
+          liquid_water_path(ji,jk) = thickness*1000._wp*mass_densities(no_of_scalars+(jk-1)*no_of_scalars_h+ji)
+          ice_water_path(ji,jk) = thickness*1000._wp*mass_densities((jk-1)*no_of_scalars_h+ji)
+          liquid_eff_radius(ji,jk) = merge(liquid_eff_radius_value,0._wp,liquid_water_path(ji,jk) > 0._wp)
+          ice_eff_radius(ji,jk) = merge(ice_eff_radius_value,0._wp,ice_water_path(ji,jk) > 0._wp)
+        enddo
       enddo
-    enddo
+    else
+      liquid_water_path(:,:) = 0._wp
+      ice_water_path(:,:)    = 0._wp
+      liquid_eff_radius(:,:) = 0._wp
+      ice_eff_radius(:,:)    = 0._wp
+    endif
     
     ! moving the temperature into the allowed area
     do ji = 1,no_of_scalars_h
@@ -391,7 +398,7 @@ module radiation
     ! initializing the short wave fluxes
     call init_fluxes(fluxes_day,no_of_day_points,no_of_layers+1,no_of_sw_bands)
     
-    ! reading the SW spectral properties of clouds
+    ! setting the bands for the SW cloud properties
     call handle_error(cloud_props_sw%init(k_dist_sw%get_band_lims_wavenumber()))
     
     ! allocating the short wave optical properties
@@ -418,8 +425,10 @@ module radiation
                                                    ice_eff_radius_day(1:no_of_day_points,:),       &
                                                    cloud_props_sw))
     
-    ! adding the SW cloud properties to the gas properties to obtain the atmosphere's properties
+    ! this seems to be just a check
     call handle_error(cloud_props_sw%delta_scale())
+    
+    ! adding the SW cloud properties to the gas properties to obtain the atmosphere's properties
     call handle_error(cloud_props_sw%increment(atmos_props_sw))
     
     ! calculate shortwave radiative fluxes (only the day points are handed over
@@ -454,7 +463,7 @@ module radiation
     ! initializing the long wave fluxes
     call init_fluxes(fluxes,no_of_scalars_h,no_of_layers+1,no_of_lw_bands)
     
-    ! reading the LW spectral properties of clouds
+    ! setting the bands for the LW cloud properties
     call handle_error(cloud_props_lw%init(k_dist_lw%get_band_lims_wavenumber()))
     
     ! allocating the long wave optical properties of the gas phase
