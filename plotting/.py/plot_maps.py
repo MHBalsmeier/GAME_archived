@@ -274,6 +274,8 @@ if uniform_range == 1:
 	total_max = np.ceil(total_max);
 	values_range_for_plot = total_max - total_min;
 	color_plot_dist = values_range_for_plot/10;
+	if short_name == "2t":
+		color_plot_dist = values_range_for_plot/20;
 	bounds = np.arange(total_min, total_max + color_plot_dist, color_plot_dist);
 	color_bar_dist = values_range_for_plot/10;
 	cmap = plt.get_cmap(colormap);
@@ -297,6 +299,8 @@ for i in range(int((run_span - start_time_since_init)/plot_interval) + 1):
 		total_max = np.ceil(total_max);
 		values_range_for_plot = total_max - total_min;
 		color_plot_dist = values_range_for_plot/10;
+		if short_name == "2t":
+			color_plot_dist = values_range_for_plot/20;
 		bounds = np.arange(total_min, total_max + color_plot_dist, color_plot_dist);
 		color_bar_dist = values_range_for_plot/10;
 		cmap = plt.get_cmap(colormap);
