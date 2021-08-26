@@ -264,16 +264,11 @@ if uniform_range == 1:
 	else:
 		total_min = np.nanmin(values);
 		total_max = np.nanmax(values);
-	if total_min == total_max:
-		total_max = total_min + 1;
-	if short_name == "tcc" or short_name == "r":
-		total_min = 0;
-		total_max = 100;
-	total_min = np.floor(total_min);
-	total_max = np.ceil(total_max);
+	total_min, total_max = mp.modify_value_boundaries(total_min, total_max, short_name);
 	values_range_for_plot = total_max - total_min;
-	values_range_for_plot = values_range_for_plot + np.mod(10 - np.mod(values_range_for_plot, 10), 10);
-	total_max = total_max + np.mod(10 - np.mod(values_range_for_plot, 10), 10);
+	if short_name == "sp" or short_name == "prmsl":
+		values_range_for_plot = values_range_for_plot + np.mod(10 - np.mod(values_range_for_plot, 10), 10);
+		total_max = total_max + np.mod(10 - np.mod(values_range_for_plot, 10), 10);
 	color_plot_dist = values_range_for_plot/10;
 	if short_name == "2t":
 		color_plot_dist = values_range_for_plot/20;
@@ -290,16 +285,11 @@ for i in range(int((run_span - start_time_since_init)/plot_interval) + 1):
 		else:
 			total_min = np.nanmin(values[:, :, i]);
 			total_max = np.nanmax(values[:, :, i]);
-		if total_min == total_max:
-			total_max = total_min + 1;
-		if short_name == "tcc" or short_name == "r":
-			total_min = 0;
-			total_max = 100;
-		total_min = np.floor(total_min);
-		total_max = np.ceil(total_max);
+		total_min, total_max = mp.modify_value_boundaries(total_min, total_max, short_name);
 		values_range_for_plot = total_max - total_min;
-		values_range_for_plot = values_range_for_plot + np.mod(10 - np.mod(values_range_for_plot, 10), 10);
-		total_max = total_max + np.mod(10 - np.mod(values_range_for_plot, 10), 10);
+		if short_name == "sp" or short_name == "prmsl":
+			values_range_for_plot = values_range_for_plot + np.mod(10 - np.mod(values_range_for_plot, 10), 10);
+			total_max = total_max + np.mod(10 - np.mod(values_range_for_plot, 10), 10);
 		color_plot_dist = values_range_for_plot/10;
 		if short_name == "2t":
 			color_plot_dist = values_range_for_plot/20;
@@ -362,8 +352,11 @@ for i in range(int((run_span - start_time_since_init)/plot_interval) + 1):
 	new_cube = iris.cube.Cube(values[:, :, i], units = unit_string_for_iris, dim_coords_and_dims = [(lat_coord, 0), (lon_coord, 1)]);
 	if contourf_plot == 1:
 		cf = iplt.contourf(new_cube, cmap = cmap, levels = bounds);
-		cbar = plt.colorbar(cf, fraction = 0.02, pad = 0.04, aspect = 80, orientation = "horizontal", ticks = np.arange(total_min, total_max + color_bar_dist, color_bar_dist));
-		cbar.ax.tick_params(labelsize = 12)
+		if scope == "WORLD":
+			cbar = plt.colorbar(cf, fraction = 0.02, pad = 0.1, aspect = 80, orientation = "horizontal", ticks = np.arange(total_min, total_max + color_bar_dist, color_bar_dist));
+		else:
+			cbar = plt.colorbar(cf, fraction = 0.02, pad = 0.05, aspect = 80, orientation = "horizontal", ticks = np.arange(total_min, total_max + color_bar_dist, color_bar_dist));
+		cbar.ax.tick_params(labelsize = 12);
 		cbar.set_label(unit_string, fontsize = 16);
 	else:
 		if short_name == "gh":

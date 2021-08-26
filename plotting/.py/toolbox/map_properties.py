@@ -1,6 +1,20 @@
 # This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 # Github repository: https://github.com/OpenNWP/GAME
 
+import numpy as np;
+
+def modify_value_boundaries(total_min, total_max, short_name):
+	if short_name == "tcc" or short_name == "r":
+		total_min = 0;
+		total_max = 100;
+	else:
+		if total_min == total_max:
+			total_max = total_min + 1;
+		else:
+			total_min = np.floor(total_min);
+			total_max = np.ceil(total_max);
+	return total_min, total_max;
+
 def return_central_point(scope):
 	if scope == "CEU":
 		central_lat_deg = 50;
