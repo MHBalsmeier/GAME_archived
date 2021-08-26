@@ -141,21 +141,18 @@ Scalar_field v_at_cell;
 double prep_for_vert_diffusion[NO_OF_H_VECTORS - NO_OF_VECTORS_H];
 } Diagnostics;
 
-// anything connected to radiation
+// needed for the radiation calculation
 typedef struct radiation {
-double lat_scal_rad[NO_OF_SCALARS_RAD_PER_LAYER];
-double lon_scal_rad[NO_OF_SCALARS_RAD_PER_LAYER];
-double sfc_sw_in[NO_OF_SCALARS_H];
-double sfc_lw_out[NO_OF_SCALARS_H];
-double sfc_sw_in_rad[NO_OF_SCALARS_RAD_PER_LAYER];
-double sfc_lw_out_rad[NO_OF_SCALARS_RAD_PER_LAYER];
-double temp_sfc_rad[NO_OF_SCALARS_RAD_PER_LAYER];
-double z_scal_rad[NO_OF_SCALARS_RAD];
-double z_vect_rad[NO_OF_SCALARS_RAD + NO_OF_SCALARS_RAD_PER_LAYER];
-double rho_rad[NO_OF_CONSTITUENTS*NO_OF_SCALARS_RAD];
-double temp_rad[NO_OF_SCALARS_RAD];
-double rad_tend_rad[NO_OF_SCALARS_RAD];
-Scalar_field radiation_tendency;
+double lat_scal[NO_OF_SCALARS_RAD_PER_LAYER];
+double lon_scal[NO_OF_SCALARS_RAD_PER_LAYER];
+double sfc_sw_in[NO_OF_SCALARS_RAD_PER_LAYER];
+double sfc_lw_out[NO_OF_SCALARS_RAD_PER_LAYER];
+double temp_sfc[NO_OF_SCALARS_RAD_PER_LAYER];
+double z_scal[NO_OF_SCALARS_RAD];
+double z_vect[NO_OF_SCALARS_RAD + NO_OF_SCALARS_RAD_PER_LAYER];
+double rho[NO_OF_CONSTITUENTS*NO_OF_SCALARS_RAD];
+double temp[NO_OF_SCALARS_RAD];
+double rad_tend[NO_OF_SCALARS_RAD];
 } Radiation;
 
 // Collects forcings.
@@ -165,6 +162,9 @@ Vector_field pressure_gradient_acc_neg_nl;
 Vector_field pressure_gradient_acc_neg_l;
 Vector_field e_kin_grad;
 Vector_field pot_vort_tend;
+double sfc_sw_in[NO_OF_SCALARS_H];
+double sfc_lw_out[NO_OF_SCALARS_H];
+Scalar_field radiation_tendency;
 } Forcings;
 
 // Info on the run configuration is collected here.

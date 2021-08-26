@@ -19,7 +19,7 @@ This file manages the RKHEVI time stepping.
 #include <stdlib.h>
 #include <stdio.h>
 
-int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Dualgrid *dualgrid, Radiation *radiation, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, double delta_t, double time_coordinate, int total_step_counter)
+int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Dualgrid *dualgrid, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, double delta_t, double time_coordinate, int total_step_counter)
 {
 	// slow terms (momentum advection and diffusion) update switch
 	int slow_update_bool = 0;
@@ -40,7 +40,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
     // interaction with soil (only useful if real radiation is on)
     if (config_info -> rad_on == 1)
     {
-    	soil_interaction(soil, diagnostics, radiation, delta_t);
+    	soil_interaction(soil, diagnostics, forcings, delta_t);
     }
     
 	/*
@@ -82,9 +82,9 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 	    // Radiation is updated here.
 		if (config_info -> rad_on > 0 && config_info -> rad_update == 1 && i == 0)
 		{
-			call_radiation(state_old, soil, grid, dualgrid, radiation, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, time_coordinate);
+			call_radiation(state_old, soil, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, time_coordinate);
 		}
-		scalar_tendencies_expl(state_old, state_new, state_tendency, soil, grid, delta_t, diagnostics, forcings, radiation, irrev, config_info, i);
+		scalar_tendencies_expl(state_old, state_new, state_tendency, soil, grid, delta_t, diagnostics, forcings, irrev, config_info, i);
 
 		// 3.) Vertical sound wave solver.
 		// -------------------------------

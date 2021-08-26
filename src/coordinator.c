@@ -483,9 +483,8 @@ int main(int argc, char *argv[])
     }
     Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
     Forcings *forcings = calloc(1, sizeof(Forcings));
-	Radiation *radiation = calloc(1, sizeof(Radiation));
     // writing out the initial state of the model run
-    write_out(state_old, wind_h_10m_array, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, radiation, io_config, config_info);
+    write_out(state_old, wind_h_10m_array, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
     t_write += WRITE_OUT_INTERVAL;
     printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     double t_0;
@@ -553,7 +552,7 @@ int main(int argc, char *argv[])
     	}
     	
     	// Time step integration.
-    	manage_rkhevi(state_old, state_new, soil, grid, dualgrid, radiation, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
+    	manage_rkhevi(state_old, state_new, soil, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
     	// This switch can be set to zero now and remains there.
     	config_info -> totally_first_step_bool = 0;
 		time_step_counter += 1;	
@@ -630,7 +629,7 @@ int main(int argc, char *argv[])
         if(t_0 + delta_t >= t_write + 300 && t_0 <= t_write + 300)
         {
         	// here, output is actually written
-            write_out(state_write, wind_h_10m_array, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, radiation, io_config, config_info);
+            write_out(state_write, wind_h_10m_array, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
             // setting the next output time
             t_write += WRITE_OUT_INTERVAL;
             
@@ -669,7 +668,6 @@ int main(int argc, char *argv[])
     free(diagnostics);
     free(forcings);
     free(state_tendency);
-    free(radiation);
     free(grid);
     free(dualgrid);
     free(state_old);

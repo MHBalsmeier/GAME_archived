@@ -18,7 +18,7 @@ const double c_v = 4184;
 const double heat_trans_coeff = 50;
 const double t_min = 273.15 - 30;
 
-int soil_interaction(Soil *soil, Diagnostics *diagnostics, Radiation *radiation, double delta_t)
+int soil_interaction(Soil *soil, Diagnostics *diagnostics, Forcings *forcings, double delta_t)
 {
 	/*
 	This function computes the interaction of the dynamical core with the soil.
@@ -36,9 +36,9 @@ int soil_interaction(Soil *soil, Diagnostics *diagnostics, Radiation *radiation,
 		// sensible heat flux
 		+= (soil -> power_flux_density_sensible[i]
 		// shortwave inbound radiation
-		+ radiation -> sfc_sw_in[i]
+		+ forcings -> sfc_sw_in[i]
 		// longwave outbound radiation
-		- radiation -> sfc_lw_out[i])
+		- forcings -> sfc_lw_out[i])
 		/(thickness*c_v*density)*delta_t;
 		// clipping too low values
 		if (soil -> temperature[i] < t_min)

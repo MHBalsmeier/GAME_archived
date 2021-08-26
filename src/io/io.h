@@ -6,7 +6,7 @@ Github repository: https://github.com/OpenNWP/GAME
 int set_grid_properties(Grid *, Dualgrid *, char[]);
 int calc_delta_t_and_related(double, double *, Grid *, Dualgrid *, State *, Config_info *);
 int set_init_data(char[], State *, Grid *);
-int write_out(State *, double [], int, double, double, Diagnostics *, Forcings *, Grid *, Dualgrid *, char [], Radiation *, Io_config *, Config_info *);
+int write_out(State *, double [], int, double, double, Diagnostics *, Forcings *, Grid *, Dualgrid *, char [], Io_config *, Config_info *);
 int write_out_integral(State *, int, Grid *, Dualgrid *, Diagnostics *, int);
 int interpolation_t(State *, State *, State *, double, double, double, Grid *);
 int epv_diagnostics(Curl_field, State *, Scalar_field, Grid *, Dualgrid *);

@@ -19,7 +19,7 @@ int create_rad_array_vector(double [], double [], int);
 int remap_to_original(double [], double [], int);
 int remap_to_original_scalar_h(double [], double [], int);
 
-int call_radiation(State *state, Soil *soil, Grid *grid, Dualgrid *dualgrid, Radiation *radiation, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, double delta_t, double time_coordinate)
+int call_radiation(State *state, Soil *soil, Grid *grid, Dualgrid *dualgrid, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, double delta_t, double time_coordinate)
 {
 	printf("Starting update of radiative fluxes ...\n");
 	int no_of_scalars = NO_OF_SCALARS_RAD;
@@ -27,30 +27,32 @@ int call_radiation(State *state, Soil *soil, Grid *grid, Dualgrid *dualgrid, Rad
 	int no_of_condensed_constituents = NO_OF_CONDENSED_CONSTITUENTS;
 	int no_of_layers = NO_OF_LAYERS;
 	// loop over all radiation blocks
+	#pragma omp parallel for
 	for (int rad_block_index = 0; rad_block_index < NO_OF_RAD_BLOCKS; ++rad_block_index)
 	{
+		Radiation *radiation = calloc(1, sizeof(Radiation));
 		// remapping all the arrays
-		create_rad_array_scalar_h(grid -> latitude_scalar, radiation -> lat_scal_rad, rad_block_index);
-		create_rad_array_scalar_h(grid -> longitude_scalar, radiation -> lon_scal_rad, rad_block_index);
-		create_rad_array_scalar_h(soil -> temperature, radiation -> temp_sfc_rad, rad_block_index);
-		create_rad_array_scalar(grid -> z_scalar, radiation -> z_scal_rad, rad_block_index);
-		create_rad_array_vector(grid -> z_vector, radiation -> z_vect_rad, rad_block_index);
-		create_rad_array_mass_den(state -> rho, radiation -> rho_rad, rad_block_index);
-		create_rad_array_scalar(diagnostics -> temperature_gas, radiation -> temp_rad, rad_block_index);
+		create_rad_array_scalar_h(grid -> latitude_scalar, radiation -> lat_scal, rad_block_index);
+		create_rad_array_scalar_h(grid -> longitude_scalar, radiation -> lon_scal, rad_block_index);
+		create_rad_array_scalar_h(soil -> temperature, radiation -> temp_sfc, rad_block_index);
+		create_rad_array_scalar(grid -> z_scalar, radiation -> z_scal, rad_block_index);
+		create_rad_array_vector(grid -> z_vector, radiation -> z_vect, rad_block_index);
+		create_rad_array_mass_den(state -> rho, radiation -> rho, rad_block_index);
+		create_rad_array_scalar(diagnostics -> temperature_gas, radiation -> temp, rad_block_index);
 		// calling the radiation routine
 		// RTE+RRTMGP
 		if (config_info -> rad_on == 1)
 		{
-			calc_radiative_flux_convergence(radiation -> lat_scal_rad,
-			radiation -> lon_scal_rad,
-			radiation -> z_scal_rad,
-			radiation -> z_vect_rad,
-			radiation -> rho_rad,
-			radiation -> temp_rad,
-			radiation -> rad_tend_rad,
-			radiation -> temp_sfc_rad,
-			radiation -> sfc_sw_in_rad,
-			radiation -> sfc_lw_out_rad,
+			calc_radiative_flux_convergence(radiation -> lat_scal,
+			radiation -> lon_scal,
+			radiation -> z_scal,
+			radiation -> z_vect,
+			radiation -> rho,
+			radiation -> temp,
+			radiation -> rad_tend,
+			radiation -> temp_sfc,
+			radiation -> sfc_sw_in,
+			radiation -> sfc_lw_out,
 			&no_of_scalars, &no_of_layers,
 			&no_of_constituents, &no_of_condensed_constituents,
 			&time_coordinate);
@@ -58,12 +60,13 @@ int call_radiation(State *state, Soil *soil, Grid *grid, Dualgrid *dualgrid, Rad
 		// Held-Suarez
 		if (config_info -> rad_on == 2)
 		{
-			held_suar(radiation -> lat_scal_rad, radiation -> z_scal_rad, radiation -> rho_rad, radiation -> temp_rad, radiation -> rad_tend_rad);
+			held_suar(radiation -> lat_scal, radiation -> z_scal, radiation -> rho, radiation -> temp, radiation -> rad_tend);
 		}
 		// filling the actual radiation tendency
-		remap_to_original(radiation -> rad_tend_rad, radiation -> radiation_tendency, rad_block_index);
-		remap_to_original_scalar_h(radiation -> sfc_sw_in_rad, radiation -> sfc_sw_in, rad_block_index);
-		remap_to_original_scalar_h(radiation -> sfc_lw_out_rad, radiation -> sfc_lw_out, rad_block_index);
+		remap_to_original(radiation -> rad_tend, forcings -> radiation_tendency, rad_block_index);
+		remap_to_original_scalar_h(radiation -> sfc_sw_in, forcings -> sfc_sw_in, rad_block_index);
+		remap_to_original_scalar_h(radiation -> sfc_lw_out, forcings -> sfc_lw_out, rad_block_index);
+		free(radiation);
 	}
 	printf("Update of radiative fluxes completed.\n");
 	return 0;

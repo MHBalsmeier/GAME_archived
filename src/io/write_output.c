@@ -39,7 +39,7 @@ int set_basic_props2grib(codes_handle *, long, long, long, long, long, long);
 double calc_std_dev(double [], int);
 int global_scalar_integrator(Scalar_field, Grid *, double *);
 
-int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Radiation *radiation, Io_config *io_config, Config_info *config_info)
+int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Io_config *io_config, Config_info *config_info)
 {
 	// Diagnostics, forcings and radiation are primarily handed over for checks.
 	
