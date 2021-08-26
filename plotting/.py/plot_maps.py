@@ -335,6 +335,17 @@ for i in range(int((run_span - start_time_since_init)/plot_interval) + 1):
 		proj = ccrs.Gnomonic(central_latitude = desired_lat_deg, central_longitude = desired_lon_deg, globe = None);
 		ax = plt.axes(projection = proj);
 		ax.set_extent([-width_map/2, width_map/2, -height_map/2, height_map/2], crs = proj);
+	if (projection == "Stereographic"):
+		fig = plt.figure(figsize = (fig_size, fig_size));
+		if scope == "ARCTIC":
+			proj = ccrs.NorthPolarStereo();
+			ax = plt.axes(projection = proj);
+			ax.set_extent([-180, 180, 40, 90], crs=ccrs.PlateCarree());
+		if scope == "ANTARCTIC":
+			proj = ccrs.SouthPolarStereo();
+			ax = plt.axes(projection = proj);
+			ax.set_extent([-180, 180, -40, -90], crs=ccrs.PlateCarree());
+		coord_sys = cs.GeogCS(6371229);
 	if (projection != "Gnomonic"):
 		lat_coord = iris.coords.DimCoord(lat_plot_deg, standard_name = "latitude", units = "degrees", coord_system = coord_sys);
 		lon_coord = iris.coords.DimCoord(lon_plot_deg, standard_name = "longitude", units = "degrees", coord_system = coord_sys);
@@ -346,8 +357,6 @@ for i in range(int((run_span - start_time_since_init)/plot_interval) + 1):
 	gl = ax.gridlines(draw_labels = True);
 	gl.xformatter = LONGITUDE_FORMATTER;
 	gl.yformatter = LATITUDE_FORMATTER;
-	if scope == "World":
-		gl.left_labels = False;
 	new_cube = iris.cube.Cube(values[:, :, i], units = unit_string_for_iris, dim_coords_and_dims = [(lat_coord, 0), (lon_coord, 1)]);
 	if contourf_plot == 1:
 		cf = iplt.contourf(new_cube, cmap = cmap, levels = bounds);
@@ -367,11 +376,10 @@ for i in range(int((run_span - start_time_since_init)/plot_interval) + 1):
 		plt.clabel(c, inline = True, fmt = "%1.0f", fontsize = 12, colors = "k");
 	if short_name == "surface_wind":
 		ax.barbs(lon_plot_deg, lat_plot_deg, values_10u[:, :, i], values_10v[:, :, i], length = 6, sizes = dict(emptybarb = 0.3, spacing = 0.2, height = 0.5), linewidth = 1.1, transform = ccrs.PlateCarree());
-	if (scope != "World"):
-		ax.add_feature(cfeature.LAND);
-		ax.add_feature(cfeature.OCEAN);
-		countries = cfeature.NaturalEarthFeature(category = "cultural", name = "admin_0_countries", scale = "10m", facecolor = "none");
-		ax.add_feature(countries, edgecolor = "gray");
+	ax.add_feature(cfeature.LAND);
+	ax.add_feature(cfeature.OCEAN);
+	countries = cfeature.NaturalEarthFeature(category = "cultural", name = "admin_0_countries", scale = "10m", facecolor = "none");
+	ax.add_feature(countries, edgecolor = "gray");
 	time_after_init_title = time_after_init;
 	if disp_time_in_hr == 1:
 		time_after_init_title = int(time_after_init/3600);
