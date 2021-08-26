@@ -29,6 +29,8 @@ def vector_2_array(vector, no_of_lines, no_of_columns):
     for i in range(0, no_of_lines):
         for j in range(0, no_of_columns):
             array[i, j] = vector[i*no_of_columns + j];
+            if array[i, j] == 9999:
+            	array[i, j] = "nan";
     return array;
 
 def fetch_model_output(input_file, time_since_init, short_name, level):

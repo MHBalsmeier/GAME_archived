@@ -259,14 +259,14 @@ if projection == "Gnomonic":
 
 if uniform_range == 1:
 	if projection == "Gnomonic":
-		total_min = np.min(values[scope_bool_array, :]);
-		total_max = np.max(values[scope_bool_array, :]);
+		total_min = np.nanmin(values[scope_bool_array, :]);
+		total_max = np.nanmax(values[scope_bool_array, :]);
 	else:
-		total_min = np.min(values);
-		total_max = np.max(values);
+		total_min = np.nanmin(values);
+		total_max = np.nanmax(values);
 	if total_min == total_max:
 		total_max = total_min + 1;
-	if short_name == "tcc":
+	if short_name == "tcc" or short_name == "r":
 		total_min = 0;
 		total_max = 100;
 	values_range_for_plot = total_max - total_min;
@@ -284,14 +284,14 @@ fig_size = 7;
 for i in range(int((run_span - start_time_since_init)/plot_interval) + 1):
 	if uniform_range == 0:
 		if projection == "Gnomonic":
-			total_min = np.min(values[scope_bool_array, i]);
-			total_max = np.max(values[scope_bool_array, i]);
+			total_min = np.nanmin(values[scope_bool_array, i]);
+			total_max = np.nanmax(values[scope_bool_array, i]);
 		else:
-			total_min = np.min(values[:, :, i]);
-			total_max = np.max(values[:, :, i]);
+			total_min = np.nanmin(values[:, :, i]);
+			total_max = np.nanmax(values[:, :, i]);
 		if total_min == total_max:
 			total_max = total_min + 1;
-		if short_name == "tcc":
+		if short_name == "tcc" or short_name == "r":
 			total_min = 0;
 			total_max = 100;
 		values_range_for_plot = total_max - total_min;

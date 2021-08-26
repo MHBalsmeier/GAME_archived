@@ -633,6 +633,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
     Scalar_field *rh = calloc(1, sizeof(Scalar_field));
     Scalar_field *epv = calloc(1, sizeof(Scalar_field));
     Scalar_field *pressure = calloc(1, sizeof(Scalar_field));
+	#pragma omp parallel for
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {    
 	    if (NO_OF_CONSTITUENTS >= 4)
