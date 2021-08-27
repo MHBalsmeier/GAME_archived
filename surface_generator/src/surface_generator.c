@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     // finding the number of points used for the average
     int no_of_avg_points;
     // this is the average number of points of the input dataset per model grid cell 
-    double area_ratio = sqrt(no_of_lat_points*no_of_lon_points/NO_OF_SCALARS_H);
+    double area_ratio = sqrt((no_of_lat_points*no_of_lon_points + 0.0)/NO_OF_SCALARS_H);
     int no_of_cells_for_gliding_avrg = 9;
     no_of_avg_points = (int) no_of_cells_for_gliding_avrg*area_ratio;
     if (no_of_avg_points >= 1)
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 			for (int j = 0; j < no_of_avg_points; ++j)
 			{
 				min_indices_vector[j] = find_min_index_exclude(distance_vector, no_of_lat_points*no_of_lon_points, min_indices_vector, no_of_avg_points);
-				weights_vector[j] = 1/(distance_vector[min_indices_vector[j]] + 0.01);
+				weights_vector[j] = 1/(pow(distance_vector[min_indices_vector[j]], 2 + EPSILON_SECURITY) + EPSILON_SECURITY);
 				weights_sum += weights_vector[j];
 			}
 			oro[i] = 0;

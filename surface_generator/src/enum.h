@@ -4,6 +4,7 @@ Github repository: https://github.com/OpenNWP/GAME
 */
 
 #include <math.h>
+#define EPSILON_SECURITY (1e-10)
 
 enum grid_integers {
 RES_ID = 5,
