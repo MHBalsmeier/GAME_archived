@@ -274,8 +274,6 @@ if uniform_range == 1:
 	if short_name == "cape":
 		values_range_for_plot = values_range_for_plot + np.mod(100 - np.mod(values_range_for_plot, 100), 100);
 		total_max = total_max + np.mod(100 - np.mod(total_max - total_min, 100), 100);
-		print(total_min);
-		print(total_max);
 	color_plot_dist = values_range_for_plot/10;
 	if short_name == "2t":
 		color_plot_dist = values_range_for_plot/20;
