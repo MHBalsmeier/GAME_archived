@@ -268,9 +268,14 @@ if uniform_range == 1:
 		total_max = np.nanmax(values);
 	total_min, total_max = mp.modify_value_boundaries(total_min, total_max, short_name);
 	values_range_for_plot = total_max - total_min;
-	if short_name == "sp" or short_name == "prmsl" or short_name == "cape":
+	if short_name == "sp" or short_name == "prmsl":
 		values_range_for_plot = values_range_for_plot + np.mod(10 - np.mod(values_range_for_plot, 10), 10);
-		total_max = total_max + np.mod(10 - np.mod(values_range_for_plot, 10), 10);
+		total_max = total_max + np.mod(10 - np.mod(total_max - total_min, 10), 10);
+	if short_name == "cape":
+		values_range_for_plot = values_range_for_plot + np.mod(100 - np.mod(values_range_for_plot, 100), 100);
+		total_max = total_max + np.mod(100 - np.mod(total_max - total_min, 100), 100);
+		print(total_min);
+		print(total_max);
 	color_plot_dist = values_range_for_plot/10;
 	if short_name == "2t":
 		color_plot_dist = values_range_for_plot/20;
@@ -289,9 +294,12 @@ for i in range(int((run_span - start_time_since_init)/plot_interval) + 1):
 			total_max = np.nanmax(values[:, :, i]);
 		total_min, total_max = mp.modify_value_boundaries(total_min, total_max, short_name);
 		values_range_for_plot = total_max - total_min;
-		if short_name == "sp" or short_name == "prmsl" or short_name == "cape":
+		if short_name == "sp" or short_name == "prmsl":
 			values_range_for_plot = values_range_for_plot + np.mod(10 - np.mod(values_range_for_plot, 10), 10);
-			total_max = total_max + np.mod(10 - np.mod(values_range_for_plot, 10), 10);
+			total_max = total_max + np.mod(10 - np.mod(total_max - total_min, 10), 10);
+		if short_name == "cape":
+			values_range_for_plot = values_range_for_plot + np.mod(100 - np.mod(values_range_for_plot, 100), 100);
+			total_max = total_max + np.mod(100 - np.mod(total_max - total_min, 100), 100);
 		color_plot_dist = values_range_for_plot/10;
 		if short_name == "2t":
 			color_plot_dist = values_range_for_plot/20;

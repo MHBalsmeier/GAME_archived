@@ -13,6 +13,8 @@ def modify_value_boundaries(total_min, total_max, short_name):
 		else:
 			total_min = np.floor(total_min);
 			total_max = np.ceil(total_max);
+	if short_name == "cape":
+		total_min = 0;
 	return total_min, total_max;
 
 def return_central_point(scope):
