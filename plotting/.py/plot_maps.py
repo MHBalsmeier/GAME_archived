@@ -19,6 +19,7 @@ import matplotlib.offsetbox as offsetbox;
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER;
 import iris.coord_systems as cs;
 import iris.plot as iplt;
+import math;
 run_span = int(sys.argv[1]);
 plot_interval = int(sys.argv[2]);
 level = int(sys.argv[3]);
@@ -117,9 +118,10 @@ if short_name == "10v":
 	surface_bool = 1;
 if short_name == "gust":
 	variable_name = "10 m gusts";
-	unit_string = "m/s";
+	unit_string = "kn";
 	show_level_on = 0;
 	surface_bool = 1;
+	rescale = conv.ms2kn(1);
 if short_name == "rprate":
 	variable_name = "Precipitation rate (rain)";
 	unit_string = "mm/h";
@@ -254,7 +256,7 @@ if projection == "Gnomonic":
 	desired_lat_deg, desired_lon_deg, height_map, width_map = mp.return_central_point(scope);
 	for i in range(len(scope_bool_array[:, 0])):
 		for j in range(len(scope_bool_array[0, :])):
-			if ds.calc_distance(desired_lat_deg, desired_lon_deg, np.rad2deg(lat[i]), np.rad2deg(lon[j])) < height_map or ds.calc_distance(desired_lat_deg, desired_lon_deg, np.rad2deg(lat[i]), np.rad2deg(lon[j])) < width_map:
+			if ds.calc_distance(desired_lat_deg, desired_lon_deg, np.rad2deg(lat[i]), np.rad2deg(lon[j])) < 0.5*math.sqrt(height_map**2 + width_map**2):
 				scope_bool_array[i, j] = True;
 
 if uniform_range == 1:
@@ -266,7 +268,7 @@ if uniform_range == 1:
 		total_max = np.nanmax(values);
 	total_min, total_max = mp.modify_value_boundaries(total_min, total_max, short_name);
 	values_range_for_plot = total_max - total_min;
-	if short_name == "sp" or short_name == "prmsl":
+	if short_name == "sp" or short_name == "prmsl" or short_name == "cape":
 		values_range_for_plot = values_range_for_plot + np.mod(10 - np.mod(values_range_for_plot, 10), 10);
 		total_max = total_max + np.mod(10 - np.mod(values_range_for_plot, 10), 10);
 	color_plot_dist = values_range_for_plot/10;
@@ -287,7 +289,7 @@ for i in range(int((run_span - start_time_since_init)/plot_interval) + 1):
 			total_max = np.nanmax(values[:, :, i]);
 		total_min, total_max = mp.modify_value_boundaries(total_min, total_max, short_name);
 		values_range_for_plot = total_max - total_min;
-		if short_name == "sp" or short_name == "prmsl":
+		if short_name == "sp" or short_name == "prmsl" or short_name == "cape":
 			values_range_for_plot = values_range_for_plot + np.mod(10 - np.mod(values_range_for_plot, 10), 10);
 			total_max = total_max + np.mod(10 - np.mod(values_range_for_plot, 10), 10);
 		color_plot_dist = values_range_for_plot/10;
