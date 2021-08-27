@@ -169,11 +169,11 @@ int interpolate_to_ll(double in_field[], double out_field[], Grid *grid)
 		// initializing the result with zero
 		out_field[i] = 0;
 		// 1/r-average
-		for (int j = 0; j < 4; ++j)
+		for (int j = 0; j < 5; ++j)
 		{
-			if (in_field[grid -> latlon_interpol_indices[4*i + j]] != 9999)
+			if (in_field[grid -> latlon_interpol_indices[5*i + j]] != 9999)
 			{
-				out_field[i] += grid -> latlon_interpol_weights[4*i + j]*in_field[grid -> latlon_interpol_indices[4*i + j]];
+				out_field[i] += grid -> latlon_interpol_weights[5*i + j]*in_field[grid -> latlon_interpol_indices[5*i + j]];
 			}
 			else
 			{
