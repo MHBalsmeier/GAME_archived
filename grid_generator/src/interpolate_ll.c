@@ -23,8 +23,8 @@ int interpolate_ll(double latitude_scalar[], double longitude_scalar[], int inte
 	double delta_longitude = 2*M_PI/NO_OF_LON_IO_POINTS;
 	// the vector containing distances to the horizontal points of the native model grid
 	double distance_vector[NO_OF_SCALARS_H];
-	int min_indices_vector[3];
-	double weights_vector[3];
+	int min_indices_vector[4];
+	double weights_vector[4];
 	int lat_index, lon_index;
 	double lat_value, lon_value, weights_sum;
 	#pragma omp parallel for private(lat_index, lon_index, lat_value, lon_value, distance_vector, min_indices_vector, weights_vector, weights_sum)
@@ -49,22 +49,22 @@ int interpolate_ll(double latitude_scalar[], double longitude_scalar[], int inte
 		{
 			distance_vector[j] = calculate_distance_h(lat_value, lon_value, latitude_scalar[j], longitude_scalar[j], 1);
 		}
-		for (int j = 0; j < 3; ++j)
+		for (int j = 0; j < 4; ++j)
 		{
 			min_indices_vector[j] = -1;
 		}
 		weights_sum = 0;
-		for (int j = 0; j < 3; ++j)
+		for (int j = 0; j < 4; ++j)
 		{
 			min_indices_vector[j] = find_min_index_exclude(distance_vector, NO_OF_SCALARS_H, min_indices_vector, 4);
-			weights_vector[j] = 1/(distance_vector[min_indices_vector[j]] + 0.01);
+			weights_vector[j] = 1/(pow(distance_vector[min_indices_vector[j]], 2 + EPSILON_SECURITY) + EPSILON_SECURITY);
 			weights_sum += weights_vector[j];
 		}
 		// writing the result to the arrays
-		for (int j = 0; j < 3; ++j)
+		for (int j = 0; j < 4; ++j)
 		{
-			interpol_indices[3*i + j] = min_indices_vector[j];
-			interpol_weights[3*i + j] = weights_vector[j]/weights_sum;
+			interpol_indices[4*i + j] = min_indices_vector[j];
+			interpol_weights[4*i + j] = weights_vector[j]/weights_sum;
 		}
 	}
 	return 0;
