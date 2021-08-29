@@ -26,12 +26,10 @@ We try to find a good balance of accuracy, efficiency and self-consistency. Gene
 
 ### Things to be done
 
-* improvement of the momentum diffusion operator
 * SLEVE
-* MPI parallelization
-* a way to construct Voronoi meshes on an ellipsoid
 * a nesting option
 * ocean dynamics and physics
+* ellipsoidal geometry
 
 ## Documents
 
