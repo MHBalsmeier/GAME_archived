@@ -35,6 +35,7 @@ int call_radiation(State *state, Soil *soil, Grid *grid, Dualgrid *dualgrid, Sta
 		create_rad_array_scalar_h(grid -> latitude_scalar, radiation -> lat_scal, rad_block_index);
 		create_rad_array_scalar_h(grid -> longitude_scalar, radiation -> lon_scal, rad_block_index);
 		create_rad_array_scalar_h(soil -> temperature, radiation -> temp_sfc, rad_block_index);
+		create_rad_array_scalar_h(grid -> sfc_albedo, radiation -> sfc_albedo, rad_block_index);
 		create_rad_array_scalar(grid -> z_scalar, radiation -> z_scal, rad_block_index);
 		create_rad_array_vector(grid -> z_vector, radiation -> z_vect, rad_block_index);
 		create_rad_array_mass_den(state -> rho, radiation -> rho, rad_block_index);
@@ -53,6 +54,7 @@ int call_radiation(State *state, Soil *soil, Grid *grid, Dualgrid *dualgrid, Sta
 			radiation -> temp_sfc,
 			radiation -> sfc_sw_in,
 			radiation -> sfc_lw_out,
+			radiation -> sfc_albedo,
 			&no_of_scalars, &no_of_layers,
 			&no_of_constituents, &no_of_condensed_constituents,
 			&time_coordinate);

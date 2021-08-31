@@ -163,12 +163,25 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_close(ncid)))
         ERR(retval);
+    #pragma omp parallel for
     for (int i = 0; i < 6*NO_OF_SCALARS_H; ++i)
     {
         if (grid -> adjacent_vector_indices_h[i] == -1)
         {
         	grid -> adjacent_vector_indices_h[i] = 0;
         }
+    }
+    #pragma omp parallel for
+    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+    {
+    	// ocean
+    	grid -> sfc_albedo[i] = 0.06;
+		// setting the land surface albedo to 0.12 (compare Zdunkowski,Trautmann & Bott:
+		// Radiation in the Atmosphere,2007,p. 444)
+    	if (grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i] > 5)
+    	{
+    		grid -> sfc_albedo[i] = 0.12;
+    	}
     }
     // determining coordinate slopes
     grad_hor_cov(grid -> z_scalar, grid -> slope, grid);

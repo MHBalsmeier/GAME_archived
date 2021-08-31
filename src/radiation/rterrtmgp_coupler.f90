@@ -115,7 +115,7 @@ module radiation
   subroutine calc_radiative_flux_convergence(latitude_scalar,longitude_scalar,&
   z_scalar,z_vector,&
   mass_densities,temperature_gas,radiation_tendency,&
-  temp_sfc,sfc_sw_in,sfc_lw_out,&
+  temp_sfc,sfc_sw_in,sfc_lw_out,sfc_albedo, &
   no_of_scalars,no_of_layers,no_of_constituents,no_of_condensed_constituents,&
   time_coord) &
   
@@ -156,6 +156,8 @@ module radiation
     real(wp),intent(inout)            :: sfc_sw_in         (no_of_scalars/no_of_layers)
     ! surface longwave out
     real(wp),intent(inout)            :: sfc_lw_out        (no_of_scalars/no_of_layers)
+    ! surface albedo for all bands
+    real(wp),intent(in)               :: sfc_albedo        (no_of_scalars/no_of_layers)
     
     ! local variables
     ! solar zenith angle
@@ -237,10 +239,10 @@ module radiation
     ! set the surface emissivity (a longwave property) to a standard value
     surface_emissivity(:,:) =  0.98_wp
     
-    ! setting the surface albedos to 0.12 (compare Zdunkowski,Trautmann & Bott:
-    ! Radiation in the Atmosphere,2007,p. 444)
-    albedo_dir        (:,:) =  0.12_wp
-    albedo_dif        (:,:) =  0.12_wp
+    do ji = 1,no_of_scalars_h
+      albedo_dir(:,ji) = sfc_albedo(ji)
+      albedo_dif(:,ji) = sfc_albedo(ji)
+    enddo
     
     ! reformatting the thermodynamical state of the gas phase for RTE+RRTMGP
     do ji = 1,no_of_scalars_h
