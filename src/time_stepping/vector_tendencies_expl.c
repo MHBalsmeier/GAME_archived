@@ -60,9 +60,9 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		if (config_info -> explicit_boundary_layer == 1)
 		{
 			// some parameters
-			double bndr_lr_height = 2850.0; // boundary layer height
+			double bndr_lr_height = 1000.0; // boundary layer height
 			double bndr_lr_visc_max = 1.0/86400.0; // maximum friction coefficient in the boundary layer
-			double e_folding_height = 8000.0;
+			double e_folding_height = 500.0;
 			double z_agl;
 			int layer_index, h_index, vector_index;
 			#pragma omp parallel for private(layer_index, h_index, vector_index, z_agl)
