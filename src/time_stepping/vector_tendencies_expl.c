@@ -56,13 +56,13 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		{
 			vert_momentum_diffusion(state, diagnostics, irrev, grid, config_info, delta_t);
 		}
-		// This is an explicit friction ansatz in the boundary layer, comparable to what is required in the Held-Suarez test.
+		// This is the explicit friction ansatz in the boundary layer from the Held-Suarez (1994) test case.
 		if (config_info -> explicit_boundary_layer == 1)
 		{
 			// some parameters
-			double bndr_lr_height = 1e3; // boundary layer height
-			double bndr_lr_visc_max = 1.0/86400; // maximum friction coefficient in the boundary layer
-			double e_folding_height = 0.5*bndr_lr_height;
+			double bndr_lr_height = 2850.0; // boundary layer height
+			double bndr_lr_visc_max = 1.0/86400.0; // maximum friction coefficient in the boundary layer
+			double e_folding_height = 8000.0;
 			double z_agl;
 			int layer_index, h_index, vector_index;
 			#pragma omp parallel for private(layer_index, h_index, vector_index, z_agl)
