@@ -14,11 +14,10 @@ This file contains the soil component of GAME.
 const double thickness = 10;
 // approximately the properties of water
 const double density = 1000;
-const double c_v = 4184;
 const double heat_trans_coeff = 50;
 const double t_min = 273.15 - 30;
 
-int soil_interaction(Soil *soil, Diagnostics *diagnostics, Forcings *forcings, double delta_t)
+int soil_interaction(Soil *soil, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, double delta_t)
 {
 	/*
 	This function computes the interaction of the dynamical core with the soil.
@@ -39,7 +38,7 @@ int soil_interaction(Soil *soil, Diagnostics *diagnostics, Forcings *forcings, d
 		+ forcings -> sfc_sw_in[i]
 		// longwave outbound radiation
 		- forcings -> sfc_lw_out[i])
-		/(thickness*c_v*density)*delta_t;
+		/(thickness*grid -> sfc_c_v[i]*density)*delta_t;
 		// clipping too low values
 		if (soil -> temperature[i] < t_min)
 		{

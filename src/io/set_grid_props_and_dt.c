@@ -17,10 +17,10 @@ This file contains functions for reading the grid properties as well as setting 
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 
-int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
+int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[], char SFC_PROP_FILE[])
 {
     int ncid, retval;
-    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_weights_id, area_dual_id, z_vector_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, trsk_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, direction_id, gravity_potential_id, inner_product_weights_id, density_to_rhombi_weights_id, density_to_rhombi_indices_id, normal_distance_dual_id, vorticity_indices_triangles_id, vorticity_signs_triangles_id, latitude_scalar_id, longitude_scalar_id, stretching_parameter_id, no_of_shaded_points_scalar_id, no_of_shaded_points_vector_id, interpol_indices_id, interpol_weights_id, theta_bg_id, exner_bg_id;
+    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_weights_id, area_dual_id, z_vector_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, trsk_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, direction_id, gravity_potential_id, inner_product_weights_id, density_to_rhombi_weights_id, density_to_rhombi_indices_id, normal_distance_dual_id, vorticity_indices_triangles_id, vorticity_signs_triangles_id, latitude_scalar_id, longitude_scalar_id, stretching_parameter_id, no_of_shaded_points_scalar_id, no_of_shaded_points_vector_id, interpol_indices_id, interpol_weights_id, theta_bg_id, exner_bg_id, sfc_albedo_id, sfc_c_v_id;
     double stretching_parameter;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
@@ -171,18 +171,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         	grid -> adjacent_vector_indices_h[i] = 0;
         }
     }
-    #pragma omp parallel for
-    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-    {
-    	// ocean
-    	grid -> sfc_albedo[i] = 0.06;
-		// setting the land surface albedo to 0.12 (compare Zdunkowski,Trautmann & Bott:
-		// Radiation in the Atmosphere,2007,p. 444)
-    	if (grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i] > 5)
-    	{
-    		grid -> sfc_albedo[i] = 0.12;
-    	}
-    }
     // determining coordinate slopes
     grad_hor_cov(grid -> z_scalar, grid -> slope, grid);
     // computing the gradient of the gravity potential
@@ -190,6 +178,22 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     // computing the gradient of the background Exner pressure
     grad(grid -> exner_bg, grid -> exner_bg_grad, grid);
     printf("stretching parameter of the vertical grid: %lf\n", stretching_parameter);
+    
+    // reading surface properties
+    
+    if ((retval = nc_open(SFC_PROP_FILE, NC_NOWRITE, &ncid)))
+        ERR(retval);
+    if ((retval = nc_inq_varid(ncid, "sfc_albedo", &sfc_albedo_id)))
+        ERR(retval);
+    if ((retval = nc_inq_varid(ncid, "sfc_c_v", &sfc_c_v_id)))
+        ERR(retval);
+    if ((retval = nc_get_var_double(ncid, sfc_albedo_id, &(grid -> sfc_albedo[0]))))
+        ERR(retval);
+    if ((retval = nc_get_var_double(ncid, sfc_c_v_id, &(grid -> sfc_c_v[0]))))
+        ERR(retval);
+    if ((retval = nc_close(ncid)))
+        ERR(retval);
+        
     return 0;
 }
 

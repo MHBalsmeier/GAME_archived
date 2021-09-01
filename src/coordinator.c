@@ -167,6 +167,10 @@ int main(int argc, char *argv[])
 	sprintf(GEO_PROP_FILE_PRE, "../../grid_generator/grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, toa, ORO_ID, grid -> no_of_oro_layers);
     char GEO_PROP_FILE[strlen(GEO_PROP_FILE_PRE) + 1];
     strcpy(GEO_PROP_FILE, GEO_PROP_FILE_PRE);
+    char SFC_PROP_FILE_PRE[200];
+	sprintf(SFC_PROP_FILE_PRE, "../../surface_generator/surface_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
+    char SFC_PROP_FILE[strlen(SFC_PROP_FILE_PRE) + 1];
+    strcpy(SFC_PROP_FILE, SFC_PROP_FILE_PRE);
     
 	// Determining the name of the init state file from the IDEAL_INPUT_ID, RES_ID, NO_OF_LAYERS and so on.
     char INIT_STATE_FILE_PRE[200];
@@ -374,7 +378,7 @@ int main(int argc, char *argv[])
     
     // Reading external data.
 	printf("Reading grid data ...\n");
-    set_grid_properties(grid, dualgrid, GEO_PROP_FILE);
+    set_grid_properties(grid, dualgrid, GEO_PROP_FILE, SFC_PROP_FILE);
     printf("Grid loaded successfully.\n");
     printf("%s", stars);
     printf("Reading initial state ...\n");

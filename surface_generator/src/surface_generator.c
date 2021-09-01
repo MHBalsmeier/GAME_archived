@@ -16,7 +16,6 @@ With this program, orographies can be produced.
 #include "enum.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
-#define UNIT "Z_SURFACE"
 #define P_0 100000.0
 
 const double MOUNTAIN_HEIGHT = 10e3;
@@ -40,8 +39,9 @@ int main(int argc, char *argv[])
 	char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
 	sprintf(OUTPUT_FILE, "surface_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
 	int ncid, scalar_h_dimid, oro_id, latitude_scalar_id, longitude_scalar_id;
-	double *oro;
-	oro = malloc(NO_OF_SCALARS_H*sizeof(double));
+	double *oro = malloc(NO_OF_SCALARS_H*sizeof(double));
+	double *sfc_albedo = malloc(NO_OF_SCALARS_H*sizeof(double));
+	double *sfc_c_v = malloc(NO_OF_SCALARS_H*sizeof(double));
     int GEO_PROP_FILE_LENGTH = 100;
     char *GEO_PROP_FILE_PRE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
     sprintf(GEO_PROP_FILE_PRE, "../grid_generator/grids/B%dL26T41152_O0_OL23_SCVT.nc", RES_ID);
@@ -176,6 +176,21 @@ int main(int argc, char *argv[])
 	free(longitude_input);
 	free(latitude_scalar);
 	free(longitude_scalar);
+    #pragma omp parallel for
+    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+    {
+    	// ocean
+    	sfc_albedo[i] = 0.06;
+    	sfc_c_v[i] = 4184;
+		// setting the land surface albedo to 0.12 (compare Zdunkowski,Trautmann & Bott:
+		// Radiation in the Atmosphere,2007,p. 444)
+    	if (oro[i] > 5)
+    	{
+    		sfc_albedo[i] = 0.12;
+    		sfc_c_v[i] = 0.5*4184;
+    	}
+    }
+    int sfc_albedo_id, sfc_c_v_id;
 	if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
 	  ERR(retval);
 	free(OUTPUT_FILE);
@@ -183,15 +198,27 @@ int main(int argc, char *argv[])
 	  ERR(retval);
 	if ((retval = nc_def_var(ncid, "z_surface", NC_DOUBLE, 1, &scalar_h_dimid, &oro_id)))
 	  ERR(retval);
-	if ((retval = nc_put_att_text(ncid, oro_id, "units", strlen(UNIT), UNIT)))
+	if ((retval = nc_put_att_text(ncid, oro_id, "units", strlen("m"), "m")))
+	  ERR(retval);
+	if ((retval = nc_def_var(ncid, "sfc_albedo", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_albedo_id)))
+	  ERR(retval);
+	if ((retval = nc_def_var(ncid, "sfc_c_v", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_c_v_id)))
+	  ERR(retval);
+	if ((retval = nc_put_att_text(ncid, sfc_c_v_id, "units", strlen("J/(kg*K)"), "J/(kg*K)")))
 	  ERR(retval);
 	if ((retval = nc_enddef(ncid)))
 	  ERR(retval);
 	if ((retval = nc_put_var_double(ncid, oro_id, &oro[0])))
 	  ERR(retval);
+	if ((retval = nc_put_var_double(ncid, sfc_albedo_id, &sfc_albedo[0])))
+	  ERR(retval);
+	if ((retval = nc_put_var_double(ncid, sfc_c_v_id, &sfc_c_v[0])))
+	  ERR(retval);
 	if ((retval = nc_close(ncid)))
 	  ERR(retval);
 	free(oro);
+	free(sfc_albedo);
+	free(sfc_c_v);
 	return 0;
 }
 

@@ -40,7 +40,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
     // interaction with soil (only useful if real radiation is on)
     if (config_info -> rad_on == 1)
     {
-    	soil_interaction(soil, diagnostics, forcings, delta_t);
+    	soil_interaction(soil, diagnostics, forcings, grid, delta_t);
     }
     
 	/*

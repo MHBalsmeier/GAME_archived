@@ -4,4 +4,4 @@ Github repository: https://github.com/OpenNWP/GAME
 */
 
 int init_soil(Soil *, Diagnostics *);
-int soil_interaction(Soil *, Diagnostics *, Forcings *, double);
+int soil_interaction(Soil *, Diagnostics *, Forcings *, Grid *, double);
