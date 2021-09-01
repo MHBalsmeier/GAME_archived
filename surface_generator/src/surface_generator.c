@@ -23,8 +23,6 @@ const double MOUNTAIN_FWHM = 1000e3;
 
 int main(int argc, char *argv[])
 {
-	int OUTPUT_FILE_LENGTH = 100;
-	char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
 	int ORO_ID;
    	ORO_ID = strtod(argv[1], NULL);
    	if (ORO_ID < 1 || ORO_ID > 2)
@@ -33,21 +31,17 @@ int main(int argc, char *argv[])
    		exit(1);
 	}
    	double oro_rescale_factor = strtof(argv[2], NULL);
+   	char OUTPUT_FILE_PRE[200];
 	sprintf(OUTPUT_FILE_PRE, "surface_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
-	OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
-	free(OUTPUT_FILE_PRE);
-	char *OUTPUT_FILE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
+   	char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
 	sprintf(OUTPUT_FILE, "surface_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
 	int ncid, scalar_h_dimid, oro_id, latitude_scalar_id, longitude_scalar_id;
 	double *oro = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *sfc_albedo = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *sfc_c_v = malloc(NO_OF_SCALARS_H*sizeof(double));
-    int GEO_PROP_FILE_LENGTH = 100;
-    char *GEO_PROP_FILE_PRE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
+	char GEO_PROP_FILE_PRE[200];
     sprintf(GEO_PROP_FILE_PRE, "../grid_generator/grids/B%dL26T41152_O0_OL23_SCVT.nc", RES_ID);
-    GEO_PROP_FILE_LENGTH = strlen(GEO_PROP_FILE_PRE);
-    free(GEO_PROP_FILE_PRE);
-    char *GEO_PROP_FILE = malloc((GEO_PROP_FILE_LENGTH + 1)*sizeof(char));
+	char GEO_PROP_FILE[strlen(GEO_PROP_FILE_PRE) + 1];
     sprintf(GEO_PROP_FILE, "../grid_generator/grids/B%dL26T41152_O0_OL23_SCVT.nc", RES_ID);
 	int retval;
     double *latitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -55,7 +49,6 @@ int main(int argc, char *argv[])
     double distance;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
-    free(GEO_PROP_FILE);
     if ((retval = nc_inq_varid(ncid, "latitude_scalar", &latitude_scalar_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "longitude_scalar", &longitude_scalar_id)))
@@ -74,16 +67,8 @@ int main(int argc, char *argv[])
     float (*z_input)[no_of_lon_points] = malloc(sizeof(float[no_of_lat_points][no_of_lon_points]));
 	if (ORO_ID == 2)
 	{
-		int INPUT_FILE_LENGTH = 100;
-		char *INPUT_FILE_PRE = malloc((INPUT_FILE_LENGTH + 1)*sizeof(char));
-		sprintf(INPUT_FILE_PRE, "real/hgt.sfc.nc");
-		INPUT_FILE_LENGTH = strlen(INPUT_FILE_PRE);
-		free(INPUT_FILE_PRE);
-		char *INPUT_FILE = malloc((INPUT_FILE_LENGTH + 1)*sizeof(char));
-		sprintf(INPUT_FILE, "real/hgt.sfc.nc");
-		if ((retval = nc_open(INPUT_FILE, NC_NOWRITE, &ncid)))
+		if ((retval = nc_open("real/hgt.sfc.nc", NC_NOWRITE, &ncid)))
 		    ERR(retval);
-		free(INPUT_FILE);
 		if ((retval = nc_inq_varid(ncid, "lat", &lat_in_id)))
 		    ERR(retval);
 		if ((retval = nc_inq_varid(ncid, "lon", &lon_in_id)))
@@ -193,7 +178,6 @@ int main(int argc, char *argv[])
     int sfc_albedo_id, sfc_c_v_id;
 	if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
 	  ERR(retval);
-	free(OUTPUT_FILE);
 	if ((retval = nc_def_dim(ncid, "scalar_index", NO_OF_SCALARS_H, &scalar_h_dimid)))
 	  ERR(retval);
 	if ((retval = nc_def_var(ncid, "z_surface", NC_DOUBLE, 1, &scalar_h_dimid, &oro_id)))
