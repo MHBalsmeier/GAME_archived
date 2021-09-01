@@ -10,7 +10,7 @@
 
 oro_id=2 # The orography ID.
 oro_rescale_factor=0.5 # rescale factor for the orography (0.5 is sufficient to stabilize the model in real orography (oro_id=2))
+res_id=5 # resolution ID
 valgrind_check=0 # set this to 1, if you want to check the code with Valgrind
 export OMP_NUM_THREADS=1 # relevant only for OMP
-number_of_cpus=1 # relevant only for MPI
-source .sh/run.sh
+source .sh/root_script.sh

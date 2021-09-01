@@ -58,12 +58,14 @@ Everything is easy and quick to install.
 * [atmostracers](https://github.com/OpenNWP/atmostracers)
 * Clone the DCMIP2016 repository: git clone https://github.com/ClimateGlobalChange/DCMIP2016.git
 * Clone our fork of the RTE+RRTMGP repository: `git clone https://github.com/OpenNWP/rte-rrtmgp`
+* Python and pip: `sudo apt-get install python3 python3-pip`
+* Python package global-land-mask (`pip3 install global-land-mask`)
 
 #### For using the plotting routines
 
 The following packages are additionally required if you want to make use of the plotting routines:
 
-* Python and the visualization library scitools-iris (installation manual: https://scitools-iris.readthedocs.io/en/latest/installing.html#installing-from-source-without-conda-on-debian-based-linux-distros-developers)
+* Python visualization library scitools-iris (installation manual: https://scitools-iris.readthedocs.io/en/latest/installing.html#installing-from-source-without-conda-on-debian-based-linux-distros-developers)
 * FFMPEG (Ubuntu: `sudo apt-get install ffmpeg`)
 
 #### For developing

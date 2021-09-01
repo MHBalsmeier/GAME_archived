@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
    	char OUTPUT_FILE_PRE[200];
 	sprintf(OUTPUT_FILE_PRE, "surface_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
    	char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
-	sprintf(OUTPUT_FILE, "surface_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
+	strcpy(OUTPUT_FILE, OUTPUT_FILE_PRE);
 	int ncid, scalar_h_dimid, oro_id, latitude_scalar_id, longitude_scalar_id;
 	double *oro = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *sfc_albedo = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 	char GEO_PROP_FILE_PRE[200];
     sprintf(GEO_PROP_FILE_PRE, "../grid_generator/grids/B%dL26T41152_O0_OL23_SCVT.nc", RES_ID);
 	char GEO_PROP_FILE[strlen(GEO_PROP_FILE_PRE) + 1];
-    sprintf(GEO_PROP_FILE, "../grid_generator/grids/B%dL26T41152_O0_OL23_SCVT.nc", RES_ID);
+    strcpy(GEO_PROP_FILE, GEO_PROP_FILE_PRE);
 	int retval;
     double *latitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
     double *longitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -161,20 +161,42 @@ int main(int argc, char *argv[])
 	free(longitude_input);
 	free(latitude_scalar);
 	free(longitude_scalar);
+	
+	// other surface properties
+	// reading the land mask
+	int is_land_id;
+	char IS_LAND_FILE_PRE[200];
+    sprintf(IS_LAND_FILE_PRE, "real//B%d_is_land.nc", RES_ID);
+	char IS_LAND_FILE[strlen(IS_LAND_FILE_PRE) + 1];
+    strcpy(IS_LAND_FILE, IS_LAND_FILE_PRE);
+	int *is_land = malloc(NO_OF_SCALARS_H*sizeof(int));
+	if ((retval = nc_open(IS_LAND_FILE, NC_NOWRITE, &ncid)))
+	    ERR(retval);
+	if ((retval = nc_inq_varid(ncid, "is_land", &is_land_id)))
+	    ERR(retval);
+	if ((retval = nc_get_var_int(ncid, is_land_id, &is_land[0])))
+	    ERR(retval);
+	if ((retval = nc_close(ncid)))
+	  ERR(retval);
+	double c_v_water = 4184;
+	double c_v_soil = 2092;
+	double albedo_water = 0.06;
+	double albedo_soil = 0.12;
     #pragma omp parallel for
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
     	// ocean
-    	sfc_albedo[i] = 0.06;
-    	sfc_c_v[i] = 4184;
+    	sfc_albedo[i] = albedo_water;
+    	sfc_c_v[i] = c_v_water;
 		// setting the land surface albedo to 0.12 (compare Zdunkowski,Trautmann & Bott:
 		// Radiation in the Atmosphere,2007,p. 444)
-    	if (oro[i] > 5)
+    	if (is_land[i] == 1)
     	{
-    		sfc_albedo[i] = 0.12;
-    		sfc_c_v[i] = 0.5*4184;
+    		sfc_albedo[i] = albedo_soil;
+    		sfc_c_v[i] = c_v_soil;
     	}
     }
+    free(is_land);
     int sfc_albedo_id, sfc_c_v_id;
 	if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
 	  ERR(retval);
