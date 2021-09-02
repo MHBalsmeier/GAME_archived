@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
 	double *oro = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *sfc_albedo = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *sfc_c_v = malloc(NO_OF_SCALARS_H*sizeof(double));
+	double *sfc_rho = malloc(NO_OF_SCALARS_H*sizeof(double));
 	char GEO_PROP_FILE_PRE[200];
     sprintf(GEO_PROP_FILE_PRE, "../grid_generator/grids/B%dL26T41152_O0_OL23_SCVT.nc", RES_ID);
 	char GEO_PROP_FILE[strlen(GEO_PROP_FILE_PRE) + 1];
@@ -182,22 +183,25 @@ int main(int argc, char *argv[])
 	double c_v_soil = 2092;
 	double albedo_water = 0.06;
 	double albedo_soil = 0.12;
+	double density_water = 1024.0;
+	double density_soil = 2000.0;
     #pragma omp parallel for
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
     	// ocean
     	sfc_albedo[i] = albedo_water;
     	sfc_c_v[i] = c_v_water;
+    	sfc_rho[i] = density_water;
 		// setting the land surface albedo to 0.12 (compare Zdunkowski,Trautmann & Bott:
 		// Radiation in the Atmosphere,2007,p. 444)
     	if (is_land[i] == 1)
     	{
     		sfc_albedo[i] = albedo_soil;
     		sfc_c_v[i] = c_v_soil;
+    		sfc_rho[i] = density_soil;
     	}
     }
-    free(is_land);
-    int sfc_albedo_id, sfc_c_v_id;
+    int sfc_albedo_id, sfc_c_v_id, sfc_density_id;
 	if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
 	  ERR(retval);
 	if ((retval = nc_def_dim(ncid, "scalar_index", NO_OF_SCALARS_H, &scalar_h_dimid)))
@@ -208,9 +212,15 @@ int main(int argc, char *argv[])
 	  ERR(retval);
 	if ((retval = nc_def_var(ncid, "sfc_albedo", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_albedo_id)))
 	  ERR(retval);
+	if ((retval = nc_def_var(ncid, "sfc_density", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_density_id)))
+	  ERR(retval);
+	if ((retval = nc_put_att_text(ncid, sfc_density_id, "units", strlen("kg/(m**3)"), "kg/(m**3)")))
+	  ERR(retval);
 	if ((retval = nc_def_var(ncid, "sfc_c_v", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_c_v_id)))
 	  ERR(retval);
 	if ((retval = nc_put_att_text(ncid, sfc_c_v_id, "units", strlen("J/(kg*K)"), "J/(kg*K)")))
+	  ERR(retval);
+	if ((retval = nc_def_var(ncid, "is_land", NC_INT, 1, &scalar_h_dimid, &is_land_id)))
 	  ERR(retval);
 	if ((retval = nc_enddef(ncid)))
 	  ERR(retval);
@@ -218,13 +228,19 @@ int main(int argc, char *argv[])
 	  ERR(retval);
 	if ((retval = nc_put_var_double(ncid, sfc_albedo_id, &sfc_albedo[0])))
 	  ERR(retval);
+	if ((retval = nc_put_var_double(ncid, sfc_density_id, &sfc_rho[0])))
+	  ERR(retval);
 	if ((retval = nc_put_var_double(ncid, sfc_c_v_id, &sfc_c_v[0])))
+	  ERR(retval);
+	if ((retval = nc_put_var_int(ncid, is_land_id, &is_land[0])))
 	  ERR(retval);
 	if ((retval = nc_close(ncid)))
 	  ERR(retval);
 	free(oro);
 	free(sfc_albedo);
+	free(sfc_rho);
 	free(sfc_c_v);
+    free(is_land);
 	return 0;
 }
 

@@ -95,6 +95,8 @@ double density_to_rhombi_weights[4*NO_OF_VECTORS_H];
 double trsk_weights[10*NO_OF_VECTORS_H];
 double sfc_albedo[NO_OF_SCALARS_H];
 double sfc_c_v[NO_OF_SCALARS_H];
+double sfc_rho[NO_OF_SCALARS_H];
+int is_land[NO_OF_SCALARS_H];
 int latlon_interpol_indices[5*NO_OF_LATLON_IO_POINTS];
 double latlon_interpol_weights[5*NO_OF_LATLON_IO_POINTS];
 double stretching_parameter;

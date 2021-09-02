@@ -61,8 +61,10 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		{
 			// some parameters
 			double bndr_lr_height = 1000.0; // boundary layer height
-			double bndr_lr_visc_max = 1.0/86400.0; // maximum friction coefficient in the boundary layer
-			double e_folding_height = 500.0;
+			double bndr_lr_visc_max_land = 1.2/86400.0; // maximum friction coefficient in the boundary layer over land
+			double bndr_lr_visc_max_water = 0.8/86400.0; // maximum friction coefficient in the boundary layer over water
+			double bndr_lr_visc_max;
+			double e_folding_height = 350.0;
 			double z_agl;
 			int layer_index, h_index, vector_index;
 			#pragma omp parallel for private(layer_index, h_index, vector_index, z_agl)
@@ -75,6 +77,11 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 				z_agl = grid -> z_vector[vector_index]
 				- 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[h_index]]
 				+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[h_index]]);
+				bndr_lr_visc_max = bndr_lr_visc_max_water;
+				if (grid -> is_land[grid -> from_index[h_index]] + grid -> is_land[grid -> to_index[h_index]] >= 1)
+				{
+					bndr_lr_visc_max = bndr_lr_visc_max_land;
+				}
 				// adding the boundary layer friction
 				if (z_agl < bndr_lr_height)
 				{

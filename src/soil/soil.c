@@ -12,8 +12,6 @@ This file contains the soil component of GAME.
 
 // some for now constant parameters
 const double thickness = 10;
-// approximately the properties of water
-const double density = 1000;
 const double heat_trans_coeff = 50;
 const double t_min = 273.15 - 30;
 
@@ -38,7 +36,7 @@ int soil_interaction(Soil *soil, Diagnostics *diagnostics, Forcings *forcings, G
 		+ forcings -> sfc_sw_in[i]
 		// longwave outbound radiation
 		- forcings -> sfc_lw_out[i])
-		/(thickness*grid -> sfc_c_v[i]*density)*delta_t;
+		/(thickness*grid -> sfc_c_v[i]*grid -> sfc_rho[i])*delta_t;
 		// clipping too low values
 		if (soil -> temperature[i] < t_min)
 		{
