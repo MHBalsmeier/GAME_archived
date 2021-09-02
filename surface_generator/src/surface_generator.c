@@ -192,10 +192,10 @@ int main(int argc, char *argv[])
     	sfc_albedo[i] = albedo_water;
     	sfc_c_v[i] = c_v_water;
     	sfc_rho[i] = density_water;
-		// setting the land surface albedo to 0.12 (compare Zdunkowski,Trautmann & Bott:
-		// Radiation in the Atmosphere,2007,p. 444)
     	if (is_land[i] == 1)
     	{
+			// setting the land surface albedo to 0.12 (compare Zdunkowski,Trautmann & Bott:
+			// Radiation in the Atmosphere,2007,p. 444)
     		sfc_albedo[i] = albedo_soil;
     		sfc_c_v[i] = c_v_soil;
     		sfc_rho[i] = density_soil;
