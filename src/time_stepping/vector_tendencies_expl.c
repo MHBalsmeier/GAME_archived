@@ -9,6 +9,7 @@ In this file, the calculation of the explicit part of the momentum equation is m
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include "../enum_and_typedefs.h"
 #include "../settings.h"
 #include "../spatial_operators/spatial_operators.h"
@@ -60,14 +61,14 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		if (config_info -> explicit_boundary_layer == 1)
 		{
 			// some parameters
-			double bndr_lr_height = 1000.0; // boundary layer height
-			double bndr_lr_visc_max_land = 1.2/86400.0; // maximum friction coefficient in the boundary layer over land
-			double bndr_lr_visc_max_water = 0.8/86400.0; // maximum friction coefficient in the boundary layer over water
-			double bndr_lr_visc_max;
-			double e_folding_height = 350.0;
+			double bndr_lr_height = 1100.0; // boundary layer height
+			double bndr_lr_visc_sfc_land = 1.2/86400.0; // maximum friction coefficient in the boundary layer over land
+			double bndr_lr_visc_sfc_water = 0.8/86400.0; // maximum friction coefficient in the boundary layer over water
+			double bndr_lr_visc_sfc;
+			double e_folding_height = bndr_lr_height/M_PI;
 			double z_agl;
 			int layer_index, h_index, vector_index;
-			#pragma omp parallel for private(layer_index, h_index, vector_index, z_agl)
+			#pragma omp parallel for private(layer_index, h_index, vector_index, z_agl, bndr_lr_visc_sfc)
 			for (int i = 0; i < NO_OF_H_VECTORS; ++i)
 			{
 				layer_index = i/NO_OF_VECTORS_H;
@@ -77,16 +78,16 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 				z_agl = grid -> z_vector[vector_index]
 				- 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[h_index]]
 				+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[h_index]]);
-				bndr_lr_visc_max = bndr_lr_visc_max_water;
+				bndr_lr_visc_sfc = bndr_lr_visc_sfc_water;
 				if (grid -> is_land[grid -> from_index[h_index]] + grid -> is_land[grid -> to_index[h_index]] >= 1)
 				{
-					bndr_lr_visc_max = bndr_lr_visc_max_land;
+					bndr_lr_visc_sfc = bndr_lr_visc_sfc_land;
 				}
 				// adding the boundary layer friction
 				if (z_agl < bndr_lr_height)
 				{
 					irrev -> friction_acc[vector_index]
-					+= -bndr_lr_visc_max*(exp(-z_agl/e_folding_height) - exp(-bndr_lr_height/e_folding_height))
+					+= -bndr_lr_visc_sfc*(exp(-z_agl/e_folding_height) - exp(-bndr_lr_height/e_folding_height))
 					/(1 - exp(-bndr_lr_height/e_folding_height))
 					*state -> wind[vector_index];
 				}
