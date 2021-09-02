@@ -179,12 +179,12 @@ int main(int argc, char *argv[])
 	    ERR(retval);
 	if ((retval = nc_close(ncid)))
 	  ERR(retval);
-	double c_v_water = 4184;
-	double c_v_soil = 2092;
+	double c_v_water = 4184.0;
+	double c_v_soil = 830.0;
 	double albedo_water = 0.06;
 	double albedo_soil = 0.12;
 	double density_water = 1024.0;
-	double density_soil = 2000.0;
+	double density_soil = 1442.0;
     #pragma omp parallel for
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {

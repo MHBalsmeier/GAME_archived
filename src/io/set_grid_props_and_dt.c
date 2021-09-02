@@ -201,7 +201,6 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[], ch
         ERR(retval);
     if ((retval = nc_close(ncid)))
         ERR(retval);
-        
     return 0;
 }
 
