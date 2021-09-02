@@ -185,11 +185,11 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[], ch
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "sfc_albedo", &sfc_albedo_id)))
         ERR(retval);
+    if ((retval = nc_inq_varid(ncid, "sfc_density", &sfc_density_id)))
+        ERR(retval);
     if ((retval = nc_inq_varid(ncid, "sfc_c_v", &sfc_c_v_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "is_land", &is_land_id)))
-        ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "sfc_density", &sfc_density_id)))
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, sfc_albedo_id, &(grid -> sfc_albedo[0]))))
         ERR(retval);
