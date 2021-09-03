@@ -62,23 +62,17 @@ int main(int argc, char *argv[])
 	{
 		ORO_ID = 2;
 	}
-    int FILE_NAME_LENGTH = 100;
-    char *GEO_PROP_FILE_PRE = malloc((FILE_NAME_LENGTH + 1)*sizeof(char));
+    char GEO_PROP_FILE_PRE[200];
     sprintf(GEO_PROP_FILE_PRE, "../grid_generator/grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
-    FILE_NAME_LENGTH = strlen(GEO_PROP_FILE_PRE);
-    free(GEO_PROP_FILE_PRE);
-    char *GEO_PROP_FILE = malloc((FILE_NAME_LENGTH + 1)*sizeof(char));
+    char GEO_PROP_FILE[strlen(GEO_PROP_FILE_PRE) + 1];
     sprintf(GEO_PROP_FILE, "../grid_generator/grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
     Grid *grid = calloc(1, sizeof(Grid));
     Dualgrid *dualgrid = calloc(1, sizeof(Dualgrid));
     set_grid_properties(grid, dualgrid, GEO_PROP_FILE);
     
-    int OUTPUT_FILE_LENGTH = 100;
-    char *OUTPUT_FILE_PRE = malloc((OUTPUT_FILE_LENGTH + 1)*sizeof(char));
+    char OUTPUT_FILE_PRE[200];
     sprintf(OUTPUT_FILE_PRE, "test_states/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", TEST_ID, RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
-    OUTPUT_FILE_LENGTH = strlen(OUTPUT_FILE_PRE);
-    free(OUTPUT_FILE_PRE);
-    char *OUTPUT_FILE = malloc((FILE_NAME_LENGTH + 1)*sizeof(char));
+    char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
     sprintf(OUTPUT_FILE, "test_states/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", TEST_ID, RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
     double *pressure = malloc(NO_OF_SCALARS*sizeof(double));
     double *temperature = malloc(NO_OF_SCALARS*sizeof(double));
@@ -142,7 +136,6 @@ int main(int argc, char *argv[])
     int ncid_grid, retval, latitude_vector_id, longitude_vector_id;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid_grid)))
         NCERR(retval);
-    free(GEO_PROP_FILE);
     if ((retval = nc_inq_varid(ncid_grid, "latitude_vector", &latitude_vector_id)))
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid_grid, "longitude_vector", &longitude_vector_id)))
@@ -319,7 +312,6 @@ int main(int argc, char *argv[])
     free(liquid_water_temp);
     free(solid_water_temp);
     free(rel_humidity);
-    free(OUTPUT_FILE);
     return 0;
 }
 
