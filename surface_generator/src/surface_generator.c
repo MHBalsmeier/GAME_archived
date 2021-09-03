@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 	// reading the land mask
 	int is_land_id;
 	char IS_LAND_FILE_PRE[200];
-    sprintf(IS_LAND_FILE_PRE, "real//B%d_is_land.nc", RES_ID);
+    sprintf(IS_LAND_FILE_PRE, "real/B%d_is_land.nc", RES_ID);
 	char IS_LAND_FILE[strlen(IS_LAND_FILE_PRE) + 1];
     strcpy(IS_LAND_FILE, IS_LAND_FILE_PRE);
 	int *is_land = malloc(NO_OF_SCALARS_H*sizeof(int));

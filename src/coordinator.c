@@ -378,7 +378,11 @@ int main(int argc, char *argv[])
     
     // Reading external data.
 	printf("Reading grid data ...\n");
-    set_grid_properties(grid, dualgrid, GEO_PROP_FILE, SFC_PROP_FILE);
+    set_grid_properties(grid, dualgrid, GEO_PROP_FILE);
+    if (ORO_ID == 2)
+    {
+    	set_sfc_properties(grid, SFC_PROP_FILE);
+    }
     printf("Grid loaded successfully.\n");
     printf("%s", stars);
     printf("Reading initial state ...\n");
