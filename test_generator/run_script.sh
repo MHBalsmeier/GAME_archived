@@ -14,7 +14,7 @@
 # 7:	moist Ullrich test with oro_id = 1
 # 8:	moist Ullrich test with oro_id = 2
 
-test_id=3
+test_id=8
 type_of_vertical_grid=0 # 0: terrain following coordinates, 1: block-like orography
 orography_layers=23 # number of layers following orography (only relevant if type_of_vertical_grid == 0)
 toa=41152 # height of the top of the atmosphere
