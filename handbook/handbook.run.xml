@@ -78,5 +78,8 @@
     <requires type="dynamic">
       <file>handbook.bcf</file>
     </requires>
+    <requires type="editable">
+      <file>references.bib</file>
+    </requires>
   </external>
 </requests>
