@@ -32,4 +32,4 @@ if [ ! -d figs ]
 then
 mkdir figs
 fi
-echo "Complete."
+echo "Completed."
