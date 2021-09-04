@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
     char GEO_PROP_FILE[strlen(GEO_PROP_FILE_PRE) + 1];
     strcpy(GEO_PROP_FILE, GEO_PROP_FILE_PRE);
     char SFC_PROP_FILE_PRE[200];
-	sprintf(SFC_PROP_FILE_PRE, "../../surface_generator/surface_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
+	sprintf(SFC_PROP_FILE_PRE, "../../surface_generator/surface_files/B%d_O%d_SCVT.nc", RES_ID, 2);
     char SFC_PROP_FILE[strlen(SFC_PROP_FILE_PRE) + 1];
     strcpy(SFC_PROP_FILE, SFC_PROP_FILE_PRE);
     
@@ -379,7 +379,7 @@ int main(int argc, char *argv[])
     // Reading external data.
 	printf("Reading grid data ...\n");
     set_grid_properties(grid, dualgrid, GEO_PROP_FILE);
-    if (ORO_ID == 2)
+    if (config_info -> rad_on == 1)
     {
     	set_sfc_properties(grid, SFC_PROP_FILE);
     }
