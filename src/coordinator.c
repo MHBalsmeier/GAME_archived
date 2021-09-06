@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
     strcpy(INIT_STATE_FILE, INIT_STATE_FILE_PRE);
     
     /*
-    Determining the C time stamp of the initialization (UTC).
+    Determining the Unix time stamp of the initialization (UTC).
     ------------------------------------------------------------
     */
     struct tm init_tm;
