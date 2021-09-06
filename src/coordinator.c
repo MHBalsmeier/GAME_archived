@@ -190,21 +190,21 @@ int main(int argc, char *argv[])
     strcpy(INIT_STATE_FILE, INIT_STATE_FILE_PRE);
     
     /*
-    Determining the Unix time stamp of the initialization (UTC).
+    Determining the C time stamp of the initialization (UTC).
     ------------------------------------------------------------
     */
-    struct tm init_t;
-    init_t.tm_year = year - 1900;
-    init_t.tm_mon = month - 1;
-    init_t.tm_mday = day;
-    init_t.tm_hour = hour;
-    init_t.tm_min = 0;
-    init_t.tm_sec = 0;
+    struct tm init_tm;
+    init_tm.tm_year = year - 1900;
+    init_tm.tm_mon = month - 1;
+    init_tm.tm_mday = day;
+    init_tm.tm_hour = hour;
+    init_tm.tm_min = 0;
+    init_tm.tm_sec = 0;
     // turning off DST
-    init_t.tm_isdst = 0;
-    time_t init_time = mktime(&init_t);
+    init_tm.tm_isdst = 0;
+    time_t init_time = mktime(&init_tm);
     // converting to double in UTC
-    double t_init = (double) init_time + init_t.tm_gmtoff;
+    double t_init = (double) init_time + init_tm.tm_gmtoff;
     
     /*
     Giving the user some information on the run to about to be executed.
