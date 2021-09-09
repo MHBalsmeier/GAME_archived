@@ -80,6 +80,7 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
     }
     
     // resricting the maximum relative humidity to 100 %
+    #pragma omp parallel for
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
 		if (rel_humidity(water_vapour_density[i], temperature_gas[i]) > 1)
