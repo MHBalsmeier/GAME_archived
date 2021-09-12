@@ -30,7 +30,7 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
     int retval, ncid;
     if ((retval = nc_open(FILE_NAME, NC_NOWRITE, &ncid)))
         NCERR(retval);
-    int temperature_gas_id, density_dry_id, wind_id, density_vapour_id, density_liquid_id, density_solid_id, temperature_liquid_id, temperature_solid_id, stretching_parameter_id;
+    int temperature_gas_id, density_dry_id, wind_id, density_vapour_id, rain_density_id, snow_density_id, temperature_liquid_id, temperature_solid_id, stretching_parameter_id;
     double stretching_parameter;
     if ((retval = nc_inq_varid(ncid, "density_dry", &density_dry_id)))
         NCERR(retval);
@@ -38,9 +38,9 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "wind", &wind_id)))
         NCERR(retval);
-    if ((retval = nc_inq_varid(ncid, "density_solid", &density_solid_id)))
+    if ((retval = nc_inq_varid(ncid, "snow_density", &snow_density_id)))
         NCERR(retval);
-    if ((retval = nc_inq_varid(ncid, "density_liquid", &density_liquid_id)))
+    if ((retval = nc_inq_varid(ncid, "rain_density", &rain_density_id)))
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "density_vapour", &density_vapour_id)))
         NCERR(retval);
@@ -60,9 +60,9 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
         NCERR(retval);    
     if ((retval = nc_get_var_double(ncid, density_vapour_id, &water_vapour_density[0])))
         NCERR(retval);    
-    if ((retval = nc_get_var_double(ncid, density_liquid_id, &liquid_water_density [0])))
+    if ((retval = nc_get_var_double(ncid, rain_density_id, &liquid_water_density [0])))
         NCERR(retval);    
-    if ((retval = nc_get_var_double(ncid, density_solid_id, &solid_water_density[0])))
+    if ((retval = nc_get_var_double(ncid, snow_density_id, &solid_water_density[0])))
         NCERR(retval);
     if ((retval = nc_get_var_double(ncid, temperature_liquid_id, &liquid_water_temperature[0])))
         NCERR(retval);    
