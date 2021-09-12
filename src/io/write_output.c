@@ -125,7 +125,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		    cape[i] = 0;
 		    if (NO_OF_CONSTITUENTS >= 4)
 		    {
-				density_v = state_write_out -> rho[3*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+				density_v = state_write_out -> rho[5*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 				density_h = density_gas(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i);
 				theta_v_prime = grid -> theta_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
 				+ state_write_out -> theta_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]*(1 + density_v/density_h*(mean_particle_masses_gas(0)/mean_particle_masses_gas(1) - 1));
@@ -133,7 +133,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 				cape[i] = 0;
 				while (z_height < z_tropopause)
 				{
-					density_v = state_write_out -> rho[3*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + i];
+					density_v = state_write_out -> rho[5*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + i];
 					density_h = density_gas(state_write_out, layer_index*NO_OF_SCALARS_H + i);
 				    theta_v = grid -> theta_bg[layer_index*NO_OF_SCALARS_H + i]
 				    + state_write_out -> theta_pert[layer_index*NO_OF_SCALARS_H + i]*(1 + density_v/density_h*(mean_particle_masses_gas(0)/mean_particle_masses_gas(1) - 1));
@@ -149,13 +149,15 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		    }
 		    
 		    // Now come the hydrometeors.
-		    if (NO_OF_CONSTITUENTS >= 4)
+		    if (NO_OF_CONSTITUENTS == 6)
 		    {
         		cloudy_box_counter = 0;
     	        for (int k = 0; k < NO_OF_LAYERS; ++k)
 			    {
 			        if (state_write_out -> rho[k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX
-			        || state_write_out -> rho[NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX)
+			        || state_write_out -> rho[1*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX
+			        || state_write_out -> rho[2*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX
+			        || state_write_out -> rho[3*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX)
 			        {
 			    		cloudy_box_counter += 1;
 		            }
@@ -168,10 +170,10 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
             }
             // solid precipitation rate
 		    sprate[i] = 0;
-		    for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS/2; ++k)
+			if (NO_OF_CONDENSED_CONSTITUENTS == 4)
 		    {
-		    	// sink velocity is 0.1, value must be positive
-		        sprate[i] += 0.1*state_write_out -> rho[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		        sprate[i] += 0.1*state_write_out -> rho[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		        sprate[i] += 0.01*state_write_out -> rho[2*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
 	        if (sprate[i] < EPSILON_SECURITY)
 	        {
@@ -179,10 +181,10 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 	        }
 	        // liquid precipitation rate
 		    rprate[i] = 0;
-		    for (int k = NO_OF_CONDENSED_CONSTITUENTS/2; k < NO_OF_CONDENSED_CONSTITUENTS; ++k)
+			if (NO_OF_CONDENSED_CONSTITUENTS == 4)
 		    {
-		    	// sink velocity is 0.1, value must be positive
-		        rprate[i] += 0.1*state_write_out -> rho[k*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		        rprate[i] += 0.1*state_write_out -> rho[NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		        rprate[i] += 0.01*state_write_out -> rho[3*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
 	        if (rprate[i] < EPSILON_SECURITY)
 	        {
