@@ -307,6 +307,15 @@ int main(int argc, char *argv[])
 	printf("%s", stars);
 	
 	printf("Physics configuration:\n");
+	printf("Number of constituents: %d\n", NO_OF_CONSTITUENTS);
+	printf("Number of condensed constituents: %d\n", NO_OF_CONDENSED_CONSTITUENTS);
+	printf("Number of gaseous constituents: %d\n", NO_OF_GASEOUS_CONSTITUENTS);
+	if (NO_OF_CONSTITUENTS != 1 && NO_OF_CONSTITUENTS != 6)
+	{
+		printf("Error: NO_OF_CONSTITUENTS must be either 1 or 6.\n");
+		printf("Aborting.\n");
+		exit(1);
+	}
 	if (config_info -> assume_lte == 0)
 	{
 		printf("Not Assuming local thermodynamic equilibrium.\n");

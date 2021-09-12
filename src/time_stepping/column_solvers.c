@@ -300,10 +300,17 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						lower_index = i + (j + 1)*NO_OF_SCALARS_H;
 						upper_index = i + j*NO_OF_SCALARS_H;
 						// For condensed constituents, a sink velocity must be added.
-						if (k < NO_OF_CONDENSED_CONSTITUENTS)
+						// precipitation
+						if (k < NO_OF_CONDENSED_CONSTITUENTS/2)
 						{
 							vertical_flux_vector_impl[j] -= 0.1;
 							vertical_flux_vector_rhs[j] -= 0.1;
+						}
+						// clouds
+						else if (k < NO_OF_CONDENSED_CONSTITUENTS)
+						{
+							vertical_flux_vector_impl[j] -= 0.01;
+							vertical_flux_vector_rhs[j] -= 0.01;
 						}
 						// multiplying the vertical velocity by the area
 						area = grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
