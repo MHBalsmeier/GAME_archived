@@ -244,7 +244,7 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 	    state -> condensed_density_temperatures,
 	    diagnostics -> temperature_gas,
 	    NO_OF_SCALARS,
-	    10*delta_t,
+	    2*delta_t,
 	    config_info -> assume_lte);
 	    int layer_index, h_index;
 	    // loop over all constituents
