@@ -28,15 +28,20 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 	*/
 	// declaring needed variables
     int h_index, layer_index;
-    double c_v_cond, tracer_heating, density_gas_weight, density_total_weight, old_weight, new_weight;
+    double c_v_cond, tracer_heating, density_gas_weight, density_total_weight;
     
     // determining the RK weights
-    new_weight = 1;
-    if (no_rk_step == 1)
+    double old_weight[NO_OF_CONSTITUENTS];
+    double new_weight[NO_OF_CONSTITUENTS];
+    for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
     {
-    	new_weight = 1;
+		new_weight[i] = 1;
+		if (no_rk_step == 1 && i != NO_OF_CONDENSED_CONSTITUENTS)
+		{
+			new_weight[i] = 0.5;
+		}
+		old_weight[i] = 1 - new_weight[i];
     }
-    old_weight = 1 - new_weight;
     
 	// Temperature diffusion gets updated here, but only at the first RK step and if heat conduction is switched on.
 	if (no_rk_step == 0 && (config_info -> temperature_diff_h == 1 || config_info -> temperature_diff_v == 1))
@@ -94,8 +99,8 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 			if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 			{
 				state_tendency -> rho[i*NO_OF_SCALARS + j]
-				= old_weight*state_tendency -> rho[i*NO_OF_SCALARS + j]
-				+ new_weight*(
+				= old_weight[i]*state_tendency -> rho[i*NO_OF_SCALARS + j]
+				+ new_weight[i]*(
 				// the advection
 				-diagnostics -> flux_density_divv[j]);
 				// the horizontal brute-force limiter
@@ -153,8 +158,8 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 						}
 					}
 					state_tendency -> rhotheta[j]
-					= old_weight*state_tendency -> rhotheta[j]
-					+ new_weight*(
+					= old_weight[i]*state_tendency -> rhotheta[j]
+					+ new_weight[i]*(
 					// the advection (resolved transport)
 					-diagnostics -> flux_density_divv[j]
 					// the diabatic forcings
@@ -205,8 +210,8 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 				{
 					c_v_cond = ret_c_v_cond(i, 0, state -> condensed_density_temperatures[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + state -> rho[i*NO_OF_SCALARS + j]));
 					state_tendency -> condensed_density_temperatures[i*NO_OF_SCALARS + j]
-					= old_weight*state_tendency -> condensed_density_temperatures[i*NO_OF_SCALARS + j]
-					+ new_weight*(
+					= old_weight[i]*state_tendency -> condensed_density_temperatures[i*NO_OF_SCALARS + j]
+					+ new_weight[i]*(
 					// the advection
 					-diagnostics -> flux_density_divv[j]
 					// the source terms
