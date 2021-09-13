@@ -1297,19 +1297,31 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 	if ((io_config -> model_level_output_switch == 1 && io_config -> netcdf_output_switch == 1)
 	|| (config_info -> nwp_mode == 1 && (int) (t_write - t_init) == config_info -> delta_t_between_analyses))
 	{
+		// diagnozing the temperatures of all constituents
 		double *temperatures = malloc((NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS*sizeof(double));
+		// loop over all gridpoints
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
+			// loop over all condensed constituents
 			for (int j = 0; j < NO_OF_CONDENSED_CONSTITUENTS; ++j)
 			{
+				// the non-LTE case
 				if (config_info -> assume_lte == 0)
 				{
-					temperatures[i] = state_write_out -> condensed_density_temperatures[i]/state_write_out -> rho[i];
+					if (state_write_out -> rho[j*NO_OF_SCALARS + i] >= EPSILON_SECURITY)
+					{
+						temperatures[j*NO_OF_SCALARS + i] = state_write_out -> condensed_density_temperatures[j*NO_OF_SCALARS + i]/state_write_out -> rho[j*NO_OF_SCALARS + i];
+					}
+					else
+					{
+						temperatures[j*NO_OF_SCALARS + i] = diagnostics -> temperature_gas[i];
+					}
 				}
+				// the LTE case
 				if (config_info -> assume_lte == 1)
 				{
-					temperatures[i] = diagnostics -> temperature_gas[i - j*NO_OF_SCALARS];
+					temperatures[j*NO_OF_SCALARS + i] = diagnostics -> temperature_gas[i];
 				}
 			}
 			temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = diagnostics -> temperature_gas[i];
@@ -1318,7 +1330,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		sprintf(OUTPUT_FILE_PRE, "%s+%ds.nc", RUN_ID, (int) (t_write - t_init));
 		char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
 		sprintf(OUTPUT_FILE, "%s+%ds.nc", RUN_ID, (int) (t_write - t_init));
-		int scalar_dimid, vector_h_dimid, vector_v_dimid, densities_dimid, temperatures_dimid, densities_id, temperatures_id, wind_id, ncid, retval, rh_id, divv_h_all_layers_id, rel_vort_id, curl_field_dimid, stretching_parameter_id, single_double_dimid, vector_dimid;
+		int ncid, retval, scalar_dimid, vector_h_dimid, vector_v_dimid, vector_dimid, densities_dimid, temperatures_dimid, curl_field_dimid, single_double_dimid, densities_id, temperatures_id, wind_id, rh_id, divv_h_all_layers_id, rel_vort_id, stretching_parameter_id;
 		
 		if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
 			NCERR(retval);
@@ -1340,8 +1352,6 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 			NCERR(retval);
 		
 		// Defining the variables.
-		if ((retval = nc_def_var(ncid, "stretching_parameter", NC_DOUBLE, 1, &single_double_dimid, &stretching_parameter_id)))
-			NCERR(retval);
 		if ((retval = nc_def_var(ncid, "densities", NC_DOUBLE, 1, &densities_dimid, &densities_id)))
 			NCERR(retval);
 		if ((retval = nc_put_att_text(ncid, densities_id, "units", strlen("kg/m^3"), "kg/m^3")))
@@ -1366,12 +1376,12 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 			NCERR(retval);
 		if ((retval = nc_put_att_text(ncid, divv_h_all_layers_id, "units", strlen("1/s"), "1/s")))
 			NCERR(retval);
+		if ((retval = nc_def_var(ncid, "stretching_parameter", NC_DOUBLE, 1, &single_double_dimid, &stretching_parameter_id)))
+			NCERR(retval);
 		if ((retval = nc_enddef(ncid)))
 			NCERR(retval);
 		
 		// setting the variables
-		if ((retval = nc_put_var_double(ncid, stretching_parameter_id, &grid -> stretching_parameter)))
-			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, densities_id, &state_write_out -> rho[0])))
 			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, temperatures_id, &temperatures[0])))
@@ -1383,6 +1393,8 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		if ((retval = nc_put_var_double(ncid, rel_vort_id, &(*rel_vort)[0])))
 			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, divv_h_all_layers_id, &(*divv_h_all_layers)[0])))
+			NCERR(retval);
+		if ((retval = nc_put_var_double(ncid, stretching_parameter_id, &grid -> stretching_parameter)))
 			NCERR(retval);
 		
 		// Closing the netcdf file.
