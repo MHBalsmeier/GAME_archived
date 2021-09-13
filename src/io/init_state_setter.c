@@ -28,7 +28,7 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
     double stretching_parameter;
     if ((retval = nc_inq_varid(ncid, "densities", &densities_id)))
         NCERR(retval);
-    if ((retval = nc_inq_varid(ncid, "temperatures",&temperatures_id)))
+    if ((retval = nc_inq_varid(ncid, "temperatures", &temperatures_id)))
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "wind", &wind_id)))
         NCERR(retval);
@@ -68,7 +68,7 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 	
 	// diagnostic thermodynamical quantities
 	double pressure, pot_temp;
-	#pragma omp parallel for private (pressure, pot_temp)
+	#pragma omp parallel for private(pressure, pot_temp)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		pressure = init_state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*specific_gas_constants(0)*temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];

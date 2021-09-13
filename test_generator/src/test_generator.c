@@ -80,7 +80,13 @@ int main(int argc, char *argv[])
     double z_height;
     double lat, lon, u, v, pressure_value, specific_humidity, total_density;
     // dummy argument
-    double dummy = 0.0;
+    double dummy_0 = 0.0;
+    double dummy_1 = 0.0;
+    double dummy_2 = 0.0;
+    double dummy_3 = 0.0;
+    double dummy_4 = 0.0;
+    double dummy_5 = 0.0;
+    double dummy_6 = 0.0;
     State *state = calloc(1, sizeof(State));
     int layer_index, h_index;
     int zero = 0;
@@ -104,12 +110,14 @@ int main(int argc, char *argv[])
         // dry Ullrich test
         if (TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
         {
-        	baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy, &dummy, &temperature[i], &dummy, &dummy, &dummy, &dummy, &dummy);
+        	baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i],
+        	&dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
         }
         // moist Ullrich test
         if (TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 8)
         {
-        	baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy, &dummy, &temperature[i], &dummy, &dummy, &dummy, &total_density, &specific_humidity);
+        	baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i],
+        	&dummy_2, &dummy_4, &dummy_5, &total_density, &specific_humidity);
         	water_vapour_density[i] = total_density*specific_humidity;
         }
     }
@@ -148,13 +156,13 @@ int main(int argc, char *argv[])
             // dry Ullrich test
             if (TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
             {
-        		baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &dummy, &z_height, &one, &u, &v, &dummy, &dummy, &dummy, &dummy, &dummy, &dummy);
+        		baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
                 state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
             }
             // moist Ullrich test
             if (TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 8)
             {
-        		baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &dummy, &z_height, &one, &u, &v, &dummy, &dummy, &dummy, &dummy, &dummy, &dummy);
+        		baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
                 state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
             }
         }
@@ -162,9 +170,9 @@ int main(int argc, char *argv[])
     free(latitude_vector);
     free(longitude_vector);
     // setting the vertical wind field equal to zero
+	#pragma omp parallel for
     for (int i = 0; i < NO_OF_LEVELS; ++i)
     {
-    	#pragma omp parallel for private(lat, lon, z_height)
         for (int j = 0; j < NO_OF_SCALARS_H; ++j)
         {
             state -> wind[i*NO_OF_VECTORS_PER_LAYER + j] = 0;
