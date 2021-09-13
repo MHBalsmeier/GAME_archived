@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
 				c = pow(state -> exner_pert[scalar_index + NO_OF_SCALARS_H], 2)*temperature[scalar_index]/temperature[scalar_index + NO_OF_SCALARS_H];
 				state -> exner_pert[scalar_index] = b + pow((pow(b, 2) + c), 0.5);
 			}
-			// scalar_field_placeholder is the gas density here
+			// scalar_field_placeholder is the dry air density here
 			diagnostics -> scalar_field_placeholder[scalar_index] = P_0*pow(state -> exner_pert[scalar_index],
 			spec_heat_capacities_p_gas(0)/specific_gas_constants(0))/(specific_gas_constants(0)*temperature[scalar_index]);
 		}
@@ -228,8 +228,24 @@ int main(int argc, char *argv[])
     #pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		
-	}    
+		for (int j = 0; j < NO_OF_CONDENSED_CONSTITUENTS; ++j)
+		{
+			// condensed densities are zero in all test states
+			state -> rho[j*NO_OF_SCALARS + i] = 0;
+			// a local LTE is assumed in all test states
+			temperatures[j*NO_OF_SCALARS + i] = temperature[i];
+		}
+		// the dry air density
+		state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = diagnostics -> scalar_field_placeholder[i];
+		// water vapout density
+		if (NO_OF_CONDENSED_CONSTITUENTS == 4)
+		{
+			state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = water_vapour_density[i];
+		}
+		// gas temperature
+		temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = temperature[i];
+	}
+	free(diagnostics);
     free(temperature);
     free(water_vapour_density);
     
