@@ -31,15 +31,15 @@ if write_out_dry_mass_integral == 1:
 	if no_of_constituents == 1:
 		plt.plot(time_vector, 100*(data[:, 1]/data[0, 1] - 1));
 		plt.legend(["Dry mass"]);
-	if no_of_constituents == 4:
+	if no_of_constituents == 6:
 		# dry mass
-		plt.plot(time_vector, 100*(data[:, 3]/data[0, 3] - 1));
+		plt.plot(time_vector, 100*(data[:, 5]/data[0, 5] - 1));
 		# the total amount of water in the atmosphere at the beginning
-		water_masses_sum = data[0, 1] + data[0, 2] + data[0, 4];
+		water_masses_init_sum = data[0, 1] + data[0, 2] + data[0, 3] + data[0, 4] + data[0, 6];
 		# water vapour
-		plt.plot(time_vector, 100*(data[:, 4]/data[0, 4] - 1));
+		plt.plot(time_vector, 100*(data[:, 6]/data[0, 6] - 1));
 		# water in all phases
-		plt.plot(time_vector, 100*((data[:, 1] + data[:, 2] + data[:, 4])/water_masses_sum - 1));
+		plt.plot(time_vector, 100*((data[:, 1] + data[:, 2] + data[:, 3] + data[:, 4] + data[:, 6])/water_masses_init_sum - 1));
 		plt.legend(["Dry mass", "Water vapour", "Water (all phases)"]);
 	plt.grid();
 	fig.savefig(fig_save_path + "/" + run_id + "_masses_integral.png", dpi = 500);
