@@ -110,8 +110,7 @@ double density_total(State *state, int grid_point_index)
 double density_gas(State *state, int grid_point_index)
 {
 	double result = 0;
-	// < 1 is temporary, normally it should be < NO_OF_GASEOUS_CONSTITUENTS
-	for (int i = 0; i < 1; ++i)
+	for (int i = 0; i < NO_OF_GASEOUS_CONSTITUENTS; ++i)
 	{
 		result += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index];
 	}

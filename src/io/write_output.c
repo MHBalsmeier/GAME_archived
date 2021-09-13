@@ -149,13 +149,13 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		    }
 		    
 		    // Now come the hydrometeors.
-		    if (NO_OF_CONSTITUENTS == 6)
+		    if (NO_OF_CONDENSED_CONSTITUENTS == 4)
 		    {
         		cloudy_box_counter = 0;
     	        for (int k = 0; k < NO_OF_LAYERS; ++k)
 			    {
 			        if (state_write_out -> rho[k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX
-			        || state_write_out -> rho[1*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX
+			        || state_write_out -> rho[NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX
 			        || state_write_out -> rho[2*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX
 			        || state_write_out -> rho[3*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX)
 			        {
@@ -175,20 +175,12 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		        sprate[i] += 0.1*state_write_out -> rho[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		        sprate[i] += 0.01*state_write_out -> rho[2*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
-	        if (sprate[i] < EPSILON_SECURITY)
-	        {
-	        	sprate[i] = 0;
-	        }
 	        // liquid precipitation rate
 		    rprate[i] = 0;
 			if (NO_OF_CONDENSED_CONSTITUENTS == 4)
 		    {
 		        rprate[i] += 0.1*state_write_out -> rho[NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		        rprate[i] += 0.01*state_write_out -> rho[3*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
-	        }
-	        if (rprate[i] < EPSILON_SECURITY)
-	        {
-	        	rprate[i] = 0;
 	        }
 		}
 		
