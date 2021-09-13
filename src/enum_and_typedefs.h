@@ -207,7 +207,7 @@ Scalar_field heating_diss;
 Scalar_field scalar_diffusion_coeff_numerical_h;
 Scalar_field scalar_diffusion_coeff_numerical_v;
 Scalar_field pressure_gradient_decel_factor;
-double constituent_mass_source_rates[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS];
+double mass_source_rates[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS];
 double constituent_heat_source_rates[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS];
 Scalar_field viscosity_div_eff;
 Vector_field viscosity_curl_eff_rhombi;

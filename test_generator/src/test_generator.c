@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
         NCERR(retval);
 
     // horizontal wind fields are determind here
-    #pragma omp parallel for private(lat, lon, z_height, u, v)
+    #pragma omp parallel for private(lat, lon, z_height, u, v, dummy_0, dummy_1, dummy_2, dummy_3, dummy_4, dummy_5, dummy_6)
     for (int i = 0; i < NO_OF_LAYERS; ++i)
     {
         for (int j = 0; j < NO_OF_VECTORS_H; ++j)

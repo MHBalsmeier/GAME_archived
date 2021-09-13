@@ -218,7 +218,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 					+ state -> rho[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state, j))
 					*(irrev -> temperature_diffusion_heating[j] + irrev -> heating_diss[j] + forcings -> radiation_tendency[j])
 					+ 1/c_v_cond*irrev -> constituent_heat_source_rates[i*NO_OF_SCALARS + j]
-					+ diagnostics -> scalar_field_placeholder[j]*(irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j]));
+					+ diagnostics -> scalar_field_placeholder[j]*(irrev -> mass_source_rates[i*NO_OF_SCALARS + j]));
 				}
 			}
 		}
@@ -238,7 +238,7 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 	{
 		// calculating the source rates
 	    calc_h2otracers_source_rates(
-	    irrev -> constituent_mass_source_rates,
+	    irrev -> mass_source_rates,
 	    irrev -> constituent_heat_source_rates,
 	    state -> rho,
 	    state -> condensed_density_temperatures,
@@ -263,12 +263,12 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 					{
 						if (i < NO_OF_CONDENSED_CONSTITUENTS)
 						{
-							state -> rho[i*NO_OF_SCALARS + j] = state -> rho[i*NO_OF_SCALARS + j] + delta_t*irrev -> constituent_mass_source_rates[i*NO_OF_SCALARS + j];
+							state -> rho[i*NO_OF_SCALARS + j] = state -> rho[i*NO_OF_SCALARS + j] + delta_t*irrev -> mass_source_rates[i*NO_OF_SCALARS + j];
 						}
 						// for the gaseous constituents (apart from the main one), an index shift is necessary
 						else
 						{
-							state -> rho[i*NO_OF_SCALARS + j] = state -> rho[i*NO_OF_SCALARS + j] + delta_t*irrev -> constituent_mass_source_rates[(i - 1)*NO_OF_SCALARS + j];
+							state -> rho[i*NO_OF_SCALARS + j] = state -> rho[i*NO_OF_SCALARS + j] + delta_t*irrev -> mass_source_rates[(i - 1)*NO_OF_SCALARS + j];
 						}
 					}
 				}
