@@ -256,18 +256,36 @@ module radiation
     enddo
     
     ! reformatting the clouds for RTE+RRTMGP
-    if (no_of_condensed_constituents > 1) then
-      liquid_eff_radius_value = 0.5_wp*(cloud_optics_sw%get_min_radius_liq()+cloud_optics_sw%get_max_radius_liq())
-      ice_eff_radius_value    = 0.5_wp*(cloud_optics_sw%get_min_radius_ice()+cloud_optics_sw%get_max_radius_ice())
+    ! the moist case
+    if (no_of_condensed_constituents == 4) then
       do ji = 1,no_of_scalars_h
         do jk = 1,no_of_layers
+          ! the solid condensates' effective radius
+          ice_eff_radius_value    = (mass_densities(2*no_of_scalars+(jk-1)*no_of_scalars_h+ji) &
+          *cloud_optics_sw%get_min_radius_ice()+mass_densities((jk-1)*no_of_scalars_h+ji)*cloud_optics_sw%get_max_radius_ice()) &
+          /(mass_densities(2*no_of_scalars+(jk-1)*no_of_scalars_h+ji)+mass_densities((jk-1)*no_of_scalars_h+ji)+1e-10)
+          ! the liquid condensates' effective radius
+          liquid_eff_radius_value = (mass_densities(3*no_of_scalars+(jk-1)*no_of_scalars_h+ji) &
+          *cloud_optics_sw%get_min_radius_liq()+mass_densities(no_of_scalars+(jk-1)*no_of_scalars_h+ji) &
+          *cloud_optics_sw%get_max_radius_liq()) &
+          /(mass_densities(3*no_of_scalars+(jk-1)*no_of_scalars_h+ji)+mass_densities(no_of_scalars+(jk-1)*no_of_scalars_h+ji)+1e-10)
+          ! thickness of the gridbox
           thickness = z_vector(ji+(jk-1)*no_of_scalars_h)-z_vector(ji+jk*no_of_scalars_h)
-          liquid_water_path(ji,jk) = thickness*1000._wp*mass_densities(no_of_scalars+(jk-1)*no_of_scalars_h+ji)
-          ice_water_path(ji,jk) = thickness*1000._wp*mass_densities((jk-1)*no_of_scalars_h+ji)
-          liquid_eff_radius(ji,jk) = merge(liquid_eff_radius_value,0._wp,liquid_water_path(ji,jk) > 0._wp)
+          ! solid water "content"
+          ice_water_path(ji,jk) = thickness*1000._wp &
+          *(mass_densities((jk-1)*no_of_scalars_h+ji) &
+          +mass_densities(2*no_of_scalars+(jk-1)*no_of_scalars_h+ji))
+          ! liquid water "content"
+          liquid_water_path(ji,jk) = thickness*1000._wp &
+          *(mass_densities(no_of_scalars+(jk-1)*no_of_scalars_h+ji) &
+          +mass_densities(3*no_of_scalars+(jk-1)*no_of_scalars_h+ji))
+          ! if there is no solid water in the grid box, the solid effective radius is set to zero
           ice_eff_radius(ji,jk) = merge(ice_eff_radius_value,0._wp,ice_water_path(ji,jk) > 0._wp)
+          ! if there is no liquid water in the grid box, the liquid effective radius is set to zero
+          liquid_eff_radius(ji,jk) = merge(liquid_eff_radius_value,0._wp,liquid_water_path(ji,jk) > 0._wp)
         enddo
       enddo
+    ! the dry case
     else
       liquid_water_path(:,:) = 0._wp
       ice_water_path(:,:)    = 0._wp
@@ -738,9 +756,9 @@ module radiation
         case("n2o")
           vol_mix_ratio(:,:) = molar_fraction_in_dry_air(11)
         case("h2o")
-          ! no_of_condensed_constituents > 0 is equivalent to the presence of water in the model atmosphere
+          ! no_of_condensed_constituents == 4 is equivalent to the presence of water in the model atmosphere
           ! in the short wave case,only the day points matter
-          if (sw_bool .and. no_of_condensed_constituents > 0) then
+          if (sw_bool .and. no_of_condensed_constituents == 4) then
             do jk=1,no_of_day_points
               do jl=1,no_of_layers
                 vol_mix_ratio(jk,jl) = & 
@@ -751,7 +769,7 @@ module radiation
               enddo
             enddo
           ! in the long wave case,all points matter
-          elseif (no_of_condensed_constituents > 0) then
+          elseif (no_of_condensed_constituents == 4) then
             do jk=1,no_of_scalars_h
               do jl=1,no_of_layers
                 vol_mix_ratio(jk,jl) = & 
