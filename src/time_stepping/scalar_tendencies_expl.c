@@ -234,7 +234,7 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 	*/
 	
 	// Only if we have multiple constituents, moisture needs to be included.
-	if (NO_OF_CONSTITUENTS == 4)
+	if (NO_OF_CONSTITUENTS > 1)
 	{
 		// calculating the source rates
 	    calc_h2otracers_source_rates(

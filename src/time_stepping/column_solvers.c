@@ -395,8 +395,8 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 					{
 						if (solution_vector[j] < 0)
 						{
-							solution_vector[j] = 0;
 							added_mass = -solution_vector[j]*grid -> volume[i + j*NO_OF_SCALARS_H];
+							solution_vector[j] = 0;
 							if (j == 0)
 							{
 								solution_vector[j + 1] -= added_mass/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H];

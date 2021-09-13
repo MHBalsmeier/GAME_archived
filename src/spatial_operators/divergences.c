@@ -87,7 +87,7 @@ int divv_h_limited(Vector_field in_field, Scalar_field out_field, Grid *grid, Sc
 		    }
 		    // this is the excess divergence (negative)
 			added_divergence = current_value[i]/delta_t - out_field[i];
-			// we add excess divergence so that the operator produces no negative mass densities
+			// we add the excess divergence so that the operator produces no negative mass densities
 			out_field[i] += added_divergence;
 			// this is the additional mass source rate that is being produced by the limiter and that violates the mass conservation
 			added_mass_rate = -added_divergence*grid -> volume[i];
@@ -105,7 +105,7 @@ int divv_h_limited(Vector_field in_field, Scalar_field out_field, Grid *grid, Sc
 				}
 			}
 			// now we want to reduce what flows out of the grid box
-			// out_flow_rate_sum - outflow_rate_factor*out_flow_rate_sum = added_mass_rate
+			// outflow_rate_factor*out_flow_rate_sum = added_mass_rate
 			outflow_rate_factor = added_mass_rate/out_flow_rate_sum;
 			for (int j = 0; j < no_of_edges; ++j)
 			{

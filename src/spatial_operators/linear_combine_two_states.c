@@ -29,7 +29,9 @@ int linear_combine_two_states(State *state_0, State *state_1, State *state_out, 
         
         for (int j = 0; j < NO_OF_CONDENSED_CONSTITUENTS; ++j)
         {
-            state_out -> condensed_density_temperatures[j*NO_OF_SCALARS + i] = coeff_0*state_0 -> condensed_density_temperatures[j*NO_OF_SCALARS + i] + coeff_1*state_1 -> condensed_density_temperatures[j*NO_OF_SCALARS + i];
+            state_out -> condensed_density_temperatures[j*NO_OF_SCALARS + i]
+            = coeff_0*state_0 -> condensed_density_temperatures[j*NO_OF_SCALARS + i]
+            + coeff_1*state_1 -> condensed_density_temperatures[j*NO_OF_SCALARS + i];
         }
     }
     
