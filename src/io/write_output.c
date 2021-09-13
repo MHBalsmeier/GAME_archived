@@ -172,14 +172,14 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		    sprate[i] = 0;
 			if (NO_OF_CONDENSED_CONSTITUENTS == 4)
 		    {
-		        sprate[i] += 0.5*state_write_out -> rho[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		        sprate[i] += 0.1*state_write_out -> rho[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		        sprate[i] += 0.01*state_write_out -> rho[2*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
 	        // liquid precipitation rate
 		    rprate[i] = 0;
 			if (NO_OF_CONDENSED_CONSTITUENTS == 4)
 		    {
-		        rprate[i] += 0.5*state_write_out -> rho[NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		        rprate[i] += 0.1*state_write_out -> rho[NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		        rprate[i] += 0.01*state_write_out -> rho[3*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
 		}
