@@ -76,22 +76,11 @@ int main(int argc, char *argv[])
     sprintf(OUTPUT_FILE, "test_states/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", TEST_ID, RES_ID, NO_OF_LAYERS, (int) TOA, ORO_ID, NO_OF_ORO_LAYERS);
     double *pressure = malloc(NO_OF_SCALARS*sizeof(double));
     double *temperature = malloc(NO_OF_SCALARS*sizeof(double));
-    double *rel_humidity = malloc(NO_OF_SCALARS*sizeof(double));
     double *water_vapour_density = malloc(NO_OF_SCALARS*sizeof(double));
-    double *liquid_water_density = malloc(NO_OF_SCALARS*sizeof(double));
-    double *solid_water_density = malloc(NO_OF_SCALARS*sizeof(double));
-    double *liquid_water_temp = malloc(NO_OF_SCALARS*sizeof(double));
-    double *solid_water_temp = malloc(NO_OF_SCALARS*sizeof(double));
     double z_height;
     double lat, lon, u, v, pressure_value, specific_humidity, total_density;
-    // dummy arguments
-    double dummy_0 = 0.0;
-    double dummy_1 = 0.0;
-    double dummy_2 = 0.0;
-    double dummy_3 = 0.0;
-    double dummy_4 = 0.0;
-    double dummy_5 = 0.0;
-    double dummy_6 = 0.0;
+    // dummy argument
+    double dummy = 0.0;
     State *state = calloc(1, sizeof(State));
     int layer_index, h_index;
     int zero = 0;
@@ -106,7 +95,6 @@ int main(int argc, char *argv[])
         lat = grid -> latitude_scalar[h_index];
         lon = grid -> longitude_scalar[h_index];
         z_height = grid -> z_scalar[i];
-        rel_humidity[i] = 0;
         // standard atmosphere
         if (TEST_ID == 0 || TEST_ID == 1 || TEST_ID == 2)
         {
@@ -116,18 +104,14 @@ int main(int argc, char *argv[])
         // dry Ullrich test
         if (TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
         {
-        	baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i], &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
+        	baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy, &dummy, &temperature[i], &dummy, &dummy, &dummy, &dummy, &dummy);
         }
         // moist Ullrich test
         if (TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 8)
         {
-        	baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i], &dummy_2, &dummy_3, &dummy_4, &total_density, &specific_humidity);
+        	baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy, &dummy, &temperature[i], &dummy, &dummy, &dummy, &total_density, &specific_humidity);
         	water_vapour_density[i] = total_density*specific_humidity;
         }
-	    liquid_water_density[i] = 0;
-	    solid_water_density[i] = 0;
-        liquid_water_temp[i] = temperature[i];
-        solid_water_temp[i] = temperature[i];
     }
     
     // reading the grid properties which are not part of the struct grid
@@ -148,6 +132,7 @@ int main(int argc, char *argv[])
         NCERR(retval);
 
     // horizontal wind fields are determind here
+    #pragma omp parallel for private(lat, lon, z_height, u, v)
     for (int i = 0; i < NO_OF_LAYERS; ++i)
     {
         for (int j = 0; j < NO_OF_VECTORS_H; ++j)
@@ -163,13 +148,13 @@ int main(int argc, char *argv[])
             // dry Ullrich test
             if (TEST_ID == 3 || TEST_ID == 4 || TEST_ID == 5)
             {
-        		baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
+        		baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &dummy, &z_height, &one, &u, &v, &dummy, &dummy, &dummy, &dummy, &dummy, &dummy);
                 state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
             }
             // moist Ullrich test
             if (TEST_ID == 6 || TEST_ID == 7 || TEST_ID == 8)
             {
-        		baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
+        		baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &dummy, &z_height, &one, &u, &v, &dummy, &dummy, &dummy, &dummy, &dummy, &dummy);
                 state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
             }
         }
@@ -205,6 +190,7 @@ int main(int argc, char *argv[])
     int scalar_index;
     double b, c;
     // theta_pert and exner_pert are a misuse of name here, they contain the full values here
+    #pragma omp parallel for private(scalar_index, b, c, pressure_value)
 	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
 	{
 		// integrating from bottom to top
@@ -235,83 +221,60 @@ int main(int argc, char *argv[])
 			spec_heat_capacities_p_gas(0)/specific_gas_constants(0))/(specific_gas_constants(0)*temperature[scalar_index]);
 		}
 	}
-    
+    free(pressure);
     free(forcings);
-    int scalar_dimid, vector_dimid, temp_id, density_dry_id, wind_id, density_vapour_id, density_liquid_id, density_solid_id, temperature_liquid_id, temperature_solid_id, ncid, single_double_dimid, stretching_parameter_id;
+    
+    double *temperatures = malloc((NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS*sizeof(double));
+    #pragma omp parallel for
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		
+	}    
+    free(temperature);
+    free(water_vapour_density);
+    
+    int ncid, scalar_dimid, vector_dimid, densities_dimid, temperatures_dimid, single_double_dimid, densities_id, temperatures_id, wind_id, stretching_parameter_id;
     if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
         NCERR(retval);
     if ((retval = nc_def_dim(ncid, "scalar_index", NO_OF_SCALARS, &scalar_dimid)))
         NCERR(retval);
     if ((retval = nc_def_dim(ncid, "vector_index", NO_OF_VECTORS, &vector_dimid)))
         NCERR(retval);
+	if ((retval = nc_def_dim(ncid, "densities_index", NO_OF_CONSTITUENTS*NO_OF_SCALARS, &densities_dimid)))
+		NCERR(retval);
+	if ((retval = nc_def_dim(ncid, "temperatures_index", (NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS, &temperatures_dimid)))
+		NCERR(retval);
     if ((retval = nc_def_dim(ncid, "single_double_dimid_index", 1, &single_double_dimid)))
         NCERR(retval);
-    if ((retval = nc_def_var(ncid, "stretching_parameter", NC_DOUBLE, 1, &single_double_dimid, &stretching_parameter_id)))
+    if ((retval = nc_def_var(ncid, "densities", NC_DOUBLE, 1, &densities_dimid, &densities_id)))
         NCERR(retval);
-    if ((retval = nc_def_var(ncid, "temperature_gas", NC_DOUBLE, 1, &scalar_dimid, &temp_id)))
+    if ((retval = nc_put_att_text(ncid, densities_id, "units", strlen("kg/m^3"), "kg/m^3")))
         NCERR(retval);
-    if ((retval = nc_put_att_text(ncid, temp_id, "units", strlen("K"), "K")))
+    if ((retval = nc_def_var(ncid, "temperatures", NC_DOUBLE, 1, &temperatures_dimid, &temperatures_id)))
         NCERR(retval);
-    if ((retval = nc_def_var(ncid, "density_dry", NC_DOUBLE, 1, &scalar_dimid, &density_dry_id)))
-        NCERR(retval);
-    if ((retval = nc_put_att_text(ncid, density_dry_id, "units", strlen("kg/m^3"), "kg/m^3")))
+    if ((retval = nc_put_att_text(ncid, temperatures_id, "units", strlen("K"), "K")))
         NCERR(retval);
     if ((retval = nc_def_var(ncid, "wind", NC_DOUBLE, 1, &vector_dimid, &wind_id)))
         NCERR(retval);
     if ((retval = nc_put_att_text(ncid, wind_id, "units", strlen("m/s"), "m/s")))
         NCERR(retval);
-    if ((retval = nc_def_var(ncid, "density_vapour", NC_DOUBLE, 1, &scalar_dimid, &density_vapour_id)))
-        NCERR(retval);
-    if ((retval = nc_put_att_text(ncid, density_vapour_id, "units", strlen("kg/m^3"), "kg/m^3")))
-        NCERR(retval);
-    if ((retval = nc_def_var(ncid, "density_liquid", NC_DOUBLE, 1, &scalar_dimid, &density_liquid_id)))
-        NCERR(retval);
-    if ((retval = nc_put_att_text(ncid, density_liquid_id, "units", strlen("kg/m^3"), "kg/m^3")))
-        NCERR(retval);
-    if ((retval = nc_def_var(ncid, "density_solid", NC_DOUBLE, 1, &scalar_dimid, &density_solid_id)))
-        NCERR(retval);
-    if ((retval = nc_put_att_text(ncid, density_solid_id, "units", strlen("kg/m^3"), "kg/m^3")))
-        NCERR(retval);
-    if ((retval = nc_def_var(ncid, "temperature_liquid", NC_DOUBLE, 1, &scalar_dimid, &temperature_liquid_id)))
-        NCERR(retval);
-    if ((retval = nc_put_att_text(ncid, temperature_liquid_id, "units", strlen("T"), "T")))
-        NCERR(retval);
-    if ((retval = nc_def_var(ncid, "temperature_solid", NC_DOUBLE, 1, &scalar_dimid, &temperature_solid_id)))
-        NCERR(retval);
-    if ((retval = nc_put_att_text(ncid, temperature_solid_id, "units", strlen("T"), "T")))
+    if ((retval = nc_def_var(ncid, "stretching_parameter", NC_DOUBLE, 1, &single_double_dimid, &stretching_parameter_id)))
         NCERR(retval);
     if ((retval = nc_enddef(ncid)))
         NCERR(retval);
-    if ((retval = nc_put_var_double(ncid, stretching_parameter_id, &grid -> stretching_parameter)))
+    if ((retval = nc_put_var_double(ncid, densities_id, &state -> rho[0])))
         NCERR(retval);
-    if ((retval = nc_put_var_double(ncid, temp_id, &temperature[0])))
-        NCERR(retval);
-    if ((retval = nc_put_var_double(ncid, density_dry_id, &diagnostics -> scalar_field_placeholder[0])))
+    if ((retval = nc_put_var_double(ncid, temperatures_id, &temperatures[0])))
         NCERR(retval);
     if ((retval = nc_put_var_double(ncid, wind_id, &state -> wind[0])))
-        NCERR(retval);    
-    if ((retval = nc_put_var_double(ncid, density_vapour_id, &water_vapour_density[0])))
-        NCERR(retval);    
-    if ((retval = nc_put_var_double(ncid, density_liquid_id, &liquid_water_density[0])))
         NCERR(retval);
-    if ((retval = nc_put_var_double(ncid, density_solid_id, &solid_water_density[0])))
-        NCERR(retval);
-    if ((retval = nc_put_var_double(ncid, temperature_liquid_id, &liquid_water_temp[0])))
-        NCERR(retval);
-    if ((retval = nc_put_var_double(ncid, temperature_solid_id, &solid_water_temp[0])))
+    if ((retval = nc_put_var_double(ncid, stretching_parameter_id, &grid -> stretching_parameter)))
         NCERR(retval);
     if ((retval = nc_close(ncid)))
     	NCERR(retval);
+    free(temperatures);
     free(state);
     free(grid);
-    free(pressure);
-    free(temperature);
-    free(water_vapour_density);
-    free(liquid_water_density);
-    free(solid_water_density);
-    free(liquid_water_temp);
-    free(solid_water_temp);
-    free(rel_humidity);
     return 0;
 }
 
