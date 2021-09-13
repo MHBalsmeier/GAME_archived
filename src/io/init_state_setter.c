@@ -83,7 +83,7 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
     // checks
     // checking for negative densities
     # pragma omp parallel for
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	for (int i = 0; i < NO_OF_CONSTITUENTS*NO_OF_SCALARS; ++i)
 	{
 		if (init_state -> rho[i] < 0)
 	    {
