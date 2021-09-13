@@ -261,14 +261,9 @@ module radiation
       do ji = 1,no_of_scalars_h
         do jk = 1,no_of_layers
           ! the solid condensates' effective radius
-          ice_eff_radius_value    = (mass_densities(2*no_of_scalars+(jk-1)*no_of_scalars_h+ji) &
-          *cloud_optics_sw%get_min_radius_ice()+mass_densities((jk-1)*no_of_scalars_h+ji)*cloud_optics_sw%get_max_radius_ice()) &
-          /(mass_densities(2*no_of_scalars+(jk-1)*no_of_scalars_h+ji)+mass_densities((jk-1)*no_of_scalars_h+ji)+1e-10)
+          ice_eff_radius_value = 0.5_wp*cloud_optics_sw%get_min_radius_ice()+0.5_wp*cloud_optics_sw%get_max_radius_ice()
           ! the liquid condensates' effective radius
-          liquid_eff_radius_value = (mass_densities(3*no_of_scalars+(jk-1)*no_of_scalars_h+ji) &
-          *cloud_optics_sw%get_min_radius_liq()+mass_densities(no_of_scalars+(jk-1)*no_of_scalars_h+ji) &
-          *cloud_optics_sw%get_max_radius_liq()) &
-          /(mass_densities(3*no_of_scalars+(jk-1)*no_of_scalars_h+ji)+mass_densities(no_of_scalars+(jk-1)*no_of_scalars_h+ji)+1e-10)
+          liquid_eff_radius_value = 0.5_wp*cloud_optics_sw%get_min_radius_liq()+0.5_wp*cloud_optics_sw%get_max_radius_liq()
           ! thickness of the gridbox
           thickness = z_vector(ji+(jk-1)*no_of_scalars_h)-z_vector(ji+jk*no_of_scalars_h)
           ! solid water "content"
