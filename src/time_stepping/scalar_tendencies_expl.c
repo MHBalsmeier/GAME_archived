@@ -28,7 +28,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 	*/
 	// declaring needed variables
     int h_index, layer_index;
-    double c_v_cond, tracer_heating, density_gas_weight, density_total_weight;
+    double c_v_cond, tracer_heating, latent_heating_weight, density_total_weight;
     
     // determining the RK weights
     double old_weight[NO_OF_CONSTITUENTS];
@@ -131,7 +131,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 			scalar_times_vector_h(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
 			divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			// adding the tendencies in all grid boxes
-			#pragma omp parallel for private(layer_index, h_index, tracer_heating, density_gas_weight, density_total_weight)
+			#pragma omp parallel for private(layer_index, h_index, tracer_heating, latent_heating_weight, density_total_weight)
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
 				layer_index = j/NO_OF_SCALARS_H;
@@ -140,18 +140,16 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 				{
 					// determining the heating rate that comes from the tracers
 					tracer_heating = 0;
-					density_gas_weight = 0;
-					density_total_weight = 0;
+					density_total_weight = density_total(state, j);
+					latent_heating_weight = 1;
 					if (config_info -> assume_lte == 0)
 					{
-						density_gas_weight = density_gas(state, j);
-						density_total_weight = density_total(state, j);
-						tracer_heating = 0;
+						latent_heating_weight = state -> rho[i*NO_OF_SCALARS + j]/density_gas(state, j);
+						// this is not yet implemented
 					}
 					if (config_info -> assume_lte == 1)
 					{
-						density_gas_weight = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j];
-						density_total_weight = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + j];
+						latent_heating_weight = state -> rho[i*NO_OF_SCALARS + j]/density_total_weight;
 						for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS; ++k)
 						{
 							tracer_heating += irrev -> constituent_heat_source_rates[k*NO_OF_SCALARS + j];
@@ -174,7 +172,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 					// this has to be divided by the c_p*exner
 					)/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j]))
 					// phase transitions
-					+ tracer_heating*state -> rho[i*NO_OF_SCALARS + j]/density_gas_weight
+					+ latent_heating_weight*tracer_heating
 					/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j])));
 					// sensible heat in the lowest layer
 					if (layer_index == NO_OF_LAYERS - 1 - grid -> no_of_shaded_points_scalar[h_index])
