@@ -38,6 +38,7 @@ const double MIN_CRITERION_CLOUDY_BOX = 1e-4;
 int set_basic_props2grib(codes_handle *, long, long, long, long, long, long);
 double calc_std_dev(double [], int);
 int global_scalar_integrator(Scalar_field, Grid *, double *);
+double pseudopotential(State *, Grid *, int);
 
 int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Io_config *io_config, Config_info *config_info)
 {
@@ -81,8 +82,9 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		double *rprate = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *sprate = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *cape = malloc(NO_OF_SCALARS_H*sizeof(double));
-		double temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta_v_prime, theta_v, cape_integrand, delta_z, temp_closest, temp_second_closest, delta_z_temp, temperature_gradient, density_v, density_h;
-		double z_tropopause = 15e3;
+		double temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta,
+		cape_integrand, delta_z, temp_closest, temp_second_closest, delta_z_temp, temperature_gradient, theta_e;
+		double z_tropopause = 12e3;
 		double standard_vert_lapse_rate = 0.0065;
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 		{
@@ -121,32 +123,30 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		    // performing the interpolation / extrapolation to two meters above the surface
 		    t2[i] = temp_closest + delta_z_temp*temperature_gradient;
 		    
-		    z_height = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i];
-		    cape[i] = 0;
-		    if (NO_OF_CONSTITUENTS >= 4)
-		    {
-				density_v = state_write_out -> rho[5*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
-				density_h = density_gas(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i);
-				theta_v_prime = grid -> theta_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
-				+ state_write_out -> theta_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]*(1 + density_v/density_h*(mean_particle_masses_gas(0)/mean_particle_masses_gas(1) - 1));
-				layer_index = NO_OF_LAYERS - 1;
-				cape[i] = 0;
-				while (z_height < z_tropopause)
+		    // diagnozing CAPE
+			// initializing CAPE with zero
+			cape[i] = 0;
+			layer_index = NO_OF_LAYERS - 1;
+		    z_height = grid -> z_scalar[layer_index*NO_OF_SCALARS_H + i];
+		    // pseduopotential temperature of the particle in the lowest layer
+		    theta_e = pseudopotential(state_write_out, grid, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i);
+			while (z_height < z_tropopause)
+			{
+				// full potential temperature in the grid box
+			    theta = grid -> theta_bg[layer_index*NO_OF_SCALARS_H + i] + state_write_out -> theta_pert[layer_index*NO_OF_SCALARS_H + i];
+			    // thickness of the gridbox
+				delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + i];
+				// this is the candidate that we might want to add to the integral
+				cape_integrand
+				= grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i]*(theta_e - theta)/theta;
+				// we do not add negative values to CAPE (see the definition of CAPE)
+				if (cape_integrand > 0)
 				{
-					density_v = state_write_out -> rho[5*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + i];
-					density_h = density_gas(state_write_out, layer_index*NO_OF_SCALARS_H + i);
-				    theta_v = grid -> theta_bg[layer_index*NO_OF_SCALARS_H + i]
-				    + state_write_out -> theta_pert[layer_index*NO_OF_SCALARS_H + i]*(1 + density_v/density_h*(mean_particle_masses_gas(0)/mean_particle_masses_gas(1) - 1));
-					delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + i];
-					z_height += delta_z;
-					cape_integrand = grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i]*(theta_v_prime - theta_v)/theta_v;
-					if (cape_integrand > 0)
-					{
-						cape[i] += cape_integrand*delta_z;
-					}
-					--layer_index;
+					cape[i] += cape_integrand*delta_z;
 				}
-		    }
+				--layer_index;
+				z_height = grid -> z_scalar[layer_index*NO_OF_SCALARS_H + i];
+			}
 		    
 		    // Now come the hydrometeors.
 		    if (NO_OF_CONDENSED_CONSTITUENTS == 4)
@@ -1590,6 +1590,44 @@ int interpolation_t(State *state_0, State *state_p1, State *state_write, double 
     linear_combine_two_states(state_0, state_p1, state_write, weight_0, weight_p1, grid);
     return 0;
 }
+
+
+double pseudopotential(State *state, Grid *grid, int scalar_index)
+{
+	/*
+	This function returns the pseudopotential temperature, which is needed for diagnozing CAPE.
+	*/
+	double result;
+	result = 0;
+	// the dry case
+	if (NO_OF_CONSTITUENTS == 1)
+	{
+		result = grid -> theta_bg[scalar_index] + state -> theta_pert[scalar_index];
+	}
+	// the moist case, based on Bolton (1980)
+	else
+	{
+		double alpha_1, alpha_2, alpha_3, r, temperature, pressure, t_lcl;
+		r = state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + scalar_index]
+		/state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index];
+		temperature
+		= (grid -> exner_bg[scalar_index] + state -> exner_pert[scalar_index])
+		*(grid -> theta_bg[scalar_index] + state -> theta_pert[scalar_index]);
+		pressure = P_0*pow(grid -> exner_bg[scalar_index] + state -> exner_pert[scalar_index],
+		spec_heat_capacities_p_gas(0)/specific_gas_constants(0));
+		alpha_1 = 0.2854*(1 - 0.28e-3*r);
+		// this is just an estimate for now
+		t_lcl = 270.0;
+		alpha_2 = 3.376/t_lcl - 0.00254;
+		alpha_3 = r*(1 + 0.81e-3*r);
+		result = temperature*pow(P_0/pressure, alpha_1)*exp(alpha_2*alpha_3);
+	}
+	return result;
+}
+
+
+
+
 
 
 
