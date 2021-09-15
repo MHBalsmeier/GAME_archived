@@ -243,7 +243,9 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 	    diagnostics -> temperature_gas,
 	    NO_OF_SCALARS,
 	    2*delta_t,
-	    config_info -> assume_lte);
+	    config_info -> assume_lte,
+	    grid -> is_land,
+	    NO_OF_LAYERS);
 	    int layer_index, h_index;
 	    // loop over all constituents
 		for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
