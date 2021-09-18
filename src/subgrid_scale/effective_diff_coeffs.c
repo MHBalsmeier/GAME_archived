@@ -290,6 +290,7 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Irreversi
 		// the vertical viscosity is just the molecular viscosity for now
 		calc_diffusion_coeff(diagnostics -> temperature_gas[i], mean_particle_mass,
 		state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i]);
+		irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i] = c_g_v*irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i];
 	}
 	return 0;
 }
