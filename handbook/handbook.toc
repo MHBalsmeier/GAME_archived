@@ -12,10 +12,6 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {3.1}Dependencies}{5}{section.3.1}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.1.1}For using the plotting routines}{5}{subsection.3.1.1}%
-\defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.1.2}For developing}{5}{subsection.3.1.2}%
-\defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {3.2}Building}{5}{section.3.2}%
 \defcounter {refsection}{0}\relax 
 \contentsline {chapter}{\numberline {4}Grid generation}{6}{chapter.4}%

@@ -4,30 +4,28 @@
 \BOOKMARK [1][-]{section.2.2}{Time stepping}{chapter.2}% 4
 \BOOKMARK [0][-]{chapter.3}{Installation}{}% 5
 \BOOKMARK [1][-]{section.3.1}{Dependencies}{chapter.3}% 6
-\BOOKMARK [2][-]{subsection.3.1.1}{For using the plotting routines}{section.3.1}% 7
-\BOOKMARK [2][-]{subsection.3.1.2}{For developing}{section.3.1}% 8
-\BOOKMARK [1][-]{section.3.2}{Building}{chapter.3}% 9
-\BOOKMARK [0][-]{chapter.4}{Grid generation}{}% 10
-\BOOKMARK [1][-]{section.4.1}{Fundamental grid quantities}{chapter.4}% 11
-\BOOKMARK [2][-]{subsection.4.1.1}{Creating a spherical geodesic grid}{section.4.1}% 12
-\BOOKMARK [2][-]{subsection.4.1.2}{Numbering and orienting the vector points}{section.4.1}% 13
-\BOOKMARK [2][-]{subsection.4.1.3}{Numbering and orienting the dual vector points}{section.4.1}% 14
-\BOOKMARK [1][-]{section.4.2}{Derived quantities}{chapter.4}% 15
-\BOOKMARK [2][-]{subsection.4.2.1}{Horizontal coordinates of dual scalar points}{section.4.2}% 16
-\BOOKMARK [2][-]{subsection.4.2.2}{Finding the neighboring vector points of a primal cell and their orientation}{section.4.2}% 17
-\BOOKMARK [2][-]{subsection.4.2.3}{Finding the neighboring vector points of a dual cell and their orientation}{section.4.2}% 18
-\BOOKMARK [1][-]{section.4.3}{Grid optimization}{chapter.4}% 19
-\BOOKMARK [1][-]{section.4.4}{Vertical grid structure}{chapter.4}% 20
-\BOOKMARK [1][-]{section.4.5}{Scalability}{chapter.4}% 21
-\BOOKMARK [2][-]{subsection.4.5.1}{Permutations of the grid points}{section.4.5}% 22
-\BOOKMARK [1][-]{section.4.6}{Horizontal grid properties}{chapter.4}% 23
-\BOOKMARK [1][-]{section.4.7}{Vertical grid properties}{chapter.4}% 24
-\BOOKMARK [1][-]{section.4.8}{How to generate a grid}{chapter.4}% 25
-\BOOKMARK [0][-]{chapter.5}{Generating a new surface file}{}% 26
-\BOOKMARK [0][-]{chapter.6}{Generating a new test state file}{}% 27
-\BOOKMARK [0][-]{chapter.7}{Running the model}{}% 28
-\BOOKMARK [1][-]{section.7.1}{Dynamics configuration}{chapter.7}% 29
-\BOOKMARK [1][-]{section.7.2}{Physics configuration}{chapter.7}% 30
-\BOOKMARK [2][-]{subsection.7.2.1}{Local thermodynamic equilibrium option}{section.7.2}% 31
-\BOOKMARK [1][-]{section.7.3}{Coupling to the radiation field}{chapter.7}% 32
-\BOOKMARK [0][-]{chapter.8}{Configuring output}{}% 33
+\BOOKMARK [1][-]{section.3.2}{Building}{chapter.3}% 7
+\BOOKMARK [0][-]{chapter.4}{Grid generation}{}% 8
+\BOOKMARK [1][-]{section.4.1}{Fundamental grid quantities}{chapter.4}% 9
+\BOOKMARK [2][-]{subsection.4.1.1}{Creating a spherical geodesic grid}{section.4.1}% 10
+\BOOKMARK [2][-]{subsection.4.1.2}{Numbering and orienting the vector points}{section.4.1}% 11
+\BOOKMARK [2][-]{subsection.4.1.3}{Numbering and orienting the dual vector points}{section.4.1}% 12
+\BOOKMARK [1][-]{section.4.2}{Derived quantities}{chapter.4}% 13
+\BOOKMARK [2][-]{subsection.4.2.1}{Horizontal coordinates of dual scalar points}{section.4.2}% 14
+\BOOKMARK [2][-]{subsection.4.2.2}{Finding the neighboring vector points of a primal cell and their orientation}{section.4.2}% 15
+\BOOKMARK [2][-]{subsection.4.2.3}{Finding the neighboring vector points of a dual cell and their orientation}{section.4.2}% 16
+\BOOKMARK [1][-]{section.4.3}{Grid optimization}{chapter.4}% 17
+\BOOKMARK [1][-]{section.4.4}{Vertical grid structure}{chapter.4}% 18
+\BOOKMARK [1][-]{section.4.5}{Scalability}{chapter.4}% 19
+\BOOKMARK [2][-]{subsection.4.5.1}{Permutations of the grid points}{section.4.5}% 20
+\BOOKMARK [1][-]{section.4.6}{Horizontal grid properties}{chapter.4}% 21
+\BOOKMARK [1][-]{section.4.7}{Vertical grid properties}{chapter.4}% 22
+\BOOKMARK [1][-]{section.4.8}{How to generate a grid}{chapter.4}% 23
+\BOOKMARK [0][-]{chapter.5}{Generating a new surface file}{}% 24
+\BOOKMARK [0][-]{chapter.6}{Generating a new test state file}{}% 25
+\BOOKMARK [0][-]{chapter.7}{Running the model}{}% 26
+\BOOKMARK [1][-]{section.7.1}{Dynamics configuration}{chapter.7}% 27
+\BOOKMARK [1][-]{section.7.2}{Physics configuration}{chapter.7}% 28
+\BOOKMARK [2][-]{subsection.7.2.1}{Local thermodynamic equilibrium option}{section.7.2}% 29
+\BOOKMARK [1][-]{section.7.3}{Coupling to the radiation field}{chapter.7}% 30
+\BOOKMARK [0][-]{chapter.8}{Configuring output}{}% 31

@@ -87,42 +87,20 @@ A fully Eulerian time stepping is employed. The basic building structure is Rung
 The following dependencies must be installed before being able to successfully build the model:
 
 \begin{itemize}
-\item geos95 (\url{https://github.com/MHBalsmeier/geos95})
+\item geos95 (\url{https://github.com/OpenNWP/geos95})
 \item netcdf library (Ubuntu: \texttt{sudo apt-get libnetcdf-dev})
-\item eccodes library (installation manual: \url{https://mhbalsmeier.github.io/tutorials/eccodes_on_ubuntu.html})
+\item eccodes library (installation manual: \url{https://gist.github.com/MHBalsmeier/a01ad4e07ecf467c90fad2ac7719844a})
 \item CMake (Ubuntu: \texttt{sudo apt-get install cmake})
-\item atmostracers (\url{https://github.com/MHBalsmeier/atmostracers})
-\item OpenMPI (Ubuntu: \texttt{sudo apt-get install mpich})
-
-\subsection{For using the plotting routines}
-\label{sec:for_using_the_plotting_routines}
-
-The following packages are additionally required if you want to make use of the plotting routines:
-%
-\item Python and the visualization library scitools-iris (installation manual: \url{https://mhbalsmeier.github.io/tutorials/iris_on_ubuntu.html}, only for the plotting routines, which are of course not art of the actual model)
+\item atmostracers (\url{https://github.com/OpenNWP/atmostracers})
+\item Python and the visualization library scitools-iris (installation manual: \url{https://scitools-iris.readthedocs.io/en/stable/installing.html#installing-from-source-without-conda-on-debian-based-linux-distros-developers}, only for the plotting routines)
 \item FFMPEG (Ubuntu: \texttt{sudo apt-get install ffmpeg}, only for the plotting routines)
-
-\subsection{For developing}
-\label{sec:for_developing}
-
 \item Valgrind (Ubuntu: \texttt{sudo apt-get install valgrind}, for doing checks)
 \end{itemize}
 
 \section{Building}
 \label{sec:building}
 
-\texttt{CMake} is used for building \texttt{GAME}. The building process is managed using the bash scripts in the directory \texttt{build\_scripts}. The following list gives an overview of the scripts residing in this directory:
-
-\begin{itemize}
-\item \texttt{build\_install.sh}: The installation directory is controlled by the variable \texttt{aim\_dir}.
-\item \texttt{install\_grids.sh}: Installs the grids to the installation directory.
-\item \texttt{install\_tests.sh}: Installs the test state initialization files to the installation directory.
-\item \texttt{install\_run\_scripts.sh}: Installs the run scripts to the installation directory.
-\item \texttt{install\_plotting\_routines.sh}: Installs the plotting routines to the installation directory.
-\item \texttt{install\_everything.sh}: Executes all the other install scripts.
-\end{itemize}
-
-Scripts with the suffix \texttt{\_dev} are not different from the original scripts, they only allow choosing a different installation directory for installations of test versions.
+\texttt{CMake} is used for building \texttt{GAME}. Execute \texttt{./compile.sh} to build the model.
 
 \chapter{Grid generation}
 \label{chap:grid_generation}
