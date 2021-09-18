@@ -290,7 +290,7 @@ The grid generator needs to be recompiled for every specific resolution, top hei
 The surface generator resides in the directory \texttt{surface\_generator} and is an individual executable meant to produce surface properties (orography, roughness length, radiative properties, etc.) for different cases defined by the \texttt{oro\_id}, given the horizontal positions of the primal scalar points. Execute the script \texttt{run.\_script.sh} with the desired \texttt{\texttt{oro\_id}}. Tab. \ref{tab:oro_id_definition} shows the definition of the orography IDs. Real orography can be downloaded from
 %
 \begin{itemize}
-\item \texttt{https://psl.noaa.gov/cgi-bin/db\_search/DBSearch.pl?Dataset=NCEP+Reanalysis\\\&Variable=Geopotential+height\&group=0\&submit=Search} (\texttt{ORO\_ID} = 3)
+\item \url{https://psl.noaa.gov/cgi-bin/db\_search/DBSearch.pl?Dataset=NCEP+Reanalysis\\\&Variable=Geopotential+height\&group=0\&submit=Search} (\texttt{ORO\_ID} = 3)
 \end{itemize}
 %
 These files are stored in the directory \texttt{surface\_generator/real}. An information file explains them and defines their individual \texttt{ORO\_ID}s. A $1/r$-interpolation with four values is used to interpolate the data to the scalar data points.
