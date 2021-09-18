@@ -271,6 +271,8 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Irreversi
 	/*
 	This function computes the viscous temperature diffusion coefficient (including Eddys).
 	*/
+	double mean_particle_mass = mean_particle_masses_gas(0);
+	double eff_particle_radius = 130e-12;
 	// The Eddy viscosity coefficient only has to be calculated if it has not yet been done.
 	if (config_info -> momentum_diff_h == 0)
 	{
@@ -285,8 +287,9 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Irreversi
 	{
 		c_g_v = spec_heat_cap_diagnostics_v(state, i, config_info);
 		irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i] = c_g_v*(irreversible_quantities -> viscosity_div_eff[i] + diagnostics -> scalar_field_placeholder[i]);
-		// vertical Eddy viscosity is about four orders of magnitude smaller
-		irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i] = 0.0001*irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i];
+		// the vertical viscosity is just the molecular viscosity for now
+		calc_diffusion_coeff(diagnostics -> temperature_gas[i], mean_particle_mass,
+		state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i]);
 	}
 	return 0;
 }
