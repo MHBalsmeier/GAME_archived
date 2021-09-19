@@ -179,6 +179,8 @@ int temperature_diff_h;
 int temperature_diff_v;
 int momentum_diff_h;
 int momentum_diff_v;
+int tracer_diff_h;
+int tracer_diff_v;
 int rad_on;
 int rad_update;
 int assume_lte;

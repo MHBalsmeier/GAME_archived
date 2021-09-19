@@ -27,7 +27,8 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 	--------------------------------------
 	*/
 	// declaring needed variables
-    int h_index, layer_index;
+    int h_index, layer_index, diff_switch;
+    diff_switch = 0;
     double c_v_cond, tracer_heating, latent_heating_weight, density_total_weight;
     
     // determining the RK weights
@@ -72,23 +73,28 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 	// loop over all constituents
 	for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
 	{
-		// Separating the mass density of the constituent at hand.
-		#pragma omp parallel for
-		for (int j = 0; j < NO_OF_SCALARS; ++j)
-		{
-		    diagnostics -> scalar_field_placeholder[j] = state -> rho[i*NO_OF_SCALARS + j];
-	    }
-        
         // This is the mass advection, which needs to be carried out for all constituents.
         // -------------------------------------------------------------------------------
-		scalar_times_vector_h(diagnostics -> scalar_field_placeholder, state -> wind, diagnostics -> flux_density, grid);
+		scalar_times_vector_h(&state -> rho[i*NO_OF_SCALARS], state -> wind, diagnostics -> flux_density, grid);
+		// horizontal mass diffusion, only for tracers
+		if (config_info -> tracer_diff_h == 1 && i != NO_OF_CONDENSED_CONSTITUENTS)
+		{
+			diff_switch = 1;
+			grad_hor(&state -> rho[i*NO_OF_SCALARS], diagnostics -> vector_field_placeholder, grid);
+		}
+		// vertical mass diffusion, only for tracers
+		if (config_info -> tracer_diff_v == 1 && i != NO_OF_CONDENSED_CONSTITUENTS)
+		{
+			diff_switch = 1;
+			grad_vert_cov(&state -> rho[i*NO_OF_SCALARS], diagnostics -> vector_field_placeholder, grid);
+		}
 		if (i == NO_OF_CONDENSED_CONSTITUENTS)
 		{
         	divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 		}
 		else
 		{
-        	divv_h_limited(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid, diagnostics -> scalar_field_placeholder, delta_t);
+        	divv_h_limited(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid, &state -> rho[i*NO_OF_SCALARS], delta_t);
 		}
 		// adding the tendencies in all grid boxes
 		#pragma omp parallel for private(layer_index, h_index)
@@ -102,7 +108,9 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 				= old_weight[i]*state_tendency -> rho[i*NO_OF_SCALARS + j]
 				+ new_weight[i]*(
 				// the advection
-				-diagnostics -> flux_density_divv[j]);
+				-diagnostics -> flux_density_divv[j])
+				// the diffusion
+				+ diff_switch*diagnostics -> scalar_field_placeholder[j];
 				// the horizontal brute-force limiter
 				if (state_old -> rho[i*NO_OF_SCALARS + j] + delta_t*state_tendency -> rho[i*NO_OF_SCALARS + j] < 0)
 				{
@@ -190,13 +198,8 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 		// -------------------------------------------------------------------------------------------------------------------
 		if (i < NO_OF_CONDENSED_CONSTITUENTS && config_info -> assume_lte == 0)
 		{
-			#pragma omp parallel for
-			for (int j = 0; j < NO_OF_SCALARS; ++j)
-			{
-				diagnostics -> scalar_field_placeholder[j] = state -> condensed_density_temperatures[i*NO_OF_SCALARS + j];
-			}
 			// The constituent velocity has already been calculated.
-		    scalar_times_vector_h(diagnostics -> scalar_field_placeholder, state -> wind, diagnostics -> flux_density, grid);
+		    scalar_times_vector_h(&state -> condensed_density_temperatures[i*NO_OF_SCALARS], state -> wind, diagnostics -> flux_density, grid);
 		    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			// adding the tendencies in all grid boxes
 			#pragma omp parallel for private(layer_index, h_index, c_v_cond)
@@ -216,7 +219,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 					+ state -> rho[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state, j))
 					*(irrev -> temperature_diffusion_heating[j] + irrev -> heating_diss[j] + forcings -> radiation_tendency[j])
 					+ 1/c_v_cond*irrev -> constituent_heat_source_rates[i*NO_OF_SCALARS + j]
-					+ diagnostics -> scalar_field_placeholder[j]*(irrev -> mass_source_rates[i*NO_OF_SCALARS + j]));
+					+ state -> condensed_density_temperatures[i*NO_OF_SCALARS + j]*(irrev -> mass_source_rates[i*NO_OF_SCALARS + j]));
 				}
 			}
 		}
