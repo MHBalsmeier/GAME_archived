@@ -15,7 +15,8 @@ In this file, diffusion coefficients, including Eddy viscosities, are computed.
 #include <stdio.h>
 #include <math.h>
 
-int tke_update(Irreversible_quantities *, double);
+int tke_update(Irreversible_quantities *, double, State *);
+double return_ver_hor_viscosity(double);
 
 int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
 {
@@ -182,28 +183,22 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 	grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H]
 	, 2)/delta_t;
 	int layer_index, h_index;
-	double mom_diff_coeff, molecuar_viscosity, dwdz;
+	double mom_diff_coeff, molecuar_viscosity;
 	// updating the TKE
-	tke_update(irrev, delta_t);
+	tke_update(irrev, delta_t, state);
 	// loop over horizontal vector points at half levels
-	#pragma omp parallel for private(layer_index, h_index, mom_diff_coeff, molecuar_viscosity, dwdz)
+	#pragma omp parallel for private(layer_index, h_index, mom_diff_coeff, molecuar_viscosity)
 	for (int i = 0; i < NO_OF_H_VECTORS - NO_OF_VECTORS_H; ++i)
 	{
 		layer_index = i/NO_OF_VECTORS_H;
 		h_index = i - layer_index*NO_OF_VECTORS_H;
-		// calculating the vertical derivative of the vertical velocity
-		dwdz = 0.5*(state -> wind[grid -> from_index[h_index] + layer_index*NO_OF_VECTORS_PER_LAYER] - state -> wind[grid -> from_index[h_index] + (layer_index + 2)*NO_OF_VECTORS_PER_LAYER])/
-		(grid -> z_vector[grid -> from_index[h_index] + layer_index*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[grid -> from_index[h_index] + (layer_index + 2)*NO_OF_VECTORS_PER_LAYER]);
-		dwdz += 0.5*(state -> wind[grid -> to_index[h_index] + layer_index*NO_OF_VECTORS_PER_LAYER] - state -> wind[grid -> to_index[h_index] + (layer_index + 2)*NO_OF_VECTORS_PER_LAYER])/
-		(grid -> z_vector[grid -> to_index[h_index] + layer_index*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[grid -> to_index[h_index] + (layer_index + 2)*NO_OF_VECTORS_PER_LAYER]);
 		// the turbulent component
-		mom_diff_coeff = 1e-3*0.11*pow(
-		grid -> z_vector[NO_OF_SCALARS_H + h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
-		- grid -> z_vector[NO_OF_SCALARS_H + h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER], 2)
-		*sqrt(2*pow(diagnostics -> prep_for_vert_diffusion[i], 2) + pow(dwdz, 2));
-		
+		mom_diff_coeff = 0.25*(return_ver_hor_viscosity(irrev -> tke[layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]])
+		+ return_ver_hor_viscosity(irrev -> tke[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]])
+		+ return_ver_hor_viscosity(irrev -> tke[(layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]])
+		+ return_ver_hor_viscosity(irrev -> tke[(layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]));
 		// computing and adding the molecular viscosity
-		// therefore, the scalar variables need to be averaged to the vector points at half levels
+		// the scalar variables need to be averaged to the vector points at half levels
 		calc_diffusion_coeff(0.25*(diagnostics -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]]
 		+ diagnostics -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]]
 		+ diagnostics -> temperature_gas[(layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]]
@@ -323,16 +318,16 @@ int calc_mass_diffusion_coeffs(State *state, Config_info *config_info, Irreversi
 	return 0;
 }
 
-int tke_update(Irreversible_quantities *irrev, double delta_t)
+int tke_update(Irreversible_quantities *irrev, double delta_t, State *state)
 {
 	/*
-	This function updates the turbulent kinetic energy (TKE).
+	This function updates the specific turbulent kinetic energy (TKE), unit: J/kg.
 	*/
 	double decay_constant = 1.0/3600;
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		irrev -> tke[i] += delta_t*(irrev -> heating_diss[i] - decay_constant*irrev -> tke[i]);
+		irrev -> tke[i] += delta_t*(irrev -> heating_diss[i]/density_gas(state, i) - decay_constant*irrev -> tke[i]);
 		if (irrev -> tke[i] < 0)
 		{
 			irrev -> tke[i] = 0;
@@ -344,11 +339,10 @@ int tke_update(Irreversible_quantities *irrev, double delta_t)
 double return_ver_hor_viscosity(double tke)
 {
 	/*
-	This function returns the vertical dynamic Eddy viscosity as a function of the TKE.
+	This function returns the vertical kinematic Eddy viscosity as a function of the TKE.
 	*/
-	double max_viscosity = 0.3; // unit: kg/(ms)
-	double max_tke = 0.1; // unit: J/m^3
-	double result = max_viscosity/max_tke*tke;
+	double prop_constant = 3.0; // unit: s
+	double result = prop_constant*tke;
 	return result;
 }
 
