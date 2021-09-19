@@ -1617,7 +1617,9 @@ double pseudopotential(State *state, Grid *grid, int scalar_index)
 		spec_heat_capacities_p_gas(0)/specific_gas_constants(0));
 		alpha_1 = 0.2854*(1 - 0.28e-3*r);
 		// this is just an estimate for now
-		t_lcl = 270.0;
+		t_lcl
+		= (grid -> exner_bg[scalar_index - NO_OF_SCALARS_H] + state -> exner_pert[scalar_index - NO_OF_SCALARS_H])
+		*(grid -> theta_bg[scalar_index - NO_OF_SCALARS_H] + state -> theta_pert[scalar_index - NO_OF_SCALARS_H]);
 		alpha_2 = 3.376/t_lcl - 0.00254;
 		alpha_3 = r*(1 + 0.81e-3*r);
 		result = temperature*pow(P_0/pressure, alpha_1)*exp(alpha_2*alpha_3);
