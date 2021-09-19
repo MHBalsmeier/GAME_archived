@@ -88,14 +88,17 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 		if (config_info -> tracer_diff_h == 1 && i > NO_OF_CONDENSED_CONSTITUENTS)
 		{
 			diff_switch = 1;
-			grad_hor(&state -> rho[i*NO_OF_SCALARS], diagnostics -> vector_field_placeholder, grid);
+			grad(&state -> rho[i*NO_OF_SCALARS], diagnostics -> vector_field_placeholder, grid);
 			divv_h(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
 		}
 		// vertical mass diffusion, only for gaseous tracers
 		if (config_info -> tracer_diff_v == 1 && i > NO_OF_CONDENSED_CONSTITUENTS)
 		{
 			diff_switch = 1;
-			grad_vert_cov(&state -> rho[i*NO_OF_SCALARS], diagnostics -> vector_field_placeholder, grid);
+			if (config_info -> tracer_diff_h == 0)
+			{
+				grad_vert_cov(&state -> rho[i*NO_OF_SCALARS], diagnostics -> vector_field_placeholder, grid);
+			}
 			add_vertical_divv(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
 		}
 		// adding the tendencies in all grid boxes
