@@ -14,11 +14,11 @@ fi
 
 if [ $valgrind_check -eq 0 ]
 then
-$number_of_cpus ./surface_generator $oro_id $oro_rescale_factor
+./surface_generator $oro_id $no_of_cells_for_gliding_avrg
 else
 if [ $valgrind_check -eq 1 ]
 then
-valgrind ./surface_generator $oro_id $oro_rescale_factor
+valgrind ./surface_generator $oro_id $no_of_cells_for_gliding_avrg
 fi
 fi
 if [ $? -ne 0 ]

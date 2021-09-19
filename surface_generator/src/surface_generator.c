@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
    		printf("Error: oro_id must not be smaller than 1 or larger than 2.\n");
    		exit(1);
 	}
-   	double oro_rescale_factor = strtof(argv[2], NULL);
+   	int no_of_cells_for_gliding_avrg = strtod(argv[2], NULL);
    	char OUTPUT_FILE_PRE[200];
 	sprintf(OUTPUT_FILE_PRE, "surface_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
    	char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
@@ -98,7 +98,6 @@ int main(int argc, char *argv[])
     int no_of_avg_points;
     // this is the average number of points of the input dataset per model grid cell 
     double area_ratio = sqrt((no_of_lat_points*no_of_lon_points + 0.0)/NO_OF_SCALARS_H);
-    int no_of_cells_for_gliding_avrg = 9;
     no_of_avg_points = (int) no_of_cells_for_gliding_avrg*area_ratio;
     if (no_of_avg_points >= 1)
     {
@@ -146,7 +145,7 @@ int main(int argc, char *argv[])
 			oro[i] = 0;
 			for (int j = 0; j < no_of_avg_points; ++j)
 			{
-				oro[i] += oro_rescale_factor*z_in_vector[min_indices_vector[j]]*weights_vector[j]/weights_sum;
+				oro[i] += z_in_vector[min_indices_vector[j]]*weights_vector[j]/weights_sum;
 			}
 			if (oro[i] < -600 || oro[i] > 5700)
 			{
