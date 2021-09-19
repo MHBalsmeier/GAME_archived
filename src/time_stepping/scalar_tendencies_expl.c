@@ -28,7 +28,6 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 	*/
 	// declaring needed variables
     int h_index, layer_index, diff_switch;
-    diff_switch = 0;
     double c_v_cond, tracer_heating, latent_heating_weight, density_total_weight;
     
     // determining the RK weights
@@ -84,23 +83,38 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 		{
         	divv_h_limited(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid, &state -> rho[i*NO_OF_SCALARS], delta_t);
 		}
-		// horizontal mass diffusion, only for gaseous tracers
-		if (config_info -> tracer_diff_h == 1 && i > NO_OF_CONDENSED_CONSTITUENTS)
+		
+		// mass diffusion, only for gaseous tracers
+		diff_switch = 0;
+		// firstly, we need to calculate the mass diffusion coeffcients
+		if (i > NO_OF_CONDENSED_CONSTITUENTS && (config_info -> tracer_diff_h == 1 || config_info -> tracer_diff_v == 1) && no_rk_step == 0)
 		{
 			diff_switch = 1;
+	    	calc_mass_diffusion_coeffs(state, config_info, irrev, diagnostics, delta_t, grid);
+		}
+		// horizontal mass diffusion
+		if (config_info -> tracer_diff_h == 1 && i > NO_OF_CONDENSED_CONSTITUENTS && no_rk_step == 0)
+		{
 			grad(&state -> rho[i*NO_OF_SCALARS], diagnostics -> vector_field_placeholder, grid);
+	    	scalar_times_vector_h(irrev -> scalar_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
 			divv_h(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
 		}
-		// vertical mass diffusion, only for gaseous tracers
-		if (config_info -> tracer_diff_v == 1 && i > NO_OF_CONDENSED_CONSTITUENTS)
+		// vertical mass diffusion
+		if (config_info -> tracer_diff_v == 1 && i > NO_OF_CONDENSED_CONSTITUENTS && no_rk_step == 0)
 		{
-			diff_switch = 1;
 			if (config_info -> tracer_diff_h == 0)
 			{
 				grad_vert_cov(&state -> rho[i*NO_OF_SCALARS], diagnostics -> vector_field_placeholder, grid);
+				#pragma omp parallel for
+				for (int j = 0; j < NO_OF_SCALARS; ++j)
+				{
+					diagnostics -> scalar_field_placeholder[j] = 0;
+				}
 			}
+	    	scalar_times_vector_v(irrev -> scalar_diffusion_coeff_numerical_v, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
 			add_vertical_divv(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
 		}
+		
 		// adding the tendencies in all grid boxes
 		#pragma omp parallel for private(layer_index, h_index)
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
@@ -113,9 +127,9 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 				= old_weight[i]*state_tendency -> rho[i*NO_OF_SCALARS + j]
 				+ new_weight[i]*(
 				// the advection
-				-diagnostics -> flux_density_divv[j])
+				-diagnostics -> flux_density_divv[j]
 				// the diffusion
-				+ diff_switch*diagnostics -> scalar_field_placeholder[j];
+				+ diff_switch*diagnostics -> scalar_field_placeholder[j]);
 				// the horizontal brute-force limiter
 				if (state_old -> rho[i*NO_OF_SCALARS + j] + delta_t*state_tendency -> rho[i*NO_OF_SCALARS + j] < 0)
 				{

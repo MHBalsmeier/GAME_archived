@@ -295,6 +295,37 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Irreversi
 	return 0;
 }
 
+int calc_mass_diffusion_coeffs(State *state, Config_info *config_info, Irreversible_quantities *irreversible_quantities, Diagnostics *diagnostics, double delta_t, Grid *grid)
+{
+	/*
+	This function computes the viscous tracer diffusion coefficient (including Eddys).
+	*/
+	// The Eddy viscosity coefficient only has to be calculated if it has not yet been done.
+	if (config_info -> momentum_diff_h == 0)
+	{
+		hori_div_viscosity_eff(state, irreversible_quantities, grid, diagnostics, config_info, delta_t);
+		hori_curl_viscosity_eff_rhombi(state, irreversible_quantities, grid, diagnostics, config_info, delta_t);
+	}
+	// averaging the curl diffusion coefficient from edges to cells
+	edges_to_cells(irreversible_quantities -> viscosity_curl_eff_rhombi, diagnostics -> scalar_field_placeholder, grid);
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i] = irreversible_quantities -> viscosity_div_eff[i] + diagnostics -> scalar_field_placeholder[i];
+		// the vertical viscosity is proportional to the horizontal viscosity for now
+		irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i] = 0.001*irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i];
+	}
+	return 0;
+}
+
+
+
+
+
+
+
+
+
 
 
 

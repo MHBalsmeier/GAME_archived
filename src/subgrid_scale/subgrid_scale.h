@@ -4,6 +4,7 @@ Github repository: https://github.com/OpenNWP/GAME
 */
 
 int calc_temp_diffusion_coeffs(State *, Config_info *, Irreversible_quantities *, Diagnostics *, double, Grid *);
+int calc_mass_diffusion_coeffs(State *, Config_info *, Irreversible_quantities *, Diagnostics *, double, Grid *);
 int hori_div_viscosity_eff(State *, Irreversible_quantities *, Grid *, Diagnostics *, Config_info *, double);
 int hori_curl_viscosity_eff_rhombi(State *, Irreversible_quantities *, Grid *, Diagnostics *, Config_info *, double);
 int hori_curl_viscosity_eff_triangles(State *, Irreversible_quantities *, Grid *, Dualgrid *dualgrid, Diagnostics *, Config_info *, double);
