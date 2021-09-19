@@ -319,5 +319,3 @@ int simple_dissipation_rate(State *state, Irreversible_quantities *irrev, Grid *
 
 
 
-
-

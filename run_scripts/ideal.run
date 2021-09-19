@@ -25,7 +25,6 @@ dt_parameter=1.5 # The sound time step will be calculated as follows: delta_t = 
 adv_sound_ratio=1 # the ratio of the advective to the sound time step
 momentum_diff_h=1 # turn on if you want horizontal momentum diffusion
 momentum_diff_v=1 # turn on if you want vertical momentum diffusion
-dissipative_heating=1 # turn on if you want a dissipative heating rate
 diff_h_smag_fac=0.11 # horizontal diffusion Smagorinsky factor
 shear_bg=0.0e-5 # assumed background (minimum) shear
 temperature_diff_h=1 # turn on if you want horizontal temperature diffusion

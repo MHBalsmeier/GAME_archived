@@ -94,7 +94,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 			}
 		}
 		// calculation of the dissipative heating rate
-		if (config_info -> dissipative_heating == 1)
+		if (config_info -> momentum_diff_h == 1 || config_info -> momentum_diff_v == 1 || config_info -> explicit_boundary_layer == 1)
 		{
 			simple_dissipation_rate(state, irrev, grid);
 		}

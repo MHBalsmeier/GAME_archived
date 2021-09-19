@@ -187,7 +187,6 @@ int assume_lte;
 int adv_sound_ratio;
 int nwp_mode;
 int delta_t_between_analyses;
-int dissipative_heating;
 int explicit_boundary_layer;
 double diff_h_smag_fac;
 double shear_bg;
@@ -215,6 +214,7 @@ Scalar_field viscosity_div_eff;
 Vector_field viscosity_curl_eff_rhombi;
 double viscosity_curl_eff_triangles[NO_OF_DUAL_V_VECTORS];
 double vert_hor_viscosity_eff[NO_OF_H_VECTORS - NO_OF_VECTORS_H];
+Scalar_field tke;
 } Irreversible_quantities;
 
 // Info on input and output is collected here.

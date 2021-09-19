@@ -93,14 +93,13 @@ int main(int argc, char *argv[])
 	config_info -> assume_lte = strtod(argv[28], NULL);
 	config_info -> adv_sound_ratio = strtod(argv[29], NULL);
 	config_info -> delta_t_between_analyses = strtod(argv[30], NULL);
-	config_info -> dissipative_heating = strtod(argv[31], NULL);
-	config_info -> diff_h_smag_fac = strtof(argv[32], NULL);
-	config_info -> shear_bg = strtof(argv[33], NULL);
-	config_info -> damping_start_height_over_toa = strtof(argv[34], NULL);
-	config_info -> damping_coeff_max = strtof(argv[35], NULL);
-	config_info -> explicit_boundary_layer = strtod(argv[36], NULL);
-	config_info -> tracer_diff_h = strtod(argv[37], NULL);
-	config_info -> tracer_diff_v = strtod(argv[38], NULL);
+	config_info -> diff_h_smag_fac = strtof(argv[31], NULL);
+	config_info -> shear_bg = strtof(argv[32], NULL);
+	config_info -> damping_start_height_over_toa = strtof(argv[33], NULL);
+	config_info -> damping_coeff_max = strtof(argv[34], NULL);
+	config_info -> explicit_boundary_layer = strtod(argv[35], NULL);
+	config_info -> tracer_diff_h = strtod(argv[36], NULL);
+	config_info -> tracer_diff_v = strtod(argv[37], NULL);
 	
 	/*
 	Checking user input for correctness:
@@ -272,14 +271,6 @@ int main(int argc, char *argv[])
 	if (config_info -> explicit_boundary_layer == 1)
 	{
 		printf("Explicit boundary layer friction is turned on.\n");
-	}
-	if (config_info -> dissipative_heating == 0)
-	{
-		printf("Dissipative heating is turned off.\n");
-	}
-	if (config_info -> dissipative_heating == 1)
-	{
-		printf("Dissipative heating is turned on.\n");
 	}
 	if (config_info -> temperature_diff_h == 0)
 	{

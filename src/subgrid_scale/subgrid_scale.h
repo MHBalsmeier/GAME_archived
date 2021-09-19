@@ -10,3 +10,4 @@ int hori_curl_viscosity_eff_rhombi(State *, Irreversible_quantities *, Grid *, D
 int hori_curl_viscosity_eff_triangles(State *, Irreversible_quantities *, Grid *, Dualgrid *dualgrid, Diagnostics *, Config_info *, double);
 int vert_w_viscosity_eff(State *, Grid *, Diagnostics *, double);
 int vert_hor_mom_viscosity(State *, Irreversible_quantities *, Diagnostics *, Config_info *, Grid *, double);
+int tke_update(Irreversible_quantities *, double);

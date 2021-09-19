@@ -15,6 +15,8 @@ In this file, diffusion coefficients, including Eddy viscosities, are computed.
 #include <stdio.h>
 #include <math.h>
 
+int tke_update(Irreversible_quantities *, double);
+
 int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
 {
 	// these things are hardly ever modified
@@ -181,6 +183,8 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 	, 2)/delta_t;
 	int layer_index, h_index;
 	double mom_diff_coeff, molecuar_viscosity, dwdz;
+	// updating the TKE
+	tke_update(irrev, delta_t);
 	// loop over horizontal vector points at half levels
 	#pragma omp parallel for private(layer_index, h_index, mom_diff_coeff, molecuar_viscosity, dwdz)
 	for (int i = 0; i < NO_OF_H_VECTORS - NO_OF_VECTORS_H; ++i)
@@ -319,8 +323,34 @@ int calc_mass_diffusion_coeffs(State *state, Config_info *config_info, Irreversi
 	return 0;
 }
 
+int tke_update(Irreversible_quantities *irrev, double delta_t)
+{
+	/*
+	This function updates the turbulent kinetic energy (TKE).
+	*/
+	double decay_constant = 1.0/3600;
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		irrev -> tke[i] += delta_t*(irrev -> heating_diss[i] - decay_constant*irrev -> tke[i]);
+		if (irrev -> tke[i] < 0)
+		{
+			irrev -> tke[i] = 0;
+		}
+	}
+	return 0;
+}
 
-
+double return_ver_hor_viscosity(double tke)
+{
+	/*
+	This function returns the vertical dynamic Eddy viscosity as a function of the TKE.
+	*/
+	double max_viscosity = 0.3; // unit: kg/(ms)
+	double max_tke = 0.1; // unit: J/m^3
+	double result = max_viscosity/max_tke*tke;
+	return result;
+}
 
 
 
