@@ -99,6 +99,8 @@ int main(int argc, char *argv[])
 	config_info -> damping_start_height_over_toa = strtof(argv[34], NULL);
 	config_info -> damping_coeff_max = strtof(argv[35], NULL);
 	config_info -> explicit_boundary_layer = strtod(argv[36], NULL);
+	config_info -> tracer_diff_h = strtod(argv[37], NULL);
+	config_info -> tracer_diff_v = strtod(argv[38], NULL);
 	
 	/*
 	Checking user input for correctness:
@@ -294,6 +296,22 @@ int main(int argc, char *argv[])
 	else
 	{
 		printf("Vertical temperature diffusion is turned on.\n");
+	}
+	if (config_info -> tracer_diff_h == 0)
+	{
+		printf("Horizontal tracer diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Horizontal tracer diffusion is turned on.\n");
+	}
+	if (config_info -> tracer_diff_v == 0)
+	{
+		printf("Vertical tracer diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Vertical tracer diffusion is turned on.\n");
 	}
 	printf("Horizontal diffusion Smagorinsky factor: %lf.\n", config_info -> diff_h_smag_fac);
 	printf("Background shear: %lf 1/s.\n", config_info -> shear_bg);
