@@ -86,33 +86,36 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 		
 		// mass diffusion, only for gaseous tracers
 		diff_switch = 0;
-		// firstly, we need to calculate the mass diffusion coeffcients
-		if (i > NO_OF_CONDENSED_CONSTITUENTS && (config_info -> tracer_diff_h == 1 || config_info -> tracer_diff_v == 1) && no_rk_step == 0)
+		if (i > NO_OF_CONDENSED_CONSTITUENTS && no_rk_step == 0)
 		{
-			diff_switch = 1;
-	    	calc_mass_diffusion_coeffs(state, config_info, irrev, diagnostics, delta_t, grid);
-		}
-		// horizontal mass diffusion
-		if (config_info -> tracer_diff_h == 1 && i > NO_OF_CONDENSED_CONSTITUENTS && no_rk_step == 0)
-		{
-			grad(&state -> rho[i*NO_OF_SCALARS], diagnostics -> vector_field_placeholder, grid);
-	    	scalar_times_vector_h(irrev -> scalar_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
-			divv_h(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
-		}
-		// vertical mass diffusion
-		if (config_info -> tracer_diff_v == 1 && i > NO_OF_CONDENSED_CONSTITUENTS && no_rk_step == 0)
-		{
-			if (config_info -> tracer_diff_h == 0)
+			// firstly, we need to calculate the mass diffusion coeffcients
+			if (config_info -> tracer_diff_h == 1 || config_info -> tracer_diff_v == 1)
 			{
-				grad_vert_cov(&state -> rho[i*NO_OF_SCALARS], diagnostics -> vector_field_placeholder, grid);
-				#pragma omp parallel for
-				for (int j = 0; j < NO_OF_SCALARS; ++j)
-				{
-					diagnostics -> scalar_field_placeholder[j] = 0;
-				}
+				diff_switch = 1;
+				calc_mass_diffusion_coeffs(state, config_info, irrev, diagnostics, delta_t, grid);
 			}
-	    	scalar_times_vector_v(irrev -> scalar_diffusion_coeff_numerical_v, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
-			add_vertical_divv(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
+			// horizontal mass diffusion
+			if (config_info -> tracer_diff_h == 1)
+			{
+				grad(&state -> rho[i*NO_OF_SCALARS], diagnostics -> vector_field_placeholder, grid);
+				scalar_times_vector_h(irrev -> scalar_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
+				divv_h(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
+			}
+			// vertical mass diffusion
+			if (config_info -> tracer_diff_v == 1)
+			{
+				if (config_info -> tracer_diff_h == 0)
+				{
+					grad_vert_cov(&state -> rho[i*NO_OF_SCALARS], diagnostics -> vector_field_placeholder, grid);
+					#pragma omp parallel for
+					for (int j = 0; j < NO_OF_SCALARS; ++j)
+					{
+						diagnostics -> scalar_field_placeholder[j] = 0;
+					}
+				}
+				scalar_times_vector_v(irrev -> scalar_diffusion_coeff_numerical_v, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
+				add_vertical_divv(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
+			}
 		}
 		
 		// adding the tendencies in all grid boxes
