@@ -76,18 +76,6 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
         // This is the mass advection, which needs to be carried out for all constituents.
         // -------------------------------------------------------------------------------
 		scalar_times_vector_h(&state -> rho[i*NO_OF_SCALARS], state -> wind, diagnostics -> flux_density, grid);
-		// horizontal mass diffusion, only for tracers
-		if (config_info -> tracer_diff_h == 1 && i != NO_OF_CONDENSED_CONSTITUENTS)
-		{
-			diff_switch = 1;
-			grad_hor(&state -> rho[i*NO_OF_SCALARS], diagnostics -> vector_field_placeholder, grid);
-		}
-		// vertical mass diffusion, only for tracers
-		if (config_info -> tracer_diff_v == 1 && i != NO_OF_CONDENSED_CONSTITUENTS)
-		{
-			diff_switch = 1;
-			grad_vert_cov(&state -> rho[i*NO_OF_SCALARS], diagnostics -> vector_field_placeholder, grid);
-		}
 		if (i == NO_OF_CONDENSED_CONSTITUENTS)
 		{
         	divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
@@ -95,6 +83,20 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 		else
 		{
         	divv_h_limited(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid, &state -> rho[i*NO_OF_SCALARS], delta_t);
+		}
+		// horizontal mass diffusion, only for gaseous tracers
+		if (config_info -> tracer_diff_h == 1 && i > NO_OF_CONDENSED_CONSTITUENTS)
+		{
+			diff_switch = 1;
+			grad_hor(&state -> rho[i*NO_OF_SCALARS], diagnostics -> vector_field_placeholder, grid);
+			divv_h(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
+		}
+		// vertical mass diffusion, only for gaseous tracers
+		if (config_info -> tracer_diff_v == 1 && i > NO_OF_CONDENSED_CONSTITUENTS)
+		{
+			diff_switch = 1;
+			grad_vert_cov(&state -> rho[i*NO_OF_SCALARS], diagnostics -> vector_field_placeholder, grid);
+			add_vertical_divv(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
 		}
 		// adding the tendencies in all grid boxes
 		#pragma omp parallel for private(layer_index, h_index)
