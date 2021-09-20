@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
 	}
 	
 	// smoothing real orography
-	int no_of_avg_points = 7;
+	int no_of_avg_points = 8;
 	int min_indices_vector[no_of_avg_points];
 	double distance_vector[NO_OF_SCALARS_H];
 	if (ORO_ID == 2)
