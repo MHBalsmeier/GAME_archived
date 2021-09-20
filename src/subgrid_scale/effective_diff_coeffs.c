@@ -343,7 +343,7 @@ double return_ver_hor_viscosity(double tke)
 	/*
 	This function returns the vertical kinematic Eddy viscosity as a function of the TKE.
 	*/
-	double prop_constant = 0.5; // unit: s
+	double prop_constant = 0.25; // unit: s
 	double result = prop_constant*tke;
 	return result;
 }
