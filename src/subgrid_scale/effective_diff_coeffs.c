@@ -323,7 +323,9 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state)
 	/*
 	This function updates the specific turbulent kinetic energy (TKE), unit: J/kg.
 	*/
-	double decay_constant = 1.0/3600;
+	double decay_constant = 1.0/86400;
+	// the decay time gets shorter for smaller mesh sizes
+	decay_constant = pow(2, RES_ID - 5)*decay_constant;
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
@@ -341,7 +343,7 @@ double return_ver_hor_viscosity(double tke)
 	/*
 	This function returns the vertical kinematic Eddy viscosity as a function of the TKE.
 	*/
-	double prop_constant = 3.0; // unit: s
+	double prop_constant = 0.5; // unit: s
 	double result = prop_constant*tke;
 	return result;
 }
