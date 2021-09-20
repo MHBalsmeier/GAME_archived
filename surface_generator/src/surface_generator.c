@@ -35,6 +35,7 @@ int main(int argc, char *argv[])
    	char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
 	strcpy(OUTPUT_FILE, OUTPUT_FILE_PRE);
 	int ncid, scalar_h_dimid, oro_id, latitude_scalar_id, longitude_scalar_id;
+	double *oro_unfiltered = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *oro = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *sfc_albedo = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *sfc_c_v = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -114,6 +115,7 @@ int main(int argc, char *argv[])
 	{
 		// default
 		oro[i] = 0;
+		oro_unfiltered[i] = 0;
 		if (ORO_ID == 1)
 		{
 			sigma_mountain = MOUNTAIN_FWHM/pow(8*log(2), 0.5);
@@ -135,10 +137,10 @@ int main(int argc, char *argv[])
    			}
 			lat_index = find_min_index(lat_distance_vector, no_of_lat_points);
 			lon_index = find_min_index(lon_distance_vector, no_of_lon_points);
-			oro[i] = z_input[lat_index][lon_index];
+			oro_unfiltered[i] = z_input[lat_index][lon_index];
 			
 			// check
-			if (oro[i] < -382 || oro[i] > 8850)
+			if (oro_unfiltered[i] < -382 || oro_unfiltered[i] > 8850)
 			{
 				printf("Warning: value out of usual range.\n");		
 			}
@@ -148,6 +150,38 @@ int main(int argc, char *argv[])
 			free(lon_distance_vector);
 		}
 	}
+	
+	// smoothing real orography
+	int no_of_avg_points = 7;
+	int min_indices_vector[no_of_avg_points];
+	double distance_vector[NO_OF_SCALARS_H];
+	if (ORO_ID == 2)
+	{
+		#pragma omp parallel for private(min_indices_vector, distance_vector)
+		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+		{
+			// finding the distance to the other grid points
+			for (int j = 0; j < NO_OF_SCALARS_H; ++j)
+			{
+				distance_vector[j] = calculate_distance_h(latitude_scalar[i], longitude_scalar[i], latitude_scalar[j], longitude_scalar[j], 1);
+			}
+			for (int j = 0; j < no_of_avg_points; ++j)
+			{
+				min_indices_vector[j] = -1;
+			}
+			for (int j = 0; j < no_of_avg_points; ++j)
+			{
+				min_indices_vector[j] = find_min_index_exclude(distance_vector, NO_OF_SCALARS_H, min_indices_vector, no_of_avg_points);
+			}
+			oro[i] = 0;
+			for (int j = 0; j < no_of_avg_points; ++j)
+			{
+				oro[i] += oro_unfiltered[min_indices_vector[j]]/no_of_avg_points;
+			}
+		}
+	}
+	free(oro_unfiltered);
+	
 	printf("minimum orography: %lf m\n", oro[find_min_index(oro, NO_OF_SCALARS_H)]);
 	printf("maximum orography: %lf m\n", oro[find_max_index(oro, NO_OF_SCALARS_H)]);
 	
