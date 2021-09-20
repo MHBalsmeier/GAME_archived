@@ -230,6 +230,34 @@
       \verb https://doi.org/10.1175/MWR2991.1
       \endverb
     \endentry
+    \entry{etopo1}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=51ce41153e78c0227190bd8de7e9293b}{%
+           family={{NOAA National Geophysical Data Center}},
+           familyi={N\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {NOAA National Centers for Environmental Information}%
+      }
+      \strng{namehash}{51ce41153e78c0227190bd8de7e9293b}
+      \strng{fullhash}{51ce41153e78c0227190bd8de7e9293b}
+      \strng{bibnamehash}{51ce41153e78c0227190bd8de7e9293b}
+      \strng{authorbibnamehash}{51ce41153e78c0227190bd8de7e9293b}
+      \strng{authornamehash}{51ce41153e78c0227190bd8de7e9293b}
+      \strng{authorfullhash}{51ce41153e78c0227190bd8de7e9293b}
+      \field{sortinit}{N}
+      \field{sortinithash}{98cf339a479c0454fe09153a08675a15}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{ETOPO1 1 Arc-Minute Global Relief Model}
+      \field{year}{2009}
+      \verb{urlraw}
+      \verb http://dx.doi.org/10.7289/V5C8276M
+      \endverb
+      \verb{url}
+      \verb http://dx.doi.org/10.7289/V5C8276M
+      \endverb
+    \endentry
     \entry{PEIXOTO201361}{article}{}
       \name{author}{2}{}{%
         {{hash=74ef4e6eb2897d41edbcfcb346749c0c}{%

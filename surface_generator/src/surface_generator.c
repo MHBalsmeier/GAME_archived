@@ -30,7 +30,6 @@ int main(int argc, char *argv[])
    		printf("Error: oro_id must not be smaller than 1 or larger than 2.\n");
    		exit(1);
 	}
-   	int no_of_cells_for_gliding_avrg = strtod(argv[2], NULL);
    	char OUTPUT_FILE_PRE[200];
 	sprintf(OUTPUT_FILE_PRE, "surface_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
    	char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
@@ -60,118 +59,16 @@ int main(int argc, char *argv[])
         ERR(retval);
 	if ((retval = nc_close(ncid)))
 	  ERR(retval);
-   	int lat_in_id, lon_in_id, z_in_id;
-   	int no_of_lat_points = 73;
-   	int no_of_lon_points = 144;
-    float *latitude_input = malloc(no_of_lat_points*sizeof(double));
-   	float *longitude_input = malloc(no_of_lon_points*sizeof(double));
-    float (*z_input)[no_of_lon_points] = malloc(sizeof(float[no_of_lat_points][no_of_lon_points]));
-	if (ORO_ID == 2)
-	{
-		if ((retval = nc_open("real/hgt.sfc.nc", NC_NOWRITE, &ncid)))
-		    ERR(retval);
-		if ((retval = nc_inq_varid(ncid, "lat", &lat_in_id)))
-		    ERR(retval);
-		if ((retval = nc_inq_varid(ncid, "lon", &lon_in_id)))
-		    ERR(retval);
-		if ((retval = nc_inq_varid(ncid, "hgt", &z_in_id)))
-		    ERR(retval);
-		if ((retval = nc_get_var_float(ncid, lat_in_id, &latitude_input[0])))
-		    ERR(retval);
-		if ((retval = nc_get_var_float(ncid, lon_in_id, &longitude_input[0])))
-		    ERR(retval);
-		if ((retval = nc_get_var_float(ncid, z_in_id, &z_input[0][0])))
-		    ERR(retval);
-		if ((retval = nc_close(ncid)))
-		  ERR(retval);
-	}
-    double *z_in_vector = malloc(no_of_lat_points*no_of_lon_points*sizeof(double));
-    int lat_index, lon_index;
-	#pragma omp parallel for private (lat_index, lon_index)
-    for (int i = 0; i < no_of_lat_points*no_of_lon_points; ++i)
-    {
-    	lat_index = i/no_of_lon_points;
-    	lon_index = i - lat_index*no_of_lon_points;
-    	z_in_vector[i] = z_input[lat_index][lon_index];
-    }
-    // finding the number of points used for the average
-    int no_of_avg_points;
-    // this is the average number of points of the input dataset per model grid cell 
-    double area_ratio = sqrt((no_of_lat_points*no_of_lon_points + 0.0)/NO_OF_SCALARS_H);
-    no_of_avg_points = (int) no_of_cells_for_gliding_avrg*area_ratio;
-    if (no_of_avg_points >= 1)
-    {
-    	printf("number of points used for averaging: %d\n", no_of_avg_points);
-    }
-    else
-    {
-    	printf("Error: number of points used for averaging is zero.\n");
-    	printf("Aborting.\n");
-    	exit(1);
-    }
-    // executing the actual interpolation
-    double weights_sum, sigma_mountain;
-	#pragma omp parallel for private(distance, lat_index, lon_index, weights_sum)
-	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-	{
-		double distance_vector[no_of_lat_points*no_of_lon_points];
-		int min_indices_vector[no_of_avg_points];
-		double weights_vector[no_of_avg_points];
-		if (ORO_ID == 1)
-		{
-			sigma_mountain = MOUNTAIN_FWHM/pow(8*log(2), 0.5);
-            distance = calculate_distance_h(latitude_scalar[i], longitude_scalar[i], 0, 0, RADIUS);
-			oro[i] = MOUNTAIN_HEIGHT*exp(-pow(distance, 2)/(2*pow(sigma_mountain, 2)));
-		}
-		if (ORO_ID == 2)
-		{
-			for (int j = 0; j < no_of_lat_points*no_of_lon_points; ++j)
-			{
-				lat_index = j/no_of_lon_points;
-				lon_index = j - lat_index*no_of_lon_points;
-				distance_vector[j] = calculate_distance_h(deg2rad(latitude_input[lat_index]), deg2rad(longitude_input[lon_index]), latitude_scalar[i], longitude_scalar[i], 1);
-			}
-			for (int j = 0; j < no_of_avg_points; ++j)
-			{
-				min_indices_vector[j] = -1;
-			}
-			weights_sum = 0;
-			for (int j = 0; j < no_of_avg_points; ++j)
-			{
-				min_indices_vector[j] = find_min_index_exclude(distance_vector, no_of_lat_points*no_of_lon_points, min_indices_vector, no_of_avg_points);
-				weights_vector[j] = 1/(pow(distance_vector[min_indices_vector[j]], 2 + EPSILON_SECURITY) + EPSILON_SECURITY);
-				weights_sum += weights_vector[j];
-			}
-			oro[i] = 0;
-			for (int j = 0; j < no_of_avg_points; ++j)
-			{
-				oro[i] += z_in_vector[min_indices_vector[j]]*weights_vector[j]/weights_sum;
-			}
-			if (oro[i] < -600 || oro[i] > 5700)
-			{
-				printf("Warning: value out of usual range.\n");		
-			}
-		}
-	}
-	printf("minimum orography: %lf m\n", oro[find_min_index(oro, NO_OF_SCALARS_H)]);
-	printf("maximum orography: %lf m\n", oro[find_max_index(oro, NO_OF_SCALARS_H)]);
-	free(z_in_vector);
-	free(z_input);
-	free(latitude_input);
-	free(longitude_input);
-	free(latitude_scalar);
-	free(longitude_scalar);
 	
-	// other surface properties
 	// reading the land mask
+	int *is_land = malloc(NO_OF_SCALARS_H*sizeof(int));
+	int is_land_id;
 	if (ORO_ID == 2)
 	{
 		char IS_LAND_FILE_PRE[200];
 		sprintf(IS_LAND_FILE_PRE, "real/B%d_is_land.nc", RES_ID);
 		char IS_LAND_FILE[strlen(IS_LAND_FILE_PRE) + 1];
 		strcpy(IS_LAND_FILE, IS_LAND_FILE_PRE);
-		int *is_land = malloc(NO_OF_SCALARS_H*sizeof(int));
-		int is_land_id;
 		if ((retval = nc_open(IS_LAND_FILE, NC_NOWRITE, &ncid)))
 			ERR(retval);
 		if ((retval = nc_inq_varid(ncid, "is_land", &is_land_id)))
@@ -180,6 +77,83 @@ int main(int argc, char *argv[])
 			ERR(retval);
 		if ((retval = nc_close(ncid)))
 		  ERR(retval);
+	}
+  
+  	// reading the ETOPO orography
+   	int lat_in_id, lon_in_id, z_in_id;
+   	int no_of_lat_points = 10801;
+   	int no_of_lon_points = 21601;
+	double *latitude_input = malloc(no_of_lat_points*sizeof(double));
+   	double *longitude_input = malloc(no_of_lon_points*sizeof(double));
+	int (*z_input)[no_of_lon_points] = malloc(sizeof(int[no_of_lat_points][no_of_lon_points]));
+	if (ORO_ID == 2)
+	{
+		if ((retval = nc_open("real/etopo.nc", NC_NOWRITE, &ncid)))
+			ERR(retval);
+		if ((retval = nc_inq_varid(ncid, "y", &lat_in_id)))
+			ERR(retval);
+		if ((retval = nc_inq_varid(ncid, "x", &lon_in_id)))
+			ERR(retval);
+		if ((retval = nc_inq_varid(ncid, "z", &z_in_id)))
+			ERR(retval);
+		if ((retval = nc_get_var_double(ncid, lat_in_id, &latitude_input[0])))
+			ERR(retval);
+		if ((retval = nc_get_var_double(ncid, lon_in_id, &longitude_input[0])))
+			ERR(retval);
+		if ((retval = nc_get_var_int(ncid, z_in_id, &z_input[0][0])))
+			ERR(retval);
+		if ((retval = nc_close(ncid)))
+		  ERR(retval);
+	}
+	
+    // executing the actual interpolation
+    int lat_index, lon_index;
+    double sigma_mountain;
+	#pragma omp parallel for private(distance, lat_index, lon_index)
+	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+	{
+		// default
+		oro[i] = 0;
+		if (ORO_ID == 1)
+		{
+			sigma_mountain = MOUNTAIN_FWHM/pow(8*log(2), 0.5);
+            distance = calculate_distance_h(latitude_scalar[i], longitude_scalar[i], 0, 0, RADIUS);
+			oro[i] = MOUNTAIN_HEIGHT*exp(-pow(distance, 2)/(2*pow(sigma_mountain, 2)));
+		}
+		// reall orography can only be different from zero on land point
+		if (ORO_ID == 2 && is_land[i] == 1)
+		{
+	    	double *lat_distance_vector = malloc(no_of_lat_points*sizeof(double));
+   			double *lon_distance_vector = malloc(no_of_lon_points*sizeof(double));
+   			for (int j = 0; j < no_of_lat_points; ++j)
+   			{
+   				lat_distance_vector[j] = fabs(deg2rad(latitude_input[j]) - latitude_scalar[i]);
+   			}
+   			for (int j = 0; j < no_of_lon_points; ++j)
+   			{
+   				lon_distance_vector[j] = fabs(deg2rad(longitude_input[j]) - longitude_scalar[i]);
+   			}
+			lat_index = find_min_index(lat_distance_vector, no_of_lat_points);
+			lon_index = find_min_index(lon_distance_vector, no_of_lon_points);
+			oro[i] = z_input[lat_index][lon_index];
+			
+			// check
+			if (oro[i] < -382 || oro[i] > 8850)
+			{
+				printf("Warning: value out of usual range.\n");		
+			}
+			
+			// freeing the memory
+			free(lat_distance_vector);
+			free(lon_distance_vector);
+		}
+	}
+	printf("minimum orography: %lf m\n", oro[find_min_index(oro, NO_OF_SCALARS_H)]);
+	printf("maximum orography: %lf m\n", oro[find_max_index(oro, NO_OF_SCALARS_H)]);
+	
+	// surface properties other than orography
+	if (ORO_ID == 2)
+	{
 		double c_v_water = 4184.0;
 		double c_v_soil = 830.0;
 		double albedo_water = 0.06;
@@ -237,12 +211,19 @@ int main(int argc, char *argv[])
 		  ERR(retval);
 		if ((retval = nc_close(ncid)))
 		  ERR(retval);
-		free(oro);
 		free(sfc_albedo);
 		free(sfc_rho);
 		free(sfc_c_v);
-		free(is_land);
     }
+	
+	free(is_land);
+	free(oro);
+	free(z_input);
+	free(latitude_input);
+	free(longitude_input);
+	free(latitude_scalar);
+	free(longitude_scalar);
+	
 	return 0;
 }
 

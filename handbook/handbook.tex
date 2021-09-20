@@ -279,7 +279,7 @@ The grid generator needs to be recompiled for every specific resolution, top hei
 \hline \textbf{\texttt{ORO\_ID}} & \textbf{Description} \tabularnewline
 \hline\hline 0 & no orography \tabularnewline
 \hline 1 & Gaussian mountain of 8 km height and 224 m standard deviation located ad 0 N / 0 E\tabularnewline
-\hline $\geq$ 2 & real orography \tabularnewline
+\hline 2 & real orography \tabularnewline
 \hline
 \end{tabular}
 \caption{Definition of orography IDs.}
@@ -287,13 +287,7 @@ The grid generator needs to be recompiled for every specific resolution, top hei
 \end{table}
 \renewcommand{\arraystretch}{1}
 
-The surface generator resides in the directory \texttt{surface\_generator} and is an individual executable meant to produce surface properties (orography, roughness length, radiative properties, etc.) for different cases defined by the \texttt{oro\_id}, given the horizontal positions of the primal scalar points. Execute the script \texttt{run.\_script.sh} with the desired \texttt{\texttt{oro\_id}}. Tab. \ref{tab:oro_id_definition} shows the definition of the orography IDs. Real orography can be downloaded from
-%
-\begin{itemize}
-\item \url{https://psl.noaa.gov/cgi-bin/db\_search/DBSearch.pl?Dataset=NCEP+Reanalysis\\\&Variable=Geopotential+height\&group=0\&submit=Search} (\texttt{ORO\_ID} = 3)
-\end{itemize}
-%
-These files are stored in the directory \texttt{surface\_generator/real}. An information file explains them and defines their individual \texttt{ORO\_ID}s. A $1/r$-interpolation with four values is used to interpolate the data to the scalar data points.
+The surface generator resides in the directory \texttt{surface\_generator} and is an individual executable meant to produce surface properties (orography, roughness length, radiative properties, etc.) for different cases defined by the \texttt{oro\_id}, given the horizontal positions of the primal scalar points. Execute the script \texttt{run.\_script.sh} with the desired \texttt{\texttt{oro\_id}}. Tab. \ref{tab:oro_id_definition} shows the definition of the orography IDs. ETOPO1 orography \cite{etopo1} can be downloaded with the script \texttt{download\_etopo.sh} which resides in the directory \texttt{surface\_generator/real}. The surface generator interpolates this data to the scalar data points.
 
 \chapter{Generating a new test state file}
 \label{chap:generating_a_new_test_state_file}
