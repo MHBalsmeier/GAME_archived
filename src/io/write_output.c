@@ -86,6 +86,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		cape_integrand, delta_z, temp_closest, temp_second_closest, delta_z_temp, temperature_gradient, theta_e;
 		double z_tropopause = 12e3;
 		double standard_vert_lapse_rate = 0.0065;
+		#pragma omp parallel for private(temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta, cape_integrand, delta_z, temp_closest, temp_second_closest, delta_z_temp, temperature_gradient, theta_e, layer_index, closest_index, second_closest_index, cloudy_box_counter, vector_to_minimize)
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 		{
 			// Now the aim is to determine the value of the MSLP.
@@ -194,6 +195,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		double *wind_10_m_mean_u = malloc(NO_OF_VECTORS_H*sizeof(double));
 		double *wind_10_m_mean_v = malloc(NO_OF_VECTORS_H*sizeof(double));
 		// loop over the horizontal vector points
+		#pragma omp parallel for private(j, wind_tangential)
 		for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)
 		{
 			// initializing the means with zero
@@ -213,6 +215,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 				wind_10_m_mean_v[h_index] += 1.0/min_no_of_output_steps*wind_tangential;
 			}
 		}
+		#pragma omp parallel for private(wind_u_value, wind_v_value)
 		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 		{
 			passive_turn(wind_10_m_mean_u[i], wind_10_m_mean_v[i], -grid -> direction[i], &wind_u_value, &wind_v_value);
@@ -226,6 +229,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		double *vector_for_std_deviation = malloc(min_no_of_output_steps*sizeof(double));
 		double wind_speed_10_m_mean;
 		// loop over all horizontal vectors
+		#pragma omp parallel for private(wind_speed_10_m_mean, standard_deviation)
 		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 		{
 			// initializing the mean with zero
@@ -653,6 +657,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
     	double (*rel_vort_on_pressure_levels)[NO_OF_PRESSURE_LEVELS] = malloc(sizeof(double[NO_OF_SCALARS_H][NO_OF_PRESSURE_LEVELS]));
     	
     	// Vertical interpolation to the pressure levels.
+    	#pragma omp parallel for private(vector_to_minimize, closest_index, second_closest_index, closest_weight)
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 		{
     		for (int j = 0; j < NO_OF_PRESSURE_LEVELS; ++j)
@@ -825,30 +830,37 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 			
 			for (int i = 0; i < NO_OF_PRESSURE_LEVELS; ++i)
 			{
+				#pragma omp parallel for
 				for (int j = 0; j < NO_OF_SCALARS_H; ++j)
 				{
 					geopotential_height_pressure_level[j] = geopotential_height[j][i];
 				}
+				#pragma omp parallel for
 				for (int j = 0; j < NO_OF_SCALARS_H; ++j)
 				{
 					temperature_pressure_level[j] = t_on_pressure_levels[j][i];
 				}
+				#pragma omp parallel for
 				for (int j = 0; j < NO_OF_SCALARS_H; ++j)
 				{
 					rh_pressure_level[j] = rh_on_pressure_levels[j][i];
 				}
+				#pragma omp parallel for
 				for (int j = 0; j < NO_OF_SCALARS_H; ++j)
 				{
 					epv_pressure_level[j] = epv_on_pressure_levels[j][i];
 				}
+				#pragma omp parallel for
 				for (int j = 0; j < NO_OF_SCALARS_H; ++j)
 				{
 					wind_u_pressure_level[j] = u_on_pressure_levels[j][i];
 				}
+				#pragma omp parallel for
 				for (int j = 0; j < NO_OF_SCALARS_H; ++j)
 				{
 					wind_v_pressure_level[j] = v_on_pressure_levels[j][i];
 				}
+				#pragma omp parallel for
 				for (int j = 0; j < NO_OF_SCALARS_H; ++j)
 				{
 					rel_vort_pressure_level[j] = rel_vort_on_pressure_levels[j][i];
@@ -1090,6 +1102,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		codes_handle *handle_divv_h = NULL;
 		for (int i = 0; i < NO_OF_LAYERS; ++i)
 		{
+			#pragma omp parallel for
 			for (int j = 0; j < NO_OF_SCALARS_H; ++j)
 			{
 				temperature_h[j] = diagnostics -> temperature_gas[i*NO_OF_SCALARS_H + j];
