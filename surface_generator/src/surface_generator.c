@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 		  ERR(retval);
 	}
 	
-    // executing the actual interpolation
+    // setting the unfiltered orography
     int lat_index, lon_index;
     double sigma_mountain;
 	#pragma omp parallel for private(distance, lat_index, lon_index)
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	// smoothing real orography
+	// smoothing the real orography
 	int no_of_avg_points = 8;
 	int min_indices_vector[no_of_avg_points];
 	double distance_vector[NO_OF_SCALARS_H];
@@ -186,69 +186,66 @@ int main(int argc, char *argv[])
 	printf("maximum orography: %lf m\n", oro[find_max_index(oro, NO_OF_SCALARS_H)]);
 	
 	// surface properties other than orography
-	if (ORO_ID == 2)
+	double c_v_water = 4184.0;
+	double c_v_soil = 830.0;
+	double albedo_water = 0.06;
+	double albedo_soil = 0.12;
+	double density_water = 1024.0;
+	double density_soil = 1442.0;
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
-		double c_v_water = 4184.0;
-		double c_v_soil = 830.0;
-		double albedo_water = 0.06;
-		double albedo_soil = 0.12;
-		double density_water = 1024.0;
-		double density_soil = 1442.0;
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+		// ocean
+		sfc_albedo[i] = albedo_water;
+		sfc_c_v[i] = c_v_water;
+		sfc_rho[i] = density_water;
+		if (is_land[i] == 1)
 		{
-			// ocean
-			sfc_albedo[i] = albedo_water;
-			sfc_c_v[i] = c_v_water;
-			sfc_rho[i] = density_water;
-			if (is_land[i] == 1)
-			{
-				// setting the land surface albedo to 0.12 (compare Zdunkowski,Trautmann & Bott:
-				// Radiation in the Atmosphere,2007,p. 444)
-				sfc_albedo[i] = albedo_soil;
-				sfc_c_v[i] = c_v_soil;
-				sfc_rho[i] = density_soil;
-			}
+			// setting the land surface albedo to 0.12 (compare Zdunkowski,Trautmann & Bott:
+			// Radiation in the Atmosphere,2007,p. 444)
+			sfc_albedo[i] = albedo_soil;
+			sfc_c_v[i] = c_v_soil;
+			sfc_rho[i] = density_soil;
 		}
-		int sfc_albedo_id, sfc_c_v_id, sfc_density_id;
-		if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
-		  ERR(retval);
-		if ((retval = nc_def_dim(ncid, "scalar_index", NO_OF_SCALARS_H, &scalar_h_dimid)))
-		  ERR(retval);
-		if ((retval = nc_def_var(ncid, "z_surface", NC_DOUBLE, 1, &scalar_h_dimid, &oro_id)))
-		  ERR(retval);
-		if ((retval = nc_put_att_text(ncid, oro_id, "units", strlen("m"), "m")))
-		  ERR(retval);
-		if ((retval = nc_def_var(ncid, "sfc_albedo", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_albedo_id)))
-		  ERR(retval);
-		if ((retval = nc_def_var(ncid, "sfc_density", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_density_id)))
-		  ERR(retval);
-		if ((retval = nc_put_att_text(ncid, sfc_density_id, "units", strlen("kg/(m**3)"), "kg/(m**3)")))
-		  ERR(retval);
-		if ((retval = nc_def_var(ncid, "sfc_c_v", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_c_v_id)))
-		  ERR(retval);
-		if ((retval = nc_put_att_text(ncid, sfc_c_v_id, "units", strlen("J/(kg*K)"), "J/(kg*K)")))
-		  ERR(retval);
-		if ((retval = nc_def_var(ncid, "is_land", NC_INT, 1, &scalar_h_dimid, &is_land_id)))
-		  ERR(retval);
-		if ((retval = nc_enddef(ncid)))
-		  ERR(retval);
-		if ((retval = nc_put_var_double(ncid, oro_id, &oro[0])))
-		  ERR(retval);
-		if ((retval = nc_put_var_double(ncid, sfc_albedo_id, &sfc_albedo[0])))
-		  ERR(retval);
-		if ((retval = nc_put_var_double(ncid, sfc_density_id, &sfc_rho[0])))
-		  ERR(retval);
-		if ((retval = nc_put_var_double(ncid, sfc_c_v_id, &sfc_c_v[0])))
-		  ERR(retval);
-		if ((retval = nc_put_var_int(ncid, is_land_id, &is_land[0])))
-		  ERR(retval);
-		if ((retval = nc_close(ncid)))
-		  ERR(retval);
-		free(sfc_albedo);
-		free(sfc_rho);
-		free(sfc_c_v);
-    }
+	}
+	int sfc_albedo_id, sfc_c_v_id, sfc_density_id;
+	if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
+	  ERR(retval);
+	if ((retval = nc_def_dim(ncid, "scalar_index", NO_OF_SCALARS_H, &scalar_h_dimid)))
+	  ERR(retval);
+	if ((retval = nc_def_var(ncid, "z_surface", NC_DOUBLE, 1, &scalar_h_dimid, &oro_id)))
+	  ERR(retval);
+	if ((retval = nc_put_att_text(ncid, oro_id, "units", strlen("m"), "m")))
+	  ERR(retval);
+	if ((retval = nc_def_var(ncid, "sfc_albedo", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_albedo_id)))
+	  ERR(retval);
+	if ((retval = nc_def_var(ncid, "sfc_density", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_density_id)))
+	  ERR(retval);
+	if ((retval = nc_put_att_text(ncid, sfc_density_id, "units", strlen("kg/(m**3)"), "kg/(m**3)")))
+	  ERR(retval);
+	if ((retval = nc_def_var(ncid, "sfc_c_v", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_c_v_id)))
+	  ERR(retval);
+	if ((retval = nc_put_att_text(ncid, sfc_c_v_id, "units", strlen("J/(kg*K)"), "J/(kg*K)")))
+	  ERR(retval);
+	if ((retval = nc_def_var(ncid, "is_land", NC_INT, 1, &scalar_h_dimid, &is_land_id)))
+	  ERR(retval);
+	if ((retval = nc_enddef(ncid)))
+	  ERR(retval);
+	if ((retval = nc_put_var_double(ncid, oro_id, &oro[0])))
+	  ERR(retval);
+	if ((retval = nc_put_var_double(ncid, sfc_albedo_id, &sfc_albedo[0])))
+	  ERR(retval);
+	if ((retval = nc_put_var_double(ncid, sfc_density_id, &sfc_rho[0])))
+	  ERR(retval);
+	if ((retval = nc_put_var_double(ncid, sfc_c_v_id, &sfc_c_v[0])))
+	  ERR(retval);
+	if ((retval = nc_put_var_int(ncid, is_land_id, &is_land[0])))
+	  ERR(retval);
+	if ((retval = nc_close(ncid)))
+	  ERR(retval);
+	free(sfc_albedo);
+	free(sfc_rho);
+	free(sfc_c_v);
 	
 	free(is_land);
 	free(oro);
