@@ -37,9 +37,9 @@ int main(int argc, char *argv[])
 	int ncid, scalar_h_dimid, oro_id, latitude_scalar_id, longitude_scalar_id;
 	double *oro_unfiltered = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *oro = malloc(NO_OF_SCALARS_H*sizeof(double));
-	double *sfc_albedo = malloc(NO_OF_SCALARS_H*sizeof(double));
-	double *sfc_c_v = malloc(NO_OF_SCALARS_H*sizeof(double));
-	double *sfc_rho = malloc(NO_OF_SCALARS_H*sizeof(double));
+	double *sfc_albedo = calloc(NO_OF_SCALARS_H, sizeof(double));
+	double *sfc_c_v = calloc(NO_OF_SCALARS_H, sizeof(double));
+	double *sfc_rho = calloc(NO_OF_SCALARS_H, sizeof(double));
 	char GEO_PROP_FILE_PRE[200];
     sprintf(GEO_PROP_FILE_PRE, "../grid_generator/grids/B%dL26T41152_O0_OL23_SCVT.nc", RES_ID);
 	char GEO_PROP_FILE[strlen(GEO_PROP_FILE_PRE) + 1];
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 	  ERR(retval);
 	
 	// reading the land mask
-	int *is_land = malloc(NO_OF_SCALARS_H*sizeof(int));
+	int *is_land = calloc(NO_OF_SCALARS_H, sizeof(int));
 	int is_land_id;
 	if (ORO_ID == 2)
 	{
