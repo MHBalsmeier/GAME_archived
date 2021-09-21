@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
 	
     // setting the unfiltered orography
     int lat_index, lon_index;
-    double sigma_mountain;
+    double sigma_mountain = MOUNTAIN_FWHM/pow(8*log(2), 0.5); // only for ORO_ID == 1
 	#pragma omp parallel for private(distance, lat_index, lon_index)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
@@ -118,7 +118,6 @@ int main(int argc, char *argv[])
 		oro_unfiltered[i] = 0;
 		if (ORO_ID == 1)
 		{
-			sigma_mountain = MOUNTAIN_FWHM/pow(8*log(2), 0.5);
             distance = calculate_distance_h(latitude_scalar[i], longitude_scalar[i], 0, 0, RADIUS);
 			oro[i] = MOUNTAIN_HEIGHT*exp(-pow(distance, 2)/(2*pow(sigma_mountain, 2)));
 		}
