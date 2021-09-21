@@ -149,6 +149,9 @@ int main(int argc, char *argv[])
 			free(lon_distance_vector);
 		}
 	}
+	free(z_input);
+	free(latitude_input);
+	free(longitude_input);
 	
 	// smoothing the real orography
 	int no_of_avg_points = 8;
@@ -179,6 +182,8 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
+	free(latitude_scalar);
+	free(longitude_scalar);
 	free(oro_unfiltered);
 	
 	printf("minimum orography: %lf m\n", oro[find_min_index(oro, NO_OF_SCALARS_H)]);
@@ -245,14 +250,8 @@ int main(int argc, char *argv[])
 	free(sfc_albedo);
 	free(sfc_rho);
 	free(sfc_c_v);
-	
 	free(is_land);
 	free(oro);
-	free(z_input);
-	free(latitude_input);
-	free(longitude_input);
-	free(latitude_scalar);
-	free(longitude_scalar);
 	
 	return 0;
 }
