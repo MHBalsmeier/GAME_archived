@@ -221,32 +221,32 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     printf("Released under the MIT license, visit https://github.com/OpenNWP/GAME for more information.\n");
     printf("%s", stars);
-	printf("what you want to do:\n");
-	printf("run_id:\t\t\t\t%s\n", RUN_ID);
-	printf("run time span:\t\t\t%d s\n", TOTAL_RUN_SPAN);
-	printf("geo properties file:\t\t%s\n", GEO_PROP_FILE);
-	printf("initialization state file:\t%s\n", INIT_STATE_FILE);
+	printf("What you want to do:\n");
+	printf("Run_id:\t\t\t\t%s\n", RUN_ID);
+	printf("Run time span:\t\t\t%d s\n", TOTAL_RUN_SPAN);
+	printf("Geo properties file:\t\t%s\n", GEO_PROP_FILE);
+	printf("Initialization state file:\t%s\n", INIT_STATE_FILE);
 	printf("Start year:\t\t\t%d\n", year);
 	printf("Start month:\t\t\t%d\n", month);
 	printf("Start day:\t\t\t%d\n", day);
 	printf("Start hour:\t\t\t%d\n", hour);
 	printf("%s", stars);
 	printf("Dynamics configuration:\n");
-	printf("number of layers: %d\n", NO_OF_LAYERS);
-	printf("number of scalar data points per layer: %d\n", NO_OF_SCALARS_H);
-	printf("number of horizontal vectors per layer: %d\n", NO_OF_VECTORS_H);
-	printf("number of scalar data points: %d\n", NO_OF_SCALARS);
-	printf("number of vectors: %d\n", NO_OF_VECTORS);
-	printf("number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
-	printf("ratio of advective to sound time step: %d\n", config_info -> adv_sound_ratio);
+	printf("Number of layers: %d\n", NO_OF_LAYERS);
+	printf("Number of scalar data points per layer: %d\n", NO_OF_SCALARS_H);
+	printf("Number of horizontal vectors per layer: %d\n", NO_OF_VECTORS_H);
+	printf("Number of scalar data points: %d\n", NO_OF_SCALARS);
+	printf("Number of vectors: %d\n", NO_OF_VECTORS);
+	printf("Number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
+	printf("Ratio of advective to sound time step: %d\n", config_info -> adv_sound_ratio);
 	if (VERT_GRID_TYPE == 0)
 	{
-		printf("terrain handling: terrain following coordinates\n");
-		printf("number of layers following orography: %d\n", grid -> no_of_oro_layers);
+		printf("Terrain handling: terrain following coordinates\n");
+		printf("Number of layers following orography: %d\n", grid -> no_of_oro_layers);
 	}
 	if (VERT_GRID_TYPE == 1)
 	{
-		printf("terrain handling: block structure\n");
+		printf("Terrain handling: block structure\n");
 	}
 	if (config_info -> momentum_diff_h == 0)
 	{
@@ -343,7 +343,7 @@ int main(int argc, char *argv[])
 	
 	printf("%s", stars);
 	printf("I/O configuration:\n");
-	printf("output written in intervals of %d s\n", WRITE_OUT_INTERVAL);
+	printf("Output written in intervals of %d s\n", WRITE_OUT_INTERVAL);
 	if (io_config -> grib_output_switch == 0)
 	{
 		printf("Grib output is turned off.\n");
@@ -434,8 +434,8 @@ int main(int argc, char *argv[])
     	exit(1);
     }
 	printf("Time step set. Information on CFL-related quantities:\n");
-    printf("fast dynamic modes time step: %lf s\n", delta_t);
-    printf("slow dynamic modes time step: %lf s\n", config_info -> adv_sound_ratio*delta_t);
+    printf("Fast dynamic modes time step: %lf s\n", delta_t);
+    printf("Slow dynamic modes time step: %lf s\n", config_info -> adv_sound_ratio*delta_t);
 	
 	// finding the minimum horizontal grid distance
 	double normal_dist_min_hor = eff_hor_res;
@@ -455,12 +455,12 @@ int main(int argc, char *argv[])
 			normal_dist_min_vert = grid -> normal_distance[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H + i];
 		}
 	}
-	printf("effective horizontal resolution: %lf km\n", 1e-3*eff_hor_res);
-	printf("minimum horizontal normal distance: %lf km\n", 1e-3*normal_dist_min_hor);
+	printf("Effective horizontal resolution: %lf km\n", 1e-3*eff_hor_res);
+	printf("Minimum horizontal normal distance: %lf km\n", 1e-3*normal_dist_min_hor);
     double max_speed_hor = 100;
-	printf("horizontal advective Courant numer: %lf\n", config_info -> adv_sound_ratio*delta_t/normal_dist_min_hor*max_speed_hor);
+	printf("Horizontal advective Courant numer: %lf\n", config_info -> adv_sound_ratio*delta_t/normal_dist_min_hor*max_speed_hor);
     double max_speed_vert = 0.1;
-	printf("vertical advective Courant numer: %lf\n", config_info -> adv_sound_ratio*delta_t/normal_dist_min_vert*max_speed_vert);
+	printf("Vertical advective Courant numer: %lf\n", config_info -> adv_sound_ratio*delta_t/normal_dist_min_vert*max_speed_vert);
     printf("%s", stars);
     printf("It begins.\n");
     printf("%s", stars);
@@ -507,7 +507,7 @@ int main(int argc, char *argv[])
     // writing out the initial state of the model run
     write_out(state_old, wind_h_10m_array, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info);
     t_write += WRITE_OUT_INTERVAL;
-    printf("run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
+    printf("Run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     double t_0;
     t_0 = t_init;
     int time_step_counter = 0;
@@ -657,9 +657,9 @@ int main(int argc, char *argv[])
             // Calculating the speed of the model.
             second_time = clock();
         	speed = CLOCKS_PER_SEC*WRITE_OUT_INTERVAL/((double) second_time - first_time);
-            printf("current speed: %lf\n", speed);
+            printf("Current speed: %lf\n", speed);
             first_time = clock();
-            printf("run progress: %f h\n", (t_0 + delta_t - t_init)/SECONDS_PER_HOUR);
+            printf("Run progress: %f h\n", (t_0 + delta_t - t_init)/SECONDS_PER_HOUR);
             
             // resetting the wind in the lowest layer to zero
             for (int i = 0; i < min_no_of_10m_wind_avg_steps*NO_OF_VECTORS_H; ++i)
@@ -698,7 +698,7 @@ int main(int argc, char *argv[])
     free(stars);
     clock_t end = clock();
     speed = CLOCKS_PER_SEC*(TOTAL_RUN_SPAN + 300)/((double) end - begin);
-    printf("average speed: %lf\n", speed);
+    printf("Average speed: %lf\n", speed);
     printf("GAME over.\n");
     return 0;
 }

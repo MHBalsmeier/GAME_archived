@@ -177,7 +177,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     grad(grid -> gravity_potential, grid -> gravity_m, grid);
     // computing the gradient of the background Exner pressure
     grad(grid -> exner_bg, grid -> exner_bg_grad, grid);
-    printf("stretching parameter of the vertical grid: %lf\n", stretching_parameter);
+    printf("Stretching parameter of the vertical grid: %lf\n", stretching_parameter);
 	return 0;
 }
 
