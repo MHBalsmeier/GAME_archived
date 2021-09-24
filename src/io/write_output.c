@@ -191,6 +191,8 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		*/
 		double wind_tangential;
 		int j;
+		// 10 m wind is measured over grass by WMO definition
+		double roughness_length_grass = 0.02;
 		double *wind_10_m_speed = malloc(min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
 		double *wind_10_m_mean_u = malloc(NO_OF_VECTORS_H*sizeof(double));
 		double *wind_10_m_mean_v = malloc(NO_OF_VECTORS_H*sizeof(double));
@@ -215,12 +217,17 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 				wind_10_m_mean_v[h_index] += 1.0/min_no_of_output_steps*wind_tangential;
 			}
 		}
-		#pragma omp parallel for private(wind_u_value, wind_v_value)
+		double rescale_factor;
+		#pragma omp parallel for private(wind_u_value, wind_v_value, rescale_factor)
 		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 		{
 			passive_turn(wind_10_m_mean_u[i], wind_10_m_mean_v[i], -grid -> direction[i], &wind_u_value, &wind_v_value);
-			wind_10_m_mean_u[i] = wind_u_value;
-			wind_10_m_mean_v[i] = wind_v_value;
+			// rescale factor for computing the wind in a height of 10 m
+			rescale_factor = log(10.0/roughness_length_grass)
+			/log((grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i]
+			- 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[i]] + grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[i]]))/roughness_length_grass);
+			wind_10_m_mean_u[i] = rescale_factor*wind_u_value;
+			wind_10_m_mean_v[i] = rescale_factor*wind_v_value;
 		}
 		// diagnozing gusts at 10 m above the surface
 		double standard_deviation;

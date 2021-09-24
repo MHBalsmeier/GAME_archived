@@ -232,6 +232,22 @@ module radiation
     real(wp)                          :: ice_eff_radius_value
     ! layer thickness
     real(wp)                          :: thickness
+    ! ice precipitation particles radius
+    real(wp)                          :: ice_precip_radius
+    ! liquid precipitation particles radius
+    real(wp)                          :: liquid_precip_radius
+    ! ice cloud particles radius
+    real(wp)                          :: ice_cloud_radius
+    ! liquid cloud particles radius
+    real(wp)                          :: liquid_cloud_radius
+    ! ice precipitation particles weight
+    real(wp)                          :: ice_precip_weight
+    ! liquid precipitation particles weight
+    real(wp)                          :: liquid_precip_weight
+    ! ice cloud particles weight
+    real(wp)                          :: ice_cloud_weight
+    ! liquid cloud particles weight
+    real(wp)                          :: liquid_cloud_weight
     
     ! calculation of the number of columns
     no_of_scalars_h =  no_of_scalars/no_of_layers
@@ -257,13 +273,23 @@ module radiation
     
     ! reformatting the clouds for RTE+RRTMGP
     ! the moist case
+    ice_precip_radius = 0.5_wp*(cloud_optics_sw%get_min_radius_ice()+cloud_optics_sw%get_max_radius_ice())
+    liquid_precip_radius = 0.5_wp*(cloud_optics_sw%get_min_radius_liq()+cloud_optics_sw%get_max_radius_liq())
+    ice_cloud_radius = cloud_optics_sw%get_min_radius_ice()
+    liquid_cloud_radius = cloud_optics_sw%get_min_radius_liq()
     if (no_of_condensed_constituents == 4) then
       do ji = 1,no_of_scalars_h
         do jk = 1,no_of_layers
           ! the solid condensates' effective radius
-          ice_eff_radius_value = 0.5_wp*cloud_optics_sw%get_min_radius_ice()+0.5_wp*cloud_optics_sw%get_max_radius_ice()
+          ice_precip_weight = mass_densities((jk-1)*no_of_scalars_h+ji)+1e-10
+          ice_cloud_weight = mass_densities(2*no_of_scalars+(jk-1)*no_of_scalars_h+ji)+1e-10
+          ice_eff_radius_value = (ice_precip_weight*ice_precip_radius+ice_cloud_weight*ice_cloud_radius) &
+          /(ice_precip_weight+ice_cloud_weight)
           ! the liquid condensates' effective radius
-          liquid_eff_radius_value = 0.5_wp*cloud_optics_sw%get_min_radius_liq()+0.5_wp*cloud_optics_sw%get_max_radius_liq()
+          liquid_precip_weight = mass_densities(no_of_scalars+(jk-1)*no_of_scalars_h+ji)+1e-10
+          liquid_cloud_weight = mass_densities(3*no_of_scalars+(jk-1)*no_of_scalars_h+ji)+1e-10
+          liquid_eff_radius_value = (liquid_precip_weight*liquid_precip_radius+liquid_cloud_weight*liquid_cloud_radius) &
+          /(liquid_precip_weight+liquid_cloud_weight)
           ! thickness of the gridbox
           thickness = z_vector(ji+(jk-1)*no_of_scalars_h)-z_vector(ji+jk*no_of_scalars_h)
           ! solid water "content"

@@ -15,7 +15,7 @@ In this file, diffusion coefficients, including Eddy viscosities, are computed.
 #include <stdio.h>
 #include <math.h>
 
-int tke_update(Irreversible_quantities *, double, State *);
+int tke_update(Irreversible_quantities *, double, State *, Diagnostics *, Grid *);
 double return_ver_hor_viscosity(double);
 
 int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
@@ -185,7 +185,7 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 	int layer_index, h_index;
 	double mom_diff_coeff, molecuar_viscosity;
 	// updating the TKE
-	tke_update(irrev, delta_t, state);
+	tke_update(irrev, delta_t, state, diagnostics, grid);
 	// loop over horizontal vector points at half levels
 	#pragma omp parallel for private(layer_index, h_index, mom_diff_coeff, molecuar_viscosity)
 	for (int i = 0; i < NO_OF_H_VECTORS - NO_OF_VECTORS_H; ++i)
@@ -318,18 +318,50 @@ int calc_mass_diffusion_coeffs(State *state, Config_info *config_info, Irreversi
 	return 0;
 }
 
-int tke_update(Irreversible_quantities *irrev, double delta_t, State *state)
+int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Diagnostics *diagnostics, Grid *grid)
 {
 	/*
 	This function updates the specific turbulent kinetic energy (TKE), unit: J/kg.
 	*/
-	double decay_constant = 1.0/86400;
+	// e-folding time of TKE over flat ground for RES_ID = 5
+	double e_folding_time_flat = 86400.0;
+	// e-folding time of TKE over rough ground for RES_ID = 5
+	double e_folding_time_rough = 43200.0;
 	// the decay time gets shorter for smaller mesh sizes
-	decay_constant = pow(2, RES_ID - 5)*decay_constant;
-	#pragma omp parallel for
+	double decay_constant_sea = 1.0/e_folding_time_flat*pow(2, RES_ID - 5);
+	double decay_constant_land = 1.0/e_folding_time_rough*pow(2, RES_ID - 5);
+	int h_index, layer_index;
+	double decay_constant;
+	// computing the advection
+	grad(irrev -> tke, diagnostics -> vector_field_placeholder, grid);
+	inner_product(diagnostics -> vector_field_placeholder, state -> wind, diagnostics -> scalar_field_placeholder, grid);
+	double production_rate;
+	#pragma omp parallel for private(h_index, layer_index, decay_constant, production_rate)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		irrev -> tke[i] += delta_t*(irrev -> heating_diss[i]/density_gas(state, i) - decay_constant*irrev -> tke[i]);
+		layer_index = i/NO_OF_SCALARS_H;
+		h_index = i - layer_index*NO_OF_SCALARS_H;
+		production_rate = 0;
+		// the decay constants differ over land vs over water
+		if (grid -> is_land[i] == 1 && grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index] <= 1000.0)
+		{
+			decay_constant = decay_constant_land;
+			production_rate = 0.5*decay_constant;
+		}
+		else
+		{
+			decay_constant = decay_constant_sea;
+		}
+		// prognostic equation for TKE
+		irrev -> tke[i] += delta_t*(
+		// advection
+		- diagnostics -> scalar_field_placeholder[i]
+		// production through dissipation of resolved energy
+		+ irrev -> heating_diss[i]/density_gas(state, i)
+		// decay through molecular dissipation
+		- decay_constant*irrev -> tke[i]
+		// production through turbulence generation in the boundary layer
+		+ production_rate*diagnostics -> e_kin[i]);
 		if (irrev -> tke[i] < 0)
 		{
 			irrev -> tke[i] = 0;
@@ -341,10 +373,10 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state)
 double return_ver_hor_viscosity(double tke)
 {
 	/*
-	This function returns the vertical kinematic Eddy viscosity as a function of the TKE.
+	This function returns the vertical kinematic Eddy viscosity as a function of the specific TKE.
 	*/
-	double prop_constant = 0.1; // unit: s
-	double result = prop_constant*tke;
+	double prop_constant = 32*pow(2, -RES_ID)*0.5; // unit: m
+	double result = prop_constant*pow(tke, 0.5);
 	return result;
 }
 
