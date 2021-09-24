@@ -343,7 +343,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 		h_index = i - layer_index*NO_OF_SCALARS_H;
 		production_rate = 0;
 		// the decay constants differ over land vs over water
-		if (grid -> is_land[i] == 1 && grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index] <= 1000.0)
+		if (grid -> is_land[h_index] == 1 && grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index] <= 1000.0)
 		{
 			decay_constant = decay_constant_land;
 			production_rate = 0.5*decay_constant;
