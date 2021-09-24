@@ -16,17 +16,18 @@ int grad_hor_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
 	/*
 	calculates the horizontal covariant gradient
     */
-    int layer_index, h_index, vector_index;
-	#pragma omp parallel for private(layer_index, h_index, vector_index)
-    for (int i = 0; i < NO_OF_H_VECTORS; ++i)
+    int vector_index;
+	#pragma omp parallel for private(vector_index)
+    for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)
     {
-        layer_index = i/NO_OF_VECTORS_H;
-        h_index = i - layer_index*NO_OF_VECTORS_H;
-        vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
-        out_field[vector_index]
-        = (in_field[grid -> to_index[h_index] + layer_index*NO_OF_SCALARS_H]
-        - in_field[grid -> from_index[h_index] + layer_index*NO_OF_SCALARS_H])
-        /grid -> normal_distance[vector_index];
+		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
+		{
+		    vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
+		    out_field[vector_index]
+		    = (in_field[grid -> to_index[h_index] + layer_index*NO_OF_SCALARS_H]
+		    - in_field[grid -> from_index[h_index] + layer_index*NO_OF_SCALARS_H])
+		    /grid -> normal_distance[vector_index];
+        }
     }
     return 0;
 }

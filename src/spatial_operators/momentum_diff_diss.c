@@ -122,19 +122,19 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		if (layer_index == 0)
 		{
 			irrev -> friction_acc[vector_index] += -irrev -> vert_hor_viscosity_eff[i]*diagnostics -> prep_for_vert_diffusion[i]/delta_z
-			/(0.5*(density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]) + density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index])));;
+			/(0.5*(density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]) + density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index])));
 		}
 		else if (layer_index == NO_OF_LAYERS - 1)
 		{
 			irrev -> friction_acc[vector_index] += irrev -> vert_hor_viscosity_eff[i - NO_OF_VECTORS_H]*diagnostics -> prep_for_vert_diffusion[i - NO_OF_VECTORS_H]/delta_z
-			/(0.5*(density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]) + density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index])));;
+			/(0.5*(density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]) + density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index])));
 		}
 		else
 		{
 			irrev -> friction_acc[vector_index] +=
 			(irrev -> vert_hor_viscosity_eff[i - NO_OF_VECTORS_H]*diagnostics -> prep_for_vert_diffusion[i - NO_OF_VECTORS_H]
 			- irrev -> vert_hor_viscosity_eff[i]*diagnostics -> prep_for_vert_diffusion[i])/delta_z
-			/(0.5*(density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]) + density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index])));;
+			/(0.5*(density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]) + density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index])));
 		}
 	}
 	
