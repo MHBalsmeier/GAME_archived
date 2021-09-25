@@ -455,44 +455,16 @@ int thomas_algorithm(double c_vector[], double d_vector[], double e_vector[], do
 	double e_prime_vector[solution_length - 1];
 	double r_prime_vector[solution_length];
 	// downward sweep (matrix)
-	if (d_vector[0] != 0)
-	{
-		e_prime_vector[0] = e_vector[0]/d_vector[0];
-	}
-	else
-	{
-		e_prime_vector[0] = 0;
-	}
+	e_prime_vector[0] = e_vector[0]/d_vector[0];
 	for (int j = 1; j < solution_length - 1; ++j)
 	{
-		if (d_vector[j] - e_prime_vector[j - 1]*c_vector[j - 1] != 0)
-		{
-			e_prime_vector[j] = e_vector[j]/(d_vector[j] - e_prime_vector[j - 1]*c_vector[j - 1]);
-		}
-		else
-		{
-			e_prime_vector[j] = 0;
-		}
+		e_prime_vector[j] = e_vector[j]/(d_vector[j] - e_prime_vector[j - 1]*c_vector[j - 1]);
 	}
 	// downward sweep (right-hand side)
-	if (d_vector[0] != 0)
-	{
-		r_prime_vector[0] = r_vector[0]/d_vector[0];
-	}
-	else
-	{
-		r_prime_vector[0] = 0;
-	}
+	r_prime_vector[0] = r_vector[0]/d_vector[0];
 	for (int j = 1; j < solution_length; ++j)
 	{
-		if (d_vector[j] - e_prime_vector[j - 1]*c_vector[j - 1] != 0)
-		{
-			r_prime_vector[j] = (r_vector[j] - r_prime_vector[j - 1]*c_vector[j - 1])/(d_vector[j] - e_prime_vector[j - 1]*c_vector[j - 1]);
-		}
-		else
-		{
-			r_prime_vector[j] = 0;
-		}
+		r_prime_vector[j] = (r_vector[j] - r_prime_vector[j - 1]*c_vector[j - 1])/(d_vector[j] - e_prime_vector[j - 1]*c_vector[j - 1]);
 	}
 	
 	// upward sweep (final solution)
