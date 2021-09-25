@@ -330,41 +330,43 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	// the decay time gets shorter for smaller mesh sizes
 	double decay_constant_sea = 1.0/e_folding_time_flat*pow(2, RES_ID - 5);
 	double decay_constant_land = 1.0/e_folding_time_rough*pow(2, RES_ID - 5);
-	int h_index, layer_index;
+	int i;
 	double decay_constant;
 	// computing the advection
 	grad(irrev -> tke, diagnostics -> vector_field_placeholder, grid);
 	inner_product(diagnostics -> vector_field_placeholder, state -> wind, diagnostics -> scalar_field_placeholder, grid);
 	double production_rate;
-	#pragma omp parallel for private(h_index, layer_index, decay_constant, production_rate)
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	#pragma omp parallel for private(i, decay_constant, production_rate)
+	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
 	{
-		layer_index = i/NO_OF_SCALARS_H;
-		h_index = i - layer_index*NO_OF_SCALARS_H;
-		production_rate = 0;
-		// the decay constants differ over land vs over water
-		if (grid -> is_land[h_index] == 1 && grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index] <= 1000.0)
+		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
 		{
-			decay_constant = decay_constant_land;
-			production_rate = 0.5*decay_constant;
-		}
-		else
-		{
-			decay_constant = decay_constant_sea;
-		}
-		// prognostic equation for TKE
-		irrev -> tke[i] += delta_t*(
-		// advection
-		- diagnostics -> scalar_field_placeholder[i]
-		// production through dissipation of resolved energy
-		+ irrev -> heating_diss[i]/density_gas(state, i)
-		// decay through molecular dissipation
-		- decay_constant*irrev -> tke[i]
-		// production through turbulence generation in the boundary layer
-		+ production_rate*diagnostics -> e_kin[i]);
-		if (irrev -> tke[i] < 0)
-		{
-			irrev -> tke[i] = 0;
+			i = layer_index*NO_OF_SCALARS_H + h_index;
+			production_rate = 0;
+			// the decay constants differ over land vs over water
+			if (grid -> is_land[h_index] == 1 && grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index] <= 1000.0)
+			{
+				decay_constant = decay_constant_land;
+				production_rate = 0.5*decay_constant;
+			}
+			else
+			{
+				decay_constant = decay_constant_sea;
+			}
+			// prognostic equation for TKE
+			irrev -> tke[i] += delta_t*(
+			// advection
+			- diagnostics -> scalar_field_placeholder[i]
+			// production through dissipation of resolved energy
+			+ irrev -> heating_diss[i]/density_gas(state, i)
+			// decay through molecular dissipation
+			- decay_constant*irrev -> tke[i]
+			// production through turbulence generation in the boundary layer
+			+ production_rate*diagnostics -> e_kin[i]);
+			if (irrev -> tke[i] < 0)
+			{
+				irrev -> tke[i] = 0;
+			}
 		}
 	}
 	return 0;
