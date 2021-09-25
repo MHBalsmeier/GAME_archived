@@ -46,17 +46,17 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
     /*
     curl of vorticity component
     */
-	int layer_index, h_index;
-	#pragma omp parallel for private(layer_index, h_index)
-	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
+	#pragma omp parallel for
+	for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)
 	{
-		layer_index = i/NO_OF_VECTORS_H;
-		h_index = i - layer_index*NO_OF_VECTORS_H;
-		// multiplying the diffusion coefficient by the relative vorticity
-    	// diagnostics -> rel_vort is a misuse of name
-		diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index]
-		= irrev -> viscosity_curl_eff_rhombi[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
-		*diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index];
+		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
+		{
+			// multiplying the diffusion coefficient by the relative vorticity
+			// diagnostics -> rel_vort is a misuse of name
+			diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index]
+			= irrev -> viscosity_curl_eff_rhombi[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
+			*diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index];
+		}
 	}
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_DUAL_V_VECTORS; ++i)
@@ -67,17 +67,18 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	
 	// adding up the two components of the momentum diffusion acceleration and dividing by the density at the edge
 	int vector_index, scalar_index_from, scalar_index_to;
-	#pragma omp parallel for private(layer_index, h_index, vector_index, scalar_index_from, scalar_index_to)
-	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
+	#pragma omp parallel for private(vector_index, scalar_index_from, scalar_index_to)
+	for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)
 	{
-		layer_index = i/NO_OF_VECTORS_H;
-		h_index = i - layer_index*NO_OF_VECTORS_H;
-		vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
-		scalar_index_from = layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index];
-		scalar_index_to = layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index];
-		irrev -> friction_acc[vector_index] =
-		(diagnostics -> vector_field_placeholder[vector_index] - diagnostics -> curl_of_vorticity[vector_index])
-		/(0.5*(density_gas(state, scalar_index_from) + density_gas(state, scalar_index_to)));
+		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
+		{
+			vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
+			scalar_index_from = layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index];
+			scalar_index_to = layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index];
+			irrev -> friction_acc[vector_index] =
+			(diagnostics -> vector_field_placeholder[vector_index] - diagnostics -> curl_of_vorticity[vector_index])
+			/(0.5*(density_gas(state, scalar_index_from) + density_gas(state, scalar_index_to)));
+		}
 	}
 	return 0;
 }
