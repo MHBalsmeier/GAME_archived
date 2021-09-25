@@ -79,7 +79,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 		{
 			call_radiation(state_old, soil, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, time_coordinate);
 		}
-		scalar_tendencies_expl(state_old, state_new, state_tendency, soil, grid, delta_t, diagnostics, forcings, irrev, config_info, i);
+		scalar_tendencies_expl(state_old, state_new, state_tendency, soil, grid, delta_t, diagnostics, forcings, irrev, config_info, i, slow_update_bool);
 
 		// 3.) Vertical sound wave solver.
 		// -------------------------------

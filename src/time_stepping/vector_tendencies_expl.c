@@ -50,12 +50,12 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     	// horizontal momentum diffusion
     	if (config_info -> momentum_diff_h == 1)
     	{
-			hori_momentum_diffusion(state, diagnostics, irrev, config_info, grid, dualgrid, delta_t);
+			hori_momentum_diffusion(state, diagnostics, irrev, config_info, grid, dualgrid, config_info -> slow_fast_ratio*delta_t);
 		}
 		// vertical momentum diffusion
 		if (config_info -> momentum_diff_v == 1)
 		{
-			vert_momentum_diffusion(state, diagnostics, irrev, grid, config_info, delta_t);
+			vert_momentum_diffusion(state, diagnostics, irrev, grid, config_info, config_info -> slow_fast_ratio*delta_t);
 		}
 		// This is the explicit friction ansatz in the boundary layer from the Held-Suarez (1994) test case.
 		if (config_info -> explicit_boundary_layer == 1)
