@@ -147,8 +147,8 @@ module radiation
     real(wp)                          :: mu_0(no_of_scalars/no_of_layers)
     ! number of points where it is day
     integer                           :: no_of_day_points
-    ! loop indices
-    integer                           :: ji,j_day,jk
+    ! loop indices and helper variables
+    integer                           :: ji,j_day,jk,base_index
     ! the indices of columns where it is day
     integer                           :: day_indices(no_of_scalars/no_of_layers)
     ! number of scalars per layer (number of columns)
@@ -282,26 +282,27 @@ module radiation
     if (no_of_condensed_constituents == 4) then
       do ji = 1,no_of_scalars_h
         do jk = 1,no_of_layers
+          base_index = (jk-1)*no_of_scalars_h
           ! the solid condensates' effective radius
-          ice_precip_weight = mass_densities((jk-1)*no_of_scalars_h+ji)+1e-10
-          ice_cloud_weight = mass_densities(2*no_of_scalars+(jk-1)*no_of_scalars_h+ji)+1e-10
+          ice_precip_weight = mass_densities(base_index+ji)+1e-10
+          ice_cloud_weight = mass_densities(2*no_of_scalars+base_index+ji)+1e-10
           ice_eff_radius_value = (ice_precip_weight*ice_precip_radius+ice_cloud_weight*ice_cloud_radius) &
           /(ice_precip_weight+ice_cloud_weight)
           ! the liquid condensates' effective radius
-          liquid_precip_weight = mass_densities(no_of_scalars+(jk-1)*no_of_scalars_h+ji)+1e-10
-          liquid_cloud_weight = mass_densities(3*no_of_scalars+(jk-1)*no_of_scalars_h+ji)+1e-10
+          liquid_precip_weight = mass_densities(no_of_scalars+base_index+ji)+1e-10
+          liquid_cloud_weight = mass_densities(3*no_of_scalars+base_index+ji)+1e-10
           liquid_eff_radius_value = (liquid_precip_weight*liquid_precip_radius+liquid_cloud_weight*liquid_cloud_radius) &
           /(liquid_precip_weight+liquid_cloud_weight)
           ! thickness of the gridbox
-          thickness = z_vector(ji+(jk-1)*no_of_scalars_h)-z_vector(ji+jk*no_of_scalars_h)
+          thickness = z_vector(ji+base_index)-z_vector(ji+jk*no_of_scalars_h)
           ! solid water "content"
           ice_water_path(ji,jk) = thickness*1000._wp &
-          *(mass_densities((jk-1)*no_of_scalars_h+ji) &
-          +mass_densities(2*no_of_scalars+(jk-1)*no_of_scalars_h+ji))
+          *(mass_densities(base_index+ji) &
+          +mass_densities(2*no_of_scalars+base_index+ji))
           ! liquid water "content"
           liquid_water_path(ji,jk) = thickness*1000._wp &
-          *(mass_densities(no_of_scalars+(jk-1)*no_of_scalars_h+ji) &
-          +mass_densities(3*no_of_scalars+(jk-1)*no_of_scalars_h+ji))
+          *(mass_densities(no_of_scalars+base_index+ji) &
+          +mass_densities(3*no_of_scalars+base_index+ji))
           ! if there is no solid water in the grid box, the solid effective radius is set to zero
           ice_eff_radius(ji,jk) = merge(ice_eff_radius_value,0._wp,ice_water_path(ji,jk) > 0._wp)
           ! if there is no liquid water in the grid box, the liquid effective radius is set to zero
