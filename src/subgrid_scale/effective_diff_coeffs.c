@@ -70,41 +70,42 @@ int hori_curl_viscosity_eff_rhombi(State *state, Irreversible_quantities *irrev,
 	double max_diff_h_coeff_turb = 0.125*grid -> mean_area_cell/delta_t;
 	double molecular_viscosity;
 	
-	int layer_index, h_index, scalar_index_from, scalar_index_to, vector_index;
-	#pragma omp parallel for private(molecular_viscosity, layer_index, h_index, scalar_index_from, scalar_index_to, vector_index)
-	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
+	int scalar_index_from, scalar_index_to, vector_index;
+	#pragma omp parallel for private(molecular_viscosity, scalar_index_from, scalar_index_to, vector_index)
+	for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)
 	{
-		layer_index = i/NO_OF_VECTORS_H;
-		h_index = i - layer_index*NO_OF_VECTORS_H;
-		vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
-		// preliminary result
-		irrev -> viscosity_curl_eff_rhombi[vector_index] = 0.35*grid -> mean_area_cell*config_info -> diff_h_smag_fac
-		*fabs(diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index]);
-		
-		// calculating and adding the molecular viscosity
-		scalar_index_from = layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index];
-		scalar_index_to = layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index];
-		calc_diffusion_coeff(
-		0.5*(diagnostics -> temperature_gas[scalar_index_from] + diagnostics -> temperature_gas[scalar_index_to]),
-		mean_particle_mass,
-		0.5*(state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_from] + state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_to]),
-		eff_particle_radius, &molecular_viscosity);
-		irrev -> viscosity_curl_eff_rhombi[vector_index] += molecular_viscosity;
-		
-		// turbulent minimum
-		if (irrev -> viscosity_curl_eff_rhombi[vector_index] < min_diff_h_coeff_turb)
+		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
 		{
-			irrev -> viscosity_curl_eff_rhombi[vector_index] = min_diff_h_coeff_turb;
+			vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
+			// preliminary result
+			irrev -> viscosity_curl_eff_rhombi[vector_index] = 0.35*grid -> mean_area_cell*config_info -> diff_h_smag_fac
+			*fabs(diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index]);
+			
+			// calculating and adding the molecular viscosity
+			scalar_index_from = layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index];
+			scalar_index_to = layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index];
+			calc_diffusion_coeff(
+			0.5*(diagnostics -> temperature_gas[scalar_index_from] + diagnostics -> temperature_gas[scalar_index_to]),
+			mean_particle_mass,
+			0.5*(state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_from] + state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_to]),
+			eff_particle_radius, &molecular_viscosity);
+			irrev -> viscosity_curl_eff_rhombi[vector_index] += molecular_viscosity;
+			
+			// turbulent minimum
+			if (irrev -> viscosity_curl_eff_rhombi[vector_index] < min_diff_h_coeff_turb)
+			{
+				irrev -> viscosity_curl_eff_rhombi[vector_index] = min_diff_h_coeff_turb;
+			}
+			
+			// maximum (stability constraint)
+			if (irrev -> viscosity_curl_eff_rhombi[vector_index] > max_diff_h_coeff_turb)
+			{
+				irrev -> viscosity_curl_eff_rhombi[vector_index] = max_diff_h_coeff_turb;
+			}
+			
+			// multiplying by the mass density of the gas phase
+			irrev -> viscosity_curl_eff_rhombi[vector_index] = 0.5*(density_gas(state, scalar_index_from) + density_gas(state, scalar_index_to))*irrev -> viscosity_curl_eff_rhombi[vector_index];
 		}
-		
-		// maximum (stability constraint)
-		if (irrev -> viscosity_curl_eff_rhombi[vector_index] > max_diff_h_coeff_turb)
-		{
-			irrev -> viscosity_curl_eff_rhombi[vector_index] = max_diff_h_coeff_turb;
-		}
-		
-		// multiplying by the mass density of the gas phase
-		irrev -> viscosity_curl_eff_rhombi[vector_index] = 0.5*(density_gas(state, scalar_index_from) + density_gas(state, scalar_index_to))*irrev -> viscosity_curl_eff_rhombi[vector_index];
 	}
 	return 0;
 }
@@ -119,9 +120,9 @@ int hori_curl_viscosity_eff_triangles(State *state, Irreversible_quantities *irr
 	// the maximum diffusion coefficient (stability constraint)
 	double max_diff_h_coeff_turb = 0.125*grid -> mean_area_cell/delta_t;
 	
-	int layer_index, h_index;
+	int layer_index, h_index, rho_base_index, temp_base_index;
 	double molecular_viscosity, density_value;
-	#pragma omp parallel for private(molecular_viscosity, layer_index, h_index, density_value)
+	#pragma omp parallel for private(molecular_viscosity, layer_index, h_index, density_value, rho_base_index, temp_base_index)
 	for (int i = 0; i < NO_OF_DUAL_V_VECTORS; ++i)
 	{
 		layer_index = i/NO_OF_DUAL_SCALARS_H;
@@ -130,23 +131,25 @@ int hori_curl_viscosity_eff_triangles(State *state, Irreversible_quantities *irr
 		irrev -> viscosity_curl_eff_triangles[i] = 0.35*grid -> mean_area_cell*config_info -> diff_h_smag_fac
 		*fabs(diagnostics -> rel_vort_on_triangles[layer_index*NO_OF_DUAL_SCALARS_H + h_index]);
 		
+		rho_base_index = NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H;
 		// calculating and adding the molecular viscosity
 		density_value =
 		1.0/6*(
-		state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
-		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
-		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
-		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
-		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]
-		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]);
+		state -> rho[rho_base_index + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
+		+ state -> rho[rho_base_index + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
+		+ state -> rho[rho_base_index + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
+		+ state -> rho[rho_base_index + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
+		+ state -> rho[rho_base_index + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]
+		+ state -> rho[rho_base_index + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]);
+		temp_base_index = layer_index*NO_OF_SCALARS_H ;
 		calc_diffusion_coeff(
 		1.0/6*(
-		diagnostics -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
-		+ diagnostics -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
-		+ diagnostics -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
-		+ diagnostics -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
-		+ diagnostics -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]
-		+ diagnostics -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]),
+		diagnostics -> temperature_gas[temp_base_index + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
+		+ diagnostics -> temperature_gas[temp_base_index + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
+		+ diagnostics -> temperature_gas[temp_base_index + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
+		+ diagnostics -> temperature_gas[temp_base_index + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
+		+ diagnostics -> temperature_gas[temp_base_index + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]
+		+ diagnostics -> temperature_gas[temp_base_index + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]),
 		mean_particle_mass,
 		density_value,
 		eff_particle_radius, &molecular_viscosity);
@@ -182,30 +185,31 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 	double max_diff_v_coeff_turb = 0.125*pow(
 	grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H]
 	, 2)/delta_t;
-	int layer_index, h_index;
+	int layer_index, h_index, scalar_base_index;
 	double mom_diff_coeff, molecuar_viscosity;
 	// updating the TKE
 	tke_update(irrev, delta_t, state, diagnostics, grid);
 	// loop over horizontal vector points at half levels
-	#pragma omp parallel for private(layer_index, h_index, mom_diff_coeff, molecuar_viscosity)
+	#pragma omp parallel for private(layer_index, h_index, mom_diff_coeff, molecuar_viscosity, scalar_base_index)
 	for (int i = 0; i < NO_OF_H_VECTORS - NO_OF_VECTORS_H; ++i)
 	{
 		layer_index = i/NO_OF_VECTORS_H;
 		h_index = i - layer_index*NO_OF_VECTORS_H;
+		scalar_base_index = layer_index*NO_OF_SCALARS_H;
 		// the turbulent component
-		mom_diff_coeff = 0.25*(return_ver_hor_viscosity(irrev -> tke[layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]])
-		+ return_ver_hor_viscosity(irrev -> tke[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]])
+		mom_diff_coeff = 0.25*(return_ver_hor_viscosity(irrev -> tke[scalar_base_index + grid -> from_index[h_index]])
+		+ return_ver_hor_viscosity(irrev -> tke[scalar_base_index + grid -> to_index[h_index]])
 		+ return_ver_hor_viscosity(irrev -> tke[(layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]])
 		+ return_ver_hor_viscosity(irrev -> tke[(layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]));
 		// computing and adding the molecular viscosity
 		// the scalar variables need to be averaged to the vector points at half levels
-		calc_diffusion_coeff(0.25*(diagnostics -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]]
-		+ diagnostics -> temperature_gas[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]]
+		calc_diffusion_coeff(0.25*(diagnostics -> temperature_gas[scalar_base_index + grid -> from_index[h_index]]
+		+ diagnostics -> temperature_gas[scalar_base_index + grid -> to_index[h_index]]
 		+ diagnostics -> temperature_gas[(layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]]
 		+ diagnostics -> temperature_gas[(layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]),
 		mean_particle_mass,
-		0.25*(state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]]
-		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]]
+		0.25*(state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_base_index + grid -> from_index[h_index]]
+		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_base_index + grid -> to_index[h_index]]
 		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]]
 		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]), eff_particle_radius, &molecuar_viscosity);
 		mom_diff_coeff += molecuar_viscosity;
@@ -218,8 +222,8 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 		
 		// multiplying by the density (averaged to the half level edge)
 		irrev -> vert_hor_viscosity_eff[i] = 
-		0.25*(density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index])
-		+ density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index])
+		0.25*(density_gas(state, scalar_base_index + grid -> from_index[h_index])
+		+ density_gas(state, scalar_base_index + grid -> to_index[h_index])
 		+ density_gas(state, (layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index])
 		+ density_gas(state, (layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]))
 		*mom_diff_coeff;
