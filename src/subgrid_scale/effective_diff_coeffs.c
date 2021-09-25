@@ -238,29 +238,31 @@ int vert_w_viscosity_eff(State *state, Grid *grid, Diagnostics *diagnostics, dou
 	double max_diff_v_coeff_turb = 0.125*pow(
 	grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H]
 	, 2)/delta_t;
-	int layer_index, h_index;
+	int i;
 	double mom_diff_coeff, molecuar_viscosity;
-	#pragma omp parallel for private(mom_diff_coeff, molecuar_viscosity, h_index, layer_index)
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	#pragma omp parallel for private(mom_diff_coeff, molecuar_viscosity, i)
+	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
 	{
-		layer_index = i/NO_OF_SCALARS_H;
-		h_index = i - layer_index*NO_OF_SCALARS_H;
-		// this is the value resulting from turbulence
-		mom_diff_coeff = 0.11*pow(
-		grid -> z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER]
-		, 2)
-		*fabs(diagnostics -> scalar_field_placeholder[i]);
-		// computing and adding the molecular momentum diffusion
-		calc_diffusion_coeff(diagnostics -> temperature_gas[i], mean_particle_mass,
-		state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &molecuar_viscosity);
-		mom_diff_coeff += molecuar_viscosity;
-		// this is the stability criterion
-		if (mom_diff_coeff > max_diff_v_coeff_turb)
+		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
 		{
-			mom_diff_coeff = max_diff_v_coeff_turb;
+			i = layer_index*NO_OF_SCALARS_H + h_index;
+			// this is the value resulting from turbulence
+			mom_diff_coeff = 0.11*pow(
+			grid -> z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER]
+			, 2)
+			*fabs(diagnostics -> scalar_field_placeholder[i]);
+			// computing and adding the molecular momentum diffusion
+			calc_diffusion_coeff(diagnostics -> temperature_gas[i], mean_particle_mass,
+			state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &molecuar_viscosity);
+			mom_diff_coeff += molecuar_viscosity;
+			// this is the stability criterion
+			if (mom_diff_coeff > max_diff_v_coeff_turb)
+			{
+				mom_diff_coeff = max_diff_v_coeff_turb;
+			}
+			
+			diagnostics -> scalar_field_placeholder[i] = density_gas(state, i)*mom_diff_coeff*diagnostics -> scalar_field_placeholder[i];
 		}
-		
-		diagnostics -> scalar_field_placeholder[i] = density_gas(state, i)*mom_diff_coeff*diagnostics -> scalar_field_placeholder[i];
 	}
 	return 0;
 }

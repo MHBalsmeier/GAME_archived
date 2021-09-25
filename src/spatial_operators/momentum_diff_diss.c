@@ -158,39 +158,43 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	// ---------------------------------------------
 	// the diffusion coefficient is the same as the one for vertical diffusion of horizontal velocity
 	// averaging the vertical velocity vertically to cell centers, using the inner product weights
-	#pragma omp parallel for private(layer_index, h_index)
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	int i;
+	#pragma omp parallel for private(i)
+	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
 	{
-		layer_index = i/NO_OF_SCALARS_H;
-		h_index = i - layer_index*NO_OF_SCALARS_H;
-		diagnostics -> scalar_field_placeholder[i] =
-		grid -> inner_product_weights[8*i + 6]*state -> wind[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
-		+ grid -> inner_product_weights[8*i + 7]*state -> wind[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
+		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
+		{
+			i = layer_index*NO_OF_SCALARS_H + h_index;
+			diagnostics -> scalar_field_placeholder[i] =
+			grid -> inner_product_weights[8*i + 6]*state -> wind[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
+			+ grid -> inner_product_weights[8*i + 7]*state -> wind[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
+		}
 	}
 	// computing the horizontal gradient of the vertical velocity field
 	grad_hor(diagnostics -> scalar_field_placeholder, diagnostics -> vector_field_placeholder, grid);
 	// multiplying by the already computed diffusion coefficient
-	#pragma omp parallel for private(layer_index, h_index, vector_index)
-	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
+	#pragma omp parallel for private(vector_index)
+	for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)
 	{
-		layer_index = i/NO_OF_VECTORS_H;
-		h_index = i - layer_index*NO_OF_VECTORS_H;
-		vector_index = NO_OF_SCALARS_H + h_index + layer_index*NO_OF_VECTORS_PER_LAYER;
-		if (layer_index == 0)
+		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
 		{
-			diagnostics -> vector_field_placeholder[vector_index] = 0.5*irrev -> vert_hor_viscosity_eff[layer_index*NO_OF_VECTORS_H + h_index]
-			*diagnostics -> vector_field_placeholder[vector_index];
-		}
-		else if (layer_index == NO_OF_LAYERS - 1)
-		{
-			diagnostics -> vector_field_placeholder[vector_index] = 0.5*irrev -> vert_hor_viscosity_eff[(layer_index - 1)*NO_OF_VECTORS_H + h_index]
-			*diagnostics -> vector_field_placeholder[vector_index];
-		}
-		else
-		{
-			diagnostics -> vector_field_placeholder[vector_index] = 0.5
-			*(irrev -> vert_hor_viscosity_eff[(layer_index - 1)*NO_OF_VECTORS_H + h_index] + irrev -> vert_hor_viscosity_eff[layer_index*NO_OF_VECTORS_H + h_index])
-			*diagnostics -> vector_field_placeholder[vector_index];
+			vector_index = NO_OF_SCALARS_H + h_index + layer_index*NO_OF_VECTORS_PER_LAYER;
+			if (layer_index == 0)
+			{
+				diagnostics -> vector_field_placeholder[vector_index] = 0.5*irrev -> vert_hor_viscosity_eff[layer_index*NO_OF_VECTORS_H + h_index]
+				*diagnostics -> vector_field_placeholder[vector_index];
+			}
+			else if (layer_index == NO_OF_LAYERS - 1)
+			{
+				diagnostics -> vector_field_placeholder[vector_index] = 0.5*irrev -> vert_hor_viscosity_eff[(layer_index - 1)*NO_OF_VECTORS_H + h_index]
+				*diagnostics -> vector_field_placeholder[vector_index];
+			}
+			else
+			{
+				diagnostics -> vector_field_placeholder[vector_index] = 0.5
+				*(irrev -> vert_hor_viscosity_eff[(layer_index - 1)*NO_OF_VECTORS_H + h_index] + irrev -> vert_hor_viscosity_eff[layer_index*NO_OF_VECTORS_H + h_index])
+				*diagnostics -> vector_field_placeholder[vector_index];
+			}
 		}
 	}
 	// the divergence of the diffusive flux density results in the diffusive acceleration
