@@ -31,16 +31,6 @@ module radiation
   ! used for C interoperability
   integer                                  :: zero = 0
   integer                                  :: one = 1
-  ! the gas concentrations (object holding all information on the composition
-  ! of the gas phase)
-  type(ty_gas_concs)                       :: gas_concentrations_sw
-  type(ty_gas_concs)                       :: gas_concentrations_lw
-  ! the spectral properties of the gas phase
-  type(ty_gas_optics_rrtmgp)               :: k_dist_sw,k_dist_lw
-  ! the spectral properties of the clouds
-  type(ty_cloud_optics)                    :: cloud_optics_sw,cloud_optics_lw
-  
-  class(ty_optical_props_arry),allocatable :: atmos,clouds
 
   character(len = 3),dimension(wp) :: active_gases =  (/ &
    "N2 ","O2 ","CH4","O3 ","CO2","H2O","N2O","CO " &
@@ -84,7 +74,6 @@ module radiation
   
   subroutine radiation_init() &
   bind(c,name = "radiation_init")
-    
     ! This is called only once, in the beginning.
     
     ! local variables
@@ -95,20 +84,6 @@ module radiation
     do ji = 1,size(active_gases)
       gases_lowercase(ji) = trim(lower_case(active_gases(ji)))
     end do
-    ! here,the names of the gases are written to the gas_concentrations object
-    call handle_error(gas_concentrations_sw%init(gases_lowercase))
-    call handle_error(gas_concentrations_lw%init(gases_lowercase))
-    
-    ! loading the short wave radiation properties
-    call load_and_init(k_dist_sw,trim(rrtmgp_coefficients_file_sw),gas_concentrations_sw)
-    ! loading the long wave radiation properties
-    call load_and_init(k_dist_lw,trim(rrtmgp_coefficients_file_lw),gas_concentrations_lw)
-    
-    ! reading the SW spectrai properties of clouds
-    call load_cld_lutcoeff(cloud_optics_sw,trim(cloud_coefficients_file_sw))
-    
-    ! reading the LW spectrai properties of clouds
-    call load_cld_lutcoeff(cloud_optics_lw,trim(cloud_coefficients_file_lw))
     
   end subroutine radiation_init
   
@@ -160,6 +135,14 @@ module radiation
     real(wp),intent(in)               :: sfc_albedo        (no_of_scalars/no_of_layers)
     
     ! local variables
+    ! the gas concentrations (object holding all information on the composition
+    ! of the gas phase)
+    type(ty_gas_concs)                :: gas_concentrations_sw
+    type(ty_gas_concs)                :: gas_concentrations_lw
+    ! the spectral properties of the gas phase
+    type(ty_gas_optics_rrtmgp)        :: k_dist_sw,k_dist_lw
+    ! the spectral properties of the clouds
+    type(ty_cloud_optics)             :: cloud_optics_sw,cloud_optics_lw
     ! solar zenith angle
     real(wp)                          :: mu_0(no_of_scalars/no_of_layers)
     ! number of points where it is day
@@ -248,6 +231,25 @@ module radiation
     real(wp)                          :: ice_cloud_weight
     ! liquid cloud particles weight
     real(wp)                          :: liquid_cloud_weight
+    
+    ! some general preparations
+    
+    ! here,the names of the gases are written to the gas_concentrations object
+    call handle_error(gas_concentrations_sw%init(gases_lowercase))
+    call handle_error(gas_concentrations_lw%init(gases_lowercase))
+    
+    !$omp critical
+    ! loading the short wave radiation properties
+    call load_and_init(k_dist_sw,trim(rrtmgp_coefficients_file_sw),gas_concentrations_sw)
+    ! loading the long wave radiation properties
+    call load_and_init(k_dist_lw,trim(rrtmgp_coefficients_file_lw),gas_concentrations_lw)
+    
+    ! reading the SW spectrai properties of clouds
+    call load_cld_lutcoeff(cloud_optics_sw,trim(cloud_coefficients_file_sw))
+    
+    ! reading the LW spectrai properties of clouds
+    call load_cld_lutcoeff(cloud_optics_lw,trim(cloud_coefficients_file_lw))
+    !$omp end critical
     
     ! calculation of the number of columns
     no_of_scalars_h =  no_of_scalars/no_of_layers
@@ -400,14 +402,16 @@ module radiation
     j_day =  0
     do ji = 1,no_of_scalars_h
       mu_0(ji) =  coszenith(latitude_scalar(ji),longitude_scalar(ji),time_coord)
-      ! it should be > 0,but this would lead to problems with the slicing procedure
-      if (mu_0(ji) >= 0) then
+      if (mu_0(ji) > 0) then
         j_day  = j_day + 1
         day_indices(j_day)    = ji
       endif
     enddo
     
     no_of_day_points = j_day
+    if (no_of_day_points == 0) then
+      goto 1
+    endif
     
     ! now we start the actual radiation calculation
     ! clearing the radiation tendency (it still contains the results of the previous call
@@ -433,8 +437,10 @@ module radiation
     end do
     
     ! setting the volume mixing ratios of the gases for the short wave calculation
+    gas_concentrations_sw%ncol = no_of_day_points
     call set_vol_mix_ratios(mass_densities,.true.,no_of_day_points,no_of_scalars_h,&
-    no_of_layers,no_of_scalars,no_of_condensed_constituents,day_indices,z_scalar)
+    no_of_layers,no_of_scalars,no_of_condensed_constituents,day_indices,z_scalar, &
+    gas_concentrations_sw)
     
     ! initializing the short wave fluxes
     call init_fluxes(fluxes_day,no_of_day_points,no_of_layers+1,no_of_sw_bands)
@@ -497,9 +503,11 @@ module radiation
     call free_fluxes(fluxes_day)
     
     ! now long wave
+1   continue
     ! setting the volume mixing ratios of the gases for the long wave calculation
     call set_vol_mix_ratios(mass_densities,.false.,no_of_day_points,no_of_scalars_h,&
-    no_of_layers,no_of_scalars,no_of_condensed_constituents,day_indices,z_scalar)
+    no_of_layers,no_of_scalars,no_of_condensed_constituents,day_indices,z_scalar, &
+    gas_concentrations_lw)
     
     ! initializing the long wave fluxes
     call init_fluxes(fluxes,no_of_scalars_h,no_of_layers+1,no_of_lw_bands)
@@ -716,12 +724,13 @@ module radiation
   end function coszenith
   
   subroutine set_vol_mix_ratios(mass_densities,sw_bool,no_of_day_points,no_of_scalars_h,&
-  no_of_layers,no_of_scalars,no_of_condensed_constituents,day_indices,z_scalar)
+  no_of_layers,no_of_scalars,no_of_condensed_constituents,day_indices,z_scalar, &
+  gas_concentrations)
     
     ! computes volume mixing ratios out of the model variables
     
     ! mass densities of the constituents
-    real(wp),intent(in)              :: mass_densities(:)
+    real(wp),intent(in)             :: mass_densities(:)
     ! short wave switch
     logical,intent(in)              :: sw_bool
     ! as usual
@@ -738,6 +747,7 @@ module radiation
     integer,intent(in)              :: day_indices(no_of_scalars/no_of_layers)
     ! z coordinates of scalar data points
     real(wp),intent(in)              :: z_scalar(no_of_scalars)
+    type(ty_gas_concs),intent(inout) :: gas_concentrations
     
     ! the volume mixing ratio of a gas
     real(wp)                          :: vol_mix_ratio(no_of_scalars_h,no_of_layers)
@@ -804,9 +814,9 @@ module radiation
         end select
       ! finally setting the VMRs to the gas_concentrations objects
       if (sw_bool) then
-        call handle_error(gas_concentrations_sw%set_vmr(gases_lowercase(ji),vol_mix_ratio(1:no_of_day_points,:)))
+        call handle_error(gas_concentrations%set_vmr(gases_lowercase(ji),vol_mix_ratio(1:no_of_day_points,:)))
       else
-        call handle_error(gas_concentrations_lw%set_vmr(gases_lowercase(ji),vol_mix_ratio(:,:)))
+        call handle_error(gas_concentrations%set_vmr(gases_lowercase(ji),vol_mix_ratio(:,:)))
       endif
     enddo ! ji
   
