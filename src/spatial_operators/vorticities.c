@@ -109,9 +109,9 @@ int calc_rel_vort(Vector_field velocity_field, Diagnostics *diagnostics, Grid *g
 	
 	// calling the function which computes the relative vorticity on triangles
 	calc_rel_vort_on_triangles(velocity_field, diagnostics -> rel_vort_on_triangles, grid, dualgrid);
-    int layer_index, h_index, index_0, index_1, index_2, index_3;
+    int layer_index, h_index, index_0, index_1, index_2, index_3, base_index;
     double covar_0, covar_2;
-	#pragma omp parallel for private(layer_index, h_index, index_0, index_1, index_2, index_3, covar_0, covar_2)
+	#pragma omp parallel for private(layer_index, h_index, index_0, index_1, index_2, index_3, covar_0, covar_2, base_index)
     for (int i = NO_OF_VECTORS_H; i < NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H; ++i)
     {
         layer_index = i/(2*NO_OF_VECTORS_H);
@@ -119,30 +119,32 @@ int calc_rel_vort(Vector_field velocity_field, Diagnostics *diagnostics, Grid *g
         // rhombus vorticities (stand vertically)
         if (h_index >= NO_OF_VECTORS_H)
         {
+        	base_index = NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER;
 			diagnostics -> rel_vort[i] = (
-			dualgrid -> area[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> from_index[h_index - NO_OF_VECTORS_H]]
+			dualgrid -> area[base_index + dualgrid -> from_index[h_index - NO_OF_VECTORS_H]]
 			*diagnostics -> rel_vort_on_triangles[layer_index*NO_OF_DUAL_SCALARS_H + dualgrid -> from_index[h_index - NO_OF_VECTORS_H]]
-			+ dualgrid -> area[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> to_index[h_index - NO_OF_VECTORS_H]]
+			+ dualgrid -> area[base_index + dualgrid -> to_index[h_index - NO_OF_VECTORS_H]]
 			*diagnostics -> rel_vort_on_triangles[layer_index*NO_OF_DUAL_SCALARS_H + dualgrid -> to_index[h_index - NO_OF_VECTORS_H]])/(
-			dualgrid -> area[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> from_index[h_index - NO_OF_VECTORS_H]]
-			+ dualgrid -> area[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + dualgrid -> to_index[h_index - NO_OF_VECTORS_H]]);
+			dualgrid -> area[base_index + dualgrid -> from_index[h_index - NO_OF_VECTORS_H]]
+			+ dualgrid -> area[base_index + dualgrid -> to_index[h_index - NO_OF_VECTORS_H]]);
         }
         // tangential (horizontal) vorticities
         else
         {
+        	base_index = layer_index*NO_OF_VECTORS_PER_LAYER;
         	// At the lower boundary, w vanishes. Furthermore, the covariant velocity below the surface is also zero.
             if (layer_index == NO_OF_LAYERS)
             {
-                index_2 = layer_index*NO_OF_VECTORS_PER_LAYER - NO_OF_VECTORS_H + h_index;
+                index_2 = base_index - NO_OF_VECTORS_H + h_index;
                 horizontal_covariant(velocity_field, layer_index - 1, h_index, grid, &covar_2);
                 diagnostics -> rel_vort[i] = 1/dualgrid -> area[h_index + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER]*grid -> normal_distance[index_2]*covar_2;
             }
             else
             {
-                index_0 = layer_index*NO_OF_VECTORS_PER_LAYER + NO_OF_SCALARS_H + h_index;
-                index_1 = layer_index*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index];
-                index_2 = layer_index*NO_OF_VECTORS_PER_LAYER - NO_OF_VECTORS_H + h_index;
-                index_3 = layer_index*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index];
+                index_0 = base_index + NO_OF_SCALARS_H + h_index;
+                index_1 = base_index + grid -> from_index[h_index];
+                index_2 = base_index - NO_OF_VECTORS_H + h_index;
+                index_3 = base_index + grid -> to_index[h_index];
                 horizontal_covariant(velocity_field, layer_index, h_index, grid, &covar_0);
                 horizontal_covariant(velocity_field, layer_index - 1, h_index, grid, &covar_2);
                 diagnostics -> rel_vort[i] = 1/dualgrid -> area[h_index + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER]*(
