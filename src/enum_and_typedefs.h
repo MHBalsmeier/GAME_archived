@@ -184,7 +184,7 @@ int tracer_diff_v;
 int rad_on;
 int rad_update;
 int assume_lte;
-int adv_sound_ratio;
+int slow_fast_ratio;
 int nwp_mode;
 int delta_t_between_analyses;
 int explicit_boundary_layer;

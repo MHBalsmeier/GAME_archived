@@ -21,17 +21,13 @@ This file manages the RKHEVI time stepping.
 
 int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Dualgrid *dualgrid, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, double delta_t, double time_coordinate, int total_step_counter)
 {
-	// slow terms (momentum advection and diffusion) update switch
+	// slow terms (diffusion) update switch
 	int slow_update_bool = 0;
-	// delta_t_small is the time step of the divergent modes integration
-	double delta_t_small = delta_t;
 	// check if slow terms have to be updated
-	if (fmod(total_step_counter, config_info -> adv_sound_ratio) == 0)
+	if (fmod(total_step_counter, config_info -> slow_fast_ratio) == 0)
 	{
-		// set the respective update switch to one
+		// setting the respective update switch to one
 		slow_update_bool = 1;
-		// delta_t is the large time step for the advection integration
-		delta_t = config_info -> adv_sound_ratio*delta_t_small;
     }
        
 	// diagnosing the temperature
@@ -99,12 +95,6 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
     
     // saturation adjustment, calculation of latent heating rates
     moisturizer(state_new, delta_t, diagnostics, irrev, config_info, grid);
-
-	// in this case, a large time step has been taken, which we modify into a small step here
-    if (slow_update_bool == 1 && config_info -> adv_sound_ratio > 1)
-    {
-    	linear_combine_two_states(state_old, state_new, state_new, 1 - delta_t_small/delta_t, delta_t_small/delta_t, grid);
-    }
     
     return 0;
 }

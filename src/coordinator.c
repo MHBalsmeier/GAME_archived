@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 	grid -> no_of_oro_layers = strtod(argv[26], NULL);
 	int VERT_GRID_TYPE = strtod(argv[27], NULL);
 	config_info -> assume_lte = strtod(argv[28], NULL);
-	config_info -> adv_sound_ratio = strtod(argv[29], NULL);
+	config_info -> slow_fast_ratio = strtod(argv[29], NULL);
 	config_info -> delta_t_between_analyses = strtod(argv[30], NULL);
 	config_info -> diff_h_smag_fac = strtof(argv[31], NULL);
 	config_info -> shear_bg = strtof(argv[32], NULL);
@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
 	printf("Number of scalar data points: %d\n", NO_OF_SCALARS);
 	printf("Number of vectors: %d\n", NO_OF_VECTORS);
 	printf("Number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
-	printf("Ratio of advective to sound time step: %d\n", config_info -> adv_sound_ratio);
+	printf("Ratio of the slow to the fast time step: %d\n", config_info -> slow_fast_ratio);
 	if (VERT_GRID_TYPE == 0)
 	{
 		printf("Terrain handling: terrain following coordinates\n");
@@ -434,8 +434,8 @@ int main(int argc, char *argv[])
     	exit(1);
     }
 	printf("Time step set. Information on CFL-related quantities:\n");
-    printf("Fast dynamic modes time step: %lf s\n", delta_t);
-    printf("Slow dynamic modes time step: %lf s\n", config_info -> adv_sound_ratio*delta_t);
+    printf("Fast modes time step: %lf s\n", delta_t);
+    printf("Slow modes time step: %lf s\n", config_info -> slow_fast_ratio*delta_t);
 	
 	// finding the minimum horizontal grid distance
 	double normal_dist_min_hor = eff_hor_res;
@@ -458,9 +458,9 @@ int main(int argc, char *argv[])
 	printf("Effective horizontal resolution: %lf km\n", 1e-3*eff_hor_res);
 	printf("Minimum horizontal normal distance: %lf km\n", 1e-3*normal_dist_min_hor);
     double max_speed_hor = 100;
-	printf("Horizontal advective Courant numer: %lf\n", config_info -> adv_sound_ratio*delta_t/normal_dist_min_hor*max_speed_hor);
+	printf("Horizontal advective Courant numer: %lf\n", delta_t/normal_dist_min_hor*max_speed_hor);
     double max_speed_vert = 0.1;
-	printf("Vertical advective Courant numer: %lf\n", config_info -> adv_sound_ratio*delta_t/normal_dist_min_vert*max_speed_vert);
+	printf("Vertical advective Courant numer: %lf\n", delta_t/normal_dist_min_vert*max_speed_vert);
     printf("%s", stars);
     printf("It begins.\n");
     printf("%s", stars);

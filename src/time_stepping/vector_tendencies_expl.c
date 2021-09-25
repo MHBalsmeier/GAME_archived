@@ -15,10 +15,10 @@ In this file, the calculation of the explicit part of the momentum equation is m
 #include "../spatial_operators/spatial_operators.h"
 #include "../thermodynamics/thermodynamics.h"
 
-int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int update_advection, int no_rk_step, double delta_t)
+int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int slow_update_bool, int no_rk_step, double delta_t)
 {
 	// momentum advection
-	if ((update_advection == 1 && no_rk_step == 1) || config_info -> totally_first_step_bool == 1)
+	if (no_rk_step == 1 || config_info -> totally_first_step_bool == 1)
 	{
 		// Here, the gaseous flux density is prepared for the generalized Coriolis term.
 		#pragma omp parallel for
@@ -45,7 +45,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     }
     
     // momentum diffusion and dissipation (only updated at the first RK step and if advection is updated as well)
-    if (no_rk_step == 0 && update_advection == 1)
+    if (no_rk_step == 0 && slow_update_bool == 1)
     {
     	// horizontal momentum diffusion
     	if (config_info -> momentum_diff_h == 1)
