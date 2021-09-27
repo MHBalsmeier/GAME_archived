@@ -38,8 +38,7 @@ int main(int argc, char *argv[])
 	double *oro_unfiltered = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *oro = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *sfc_albedo = calloc(NO_OF_SCALARS_H, sizeof(double));
-	double *sfc_c_v = calloc(NO_OF_SCALARS_H, sizeof(double));
-	double *sfc_rho = calloc(NO_OF_SCALARS_H, sizeof(double));
+	double *sfc_rho_c = calloc(NO_OF_SCALARS_H, sizeof(double));
 	char GEO_PROP_FILE_PRE[200];
     sprintf(GEO_PROP_FILE_PRE, "../grid_generator/grids/B%dL26T41152_O0_OL23_SCVT.nc", RES_ID);
 	char GEO_PROP_FILE[strlen(GEO_PROP_FILE_PRE) + 1];
@@ -201,18 +200,16 @@ int main(int argc, char *argv[])
 	{
 		// ocean
 		sfc_albedo[i] = albedo_water;
-		sfc_c_v[i] = c_v_water;
-		sfc_rho[i] = density_water;
+		sfc_rho_c[i] = density_water*c_v_water;
 		if (is_land[i] == 1)
 		{
 			// setting the land surface albedo to 0.12 (compare Zdunkowski,Trautmann & Bott:
 			// Radiation in the Atmosphere,2007,p. 444)
 			sfc_albedo[i] = albedo_soil;
-			sfc_c_v[i] = c_v_soil;
-			sfc_rho[i] = density_soil;
+			sfc_rho_c[i] = density_soil*c_v_soil;
 		}
 	}
-	int sfc_albedo_id, sfc_c_v_id, sfc_density_id;
+	int sfc_albedo_id, sfc_rho_c_id;
 	if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
 	  ERR(retval);
 	if ((retval = nc_def_dim(ncid, "scalar_index", NO_OF_SCALARS_H, &scalar_h_dimid)))
@@ -223,13 +220,9 @@ int main(int argc, char *argv[])
 	  ERR(retval);
 	if ((retval = nc_def_var(ncid, "sfc_albedo", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_albedo_id)))
 	  ERR(retval);
-	if ((retval = nc_def_var(ncid, "sfc_density", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_density_id)))
+	if ((retval = nc_def_var(ncid, "sfc_rho_c", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_rho_c_id)))
 	  ERR(retval);
-	if ((retval = nc_put_att_text(ncid, sfc_density_id, "units", strlen("kg/(m**3)"), "kg/(m**3)")))
-	  ERR(retval);
-	if ((retval = nc_def_var(ncid, "sfc_c_v", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_c_v_id)))
-	  ERR(retval);
-	if ((retval = nc_put_att_text(ncid, sfc_c_v_id, "units", strlen("J/(kg*K)"), "J/(kg*K)")))
+	if ((retval = nc_put_att_text(ncid, sfc_rho_c_id, "units", strlen("J(K*m**3)"), "J/(K*m**3)")))
 	  ERR(retval);
 	if ((retval = nc_def_var(ncid, "is_land", NC_INT, 1, &scalar_h_dimid, &is_land_id)))
 	  ERR(retval);
@@ -239,17 +232,14 @@ int main(int argc, char *argv[])
 	  ERR(retval);
 	if ((retval = nc_put_var_double(ncid, sfc_albedo_id, &sfc_albedo[0])))
 	  ERR(retval);
-	if ((retval = nc_put_var_double(ncid, sfc_density_id, &sfc_rho[0])))
-	  ERR(retval);
-	if ((retval = nc_put_var_double(ncid, sfc_c_v_id, &sfc_c_v[0])))
+	if ((retval = nc_put_var_double(ncid, sfc_rho_c_id, &sfc_rho_c[0])))
 	  ERR(retval);
 	if ((retval = nc_put_var_int(ncid, is_land_id, &is_land[0])))
 	  ERR(retval);
 	if ((retval = nc_close(ncid)))
 	  ERR(retval);
 	free(sfc_albedo);
-	free(sfc_rho);
-	free(sfc_c_v);
+	free(sfc_rho_c);
 	free(is_land);
 	free(oro);
 	

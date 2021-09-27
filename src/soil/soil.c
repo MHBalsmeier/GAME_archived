@@ -36,7 +36,7 @@ int soil_interaction(Soil *soil, Diagnostics *diagnostics, Forcings *forcings, G
 		+ forcings -> sfc_sw_in[i]
 		// longwave outbound radiation
 		- forcings -> sfc_lw_out[i])
-		/(thickness*grid -> sfc_c_v[i]*grid -> sfc_rho[i])*delta_t;
+		/(thickness*grid -> sfc_rho_c[i])*delta_t;
 		// clipping too low values
 		if (soil -> temperature[i] < t_min)
 		{

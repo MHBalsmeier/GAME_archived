@@ -184,22 +184,18 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
 int set_sfc_properties(Grid *grid, char SFC_PROP_FILE[])
 {
     // reading surface properties
-    int ncid, retval, sfc_density_id, sfc_albedo_id, sfc_c_v_id, is_land_id;
+    int ncid, retval, sfc_rho_c_id, sfc_albedo_id, is_land_id;
     if ((retval = nc_open(SFC_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "sfc_density", &sfc_density_id)))
+    if ((retval = nc_inq_varid(ncid, "sfc_rho_c", &sfc_rho_c_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "sfc_albedo", &sfc_albedo_id)))
         ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "sfc_c_v", &sfc_c_v_id)))
-        ERR(retval);
     if ((retval = nc_inq_varid(ncid, "is_land", &is_land_id)))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, sfc_density_id, &(grid -> sfc_rho[0]))))
+    if ((retval = nc_get_var_double(ncid, sfc_rho_c_id, &(grid -> sfc_rho_c[0]))))
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, sfc_albedo_id, &(grid -> sfc_albedo[0]))))
-        ERR(retval);
-    if ((retval = nc_get_var_double(ncid, sfc_c_v_id, &(grid -> sfc_c_v[0]))))
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, is_land_id, &(grid -> is_land[0]))))
         ERR(retval);
