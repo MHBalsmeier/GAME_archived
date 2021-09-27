@@ -11,7 +11,7 @@ This file contains the soil component of GAME.
 #include <stdio.h>
 
 // some for now constant parameters
-const double thickness = 10;
+const double thickness = 1;
 const double heat_trans_coeff = 50;
 const double t_min = 273.15 - 30;
 

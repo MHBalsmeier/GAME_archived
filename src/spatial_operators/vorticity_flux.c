@@ -27,14 +27,14 @@ int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vec
     	for (int layer_index = 0; layer_index < NO_OF_LAYERS + 1; ++layer_index)
     	{
 		    i = layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
-		    out_field[i] = 0;
 		    
 		    /*
 		    Calculating the horizontal component of the vorticity flux term.
 		    ----------------------------------------------------------------
 		    */
-		    if (h_index >= NO_OF_SCALARS_H)
+		    if (h_index >= NO_OF_SCALARS_H && layer_index < NO_OF_LAYERS)
 		    {
+			    out_field[i] = 0;
 		    	h_index_shifted = h_index - NO_OF_SCALARS_H;
 		    	mass_flux_base_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER;
 		    	pot_vort_base_index = NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H;
@@ -140,8 +140,9 @@ int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vec
 		    Calculating the vertical component of the vorticity flux term.
 		    --------------------------------------------------------------
 		    */
-		    else
+		    else if (h_index < NO_OF_SCALARS_H)
 		    {
+			    out_field[i] = 0;
 				/*
 				Determining the vertical acceleration due to the vorticity flux term.
 				*/
