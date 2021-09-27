@@ -144,6 +144,11 @@ Scalar_field v_at_cell;
 double prep_for_vert_diffusion[NO_OF_H_VECTORS - NO_OF_VECTORS_H];
 } Diagnostics;
 
+// the wave component
+typedef struct waves {
+double swh[NO_OF_SCALARS_H];
+} Waves;
+
 // needed for the radiation calculation
 typedef struct radiation {
 double lat_scal[NO_OF_SCALARS_RAD_PER_LAYER];
@@ -187,6 +192,7 @@ int slow_fast_ratio;
 int nwp_mode;
 int delta_t_between_analyses;
 int explicit_boundary_layer;
+int waves_on;
 double diff_h_smag_fac;
 double shear_bg;
 double damping_start_height_over_toa;

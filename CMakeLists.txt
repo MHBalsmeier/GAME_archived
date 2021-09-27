@@ -36,9 +36,6 @@ src/subgrid_scale/gravity_waves.c
 src/subgrid_scale/convection.c
 src/soil/soil.c
 src/waves/waves.c
-src/soil_coupler/soil_coupler.c
-src/waves_coupler/waves_coupler.c
-src/ocean_coupler/ocean_coupler.c
 src/radiation/manage_radiation_calls.c
 src/radiation/held_suar.c
 src/radiation/rterrtmgp_coupler.f90
