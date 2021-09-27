@@ -27,8 +27,7 @@ We try to find a good balance of accuracy, efficiency and self-consistency. Gene
 ### Things to be done
 
 * SLEVE
-* a nesting option
-* ocean dynamics and physics
+* an option for non-uniform resolutions
 * ellipsoidal geometry
 
 ## Documents
