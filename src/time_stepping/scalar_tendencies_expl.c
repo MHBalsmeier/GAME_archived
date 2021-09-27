@@ -27,7 +27,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 	--------------------------------------
 	*/
 	// declaring needed variables
-    int h_index, layer_index, diff_switch;
+    int h_index, layer_index, diff_switch, scalar_shift_index;
     double c_v_cond, tracer_heating, latent_heating_weight, density_total_weight;
     
     // determining the RK weights
@@ -72,16 +72,17 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 	// loop over all constituents
 	for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
 	{
+		scalar_shift_index = i*NO_OF_SCALARS;
         // This is the mass advection, which needs to be carried out for all constituents.
         // -------------------------------------------------------------------------------
-		scalar_times_vector_h(&state -> rho[i*NO_OF_SCALARS], state -> wind, diagnostics -> flux_density, grid);
+		scalar_times_vector_h(&state -> rho[scalar_shift_index], state -> wind, diagnostics -> flux_density, grid);
 		if (i == NO_OF_CONDENSED_CONSTITUENTS)
 		{
         	divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 		}
 		else
 		{
-        	divv_h_limited(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid, &state -> rho[i*NO_OF_SCALARS], delta_t);
+        	divv_h_limited(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid, &state -> rho[scalar_shift_index], delta_t);
 		}
 		
 		// mass diffusion, only for gaseous tracers
@@ -97,7 +98,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 			// horizontal mass diffusion
 			if (config_info -> tracer_diff_h == 1)
 			{
-				grad(&state -> rho[i*NO_OF_SCALARS], diagnostics -> vector_field_placeholder, grid);
+				grad(&state -> rho[scalar_shift_index], diagnostics -> vector_field_placeholder, grid);
 				scalar_times_vector_h(irrev -> scalar_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
 				divv_h(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
 			}
@@ -106,7 +107,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 			{
 				if (config_info -> tracer_diff_h == 0)
 				{
-					grad_vert_cov(&state -> rho[i*NO_OF_SCALARS], diagnostics -> vector_field_placeholder, grid);
+					grad_vert_cov(&state -> rho[scalar_shift_index], diagnostics -> vector_field_placeholder, grid);
 					#pragma omp parallel for
 					for (int j = 0; j < NO_OF_SCALARS; ++j)
 					{
@@ -126,17 +127,17 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 			h_index = j - layer_index*NO_OF_SCALARS_H;
 			if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 			{
-				state_tendency -> rho[i*NO_OF_SCALARS + j]
-				= old_weight[i]*state_tendency -> rho[i*NO_OF_SCALARS + j]
+				state_tendency -> rho[scalar_shift_index + j]
+				= old_weight[i]*state_tendency -> rho[scalar_shift_index + j]
 				+ new_weight[i]*(
 				// the advection
 				-diagnostics -> flux_density_divv[j]
 				// the diffusion
 				+ diff_switch*diagnostics -> scalar_field_placeholder[j]);
 				// the horizontal brute-force limiter
-				if (state_old -> rho[i*NO_OF_SCALARS + j] + delta_t*state_tendency -> rho[i*NO_OF_SCALARS + j] < 0)
+				if (state_old -> rho[scalar_shift_index + j] + delta_t*state_tendency -> rho[scalar_shift_index + j] < 0)
 				{
-					state_tendency -> rho[i*NO_OF_SCALARS + j] = -state_old -> rho[i*NO_OF_SCALARS + j]/delta_t;
+					state_tendency -> rho[scalar_shift_index + j] = -state_old -> rho[scalar_shift_index + j]/delta_t;
 				}
 		    }
 	    }
@@ -149,9 +150,9 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 			#pragma omp parallel for
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
-				if (state -> rho[i*NO_OF_SCALARS + j] != 0)
+				if (state -> rho[scalar_shift_index + j] != 0)
 				{
-					diagnostics -> scalar_field_placeholder[j] = state -> rhotheta[j]/state -> rho[i*NO_OF_SCALARS + j];
+					diagnostics -> scalar_field_placeholder[j] = state -> rhotheta[j]/state -> rho[scalar_shift_index + j];
 				}
 				else
 				{
@@ -174,12 +175,12 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 					latent_heating_weight = 1;
 					if (config_info -> assume_lte == 0)
 					{
-						latent_heating_weight = state -> rho[i*NO_OF_SCALARS + j]/density_gas(state, j);
+						latent_heating_weight = state -> rho[scalar_shift_index + j]/density_gas(state, j);
 						// this is not yet implemented
 					}
 					if (config_info -> assume_lte == 1)
 					{
-						latent_heating_weight = state -> rho[i*NO_OF_SCALARS + j]/density_total_weight;
+						latent_heating_weight = state -> rho[scalar_shift_index + j]/density_total_weight;
 						for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS; ++k)
 						{
 							tracer_heating += irrev -> constituent_heat_source_rates[k*NO_OF_SCALARS + j];
@@ -192,7 +193,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 					-diagnostics -> flux_density_divv[j]
 					// the diabatic forcings
 					// weighting factor
-					+ state -> rho[i*NO_OF_SCALARS + j]/density_total_weight*(
+					+ state -> rho[scalar_shift_index + j]/density_total_weight*(
 					// dissipation of molecular + turbulent momentum diffusion
 					irrev -> heating_diss[j]
 					// molecular + turbulent heat transport
@@ -221,7 +222,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 		if (i < NO_OF_CONDENSED_CONSTITUENTS && config_info -> assume_lte == 0)
 		{
 			// The constituent velocity has already been calculated.
-		    scalar_times_vector_h(&state -> condensed_density_temperatures[i*NO_OF_SCALARS], state -> wind, diagnostics -> flux_density, grid);
+		    scalar_times_vector_h(&state -> condensed_density_temperatures[scalar_shift_index], state -> wind, diagnostics -> flux_density, grid);
 		    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			// adding the tendencies in all grid boxes
 			#pragma omp parallel for private(layer_index, h_index, c_v_cond)
@@ -231,17 +232,17 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 				h_index = j - layer_index*NO_OF_SCALARS_H;
 				if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 				{
-					c_v_cond = ret_c_v_cond(i, 0, state -> condensed_density_temperatures[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + state -> rho[i*NO_OF_SCALARS + j]));
-					state_tendency -> condensed_density_temperatures[i*NO_OF_SCALARS + j]
-					= old_weight[i]*state_tendency -> condensed_density_temperatures[i*NO_OF_SCALARS + j]
+					c_v_cond = ret_c_v_cond(i, 0, state -> condensed_density_temperatures[scalar_shift_index + j]/(EPSILON_SECURITY + state -> rho[scalar_shift_index + j]));
+					state_tendency -> condensed_density_temperatures[scalar_shift_index + j]
+					= old_weight[i]*state_tendency -> condensed_density_temperatures[scalar_shift_index + j]
 					+ new_weight[i]*(
 					// the advection
 					-diagnostics -> flux_density_divv[j]
 					// the source terms
-					+ state -> rho[i*NO_OF_SCALARS + j]/(EPSILON_SECURITY + c_v_cond*density_total(state, j))
+					+ state -> rho[scalar_shift_index + j]/(EPSILON_SECURITY + c_v_cond*density_total(state, j))
 					*(irrev -> temperature_diffusion_heating[j] + irrev -> heating_diss[j] + forcings -> radiation_tendency[j])
-					+ 1/c_v_cond*irrev -> constituent_heat_source_rates[i*NO_OF_SCALARS + j]
-					+ state -> condensed_density_temperatures[i*NO_OF_SCALARS + j]*(irrev -> mass_source_rates[i*NO_OF_SCALARS + j]));
+					+ 1/c_v_cond*irrev -> constituent_heat_source_rates[scalar_shift_index + j]
+					+ state -> condensed_density_temperatures[scalar_shift_index + j]*(irrev -> mass_source_rates[scalar_shift_index + j]));
 				}
 			}
 		}
@@ -271,10 +272,11 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 	    config_info -> assume_lte,
 	    grid -> is_land,
 	    NO_OF_LAYERS);
-	    int layer_index, h_index;
+	    int layer_index, h_index, scalar_shift_index;
 	    // loop over all constituents
 		for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
 		{
+			scalar_shift_index = i*NO_OF_SCALARS;
 			// the main gaseous constituent has no source rates
 			if (i != NO_OF_CONDENSED_CONSTITUENTS)
 			{
@@ -288,12 +290,12 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 					{
 						if (i < NO_OF_CONDENSED_CONSTITUENTS)
 						{
-							state -> rho[i*NO_OF_SCALARS + j] = state -> rho[i*NO_OF_SCALARS + j] + delta_t*irrev -> mass_source_rates[i*NO_OF_SCALARS + j];
+							state -> rho[scalar_shift_index + j] = state -> rho[scalar_shift_index + j] + delta_t*irrev -> mass_source_rates[scalar_shift_index + j];
 						}
 						// for the gaseous constituents (apart from the main one), an index shift is necessary
 						else
 						{
-							state -> rho[i*NO_OF_SCALARS + j] = state -> rho[i*NO_OF_SCALARS + j] + delta_t*irrev -> mass_source_rates[(i - 1)*NO_OF_SCALARS + j];
+							state -> rho[scalar_shift_index + j] = state -> rho[scalar_shift_index + j] + delta_t*irrev -> mass_source_rates[(i - 1)*NO_OF_SCALARS + j];
 						}
 					}
 				}
