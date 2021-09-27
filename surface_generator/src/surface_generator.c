@@ -189,8 +189,8 @@ int main(int argc, char *argv[])
 	printf("maximum orography: %lf m\n", oro[find_max_index(oro, NO_OF_SCALARS_H)]);
 	
 	// surface properties other than orography
-	double c_v_water = 4184.0;
-	double c_v_soil = 830.0;
+	double c_p_water = 4184.0;
+	double c_p_soil = 830.0;
 	double albedo_water = 0.06;
 	double albedo_soil = 0.12;
 	double density_water = 1024.0;
@@ -200,13 +200,13 @@ int main(int argc, char *argv[])
 	{
 		// ocean
 		sfc_albedo[i] = albedo_water;
-		sfc_rho_c[i] = density_water*c_v_water;
+		sfc_rho_c[i] = density_water*c_p_water;
 		if (is_land[i] == 1)
 		{
 			// setting the land surface albedo to 0.12 (compare Zdunkowski,Trautmann & Bott:
 			// Radiation in the Atmosphere,2007,p. 444)
 			sfc_albedo[i] = albedo_soil;
-			sfc_rho_c[i] = density_soil*c_v_soil;
+			sfc_rho_c[i] = density_soil*c_p_soil;
 		}
 	}
 	int sfc_albedo_id, sfc_rho_c_id;
