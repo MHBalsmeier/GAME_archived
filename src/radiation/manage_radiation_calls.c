@@ -70,7 +70,6 @@ int call_radiation(State *state, Soil *soil, Grid *grid, Dualgrid *dualgrid, Sta
 		remap_to_original_scalar_h(radiation -> sfc_lw_out, forcings -> sfc_lw_out, rad_block_index);
 		free(radiation);
 	}
-	printf("%lf\n", forcings -> sfc_lw_out[1000]);
 	printf("Update of radiative fluxes completed.\n");
 	return 0;
 }
