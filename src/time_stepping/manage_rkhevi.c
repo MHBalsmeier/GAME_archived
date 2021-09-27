@@ -13,14 +13,13 @@ This file manages the RKHEVI time stepping.
 #include "time_stepping.h"
 #include "../radiation/radiation.h"
 #include "../thermodynamics/thermodynamics.h"
-#include "../waves/waves.h"
 #include "../io/io.h"
 #include "../soil/soil.h"
 #include <geos95.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Waves *waves, Grid *grid, Dualgrid *dualgrid, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, double delta_t, double time_coordinate, int total_step_counter)
+int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Dualgrid *dualgrid, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, double delta_t, double time_coordinate, int total_step_counter)
 {
 	// slow terms (diffusion) update switch
 	int slow_update_bool = 0;
@@ -38,12 +37,6 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Waves *waves, 
     if (config_info -> rad_on == 1)
     {
     	soil_interaction(soil, diagnostics, forcings, grid, delta_t);
-    }
-    
-    // wave component
-    if (config_info -> waves_on == 1)
-    {
-    	update_waves(waves, diagnostics, grid);
     }
     
 	/*

@@ -100,7 +100,6 @@ int main(int argc, char *argv[])
 	config_info -> explicit_boundary_layer = strtod(argv[35], NULL);
 	config_info -> tracer_diff_h = strtod(argv[36], NULL);
 	config_info -> tracer_diff_v = strtod(argv[37], NULL);
-	config_info -> waves_on = strtod(argv[38], NULL);
 	
 	/*
 	Checking user input for correctness:
@@ -504,7 +503,6 @@ int main(int argc, char *argv[])
     	}
     }
     Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
-    Waves *waves = calloc(1, sizeof(Waves));
 	temperature_diagnostics(state_old, grid, diagnostics);
 	inner_product(state_old -> wind, state_old -> wind, diagnostics -> e_kin, grid);
     Forcings *forcings = calloc(1, sizeof(Forcings));
@@ -577,7 +575,7 @@ int main(int argc, char *argv[])
     	}
     	
     	// Time step integration.
-    	manage_rkhevi(state_old, state_new, soil, waves, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
+    	manage_rkhevi(state_old, state_new, soil, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
     	// This switch can be set to zero now and remains there.
     	config_info -> totally_first_step_bool = 0;
 		time_step_counter += 1;	
@@ -691,7 +689,6 @@ int main(int argc, char *argv[])
     free(config_info);
     free(io_config);
     free(diagnostics);
-    free(waves);
     free(forcings);
     free(state_tendency);
     free(grid);
