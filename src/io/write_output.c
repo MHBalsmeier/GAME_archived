@@ -40,7 +40,7 @@ double calc_std_dev(double [], int);
 int global_scalar_integrator(Scalar_field, Grid *, double *);
 double pseudopotential(State *, Grid *, int);
 
-int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Io_config *io_config, Config_info *config_info)
+int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Io_config *io_config, Config_info *config_info, Soil *soil)
 {
 	printf("Writing output ...\n");
 	// Diagnostics, forcings and radiation are primarily handed over for checks.
@@ -112,16 +112,23 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 				vector_to_minimize[j] = fabs(grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i] + 2 - grid -> z_scalar[i + j*NO_OF_SCALARS_H]);
 			}
 			closest_index = find_min_index(vector_to_minimize, NO_OF_LAYERS);
-			second_closest_index = closest_index - 1;
-			if (grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] > grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i] + 2 && closest_index < NO_OF_LAYERS - 1)
-			{
-				second_closest_index = closest_index + 1;
-			}
-		    delta_z_temp = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i] + 2 - grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H];
 		    temp_closest = diagnostics -> temperature_gas[closest_index*NO_OF_SCALARS_H + i];
-		    temp_second_closest = diagnostics -> temperature_gas[second_closest_index*NO_OF_SCALARS_H + i];
-		    // calculating the vertical temperature gradient that will be used for the extrapolation
-		    temperature_gradient = (temp_closest - temp_second_closest)/(grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] - grid -> z_scalar[i + second_closest_index*NO_OF_SCALARS_H]);
+			delta_z_temp = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i] + 2 - grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H];
+		    if (config_info -> rad_on == 0)
+			{
+				second_closest_index = closest_index - 1;
+				if (grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] > grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i] + 2 && closest_index < NO_OF_LAYERS - 1)
+				{
+					second_closest_index = closest_index + 1;
+				}
+				temp_second_closest = diagnostics -> temperature_gas[second_closest_index*NO_OF_SCALARS_H + i];
+				// calculating the vertical temperature gradient that will be used for the extrapolation
+				temperature_gradient = (temp_closest - temp_second_closest)/(grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] - grid -> z_scalar[i + second_closest_index*NO_OF_SCALARS_H]);
+		    }
+		    else
+		    {
+		    	temperature_gradient = (temp_closest - soil -> temperature[i])/(grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]);
+		    }
 		    // performing the interpolation / extrapolation to two meters above the surface
 		    t2[i] = temp_closest + delta_z_temp*temperature_gradient;
 		    
