@@ -203,7 +203,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 					+ irrev -> temperature_diffusion_heating[j]
 					// radiation
 					+ forcings -> radiation_tendency[j]
-					// this has to be divided by the c_p*exner
+					// this has to be divided by c_p*exner
 					)/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j]))
 					// phase transitions
 					+ latent_heating_weight*tracer_heating
