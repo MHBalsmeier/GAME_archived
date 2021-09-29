@@ -11,7 +11,7 @@ In this file, the explicit component of the pressure gradient acceleration is ma
 #include "../settings.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "../thermodynamics/thermodynamics.h"
+#include "../thermodynamics.h"
 #include <omp.h>
 #include "../spatial_operators/spatial_operators.h"
 

@@ -26,7 +26,7 @@ src/spatial_operators/gradient_operators.c
 src/spatial_operators/inner_product.c
 src/spatial_operators/averaging.c
 src/spatial_operators/linear_combine_two_states.c
-src/thermodynamics/thermodynamics.c
+src/thermodynamics.c
 src/io/init_state_setter.c
 src/io/write_output.c
 src/io/set_grid_props_and_dt.c
@@ -34,7 +34,7 @@ src/io/spatial_ops_for_output.c
 src/subgrid_scale/effective_diff_coeffs.c
 src/subgrid_scale/gravity_waves.c
 src/subgrid_scale/convection.c
-src/soil/soil.c
+src/soil.c
 src/radiation/manage_radiation_calls.c
 src/radiation/held_suar.c
 src/radiation/rterrtmgp_coupler.f90

@@ -15,10 +15,9 @@ The main organizes the model, manages the time stepping, calls model output, col
 #include "enum_and_typedefs.h"
 #include "io/io.h"
 #include "spatial_operators/spatial_operators.h"
-#include "thermodynamics/thermodynamics.h"
 #include "radiation/radiation.h"
 #include "time_stepping/time_stepping.h"
-#include "soil/soil.h"
+#include "soil.h"
 
 int main(int argc, char *argv[])
 {

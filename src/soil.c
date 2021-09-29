@@ -7,7 +7,7 @@ Github repository: https://github.com/OpenNWP/GAME
 This file contains the soil component of GAME.
 */
 
-#include "../enum_and_typedefs.h"
+#include "enum_and_typedefs.h"
 #include <stdio.h>
 
 // some for now constant parameters

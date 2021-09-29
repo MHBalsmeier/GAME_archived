@@ -10,7 +10,7 @@ In this file, diffusion coefficients, including Eddy viscosities, are computed.
 #include "../enum_and_typedefs.h"
 #include "../settings.h"
 #include "../spatial_operators/spatial_operators.h"
-#include "../thermodynamics/thermodynamics.h"
+#include "../thermodynamics.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>

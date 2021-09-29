@@ -12,9 +12,9 @@ This file manages the RKHEVI time stepping.
 #include "../spatial_operators/spatial_operators.h"
 #include "time_stepping.h"
 #include "../radiation/radiation.h"
-#include "../thermodynamics/thermodynamics.h"
+#include "../thermodynamics.h"
 #include "../io/io.h"
-#include "../soil/soil.h"
+#include "../soil.h"
 #include <geos95.h>
 #include <stdlib.h>
 #include <stdio.h>

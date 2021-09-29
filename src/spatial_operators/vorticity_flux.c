@@ -8,7 +8,7 @@ In this file, the vorticity flux term of the Lamb tansformation gets computed.
 */
 
 #include "../enum_and_typedefs.h"
-#include "../thermodynamics/thermodynamics.h"
+#include "../thermodynamics.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "geos95.h"

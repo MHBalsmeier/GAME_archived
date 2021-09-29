@@ -11,7 +11,7 @@ This file contains the implicit vertical solvers.
 #include <stdio.h>
 #include "../enum_and_typedefs.h"
 #include "../settings.h"
-#include "../thermodynamics/thermodynamics.h"
+#include "../thermodynamics.h"
 #include "../spatial_operators/spatial_operators.h"
 #include "atmostracers.h"
 

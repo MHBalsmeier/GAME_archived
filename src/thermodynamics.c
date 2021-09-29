@@ -11,9 +11,9 @@ v:	water vapour
 h:	humid
 */
 
-#include "../enum_and_typedefs.h"
-#include "../settings.h"
-#include "../spatial_operators/spatial_operators.h"
+#include "enum_and_typedefs.h"
+#include "settings.h"
+#include "spatial_operators/spatial_operators.h"
 #include "thermodynamics.h"
 #include <stdio.h>
 #include <stdlib.h>

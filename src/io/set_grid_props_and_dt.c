@@ -13,7 +13,6 @@ This file contains functions for reading the grid properties as well as setting 
 #include "geos95.h"
 #include "../enum_and_typedefs.h"
 #include "../spatial_operators/spatial_operators.h"
-#include "../thermodynamics/thermodynamics.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 

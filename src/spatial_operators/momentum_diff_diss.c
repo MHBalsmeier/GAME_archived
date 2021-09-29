@@ -10,7 +10,7 @@ The momentum diffusion acceleration is computed here (apart from the diffusion c
 #include "../enum_and_typedefs.h"
 #include "spatial_operators.h"
 #include "../subgrid_scale/subgrid_scale.h"
-#include "../thermodynamics/thermodynamics.h"
+#include "../thermodynamics.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
