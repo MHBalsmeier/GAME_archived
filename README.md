@@ -1,3 +1,6 @@
+
+# GAME
+
 The Geophysical Fluids Modeling Framework (GAME) is a non-hydrostatic hexagonal C-grid dynamical core with the possibility to advect a variable number of constituents. For radiation, it is coupled to RTE+RRTMGP.
 
 ## Overview
