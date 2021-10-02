@@ -363,7 +363,7 @@ for i in range(int((run_span - start_time_since_init)/plot_interval) + 1):
 		if scope == "WORLD":
 			cbar = plt.colorbar(cf, fraction = 0.02, pad = 0.1, aspect = 80, orientation = "horizontal", ticks = np.arange(total_min, total_max + color_bar_dist, color_bar_dist));
 		else:
-			cbar = plt.colorbar(cf, fraction = 0.02, pad = 0.05, aspect = 80, orientation = "horizontal", ticks = np.arange(total_min, total_max + color_bar_dist, color_bar_dist));
+			cbar = plt.colorbar(cf, fraction = 0.02, pad = 0.1, aspect = 80, orientation = "horizontal", ticks = np.arange(total_min, total_max + color_bar_dist, color_bar_dist));
 		cbar.ax.tick_params(labelsize = 12);
 		cbar.set_label(unit_string, fontsize = 16);
 	else:
