@@ -58,7 +58,7 @@ Everything is easy and quick to install.
 * eccodes library (installation manual: https://gist.github.com/MHBalsmeier/a01ad4e07ecf467c90fad2ac7719844a)
 * [geos95](https://github.com/OpenNWP/geos95)
 * [atmostracers](https://github.com/OpenNWP/atmostracers)
-* Clone the DCMIP2016 repository: git clone https://github.com/ClimateGlobalChange/DCMIP2016.git
+* Clone the DCMIP2016 repository: `git clone https://github.com/ClimateGlobalChange/DCMIP2016.git`
 * Clone our fork of the RTE+RRTMGP repository: `git clone https://github.com/OpenNWP/rte-rrtmgp`
 * Python and pip: `sudo apt-get install python3 python3-pip`
 * Python package global-land-mask (`pip3 install global-land-mask`)
@@ -82,7 +82,7 @@ The following packages are additionally required if you want to make use of the 
 
 ### Build and install
 
-If you want to use radiation, modify the spectral properties filenames in the file src/radiation/rterrtmgp_coupler.f90. Then run
+If you want to use radiation, modify the spectral properties filenames in the file `src/radiation/rterrtmgp_coupler.f90`. Then run
 
 	./compile.sh
 
