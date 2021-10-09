@@ -64,6 +64,33 @@
       \verb https://github.com/MHBalsmeier/atmostracers
       \endverb
     \endentry
+    \entry{kompendium}{book}{}
+      \name{author}{1}{}{%
+        {{hash=28c5cd8780b41f05e52c6535be65b17e}{%
+           family={Balsmeier},
+           familyi={B\bibinitperiod},
+           given={M.\bibnamedelimi H.},
+           giveni={M\bibinitperiod\bibinitdelim H\bibinitperiod}}}%
+      }
+      \strng{namehash}{28c5cd8780b41f05e52c6535be65b17e}
+      \strng{fullhash}{28c5cd8780b41f05e52c6535be65b17e}
+      \strng{bibnamehash}{28c5cd8780b41f05e52c6535be65b17e}
+      \strng{authorbibnamehash}{28c5cd8780b41f05e52c6535be65b17e}
+      \strng{authornamehash}{28c5cd8780b41f05e52c6535be65b17e}
+      \strng{authorfullhash}{28c5cd8780b41f05e52c6535be65b17e}
+      \field{sortinit}{B}
+      \field{sortinithash}{8de16967003c7207dae369d874f1456e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Kompendium Theoretische Meteorologie}
+      \field{year}{2021}
+      \verb{urlraw}
+      \verb https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
+      \endverb
+      \verb{url}
+      \verb https://raw.githubusercontent.com/MHBalsmeier/kompendium/master/kompendium.pdf
+      \endverb
+    \endentry
     \entry{Du2003}{article}{}
       \name{author}{3}{}{%
         {{hash=3f79fb13c57a91bb57a69f1cd97b6cc8}{%
