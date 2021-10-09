@@ -216,8 +216,8 @@ The vertical grid structure is determined by the following properties:
 
 \begin{itemize}
 \item the height of the top of the atmosphere, specified via the parameter \texttt{TOA}
-\item the number of layers, specified via the parameter \texttt{NUMBER\_OF\_LAYERS} $N_L$
-\item the number of layers following the orography, specified via the parameter \texttt{NUMBER\_OF\_ORO\_LAYERS} $N_O$
+\item the number of layers, specified via the parameter \texttt{NO\_OF\_LAYERS} $N_L$
+\item the number of layers following the orography, specified via the parameter \texttt{NO\_OF\_ORO\_LAYERS} $N_O$
 \item the stretching parameter $\beta$, which can be set in the run script
 \item the orography, specified via the parameter \texttt{ORO\_ID}
 \end{itemize}
@@ -315,7 +315,7 @@ The surface generator resides in the directory \texttt{surface\_generator} and i
 \end{table}
 \renewcommand{\arraystretch}{1}
 
-A new test state can be generated with the code in the directory \texttt{test\_generator/src}. Therefore, firstly change the parameters \texttt{RES\_ID}, \texttt{NUMBER\_OF\_LAYERS} and \texttt{NUMBER\_OF\_ORO\_LAYERS} in the file \texttt{test\_generator.c}. Then compile by sourcing the file \texttt{compile.sh} before executing the file \texttt{run.sh} with the specific \texttt{test\_id}. Tab. \ref{tab:test_id_definition} shows the definition of the test IDs.
+A new test state can be generated with the code in the directory \texttt{test\_generator/src}. Therefore, firstly change the parameters \texttt{RES\_ID}, \texttt{NO\_OF\_LAYERS} and \texttt{NO\_OF\_ORO\_LAYERS} in the file \texttt{test\_generator.c}. Then compile by sourcing the file \texttt{compile.sh} before executing the file \texttt{run.sh} with the specific \texttt{test\_id}. Tab. \ref{tab:test_id_definition} shows the definition of the test IDs.
 
 The so-called \textit{full width at half maximum (FWHM)} is the width of a peak at half its maximum height. For a normal distribution, one finds
 %
