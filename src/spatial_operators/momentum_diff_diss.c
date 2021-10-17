@@ -102,7 +102,9 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		if (layer_index == NO_OF_LAYERS)
 		{
 			diagnostics -> dv_hdz[i] = state -> wind[NO_OF_SCALARS_H + h_index + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER]
-			/grid -> z_vector[NO_OF_SCALARS_H + h_index + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER];
+			/(grid -> z_vector[NO_OF_SCALARS_H + h_index + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER]
+			- 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[h_index]]
+			+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[h_index]]));
 		}
 		// inner layers
 		else if (layer_index >= 1)
