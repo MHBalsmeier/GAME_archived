@@ -141,7 +141,7 @@ Vector_field u_at_edge;
 Vector_field v_at_edge;
 Scalar_field u_at_cell;
 Scalar_field v_at_cell;
-double prep_for_vert_diffusion[NO_OF_H_VECTORS - NO_OF_VECTORS_H];
+double dv_hdz[NO_OF_H_VECTORS + NO_OF_VECTORS_H];
 } Diagnostics;
 
 // needed for the radiation calculation
@@ -213,7 +213,7 @@ double constituent_heat_source_rates[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS]
 Scalar_field viscosity_div_eff;
 Vector_field viscosity_curl_eff_rhombi;
 double viscosity_curl_eff_triangles[NO_OF_DUAL_V_VECTORS];
-double vert_hor_viscosity_eff[NO_OF_H_VECTORS - NO_OF_VECTORS_H];
+double vert_hor_viscosity_eff[NO_OF_H_VECTORS + NO_OF_VECTORS_H];
 Scalar_field tke;
 } Irreversible_quantities;
 

@@ -221,12 +221,24 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 		}
 		
 		// multiplying by the density (averaged to the half level edge)
-		irrev -> vert_hor_viscosity_eff[i] = 
+		irrev -> vert_hor_viscosity_eff[i + NO_OF_VECTORS_H] = 
 		0.25*(density_gas(state, scalar_base_index + grid -> from_index[h_index])
 		+ density_gas(state, scalar_base_index + grid -> to_index[h_index])
 		+ density_gas(state, (layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index])
 		+ density_gas(state, (layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]))
 		*mom_diff_coeff;
+	}
+	// for now, we set the vertical diffusion coefficient at the TOA equal to the vertical diffusion coefficient in the layer below
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+	{
+		irrev -> vert_hor_viscosity_eff[i] = irrev -> vert_hor_viscosity_eff[i + NO_OF_VECTORS_H];
+	}
+	// for now, we set the vertical diffusion coefficient at the surface equal to the vertical diffusion coefficient in the layer above
+	#pragma omp parallel for	
+	for (int i = NO_OF_H_VECTORS; i < NO_OF_H_VECTORS + NO_OF_VECTORS_H; ++i)
+	{
+		irrev -> vert_hor_viscosity_eff[i] = irrev -> vert_hor_viscosity_eff[i - NO_OF_VECTORS_H];
 	}
 	return 0;
 }
