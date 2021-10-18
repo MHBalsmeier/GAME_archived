@@ -91,28 +91,29 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	
 	// 1.) vertical diffusion of horizontal velocity
 	// ---------------------------------------------
-	int layer_index, h_index;
+	int layer_index, h_index, vector_index;
 	// calculating the vertical gradient of the horizontal velocity at half levels
-	#pragma omp parallel for private(layer_index, h_index)
+	#pragma omp parallel for private(layer_index, h_index, vector_index)
 	for (int i = 0; i < NO_OF_H_VECTORS + NO_OF_VECTORS_H; ++i)
 	{
 		layer_index = i/NO_OF_VECTORS_H;
 		h_index = i - layer_index*NO_OF_VECTORS_H;
+		vector_index = NO_OF_SCALARS_H + h_index + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER;
 		// at the surface
 		if (layer_index == NO_OF_LAYERS)
 		{
-			diagnostics -> dv_hdz[i] = state -> wind[NO_OF_SCALARS_H + h_index + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER]
-			/(grid -> z_vector[NO_OF_SCALARS_H + h_index + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER]
+			diagnostics -> dv_hdz[i] = state -> wind[vector_index]
+			/(grid -> z_vector[vector_index]
 			- 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[h_index]]
 			+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[h_index]]));
 		}
 		// inner layers
 		else if (layer_index >= 1)
 		{
-			diagnostics -> dv_hdz[i] = (state -> wind[NO_OF_SCALARS_H + h_index + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER]
-			- state -> wind[NO_OF_SCALARS_H + h_index + layer_index*NO_OF_VECTORS_PER_LAYER])
-			/(grid -> z_vector[NO_OF_SCALARS_H + h_index + (layer_index - 1)*NO_OF_VECTORS_PER_LAYER]
-			- grid -> z_vector[NO_OF_SCALARS_H + h_index + layer_index*NO_OF_VECTORS_PER_LAYER]);
+			diagnostics -> dv_hdz[i] = (state -> wind[vector_index]
+			- state -> wind[vector_index + NO_OF_VECTORS_PER_LAYER])
+			/(grid -> z_vector[vector_index]
+			- grid -> z_vector[vector_index + NO_OF_VECTORS_PER_LAYER]);
 		}
 		// the second derivative is assumed to vanish at the TOA
 		else if (layer_index == 1)
@@ -123,7 +124,6 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	// calculating the respective diffusion coefficient
 	vert_hor_mom_viscosity(state, irrev, diagnostics, config_info, grid, delta_t);
 	// now, the second derivative needs to be taken
-	int vector_index;
 	double z_upper, z_lower, delta_z;
 	#pragma omp parallel for private(layer_index, h_index, vector_index, z_upper, z_lower, delta_z)
 	for (int i = 0; i < NO_OF_H_VECTORS; ++i)
