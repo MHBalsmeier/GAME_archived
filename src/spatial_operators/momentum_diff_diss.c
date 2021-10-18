@@ -94,7 +94,7 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	int layer_index, h_index, vector_index;
 	// calculating the vertical gradient of the horizontal velocity at half levels
 	#pragma omp parallel for private(layer_index, h_index, vector_index)
-	for (int i = 0; i < NO_OF_H_VECTORS + NO_OF_VECTORS_H; ++i)
+	for (int i = NO_OF_VECTORS_H; i < NO_OF_H_VECTORS + NO_OF_VECTORS_H; ++i)
 	{
 		layer_index = i/NO_OF_VECTORS_H;
 		h_index = i - layer_index*NO_OF_VECTORS_H;
