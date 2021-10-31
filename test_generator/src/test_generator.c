@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
 	vorticity_flux(diagnostics -> flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid, dualgrid);
 	free(dualgrid);
 	// Kinetic energy is prepared for the gradient term of the Lamb transformation.
-	inner_product(state -> wind, state -> wind, diagnostics -> e_kin, grid);
+	inner_product(state -> wind, state -> wind, diagnostics -> v_squared, grid);
     // density is determined out of the hydrostatic equation
     int scalar_index;
     double b, c;
@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
 				b = -0.5*state -> exner_pert[scalar_index + NO_OF_SCALARS_H]/temperature[scalar_index + NO_OF_SCALARS_H]
 				*(temperature[scalar_index] - temperature[scalar_index + NO_OF_SCALARS_H]
 				+ 2/spec_heat_capacities_p_gas(0)*(grid -> gravity_potential[scalar_index] - grid -> gravity_potential[scalar_index + NO_OF_SCALARS_H]
-				+ 0.5*diagnostics -> e_kin[scalar_index] - 0.5*diagnostics -> e_kin[scalar_index + NO_OF_SCALARS_H]
+				+ 0.5*diagnostics -> v_squared[scalar_index] - 0.5*diagnostics -> v_squared[scalar_index + NO_OF_SCALARS_H]
 				- (grid -> z_scalar[scalar_index] - grid -> z_scalar[scalar_index + NO_OF_SCALARS_H])*forcings -> pot_vort_tend[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER]));
 				c = pow(state -> exner_pert[scalar_index + NO_OF_SCALARS_H], 2)*temperature[scalar_index]/temperature[scalar_index + NO_OF_SCALARS_H];
 				state -> exner_pert[scalar_index] = b + pow((pow(b, 2) + c), 0.5);
