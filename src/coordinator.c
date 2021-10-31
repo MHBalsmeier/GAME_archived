@@ -504,7 +504,7 @@ int main(int argc, char *argv[])
     }
     Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
 	temperature_diagnostics(state_old, grid, diagnostics);
-	inner_product(state_old -> wind, state_old -> wind, diagnostics -> e_kin, grid);
+	inner_product(state_old -> wind, state_old -> wind, diagnostics -> v_squared, grid);
     Forcings *forcings = calloc(1, sizeof(Forcings));
 	Soil *soil = calloc(1, sizeof(Soil));
 	init_soil(soil, diagnostics);

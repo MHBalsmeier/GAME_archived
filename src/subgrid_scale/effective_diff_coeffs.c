@@ -380,7 +380,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 			// decay through molecular dissipation
 			- decay_constant*irrev -> tke[i]
 			// production through turbulence generation in the boundary layer
-			+ production_rate*diagnostics -> e_kin[i]);
+			+ production_rate*diagnostics -> v_squared[i]);
 			if (irrev -> tke[i] < 0)
 			{
 				irrev -> tke[i] = 0;

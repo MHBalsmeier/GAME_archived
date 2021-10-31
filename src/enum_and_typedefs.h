@@ -132,7 +132,7 @@ Curl_field rel_vort;
 Curl_field pot_vort;
 Scalar_field temperature_gas;
 Scalar_field c_g_p_field;
-Scalar_field e_kin;
+Scalar_field v_squared;
 Scalar_field wind_divv;
 Vector_field curl_of_vorticity;
 Scalar_field scalar_field_placeholder;
@@ -164,7 +164,7 @@ typedef struct forcings {
 Vector_field pgrad_acc_old;
 Vector_field pressure_gradient_acc_neg_nl;
 Vector_field pressure_gradient_acc_neg_l;
-Vector_field e_kin_grad;
+Vector_field v_squared_grad;
 Vector_field pot_vort_tend;
 double sfc_sw_in[NO_OF_SCALARS_H];
 double sfc_lw_out[NO_OF_SCALARS_H];
