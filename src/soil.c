@@ -8,26 +8,31 @@ This file contains the soil component of GAME.
 */
 
 #include "enum_and_typedefs.h"
+#include "thermodynamics.h"
+#include "atmostracers.h"
+#include "settings.h"
 #include <stdio.h>
 
 // some for now constant parameters
 const double thickness = 1;
-const double heat_trans_coeff = 50;
 const double t_min = 273.15 - 30;
 
-int soil_interaction(Soil *soil, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, double delta_t)
+int soil_interaction(State *state, Soil *soil, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, double delta_t)
 {
 	/*
 	This function computes the interaction of the dynamical core with the soil.
 	*/
 	
+	double flux_resistance;
 	// loop over all horizontal cells
-	#pragma omp parallel for
+	#pragma omp parallel for private(flux_resistance)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// sensible heat flux density through the surface
-		soil -> power_flux_density_sensible[i] = heat_trans_coeff*(diagnostics -> temperature_gas[NO_OF_SCALARS - NO_OF_SCALARS_H + i] - soil -> temperature[i]);
-		
+		flux_resistance = sfc_flux_resistance(pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + i], 0.5), grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + i]
+		- grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i], 0.02);
+		soil -> power_flux_density_sensible[i] = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i]
+		*spec_heat_capacities_v_gas(0)*(diagnostics -> temperature_gas[NO_OF_SCALARS - NO_OF_SCALARS_H + i] - soil -> temperature[i])/flux_resistance;
 		// summing up the power densities and transforming into a temperature change
 		soil -> temperature[i]
 		// sensible heat flux
