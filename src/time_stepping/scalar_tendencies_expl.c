@@ -28,7 +28,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 	*/
 	// declaring needed variables
     int h_index, layer_index, diff_switch, scalar_shift_index, scalar_index;
-    double c_v_cond, tracer_heating, latent_heating_weight, density_total_weight;
+    double c_v_cond_value, tracer_heating, latent_heating_weight, density_total_weight;
     
     // determining the RK weights
     double old_weight[NO_OF_CONSTITUENTS];
@@ -228,7 +228,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 		    scalar_times_vector_h(&state -> condensed_density_temperatures[scalar_shift_index], state -> wind, diagnostics -> flux_density, grid);
 		    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			// adding the tendencies in all grid boxes
-			#pragma omp parallel for private(layer_index, h_index, c_v_cond, scalar_index)
+			#pragma omp parallel for private(layer_index, h_index, c_v_cond_value, scalar_index)
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
 				layer_index = j/NO_OF_SCALARS_H;
@@ -236,16 +236,16 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 				if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 				{
 					scalar_index = scalar_shift_index + j;
-					c_v_cond = ret_c_v_cond(i, 0, state -> condensed_density_temperatures[scalar_index]/(EPSILON_SECURITY + state -> rho[scalar_index]));
+					c_v_cond_value = c_v_cond(i, 0, state -> condensed_density_temperatures[scalar_index]/(EPSILON_SECURITY + state -> rho[scalar_index]));
 					state_tendency -> condensed_density_temperatures[scalar_index]
 					= old_weight[i]*state_tendency -> condensed_density_temperatures[scalar_index]
 					+ new_weight[i]*(
 					// the advection
 					-diagnostics -> flux_density_divv[j]
 					// the source terms
-					+ state -> rho[scalar_index]/(EPSILON_SECURITY + c_v_cond*density_total(state, j))
+					+ state -> rho[scalar_index]/(EPSILON_SECURITY + c_v_cond_value*density_total(state, j))
 					*(irrev -> temperature_diffusion_heating[j] + irrev -> heating_diss[j] + forcings -> radiation_tendency[j])
-					+ 1/c_v_cond*irrev -> constituent_heat_source_rates[scalar_index]
+					+ 1/c_v_cond_value*irrev -> constituent_heat_source_rates[scalar_index]
 					+ state -> condensed_density_temperatures[scalar_index]*(irrev -> mass_source_rates[scalar_index]));
 				}
 			}
