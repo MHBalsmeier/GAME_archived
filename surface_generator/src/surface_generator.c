@@ -192,6 +192,8 @@ int main(int argc, char *argv[])
 	double c_p_water = 4184.0;
 	double c_p_soil = 830.0;
 	double albedo_water = 0.06;
+	// setting the land surface albedo to 0.12 (compare Zdunkowski, Trautmann & Bott:
+	// Radiation in the Atmosphere, 2007, p. 444)
 	double albedo_soil = 0.12;
 	double density_water = 1024.0;
 	double density_soil = 1442.0;
@@ -201,10 +203,9 @@ int main(int argc, char *argv[])
 		// ocean
 		sfc_albedo[i] = albedo_water;
 		sfc_rho_c[i] = density_water*c_p_water;
+		// land
 		if (is_land[i] == 1)
 		{
-			// setting the land surface albedo to 0.12 (compare Zdunkowski,Trautmann & Bott:
-			// Radiation in the Atmosphere,2007,p. 444)
 			sfc_albedo[i] = albedo_soil;
 			sfc_rho_c[i] = density_soil*c_p_soil;
 		}
@@ -222,7 +223,7 @@ int main(int argc, char *argv[])
 	  ERR(retval);
 	if ((retval = nc_def_var(ncid, "sfc_rho_c", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_rho_c_id)))
 	  ERR(retval);
-	if ((retval = nc_put_att_text(ncid, sfc_rho_c_id, "units", strlen("J(K*m**3)"), "J/(K*m**3)")))
+	if ((retval = nc_put_att_text(ncid, sfc_rho_c_id, "units", strlen("J/(K*m**3)"), "J/(K*m**3)")))
 	  ERR(retval);
 	if ((retval = nc_def_var(ncid, "is_land", NC_INT, 1, &scalar_h_dimid, &is_land_id)))
 	  ERR(retval);

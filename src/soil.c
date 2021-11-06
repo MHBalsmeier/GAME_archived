@@ -13,9 +13,8 @@ This file contains the soil component of GAME.
 #include "settings.h"
 #include <stdio.h>
 
-// some for now constant parameters
+// one for now constant parameters
 const double thickness = 1;
-const double t_min = 273.15 - 30;
 
 int soil_interaction(State *state, Soil *soil, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, double delta_t)
 {
@@ -42,13 +41,7 @@ int soil_interaction(State *state, Soil *soil, Diagnostics *diagnostics, Forcing
 		// longwave outbound radiation
 		- forcings -> sfc_lw_out[i])
 		/(thickness*grid -> sfc_rho_c[i])*delta_t;
-		// clipping too low values
-		if (soil -> temperature[i] < t_min)
-		{
-			soil -> temperature[i] = t_min;
-		}
 	}
-		
 	return 0;
 }
 
@@ -64,7 +57,6 @@ int init_soil(Soil *soil, Diagnostics *diagnostics)
 		// setting the soil temperature equal to the temperature in the lowest layer
 		soil -> temperature[i] = diagnostics -> temperature_gas[NO_OF_SCALARS - NO_OF_SCALARS_H + i];
 	}
-	
 	return 0;
 }
 

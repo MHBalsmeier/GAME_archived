@@ -392,6 +392,7 @@ int main(int argc, char *argv[])
     // Reading external data.
 	printf("Reading grid data ...\n");
     set_grid_properties(grid, dualgrid, GEO_PROP_FILE);
+    // If we have radiation turned on, we also need soil.
     if (config_info -> rad_on == 1)
     {
     	set_sfc_properties(grid, SFC_PROP_FILE);
