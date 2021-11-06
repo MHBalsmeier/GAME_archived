@@ -348,12 +348,11 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	// the decay time gets shorter for smaller mesh sizes
 	double decay_constant_sea = 1.0/e_folding_time_flat*pow(2, RES_ID - 5);
 	double decay_constant_land = 1.0/e_folding_time_rough*pow(2, RES_ID - 5);
-	int i;
-	double decay_constant;
 	// computing the advection
 	grad(irrev -> tke, diagnostics -> vector_field_placeholder, grid);
 	inner_product(diagnostics -> vector_field_placeholder, state -> wind, diagnostics -> scalar_field_placeholder, grid);
-	double production_rate;
+	int i;
+	double decay_constant, production_rate;
 	#pragma omp parallel for private(i, decay_constant, production_rate)
 	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
 	{
@@ -365,7 +364,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 			if (grid -> is_land[h_index] == 1 && grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index] <= 1000.0)
 			{
 				decay_constant = decay_constant_land;
-				production_rate = 0.5*decay_constant;
+				production_rate = decay_constant*pow(2, 5 - RES_ID);
 			}
 			else
 			{
@@ -380,7 +379,8 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 			// decay through molecular dissipation
 			- decay_constant*irrev -> tke[i]
 			// production through turbulence generation in the boundary layer
-			+ production_rate*diagnostics -> v_squared[i]);
+			+ production_rate*0.5*diagnostics -> v_squared[i]);
+			// clipping negative values which might occur through advection
 			if (irrev -> tke[i] < 0)
 			{
 				irrev -> tke[i] = 0;
