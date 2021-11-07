@@ -16,7 +16,7 @@ In this file, diffusion coefficients, including Eddy viscosities, are computed.
 #include <math.h>
 
 int tke_update(Irreversible_quantities *, double, State *, Diagnostics *, Grid *);
-double return_ver_hor_viscosity(double);
+double ver_hor_viscosity(double, double);
 
 int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
 {
@@ -186,21 +186,22 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 	grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H]
 	, 2)/delta_t;
 	int layer_index, h_index, scalar_base_index;
-	double mom_diff_coeff, molecuar_viscosity;
+	double mom_diff_coeff, molecuar_viscosity, delta_z;
 	// updating the TKE
 	tke_update(irrev, delta_t, state, diagnostics, grid);
 	// loop over horizontal vector points at half levels
-	#pragma omp parallel for private(layer_index, h_index, mom_diff_coeff, molecuar_viscosity, scalar_base_index)
+	#pragma omp parallel for private(layer_index, h_index, mom_diff_coeff, molecuar_viscosity, scalar_base_index, delta_z)
 	for (int i = 0; i < NO_OF_H_VECTORS - NO_OF_VECTORS_H; ++i)
 	{
 		layer_index = i/NO_OF_VECTORS_H;
 		h_index = i - layer_index*NO_OF_VECTORS_H;
 		scalar_base_index = layer_index*NO_OF_SCALARS_H;
 		// the turbulent component
-		mom_diff_coeff = 0.25*(return_ver_hor_viscosity(irrev -> tke[scalar_base_index + grid -> from_index[h_index]])
-		+ return_ver_hor_viscosity(irrev -> tke[scalar_base_index + grid -> to_index[h_index]])
-		+ return_ver_hor_viscosity(irrev -> tke[(layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]])
-		+ return_ver_hor_viscosity(irrev -> tke[(layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]));
+		delta_z = grid -> z_vector[0]/NO_OF_LAYERS;
+		mom_diff_coeff = 0.25*(ver_hor_viscosity(irrev -> tke[scalar_base_index + grid -> from_index[h_index]], delta_z)
+		+ ver_hor_viscosity(irrev -> tke[scalar_base_index + grid -> to_index[h_index]], delta_z)
+		+ ver_hor_viscosity(irrev -> tke[(layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]], delta_z)
+		+ ver_hor_viscosity(irrev -> tke[(layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]], delta_z));
 		// computing and adding the molecular viscosity
 		// the scalar variables need to be averaged to the vector points at half levels
 		calc_diffusion_coeff(0.25*(diagnostics -> temperature_gas[scalar_base_index + grid -> from_index[h_index]]
@@ -390,12 +391,12 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	return 0;
 }
 
-double return_ver_hor_viscosity(double tke)
+double ver_hor_viscosity(double tke, double delta_z)
 {
 	/*
 	This function returns the vertical kinematic Eddy viscosity as a function of the specific TKE.
 	*/
-	double prop_constant = 32*pow(2, -RES_ID)*0.5; // unit: m
+	double prop_constant = 0.11*delta_z*4*M_PI; // unit: m
 	double result = prop_constant*pow(tke, 0.5);
 	return result;
 }
