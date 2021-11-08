@@ -398,7 +398,7 @@ double ver_hor_viscosity(double tke, double delta_z)
 	*/
 	// the 0.1 is something like an aspect ratio, the rest is comparable to the horizontal Smagorinsky ansatz
 	double prop_constant = 0.01*0.11*delta_z*4*M_PI; // unit: m
-	double result = prop_constant*pow(tke, 0.5);
+	double result = prop_constant*pow(2*tke, 0.5);
 	return result;
 }
 
