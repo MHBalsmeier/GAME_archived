@@ -197,7 +197,8 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 		h_index = i - layer_index*NO_OF_VECTORS_H;
 		scalar_base_index = layer_index*NO_OF_SCALARS_H;
 		// the turbulent component
-		delta_z = grid -> z_vector[0]/NO_OF_LAYERS;
+		delta_z = grid -> z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
+		- grid -> z_vector[NO_OF_SCALARS_H + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER + h_index];
 		mom_diff_coeff = 0.25*(ver_hor_viscosity(irrev -> tke[scalar_base_index + grid -> from_index[h_index]], delta_z)
 		+ ver_hor_viscosity(irrev -> tke[scalar_base_index + grid -> to_index[h_index]], delta_z)
 		+ ver_hor_viscosity(irrev -> tke[(layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]], delta_z)
