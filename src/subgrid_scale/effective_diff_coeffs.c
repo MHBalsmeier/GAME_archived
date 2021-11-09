@@ -349,6 +349,10 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	/*
 	This function updates the specific turbulent kinetic energy (TKE), unit: J/kg.
 	*/
+	// the ratio of global unresolved to resolved kinetic energy
+	double tke_ke_ratio = 0.1*pow(4, 5 - RES_ID);
+	// the e-folding time of TKE approximation
+	double tke_approx_time = 10800*pow(4, 5 - RES_ID);
 	// computing the advection
 	grad(irrev -> tke, diagnostics -> vector_field_placeholder, grid);
 	inner_product(diagnostics -> vector_field_placeholder, state -> wind, diagnostics -> scalar_field_placeholder, grid);
@@ -365,7 +369,9 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 			// the decay constants differ over land vs over water
 			if (grid -> is_land[h_index] == 1 && grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index] <= 1000.0)
 			{
-				production_rate = decay_constant*pow(2, 5 - RES_ID);
+				production_rate = (tke_ke_ratio*0.5*diagnostics -> v_squared[i] - irrev -> tke[i])/tke_approx_time;
+				// restricting the production rate to positive values
+				production_rate = fmax(0, production_rate);
 			}
 			// prognostic equation for TKE
 			irrev -> tke[i] += delta_t*(
@@ -376,7 +382,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 			// decay through molecular dissipation
 			- decay_constant*irrev -> tke[i]
 			// production through turbulence generation in the boundary layer
-			+ production_rate*0.5*diagnostics -> v_squared[i]);
+			+ production_rate);
 			// clipping negative values which might occur through advection
 			if (irrev -> tke[i] < 0)
 			{
