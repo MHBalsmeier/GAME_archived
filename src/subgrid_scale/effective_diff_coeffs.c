@@ -20,6 +20,9 @@ double ver_hor_viscosity(double, double);
 
 int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
 {
+	/*
+	This function computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal divergent movements.
+	*/
 	// these things are hardly ever modified
 	double eff_particle_radius = 130e-12;
 	double mean_particle_mass = mean_particle_masses_gas(0);
@@ -61,6 +64,9 @@ int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *g
 
 int hori_curl_viscosity_eff_rhombi(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
 {
+	/*
+	This function computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal curl movements.
+	*/
 	// these things are hardly ever modified
 	double eff_particle_radius = 130e-12;
 	double mean_particle_mass = mean_particle_masses_gas(0);
@@ -343,13 +349,6 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	/*
 	This function updates the specific turbulent kinetic energy (TKE), unit: J/kg.
 	*/
-	// e-folding time of TKE over flat ground for RES_ID = 5
-	double e_folding_time_flat = 86400.0;
-	// e-folding time of TKE over rough ground for RES_ID = 5
-	double e_folding_time_rough = 43200.0;
-	// the decay time gets shorter for smaller mesh sizes
-	double decay_constant_sea = 1.0/e_folding_time_flat*pow(2, RES_ID - 5);
-	double decay_constant_land = 1.0/e_folding_time_rough*pow(2, RES_ID - 5);
 	// computing the advection
 	grad(irrev -> tke, diagnostics -> vector_field_placeholder, grid);
 	inner_product(diagnostics -> vector_field_placeholder, state -> wind, diagnostics -> scalar_field_placeholder, grid);
@@ -361,16 +360,12 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
 		{
 			i = layer_index*NO_OF_SCALARS_H + h_index;
+			decay_constant = 8*pow(M_PI, 2)/grid -> mean_area_cell*irrev -> viscosity_div_eff[i];
 			production_rate = 0;
 			// the decay constants differ over land vs over water
 			if (grid -> is_land[h_index] == 1 && grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index] <= 1000.0)
 			{
-				decay_constant = decay_constant_land;
 				production_rate = decay_constant*pow(2, 5 - RES_ID);
-			}
-			else
-			{
-				decay_constant = decay_constant_sea;
 			}
 			// prognostic equation for TKE
 			irrev -> tke[i] += delta_t*(
