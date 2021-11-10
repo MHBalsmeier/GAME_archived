@@ -317,8 +317,8 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						// precipitation
 						if (k < NO_OF_CONDENSED_CONSTITUENTS/2)
 						{
-							vertical_flux_vector_impl[j] -= 0.1;
-							vertical_flux_vector_rhs[j] -= 0.1;
+							vertical_flux_vector_impl[j] -= 0.4;
+							vertical_flux_vector_rhs[j] -= 0.4;
 						}
 						// clouds
 						else if (k < NO_OF_CONDENSED_CONSTITUENTS)
