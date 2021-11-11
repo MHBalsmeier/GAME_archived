@@ -29,6 +29,17 @@ double get_impl_thermo_weight()
 	return impl_thermo_weight;
 }
 
+double cloud_droplets_velocity()
+{
+	return 0.01;
+}
+
+double precipitation_droplets_velocity()
+{
+	return 0.3;
+}
+
+
 // input and output
 // ---------------------
 

@@ -317,14 +317,14 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						// precipitation
 						if (k < NO_OF_CONDENSED_CONSTITUENTS/2)
 						{
-							vertical_flux_vector_impl[j] -= 0.3;
-							vertical_flux_vector_rhs[j] -= 0.3;
+							vertical_flux_vector_impl[j] -= precipitation_droplets_velocity();
+							vertical_flux_vector_rhs[j] -= precipitation_droplets_velocity();
 						}
 						// clouds
 						else if (k < NO_OF_CONDENSED_CONSTITUENTS)
 						{
-							vertical_flux_vector_impl[j] -= 0.01;
-							vertical_flux_vector_rhs[j] -= 0.01;
+							vertical_flux_vector_impl[j] -= cloud_droplets_velocity();
+							vertical_flux_vector_rhs[j] -= cloud_droplets_velocity();
 						}
 						// multiplying the vertical velocity by the area
 						area = grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
