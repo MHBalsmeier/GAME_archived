@@ -25,7 +25,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 	
 	// declaring and defining some variables that will be needed later on
 	int lower_index, base_index;
-	double impl_weight = get_impl_thermo_weight();
+	double impl_weight = impl_thermo_weight();
 	double c_v = spec_heat_capacities_v_gas(0);
 	double c_p = spec_heat_capacities_p_gas(0);
 	double r_d = specific_gas_constants(0);

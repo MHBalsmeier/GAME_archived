@@ -22,7 +22,7 @@ int get_gas_contituents_ids(int gas_constituent_id)
 	return gas_constituent_ids_vector[gas_constituent_id];
 }
 
-double get_impl_thermo_weight()
+double impl_thermo_weight()
 {
 	return 0.75;
 }

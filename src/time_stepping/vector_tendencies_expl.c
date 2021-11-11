@@ -115,9 +115,9 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 	old_weight = 1 - new_weight;
 	// the weights for the pressure gradient
 	double old_hor_pgrad_weight, current_hor_pgrad_weight, current_ver_pgrad_weight;
-	current_hor_pgrad_weight = 0.5 + get_impl_thermo_weight();
+	current_hor_pgrad_weight = 0.5 + impl_thermo_weight();
 	old_hor_pgrad_weight = 1 - current_hor_pgrad_weight;
-	current_ver_pgrad_weight = 1 - get_impl_thermo_weight();
+	current_ver_pgrad_weight = 1 - impl_thermo_weight();
     int layer_index, h_index;
     #pragma omp parallel for private(layer_index, h_index)
     for (int i = 0; i < NO_OF_VECTORS; ++i)
