@@ -8,36 +8,25 @@ With this program, ideal input states for GAME can be produced.
 */
 
 #include <stdlib.h>
-#include "../../src/enum_and_typedefs.h"
-#include "../../src/thermodynamics.h"
-#include "../../src/settings.h"
-#include "../../src/spatial_operators/spatial_operators.h"
-#include "../../src/io/io.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <netcdf.h>
-#include "geos95.h"
+#include "../../src/enum_and_typedefs.h"
 #include "../../shared/shared.h"
+#include "../../src/thermodynamics.h"
+#include "../../src/settings.h"
+#include "../../src/spatial_operators/spatial_operators.h"
+#include "../../src/io/io.h"
+#include "geos95.h"
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 #define N_A (6.0221409e23)
 #define K_B (1.380649e-23)
-
-// constants needed for the JW test state
-const double TROPO_HEIGHT = 12e3;
-double T_0 = 288;
-double GAMMA = 0.005;
-const double G = 9.80616;
-const double DELTA_T = 4.8e5;
-const double ETA_T = 0.2;
-const double U_0 = 35;
-const double ETA_0 = 0.252;
 
 int find_pressure_value(double, double, double *);
 
 int main(int argc, char *argv[])
 {
-	// some thermodynamical quantities
 	int TEST_ID;
    	TEST_ID = strtod(argv[1], NULL);
    	int NO_OF_ORO_LAYERS = strtod(argv[2], NULL);

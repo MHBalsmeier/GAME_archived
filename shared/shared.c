@@ -6,17 +6,11 @@ Github repository: https://github.com/OpenNWP/GAME
 #include <math.h>
 #include "atmostracers.h"
 #include "../src/enum_and_typedefs.h"
-#define OMEGA (7.292115e-5)
-#define N_A (6.0221409e23)
-#define K_B (1.380649e-23)
-#define M_D 0.028964420
-#define R (N_A*K_B)
-#define R_D (R/M_D)
-#define P_0 100000.0
+#include "constants.h"
 
+// constants that are specific to the ICAO standard atmosphere
 const double T_SFC = 273.15 + 15;
 const double TEMP_GRADIENT = -0.65/100;
-// constants that are specific to the ICAO standard atmosphere
 const double P_0_STANDARD = 101325;
 const double TROPO_HEIGHT_STANDARD = 11e3;
 const double INVERSE_HEIGHT_STANDARD = 20e3;
@@ -77,21 +71,25 @@ double standard_pres(double z_height)
 
 double mean_particle_masses_gas(int gas_constituent_id)
 {
+	// binding to atmostracers
 	return mean_particle_masses_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
 }
 
 double spec_heat_capacities_v_gas(int gas_constituent_id)
 {
+	// binding to atmostracers
 	return spec_heat_capacities_v_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
 }
 
 double spec_heat_capacities_p_gas(int gas_constituent_id)
 {
+	// binding to atmostracers
 	return spec_heat_capacities_p_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
 }
 
 double specific_gas_constants(int gas_constituent_id)
 {
+	// binding to atmostracers
 	return specific_gas_constants_lookup(get_gas_contituents_ids(gas_constituent_id));
 }
 
