@@ -13,7 +13,7 @@ h:	humid
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "atmostracers.h"
+#include <atmostracers.h>
 #include "game_types.h"
 #include "constants.h"
 #include "spatial_operators/spatial_operators.h"

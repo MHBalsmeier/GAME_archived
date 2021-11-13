@@ -7,10 +7,10 @@ Github repository: https://github.com/OpenNWP/GAME
 This file manages the calls to the radiation routines.
 */
 
-#include "../game_types.h"
-#include "../radiation/radiation.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "../game_types.h"
+#include "../radiation/radiation.h"
 
 int create_rad_array_scalar(double [], double [], int);
 int create_rad_array_scalar_h(double [], double [], int);

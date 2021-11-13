@@ -7,11 +7,11 @@ Github repository: https://github.com/OpenNWP/GAME
 This file contains discrete coordinate transformations on the icosahedral grid.
 */
 
-#include "include.h"
-#include "../../src/game_types.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "geos95.h"
+#include <geos95.h>
+#include "../../src/game_types.h"
+#include "include.h"
 
 int find_coords_from_triangle_on_face_index(int triangle_on_face_index, int res_id, int *coord_0, int *coord_1, int *coord_0_points_amount)
 {

@@ -12,10 +12,10 @@ The grid generation procedure is manged from this file. Memory allocation and IO
 #include <netcdf.h>
 #include <string.h>
 #include <math.h>
-#include "include.h"
+#include <geos95.h>
 #include "../../src/game_types.h"
-#include "geos95.h"
 #include "../../src/constants.h"
+#include "include.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 #define RESET "\033[0m"

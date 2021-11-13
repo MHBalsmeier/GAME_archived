@@ -7,12 +7,12 @@ Github repository: https://github.com/OpenNWP/GAME
 In this file, everything that is needed for calculating the vorticity flux term is prepared.
 */
 
-#include "include.h"
-#include "../../src/game_types.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "geos95.h"
+#include <geos95.h>
+#include "../../src/game_types.h"
 #include "../../src/constants.h"
+#include "include.h"
 
 int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_indices[], double normal_distance[], double normal_distance_dual[], int to_index[], double area[], double z_scalar[], double latitude_scalar[], double longitude_scalar[], double latitude_vector[], double longitude_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], double trsk_weights[], int trsk_indices[], int from_index[], int adjacent_vector_indices_h[], double z_vector[], double z_vector_dual[])
 {

@@ -12,9 +12,9 @@ In addition to that, some postprocessing diagnostics are also calculated here.
 #include <string.h>
 #include <time.h>
 #include <netcdf.h>
-#include "eccodes.h"
-#include "geos95.h"
-#include "atmostracers.h"
+#include <eccodes.h>
+#include <geos95.h>
+#include <atmostracers.h>
 #include "../game_types.h"
 #include "../constants.h"
 #include "io.h"

@@ -7,13 +7,13 @@ Github repository: https://github.com/OpenNWP/GAME
 This file contains functions that compute properties of the vertical grid.
 */
 
-#include "include.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "geos95.h"
-#include "../../src/constants.h"
+#include <geos95.h>
 #include "../../src/game_types.h"
+#include "../../src/constants.h"
+#include "include.h"
 #include "../../src/thermodynamics.h"
 #include "standard.h"
 

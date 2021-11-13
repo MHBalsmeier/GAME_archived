@@ -12,7 +12,7 @@ With this program, ideal input states for GAME can be produced.
 #include <string.h>
 #include <math.h>
 #include <netcdf.h>
-#include "geos95.h"
+#include <geos95.h>
 #include "../../src/game_types.h"
 #include "../../src/constants.h"
 #include "../../src/thermodynamics.h"

@@ -7,14 +7,14 @@ Github repository: https://github.com/OpenNWP/GAME
 This file collects functions that are relevant for the neighbourship relations of the grid cells and edges.
 */
 
-#include "include.h"
-#include "../../src/game_types.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "geos95.h"
+#include <geos95.h>
 #include <netcdf.h>
 #include <math.h>
+#include "../../src/game_types.h"
+#include "include.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 

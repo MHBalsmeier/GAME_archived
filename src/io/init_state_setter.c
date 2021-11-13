@@ -10,7 +10,7 @@ In this file, the initial state of the simulation is read in from a netcdf file.
 #include <stdio.h>
 #include <stdlib.h>
 #include <netcdf.h>
-#include "atmostracers.h"
+#include <atmostracers.h>
 #include "../game_types.h"
 #include "../constants.h"
 #include "../thermodynamics.h"

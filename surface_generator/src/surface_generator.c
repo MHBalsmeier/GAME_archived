@@ -12,7 +12,7 @@ With this program, orographies can be produced.
 #include <netcdf.h>
 #include <math.h>
 #include <string.h>
-#include "geos95.h"
+#include <geos95.h>
 #include "../../src/game_types.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
