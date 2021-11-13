@@ -7,12 +7,11 @@ Github repository: https://github.com/OpenNWP/GAME
 This file contains the soil component of GAME.
 */
 
+#include <stdio.h>
 #include "enum_and_typedefs.h"
-#include "../shared/shared.h"
-#include "thermodynamics.h"
 #include "atmostracers.h"
 #include "settings.h"
-#include <stdio.h>
+#include "thermodynamics.h"
 
 // one for now constant parameters
 const double thickness = 1;

@@ -7,9 +7,9 @@ Github repository: https://github.com/OpenNWP/GAME
 Calculates the Held-Suarez radiative forcing.
 */
 
+#include <stdio.h>
 #include "../enum_and_typedefs.h"
-#include "../../shared/shared.h"
-#include "stdio.h"
+#include "../thermodynamics.h"
 
 double t_eq(double, double);
 double k_T(double, double);

@@ -11,7 +11,6 @@ enable_language(Fortran)
 add_executable(
 game
 src/coordinator.c
-shared/shared.c
 src/settings.c
 src/time_stepping/manage_rkhevi.c
 src/time_stepping/manage_pressure_gradient.c

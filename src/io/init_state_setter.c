@@ -9,10 +9,10 @@ In this file, the initial state of the simulation is read in from a netcdf file.
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "../enum_and_typedefs.h"
-#include "../../shared/shared.h"
 #include <netcdf.h>
 #include "atmostracers.h"
+#include "../enum_and_typedefs.h"
+#include "../thermodynamics.h"
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 
 int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)

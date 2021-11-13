@@ -12,18 +12,16 @@ With this program, ideal input states for GAME can be produced.
 #include <string.h>
 #include <math.h>
 #include <netcdf.h>
+#include "geos95.h"
 #include "../../src/enum_and_typedefs.h"
-#include "../../shared/shared.h"
 #include "../../src/thermodynamics.h"
 #include "../../src/settings.h"
 #include "../../src/spatial_operators/spatial_operators.h"
 #include "../../src/io/io.h"
-#include "geos95.h"
+#include "../../grid_generator/src/standard.h"
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 #define N_A (6.0221409e23)
 #define K_B (1.380649e-23)
-
-int find_pressure_value(double, double, double *);
 
 int main(int argc, char *argv[])
 {

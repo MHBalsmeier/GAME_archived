@@ -8,14 +8,22 @@ This file contains functions that compute properties of the vertical grid.
 */
 
 #include "include.h"
-#include "enum.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "../../shared/shared.h"
-#include "../../shared/constants.h"
-#include "../../src/settings.h"
 #include "geos95.h"
+#include "../../constants.h"
+#include "../../src/enum_and_typedefs.h"
+#include "../../src/thermodynamics.h"
+#include "standard.h"
+
+// constants that are specific to the ICAO standard atmosphere
+const double T_SFC = 273.15 + 15;
+const double TEMP_GRADIENT = -0.65/100;
+const double P_0_STANDARD = 101325;
+const double TROPO_HEIGHT_STANDARD = 11e3;
+const double INVERSE_HEIGHT_STANDARD = 20e3;
+const double TEMP_GRADIENT_INV_STANDARD = 0.1/100;
 
 int set_z_scalar(double z_scalar[], double z_surface[], int NO_OF_ORO_LAYERS, double TOA, double stretching_parameter, int VERT_GRID_TYPE)
 {
@@ -369,7 +377,47 @@ int set_background_state(double z_scalar[], double gravity_potential[], double t
 	return 0;
 }
 
+double standard_temp(double z_height)
+{
+    // temperature in the standard atmosphere
+    const double TROPO_TEMP_STANDARD = T_SFC + TROPO_HEIGHT_STANDARD*TEMP_GRADIENT;
+    double temperature;
+    if (z_height < TROPO_HEIGHT_STANDARD)
+    {
+        temperature = T_SFC + z_height*TEMP_GRADIENT;
+    }
+    else if (z_height < INVERSE_HEIGHT_STANDARD)
+    {
+        temperature = TROPO_TEMP_STANDARD;
+    }
+    else
+    {
+    	temperature = TROPO_TEMP_STANDARD + TEMP_GRADIENT_INV_STANDARD*(z_height - INVERSE_HEIGHT_STANDARD);
+    }
+    return temperature;
+}
 
+double standard_pres(double z_height)
+{
+    // pressure in the standard atmosphere
+	const double G = 9.80616;
+    const double TROPO_TEMP_STANDARD = T_SFC + TROPO_HEIGHT_STANDARD*TEMP_GRADIENT;
+    double pressure, pressure_at_inv_standard;
+    if (z_height < TROPO_HEIGHT_STANDARD)
+    {
+        pressure = P_0_STANDARD*pow(1 + TEMP_GRADIENT*z_height/T_SFC, -G/(R_D*TEMP_GRADIENT));
+    }
+    else if (z_height < INVERSE_HEIGHT_STANDARD)
+    {
+        pressure = P_0_STANDARD*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT_STANDARD/T_SFC, -G/(R_D*TEMP_GRADIENT))*exp(-G*(z_height - TROPO_HEIGHT_STANDARD)/(R_D*TROPO_TEMP_STANDARD));
+    }
+    else
+    {
+    	pressure_at_inv_standard = P_0_STANDARD*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT_STANDARD/T_SFC, -G/(R_D*TEMP_GRADIENT))*exp(-G*(INVERSE_HEIGHT_STANDARD - TROPO_HEIGHT_STANDARD)/(R_D*TROPO_TEMP_STANDARD));
+        pressure = pressure_at_inv_standard*pow(1 + TEMP_GRADIENT*(z_height - INVERSE_HEIGHT_STANDARD)/T_SFC, -G/(R_D*TEMP_GRADIENT));
+    }
+    return pressure;
+}
 
 
 

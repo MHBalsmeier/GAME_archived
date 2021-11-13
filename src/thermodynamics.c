@@ -11,12 +11,13 @@ v:	water vapour
 h:	humid
 */
 
-#include "enum_and_typedefs.h"
-#include "../shared/shared.h"
-#include "spatial_operators/spatial_operators.h"
-#include "thermodynamics.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "atmostracers.h"
+#include "enum_and_typedefs.h"
+#include "settings.h"
+#include "spatial_operators/spatial_operators.h"
+#include "thermodynamics.h"
 
 int temperature_diagnostics(State *state, Grid *grid, Diagnostics *diagnostics)
 {
@@ -177,6 +178,29 @@ int calc_diffusion_coeff(double temperature, double particle_mass, double densit
 }
 
 
+double mean_particle_masses_gas(int gas_constituent_id)
+{
+	// binding to atmostracers
+	return mean_particle_masses_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
+}
+
+double spec_heat_capacities_v_gas(int gas_constituent_id)
+{
+	// binding to atmostracers
+	return spec_heat_capacities_v_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
+}
+
+double spec_heat_capacities_p_gas(int gas_constituent_id)
+{
+	// binding to atmostracers
+	return spec_heat_capacities_p_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
+}
+
+double specific_gas_constants(int gas_constituent_id)
+{
+	// binding to atmostracers
+	return specific_gas_constants_lookup(get_gas_contituents_ids(gas_constituent_id));
+}
 
 
 

@@ -7,11 +7,11 @@ Github repository: https://github.com/OpenNWP/GAME
 In this file, interpolation indices and weights to the lat-lon grid are computed.
 */
 
-#include "enum.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "../../shared/constants.h"
+#include "../../src/enum_and_typedefs.h"
 #include "geos95.h"
+#include "../../constants.h"
 
 int interpolate_ll(double latitude_scalar[], double longitude_scalar[], int interpol_indices[], double interpol_weights[])
 {

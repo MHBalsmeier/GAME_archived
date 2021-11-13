@@ -11,9 +11,9 @@ In this file, the horizontal grid generation procedure is stored.
 #include <stdio.h>
 #include <netcdf.h>
 #include "geos95.h"
-#include "enum.h"
+#include "../../src/enum_and_typedefs.h"
 #include "include.h"
-#include "../../shared/constants.h"
+#include "../../constants.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 

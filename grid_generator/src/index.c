@@ -8,7 +8,7 @@ This file collects functions that are relevant for the neighbourship relations o
 */
 
 #include "include.h"
-#include "enum.h"
+#include "../../src/enum_and_typedefs.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

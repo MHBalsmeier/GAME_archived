@@ -13,8 +13,7 @@ In addition to that, some postprocessing diagnostics are also calculated here.
 #include <time.h>
 #include <netcdf.h>
 #include "../enum_and_typedefs.h"
-#include "../../shared/shared.h"
-#include "../../shared/constants.h"
+#include "../../constants.h"
 #include "io.h"
 #include "../thermodynamics.h"
 #include "../spatial_operators/spatial_operators.h"
