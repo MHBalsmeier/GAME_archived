@@ -8,14 +8,6 @@ In this file, constants and types are defined.
 */
 
 #include <math.h>
-// some fundamental constants
-#define K_B (1.380649e-23)
-#define P_0 100000.0
-#define SECONDS_PER_HOUR 3600
-#define RHO_WATER 1024.0
-#define OMEGA (7.292115e-5)
-#define FOOT 0.3048
-#define EPSILON_SECURITY (1e-10)
 
 enum grid_integers {
 // This determines the horizontal resolution.

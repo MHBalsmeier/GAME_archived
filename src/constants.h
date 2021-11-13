@@ -16,3 +16,5 @@ This file collects physical constants that are hardly ever modified.
 #define P_0 100000.0
 #define GRAVITY_MEAN_SFC_ABS 9.80616
 #define EPSILON_SECURITY (1e-10)
+#define SECONDS_PER_HOUR 3600
+#define RHO_WATER 1024.0

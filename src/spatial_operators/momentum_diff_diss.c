@@ -7,14 +7,15 @@ Github repository: https://github.com/OpenNWP/GAME
 The momentum diffusion acceleration is computed here (apart from the diffusion coefficients).
 */
 
-#include "../game_types.h"
-#include "spatial_operators.h"
-#include "../subgrid_scale/subgrid_scale.h"
-#include "../thermodynamics.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include "geos95.h"
+#include "../game_types.h"
+#include "../constants.h"
+#include "spatial_operators.h"
+#include "../subgrid_scale/subgrid_scale.h"
+#include "../thermodynamics.h"
 
 int hor_calc_curl_of_vorticity(Curl_field, Vector_field, double [], Grid *, Dualgrid *);
 

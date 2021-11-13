@@ -7,13 +7,14 @@ Github repository: https://github.com/OpenNWP/GAME
 This is the horizontal (explicit) part of the constituent integration.
 */
 
-#include "../game_types.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include "atmostracers.h"
+#include "../game_types.h"
+#include "../constants.h"
 #include "../spatial_operators/spatial_operators.h"
 #include "../thermodynamics.h"
 #include "../subgrid_scale/subgrid_scale.h"
-#include "stdio.h"
-#include "stdlib.h"
 
 int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Soil *soil, Grid *grid, double delta_t, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step, int slow_update_bool)
 {

@@ -9,6 +9,7 @@ Calculates the Held-Suarez radiative forcing.
 
 #include <stdio.h>
 #include "../game_types.h"
+#include "../constants.h"
 #include "../thermodynamics.h"
 
 double t_eq(double, double);

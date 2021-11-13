@@ -15,6 +15,7 @@ h:	humid
 #include <stdlib.h>
 #include "atmostracers.h"
 #include "game_types.h"
+#include "constants.h"
 #include "settings.h"
 #include "spatial_operators/spatial_operators.h"
 #include "thermodynamics.h"
