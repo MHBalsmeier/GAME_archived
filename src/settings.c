@@ -11,17 +11,6 @@ In this file, the model run and I/O configurations can be set, which are not acc
 #include "settings.h"
 #include "enum_and_typedefs.h"
 
-int get_gas_contituents_ids(int gas_constituent_id)
-{
-	// This defines the constituents of the gas phase.
-	int gas_constituent_ids_vector[NO_OF_GASEOUS_CONSTITUENTS];
-	for (int i = 0; i < NO_OF_GASEOUS_CONSTITUENTS; ++i)
-	{
-		gas_constituent_ids_vector[i] = i;
-	}
-	return gas_constituent_ids_vector[gas_constituent_id];
-}
-
 double impl_thermo_weight()
 {
 	return 0.75;
@@ -51,29 +40,6 @@ int get_pressure_levels(double pressure_levels[])
 	pressure_levels[4] = 85000;
 	pressure_levels[5] = 92500;
 	return 0;
-}
-
-// the user should not change anything below here
-// ----------------------------------------------
-
-double mean_particle_masses_gas(int gas_constituent_id)
-{
-	return mean_particle_masses_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
-}
-
-double spec_heat_capacities_v_gas(int gas_constituent_id)
-{
-	return spec_heat_capacities_v_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
-}
-
-double spec_heat_capacities_p_gas(int gas_constituent_id)
-{
-	return spec_heat_capacities_p_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
-}
-
-double specific_gas_constants(int gas_constituent_id)
-{
-	return specific_gas_constants_lookup(get_gas_contituents_ids(gas_constituent_id));
 }
 
 

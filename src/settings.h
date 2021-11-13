@@ -7,10 +7,6 @@ Github repository: https://github.com/OpenNWP/GAME
 #define NO_OF_PRESSURE_LEVELS 6
 
 double impl_thermo_weight();
-double mean_particle_masses_gas(int);
-double spec_heat_capacities_v_gas(int);
-double spec_heat_capacities_p_gas(int);
-double specific_gas_constants(int);
-int get_pressure_levels(double []);
 double cloud_droplets_velocity();
 double precipitation_droplets_velocity();
+int get_pressure_levels(double []);

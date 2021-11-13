@@ -5,6 +5,7 @@ Github repository: https://github.com/OpenNWP/GAME
 
 #include <math.h>
 #include "geos95.h"
+#include "../src/enum_and_typedefs.h"
 #define OMEGA (7.292115e-5)
 #define N_A (6.0221409e23)
 #define K_B (1.380649e-23)
@@ -20,6 +21,17 @@ const double P_0_STANDARD = 101325;
 const double TROPO_HEIGHT_STANDARD = 11e3;
 const double INVERSE_HEIGHT_STANDARD = 20e3;
 const double TEMP_GRADIENT_INV_STANDARD = 0.1/100;
+
+int get_gas_contituents_ids(int gas_constituent_id)
+{
+	// This defines the constituents of the gas phase.
+	int gas_constituent_ids_vector[NO_OF_GASEOUS_CONSTITUENTS];
+	for (int i = 0; i < NO_OF_GASEOUS_CONSTITUENTS; ++i)
+	{
+		gas_constituent_ids_vector[i] = i;
+	}
+	return gas_constituent_ids_vector[gas_constituent_id];
+}
 
 double standard_temp(double z_height)
 {
@@ -63,7 +75,25 @@ double standard_pres(double z_height)
     return pressure;
 }
 
+double mean_particle_masses_gas(int gas_constituent_id)
+{
+	return mean_particle_masses_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
+}
 
+double spec_heat_capacities_v_gas(int gas_constituent_id)
+{
+	return spec_heat_capacities_v_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
+}
+
+double spec_heat_capacities_p_gas(int gas_constituent_id)
+{
+	return spec_heat_capacities_p_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
+}
+
+double specific_gas_constants(int gas_constituent_id)
+{
+	return specific_gas_constants_lookup(get_gas_contituents_ids(gas_constituent_id));
+}
 
 
 

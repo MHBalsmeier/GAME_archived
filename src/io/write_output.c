@@ -9,6 +9,7 @@ In addition to that, some postprocessing diagnostics are also calculated here.
 */
 
 #include "../enum_and_typedefs.h"
+#include "../../shared/shared.h"
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -26,12 +27,6 @@ In addition to that, some postprocessing diagnostics are also calculated here.
 
 // constants that are specific to the ICAO standard atmosphere
 const double GRAVITY_MEAN = 9.80616;
-const double TEMP_GRADIENT = -0.65/100;
-const double T_SFC = 273.15 + 15;
-const double P_0_STANDARD = 101325;
-const double TROPO_HEIGHT_STANDARD = 11e3;
-const double INVERSE_HEIGHT_STANDARD = 20e3;
-const double TEMP_GRADIENT_INV_STANDARD = 0.1/100;
 const double SCALE_HEIGHT = 8e3;
 const double MIN_CRITERION_CLOUDY_BOX = 1e-4;
 
