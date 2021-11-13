@@ -12,7 +12,7 @@ In this file, remapping indices and weights to rhombi are computed.
 #include <stdlib.h>
 #include <stdio.h>
 #include "geos95.h"
-#include "../../constants.h"
+#include "../../src/constants.h"
 
 int rhombus_averaging(int vorticity_indices_triangles[], int vorticity_signs_triangles[], int from_index_dual[], int to_index_dual[], int vorticity_indices_rhombi[], int density_to_rhombus_indices[], int from_index[], int to_index[], double area_dual[], double z_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], double density_to_rhombus_weights[], double latitude_vector[], double longitude_vector[], double latitude_scalar[], double longitude_scalar[], double TOA)
 {

@@ -12,7 +12,7 @@ This file contains functions that compute properties of the vertical grid.
 #include <stdio.h>
 #include <math.h>
 #include "geos95.h"
-#include "../../constants.h"
+#include "../../src/constants.h"
 #include "../../src/enum_and_typedefs.h"
 #include "../../src/thermodynamics.h"
 #include "standard.h"
