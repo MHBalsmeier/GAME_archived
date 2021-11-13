@@ -8,7 +8,7 @@ Calculates the Held-Suarez radiative forcing.
 */
 
 #include "../enum_and_typedefs.h"
-#include "../settings.h"
+#include "../../shared/shared.h"
 #include "stdio.h"
 
 double t_eq(double, double);

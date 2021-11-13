@@ -8,6 +8,7 @@ This file contains the soil component of GAME.
 */
 
 #include "enum_and_typedefs.h"
+#include "../shared/shared.h"
 #include "thermodynamics.h"
 #include "atmostracers.h"
 #include "settings.h"
