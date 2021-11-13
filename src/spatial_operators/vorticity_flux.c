@@ -7,11 +7,11 @@ Github repository: https://github.com/OpenNWP/GAME
 In this file, the vorticity flux term of the Lamb tansformation gets computed.
 */
 
-#include "../game_types.h"
-#include "../thermodynamics.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "geos95.h"
+#include "../game_types.h"
+#include "../thermodynamics.h"
 
 int vorticity_flux(Vector_field mass_flux_density, Curl_field pot_vorticity, Vector_field out_field, Grid *grid, Dualgrid *dualgrid)
 {

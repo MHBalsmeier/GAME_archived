@@ -7,8 +7,8 @@ Github repository: https://github.com/OpenNWP/GAME
 Here, vorticities are calculated. The word "vorticity" hereby refers to both vertical and tangential components.
 */
 
-#include "../game_types.h"
 #include <stdio.h>
+#include "../game_types.h"
 #include "geos95.h"
 #include "../thermodynamics.h"
 #include "spatial_operators.h"

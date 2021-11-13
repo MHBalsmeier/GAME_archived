@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     strcpy(WRITE_OUT_INTERVAL_PRE, argv[2]);
     int WRITE_OUT_INTERVAL = strtol(WRITE_OUT_INTERVAL_PRE, NULL, 10);
     free(WRITE_OUT_INTERVAL_PRE);
-    double dt_parameter = strtof(argv[3], NULL);
+    double dt_parameter = strtod(argv[3], NULL);
     Config *config = calloc(1, sizeof(Config));
     config -> momentum_diff_h = strtod(argv[4], NULL);
     config -> momentum_diff_v = strtod(argv[5], NULL);
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     write_out_energy_integrals = strtod(argv[9], NULL);
     config -> temperature_diff_h = strtod(argv[10], NULL);
     double radiation_delta_t;
-    radiation_delta_t = strtof(argv[11], NULL);
+    radiation_delta_t = strtod(argv[11], NULL);
     int year;
     year = strtod(argv[12], NULL);
     int month;
@@ -94,10 +94,10 @@ int main(int argc, char *argv[])
 	config -> assume_lte = strtod(argv[28], NULL);
 	config -> slow_fast_ratio = strtod(argv[29], NULL);
 	config -> delta_t_between_analyses = strtod(argv[30], NULL);
-	config -> diff_h_smag_fac = strtof(argv[31], NULL);
-	config -> shear_bg = strtof(argv[32], NULL);
-	config -> damping_start_height_over_toa = strtof(argv[33], NULL);
-	config -> damping_coeff_max = strtof(argv[34], NULL);
+	config -> diff_h_smag_fac = strtod(argv[31], NULL);
+	config -> shear_bg = strtod(argv[32], NULL);
+	config -> damping_start_height_over_toa = strtod(argv[33], NULL);
+	config -> damping_coeff_max = strtod(argv[34], NULL);
 	config -> explicit_boundary_layer = strtod(argv[35], NULL);
 	config -> tracer_diff_h = strtod(argv[36], NULL);
 	config -> tracer_diff_v = strtod(argv[37], NULL);

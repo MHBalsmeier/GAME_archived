@@ -7,9 +7,9 @@ Github repository: https://github.com/OpenNWP/GAME
 This file contains the gradient operators.
 */
 
+#include <stdio.h>
 #include "../game_types.h"
 #include "spatial_operators.h"
-#include <stdio.h>
 
 int grad_hor_cov(Scalar_field in_field, Vector_field out_field, Grid *grid)
 {
