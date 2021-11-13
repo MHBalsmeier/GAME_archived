@@ -7,10 +7,9 @@ Github repository: https://github.com/OpenNWP/GAME
 This file contains a function for linearly combining two states.
 */
 
-#include "../game_types.h"
-#include "spatial_operators.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "../game_types.h"
 
 int linear_combine_two_states(State *state_0, State *state_1, State *state_out, double coeff_0, double coeff_1, Grid *grid)
 {
