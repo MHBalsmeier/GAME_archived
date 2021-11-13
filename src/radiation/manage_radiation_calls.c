@@ -19,7 +19,7 @@ int create_rad_array_vector(double [], double [], int);
 int remap_to_original(double [], double [], int);
 int remap_to_original_scalar_h(double [], double [], int);
 
-int call_radiation(State *state, Soil *soil, Grid *grid, Dualgrid *dualgrid, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, double delta_t, double time_coordinate)
+int call_radiation(State *state, Soil *soil, Grid *grid, Dualgrid *dualgrid, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config, double delta_t, double time_coordinate)
 {
 	printf("Starting update of radiative fluxes ...\n");
 	int no_of_scalars = NO_OF_SCALARS_RAD;
@@ -42,7 +42,7 @@ int call_radiation(State *state, Soil *soil, Grid *grid, Dualgrid *dualgrid, Sta
 		create_rad_array_scalar(diagnostics -> temperature_gas, radiation -> temp, rad_block_index);
 		// calling the radiation routine
 		// RTE+RRTMGP
-		if (config_info -> rad_on == 1)
+		if (config -> rad_on == 1)
 		{
 			calc_radiative_flux_convergence(radiation -> lat_scal,
 			radiation -> lon_scal,
@@ -60,7 +60,7 @@ int call_radiation(State *state, Soil *soil, Grid *grid, Dualgrid *dualgrid, Sta
 			&time_coordinate);
 		}
 		// Held-Suarez
-		if (config_info -> rad_on == 2)
+		if (config -> rad_on == 2)
 		{
 			held_suar(radiation -> lat_scal, radiation -> z_scal, radiation -> rho, radiation -> temp, radiation -> rad_tend);
 		}

@@ -168,7 +168,7 @@ Scalar_field radiation_tendency;
 } Forcings;
 
 // Info on the run configuration is collected here.
-typedef struct config_info {
+typedef struct config {
 int totally_first_step_bool;
 int temperature_diff_h;
 int temperature_diff_v;
@@ -188,7 +188,10 @@ double diff_h_smag_fac;
 double shear_bg;
 double damping_start_height_over_toa;
 double damping_coeff_max;
-} Config_info;
+double impl_thermo_weight;
+double cloud_droplets_velocity;
+double precipitation_droplets_velocity;
+} Config;
 
 // soil information
 typedef struct soil {
@@ -214,13 +217,13 @@ Scalar_field tke;
 } Irreversible_quantities;
 
 // Info on input and output is collected here.
-typedef struct io_config {
+typedef struct config_io {
 int grib_output_switch;
 int netcdf_output_switch;
 int pressure_level_output_switch;
 int model_level_output_switch;
 int surface_output_switch;
-} Io_config;
+} Config_io;
 
 
 

@@ -15,7 +15,7 @@ In this file, the explicit component of the pressure gradient acceleration is ma
 
 double pressure_gradient_1_damping_factor(double);
 
-int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info)
+int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config)
 {
 	/*
 	This function computes the pressure gradient acceleration.
@@ -23,7 +23,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	
 	// 2.) the nonlinear pressure gradient term
 	// Before calculating the pressure gradient acceleration, the old one must be saved for extrapolation.
-	if (config_info -> totally_first_step_bool == 0)
+	if (config -> totally_first_step_bool == 0)
 	{
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_VECTORS; ++i)
@@ -37,9 +37,9 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		if (config_info -> assume_lte == 0)
+		if (config -> assume_lte == 0)
 		{
-			diagnostics -> c_g_p_field[i] = spec_heat_cap_diagnostics_p(state, i, config_info);
+			diagnostics -> c_g_p_field[i] = spec_heat_cap_diagnostics_p(state, i, config);
 			diagnostics -> scalar_field_placeholder[i] = diagnostics -> c_g_p_field[i]*(grid -> theta_bg[i] + state -> theta_pert[i]);
 		}
 		else
@@ -55,7 +55,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		if (config_info -> assume_lte == 0)
+		if (config -> assume_lte == 0)
 		{
 			diagnostics -> scalar_field_placeholder[i] = diagnostics -> c_g_p_field[i]*state -> theta_pert[i];
 		}
@@ -68,7 +68,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	
 	// 4.) The pressure gradient has to get a deceleration factor due to condensates.
 	// --------------------------------------------------------------------------------
-	if (config_info -> assume_lte == 0)
+	if (config -> assume_lte == 0)
 	{
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
@@ -80,7 +80,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	}
 	
 	// at the very fist step, the old time step pressure gradient acceleration must be saved here
-	if (config_info -> totally_first_step_bool == 1)
+	if (config -> totally_first_step_bool == 1)
 	{
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_VECTORS; ++i)

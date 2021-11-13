@@ -10,7 +10,6 @@ This file contains the soil component of GAME.
 #include <stdio.h>
 #include "game_types.h"
 #include "atmostracers.h"
-#include "settings.h"
 #include "thermodynamics.h"
 
 // one for now constant parameters

@@ -10,13 +10,12 @@ This file contains the implicit vertical solvers.
 #include <stdlib.h>
 #include <stdio.h>
 #include "../game_types.h"
-#include "../settings.h"
 #include "../thermodynamics.h"
 #include "atmostracers.h"
 
 int thomas_algorithm(double [], double [], double [], double [], double [], int);
 
-int three_band_solver_ver_waves(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, Grid *grid, int rk_step)
+int three_band_solver_ver_waves(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config *config, double delta_t, Grid *grid, int rk_step)
 {
 	/*
 	This is the implicit vertical solver for the main fluid constituent.
@@ -24,13 +23,13 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 	
 	// declaring and defining some variables that will be needed later on
 	int lower_index, base_index;
-	double impl_weight = impl_thermo_weight();
+	double impl_weight = config -> impl_thermo_weight;
 	double c_v = spec_heat_capacities_v_gas(0);
 	double c_p = spec_heat_capacities_p_gas(0);
 	double r_d = specific_gas_constants(0);
 	// This is for Klemp (2008).
 	double damping_coeff, damping_start_height, z_above_damping;
-	damping_start_height = config_info -> damping_start_height_over_toa*grid -> z_vector[0];
+	damping_start_height = config -> damping_start_height_over_toa*grid -> z_vector[0];
 	
 	// partial derivatives new time step weight
 	double partial_deriv_new_time_step_weight = 0.5;
@@ -169,7 +168,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			}
 			else
 			{
-				damping_coeff = config_info -> damping_coeff_max*pow(sin(0.5*M_PI*z_above_damping/(grid -> z_vector[0] - damping_start_height)), 2);
+				damping_coeff = config -> damping_coeff_max*pow(sin(0.5*M_PI*z_above_damping/(grid -> z_vector[0] - damping_start_height)), 2);
 			}
 			solution_vector[j] = solution_vector[j]/(1 + delta_t*damping_coeff);
 		}
@@ -250,7 +249,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 	return 0;
 }
 
-int three_band_solver_gen_densitites(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config_info *config_info, double delta_t, Grid *grid)
+int three_band_solver_gen_densitites(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config *config, double delta_t, Grid *grid)
 {
 	// Vertical advection of generalized densities (of tracers) with 3-band matrices.
 	// mass densities, density x temperatures
@@ -271,7 +270,7 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 		if (quantity_id == 1)
 		{
 			// in this case, all the condensed constituents have a density x temperature field
-			if(config_info -> assume_lte == 0)
+			if(config -> assume_lte == 0)
 			{
 				no_of_relevant_constituents = NO_OF_CONDENSED_CONSTITUENTS;
 			}
@@ -316,14 +315,14 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						// precipitation
 						if (k < NO_OF_CONDENSED_CONSTITUENTS/2)
 						{
-							vertical_flux_vector_impl[j] -= precipitation_droplets_velocity();
-							vertical_flux_vector_rhs[j] -= precipitation_droplets_velocity();
+							vertical_flux_vector_impl[j] -= config -> precipitation_droplets_velocity;
+							vertical_flux_vector_rhs[j] -= config -> precipitation_droplets_velocity;
 						}
 						// clouds
 						else if (k < NO_OF_CONDENSED_CONSTITUENTS)
 						{
-							vertical_flux_vector_impl[j] -= cloud_droplets_velocity();
-							vertical_flux_vector_rhs[j] -= cloud_droplets_velocity();
+							vertical_flux_vector_impl[j] -= config -> cloud_droplets_velocity;
+							vertical_flux_vector_rhs[j] -= config -> cloud_droplets_velocity;
 						}
 						// multiplying the vertical velocity by the area
 						area = grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];

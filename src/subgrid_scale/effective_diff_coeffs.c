@@ -17,7 +17,7 @@ In this file, diffusion coefficients, including Eddy viscosities, are computed.
 int tke_update(Irreversible_quantities *, double, State *, Diagnostics *, Grid *);
 double ver_hor_viscosity(double, double);
 
-int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
+int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config *config, double delta_t)
 {
 	/*
 	This function computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal divergent movements.
@@ -26,7 +26,7 @@ int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *g
 	double eff_particle_radius = 130e-12;
 	double mean_particle_mass = mean_particle_masses_gas(0);
 	// the minimum "background" diffusion coefficient
-	double min_diff_h_coeff_turb = grid -> mean_area_cell*config_info -> diff_h_smag_fac*config_info -> shear_bg;
+	double min_diff_h_coeff_turb = grid -> mean_area_cell*config -> diff_h_smag_fac*config -> shear_bg;
 	// the maximum diffusion coefficient (stability constraint)
 	double max_diff_h_coeff_turb = 0.125*grid -> mean_area_cell/delta_t;
 	double molecular_viscosity;
@@ -35,7 +35,7 @@ int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *g
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		// preliminary result
-		irrev -> viscosity_div_eff[i] = 7*grid -> mean_area_cell*config_info -> diff_h_smag_fac
+		irrev -> viscosity_div_eff[i] = 7*grid -> mean_area_cell*config -> diff_h_smag_fac
 		*fabs(5.0/3*diagnostics -> wind_divv[i]);
 		
 		// calculating and adding the molecular viscosity
@@ -61,7 +61,7 @@ int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *g
 	return 0;
 }
 
-int hori_curl_viscosity_eff_rhombi(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
+int hori_curl_viscosity_eff_rhombi(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config *config, double delta_t)
 {
 	/*
 	This function computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal curl movements.
@@ -70,7 +70,7 @@ int hori_curl_viscosity_eff_rhombi(State *state, Irreversible_quantities *irrev,
 	double eff_particle_radius = 130e-12;
 	double mean_particle_mass = mean_particle_masses_gas(0);
 	// the minimum "background" diffusion coefficient
-	double min_diff_h_coeff_turb = grid -> mean_area_cell*config_info -> diff_h_smag_fac*config_info -> shear_bg;
+	double min_diff_h_coeff_turb = grid -> mean_area_cell*config -> diff_h_smag_fac*config -> shear_bg;
 	// the maximum diffusion coefficient (stability constraint)
 	double max_diff_h_coeff_turb = 0.125*grid -> mean_area_cell/delta_t;
 	double molecular_viscosity;
@@ -83,7 +83,7 @@ int hori_curl_viscosity_eff_rhombi(State *state, Irreversible_quantities *irrev,
 		{
 			vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
 			// preliminary result
-			irrev -> viscosity_curl_eff_rhombi[vector_index] = 0.35*grid -> mean_area_cell*config_info -> diff_h_smag_fac
+			irrev -> viscosity_curl_eff_rhombi[vector_index] = 0.35*grid -> mean_area_cell*config -> diff_h_smag_fac
 			*fabs(diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index]);
 			
 			// calculating and adding the molecular viscosity
@@ -115,13 +115,13 @@ int hori_curl_viscosity_eff_rhombi(State *state, Irreversible_quantities *irrev,
 	return 0;
 }
 
-int hori_curl_viscosity_eff_triangles(State *state, Irreversible_quantities *irrev, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Config_info *config_info, double delta_t)
+int hori_curl_viscosity_eff_triangles(State *state, Irreversible_quantities *irrev, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Config *config, double delta_t)
 {
 	// these things are hardly ever modified
 	double eff_particle_radius = 130e-12;
 	double mean_particle_mass = mean_particle_masses_gas(0);
 	// the minimum "background" diffusion coefficient
-	double min_diff_h_coeff_turb = grid -> mean_area_cell*config_info -> diff_h_smag_fac*config_info -> shear_bg;
+	double min_diff_h_coeff_turb = grid -> mean_area_cell*config -> diff_h_smag_fac*config -> shear_bg;
 	// the maximum diffusion coefficient (stability constraint)
 	double max_diff_h_coeff_turb = 0.125*grid -> mean_area_cell/delta_t;
 	
@@ -133,7 +133,7 @@ int hori_curl_viscosity_eff_triangles(State *state, Irreversible_quantities *irr
 		layer_index = i/NO_OF_DUAL_SCALARS_H;
 		h_index = i - layer_index*NO_OF_DUAL_SCALARS_H;
 		// preliminary result
-		irrev -> viscosity_curl_eff_triangles[i] = 0.35*grid -> mean_area_cell*config_info -> diff_h_smag_fac
+		irrev -> viscosity_curl_eff_triangles[i] = 0.35*grid -> mean_area_cell*config -> diff_h_smag_fac
 		*fabs(diagnostics -> rel_vort_on_triangles[layer_index*NO_OF_DUAL_SCALARS_H + h_index]);
 		
 		rho_base_index = NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H;
@@ -178,7 +178,7 @@ int hori_curl_viscosity_eff_triangles(State *state, Irreversible_quantities *irr
 	return 0;
 }
 
-int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnostics *diagnostics, Config_info *config_info, Grid *grid, double delta_t)
+int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnostics *diagnostics, Config *config, Grid *grid, double delta_t)
 {
 	/*
 	This function computes the effective viscosity (Eddy + molecular viscosity) for the vertical diffusion of horizontal velocity.
@@ -290,7 +290,7 @@ int vert_w_viscosity_eff(State *state, Grid *grid, Diagnostics *diagnostics, dou
 	return 0;
 }
 
-int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Irreversible_quantities *irreversible_quantities, Diagnostics *diagnostics, double delta_t, Grid *grid)
+int calc_temp_diffusion_coeffs(State *state, Config *config, Irreversible_quantities *irreversible_quantities, Diagnostics *diagnostics, double delta_t, Grid *grid)
 {
 	/*
 	This function computes the viscous temperature diffusion coefficient (including Eddys).
@@ -298,10 +298,10 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Irreversi
 	double mean_particle_mass = mean_particle_masses_gas(0);
 	double eff_particle_radius = 130e-12;
 	// The Eddy viscosity coefficient only has to be calculated if it has not yet been done.
-	if (config_info -> momentum_diff_h == 0)
+	if (config -> momentum_diff_h == 0)
 	{
-		hori_div_viscosity_eff(state, irreversible_quantities, grid, diagnostics, config_info, delta_t);
-		hori_curl_viscosity_eff_rhombi(state, irreversible_quantities, grid, diagnostics, config_info, delta_t);
+		hori_div_viscosity_eff(state, irreversible_quantities, grid, diagnostics, config, delta_t);
+		hori_curl_viscosity_eff_rhombi(state, irreversible_quantities, grid, diagnostics, config, delta_t);
 	}
 	// averaging the curl diffusion coefficient from edges to cells
 	edges_to_cells(irreversible_quantities -> viscosity_curl_eff_rhombi, diagnostics -> scalar_field_placeholder, grid);
@@ -309,7 +309,7 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Irreversi
 	#pragma omp parallel for private (c_g_v)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		c_g_v = spec_heat_cap_diagnostics_v(state, i, config_info);
+		c_g_v = spec_heat_cap_diagnostics_v(state, i, config);
 		irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i] = c_g_v*(irreversible_quantities -> viscosity_div_eff[i] + diagnostics -> scalar_field_placeholder[i]);
 		// the vertical viscosity is just the molecular viscosity for now
 		calc_diffusion_coeff(diagnostics -> temperature_gas[i], mean_particle_mass,
@@ -319,16 +319,16 @@ int calc_temp_diffusion_coeffs(State *state, Config_info *config_info, Irreversi
 	return 0;
 }
 
-int calc_mass_diffusion_coeffs(State *state, Config_info *config_info, Irreversible_quantities *irreversible_quantities, Diagnostics *diagnostics, double delta_t, Grid *grid)
+int calc_mass_diffusion_coeffs(State *state, Config *config, Irreversible_quantities *irreversible_quantities, Diagnostics *diagnostics, double delta_t, Grid *grid)
 {
 	/*
 	This function computes the viscous tracer diffusion coefficient (including Eddys).
 	*/
 	// The Eddy viscosity coefficient only has to be calculated if it has not yet been done.
-	if (config_info -> momentum_diff_h == 0)
+	if (config -> momentum_diff_h == 0)
 	{
-		hori_div_viscosity_eff(state, irreversible_quantities, grid, diagnostics, config_info, delta_t);
-		hori_curl_viscosity_eff_rhombi(state, irreversible_quantities, grid, diagnostics, config_info, delta_t);
+		hori_div_viscosity_eff(state, irreversible_quantities, grid, diagnostics, config, delta_t);
+		hori_curl_viscosity_eff_rhombi(state, irreversible_quantities, grid, diagnostics, config, delta_t);
 	}
 	// averaging the curl diffusion coefficient from edges to cells
 	edges_to_cells(irreversible_quantities -> viscosity_curl_eff_rhombi, diagnostics -> scalar_field_placeholder, grid);

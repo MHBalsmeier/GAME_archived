@@ -16,7 +16,7 @@ This is the horizontal (explicit) part of the constituent integration.
 #include "../thermodynamics.h"
 #include "../subgrid_scale/subgrid_scale.h"
 
-int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Soil *soil, Grid *grid, double delta_t, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int no_rk_step, int slow_update_bool)
+int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Soil *soil, Grid *grid, double delta_t, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config, int no_rk_step, int slow_update_bool)
 {
 	/*
 	This function manages the calculation of the explicit scalar tendencies.
@@ -44,22 +44,22 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
     }
     
 	// Temperature diffusion gets updated here, but only at the first RK step and if heat conduction is switched on.
-	if ((no_rk_step == 0 && slow_update_bool == 1) && (config_info -> temperature_diff_h == 1 || config_info -> temperature_diff_v == 1))
+	if ((no_rk_step == 0 && slow_update_bool == 1) && (config -> temperature_diff_h == 1 || config -> temperature_diff_v == 1))
 	{
 	    // The diffusion of the temperature depends on its gradient.
 		grad(diagnostics -> temperature_gas, diagnostics -> vector_field_placeholder, grid);
 		// Now we need to calculate the temperature diffusion coefficients.
-	    calc_temp_diffusion_coeffs(state, config_info, irrev, diagnostics, config_info -> slow_fast_ratio*delta_t, grid);
+	    calc_temp_diffusion_coeffs(state, config, irrev, diagnostics, config -> slow_fast_ratio*delta_t, grid);
 		// Now the diffusive temperature flux density can be obtained.
 	    scalar_times_vector_h(irrev -> scalar_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid);
-	    if (config_info -> temperature_diff_v == 1)
+	    if (config -> temperature_diff_v == 1)
 	    {
 	    	scalar_times_vector_v(irrev -> scalar_diffusion_coeff_numerical_v, diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid);
 	    }
 	    // The divergence of the diffusive temperature flux density is the diffusive temperature heating.
 	    divv_h(diagnostics -> flux_density, irrev -> temperature_diffusion_heating, grid);
 	    // the vertical divergence is only needed if the vertical temperature diffusion is switched on
-	    if (config_info -> temperature_diff_v == 1)
+	    if (config -> temperature_diff_v == 1)
 	    {
 	    	add_vertical_divv(diagnostics -> flux_density, irrev -> temperature_diffusion_heating, grid);
 		}
@@ -90,22 +90,22 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 		if (i > NO_OF_CONDENSED_CONSTITUENTS && no_rk_step == 0)
 		{
 			// firstly, we need to calculate the mass diffusion coeffcients
-			if (config_info -> tracer_diff_h == 1 || config_info -> tracer_diff_v == 1)
+			if (config -> tracer_diff_h == 1 || config -> tracer_diff_v == 1)
 			{
 				diff_switch = 1;
-				calc_mass_diffusion_coeffs(state, config_info, irrev, diagnostics, delta_t, grid);
+				calc_mass_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid);
 			}
 			// horizontal mass diffusion
-			if (config_info -> tracer_diff_h == 1)
+			if (config -> tracer_diff_h == 1)
 			{
 				grad(&state -> rho[scalar_shift_index], diagnostics -> vector_field_placeholder, grid);
 				scalar_times_vector_h(irrev -> scalar_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
 				divv_h(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
 			}
 			// vertical mass diffusion
-			if (config_info -> tracer_diff_v == 1)
+			if (config -> tracer_diff_v == 1)
 			{
-				if (config_info -> tracer_diff_h == 0)
+				if (config -> tracer_diff_h == 0)
 				{
 					grad_vert_cov(&state -> rho[scalar_shift_index], diagnostics -> vector_field_placeholder, grid);
 					#pragma omp parallel for
@@ -176,12 +176,12 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 					tracer_heating = 0;
 					density_total_weight = density_total(state, j);
 					latent_heating_weight = 1;
-					if (config_info -> assume_lte == 0)
+					if (config -> assume_lte == 0)
 					{
 						latent_heating_weight = state -> rho[scalar_index]/density_gas(state, j);
 						// this is not yet implemented
 					}
-					if (config_info -> assume_lte == 1)
+					if (config -> assume_lte == 1)
 					{
 						latent_heating_weight = state -> rho[scalar_index]/density_total_weight;
 						for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS; ++k)
@@ -222,7 +222,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
     
 		// This is the integration of the "density x temperature" fields. It only needs to be done for condensed constituents.
 		// -------------------------------------------------------------------------------------------------------------------
-		if (i < NO_OF_CONDENSED_CONSTITUENTS && config_info -> assume_lte == 0)
+		if (i < NO_OF_CONDENSED_CONSTITUENTS && config -> assume_lte == 0)
 		{
 			// The constituent velocity has already been calculated.
 		    scalar_times_vector_h(&state -> condensed_density_temperatures[scalar_shift_index], state -> wind, diagnostics -> flux_density, grid);
@@ -255,7 +255,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 	return 0;
 }
 
-int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid)
+int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config *config, Grid *grid)
 {
 	/*
 	This function manages the calculation of the phase transition rates.
@@ -273,7 +273,7 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 	    diagnostics -> temperature_gas,
 	    NO_OF_SCALARS,
 	    2*delta_t,
-	    config_info -> assume_lte,
+	    config -> assume_lte,
 	    grid -> is_land,
 	    NO_OF_LAYERS,
 	    grid -> z_scalar,

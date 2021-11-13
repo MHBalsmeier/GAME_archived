@@ -11,20 +11,19 @@ In this file, the calculation of the explicit part of the momentum equation is m
 #include <stdio.h>
 #include <math.h>
 #include "../game_types.h"
-#include "../settings.h"
 #include "../spatial_operators/spatial_operators.h"
 #include "../thermodynamics.h"
 
-int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config_info *config_info, int slow_update_bool, int no_rk_step, double delta_t)
+int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config, int slow_update_bool, int no_rk_step, double delta_t)
 {
 	// momentum advection
-	if (no_rk_step == 1 || config_info -> totally_first_step_bool == 1)
+	if (no_rk_step == 1 || config -> totally_first_step_bool == 1)
 	{
 		// Here, the gaseous flux density is prepared for the generalized Coriolis term.
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
-			if (config_info -> assume_lte == 0)
+			if (config -> assume_lte == 0)
 			{
 				diagnostics -> scalar_field_placeholder[i] = density_gas(state, i);
 			}
@@ -48,17 +47,17 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     if (no_rk_step == 0 && slow_update_bool == 1)
     {
     	// horizontal momentum diffusion
-    	if (config_info -> momentum_diff_h == 1)
+    	if (config -> momentum_diff_h == 1)
     	{
-			hori_momentum_diffusion(state, diagnostics, irrev, config_info, grid, dualgrid, config_info -> slow_fast_ratio*delta_t);
+			hori_momentum_diffusion(state, diagnostics, irrev, config, grid, dualgrid, config -> slow_fast_ratio*delta_t);
 		}
 		// vertical momentum diffusion
-		if (config_info -> momentum_diff_v == 1)
+		if (config -> momentum_diff_v == 1)
 		{
-			vert_momentum_diffusion(state, diagnostics, irrev, grid, config_info, config_info -> slow_fast_ratio*delta_t);
+			vert_momentum_diffusion(state, diagnostics, irrev, grid, config, config -> slow_fast_ratio*delta_t);
 		}
 		// This is the explicit friction ansatz in the boundary layer from the Held-Suarez (1994) test case.
-		if (config_info -> explicit_boundary_layer == 1)
+		if (config -> explicit_boundary_layer == 1)
 		{
 			// some parameters
 			double bndr_lr_height = 1100.0; // boundary layer height
@@ -94,12 +93,12 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 			}
 		}
 		// calculation of the dissipative heating rate
-		if (config_info -> momentum_diff_h == 1 || config_info -> momentum_diff_v == 1 || config_info -> explicit_boundary_layer == 1)
+		if (config -> momentum_diff_h == 1 || config -> momentum_diff_v == 1 || config -> explicit_boundary_layer == 1)
 		{
 			simple_dissipation_rate(state, irrev, grid);
 		}
 		// Due to condensates, the friction acceleration needs to get a deceleration factor.
-		if (config_info -> assume_lte == 0)
+		if (config -> assume_lte == 0)
 		{
 			scalar_times_vector(irrev -> pressure_gradient_decel_factor, irrev -> friction_acc, irrev -> friction_acc, grid);
 		}
@@ -115,9 +114,9 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 	old_weight = 1 - new_weight;
 	// the weights for the pressure gradient
 	double old_hor_pgrad_weight, current_hor_pgrad_weight, current_ver_pgrad_weight;
-	current_hor_pgrad_weight = 0.5 + impl_thermo_weight();
+	current_hor_pgrad_weight = 0.5 + config -> impl_thermo_weight;
 	old_hor_pgrad_weight = 1 - current_hor_pgrad_weight;
-	current_ver_pgrad_weight = 1 - impl_thermo_weight();
+	current_ver_pgrad_weight = 1 - config -> impl_thermo_weight;
     int layer_index, h_index;
     #pragma omp parallel for private(layer_index, h_index)
     for (int i = 0; i < NO_OF_VECTORS; ++i)

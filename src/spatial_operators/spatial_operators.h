@@ -30,6 +30,6 @@ int remap_verpri2horpri_vector(Vector_field, int, int, double *, Grid *);
 int horizontal_covariant(Vector_field, int, int, Grid *, double *);
 int curl_field_to_cells(Curl_field, Scalar_field, Grid *);
 int edges_to_cells(Vector_field, Scalar_field, Grid *);
-int hori_momentum_diffusion(State *, Diagnostics *, Irreversible_quantities*, Config_info *, Grid *, Dualgrid *, double);
-int vert_momentum_diffusion(State *, Diagnostics *, Irreversible_quantities*, Grid *, Config_info *, double);
+int hori_momentum_diffusion(State *, Diagnostics *, Irreversible_quantities*, Config *, Grid *, Dualgrid *, double);
+int vert_momentum_diffusion(State *, Diagnostics *, Irreversible_quantities*, Grid *, Config *, double);
 int simple_dissipation_rate(State *, Irreversible_quantities *, Grid *);

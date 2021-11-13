@@ -17,7 +17,6 @@ In addition to that, some postprocessing diagnostics are also calculated here.
 #include "io.h"
 #include "../thermodynamics.h"
 #include "../spatial_operators/spatial_operators.h"
-#include "../settings.h"
 #include "eccodes.h"
 #include "geos95.h"
 #include "atmostracers.h"
@@ -25,12 +24,16 @@ In addition to that, some postprocessing diagnostics are also calculated here.
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 
+// the number of pressure levels for the pressure level output
+const int NO_OF_PRESSURE_LEVELS = 6;
+
 int set_basic_props2grib(codes_handle *, long, long, long, long, long, long);
 double calc_std_dev(double [], int);
 int global_scalar_integrator(Scalar_field, Grid *, double *);
 double pseudopotential(State *, Grid *, int);
+int get_pressure_levels(double []);
 
-int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Io_config *io_config, Config_info *config_info, Soil *soil)
+int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Config_io *config_io, Config *config, Soil *soil)
 {
 	printf("Writing output ...\n");
 	// Diagnostics, forcings and radiation are primarily handed over for checks.
@@ -65,7 +68,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 	-------------------------------------
 	*/
 	
-	if (io_config -> surface_output_switch == 1)
+	if (config_io -> surface_output_switch == 1)
 	{
 		double *mslp = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *surface_p = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -84,17 +87,17 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 			// Now the aim is to determine the value of the MSLP.
 		    temp_lowest_layer = diagnostics -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		    pressure_value = density_gas(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i)
-		    *gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i, config_info)
+		    *gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i, config)
 		    *temp_lowest_layer;
 		    temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
 		    mslp_factor = pow(1 - (temp_mslp - temp_lowest_layer)/temp_mslp, grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i]/
-		    (gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i, config_info)*standard_vert_lapse_rate));
+		    (gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i, config)*standard_vert_lapse_rate));
 		    mslp[i] = pressure_value/mslp_factor;
 		    
 			// Now the aim is to determine the value of the surface pressure.
 			temp_surface = temp_lowest_layer + standard_vert_lapse_rate*(grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i]);
 		    surface_p_factor = pow(1 - (temp_surface - temp_lowest_layer)/temp_surface, grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i]/
-		    (gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i, config_info)*standard_vert_lapse_rate));
+		    (gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i, config)*standard_vert_lapse_rate));
 			surface_p[i] = pressure_value/surface_p_factor;
 			
 			// Now the aim is to calculate the 2 m temperature.
@@ -105,7 +108,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 			closest_index = find_min_index(vector_to_minimize, NO_OF_LAYERS);
 		    temp_closest = diagnostics -> temperature_gas[closest_index*NO_OF_SCALARS_H + i];
 			delta_z_temp = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i] + 2 - grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H];
-		    if (config_info -> rad_on == 0)
+		    if (config -> rad_on == 0)
 			{
 				second_closest_index = closest_index - 1;
 				if (grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] > grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i] + 2 && closest_index < NO_OF_LAYERS - 1)
@@ -172,15 +175,15 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		    sprate[i] = 0;
 			if (NO_OF_CONDENSED_CONSTITUENTS == 4)
 		    {
-		        sprate[i] += precipitation_droplets_velocity()*state_write_out -> rho[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
-		        sprate[i] += cloud_droplets_velocity()*state_write_out -> rho[2*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		        sprate[i] += config -> precipitation_droplets_velocity*state_write_out -> rho[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		        sprate[i] += config -> cloud_droplets_velocity*state_write_out -> rho[2*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
 	        // liquid precipitation rate
 		    rprate[i] = 0;
 			if (NO_OF_CONDENSED_CONSTITUENTS == 4)
 		    {
-		        rprate[i] += precipitation_droplets_velocity()*state_write_out -> rho[NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
-		        rprate[i] += cloud_droplets_velocity()*state_write_out -> rho[3*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		        rprate[i] += config -> precipitation_droplets_velocity*state_write_out -> rho[NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		        rprate[i] += config -> cloud_droplets_velocity*state_write_out -> rho[3*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
 		}
 		
@@ -277,7 +280,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		free(wind_10_m_gusts_speed);
 		
 		// Netcdf output.
-		if (io_config -> netcdf_output_switch == 1)
+		if (config_io -> netcdf_output_switch == 1)
 		{
 			char OUTPUT_FILE_PRE[300];
 			sprintf(OUTPUT_FILE_PRE, "%s+%ds_surface.nc", RUN_ID, (int) (t_write - t_init));
@@ -361,7 +364,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		}
 		
 		// Grib output.
-		if (io_config -> grib_output_switch == 1)
+		if (config_io -> grib_output_switch == 1)
 		{
 			long unsigned tcc_string_length = 4;
 			long unsigned cape_string_length = 5;
@@ -636,7 +639,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 	    {
     		(*rh)[i] = 100*rel_humidity(state_write_out -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i], diagnostics -> temperature_gas[i]);
     	}
-    	(*pressure)[i] = density_gas(state_write_out, i)*gas_constant_diagnostics(state_write_out, i, config_info)*diagnostics -> temperature_gas[i];
+    	(*pressure)[i] = density_gas(state_write_out, i)*gas_constant_diagnostics(state_write_out, i, config)*diagnostics -> temperature_gas[i];
     }
     
 	#pragma omp parallel for
@@ -649,7 +652,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
     
 	// Pressure level output.
 	double closest_weight;
-    if (io_config -> pressure_level_output_switch == 1)
+    if (config_io -> pressure_level_output_switch == 1)
     {
     	double *pressure_levels = malloc(sizeof(double)*NO_OF_PRESSURE_LEVELS);
     	get_pressure_levels(pressure_levels);
@@ -725,7 +728,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		}
     	
 		// Netcdf output.
-		if (io_config -> netcdf_output_switch == 1)
+		if (config_io -> netcdf_output_switch == 1)
 		{
 			int OUTPUT_FILE_PRESSURE_LEVEL_LENGTH = 300;
 			char *OUTPUT_FILE_PRESSURE_LEVEL_PRE = malloc((OUTPUT_FILE_PRESSURE_LEVEL_LENGTH + 1)*sizeof(char));
@@ -805,7 +808,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		}
 		
 		// Grib output.
-		if (io_config -> grib_output_switch == 1)
+		if (config_io -> grib_output_switch == 1)
 		{
 			char *SAMPLE_FILENAME = "../../test_generator/test_states/grib_template.grb2";
 			FILE *SAMPLE_FILE;
@@ -1077,7 +1080,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
     }
 
 	// Grib output.
-	if (io_config -> model_level_output_switch == 1 && io_config -> grib_output_switch == 1)
+	if (config_io -> model_level_output_switch == 1 && config_io -> grib_output_switch == 1)
 	{
 		// Grib requires everything to be on horizontal levels.
 		double *temperature_h = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -1313,8 +1316,8 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 	}
 	
 	// Netcdf output.
-	if ((io_config -> model_level_output_switch == 1 && io_config -> netcdf_output_switch == 1)
-	|| (config_info -> nwp_mode == 1 && (int) (t_write - t_init) == config_info -> delta_t_between_analyses))
+	if ((config_io -> model_level_output_switch == 1 && config_io -> netcdf_output_switch == 1)
+	|| (config -> nwp_mode == 1 && (int) (t_write - t_init) == config -> delta_t_between_analyses))
 	{
 		// diagnozing the temperatures of all constituents
 		double *temperatures = malloc((NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS*sizeof(double));
@@ -1326,7 +1329,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 			for (int j = 0; j < NO_OF_CONDENSED_CONSTITUENTS; ++j)
 			{
 				// the non-LTE case
-				if (config_info -> assume_lte == 0)
+				if (config -> assume_lte == 0)
 				{
 					if (state_write_out -> rho[j*NO_OF_SCALARS + i] >= EPSILON_SECURITY)
 					{
@@ -1338,7 +1341,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 					}
 				}
 				// the LTE case
-				if (config_info -> assume_lte == 1)
+				if (config -> assume_lte == 1)
 				{
 					temperatures[j*NO_OF_SCALARS + i] = diagnostics -> temperature_gas[i];
 				}
@@ -1647,7 +1650,17 @@ double pseudopotential(State *state, Grid *grid, int scalar_index)
 	return result;
 }
 
-
+// This function returns the pressure levels for the pressure_level output.
+int get_pressure_levels(double pressure_levels[])
+{
+	pressure_levels[0] = 20000;
+	pressure_levels[1] = 30000;
+	pressure_levels[2] = 50000;
+	pressure_levels[3] = 70000;
+	pressure_levels[4] = 85000;
+	pressure_levels[5] = 92500;
+	return 0;
+}
 
 
 

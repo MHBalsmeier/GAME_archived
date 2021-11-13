@@ -19,7 +19,7 @@ The momentum diffusion acceleration is computed here (apart from the diffusion c
 
 int hor_calc_curl_of_vorticity(Curl_field, Vector_field, double [], Grid *, Dualgrid *);
 
-int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config_info *config_info, Grid *grid, Dualgrid *dualgrid, double delta_t)
+int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config *config, Grid *grid, Dualgrid *dualgrid, double delta_t)
 {
 	/*
 	This is the horizontal momentum diffusion operator (horizontal diffusion of horizontal velocity).
@@ -31,12 +31,12 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	calc_rel_vort(state -> wind, diagnostics, grid, dualgrid);
     
     // calculating the effective horizontal kinematic viscosity acting on divergences (Eddy viscosity)
-	hori_div_viscosity_eff(state, irrev, grid, diagnostics, config_info, delta_t);
+	hori_div_viscosity_eff(state, irrev, grid, diagnostics, config, delta_t);
 	
     // calculating the effective horizontal kinematic viscosity acting on vorticities on rhombi (Eddy viscosity)
-	hori_curl_viscosity_eff_rhombi(state, irrev, grid, diagnostics, config_info, delta_t);
+	hori_curl_viscosity_eff_rhombi(state, irrev, grid, diagnostics, config, delta_t);
     // calculating the effective horizontal kinematic viscosity acting on vorticities on triangles (Eddy viscosity)
-	hori_curl_viscosity_eff_triangles(state, irrev, grid, dualgrid, diagnostics, config_info, delta_t);
+	hori_curl_viscosity_eff_triangles(state, irrev, grid, dualgrid, diagnostics, config, delta_t);
 	
 	/*
 	gradient of divergence component
@@ -84,7 +84,7 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	return 0;
 }
 
-int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Grid *grid, Config_info *config_info, double delta_t)
+int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Grid *grid, Config *config, double delta_t)
 {
 	/*
 	This is the vertical momentum diffusion. The horizontal diffusion has already been called at this points, so we can add the new tendencies.
@@ -123,7 +123,7 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		}
 	}
 	// calculating the respective diffusion coefficient
-	vert_hor_mom_viscosity(state, irrev, diagnostics, config_info, grid, delta_t);
+	vert_hor_mom_viscosity(state, irrev, diagnostics, config, grid, delta_t);
 	// now, the second derivative needs to be taken
 	double z_upper, z_lower, delta_z;
 	#pragma omp parallel for private(layer_index, h_index, vector_index, z_upper, z_lower, delta_z)

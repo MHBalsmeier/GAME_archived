@@ -43,17 +43,17 @@ int main(int argc, char *argv[])
     int WRITE_OUT_INTERVAL = strtol(WRITE_OUT_INTERVAL_PRE, NULL, 10);
     free(WRITE_OUT_INTERVAL_PRE);
     double dt_parameter = strtof(argv[3], NULL);
-    Config_info *config_info = calloc(1, sizeof(Config_info));
-    config_info -> momentum_diff_h = strtod(argv[4], NULL);
-    config_info -> momentum_diff_v = strtod(argv[5], NULL);
-    config_info -> rad_on = strtod(argv[6], NULL);
+    Config *config = calloc(1, sizeof(Config));
+    config -> momentum_diff_h = strtod(argv[4], NULL);
+    config -> momentum_diff_v = strtod(argv[5], NULL);
+    config -> rad_on = strtod(argv[6], NULL);
     int write_out_mass_integrals;
     write_out_mass_integrals = strtod(argv[7], NULL);
     int write_out_rhotheta_integral; 
     write_out_rhotheta_integral = strtod(argv[8], NULL);
     int write_out_energy_integrals;
     write_out_energy_integrals = strtod(argv[9], NULL);
-    config_info -> temperature_diff_h = strtod(argv[10], NULL);
+    config -> temperature_diff_h = strtod(argv[10], NULL);
     double radiation_delta_t;
     radiation_delta_t = strtof(argv[11], NULL);
     int year;
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     len = strlen(argv[15]);
     char *hour_string = malloc((len + 1)*sizeof(char));
     strcpy(hour_string, argv[15]);
-    config_info -> temperature_diff_v = strtod(argv[16], NULL);
+    config -> temperature_diff_v = strtod(argv[16], NULL);
     len = strlen(argv[17]);
     char *RUN_ID = malloc((len + 1)*sizeof(char));
     strcpy(RUN_ID, argv[17]);
@@ -83,24 +83,27 @@ int main(int argc, char *argv[])
 	ORO_ID = strtod(argv[19], NULL);
     int IDEAL_INPUT_ID;
     IDEAL_INPUT_ID = strtod(argv[20], NULL);
-    Io_config *io_config = calloc(1, sizeof(Io_config));
-	io_config -> grib_output_switch = strtod(argv[21], NULL);
-	io_config -> netcdf_output_switch = strtod(argv[22], NULL);
-	io_config -> pressure_level_output_switch = strtod(argv[23], NULL);
-	io_config -> model_level_output_switch = strtod(argv[24], NULL);
-	io_config -> surface_output_switch = strtod(argv[25], NULL);
+    Config_io *config_io = calloc(1, sizeof(Config_io));
+	config_io -> grib_output_switch = strtod(argv[21], NULL);
+	config_io -> netcdf_output_switch = strtod(argv[22], NULL);
+	config_io -> pressure_level_output_switch = strtod(argv[23], NULL);
+	config_io -> model_level_output_switch = strtod(argv[24], NULL);
+	config_io -> surface_output_switch = strtod(argv[25], NULL);
 	grid -> no_of_oro_layers = strtod(argv[26], NULL);
 	int VERT_GRID_TYPE = strtod(argv[27], NULL);
-	config_info -> assume_lte = strtod(argv[28], NULL);
-	config_info -> slow_fast_ratio = strtod(argv[29], NULL);
-	config_info -> delta_t_between_analyses = strtod(argv[30], NULL);
-	config_info -> diff_h_smag_fac = strtof(argv[31], NULL);
-	config_info -> shear_bg = strtof(argv[32], NULL);
-	config_info -> damping_start_height_over_toa = strtof(argv[33], NULL);
-	config_info -> damping_coeff_max = strtof(argv[34], NULL);
-	config_info -> explicit_boundary_layer = strtod(argv[35], NULL);
-	config_info -> tracer_diff_h = strtod(argv[36], NULL);
-	config_info -> tracer_diff_v = strtod(argv[37], NULL);
+	config -> assume_lte = strtod(argv[28], NULL);
+	config -> slow_fast_ratio = strtod(argv[29], NULL);
+	config -> delta_t_between_analyses = strtod(argv[30], NULL);
+	config -> diff_h_smag_fac = strtof(argv[31], NULL);
+	config -> shear_bg = strtof(argv[32], NULL);
+	config -> damping_start_height_over_toa = strtof(argv[33], NULL);
+	config -> damping_coeff_max = strtof(argv[34], NULL);
+	config -> explicit_boundary_layer = strtod(argv[35], NULL);
+	config -> tracer_diff_h = strtod(argv[36], NULL);
+	config -> tracer_diff_v = strtod(argv[37], NULL);
+	config -> impl_thermo_weight = strtod(argv[38], NULL);
+	config -> cloud_droplets_velocity = strtod(argv[39], NULL);
+	config -> precipitation_droplets_velocity = strtod(argv[40], NULL);
 	
 	/*
 	Checking user input for correctness:
@@ -118,7 +121,7 @@ int main(int argc, char *argv[])
     	printf("Aborting.\n");
     	exit(1);
     }
-	if (config_info -> assume_lte != 0 && config_info -> assume_lte != 1)
+	if (config -> assume_lte != 0 && config -> assume_lte != 1)
 	{
 		printf("simplified_moisture_switch must be either 0 or 1.\n");
     	printf("Aborting.\n");
@@ -129,13 +132,13 @@ int main(int argc, char *argv[])
 	{
 		grid -> no_of_oro_layers = 0;
 	}
-	if (io_config -> grib_output_switch == 0 && io_config -> netcdf_output_switch == 0)
+	if (config_io -> grib_output_switch == 0 && config_io -> netcdf_output_switch == 0)
 	{
 		printf("Either grib_output_switch or netcdf_output_switch must be set to 1.\n");
     	printf("Aborting.\n");
 		exit(1);
 	}
-	if (config_info -> momentum_diff_h == 0 && config_info -> momentum_diff_v == 1)
+	if (config -> momentum_diff_h == 0 && config -> momentum_diff_v == 1)
 	{
 		printf("Horizontal momentum diffusion cannot be off if vertical momentum diffusion is on.\n");
     	printf("Aborting.\n");
@@ -176,13 +179,13 @@ int main(int argc, char *argv[])
     // The NWP case.
     if (IDEAL_INPUT_ID == -1)
     {
-    	config_info -> nwp_mode = 1;
+    	config -> nwp_mode = 1;
     	sprintf(INIT_STATE_FILE_PRE, "../../nwp_init/%d%s%s%s_B%dL%dT%d_O%d_OL%d_SCVT.nc", year, month_string, day_string, hour_string, RES_ID, NO_OF_LAYERS, toa, ORO_ID, grid -> no_of_oro_layers);
     }
     // The idealized input case.
     else
     {
-    	config_info -> nwp_mode = 0;
+    	config -> nwp_mode = 0;
 		sprintf(INIT_STATE_FILE_PRE, "../../test_generator/test_states/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc", IDEAL_INPUT_ID, RES_ID, NO_OF_LAYERS, toa, ORO_ID, grid -> no_of_oro_layers);
     }
     char INIT_STATE_FILE[strlen(INIT_STATE_FILE_PRE) + 1];
@@ -239,7 +242,7 @@ int main(int argc, char *argv[])
 	printf("Number of scalar data points: %d\n", NO_OF_SCALARS);
 	printf("Number of vectors: %d\n", NO_OF_VECTORS);
 	printf("Number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
-	printf("Ratio of the slow to the fast time step: %d\n", config_info -> slow_fast_ratio);
+	printf("Ratio of the slow to the fast time step: %d\n", config -> slow_fast_ratio);
 	if (VERT_GRID_TYPE == 0)
 	{
 		printf("Terrain handling: terrain following coordinates\n");
@@ -249,31 +252,31 @@ int main(int argc, char *argv[])
 	{
 		printf("Terrain handling: block structure\n");
 	}
-	if (config_info -> momentum_diff_h == 0)
+	if (config -> momentum_diff_h == 0)
 	{
 		printf("Horizontal momentum diffusion is turned off.\n");
 	}
-	if (config_info -> momentum_diff_h == 1)
+	if (config -> momentum_diff_h == 1)
 	{
 		printf("Horizontal momentum diffusion is turned on.\n");
 	}
-	if (config_info -> momentum_diff_v == 0)
+	if (config -> momentum_diff_v == 0)
 	{
 		printf("Vertical momentum diffusion is turned off.\n");
 	}
-	if (config_info -> momentum_diff_v == 1)
+	if (config -> momentum_diff_v == 1)
 	{
 		printf("Vertical momentum diffusion is turned on.\n");
 	}
-	if (config_info -> explicit_boundary_layer == 0)
+	if (config -> explicit_boundary_layer == 0)
 	{
 		printf("Explicit boundary layer friction is turned off.\n");
 	}
-	if (config_info -> explicit_boundary_layer == 1)
+	if (config -> explicit_boundary_layer == 1)
 	{
 		printf("Explicit boundary layer friction is turned on.\n");
 	}
-	if (config_info -> temperature_diff_h == 0)
+	if (config -> temperature_diff_h == 0)
 	{
 		printf("Horizontal temperature diffusion is turned off.\n");
 	}
@@ -281,7 +284,7 @@ int main(int argc, char *argv[])
 	{
 		printf("Horizontal temperature diffusion is turned on.\n");
 	}
-	if (config_info -> temperature_diff_v == 0)
+	if (config -> temperature_diff_v == 0)
 	{
 		printf("Vertical temperature diffusion is turned off.\n");
 	}
@@ -289,7 +292,7 @@ int main(int argc, char *argv[])
 	{
 		printf("Vertical temperature diffusion is turned on.\n");
 	}
-	if (config_info -> tracer_diff_h == 0)
+	if (config -> tracer_diff_h == 0)
 	{
 		printf("Horizontal tracer diffusion is turned off.\n");
 	}
@@ -297,7 +300,7 @@ int main(int argc, char *argv[])
 	{
 		printf("Horizontal tracer diffusion is turned on.\n");
 	}
-	if (config_info -> tracer_diff_v == 0)
+	if (config -> tracer_diff_v == 0)
 	{
 		printf("Vertical tracer diffusion is turned off.\n");
 	}
@@ -305,10 +308,10 @@ int main(int argc, char *argv[])
 	{
 		printf("Vertical tracer diffusion is turned on.\n");
 	}
-	printf("Horizontal diffusion Smagorinsky factor: %lf.\n", config_info -> diff_h_smag_fac);
-	printf("Background shear: %lf 1/s.\n", config_info -> shear_bg);
-	printf("Swamp layer starts at %lf m.\n", config_info -> damping_start_height_over_toa*toa);
-	printf("Maximum swamp layer damping coefficient: %lf 1/s.\n", config_info -> damping_coeff_max);
+	printf("Horizontal diffusion Smagorinsky factor: %lf.\n", config -> diff_h_smag_fac);
+	printf("Background shear: %lf 1/s.\n", config -> shear_bg);
+	printf("Swamp layer starts at %lf m.\n", config -> damping_start_height_over_toa*toa);
+	printf("Maximum swamp layer damping coefficient: %lf 1/s.\n", config -> damping_coeff_max);
 	printf("%s", stars);
 	
 	printf("Physics configuration:\n");
@@ -321,23 +324,23 @@ int main(int argc, char *argv[])
 		printf("Aborting.\n");
 		exit(1);
 	}
-	if (config_info -> assume_lte == 0)
+	if (config -> assume_lte == 0)
 	{
 		printf("Not Assuming local thermodynamic equilibrium.\n");
 	}
-	if (config_info -> assume_lte == 1)
+	if (config -> assume_lte == 1)
 	{
 		printf("Assuming local thermodynamic equilibrium.\n");
 	}
-	if (config_info -> rad_on == 0)
+	if (config -> rad_on == 0)
 	{
 		printf("Radiation is turned off.\n");
 	}
-	if (config_info -> rad_on == 1)
+	if (config -> rad_on == 1)
 	{
 		printf("Radiation is turned on.\n");
 	}
-	if (config_info -> rad_on == 2)
+	if (config -> rad_on == 2)
 	{
 		printf("Held-Suarez-forcing is turned on.\n");
 	}
@@ -345,7 +348,7 @@ int main(int argc, char *argv[])
 	printf("%s", stars);
 	printf("I/O configuration:\n");
 	printf("Output written in intervals of %d s\n", WRITE_OUT_INTERVAL);
-	if (io_config -> grib_output_switch == 0)
+	if (config_io -> grib_output_switch == 0)
 	{
 		printf("Grib output is turned off.\n");
 	}
@@ -353,7 +356,7 @@ int main(int argc, char *argv[])
 	{
 		printf("Grib output is turned on.\n");
 	}
-	if (io_config -> netcdf_output_switch == 0)
+	if (config_io -> netcdf_output_switch == 0)
 	{
 		printf("Netcdf output is turned off.\n");
 	}
@@ -361,7 +364,7 @@ int main(int argc, char *argv[])
 	{
 		printf("Netcdf output is turned on.\n");
 	}
-	if (io_config -> model_level_output_switch == 0)
+	if (config_io -> model_level_output_switch == 0)
 	{
 		printf("Model level output is turned off.\n");
 	}
@@ -369,7 +372,7 @@ int main(int argc, char *argv[])
 	{
 		printf("Model level output is turned on.\n");
 	}
-	if (io_config -> surface_output_switch == 0)
+	if (config_io -> surface_output_switch == 0)
 	{
 		printf("Surface output is turned off.\n");
 	}
@@ -377,7 +380,7 @@ int main(int argc, char *argv[])
 	{
 		printf("Surface output is turned on.\n");
 	}
-	if (io_config -> pressure_level_output_switch == 0)
+	if (config_io -> pressure_level_output_switch == 0)
 	{
 		printf("Pressure level output is turned off.\n");
 	}
@@ -394,7 +397,7 @@ int main(int argc, char *argv[])
 	printf("Reading grid data ...\n");
     set_grid_properties(grid, dualgrid, GEO_PROP_FILE);
     // If we have radiation turned on, we also need soil.
-    if (config_info -> rad_on == 1)
+    if (config -> rad_on == 1)
     {
     	set_sfc_properties(grid, SFC_PROP_FILE);
     }
@@ -437,7 +440,7 @@ int main(int argc, char *argv[])
     }
 	printf("Time step set. Information on CFL-related quantities:\n");
     printf("Fast modes time step: %lf s\n", delta_t);
-    printf("Slow modes time step: %lf s\n", config_info -> slow_fast_ratio*delta_t);
+    printf("Slow modes time step: %lf s\n", config -> slow_fast_ratio*delta_t);
 	
 	// finding the minimum horizontal grid distance
 	double normal_dist_min_hor = eff_hor_res;
@@ -511,7 +514,7 @@ int main(int argc, char *argv[])
 	Soil *soil = calloc(1, sizeof(Soil));
 	init_soil(soil, diagnostics);
     // writing out the initial state of the model run
-    write_out(state_old, wind_h_10m_array, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info, soil);
+    write_out(state_old, wind_h_10m_array, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, config_io, config, soil);
     t_write += WRITE_OUT_INTERVAL;
     printf("Run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     double t_0;
@@ -531,8 +534,8 @@ int main(int argc, char *argv[])
     {
 		write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 2);
 	}
-    config_info -> rad_update = 1;
-    if (config_info -> rad_on == 1)
+    config -> rad_update = 1;
+    if (config -> rad_on == 1)
     {
     	radiation_init();
     }
@@ -554,7 +557,7 @@ int main(int argc, char *argv[])
     -------------------------------------
     */
     // This is necessary because at the very first step of the model integration, some things are handled differently in the time stepping.
-    config_info -> totally_first_step_bool = 1;
+    config -> totally_first_step_bool = 1;
     // this is to store the speed of the model integration
     double speed;
     while (t_0 < t_init + TOTAL_RUN_SPAN + 300)
@@ -568,18 +571,18 @@ int main(int argc, char *argv[])
     	*/
         if (t_0 <= t_rad_update && t_0 + delta_t >= t_rad_update)
         {
-        	config_info -> rad_update = 1;
+        	config -> rad_update = 1;
         	t_rad_update += radiation_delta_t;
         }
         else
         {
-        	config_info -> rad_update = 0;
+        	config -> rad_update = 0;
     	}
     	
     	// Time step integration.
-    	manage_rkhevi(state_old, state_new, soil, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config_info, delta_t, t_0, time_step_counter);
+    	manage_rkhevi(state_old, state_new, soil, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config, delta_t, t_0, time_step_counter);
     	// This switch can be set to zero now and remains there.
-    	config_info -> totally_first_step_bool = 0;
+    	config -> totally_first_step_bool = 0;
 		time_step_counter += 1;	
 		
 		/*
@@ -654,7 +657,7 @@ int main(int argc, char *argv[])
         if(t_0 + delta_t >= t_write + 300 && t_0 <= t_write + 300)
         {
         	// here, output is actually written
-            write_out(state_write, wind_h_10m_array, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, io_config, config_info, soil);
+            write_out(state_write, wind_h_10m_array, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, RUN_ID, config_io, config, soil);
             // setting the next output time
             t_write += WRITE_OUT_INTERVAL;
             
@@ -688,8 +691,8 @@ int main(int argc, char *argv[])
     free(hour_string);
    	free(RUN_ID);
     free(irrev);
-    free(config_info);
-    free(io_config);
+    free(config);
+    free(config_io);
     free(diagnostics);
     free(forcings);
     free(state_tendency);

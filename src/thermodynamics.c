@@ -16,7 +16,6 @@ h:	humid
 #include "atmostracers.h"
 #include "game_types.h"
 #include "constants.h"
-#include "settings.h"
 #include "spatial_operators/spatial_operators.h"
 #include "thermodynamics.h"
 
@@ -33,16 +32,16 @@ int temperature_diagnostics(State *state, Grid *grid, Diagnostics *diagnostics)
 	return 0;
 }
 
-double spec_heat_cap_diagnostics_v(State *state, int grid_point_index, Config_info *config_info)
+double spec_heat_cap_diagnostics_v(State *state, int grid_point_index, Config *config)
 {
 	double rho_g = 0;
 	int no_of_relevant_constituents = 0;
-	if (config_info -> assume_lte == 0)
+	if (config -> assume_lte == 0)
 	{
 		no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
 		rho_g = density_gas(state, grid_point_index);
 	}
-	if (config_info -> assume_lte == 1)
+	if (config -> assume_lte == 1)
 	{
 		no_of_relevant_constituents = 1;
 		rho_g = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index];
@@ -55,16 +54,16 @@ double spec_heat_cap_diagnostics_v(State *state, int grid_point_index, Config_in
 	return result;
 }
 
-double spec_heat_cap_diagnostics_p(State *state, int grid_point_index, Config_info *config_info)
+double spec_heat_cap_diagnostics_p(State *state, int grid_point_index, Config *config)
 {
 	double rho_g = 0;
 	int no_of_relevant_constituents = 0;
-	if (config_info -> assume_lte == 0)
+	if (config -> assume_lte == 0)
 	{
 		no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
 		rho_g = density_gas(state, grid_point_index);
 	}
-	if (config_info -> assume_lte == 1)
+	if (config -> assume_lte == 1)
 	{
 		no_of_relevant_constituents = 1;
 		rho_g = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index];
@@ -77,16 +76,16 @@ double spec_heat_cap_diagnostics_p(State *state, int grid_point_index, Config_in
 	return result;
 }
 
-double gas_constant_diagnostics(State *state, int grid_point_index, Config_info *config_info)
+double gas_constant_diagnostics(State *state, int grid_point_index, Config *config)
 {
 	double rho_g = 0;
 	int no_of_relevant_constituents = 0;
-	if (config_info -> assume_lte == 0)
+	if (config -> assume_lte == 0)
 	{
 		no_of_relevant_constituents = NO_OF_GASEOUS_CONSTITUENTS;
 		rho_g = density_gas(state, grid_point_index);
 	}
-	if (config_info -> assume_lte == 1)
+	if (config -> assume_lte == 1)
 	{
 		no_of_relevant_constituents = 1;
 		rho_g = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index];
@@ -182,25 +181,25 @@ int calc_diffusion_coeff(double temperature, double particle_mass, double densit
 double mean_particle_masses_gas(int gas_constituent_id)
 {
 	// binding to atmostracers
-	return mean_particle_masses_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
+	return mean_particle_masses_gas_lookup(gas_constituent_id);
 }
 
 double spec_heat_capacities_v_gas(int gas_constituent_id)
 {
 	// binding to atmostracers
-	return spec_heat_capacities_v_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
+	return spec_heat_capacities_v_gas_lookup(gas_constituent_id);
 }
 
 double spec_heat_capacities_p_gas(int gas_constituent_id)
 {
 	// binding to atmostracers
-	return spec_heat_capacities_p_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
+	return spec_heat_capacities_p_gas_lookup(gas_constituent_id);
 }
 
 double specific_gas_constants(int gas_constituent_id)
 {
 	// binding to atmostracers
-	return specific_gas_constants_lookup(get_gas_contituents_ids(gas_constituent_id));
+	return specific_gas_constants_lookup(gas_constituent_id);
 }
 
 
