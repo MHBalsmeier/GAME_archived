@@ -7,6 +7,9 @@ Github repository: https://github.com/OpenNWP/GAME
 This file manages the RKHEVI time stepping.
 */
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <geos95.h>
 #include "../game_types.h"
 #include "../spatial_operators/spatial_operators.h"
 #include "time_stepping.h"
@@ -14,9 +17,6 @@ This file manages the RKHEVI time stepping.
 #include "../thermodynamics.h"
 #include "../io/io.h"
 #include "../soil.h"
-#include <geos95.h>
-#include <stdlib.h>
-#include <stdio.h>
 
 int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Dualgrid *dualgrid, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config, double delta_t, double time_coordinate, int total_step_counter)
 {

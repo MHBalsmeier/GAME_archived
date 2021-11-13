@@ -7,12 +7,12 @@ Github repository: https://github.com/OpenNWP/GAME
 In this file, diffusion coefficients, including Eddy viscosities, are computed.
 */
 
-#include "../game_types.h"
-#include "../spatial_operators/spatial_operators.h"
-#include "../thermodynamics.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "../game_types.h"
+#include "../spatial_operators/spatial_operators.h"
+#include "../thermodynamics.h"
 
 int tke_update(Irreversible_quantities *, double, State *, Diagnostics *, Grid *);
 double ver_hor_viscosity(double, double);

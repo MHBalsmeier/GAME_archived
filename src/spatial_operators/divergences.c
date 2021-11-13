@@ -7,9 +7,9 @@ Github repository: https://github.com/OpenNWP/GAME
 In this file, divergences get computed.
 */
 
+#include <stdio.h>
 #include "../game_types.h"
 #include "spatial_operators.h"
-#include <stdio.h>
 
 int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
 {

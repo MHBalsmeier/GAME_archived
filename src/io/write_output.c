@@ -12,14 +12,14 @@ In addition to that, some postprocessing diagnostics are also calculated here.
 #include <string.h>
 #include <time.h>
 #include <netcdf.h>
+#include "eccodes.h"
+#include "geos95.h"
+#include "atmostracers.h"
 #include "../game_types.h"
 #include "../constants.h"
 #include "io.h"
 #include "../thermodynamics.h"
 #include "../spatial_operators/spatial_operators.h"
-#include "eccodes.h"
-#include "geos95.h"
-#include "atmostracers.h"
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}

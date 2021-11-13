@@ -7,10 +7,10 @@ Github repository: https://github.com/OpenNWP/GAME
 In this file, spatial operators are collected which are only needed for the output.
 */
 
-#include "../game_types.h"
-#include "../spatial_operators/spatial_operators.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "../game_types.h"
+#include "../spatial_operators/spatial_operators.h"
 
 int inner_product_tangential(Vector_field, Vector_field, Scalar_field, Grid *, Dualgrid *);
 
