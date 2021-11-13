@@ -10,7 +10,7 @@ In this file, the initial state of the simulation is read in from a netcdf file.
 #include <stdio.h>
 #include <stdlib.h>
 #include "../enum_and_typedefs.h"
-#include "../settings.h"
+#include "../../shared/shared.h"
 #include <netcdf.h>
 #include "atmostracers.h"
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}

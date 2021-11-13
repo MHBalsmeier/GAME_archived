@@ -4,7 +4,7 @@ Github repository: https://github.com/OpenNWP/GAME
 */
 
 #include <math.h>
-#include "geos95.h"
+#include "atmostracers.h"
 #include "../src/enum_and_typedefs.h"
 #define OMEGA (7.292115e-5)
 #define N_A (6.0221409e23)

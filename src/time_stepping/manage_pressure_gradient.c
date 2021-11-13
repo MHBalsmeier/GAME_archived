@@ -7,12 +7,11 @@ Github repository: https://github.com/OpenNWP/GAME
 In this file, the explicit component of the pressure gradient acceleration is managed.
 */
 
-#include "../enum_and_typedefs.h"
-#include "../settings.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "../enum_and_typedefs.h"
+#include "../../shared/shared.h"
 #include "../thermodynamics.h"
-#include <omp.h>
 #include "../spatial_operators/spatial_operators.h"
 
 double pressure_gradient_1_damping_factor(double);
