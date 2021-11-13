@@ -37,7 +37,6 @@ double precipitation_droplets_velocity()
 	return 0.3;
 }
 
-
 // input and output
 // ---------------------
 
