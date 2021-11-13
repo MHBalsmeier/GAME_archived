@@ -56,11 +56,6 @@ int get_pressure_levels(double pressure_levels[])
 // the user should not change anything below here
 // ----------------------------------------------
 
-double entropy_constants_gas(int gas_constituent_id)
-{
-	return entropy_constants_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
-}
-
 double mean_particle_masses_gas(int gas_constituent_id)
 {
 	return mean_particle_masses_gas_lookup(get_gas_contituents_ids(gas_constituent_id));
