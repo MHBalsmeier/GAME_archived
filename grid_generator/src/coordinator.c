@@ -15,9 +15,9 @@ The grid generation procedure is manged from this file. Memory allocation and IO
 #include "include.h"
 #include "enum.h"
 #include "geos95.h"
+#include "../../shared/constants.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
-#define GRAVITY_MEAN_SFC_ABS 9.80616
 #define RESET "\033[0m"
 #define BLACK "\033[30m"
 #define RED "\033[31m"

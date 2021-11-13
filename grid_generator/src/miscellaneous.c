@@ -14,6 +14,7 @@ This function is a collection of some helper functions that are needed for the g
 #include <string.h>
 #include "include.h"
 #include "enum.h"
+#include "../../shared/constants.h"
 #include "geos95.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}

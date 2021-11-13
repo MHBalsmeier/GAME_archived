@@ -4,11 +4,6 @@ Github repository: https://github.com/OpenNWP/GAME
 */
 
 #include <math.h>
-#define OMEGA (7.292115e-5)
-#define SEMIMAJOR 6378137.0
-#define SEMIMINOR 6356752.314
-#define EPSILON_SECURITY (1e-10)
-#define P_0 1e5
 
 enum grid_integers {
 RES_ID = 5,

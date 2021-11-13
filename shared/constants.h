@@ -14,3 +14,5 @@ This file collects physical constants that are hardly ever modified.
 #define R (N_A*K_B)
 #define R_D (R/M_D)
 #define P_0 100000.0
+#define GRAVITY_MEAN_SFC_ABS 9.80616
+#define EPSILON_SECURITY (1e-10)

@@ -14,6 +14,7 @@ In addition to that, some postprocessing diagnostics are also calculated here.
 #include <netcdf.h>
 #include "../enum_and_typedefs.h"
 #include "../../shared/shared.h"
+#include "../../shared/constants.h"
 #include "io.h"
 #include "../thermodynamics.h"
 #include "../spatial_operators/spatial_operators.h"
@@ -24,11 +25,6 @@ In addition to that, some postprocessing diagnostics are also calculated here.
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
-
-// constants that are specific to the ICAO standard atmosphere
-const double GRAVITY_MEAN = 9.80616;
-const double SCALE_HEIGHT = 8e3;
-const double MIN_CRITERION_CLOUDY_BOX = 1e-4;
 
 int set_basic_props2grib(codes_handle *, long, long, long, long, long, long);
 double calc_std_dev(double [], int);
@@ -58,6 +54,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 	int layer_index, closest_index, second_closest_index;
 	double wind_u_value, wind_v_value, cloudy_box_counter;
 	double vector_to_minimize[NO_OF_LAYERS];
+	double min_density_cloudy_box = 1e-4;
 	
 	double *grib_output_field = malloc(NO_OF_LATLON_IO_POINTS*sizeof(double));
 	
@@ -158,10 +155,10 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
         		cloudy_box_counter = 0;
     	        for (int k = 0; k < NO_OF_LAYERS; ++k)
 			    {
-			        if (state_write_out -> rho[k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX
-			        || state_write_out -> rho[NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX
-			        || state_write_out -> rho[2*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX
-			        || state_write_out -> rho[3*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > MIN_CRITERION_CLOUDY_BOX)
+			        if (state_write_out -> rho[k*NO_OF_SCALARS_H + i] > min_density_cloudy_box
+			        || state_write_out -> rho[NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > min_density_cloudy_box
+			        || state_write_out -> rho[2*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > min_density_cloudy_box
+			        || state_write_out -> rho[3*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > min_density_cloudy_box)
 			        {
 			    		cloudy_box_counter += 1;
 		            }
@@ -711,7 +708,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 					(fabs(log((*pressure)[closest_index*NO_OF_SCALARS_H + i]/(*pressure)[second_closest_index*NO_OF_SCALARS_H + i])) + EPSILON_SECURITY);
 					geopotential_height[i][j] = closest_weight*grid -> gravity_potential[closest_index*NO_OF_SCALARS_H + i]
 					+ (1 - closest_weight)*grid -> gravity_potential[second_closest_index*NO_OF_SCALARS_H + i];
-					geopotential_height[i][j] = geopotential_height[i][j]/GRAVITY_MEAN;
+					geopotential_height[i][j] = geopotential_height[i][j]/GRAVITY_MEAN_SFC_ABS;
 					t_on_pressure_levels[i][j] = closest_weight*diagnostics -> temperature_gas[closest_index*NO_OF_SCALARS_H + i]
 					+ (1 - closest_weight)*diagnostics -> temperature_gas[second_closest_index*NO_OF_SCALARS_H + i];
 					rh_on_pressure_levels[i][j] = closest_weight*(*rh)[closest_index*NO_OF_SCALARS_H + i]
