@@ -7,7 +7,7 @@ Github repository: https://github.com/OpenNWP/GAME
 This file manages the calls to the radiation routines.
 */
 
-#include "../enum_and_typedefs.h"
+#include "../game_types.h"
 #include "../radiation/radiation.h"
 #include <stdlib.h>
 #include <stdio.h>

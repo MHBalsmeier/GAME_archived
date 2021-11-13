@@ -8,7 +8,7 @@ In this file, the gravity potential gets computed.
 */
 
 #include "include.h"
-#include "../../src/enum_and_typedefs.h"
+#include "../../src/game_types.h"
 #include "geos95.h"
 
 int set_gravity_potential(double z_scalar[], double gravity_potential[], double GRAVITY_MEAN_SFC_ABS)

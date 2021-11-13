@@ -12,7 +12,7 @@ In addition to that, some postprocessing diagnostics are also calculated here.
 #include <string.h>
 #include <time.h>
 #include <netcdf.h>
-#include "../enum_and_typedefs.h"
+#include "../game_types.h"
 #include "../constants.h"
 #include "io.h"
 #include "../thermodynamics.h"

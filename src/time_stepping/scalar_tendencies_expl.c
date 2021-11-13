@@ -7,7 +7,7 @@ Github repository: https://github.com/OpenNWP/GAME
 This is the horizontal (explicit) part of the constituent integration.
 */
 
-#include "../enum_and_typedefs.h"
+#include "../game_types.h"
 #include "atmostracers.h"
 #include "../spatial_operators/spatial_operators.h"
 #include "../thermodynamics.h"

@@ -11,7 +11,7 @@ In this file, the initial state of the simulation is read in from a netcdf file.
 #include <stdlib.h>
 #include <netcdf.h>
 #include "atmostracers.h"
-#include "../enum_and_typedefs.h"
+#include "../game_types.h"
 #include "../thermodynamics.h"
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 

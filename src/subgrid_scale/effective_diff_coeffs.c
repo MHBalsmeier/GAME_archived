@@ -7,7 +7,7 @@ Github repository: https://github.com/OpenNWP/GAME
 In this file, diffusion coefficients, including Eddy viscosities, are computed.
 */
 
-#include "../enum_and_typedefs.h"
+#include "../game_types.h"
 #include "../spatial_operators/spatial_operators.h"
 #include "../thermodynamics.h"
 #include <stdlib.h>

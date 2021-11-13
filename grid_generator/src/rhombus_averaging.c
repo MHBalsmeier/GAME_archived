@@ -8,7 +8,7 @@ In this file, remapping indices and weights to rhombi are computed.
 */
 
 #include "include.h"
-#include "../../src/enum_and_typedefs.h"
+#include "../../src/game_types.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "geos95.h"

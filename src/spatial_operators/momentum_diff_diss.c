@@ -7,7 +7,7 @@ Github repository: https://github.com/OpenNWP/GAME
 The momentum diffusion acceleration is computed here (apart from the diffusion coefficients).
 */
 
-#include "../enum_and_typedefs.h"
+#include "../game_types.h"
 #include "spatial_operators.h"
 #include "../subgrid_scale/subgrid_scale.h"
 #include "../thermodynamics.h"

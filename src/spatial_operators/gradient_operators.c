@@ -7,7 +7,7 @@ Github repository: https://github.com/OpenNWP/GAME
 This file contains the gradient operators.
 */
 
-#include "../enum_and_typedefs.h"
+#include "../game_types.h"
 #include "spatial_operators.h"
 #include <stdio.h>
 

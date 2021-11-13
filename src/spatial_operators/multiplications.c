@@ -7,7 +7,7 @@ Github repository: https://github.com/OpenNWP/GAME
 In this file, algebraic multiplications of fields are collected.
 */
 
-#include "../enum_and_typedefs.h"
+#include "../game_types.h"
 #include "spatial_operators.h"
 #include "../thermodynamics.h"
 #include <stdio.h>

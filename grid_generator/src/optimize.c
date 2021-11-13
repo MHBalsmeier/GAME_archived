@@ -10,7 +10,7 @@ The Lloyd algorithm is implemented here.
 #include <stdlib.h>
 #include <stdio.h>
 #include "geos95.h"
-#include "../../src/enum_and_typedefs.h"
+#include "../../src/game_types.h"
 #include "include.h"
 
 int find_cell_cgs(double [], double [], double [], double [], int [], int [], int []);

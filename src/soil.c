@@ -8,7 +8,7 @@ This file contains the soil component of GAME.
 */
 
 #include <stdio.h>
-#include "enum_and_typedefs.h"
+#include "game_types.h"
 #include "atmostracers.h"
 #include "settings.h"
 #include "thermodynamics.h"

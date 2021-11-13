@@ -9,7 +9,7 @@ This file contains the implicit vertical solvers.
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "../enum_and_typedefs.h"
+#include "../game_types.h"
 #include "../settings.h"
 #include "../thermodynamics.h"
 #include "atmostracers.h"

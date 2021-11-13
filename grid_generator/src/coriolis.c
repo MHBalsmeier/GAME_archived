@@ -8,7 +8,7 @@ In this file, everything that is needed for calculating the vorticity flux term 
 */
 
 #include "include.h"
-#include "../../src/enum_and_typedefs.h"
+#include "../../src/game_types.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "geos95.h"

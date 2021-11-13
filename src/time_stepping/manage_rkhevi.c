@@ -7,7 +7,7 @@ Github repository: https://github.com/OpenNWP/GAME
 This file manages the RKHEVI time stepping.
 */
 
-#include "../enum_and_typedefs.h"
+#include "../game_types.h"
 #include "../settings.h"
 #include "../spatial_operators/spatial_operators.h"
 #include "time_stepping.h"

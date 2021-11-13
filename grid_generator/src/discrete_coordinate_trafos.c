@@ -8,7 +8,7 @@ This file contains discrete coordinate transformations on the icosahedral grid.
 */
 
 #include "include.h"
-#include "../../src/enum_and_typedefs.h"
+#include "../../src/game_types.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "geos95.h"

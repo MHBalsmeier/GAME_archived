@@ -7,7 +7,7 @@ Github repository: https://github.com/OpenNWP/GAME
 This file contains functions that perform averagings.
 */
 
-#include "../enum_and_typedefs.h"
+#include "../game_types.h"
 #include "geos95.h"
 #include <stdio.h>
 

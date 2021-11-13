@@ -13,7 +13,7 @@ This function is a collection of some helper functions that are needed for the g
 #include <stdio.h>
 #include <string.h>
 #include "include.h"
-#include "../../src/enum_and_typedefs.h"
+#include "../../src/game_types.h"
 #include "geos95.h"
 #include "../../src/constants.h"
 #define ERRCODE 2

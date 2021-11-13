@@ -11,7 +11,7 @@ This file contains functions for reading the grid properties as well as setting 
 #include <stdio.h>
 #include <netcdf.h>
 #include "geos95.h"
-#include "../enum_and_typedefs.h"
+#include "../game_types.h"
 #include "../spatial_operators/spatial_operators.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}

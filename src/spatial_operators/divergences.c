@@ -7,7 +7,7 @@ Github repository: https://github.com/OpenNWP/GAME
 In this file, divergences get computed.
 */
 
-#include "../enum_and_typedefs.h"
+#include "../game_types.h"
 #include "spatial_operators.h"
 #include <stdio.h>
 

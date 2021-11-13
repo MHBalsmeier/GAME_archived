@@ -9,7 +9,7 @@ In this file, the model run and I/O configurations can be set, which are not acc
 
 #include "atmostracers.h"
 #include "settings.h"
-#include "enum_and_typedefs.h"
+#include "game_types.h"
 
 int get_gas_contituents_ids(int gas_constituent_id)
 {

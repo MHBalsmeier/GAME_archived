@@ -7,7 +7,7 @@ Github repository: https://github.com/OpenNWP/GAME
 In this file, spatial operators are collected which are only needed for the output.
 */
 
-#include "../enum_and_typedefs.h"
+#include "../game_types.h"
 #include "../spatial_operators/spatial_operators.h"
 #include <stdio.h>
 #include <stdlib.h>

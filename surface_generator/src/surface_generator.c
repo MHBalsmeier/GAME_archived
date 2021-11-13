@@ -13,7 +13,7 @@ With this program, orographies can be produced.
 #include <math.h>
 #include <string.h>
 #include "geos95.h"
-#include "../../src/enum_and_typedefs.h"
+#include "../../src/game_types.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 #define P_0 100000.0

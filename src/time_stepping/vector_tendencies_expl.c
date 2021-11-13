@@ -10,7 +10,7 @@ In this file, the calculation of the explicit part of the momentum equation is m
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "../enum_and_typedefs.h"
+#include "../game_types.h"
 #include "../settings.h"
 #include "../spatial_operators/spatial_operators.h"
 #include "../thermodynamics.h"

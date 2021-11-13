@@ -7,7 +7,7 @@ Github repository: https://github.com/OpenNWP/GAME
 In this file, the inner product of two vector fields is computed.
 */
 
-#include "../enum_and_typedefs.h"
+#include "../game_types.h"
 #include <stdio.h>
 
 int inner_product(Vector_field in_field_0, Vector_field in_field_1, Scalar_field out_field, Grid *grid)

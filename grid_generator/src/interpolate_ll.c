@@ -9,7 +9,7 @@ In this file, interpolation indices and weights to the lat-lon grid are computed
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "../../src/enum_and_typedefs.h"
+#include "../../src/game_types.h"
 #include "geos95.h"
 #include "../../src/constants.h"
 
