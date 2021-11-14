@@ -279,7 +279,8 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 	    grid -> z_scalar,
 	    grid -> z_vector,
 	    diagnostics -> v_squared,
-	    NO_OF_VECTORS_PER_LAYER);
+	    NO_OF_VECTORS_PER_LAYER,
+	    grid -> roughness_length);
 	    int layer_index, h_index, scalar_shift_index, scalar_index;
 	    // loop over all constituents
 		for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
