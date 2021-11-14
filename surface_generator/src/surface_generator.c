@@ -37,8 +37,6 @@ int main(int argc, char *argv[])
 	int ncid, scalar_h_dimid, oro_id, latitude_scalar_id, longitude_scalar_id;
 	double *oro_unfiltered = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *oro = malloc(NO_OF_SCALARS_H*sizeof(double));
-	double *sfc_albedo = calloc(NO_OF_SCALARS_H, sizeof(double));
-	double *sfc_rho_c = calloc(NO_OF_SCALARS_H, sizeof(double));
 	char GEO_PROP_FILE_PRE[200];
     sprintf(GEO_PROP_FILE_PRE, "../grid_generator/grids/B%dL26T41152_O0_OL23_SCVT.nc", RES_ID);
 	char GEO_PROP_FILE[strlen(GEO_PROP_FILE_PRE) + 1];
@@ -189,6 +187,9 @@ int main(int argc, char *argv[])
 	printf("maximum orography: %lf m\n", oro[find_max_index(oro, NO_OF_SCALARS_H)]);
 	
 	// surface properties other than orography
+   	double *roughness_length = malloc(NO_OF_SCALARS_H*sizeof(double));
+	double *sfc_albedo = calloc(NO_OF_SCALARS_H, sizeof(double));
+	double *sfc_rho_c = calloc(NO_OF_SCALARS_H, sizeof(double));
 	double c_p_water = 4184.0;
 	double c_p_soil = 830.0;
 	double albedo_water = 0.06;
@@ -209,8 +210,10 @@ int main(int argc, char *argv[])
 			sfc_albedo[i] = albedo_soil;
 			sfc_rho_c[i] = density_soil*c_p_soil;
 		}
+		// roughness length
+		roughness_length[i] = 0.02;
 	}
-	int sfc_albedo_id, sfc_rho_c_id;
+	int sfc_albedo_id, sfc_rho_c_id, roughness_length_id;
 	if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
 	  ERR(retval);
 	if ((retval = nc_def_dim(ncid, "scalar_index", NO_OF_SCALARS_H, &scalar_h_dimid)))
@@ -227,6 +230,10 @@ int main(int argc, char *argv[])
 	  ERR(retval);
 	if ((retval = nc_def_var(ncid, "is_land", NC_INT, 1, &scalar_h_dimid, &is_land_id)))
 	  ERR(retval);
+	if ((retval = nc_def_var(ncid, "roughness_length", NC_DOUBLE, 1, &scalar_h_dimid, &roughness_length_id)))
+	  ERR(retval);
+	if ((retval = nc_put_att_text(ncid, roughness_length_id, "units", strlen("m"), "m")))
+	  ERR(retval);
 	if ((retval = nc_enddef(ncid)))
 	  ERR(retval);
 	if ((retval = nc_put_var_double(ncid, oro_id, &oro[0])))
@@ -237,8 +244,11 @@ int main(int argc, char *argv[])
 	  ERR(retval);
 	if ((retval = nc_put_var_int(ncid, is_land_id, &is_land[0])))
 	  ERR(retval);
+	if ((retval = nc_put_var_double(ncid, roughness_length_id, &roughness_length[0])))
+	  ERR(retval);
 	if ((retval = nc_close(ncid)))
 	  ERR(retval);
+	free(roughness_length);
 	free(sfc_albedo);
 	free(sfc_rho_c);
 	free(is_land);
