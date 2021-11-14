@@ -355,6 +355,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	// computing the advection
 	grad(irrev -> tke, diagnostics -> vector_field_placeholder, grid);
 	inner_product(diagnostics -> vector_field_placeholder, state -> wind, diagnostics -> scalar_field_placeholder, grid);
+	double boundary_layer_height = 1000.0;
 	int i;
 	double decay_constant, production_rate;
 	#pragma omp parallel for private(i, decay_constant, production_rate)
@@ -366,9 +367,14 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 			decay_constant = 8*pow(M_PI, 2)/grid -> mean_area_cell*irrev -> viscosity_div_eff[i];
 			production_rate = 0;
 			// the decay constants differ over land vs over water
-			if (grid -> is_land[h_index] == 1 && grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index] <= 1000.0)
+			if (grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index] <= boundary_layer_height)
 			{
-				production_rate = (tke_ke_ratio*0.5*diagnostics -> v_squared[i] - irrev -> tke[i])/tke_approx_time;
+				production_rate =
+				// factor taking into account the roughness of the surface
+				grid -> roughness_length[h_index]/0.08
+				// height-dependent factor
+				*(grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index])/boundary_layer_height
+				*(tke_ke_ratio*0.5*diagnostics -> v_squared[i] - irrev -> tke[i])/tke_approx_time;
 				// restricting the production rate to positive values
 				production_rate = fmax(0, production_rate);
 			}
