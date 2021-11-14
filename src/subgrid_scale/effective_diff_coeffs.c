@@ -373,7 +373,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 				// factor taking into account the roughness of the surface
 				grid -> roughness_length[h_index]/0.08
 				// height-dependent factor
-				*(grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index])/boundary_layer_height
+				*(boundary_layer_height - (grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index]))/boundary_layer_height
 				*(tke_ke_ratio*0.5*diagnostics -> v_squared[i] - irrev -> tke[i])/tke_approx_time;
 				// restricting the production rate to positive values
 				production_rate = fmax(0, production_rate);
