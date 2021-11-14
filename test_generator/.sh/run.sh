@@ -6,7 +6,7 @@
 echo "***** TEST FILE CREATION *****"
 if [ $valgrind_check -eq 0 ]
 then
-mpirun -np $number_of_cpus ./test_generator $test_id $orography_layers $type_of_vertical_grid $toa
+./test_generator $test_id $orography_layers $type_of_vertical_grid $toa
 else
 if [ $valgrind_check -eq 1 ]
 then
