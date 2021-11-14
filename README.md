@@ -55,13 +55,13 @@ It is recommended to run the model on Linux. We will not help people who have pr
 
 Everything is easy and quick to install.
 
-* eccodes library (installation manual: https://gist.github.com/MHBalsmeier/a01ad4e07ecf467c90fad2ac7719844a)
+	sudo apt-get install gcc gfortran git make cmake wget libeccodes-dev python3 python3-pip libnetcdf-dev libnetcdff-dev
+
 * [geos95](https://github.com/OpenNWP/geos95)
 * [atmostracers](https://github.com/OpenNWP/atmostracers)
-* Clone the DCMIP2016 repository: `git clone https://github.com/ClimateGlobalChange/DCMIP2016.git`
+* Clone the DCMIP2016 repository: `git clone https://github.com/ClimateGlobalChange/DCMIP2016`
 * Clone our fork of the RTE+RRTMGP repository: `git clone https://github.com/OpenNWP/rte-rrtmgp`
-* Python and pip: `sudo apt-get install python3 python3-pip`
-* Python package global-land-mask (`pip3 install global-land-mask`)
+* `pip3 install global-land-mask eccodes`
 
 #### For using the plotting routines
 
@@ -76,7 +76,7 @@ The following packages are additionally required if you want to make use of the 
 
 ### Download
 
-	git clone https://github.com/OpenNWP/GAME.git
+	git clone https://github.com/OpenNWP/GAME
 	cd GAME
 	./create_directories.sh
 
