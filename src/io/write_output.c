@@ -194,7 +194,6 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		double wind_tangential;
 		int j;
 		// 10 m wind is measured over grass by WMO definition
-		double roughness_length_grass = 0.02;
 		double *wind_10_m_speed = malloc(min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
 		double *wind_10_m_mean_u = malloc(NO_OF_VECTORS_H*sizeof(double));
 		double *wind_10_m_mean_v = malloc(NO_OF_VECTORS_H*sizeof(double));
@@ -219,15 +218,20 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 				wind_10_m_mean_v[h_index] += 1.0/min_no_of_output_steps*wind_tangential;
 			}
 		}
-		double actual_roughness_length, z_agl, rescale_factor;
-		#pragma omp parallel for private(wind_u_value, wind_v_value, actual_roughness_length, z_agl, rescale_factor)
+		double roughness_length_extrapolation, actual_roughness_length, z_agl, rescale_factor;
+		#pragma omp parallel for private(wind_u_value, wind_v_value, roughness_length_extrapolation, actual_roughness_length, z_agl, rescale_factor)
 		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 		{
 			actual_roughness_length = 0.5*(grid -> roughness_length[grid -> from_index[i]] + grid -> roughness_length[grid -> to_index[i]]);
+			roughness_length_extrapolation = 0.02; // grass
+			if (grid -> is_land[grid -> from_index[i]] == 0)
+			{
+				roughness_length_extrapolation = actual_roughness_length;
+			}
 			z_agl = 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[i]] + grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[i]]);
 			passive_turn(wind_10_m_mean_u[i], wind_10_m_mean_v[i], -grid -> direction[i], &wind_u_value, &wind_v_value);
 			// rescale factor for computing the wind in a height of 10 m
-			rescale_factor = log(10.0/roughness_length_grass)/log((grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i] - z_agl)/actual_roughness_length);
+			rescale_factor = log(10.0/roughness_length_extrapolation)/log((grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i] - z_agl)/actual_roughness_length);
 			wind_10_m_mean_u[i] = rescale_factor*wind_u_value;
 			wind_10_m_mean_v[i] = rescale_factor*wind_v_value;
 		}
