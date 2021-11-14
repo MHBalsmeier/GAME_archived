@@ -14,6 +14,7 @@ With this program, orographies can be produced.
 #include <string.h>
 #include <geos95.h>
 #include "../../src/game_types.h"
+#include "../../src/constants.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 #define P_0 100000.0
@@ -196,14 +197,13 @@ int main(int argc, char *argv[])
 	// setting the land surface albedo to 0.12 (compare Zdunkowski, Trautmann & Bott:
 	// Radiation in the Atmosphere, 2007, p. 444)
 	double albedo_soil = 0.12;
-	double density_water = 1024.0;
 	double density_soil = 1442.0;
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// ocean
 		sfc_albedo[i] = albedo_water;
-		sfc_rho_c[i] = density_water*c_p_water;
+		sfc_rho_c[i] = RHO_WATER*c_p_water;
 		roughness_length[i] = 0.08;
 		// land
 		if (is_land[i] == 1)
