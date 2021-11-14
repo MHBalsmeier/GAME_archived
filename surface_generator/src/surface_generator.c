@@ -204,14 +204,14 @@ int main(int argc, char *argv[])
 		// ocean
 		sfc_albedo[i] = albedo_water;
 		sfc_rho_c[i] = density_water*c_p_water;
+		roughness_length[i] = 0.08;
 		// land
 		if (is_land[i] == 1)
 		{
 			sfc_albedo[i] = albedo_soil;
 			sfc_rho_c[i] = density_soil*c_p_soil;
+			roughness_length[i] = 0.2;
 		}
-		// roughness length
-		roughness_length[i] = 0.02;
 	}
 	int sfc_albedo_id, sfc_rho_c_id, roughness_length_id;
 	if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
