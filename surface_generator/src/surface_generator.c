@@ -242,9 +242,9 @@ int main(int argc, char *argv[])
 	  ERR(retval);
 	if ((retval = nc_put_var_double(ncid, sfc_rho_c_id, &sfc_rho_c[0])))
 	  ERR(retval);
-	if ((retval = nc_put_var_int(ncid, is_land_id, &is_land[0])))
-	  ERR(retval);
 	if ((retval = nc_put_var_double(ncid, roughness_length_id, &roughness_length[0])))
+	  ERR(retval);
+	if ((retval = nc_put_var_int(ncid, is_land_id, &is_land[0])))
 	  ERR(retval);
 	if ((retval = nc_close(ncid)))
 	  ERR(retval);
