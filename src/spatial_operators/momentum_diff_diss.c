@@ -12,7 +12,7 @@ The momentum diffusion acceleration is computed here (apart from the diffusion c
 #include <math.h>
 #include <geos95.h>
 #include "../game_types.h"
-#include "../constants.h"
+#include "../game_constants.h"
 #include "spatial_operators.h"
 #include "../subgrid_scale/subgrid_scale.h"
 #include "../thermodynamics.h"

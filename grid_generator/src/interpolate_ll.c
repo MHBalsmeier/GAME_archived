@@ -11,7 +11,7 @@ In this file, interpolation indices and weights to the lat-lon grid are computed
 #include <stdio.h>
 #include <geos95.h>
 #include "../../src/game_types.h"
-#include "../../src/constants.h"
+#include "../../src/game_constants.h"
 
 int interpolate_ll(double latitude_scalar[], double longitude_scalar[], int interpol_indices[], double interpol_weights[])
 {

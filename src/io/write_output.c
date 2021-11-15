@@ -16,7 +16,7 @@ In addition to that, some postprocessing diagnostics are also calculated here.
 #include <geos95.h>
 #include <atmostracers.h>
 #include "../game_types.h"
-#include "../constants.h"
+#include "../game_constants.h"
 #include "io.h"
 #include "../thermodynamics.h"
 #include "../spatial_operators/spatial_operators.h"

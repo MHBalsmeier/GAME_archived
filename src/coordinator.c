@@ -13,7 +13,7 @@ The main organizes the model, manages the time stepping, calls model output, col
 #include <time.h>
 #include <geos95.h>
 #include "game_types.h"
-#include "constants.h"
+#include "game_constants.h"
 #include "io/io.h"
 #include "spatial_operators/spatial_operators.h"
 #include "radiation/radiation.h"

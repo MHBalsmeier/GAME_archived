@@ -4,7 +4,7 @@
 # Github repository: https://github.com/OpenNWP/GAME
 
 echo "Starting to compile surface generator ..."
-gcc src/* -lnetcdf -lgeos95 -fopenmp -lm -Wall -o surface_generator
+gcc -O2 src/* -lnetcdf -lgeos95 -fopenmp -lm -Wall -o surface_generator
 if [ $? -ne 0 ]
 then
 echo -e ${RED}Surface generator compilation failed.$NC

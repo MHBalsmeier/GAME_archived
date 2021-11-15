@@ -12,7 +12,7 @@ In this file, the horizontal grid generation procedure is stored.
 #include <netcdf.h>
 #include <geos95.h>
 #include "../../src/game_types.h"
-#include "../../src/constants.h"
+#include "../../src/game_constants.h"
 #include "include.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}

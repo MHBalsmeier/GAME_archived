@@ -14,7 +14,7 @@ This function is a collection of some helper functions that are needed for the g
 #include <string.h>
 #include <geos95.h>
 #include "../../src/game_types.h"
-#include "../../src/constants.h"
+#include "../../src/game_constants.h"
 #include "include.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}

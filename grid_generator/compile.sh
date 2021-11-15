@@ -4,7 +4,7 @@
 # Github repository: https://github.com/OpenNWP/GAME
 
 echo "Starting to compile grid generator ..."
-gcc src/* ../src/thermodynamics.c -O1 -fopenmp -lnetcdf -lm -lgeos95 -latmostracers -Wall -o grid_generator
+gcc -O2 src/* ../src/thermodynamics.c -fopenmp -lnetcdf -lm -lgeos95 -latmostracers -Wall -o grid_generator
 if [ $? -ne 0 ]
 then
 echo -e ${RED}Grid generator compilation failed.$NC

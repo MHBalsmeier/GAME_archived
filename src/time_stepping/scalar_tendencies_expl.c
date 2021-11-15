@@ -11,7 +11,7 @@ This is the horizontal (explicit) part of the constituent integration.
 #include <stdlib.h>
 #include <atmostracers.h>
 #include "../game_types.h"
-#include "../constants.h"
+#include "../game_constants.h"
 #include "../spatial_operators/spatial_operators.h"
 #include "../thermodynamics.h"
 #include "../subgrid_scale/subgrid_scale.h"
