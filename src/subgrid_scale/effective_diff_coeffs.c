@@ -335,10 +335,10 @@ int calc_mass_diffusion_coeffs(State *state, Config *config, Irreversible_quanti
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i] = 0.1*(irreversible_quantities -> viscosity_div_eff[i] + diagnostics -> scalar_field_placeholder[i])
+		irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i] = (irreversible_quantities -> viscosity_div_eff[i] + diagnostics -> scalar_field_placeholder[i])
 		/density_gas(state, i);
 		// the vertical viscosity is proportional to the horizontal viscosity for now
-		irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i] = 0.001*irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i];
+		irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i] = 0.0001*irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i];
 	}
 	return 0;
 }
