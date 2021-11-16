@@ -86,6 +86,8 @@ If you want to use radiation, modify the spectral properties filenames in the fi
 
 	./compile.sh
 
+Before being able to run the model, however, you need to create a grid file, a surface properties file and an initial state. The handbook gives further information on that.
+
 ## Fundamental literature
 
 * Staniforth, A. and Thuburn, J. (2012), Horizontal grids for global weather and climate prediction models: a review. Q.J.R. Meteorol. Soc., 138: 1-26. doi:10.1002/qj.958
