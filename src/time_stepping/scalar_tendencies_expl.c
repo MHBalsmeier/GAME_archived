@@ -93,7 +93,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 			if (config -> tracer_diff_h == 1 || config -> tracer_diff_v == 1)
 			{
 				diff_switch = 1;
-				calc_mass_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid);
+				calc_mass_diffusion_coeffs(state, config, irrev, diagnostics, config -> slow_fast_ratio*delta_t, grid);
 			}
 			// horizontal mass diffusion
 			if (config -> tracer_diff_h == 1)
