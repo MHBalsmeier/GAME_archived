@@ -164,17 +164,21 @@ double calc_condensates_density_sum(int scalar_gridpoint_index, Mass_densities m
 	return result;
 }
 
-int calc_diffusion_coeff(double temperature, double particle_mass, double density, double particle_radius, double *result)
+double calc_diffusion_coeff(double temperature, double density)
 {
 	/*
 	This function calculates the molecular diffusion coefficient according to the kinetic gas theory.
 	*/
+	// these things are hardly ever modified
+	double particle_radius = 130e-12;
+	double particle_mass = mean_particle_masses_gas(0);
+	// actual calculation
     double thermal_velocity = sqrt(8*K_B*temperature/(M_PI*particle_mass));
     double particle_density = density/particle_mass;
     double cross_section = 4*M_PI*pow(particle_radius, 2);
     double mean_free_path = 1/(sqrt(2)*particle_density*cross_section);
-    *result = 1.0/3.0*thermal_velocity*mean_free_path;
-    return 0;
+    double result = 1.0/3*thermal_velocity*mean_free_path;
+    return result;
 }
 
 

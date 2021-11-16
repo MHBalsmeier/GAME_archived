@@ -22,9 +22,6 @@ int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *g
 	/*
 	This function computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal divergent movements.
 	*/
-	// these things are hardly ever modified
-	double eff_particle_radius = 130e-12;
-	double mean_particle_mass = mean_particle_masses_gas(0);
 	// the minimum "background" diffusion coefficient
 	double min_diff_h_coeff_turb = grid -> mean_area_cell*config -> diff_h_smag_fac*config -> shear_bg;
 	// the maximum diffusion coefficient (stability constraint)
@@ -39,8 +36,7 @@ int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *g
 		*fabs(5.0/3*diagnostics -> wind_divv[i]);
 		
 		// calculating and adding the molecular viscosity
-		calc_diffusion_coeff(diagnostics -> temperature_gas[i], mean_particle_mass, state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i],
-		eff_particle_radius, &molecular_viscosity);
+		molecular_viscosity = calc_diffusion_coeff(diagnostics -> temperature_gas[i], state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]);
 		irrev -> viscosity_div_eff[i] += molecular_viscosity;
 		
 		// turbulent minimum
@@ -64,11 +60,8 @@ int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *g
 int hori_curl_viscosity_eff_rhombi(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config *config, double delta_t)
 {
 	/*
-	This function computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal curl movements.
+	This function computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal curl movements on rhombi.
 	*/
-	// these things are hardly ever modified
-	double eff_particle_radius = 130e-12;
-	double mean_particle_mass = mean_particle_masses_gas(0);
 	// the minimum "background" diffusion coefficient
 	double min_diff_h_coeff_turb = grid -> mean_area_cell*config -> diff_h_smag_fac*config -> shear_bg;
 	// the maximum diffusion coefficient (stability constraint)
@@ -89,11 +82,9 @@ int hori_curl_viscosity_eff_rhombi(State *state, Irreversible_quantities *irrev,
 			// calculating and adding the molecular viscosity
 			scalar_index_from = layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index];
 			scalar_index_to = layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index];
-			calc_diffusion_coeff(
+			molecular_viscosity = calc_diffusion_coeff(
 			0.5*(diagnostics -> temperature_gas[scalar_index_from] + diagnostics -> temperature_gas[scalar_index_to]),
-			mean_particle_mass,
-			0.5*(state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_from] + state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_to]),
-			eff_particle_radius, &molecular_viscosity);
+			0.5*(state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_from] + state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_to]));
 			irrev -> viscosity_curl_eff_rhombi[vector_index] += molecular_viscosity;
 			
 			// turbulent minimum
@@ -112,14 +103,16 @@ int hori_curl_viscosity_eff_rhombi(State *state, Irreversible_quantities *irrev,
 			irrev -> viscosity_curl_eff_rhombi[vector_index] = 0.5*(density_gas(state, scalar_index_from) + density_gas(state, scalar_index_to))*irrev -> viscosity_curl_eff_rhombi[vector_index];
 		}
 	}
+	// averaging the curl diffusion coefficient from edges to cells
+	edges_to_cells(irrev -> viscosity_curl_eff_rhombi, irrev -> viscosity_curl_eff, grid);
 	return 0;
 }
 
 int hori_curl_viscosity_eff_triangles(State *state, Irreversible_quantities *irrev, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Config *config, double delta_t)
 {
-	// these things are hardly ever modified
-	double eff_particle_radius = 130e-12;
-	double mean_particle_mass = mean_particle_masses_gas(0);
+	/*
+	This function computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal curl movements on triangles.
+	*/
 	// the minimum "background" diffusion coefficient
 	double min_diff_h_coeff_turb = grid -> mean_area_cell*config -> diff_h_smag_fac*config -> shear_bg;
 	// the maximum diffusion coefficient (stability constraint)
@@ -147,7 +140,7 @@ int hori_curl_viscosity_eff_triangles(State *state, Irreversible_quantities *irr
 		+ state -> rho[rho_base_index + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]
 		+ state -> rho[rho_base_index + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]);
 		temp_base_index = layer_index*NO_OF_SCALARS_H ;
-		calc_diffusion_coeff(
+		molecular_viscosity = calc_diffusion_coeff(
 		1.0/6*(
 		diagnostics -> temperature_gas[temp_base_index + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
 		+ diagnostics -> temperature_gas[temp_base_index + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
@@ -155,9 +148,7 @@ int hori_curl_viscosity_eff_triangles(State *state, Irreversible_quantities *irr
 		+ diagnostics -> temperature_gas[temp_base_index + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
 		+ diagnostics -> temperature_gas[temp_base_index + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]
 		+ diagnostics -> temperature_gas[temp_base_index + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]),
-		mean_particle_mass,
-		density_value,
-		eff_particle_radius, &molecular_viscosity);
+		density_value);
 		irrev -> viscosity_curl_eff_triangles[i] += molecular_viscosity;
 		
 		// turbulent minimum
@@ -185,8 +176,6 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 	This quantity is located at the half level edges.
 	To obey the symmetry of the stress tensor, the same coefficient must be used for the horizontal diffusion of vertical velocity.
 	*/
-	double eff_particle_radius = 130e-12;
-	double mean_particle_mass = mean_particle_masses_gas(0);
 	double max_diff_v_coeff_turb = 0.125*pow(
 	grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H]
 	, 2)/delta_t;
@@ -210,15 +199,14 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 		+ ver_hor_viscosity(irrev -> tke[(layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]], delta_z));
 		// computing and adding the molecular viscosity
 		// the scalar variables need to be averaged to the vector points at half levels
-		calc_diffusion_coeff(0.25*(diagnostics -> temperature_gas[scalar_base_index + grid -> from_index[h_index]]
+		molecuar_viscosity = calc_diffusion_coeff(0.25*(diagnostics -> temperature_gas[scalar_base_index + grid -> from_index[h_index]]
 		+ diagnostics -> temperature_gas[scalar_base_index + grid -> to_index[h_index]]
 		+ diagnostics -> temperature_gas[(layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]]
 		+ diagnostics -> temperature_gas[(layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]),
-		mean_particle_mass,
 		0.25*(state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_base_index + grid -> from_index[h_index]]
 		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_base_index + grid -> to_index[h_index]]
 		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]]
-		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]), eff_particle_radius, &molecuar_viscosity);
+		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]));
 		mom_diff_coeff += molecuar_viscosity;
 		
 		// obeying the stability limit
@@ -255,8 +243,6 @@ int vert_w_viscosity_eff(State *state, Grid *grid, Diagnostics *diagnostics, dou
 	/*
 	This function multiplies scalar_field_placeholder (containing dw/dz) by the diffusion coefficient acting on w because of w.
 	*/
-	double eff_particle_radius = 130e-12;
-	double mean_particle_mass = mean_particle_masses_gas(0);
 	// the maximum vertical diffusion coefficient
 	double max_diff_v_coeff_turb = 0.125*pow(
 	grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H]
@@ -275,8 +261,7 @@ int vert_w_viscosity_eff(State *state, Grid *grid, Diagnostics *diagnostics, dou
 			, 2)
 			*fabs(diagnostics -> scalar_field_placeholder[i]);
 			// computing and adding the molecular momentum diffusion
-			calc_diffusion_coeff(diagnostics -> temperature_gas[i], mean_particle_mass,
-			state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &molecuar_viscosity);
+			molecuar_viscosity = calc_diffusion_coeff(diagnostics -> temperature_gas[i], state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]);
 			mom_diff_coeff += molecuar_viscosity;
 			// this is the stability criterion
 			if (mom_diff_coeff > max_diff_v_coeff_turb)
@@ -290,36 +275,41 @@ int vert_w_viscosity_eff(State *state, Grid *grid, Diagnostics *diagnostics, dou
 	return 0;
 }
 
-int calc_temp_diffusion_coeffs(State *state, Config *config, Irreversible_quantities *irreversible_quantities, Diagnostics *diagnostics, double delta_t, Grid *grid)
+int calc_temp_diffusion_coeffs(State *state, Config *config, Irreversible_quantities *irrev, Diagnostics *diagnostics, double delta_t, Grid *grid)
 {
 	/*
 	This function computes the viscous temperature diffusion coefficient (including Eddys).
 	*/
-	double mean_particle_mass = mean_particle_masses_gas(0);
-	double eff_particle_radius = 130e-12;
 	// The Eddy viscosity coefficient only has to be calculated if it has not yet been done.
 	if (config -> momentum_diff_h == 0)
 	{
-		hori_div_viscosity_eff(state, irreversible_quantities, grid, diagnostics, config, delta_t);
-		hori_curl_viscosity_eff_rhombi(state, irreversible_quantities, grid, diagnostics, config, delta_t);
+		hori_div_viscosity_eff(state, irrev, grid, diagnostics, config, delta_t);
+		hori_curl_viscosity_eff_rhombi(state, irrev, grid, diagnostics, config, delta_t);
 	}
-	// averaging the curl diffusion coefficient from edges to cells
-	edges_to_cells(irreversible_quantities -> viscosity_curl_eff_rhombi, diagnostics -> scalar_field_placeholder, grid);
+	int layer_index, h_index;
 	double c_g_v;
-	#pragma omp parallel for private (c_g_v)
+	#pragma omp parallel for private(c_g_v, layer_index, h_index)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
+		layer_index = i/NO_OF_SCALARS_H;
+		h_index = i - layer_index*NO_OF_SCALARS_H;
 		c_g_v = spec_heat_cap_diagnostics_v(state, i, config);
-		irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i] = c_g_v*(irreversible_quantities -> viscosity_div_eff[i] + diagnostics -> scalar_field_placeholder[i]);
-		// the vertical viscosity is just the molecular viscosity for now
-		calc_diffusion_coeff(diagnostics -> temperature_gas[i], mean_particle_mass,
-		state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i], eff_particle_radius, &irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i]);
-		irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i] = c_g_v*irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i];
+		irrev -> scalar_diffusion_coeff_numerical_h[i] = c_g_v*(irrev -> viscosity_div_eff[i] + irrev -> viscosity_curl_eff[i]);
+		// molecular viscosity
+		irrev -> molecular_diffusion_coeff[i] = calc_diffusion_coeff(diagnostics -> temperature_gas[i], state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]);
+		// vertical diffusion coefficient
+		irrev -> scalar_diffusion_coeff_numerical_v[i]
+		// turbulent component
+		= ver_hor_viscosity(irrev -> tke[i], grid -> z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER])
+		// molecular component
+		+ irrev -> molecular_diffusion_coeff[i];
+		// rescaling for temperature diffusion
+		irrev -> scalar_diffusion_coeff_numerical_v[i] = density_gas(state, i)*c_g_v*irrev -> scalar_diffusion_coeff_numerical_v[i];
 	}
 	return 0;
 }
 
-int calc_mass_diffusion_coeffs(State *state, Config *config, Irreversible_quantities *irreversible_quantities, Diagnostics *diagnostics, double delta_t, Grid *grid)
+int calc_mass_diffusion_coeffs(State *state, Config *config, Irreversible_quantities *irrev, Diagnostics *diagnostics, double delta_t, Grid *grid)
 {
 	/*
 	This function computes the viscous tracer diffusion coefficient (including Eddys).
@@ -327,18 +317,25 @@ int calc_mass_diffusion_coeffs(State *state, Config *config, Irreversible_quanti
 	// The Eddy viscosity coefficient only has to be calculated if it has not yet been done.
 	if (config -> momentum_diff_h == 0)
 	{
-		hori_div_viscosity_eff(state, irreversible_quantities, grid, diagnostics, config, delta_t);
-		hori_curl_viscosity_eff_rhombi(state, irreversible_quantities, grid, diagnostics, config, delta_t);
+		hori_div_viscosity_eff(state, irrev, grid, diagnostics, config, delta_t);
+		hori_curl_viscosity_eff_rhombi(state, irrev, grid, diagnostics, config, delta_t);
 	}
-	// averaging the curl diffusion coefficient from edges to cells
-	edges_to_cells(irreversible_quantities -> viscosity_curl_eff_rhombi, diagnostics -> scalar_field_placeholder, grid);
-	#pragma omp parallel for
+	int layer_index, h_index;
+	#pragma omp parallel for private(layer_index, h_index)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i] = (irreversible_quantities -> viscosity_div_eff[i] + diagnostics -> scalar_field_placeholder[i])
+		layer_index = i/NO_OF_SCALARS_H;
+		h_index = i - layer_index*NO_OF_SCALARS_H;
+		irrev -> scalar_diffusion_coeff_numerical_h[i] = (irrev -> viscosity_div_eff[i] + irrev -> viscosity_curl_eff[i])
 		/density_gas(state, i);
-		// the vertical viscosity is proportional to the horizontal viscosity for now
-		irreversible_quantities -> scalar_diffusion_coeff_numerical_v[i] = 0.0001*irreversible_quantities -> scalar_diffusion_coeff_numerical_h[i];
+		// molecular viscosity
+		irrev -> molecular_diffusion_coeff[i] = calc_diffusion_coeff(diagnostics -> temperature_gas[i], state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]);
+		// vertical diffusion coefficient
+		irrev -> scalar_diffusion_coeff_numerical_v[i]
+		// turbulent component
+		= ver_hor_viscosity(irrev -> tke[i], grid -> z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER])
+		// molecular component
+		+ irrev -> molecular_diffusion_coeff[i];
 	}
 	return 0;
 }
@@ -364,7 +361,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
 		{
 			i = layer_index*NO_OF_SCALARS_H + h_index;
-			decay_constant = 8*pow(M_PI, 2)/grid -> mean_area_cell*irrev -> viscosity_div_eff[i];
+			decay_constant = 8*pow(M_PI, 2)/grid -> mean_area_cell*(irrev -> viscosity_div_eff[i] + irrev -> viscosity_curl_eff[i])/density_gas(state, i);
 			production_rate = 0;
 			// the decay constants differ over land vs over water
 			if (grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index] <= boundary_layer_height)
