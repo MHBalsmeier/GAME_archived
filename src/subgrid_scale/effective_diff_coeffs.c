@@ -278,7 +278,7 @@ int vert_w_viscosity_eff(State *state, Grid *grid, Diagnostics *diagnostics, dou
 int calc_temp_diffusion_coeffs(State *state, Config *config, Irreversible_quantities *irrev, Diagnostics *diagnostics, double delta_t, Grid *grid)
 {
 	/*
-	This function computes the viscous temperature diffusion coefficient (including Eddys).
+	This function computes the viscous temperature diffusion coefficient (including eddies).
 	*/
 	// The Eddy viscosity coefficient only has to be calculated if it has not yet been done.
 	if (config -> momentum_diff_h == 0)
@@ -288,7 +288,7 @@ int calc_temp_diffusion_coeffs(State *state, Config *config, Irreversible_quanti
 	}
 	int layer_index, h_index;
 	double c_g_v;
-	#pragma omp parallel for private(c_g_v, layer_index, h_index)
+	#pragma omp parallel for private(layer_index, h_index, c_g_v)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		layer_index = i/NO_OF_SCALARS_H;
@@ -312,7 +312,7 @@ int calc_temp_diffusion_coeffs(State *state, Config *config, Irreversible_quanti
 int calc_mass_diffusion_coeffs(State *state, Config *config, Irreversible_quantities *irrev, Diagnostics *diagnostics, double delta_t, Grid *grid)
 {
 	/*
-	This function computes the viscous tracer diffusion coefficient (including Eddys).
+	This function computes the viscous tracer diffusion coefficient (including eddies).
 	*/
 	// The Eddy viscosity coefficient only has to be calculated if it has not yet been done.
 	if (config -> momentum_diff_h == 0)
