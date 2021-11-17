@@ -138,6 +138,12 @@ int main(int argc, char *argv[])
     	printf("Aborting.\n");
 		exit(1);
 	}
+	if (config -> slow_fast_ratio <= 0)
+	{
+		printf("slow_fast_ratio cannot be smaller than one.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
 	if (config -> momentum_diff_h == 0 && config -> momentum_diff_v == 1)
 	{
 		printf("Horizontal momentum diffusion cannot be off if vertical momentum diffusion is on.\n");
