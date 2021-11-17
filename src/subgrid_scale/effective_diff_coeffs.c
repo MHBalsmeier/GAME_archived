@@ -279,11 +279,12 @@ int calc_temp_diffusion_coeffs(State *state, Config *config, Irreversible_quanti
 	/*
 	This function computes the viscous temperature diffusion coefficient (including eddies).
 	*/
-	// The Eddy viscosity coefficient only has to be calculated if it has not yet been done.
+	// The eddy viscosity coefficient an the TKE only has to be calculated if it has not yet been done.
 	if (config -> momentum_diff_h == 0)
 	{
 		hori_div_viscosity_eff(state, irrev, grid, diagnostics, config, delta_t);
 		hori_curl_viscosity_eff_rhombi(state, irrev, grid, diagnostics, config, delta_t);
+		tke_update(irrev, delta_t, state, diagnostics, grid);
 	}
 	int layer_index, h_index;
 	double c_g_v;
@@ -313,11 +314,12 @@ int calc_mass_diffusion_coeffs(State *state, Config *config, Irreversible_quanti
 	/*
 	This function computes the viscous tracer diffusion coefficient (including eddies).
 	*/
-	// The Eddy viscosity coefficient only has to be calculated if it has not yet been done.
-	if (config -> momentum_diff_h == 0)
+	// The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
+	if (config -> momentum_diff_h == 0 && config -> temperature_diff_h == 0)
 	{
 		hori_div_viscosity_eff(state, irrev, grid, diagnostics, config, delta_t);
 		hori_curl_viscosity_eff_rhombi(state, irrev, grid, diagnostics, config, delta_t);
+		tke_update(irrev, delta_t, state, diagnostics, grid);
 	}
 	int layer_index, h_index;
 	#pragma omp parallel for private(layer_index, h_index)
@@ -400,7 +402,7 @@ double ver_hor_viscosity(double tke, double delta_z)
 	This function returns the vertical kinematic Eddy viscosity as a function of the specific TKE.
 	*/
 	double mixing_length = 100;
-	double prop_constant = 0.02*fmin(delta_z, mixing_length); // unit: m
+	double prop_constant = 0.03*fmin(delta_z, mixing_length); // unit: m
 	double result = prop_constant*pow(2*tke, 0.5);
 	return result;
 }

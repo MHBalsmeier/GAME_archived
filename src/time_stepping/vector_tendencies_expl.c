@@ -44,7 +44,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     }
     
     // momentum diffusion and dissipation (only updated at the first RK step and if advection is updated as well)
-    if (no_rk_step == 0 && slow_update_bool == 1)
+    if (slow_update_bool == 1)
     {
     	// horizontal momentum diffusion
     	if (config -> momentum_diff_h == 1)

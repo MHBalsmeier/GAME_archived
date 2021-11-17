@@ -44,23 +44,20 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
     }
     
 	// Temperature diffusion gets updated here, but only at the first RK step and if heat conduction is switched on.
-	if ((no_rk_step == 0 && slow_update_bool == 1) && (config -> temperature_diff_h == 1 || config -> temperature_diff_v == 1))
+	if (slow_update_bool == 1 && config -> temperature_diff_h == 1)
 	{
-	    // The diffusion of the temperature depends on its gradient.
-		grad(diagnostics -> temperature_gas, diagnostics -> vector_field_placeholder, grid);
 		// Now we need to calculate the temperature diffusion coefficients.
 	    calc_temp_diffusion_coeffs(state, config, irrev, diagnostics, config -> slow_fast_ratio*delta_t, grid);
+	    // The diffusion of the temperature depends on its gradient.
+		grad(diagnostics -> temperature_gas, diagnostics -> vector_field_placeholder, grid);
 		// Now the diffusive temperature flux density can be obtained.
 	    scalar_times_vector_h(irrev -> scalar_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid);
+	    // The divergence of the diffusive temperature flux density is the diffusive temperature heating.
+	    divv_h(diagnostics -> flux_density, irrev -> temperature_diffusion_heating, grid);
+    	// vertical temperature diffusion
 	    if (config -> temperature_diff_v == 1)
 	    {
 	    	scalar_times_vector_v(irrev -> scalar_diffusion_coeff_numerical_v, diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid);
-	    }
-	    // The divergence of the diffusive temperature flux density is the diffusive temperature heating.
-	    divv_h(diagnostics -> flux_density, irrev -> temperature_diffusion_heating, grid);
-	    // the vertical divergence is only needed if the vertical temperature diffusion is switched on
-	    if (config -> temperature_diff_v == 1)
-	    {
 	    	add_vertical_divv(diagnostics -> flux_density, irrev -> temperature_diffusion_heating, grid);
 		}
 	}
@@ -87,33 +84,18 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 		
 		// mass diffusion, only for gaseous tracers
 		diff_switch = 0;
-		if (i > NO_OF_CONDENSED_CONSTITUENTS && no_rk_step == 0)
+		if (i > NO_OF_CONDENSED_CONSTITUENTS && slow_update_bool == 1 && config -> tracer_diff_h == 1)
 		{
 			// firstly, we need to calculate the mass diffusion coeffcients
-			if (config -> tracer_diff_h == 1 || config -> tracer_diff_v == 1)
-			{
-				diff_switch = 1;
-				calc_mass_diffusion_coeffs(state, config, irrev, diagnostics, config -> slow_fast_ratio*delta_t, grid);
-			}
-			// horizontal mass diffusion
-			if (config -> tracer_diff_h == 1)
-			{
-				grad(&state -> rho[scalar_shift_index], diagnostics -> vector_field_placeholder, grid);
-				scalar_times_vector_h(irrev -> scalar_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
-				divv_h(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
-			}
+			diff_switch = 1;
+			calc_mass_diffusion_coeffs(state, config, irrev, diagnostics, config -> slow_fast_ratio*delta_t, grid);
+			grad(&state -> rho[scalar_shift_index], diagnostics -> vector_field_placeholder, grid);
+			// Now the diffusive mass flux density can be obtained.
+			scalar_times_vector_h(irrev -> scalar_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
+			divv_h(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
 			// vertical mass diffusion
 			if (config -> tracer_diff_v == 1)
 			{
-				if (config -> tracer_diff_h == 0)
-				{
-					grad_vert_cov(&state -> rho[scalar_shift_index], diagnostics -> vector_field_placeholder, grid);
-					#pragma omp parallel for
-					for (int j = 0; j < NO_OF_SCALARS; ++j)
-					{
-						diagnostics -> scalar_field_placeholder[j] = 0;
-					}
-				}
 				scalar_times_vector_v(irrev -> scalar_diffusion_coeff_numerical_v, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
 				add_vertical_divv(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
 			}

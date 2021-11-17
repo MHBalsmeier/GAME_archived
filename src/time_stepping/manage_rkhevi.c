@@ -90,6 +90,9 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 		{
 			three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, config, delta_t, grid);
 		}
+		
+		// At the second RK step slow terms are never updated.
+		slow_update_bool = 0;
     }
     
     // saturation adjustment, calculation of latent heating rates

@@ -144,6 +144,18 @@ int main(int argc, char *argv[])
     	printf("Aborting.\n");
 		exit(1);
 	}
+	if (config -> temperature_diff_h == 0 && config -> temperature_diff_v == 1)
+	{
+		printf("Horizontal temperature diffusion cannot be off if vertical temperature diffusion is on.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
+	if (config -> tracer_diff_h == 0 && config -> tracer_diff_v == 1)
+	{
+		printf("Horizontal tracer diffusion cannot be off if vertical tracer diffusion is on.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
 	
     /*
     This sets the ORO_ID (orography ID) as a function of the IDEAL_INPUT_ID.
