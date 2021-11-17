@@ -86,12 +86,14 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 		diff_switch = 0;
 		if (i > NO_OF_CONDENSED_CONSTITUENTS && slow_update_bool == 1 && config -> tracer_diff_h == 1)
 		{
-			// firstly, we need to calculate the mass diffusion coeffcients
 			diff_switch = 1;
+			// firstly, we need to calculate the mass diffusion coeffcients
 			calc_mass_diffusion_coeffs(state, config, irrev, diagnostics, config -> slow_fast_ratio*delta_t, grid);
+    		// The diffusion of the tracer density depends on its gradient.
 			grad(&state -> rho[scalar_shift_index], diagnostics -> vector_field_placeholder, grid);
 			// Now the diffusive mass flux density can be obtained.
 			scalar_times_vector_h(irrev -> scalar_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
+	    	// The divergence of the diffusive mass flux density is the diffusive mass source rate.
 			divv_h(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
 			// vertical mass diffusion
 			if (config -> tracer_diff_v == 1)
