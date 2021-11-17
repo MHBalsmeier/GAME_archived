@@ -32,8 +32,7 @@ int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *g
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		// preliminary result
-		irrev -> viscosity_div_eff[i] = 7*grid -> mean_area_cell*config -> diff_h_smag_fac
-		*fabs(5.0/3*diagnostics -> wind_divv[i]);
+		irrev -> viscosity_div_eff[i] = config -> diff_h_smag_fac*grid -> mean_area_cell*fabs(diagnostics -> wind_divv[i]);
 		
 		// calculating and adding the molecular viscosity
 		molecular_viscosity = calc_diffusion_coeff(diagnostics -> temperature_gas[i], state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]);
@@ -76,7 +75,7 @@ int hori_curl_viscosity_eff_rhombi(State *state, Irreversible_quantities *irrev,
 		{
 			vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
 			// preliminary result
-			irrev -> viscosity_curl_eff_rhombi[vector_index] = 0.35*grid -> mean_area_cell*config -> diff_h_smag_fac
+			irrev -> viscosity_curl_eff_rhombi[vector_index] = config -> diff_h_smag_fac*grid -> mean_area_cell
 			*fabs(diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index]);
 			
 			// calculating and adding the molecular viscosity
@@ -126,7 +125,7 @@ int hori_curl_viscosity_eff_triangles(State *state, Irreversible_quantities *irr
 		layer_index = i/NO_OF_DUAL_SCALARS_H;
 		h_index = i - layer_index*NO_OF_DUAL_SCALARS_H;
 		// preliminary result
-		irrev -> viscosity_curl_eff_triangles[i] = 0.35*grid -> mean_area_cell*config -> diff_h_smag_fac
+		irrev -> viscosity_curl_eff_triangles[i] = config -> diff_h_smag_fac*grid -> mean_area_cell
 		*fabs(diagnostics -> rel_vort_on_triangles[layer_index*NO_OF_DUAL_SCALARS_H + h_index]);
 		
 		rho_base_index = NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H;
@@ -401,7 +400,7 @@ double ver_hor_viscosity(double tke, double delta_z)
 	This function returns the vertical kinematic Eddy viscosity as a function of the specific TKE.
 	*/
 	double mixing_length = 100;
-	double prop_constant = 0.01*fmin(delta_z, mixing_length); // unit: m
+	double prop_constant = 0.02*fmin(delta_z, mixing_length); // unit: m
 	double result = prop_constant*pow(2*tke, 0.5);
 	return result;
 }
