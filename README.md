@@ -49,7 +49,7 @@ The handbook of the model can be found in the subdirectory handbook. It is to be
 
 ## Installing the model
 
-It is recommended to run the model on Linux. We will not help people who have problems trying to install the model on other operating systems.
+It is recommended to run the model on Linux.
 
 ### Dependencies
 
