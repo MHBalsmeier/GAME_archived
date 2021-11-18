@@ -30,12 +30,12 @@ int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *g
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		// preliminary result
-		irrev -> viscosity_div_eff[i] = 10*config -> diff_h_smag_fac*grid -> mean_area_cell*fabs(diagnostics -> wind_divv[i]);
-		
-		// calculating and adding the molecular viscosity
+		// molecular component
 		irrev -> molecular_diffusion_coeff[i] = calc_diffusion_coeff(diagnostics -> temperature_gas[i], state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]);
-		irrev -> viscosity_div_eff[i] += irrev -> molecular_diffusion_coeff[i];
+		irrev -> viscosity_div_eff[i] = irrev -> molecular_diffusion_coeff[i];
+		
+		// turbulent component (the divergence is approximately one order of magnitude smaller than the vorticity, that is where this prefactor comes from)
+		irrev -> viscosity_div_eff[i] += 10*config -> diff_h_smag_fac*grid -> mean_area_cell*fabs(diagnostics -> wind_divv[i]);
 		
 		// turbulent minimum
 		if (irrev -> viscosity_div_eff[i] < min_diff_h_coeff_turb)
