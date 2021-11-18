@@ -94,8 +94,8 @@ int main(int argc, char *argv[])
 	config -> assume_lte = strtod(argv[28], NULL);
 	config -> slow_fast_ratio = strtod(argv[29], NULL);
 	config -> delta_t_between_analyses = strtod(argv[30], NULL);
-	config -> diff_h_smag_fac = strtod(argv[31], NULL);
-	config -> shear_bg = strtod(argv[32], NULL);
+	config -> diff_h_smag_div = strtod(argv[31], NULL);
+	config -> diff_h_smag_rot = strtod(argv[32], NULL);
 	config -> damping_start_height_over_toa = strtod(argv[33], NULL);
 	config -> damping_coeff_max = strtod(argv[34], NULL);
 	config -> explicit_boundary_layer = strtod(argv[35], NULL);
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
 	config -> precipitation_droplets_velocity = strtod(argv[40], NULL);
 	
 	/*
-	Checking user input for correctness:
+	checking user input for correctness:
 	------------------------------------
 	*/
     if (grid -> no_of_oro_layers < 0 || grid -> no_of_oro_layers >= NO_OF_LAYERS)
@@ -123,14 +123,81 @@ int main(int argc, char *argv[])
     }
 	if (config -> assume_lte != 0 && config -> assume_lte != 1)
 	{
-		printf("simplified_moisture_switch must be either 0 or 1.\n");
+		printf("assume_lte must be either 0 or 1.\n");
     	printf("Aborting.\n");
 		exit(1);
 	}
-	// in the case of block-shaped mountains, no layers follow the orography
-	if (VERT_GRID_TYPE == 1)
+	if (config -> momentum_diff_h != 0 && config -> momentum_diff_h != 1)
 	{
-		grid -> no_of_oro_layers = 0;
+		printf("momentum_diff_h must be either 0 or 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
+	if (config -> momentum_diff_v != 0 && config -> momentum_diff_v != 1)
+	{
+		printf("momentum_diff_v must be either 0 or 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
+	if (config -> temperature_diff_h != 0 && config -> temperature_diff_h != 1)
+	{
+		printf("temperature_diff_h must be either 0 or 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
+	if (config -> temperature_diff_v != 0 && config -> temperature_diff_v != 1)
+	{
+		printf("temperature_diff_v must be either 0 or 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
+	if (config -> tracer_diff_h != 0 && config -> tracer_diff_h != 1)
+	{
+		printf("tracer_diff_h must be either 0 or 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
+	if (config -> tracer_diff_v != 0 && config -> tracer_diff_v != 1)
+	{
+		printf("tracer_diff_v must be either 0 or 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
+	if (config -> rad_on != 0 && config -> rad_on != 1)
+	{
+		printf("rad_on must be either 0 or 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
+	if (config_io -> grib_output_switch != 0 && config_io -> grib_output_switch != 1)
+	{
+		printf("grib_output_switch must be either 0 or 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
+	if (config_io -> netcdf_output_switch != 0 && config_io -> netcdf_output_switch != 1)
+	{
+		printf("netcdf_output_switch must be either 0 or 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
+	if (config_io -> pressure_level_output_switch != 0 && config_io -> pressure_level_output_switch != 1)
+	{
+		printf("pressure_level_output_switch must be either 0 or 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
+	if (config_io -> model_level_output_switch != 0 && config_io -> model_level_output_switch != 1)
+	{
+		printf("model_level_output_switch must be either 0 or 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
+	if (config_io -> surface_output_switch != 0 && config_io -> surface_output_switch != 1)
+	{
+		printf("surface_output_switch must be either 0 or 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
 	}
 	if (config_io -> grib_output_switch == 0 && config_io -> netcdf_output_switch == 0)
 	{
@@ -179,6 +246,11 @@ int main(int argc, char *argv[])
     {
 		ORO_ID = 2;
     }
+    // in the case of block-shaped mountains, no layers follow the orography
+	if (VERT_GRID_TYPE == 1)
+	{
+		grid -> no_of_oro_layers = 0;
+	}
     /*
 	Determining the name of the grid file from the RES_ID, NO_OF_LAYERS and so on.
     ------------------------------------------------------------------------------
@@ -326,8 +398,8 @@ int main(int argc, char *argv[])
 	{
 		printf("Vertical tracer diffusion is turned on.\n");
 	}
-	printf("Horizontal diffusion Smagorinsky factor: %lf.\n", config -> diff_h_smag_fac);
-	printf("Background shear: %lf 1/s.\n", config -> shear_bg);
+	printf("Horizontal diffusion Smagorinsky factor acting on divergent movements: %lf.\n", config -> diff_h_smag_div);
+	printf("Horizontal diffusion Smagorinsky factor acting on vortical movements: %lf.\n", config -> diff_h_smag_rot);
 	printf("Swamp layer starts at %lf m.\n", config -> damping_start_height_over_toa*toa);
 	printf("Maximum swamp layer damping coefficient: %lf 1/s.\n", config -> damping_coeff_max);
 	printf("%s", stars);
@@ -447,7 +519,7 @@ int main(int argc, char *argv[])
 		h_index = i - layer_index*NO_OF_SCALARS_H;
 		cell_area_sum += grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
 	}
-	grid -> mean_area_cell = cell_area_sum/(NO_OF_LEVELS*NO_OF_SCALARS_H);
+	grid -> mean_velocity_area = 2.0/3*cell_area_sum/(NO_OF_LEVELS*NO_OF_SCALARS_H);
     
     // some more checks and info
     if (radiation_delta_t < delta_t)

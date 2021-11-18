@@ -96,7 +96,7 @@ int is_land[NO_OF_SCALARS_H];
 int latlon_interpol_indices[5*NO_OF_LATLON_IO_POINTS];
 double latlon_interpol_weights[5*NO_OF_LATLON_IO_POINTS];
 double stretching_parameter;
-double mean_area_cell;
+double mean_velocity_area;
 } Grid;
 
 // Contains properties of the dual grid.
@@ -185,8 +185,8 @@ int nwp_mode;
 int delta_t_between_analyses;
 int explicit_boundary_layer;
 int waves_on;
-double diff_h_smag_fac;
-double shear_bg;
+double diff_h_smag_div;
+double diff_h_smag_rot;
 double damping_start_height_over_toa;
 double damping_coeff_max;
 double impl_thermo_weight;

@@ -22,10 +22,8 @@ int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *g
 	/*
 	This function computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal divergent movements.
 	*/
-	// the minimum "background" diffusion coefficient
-	double min_diff_h_coeff_turb = grid -> mean_area_cell*config -> diff_h_smag_fac*config -> shear_bg;
 	// the maximum diffusion coefficient (stability constraint)
-	double max_diff_h_coeff_turb = 0.125*grid -> mean_area_cell/delta_t;
+	double max_diff_h_coeff_turb = 0.125*grid -> mean_velocity_area/delta_t;
 	
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
@@ -34,14 +32,9 @@ int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *g
 		irrev -> molecular_diffusion_coeff[i] = calc_diffusion_coeff(diagnostics -> temperature_gas[i], state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]);
 		irrev -> viscosity_div_eff[i] = irrev -> molecular_diffusion_coeff[i];
 		
-		// turbulent component (the divergence is approximately one order of magnitude smaller than the vorticity, that is where this prefactor comes from)
-		irrev -> viscosity_div_eff[i] += 10*config -> diff_h_smag_fac*grid -> mean_area_cell*fabs(diagnostics -> wind_divv[i]);
-		
-		// turbulent minimum
-		if (irrev -> viscosity_div_eff[i] < min_diff_h_coeff_turb)
-		{
-			irrev -> viscosity_div_eff[i] = min_diff_h_coeff_turb;
-		}
+		// turbulent component (the divergence is approximately one order of magnitude smaller than the vorticity, that is where the prefactor of 6 comes from)
+		// 4.0/3 is a result of the stress tensor
+		irrev -> viscosity_div_eff[i] += config -> diff_h_smag_div*grid -> mean_velocity_area*fabs(4.0/3*diagnostics -> wind_divv[i]);
 		
 		// maximum (stability constraint)
 		if (irrev -> viscosity_div_eff[i] > max_diff_h_coeff_turb)
@@ -60,10 +53,8 @@ int hori_curl_viscosity_eff_rhombi(State *state, Irreversible_quantities *irrev,
 	/*
 	This function computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal curl movements on rhombi.
 	*/
-	// the minimum "background" diffusion coefficient
-	double min_diff_h_coeff_turb = grid -> mean_area_cell*config -> diff_h_smag_fac*config -> shear_bg;
 	// the maximum diffusion coefficient (stability constraint)
-	double max_diff_h_coeff_turb = 0.125*grid -> mean_area_cell/delta_t;
+	double max_diff_h_coeff_turb = 0.125*grid -> mean_velocity_area/delta_t;
 	double molecular_viscosity;
 	
 	int scalar_index_from, scalar_index_to, vector_index;
@@ -74,7 +65,7 @@ int hori_curl_viscosity_eff_rhombi(State *state, Irreversible_quantities *irrev,
 		{
 			vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
 			// preliminary result
-			irrev -> viscosity_curl_eff_rhombi[vector_index] = config -> diff_h_smag_fac*grid -> mean_area_cell
+			irrev -> viscosity_curl_eff_rhombi[vector_index] = config -> diff_h_smag_rot*grid -> mean_velocity_area
 			*fabs(diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index]);
 			
 			// calculating and adding the molecular viscosity
@@ -84,12 +75,6 @@ int hori_curl_viscosity_eff_rhombi(State *state, Irreversible_quantities *irrev,
 			0.5*(diagnostics -> temperature_gas[scalar_index_from] + diagnostics -> temperature_gas[scalar_index_to]),
 			0.5*(state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_from] + state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_to]));
 			irrev -> viscosity_curl_eff_rhombi[vector_index] += molecular_viscosity;
-			
-			// turbulent minimum
-			if (irrev -> viscosity_curl_eff_rhombi[vector_index] < min_diff_h_coeff_turb)
-			{
-				irrev -> viscosity_curl_eff_rhombi[vector_index] = min_diff_h_coeff_turb;
-			}
 			
 			// maximum (stability constraint)
 			if (irrev -> viscosity_curl_eff_rhombi[vector_index] > max_diff_h_coeff_turb)
@@ -111,10 +96,8 @@ int hori_curl_viscosity_eff_triangles(State *state, Irreversible_quantities *irr
 	/*
 	This function computes the effective diffusion coefficient (molecular + turbulent) acting on horizontal curl movements on triangles.
 	*/
-	// the minimum "background" diffusion coefficient
-	double min_diff_h_coeff_turb = grid -> mean_area_cell*config -> diff_h_smag_fac*config -> shear_bg;
 	// the maximum diffusion coefficient (stability constraint)
-	double max_diff_h_coeff_turb = 0.125*grid -> mean_area_cell/delta_t;
+	double max_diff_h_coeff_turb = 0.125*grid -> mean_velocity_area/delta_t;
 	
 	int layer_index, h_index, rho_base_index, temp_base_index;
 	double molecular_viscosity, density_value;
@@ -124,7 +107,7 @@ int hori_curl_viscosity_eff_triangles(State *state, Irreversible_quantities *irr
 		layer_index = i/NO_OF_DUAL_SCALARS_H;
 		h_index = i - layer_index*NO_OF_DUAL_SCALARS_H;
 		// preliminary result
-		irrev -> viscosity_curl_eff_triangles[i] = config -> diff_h_smag_fac*grid -> mean_area_cell
+		irrev -> viscosity_curl_eff_triangles[i] = config -> diff_h_smag_rot*grid -> mean_velocity_area
 		*fabs(diagnostics -> rel_vort_on_triangles[layer_index*NO_OF_DUAL_SCALARS_H + h_index]);
 		
 		rho_base_index = NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H;
@@ -148,12 +131,6 @@ int hori_curl_viscosity_eff_triangles(State *state, Irreversible_quantities *irr
 		+ diagnostics -> temperature_gas[temp_base_index + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]),
 		density_value);
 		irrev -> viscosity_curl_eff_triangles[i] += molecular_viscosity;
-		
-		// turbulent minimum
-		if (irrev -> viscosity_curl_eff_triangles[i] < min_diff_h_coeff_turb)
-		{
-			irrev -> viscosity_curl_eff_triangles[i] = min_diff_h_coeff_turb;
-		}
 		
 		// maximum (stability constraint)
 		if (irrev -> viscosity_curl_eff_triangles[i] > max_diff_h_coeff_turb)
@@ -379,7 +356,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
 		{
 			i = layer_index*NO_OF_SCALARS_H + h_index;
-			decay_constant = 8*pow(M_PI, 2)/grid -> mean_area_cell*(irrev -> viscosity_div_eff[i] + irrev -> viscosity_curl_eff[i])/density_gas(state, i);
+			decay_constant = 8*pow(M_PI, 2)/grid -> mean_velocity_area*(irrev -> viscosity_div_eff[i] + irrev -> viscosity_curl_eff[i])/density_gas(state, i);
 			production_rate = 0;
 			// the decay constants differ over land vs over water
 			if (grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index] <= boundary_layer_height)
