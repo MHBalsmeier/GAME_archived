@@ -31,7 +31,7 @@ int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *g
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		// preliminary result
-		irrev -> viscosity_div_eff[i] = config -> diff_h_smag_fac*grid -> mean_area_cell*fabs(diagnostics -> wind_divv[i]);
+		irrev -> viscosity_div_eff[i] = 10*config -> diff_h_smag_fac*grid -> mean_area_cell*fabs(diagnostics -> wind_divv[i]);
 		
 		// calculating and adding the molecular viscosity
 		irrev -> molecular_diffusion_coeff[i] = calc_diffusion_coeff(diagnostics -> temperature_gas[i], state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]);
@@ -346,7 +346,7 @@ int calc_mass_diffusion_coeffs(State *state, Config *config, Irreversible_quanti
 		// molecular component
 		= irrev -> molecular_diffusion_coeff[i]
 		// turbulent component
-		+ 0.1*(irrev -> viscosity_div_eff[i] + irrev -> viscosity_curl_eff[i])
+		+ (irrev -> viscosity_div_eff[i] + irrev -> viscosity_curl_eff[i])
 		/density_gas(state, i);
 		// vertical diffusion coefficient
 		irrev -> scalar_diffusion_coeff_numerical_v[i]
