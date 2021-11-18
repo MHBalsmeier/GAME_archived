@@ -213,7 +213,7 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 	return 0;
 }
 
-int vert_w_viscosity_eff(State *state, Grid *grid, Diagnostics *diagnostics, double delta_t)
+int vert_w_viscosity_eff(State *state, Grid *grid, Diagnostics *diagnostics, Irreversible_quantities *irrev, double delta_t)
 {
 	/*
 	This function multiplies scalar_field_placeholder (containing dw/dz) by the diffusion coefficient acting on w because of w.
@@ -223,22 +223,23 @@ int vert_w_viscosity_eff(State *state, Grid *grid, Diagnostics *diagnostics, dou
 	grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H]
 	, 2)/delta_t;
 	int i;
-	double mom_diff_coeff, molecuar_viscosity;
-	#pragma omp parallel for private(mom_diff_coeff, molecuar_viscosity, i)
+	double mom_diff_coeff;
+	#pragma omp parallel for private(mom_diff_coeff, i)
 	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
 	{
 		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
 		{
 			i = layer_index*NO_OF_SCALARS_H + h_index;
 			// this is the value resulting from turbulence
-			mom_diff_coeff = 0.11*pow(
+			mom_diff_coeff
+			// molecular viscosity
+			= irrev -> molecular_diffusion_coeff[i]
+			// turbulent component
+			+ 0.11*pow(
 			grid -> z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER]
 			, 2)
 			*fabs(diagnostics -> scalar_field_placeholder[i]);
-			// computing and adding the molecular momentum diffusion
-			molecuar_viscosity = calc_diffusion_coeff(diagnostics -> temperature_gas[i], state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]);
-			mom_diff_coeff += molecuar_viscosity;
-			// this is the stability criterion
+			// stability criterion
 			if (mom_diff_coeff > max_diff_v_coeff_turb)
 			{
 				mom_diff_coeff = max_diff_v_coeff_turb;
