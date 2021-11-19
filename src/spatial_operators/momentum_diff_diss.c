@@ -30,13 +30,13 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
     // calculating the relative vorticity of the wind field
 	calc_rel_vort(state -> wind, diagnostics, grid, dualgrid);
     
-    // calculating the effective horizontal kinematic viscosity acting on divergences (Eddy viscosity)
-	hori_div_viscosity_eff(state, irrev, grid, diagnostics, config, delta_t);
+    // calculating the effective horizontal kinematic viscosity acting on divergences (eddy viscosity)
+	hori_div_viscosity_eff(state, irrev, grid, diagnostics, config);
 	
-    // calculating the effective horizontal kinematic viscosity acting on vorticities on rhombi (Eddy viscosity)
-	hori_curl_viscosity_eff_rhombi(state, irrev, grid, diagnostics, config, delta_t);
-    // calculating the effective horizontal kinematic viscosity acting on vorticities on triangles (Eddy viscosity)
-	hori_curl_viscosity_eff_triangles(state, irrev, grid, dualgrid, diagnostics, config, delta_t);
+    // calculating the effective horizontal kinematic viscosity acting on vorticities on rhombi (eddy viscosity)
+	hori_curl_viscosity_eff_rhombi(state, irrev, grid, diagnostics, config);
+    // calculating the effective horizontal kinematic viscosity acting on vorticities on triangles (eddy viscosity)
+	hori_curl_viscosity_eff_triangles(state, irrev, grid, dualgrid, diagnostics, config);
 	
 	/*
 	gradient of divergence component
