@@ -19,7 +19,7 @@ The momentum diffusion acceleration is computed here (apart from the diffusion c
 
 int hor_calc_curl_of_vorticity(Curl_field, Vector_field, double [], Grid *, Dualgrid *);
 
-int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config *config, Grid *grid, Dualgrid *dualgrid, double delta_t)
+int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config *config, Grid *grid, Dualgrid *dualgrid)
 {
 	/*
 	This is the horizontal momentum diffusion operator (horizontal diffusion of horizontal velocity).

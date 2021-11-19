@@ -49,7 +49,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     	// horizontal momentum diffusion
     	if (config -> momentum_diff_h == 1)
     	{
-			hori_momentum_diffusion(state, diagnostics, irrev, config, grid, dualgrid, config -> slow_fast_ratio*delta_t);
+			hori_momentum_diffusion(state, diagnostics, irrev, config, grid, dualgrid);
 		}
 		// vertical momentum diffusion
 		if (config -> momentum_diff_v == 1)
