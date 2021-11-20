@@ -173,6 +173,13 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         	grid -> adjacent_vector_indices_h[i] = 0;
         }
     }
+	// this is only relevant for idealized test cases, for other cases, it will be overwritten by the function
+    // set_sfc_properties
+    #pragma omp parallel for
+    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+	{
+        grid -> roughness_length[i] = 0.02;
+    }
     // determining coordinate slopes
     grad_hor_cov(grid -> z_scalar, grid -> slope, grid);
     // computing the gradient of the gravity potential
