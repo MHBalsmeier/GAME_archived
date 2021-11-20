@@ -42,6 +42,7 @@ radiation_delta_t=10800 # every how many seconds the radiation fluxes wil be upd
 assume_lte=1 # set this to one if you do not want to assign individual temperatures to tracers
 cloud_droplets_velocity=0.01 # sedimentation velocity of cloud droplets
 precipitation_droplets_velocity=0.1 # sedimentation velocity of precipitation droplets
+mixing_length=100.0 # mixing length for vertical diffusion scheme
 
 # I/O
 write_out_interval=86400 # every how many seconds an output file will be created

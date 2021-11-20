@@ -15,7 +15,7 @@ In this file, diffusion coefficients, including Eddy viscosities, are computed.
 #include "../thermodynamics.h"
 
 int tke_update(Irreversible_quantities *, double, State *, Diagnostics *, Grid *);
-double ver_hor_viscosity(double, double);
+double ver_hor_viscosity(double, double, double);
 
 int hori_div_viscosity_eff(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config *config)
 {
@@ -162,10 +162,10 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 		// the turbulent component
 		delta_z = grid -> z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
 		- grid -> z_vector[NO_OF_SCALARS_H + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER + h_index];
-		mom_diff_coeff = 0.25*(ver_hor_viscosity(irrev -> tke[scalar_base_index + grid -> from_index[h_index]], delta_z)
-		+ ver_hor_viscosity(irrev -> tke[scalar_base_index + grid -> to_index[h_index]], delta_z)
-		+ ver_hor_viscosity(irrev -> tke[(layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]], delta_z)
-		+ ver_hor_viscosity(irrev -> tke[(layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]], delta_z));
+		mom_diff_coeff = 0.25*(ver_hor_viscosity(irrev -> tke[scalar_base_index + grid -> from_index[h_index]], delta_z, irrev -> mixing_length)
+		+ ver_hor_viscosity(irrev -> tke[scalar_base_index + grid -> to_index[h_index]], delta_z, irrev -> mixing_length)
+		+ ver_hor_viscosity(irrev -> tke[(layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]], delta_z, irrev -> mixing_length)
+		+ ver_hor_viscosity(irrev -> tke[(layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]], delta_z, irrev -> mixing_length));
 		// computing and adding the molecular viscosity
 		// the scalar variables need to be averaged to the vector points at half levels
 		molecuar_viscosity = calc_diffusion_coeff(0.25*(diagnostics -> temperature_gas[scalar_base_index + grid -> from_index[h_index]]
@@ -224,13 +224,13 @@ int vert_w_viscosity_eff(State *state, Grid *grid, Diagnostics *diagnostics, Irr
 		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
 		{
 			i = layer_index*NO_OF_SCALARS_H + h_index;
-			// this is the value resulting from turbulence
 			mom_diff_coeff
 			// molecular viscosity
 			= irrev -> molecular_diffusion_coeff[i]
 			// turbulent component
-			+ 0.11*pow(
-			grid -> z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER]
+			+ pow(
+			fmin(irrev -> mixing_length,
+			grid -> z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER])
 			, 2)
 			*fabs(diagnostics -> scalar_field_placeholder[i]);
 			// stability criterion
@@ -283,7 +283,9 @@ int calc_temp_diffusion_coeffs(State *state, Config *config, Irreversible_quanti
 		// molecular component
 		= density_gas(state, i)*c_g_v*(irrev -> molecular_diffusion_coeff[i]
 		// turbulent component
-		+ ver_hor_viscosity(irrev -> tke[i], grid -> z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER]));
+		+ ver_hor_viscosity(irrev -> tke[i],
+		grid -> z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER],
+		irrev -> mixing_length));
 	}
 	return 0;
 }
@@ -325,7 +327,8 @@ int calc_mass_diffusion_coeffs(State *state, Config *config, Irreversible_quanti
 		// molecular component
 		= irrev -> molecular_diffusion_coeff[i]
 		// turbulent component
-		+ ver_hor_viscosity(irrev -> tke[i], grid -> z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER]);
+		+ ver_hor_viscosity(irrev -> tke[i], grid -> z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER],
+		irrev -> mixing_length);
 	}
 	return 0;
 }
@@ -385,12 +388,11 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	return 0;
 }
 
-double ver_hor_viscosity(double tke, double delta_z)
+double ver_hor_viscosity(double tke, double delta_z, double mixing_length)
 {
 	/*
 	This function returns the vertical kinematic Eddy viscosity as a function of the specific TKE.
 	*/
-	double mixing_length = 100;
 	double prop_constant = 0.03*fmin(delta_z, mixing_length); // unit: m
 	double result = prop_constant*pow(2*tke, 0.5);
 	return result;

@@ -104,6 +104,8 @@ int main(int argc, char *argv[])
 	config -> impl_thermo_weight = strtod(argv[38], NULL);
 	config -> cloud_droplets_velocity = strtod(argv[39], NULL);
 	config -> precipitation_droplets_velocity = strtod(argv[40], NULL);
+    Irreversible_quantities *irrev = calloc(1, sizeof(Irreversible_quantities));
+	irrev -> mixing_length = strtod(argv[41], NULL);
 	
 	/*
 	checking user input for correctness:
@@ -637,7 +639,6 @@ int main(int argc, char *argv[])
     double t_rad_update = t_0;
     int wind_10_m_step_counter = 0;
     State *state_tendency = calloc(1, sizeof(State));
-    Irreversible_quantities *irrev = calloc(1, sizeof(Irreversible_quantities));
 	// the maximum horizontal diffusion coefficient (stability constraint)
 	irrev -> max_diff_h_coeff_turb = 0.125*grid -> mean_velocity_area/(config -> slow_fast_ratio*delta_t);
     State *state_new = calloc(1, sizeof(State));
