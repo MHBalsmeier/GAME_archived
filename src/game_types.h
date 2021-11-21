@@ -243,9 +243,9 @@ int month;
 int day;
 int hour;
 char run_id[100];
-char month_string[2];
-char day_string[2];
-char hour_string[2];
+char month_string[3];
+char day_string[3];
+char hour_string[3];
 int ideal_input_id;
 } Config_io;
 
