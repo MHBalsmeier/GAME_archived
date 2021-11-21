@@ -33,7 +33,7 @@ int global_scalar_integrator(Scalar_field, Grid *, double *);
 double pseudopotential(State *, Grid *, int);
 int get_pressure_levels(double []);
 
-int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, char RUN_ID[], Config_io *config_io, Config *config, Soil *soil)
+int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, Config_io *config_io, Config *config, Soil *soil)
 {
 	printf("Writing output ...\n");
 	// Diagnostics, forcings and radiation are primarily handed over for checks.
@@ -287,9 +287,9 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		if (config_io -> netcdf_output_switch == 1)
 		{
 			char OUTPUT_FILE_PRE[300];
-			sprintf(OUTPUT_FILE_PRE, "%s+%ds_surface.nc", RUN_ID, (int) (t_write - t_init));
+			sprintf(OUTPUT_FILE_PRE, "%s+%ds_surface.nc", config_io -> run_id, (int) (t_write - t_init));
 			char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
-			sprintf(OUTPUT_FILE, "%s+%ds_surface.nc", RUN_ID, (int) (t_write - t_init));
+			sprintf(OUTPUT_FILE, "%s+%ds_surface.nc", config_io -> run_id, (int) (t_write - t_init));
 			int scalar_h_dimid, mslp_id, ncid, retval, surface_p_id, rprate_id, sprate_id, cape_id, tcdc_id, t2_id, u10_id, v10_id, gusts_id;
 			
 			if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
@@ -373,9 +373,9 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 			long unsigned tcc_string_length = 4;
 			long unsigned cape_string_length = 5;
 			char OUTPUT_FILE_PRE[300];
-			sprintf(OUTPUT_FILE_PRE, "%s+%ds_surface.grb2", RUN_ID, (int) (t_write - t_init));
+			sprintf(OUTPUT_FILE_PRE, "%s+%ds_surface.grb2", config_io -> run_id, (int) (t_write - t_init));
 			char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
-			sprintf(OUTPUT_FILE, "%s+%ds_surface.grb2", RUN_ID, (int) (t_write - t_init));
+			sprintf(OUTPUT_FILE, "%s+%ds_surface.grb2", config_io -> run_id, (int) (t_write - t_init));
 			char *SAMPLE_FILENAME = "../../test_generator/test_states/grib_template.grb2";
 			FILE *SAMPLE_FILE;
 			if (t_init < 0)
@@ -736,11 +736,11 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		{
 			int OUTPUT_FILE_PRESSURE_LEVEL_LENGTH = 300;
 			char *OUTPUT_FILE_PRESSURE_LEVEL_PRE = malloc((OUTPUT_FILE_PRESSURE_LEVEL_LENGTH + 1)*sizeof(char));
-			sprintf(OUTPUT_FILE_PRESSURE_LEVEL_PRE, "%s+%ds_pressure_levels.nc", RUN_ID, (int) (t_write - t_init));
+			sprintf(OUTPUT_FILE_PRESSURE_LEVEL_PRE, "%s+%ds_pressure_levels.nc", config_io -> run_id, (int) (t_write - t_init));
 			OUTPUT_FILE_PRESSURE_LEVEL_LENGTH = strlen(OUTPUT_FILE_PRESSURE_LEVEL_PRE);
 			free(OUTPUT_FILE_PRESSURE_LEVEL_PRE);
 			char *OUTPUT_FILE_PRESSURE_LEVEL = malloc((OUTPUT_FILE_PRESSURE_LEVEL_LENGTH + 1)*sizeof(char));
-			sprintf(OUTPUT_FILE_PRESSURE_LEVEL, "%s+%ds_pressure_levels.nc", RUN_ID, (int) (t_write - t_init));
+			sprintf(OUTPUT_FILE_PRESSURE_LEVEL, "%s+%ds_pressure_levels.nc", config_io -> run_id, (int) (t_write - t_init));
 			int ncid_pressure_level, scalar_h_dimid, level_dimid, geopot_height_id, temp_pressure_level_id, rh_pressure_level_id, wind_u_pressure_level_id, wind_v_pressure_level_id, pressure_levels_id, epv_pressure_level_id, rel_vort_pressure_level_id;
 			if ((retval = nc_create(OUTPUT_FILE_PRESSURE_LEVEL, NC_CLOBBER, &ncid_pressure_level)))
 				NCERR(retval);
@@ -818,11 +818,11 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 			FILE *SAMPLE_FILE;
 			int OUTPUT_FILE_PRESSURE_LEVEL_LENGTH = 300;
 			char *OUTPUT_FILE_PRESSURE_LEVEL_PRE = malloc((OUTPUT_FILE_PRESSURE_LEVEL_LENGTH + 1)*sizeof(char));
-			sprintf(OUTPUT_FILE_PRESSURE_LEVEL_PRE, "%s+%ds_pressure_levels.grb2", RUN_ID, (int) (t_write - t_init));
+			sprintf(OUTPUT_FILE_PRESSURE_LEVEL_PRE, "%s+%ds_pressure_levels.grb2", config_io -> run_id, (int) (t_write - t_init));
 			OUTPUT_FILE_PRESSURE_LEVEL_LENGTH = strlen(OUTPUT_FILE_PRESSURE_LEVEL_PRE);
 			free(OUTPUT_FILE_PRESSURE_LEVEL_PRE);
 			char *OUTPUT_FILE_PRESSURE_LEVEL = malloc((OUTPUT_FILE_PRESSURE_LEVEL_LENGTH + 1)*sizeof(char));
-			sprintf(OUTPUT_FILE_PRESSURE_LEVEL, "%s+%ds_pressure_levels.grb2", RUN_ID, (int) (t_write - t_init));
+			sprintf(OUTPUT_FILE_PRESSURE_LEVEL, "%s+%ds_pressure_levels.grb2", config_io -> run_id, (int) (t_write - t_init));
 			FILE *OUT_GRIB;
 			OUT_GRIB = fopen(OUTPUT_FILE_PRESSURE_LEVEL, "w+");
 			double *geopotential_height_pressure_level = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -1096,9 +1096,9 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		double *divv_h = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *wind_w_h = malloc(NO_OF_SCALARS_H*sizeof(double));
 		char OUTPUT_FILE_PRE[300];
-		sprintf(OUTPUT_FILE_PRE, "%s+%ds.grb2", RUN_ID, (int) (t_write - t_init));
+		sprintf(OUTPUT_FILE_PRE, "%s+%ds.grb2", config_io -> run_id, (int) (t_write - t_init));
 		char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
-		sprintf(OUTPUT_FILE, "%s+%ds.grb2", RUN_ID, (int) (t_write - t_init));
+		sprintf(OUTPUT_FILE, "%s+%ds.grb2", config_io -> run_id, (int) (t_write - t_init));
 		char *SAMPLE_FILENAME = "../../test_generator/test_states/grib_template.grb2";
 		FILE *SAMPLE_FILE;
 		if (t_init < 0)
@@ -1353,9 +1353,9 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 			temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = diagnostics -> temperature_gas[i];
 		}
 		char OUTPUT_FILE_PRE[300];
-		sprintf(OUTPUT_FILE_PRE, "%s+%ds.nc", RUN_ID, (int) (t_write - t_init));
+		sprintf(OUTPUT_FILE_PRE, "%s+%ds.nc", config_io -> run_id, (int) (t_write - t_init));
 		char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
-		sprintf(OUTPUT_FILE, "%s+%ds.nc", RUN_ID, (int) (t_write - t_init));
+		sprintf(OUTPUT_FILE, "%s+%ds.nc", config_io -> run_id, (int) (t_write - t_init));
 		int ncid, retval, scalar_dimid, vector_h_dimid, vector_v_dimid, vector_dimid, densities_dimid, temperatures_dimid,
 		curl_field_dimid, single_double_dimid, densities_id, temperatures_id, wind_id, rh_id, divv_h_all_layers_id, rel_vort_id, stretching_parameter_id;
 		

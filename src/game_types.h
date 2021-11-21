@@ -97,6 +97,7 @@ int latlon_interpol_indices[5*NO_OF_LATLON_IO_POINTS];
 double latlon_interpol_weights[5*NO_OF_LATLON_IO_POINTS];
 double stretching_parameter;
 double mean_velocity_area;
+int vert_grid_type;
 } Grid;
 
 // Contains properties of the dual grid.
@@ -185,6 +186,9 @@ int nwp_mode;
 int delta_t_between_analyses;
 int explicit_boundary_layer;
 int waves_on;
+int total_run_span;
+int toa;
+int oro_id;
 double diff_h_smag_div;
 double diff_h_smag_rot;
 double damping_start_height_over_toa;
@@ -192,6 +196,8 @@ double damping_coeff_max;
 double impl_thermo_weight;
 double cloud_droplets_velocity;
 double precipitation_droplets_velocity;
+double dt_parameter;
+double radiation_delta_t;
 } Config;
 
 // soil information
@@ -228,6 +234,19 @@ int netcdf_output_switch;
 int pressure_level_output_switch;
 int model_level_output_switch;
 int surface_output_switch;
+int write_out_interval;
+int write_out_mass_integrals;
+int write_out_rhotheta_integral;
+int write_out_energy_integrals;
+int year;
+int month;
+int day;
+int hour;
+char run_id[100];
+char month_string[2];
+char day_string[2];
+char hour_string[2];
+int ideal_input_id;
 } Config_io;
 
 
