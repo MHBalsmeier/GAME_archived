@@ -31,17 +31,17 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	calc_rel_vort(state -> wind, diagnostics, grid, dualgrid);
     
     // calculating the effective horizontal kinematic viscosity acting on divergences (eddy viscosity)
-	hori_div_viscosity_eff(state, irrev, grid, diagnostics, config);
+	hori_div_viscosity(state, irrev, grid, diagnostics, config);
 	
     // calculating the effective horizontal kinematic viscosity acting on vorticities on rhombi (eddy viscosity)
-	hori_curl_viscosity_eff_rhombi(state, irrev, grid, diagnostics, config);
+	hori_curl_viscosity_rhombi(state, irrev, grid, diagnostics, config);
     // calculating the effective horizontal kinematic viscosity acting on vorticities on triangles (eddy viscosity)
-	hori_curl_viscosity_eff_triangles(state, irrev, grid, dualgrid, diagnostics, config);
+	hori_curl_viscosity_triangles(state, irrev, grid, dualgrid, diagnostics, config);
 	
 	/*
 	gradient of divergence component
 	*/
-	scalar_times_scalar(irrev -> viscosity_div_eff, diagnostics -> wind_divv, diagnostics -> wind_divv);
+	scalar_times_scalar(irrev -> viscosity_div, diagnostics -> wind_divv, diagnostics -> wind_divv);
 	grad_hor(diagnostics -> wind_divv, diagnostics -> vector_field_placeholder, grid);
     
     /*
@@ -55,14 +55,14 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 			// multiplying the diffusion coefficient by the relative vorticity
 			// diagnostics -> rel_vort is a misuse of name
 			diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index]
-			= irrev -> viscosity_curl_eff_rhombi[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
+			= irrev -> viscosity_curl_rhombi[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index]
 			*diagnostics -> rel_vort[NO_OF_VECTORS_H + 2*layer_index*NO_OF_VECTORS_H + h_index];
 		}
 	}
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_DUAL_V_VECTORS; ++i)
 	{
-		diagnostics -> rel_vort_on_triangles[i] = irrev -> viscosity_curl_eff_triangles[i]*diagnostics -> rel_vort_on_triangles[i];
+		diagnostics -> rel_vort_on_triangles[i] = irrev -> viscosity_curl_triangles[i]*diagnostics -> rel_vort_on_triangles[i];
 	}
     hor_calc_curl_of_vorticity(diagnostics -> rel_vort, diagnostics -> rel_vort_on_triangles, diagnostics -> curl_of_vorticity, grid, dualgrid);
 	
@@ -138,8 +138,8 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		+ grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index]]);
 		delta_z = z_upper - z_lower;
 		irrev -> friction_acc[vector_index] +=
-		(irrev -> vert_hor_viscosity_eff[i]*diagnostics -> dv_hdz[i]
-		- irrev -> vert_hor_viscosity_eff[i + NO_OF_VECTORS_H]*diagnostics -> dv_hdz[i + NO_OF_VECTORS_H])/delta_z
+		(irrev -> vert_hor_viscosity[i]*diagnostics -> dv_hdz[i]
+		- irrev -> vert_hor_viscosity[i + NO_OF_VECTORS_H]*diagnostics -> dv_hdz[i + NO_OF_VECTORS_H])/delta_z
 		/(0.5*(density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]) + density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index])));
 	}
 	
@@ -154,7 +154,7 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	// computing something like dw/dz
 	add_vertical_divv(state -> wind, diagnostics -> scalar_field_placeholder, grid);
 	// computing and multiplying by the respective diffusion coefficient
-	vert_w_viscosity_eff(state, grid, diagnostics, irrev, delta_t);
+	vert_w_viscosity(state, grid, diagnostics, irrev, delta_t);
 	// taking the second derivative to compute the diffusive tendency
 	grad_vert_cov(diagnostics -> scalar_field_placeholder, irrev -> friction_acc, grid);
 	
@@ -185,18 +185,18 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 			vector_index = NO_OF_SCALARS_H + h_index + layer_index*NO_OF_VECTORS_PER_LAYER;
 			if (layer_index == 0)
 			{
-				diagnostics -> vector_field_placeholder[vector_index] = 0.5*irrev -> vert_hor_viscosity_eff[layer_index*NO_OF_VECTORS_H + h_index]
+				diagnostics -> vector_field_placeholder[vector_index] = 0.5*irrev -> vert_hor_viscosity[layer_index*NO_OF_VECTORS_H + h_index]
 				*diagnostics -> vector_field_placeholder[vector_index];
 			}
 			else if (layer_index == NO_OF_LAYERS - 1)
 			{
-				diagnostics -> vector_field_placeholder[vector_index] = 0.5*irrev -> vert_hor_viscosity_eff[(layer_index - 1)*NO_OF_VECTORS_H + h_index]
+				diagnostics -> vector_field_placeholder[vector_index] = 0.5*irrev -> vert_hor_viscosity[(layer_index - 1)*NO_OF_VECTORS_H + h_index]
 				*diagnostics -> vector_field_placeholder[vector_index];
 			}
 			else
 			{
 				diagnostics -> vector_field_placeholder[vector_index] = 0.5
-				*(irrev -> vert_hor_viscosity_eff[(layer_index - 1)*NO_OF_VECTORS_H + h_index] + irrev -> vert_hor_viscosity_eff[layer_index*NO_OF_VECTORS_H + h_index])
+				*(irrev -> vert_hor_viscosity[(layer_index - 1)*NO_OF_VECTORS_H + h_index] + irrev -> vert_hor_viscosity[layer_index*NO_OF_VECTORS_H + h_index])
 				*diagnostics -> vector_field_placeholder[vector_index];
 			}
 		}
