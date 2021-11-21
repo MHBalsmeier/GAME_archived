@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     clock_t begin = clock();
     
     /*
-    Allocating memory.
+    allocating memory
     ------------------
     */
     Grid *grid = calloc(1, sizeof(Grid));
@@ -42,8 +42,8 @@ int main(int argc, char *argv[])
 	Soil *soil = calloc(1, sizeof(Soil));
     
     /*
-    Reading command line input.
-    ---------------------------
+    reading command line input
+    --------------------------
     */
     int agv_counter = 1;
     config -> total_run_span = strtod(argv[agv_counter], NULL);
@@ -599,8 +599,8 @@ int main(int argc, char *argv[])
     	/*
     	Writing the actual output.
     	--------------------------
-    	// interpolating to the output time
     	*/
+    	// interpolating to the output time
         if(t_0 + delta_t >= t_write && t_0 <= t_write)
         {
             interpolation_t(state_old, state_new, state_write, t_0, t_0 + delta_t, t_write, grid);
