@@ -33,7 +33,7 @@ int global_scalar_integrator(Scalar_field, Grid *, double *);
 double pseudopotential(State *, Grid *, int);
 int get_pressure_levels(double []);
 
-int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, Config_io *config_io, Config *config, Soil *soil)
+int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, Config_io *config_io, Config *config, Soil *soil)
 {
 	printf("Writing output ...\n");
 	// Diagnostics, forcings and radiation are primarily handed over for checks.
@@ -211,10 +211,10 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 				wind_tangential = 0;
 				for (int i = 0; i < 10; ++i)
 				{
-					wind_tangential += grid -> trsk_weights[10*h_index + i]*wind_h_10m_array[time_step_10_m_wind*NO_OF_VECTORS_H + grid -> trsk_indices[10*h_index + i]];
+					wind_tangential += grid -> trsk_weights[10*h_index + i]*wind_h_lowest_layer_array[time_step_10_m_wind*NO_OF_VECTORS_H + grid -> trsk_indices[10*h_index + i]];
 				}
-				wind_10_m_speed[j] = sqrt(pow(wind_h_10m_array[j], 2) + pow(wind_tangential, 2));
-				wind_10_m_mean_u[h_index] += 1.0/min_no_of_output_steps*wind_h_10m_array[j];
+				wind_10_m_speed[j] = sqrt(pow(wind_h_lowest_layer_array[j], 2) + pow(wind_tangential, 2));
+				wind_10_m_mean_u[h_index] += 1.0/min_no_of_output_steps*wind_h_lowest_layer_array[j];
 				wind_10_m_mean_v[h_index] += 1.0/min_no_of_output_steps*wind_tangential;
 			}
 		}
