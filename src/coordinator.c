@@ -22,6 +22,8 @@ The main organizes the model, manages the time stepping, calls model output, col
 #include "soil.h"
 
 int sanity_checker(Config *, Config_io *, Grid *);
+int read_argv(int, char *[], Config *, Config_io *, Grid *, Irreversible_quantities *);
+int readback_config(Config *, Config_io *, Grid *, char [], char [], char []);
 
 int main(int argc, char *argv[])
 {
@@ -45,91 +47,7 @@ int main(int argc, char *argv[])
     reading command line input
     --------------------------
     */
-    int agv_counter = 1;
-    config -> total_run_span = strtod(argv[agv_counter], NULL);
-    argv++;
-    config_io -> write_out_interval = strtod(argv[agv_counter], NULL);
-    argv++;
-    config -> dt_parameter = strtod(argv[agv_counter], NULL);
-    argv++;
-    config -> momentum_diff_h = strtod(argv[agv_counter], NULL);
-    argv++;
-    config -> momentum_diff_v = strtod(argv[agv_counter], NULL);
-    argv++;
-    config -> rad_on = strtod(argv[agv_counter], NULL);
-    argv++;
-    config_io -> write_out_mass_integrals = strtod(argv[agv_counter], NULL);
-    argv++;
-    config_io -> write_out_rhotheta_integral = strtod(argv[agv_counter], NULL);
-    argv++;
-    config_io -> write_out_energy_integrals = strtod(argv[agv_counter], NULL);
-    argv++;
-    config -> temperature_diff_h = strtod(argv[agv_counter], NULL);
-    argv++;
-    config -> radiation_delta_t = strtod(argv[agv_counter], NULL);
-    argv++;
-    config_io -> year = strtod(argv[agv_counter], NULL);
-    argv++;
-    config_io -> month = strtod(argv[agv_counter], NULL);
-    strcpy(config_io -> month_string, argv[agv_counter]);
-    argv++;
-    config_io -> day = strtod(argv[agv_counter], NULL);
-    strcpy(config_io -> day_string, argv[agv_counter]);
-    argv++;
-    config_io -> hour = strtod(argv[agv_counter], NULL);
-    strcpy(config_io -> hour_string, argv[agv_counter]);
-    argv++;
-    config -> temperature_diff_v = strtod(argv[agv_counter], NULL);
-    argv++;
-    strcpy(config_io -> run_id, argv[agv_counter]);
-    argv++;
-	config -> toa = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> oro_id = strtod(argv[agv_counter], NULL);
-    argv++;
-    config_io -> ideal_input_id = strtod(argv[agv_counter], NULL);
-    argv++;
-	config_io -> grib_output_switch = strtod(argv[agv_counter], NULL);
-    argv++;
-	config_io -> netcdf_output_switch = strtod(argv[agv_counter], NULL);
-    argv++;
-	config_io -> pressure_level_output_switch = strtod(argv[agv_counter], NULL);
-    argv++;
-	config_io -> model_level_output_switch = strtod(argv[agv_counter], NULL);
-    argv++;
-	config_io -> surface_output_switch = strtod(argv[agv_counter], NULL);
-    argv++;
-	grid -> no_of_oro_layers = strtod(argv[agv_counter], NULL);
-    argv++;
-	grid -> vert_grid_type = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> assume_lte = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> slow_fast_ratio = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> delta_t_between_analyses = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> diff_h_smag_div = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> diff_h_smag_rot = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> damping_start_height_over_toa = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> damping_coeff_max = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> explicit_boundary_layer = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> tracer_diff_h = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> tracer_diff_v = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> impl_thermo_weight = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> cloud_droplets_velocity = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> precipitation_droplets_velocity = strtod(argv[agv_counter], NULL);
-    argv++;
-	irrev -> mixing_length = strtod(argv[agv_counter], NULL);
+	read_argv(argc, argv, config, config_io, grid, irrev);
 	
 	// checking the user input
 	sanity_checker(config, config_io, grid);
@@ -159,33 +77,33 @@ int main(int argc, char *argv[])
 	Determining the name of the grid file from the RES_ID, NO_OF_LAYERS and so on.
     ------------------------------------------------------------------------------
     */
-    char GEO_PROP_FILE_PRE[200];
-	sprintf(GEO_PROP_FILE_PRE, "../../grid_generator/grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, config -> toa, config -> oro_id, grid -> no_of_oro_layers);
-    char GEO_PROP_FILE[strlen(GEO_PROP_FILE_PRE) + 1];
-    strcpy(GEO_PROP_FILE, GEO_PROP_FILE_PRE);
+    char grid_file_PRE[200];
+	sprintf(grid_file_PRE, "../../grid_generator/grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, config -> toa, config -> oro_id, grid -> no_of_oro_layers);
+    char grid_file[strlen(grid_file_PRE) + 1];
+    strcpy(grid_file, grid_file_PRE);
     char SFC_PROP_FILE_PRE[200];
 	sprintf(SFC_PROP_FILE_PRE, "../../surface_generator/surface_files/B%d_O%d_SCVT.nc", RES_ID, 2);
     char SFC_PROP_FILE[strlen(SFC_PROP_FILE_PRE) + 1];
     strcpy(SFC_PROP_FILE, SFC_PROP_FILE_PRE);
     
 	// Determining the name of the init state file from the IDEAL_INPUT_ID, RES_ID, NO_OF_LAYERS and so on.
-    char INIT_STATE_FILE_PRE[200];
+    char init_state_file_PRE[200];
     // The NWP case.
     if (config_io -> ideal_input_id == -1)
     {
     	config -> nwp_mode = 1;
-    	sprintf(INIT_STATE_FILE_PRE, "../../nwp_init/%d%s%s%s_B%dL%dT%d_O%d_OL%d_SCVT.nc",
+    	sprintf(init_state_file_PRE, "../../nwp_init/%d%s%s%s_B%dL%dT%d_O%d_OL%d_SCVT.nc",
     	config_io -> year, config_io -> month_string, config_io -> day_string, config_io -> hour_string, RES_ID, NO_OF_LAYERS, config -> toa, config -> oro_id, grid -> no_of_oro_layers);
     }
     // The idealized input case.
     else
     {
     	config -> nwp_mode = 0;
-		sprintf(INIT_STATE_FILE_PRE, "../../test_generator/test_states/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc",
+		sprintf(init_state_file_PRE, "../../test_generator/test_states/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc",
 		config_io -> ideal_input_id, RES_ID, NO_OF_LAYERS, config -> toa, config -> oro_id, grid -> no_of_oro_layers);
     }
-    char INIT_STATE_FILE[strlen(INIT_STATE_FILE_PRE) + 1];
-    strcpy(INIT_STATE_FILE, INIT_STATE_FILE_PRE);
+    char init_state_file[strlen(init_state_file_PRE) + 1];
+    strcpy(init_state_file, init_state_file_PRE);
     
     /*
     Determining the Unix time stamp of the initialization (UTC).
@@ -210,188 +128,17 @@ int main(int argc, char *argv[])
     */
     char *stars  = malloc(83*sizeof(char));
     for (int i = 0; i < 81; ++i)
+    {
         stars[i] = '*';
+    }
     stars[81] = '\n';
     stars[82] = '\0';
-    printf("%s", stars);
-    printf("*\t\t\t\t\t\t\t\t\t\t*\n");
-    printf("*\t\t\t\tThis is the GAME\t\t\t\t*\n");
-    printf("*\t\t\tGeophysical Fluids Modeling Framework\t\t\t*\n");
-    printf("*\t\t\t\t\t\t\t\t\t\t*\n");
-    printf("%s", stars);
-    printf("Released under the MIT license, visit https://github.com/OpenNWP/GAME for more information.\n");
-    printf("%s", stars);
-	printf("What you want to do:\n");
-	printf("Run_id:\t\t\t\t%s\n", config_io -> run_id);
-	printf("Run time span:\t\t\t%d s\n", config -> total_run_span);
-	printf("Geo properties file:\t\t%s\n", GEO_PROP_FILE);
-	printf("Initialization state file:\t%s\n", INIT_STATE_FILE);
-	printf("Start year:\t\t\t%d\n", config_io -> year);
-	printf("Start month:\t\t\t%d\n", config_io -> month);
-	printf("Start day:\t\t\t%d\n", config_io -> day);
-	printf("Start hour:\t\t\t%d\n", config_io -> hour);
-	printf("%s", stars);
-	printf("Dynamics configuration:\n");
-	printf("Number of layers: %d\n", NO_OF_LAYERS);
-	printf("Number of scalar data points per layer: %d\n", NO_OF_SCALARS_H);
-	printf("Number of horizontal vectors per layer: %d\n", NO_OF_VECTORS_H);
-	printf("Number of scalar data points: %d\n", NO_OF_SCALARS);
-	printf("Number of vectors: %d\n", NO_OF_VECTORS);
-	printf("Number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
-	printf("Ratio of the slow to the fast time step: %d\n", config -> slow_fast_ratio);
-	if (grid -> vert_grid_type == 0)
-	{
-		printf("Terrain handling: terrain following coordinates\n");
-		printf("Number of layers following orography: %d\n", grid -> no_of_oro_layers);
-	}
-	if (grid -> vert_grid_type == 1)
-	{
-		printf("Terrain handling: block structure\n");
-	}
-	if (config -> momentum_diff_h == 0)
-	{
-		printf("Horizontal momentum diffusion is turned off.\n");
-	}
-	if (config -> momentum_diff_h == 1)
-	{
-		printf("Horizontal momentum diffusion is turned on.\n");
-	}
-	if (config -> momentum_diff_v == 0)
-	{
-		printf("Vertical momentum diffusion is turned off.\n");
-	}
-	if (config -> momentum_diff_v == 1)
-	{
-		printf("Vertical momentum diffusion is turned on.\n");
-	}
-	if (config -> explicit_boundary_layer == 0)
-	{
-		printf("Explicit boundary layer friction is turned off.\n");
-	}
-	if (config -> explicit_boundary_layer == 1)
-	{
-		printf("Explicit boundary layer friction is turned on.\n");
-	}
-	if (config -> temperature_diff_h == 0)
-	{
-		printf("Horizontal temperature diffusion is turned off.\n");
-	}
-	else
-	{
-		printf("Horizontal temperature diffusion is turned on.\n");
-	}
-	if (config -> temperature_diff_v == 0)
-	{
-		printf("Vertical temperature diffusion is turned off.\n");
-	}
-	else
-	{
-		printf("Vertical temperature diffusion is turned on.\n");
-	}
-	if (config -> tracer_diff_h == 0)
-	{
-		printf("Horizontal tracer diffusion is turned off.\n");
-	}
-	else
-	{
-		printf("Horizontal tracer diffusion is turned on.\n");
-	}
-	if (config -> tracer_diff_v == 0)
-	{
-		printf("Vertical tracer diffusion is turned off.\n");
-	}
-	else
-	{
-		printf("Vertical tracer diffusion is turned on.\n");
-	}
-	printf("Horizontal diffusion Smagorinsky factor acting on divergent movements: %lf.\n", config -> diff_h_smag_div);
-	printf("Horizontal diffusion Smagorinsky factor acting on vortical movements: %lf.\n", config -> diff_h_smag_rot);
-	printf("Swamp layer starts at %lf m.\n", config -> damping_start_height_over_toa*config -> toa);
-	printf("Maximum swamp layer damping coefficient: %lf 1/s.\n", config -> damping_coeff_max);
-	printf("%s", stars);
-	
-	printf("Physics configuration:\n");
-	printf("Number of constituents: %d\n", NO_OF_CONSTITUENTS);
-	printf("Number of condensed constituents: %d\n", NO_OF_CONDENSED_CONSTITUENTS);
-	printf("Number of gaseous constituents: %d\n", NO_OF_GASEOUS_CONSTITUENTS);
-	if (NO_OF_CONSTITUENTS != 1 && NO_OF_CONSTITUENTS != 6)
-	{
-		printf("Error: NO_OF_CONSTITUENTS must be either 1 or 6.\n");
-		printf("Aborting.\n");
-		exit(1);
-	}
-	if (config -> assume_lte == 0)
-	{
-		printf("Not Assuming local thermodynamic equilibrium.\n");
-	}
-	if (config -> assume_lte == 1)
-	{
-		printf("Assuming local thermodynamic equilibrium.\n");
-	}
-	if (config -> rad_on == 0)
-	{
-		printf("Radiation is turned off.\n");
-	}
-	if (config -> rad_on == 1)
-	{
-		printf("Radiation is turned on.\n");
-	}
-	if (config -> rad_on == 2)
-	{
-		printf("Held-Suarez-forcing is turned on.\n");
-	}
-	
-	printf("%s", stars);
-	printf("I/O configuration:\n");
-	printf("Output written in intervals of %d s\n", config_io -> write_out_interval);
-	if (config_io -> grib_output_switch == 0)
-	{
-		printf("Grib output is turned off.\n");
-	}
-	else
-	{
-		printf("Grib output is turned on.\n");
-	}
-	if (config_io -> netcdf_output_switch == 0)
-	{
-		printf("Netcdf output is turned off.\n");
-	}
-	else
-	{
-		printf("Netcdf output is turned on.\n");
-	}
-	if (config_io -> model_level_output_switch == 0)
-	{
-		printf("Model level output is turned off.\n");
-	}
-	else
-	{
-		printf("Model level output is turned on.\n");
-	}
-	if (config_io -> surface_output_switch == 0)
-	{
-		printf("Surface output is turned off.\n");
-	}
-	else
-	{
-		printf("Surface output is turned on.\n");
-	}
-	if (config_io -> pressure_level_output_switch == 0)
-	{
-		printf("Pressure level output is turned off.\n");
-	}
-	else
-	{
-		printf("Pressure level output is turned on.\n");
-	}
-	printf("%s", stars);
-	printf("Model is fully configured now. Starting to read external data.\n");
-	printf("%s", stars);
+	readback_config(config, config_io, grid, grid_file, init_state_file, stars);
     // Reading and processing user input finished.
     
     // Reading external data.
 	printf("Reading grid data ...\n");
-    set_grid_properties(grid, dualgrid, GEO_PROP_FILE);
+    set_grid_properties(grid, dualgrid, grid_file);
     // If we have radiation turned on, we also need soil.
     if (config -> rad_on == 1)
     {
@@ -401,7 +148,7 @@ int main(int argc, char *argv[])
     printf("%s", stars);
     printf("Reading initial state ...\n");
     State *state_old = calloc(1, sizeof(State));
-    set_init_data(INIT_STATE_FILE, state_old, grid);
+    set_init_data(init_state_file, state_old, grid);
 	printf("Initial state loaded successfully.\n");
 	printf("%s", stars);
 	
@@ -829,9 +576,280 @@ int sanity_checker(Config *config, Config_io *config_io, Grid *grid)
 	return 0;
 }
 
+int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid *grid, Irreversible_quantities *irrev)
+{
+	/*
+	This function reads the command-line arguments.
+	*/
+    int agv_counter = 1;
+    config -> total_run_span = strtod(argv[agv_counter], NULL);
+    argv++;
+    config_io -> write_out_interval = strtod(argv[agv_counter], NULL);
+    argv++;
+    config -> dt_parameter = strtod(argv[agv_counter], NULL);
+    argv++;
+    config -> momentum_diff_h = strtod(argv[agv_counter], NULL);
+    argv++;
+    config -> momentum_diff_v = strtod(argv[agv_counter], NULL);
+    argv++;
+    config -> rad_on = strtod(argv[agv_counter], NULL);
+    argv++;
+    config_io -> write_out_mass_integrals = strtod(argv[agv_counter], NULL);
+    argv++;
+    config_io -> write_out_rhotheta_integral = strtod(argv[agv_counter], NULL);
+    argv++;
+    config_io -> write_out_energy_integrals = strtod(argv[agv_counter], NULL);
+    argv++;
+    config -> temperature_diff_h = strtod(argv[agv_counter], NULL);
+    argv++;
+    config -> radiation_delta_t = strtod(argv[agv_counter], NULL);
+    argv++;
+    config_io -> year = strtod(argv[agv_counter], NULL);
+    argv++;
+    config_io -> month = strtod(argv[agv_counter], NULL);
+    strcpy(config_io -> month_string, argv[agv_counter]);
+    argv++;
+    config_io -> day = strtod(argv[agv_counter], NULL);
+    strcpy(config_io -> day_string, argv[agv_counter]);
+    argv++;
+    config_io -> hour = strtod(argv[agv_counter], NULL);
+    strcpy(config_io -> hour_string, argv[agv_counter]);
+    argv++;
+    config -> temperature_diff_v = strtod(argv[agv_counter], NULL);
+    argv++;
+    strcpy(config_io -> run_id, argv[agv_counter]);
+    argv++;
+	config -> toa = strtod(argv[agv_counter], NULL);
+    argv++;
+	config -> oro_id = strtod(argv[agv_counter], NULL);
+    argv++;
+    config_io -> ideal_input_id = strtod(argv[agv_counter], NULL);
+    argv++;
+	config_io -> grib_output_switch = strtod(argv[agv_counter], NULL);
+    argv++;
+	config_io -> netcdf_output_switch = strtod(argv[agv_counter], NULL);
+    argv++;
+	config_io -> pressure_level_output_switch = strtod(argv[agv_counter], NULL);
+    argv++;
+	config_io -> model_level_output_switch = strtod(argv[agv_counter], NULL);
+    argv++;
+	config_io -> surface_output_switch = strtod(argv[agv_counter], NULL);
+    argv++;
+	grid -> no_of_oro_layers = strtod(argv[agv_counter], NULL);
+    argv++;
+	grid -> vert_grid_type = strtod(argv[agv_counter], NULL);
+    argv++;
+	config -> assume_lte = strtod(argv[agv_counter], NULL);
+    argv++;
+	config -> slow_fast_ratio = strtod(argv[agv_counter], NULL);
+    argv++;
+	config -> delta_t_between_analyses = strtod(argv[agv_counter], NULL);
+    argv++;
+	config -> diff_h_smag_div = strtod(argv[agv_counter], NULL);
+    argv++;
+	config -> diff_h_smag_rot = strtod(argv[agv_counter], NULL);
+    argv++;
+	config -> damping_start_height_over_toa = strtod(argv[agv_counter], NULL);
+    argv++;
+	config -> damping_coeff_max = strtod(argv[agv_counter], NULL);
+    argv++;
+	config -> explicit_boundary_layer = strtod(argv[agv_counter], NULL);
+    argv++;
+	config -> tracer_diff_h = strtod(argv[agv_counter], NULL);
+    argv++;
+	config -> tracer_diff_v = strtod(argv[agv_counter], NULL);
+    argv++;
+	config -> impl_thermo_weight = strtod(argv[agv_counter], NULL);
+    argv++;
+	config -> cloud_droplets_velocity = strtod(argv[agv_counter], NULL);
+    argv++;
+	config -> precipitation_droplets_velocity = strtod(argv[agv_counter], NULL);
+    argv++;
+	irrev -> mixing_length = strtod(argv[agv_counter], NULL);
+	return 0;
+}
 
-
-
+int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_file[], char init_state_file[], char stars[])
+{
+	/*
+	This function gives the user information on the model configuration.
+	*/
+    printf("%s", stars);
+    printf("*\t\t\t\t\t\t\t\t\t\t*\n");
+    printf("*\t\t\t\tThis is the GAME\t\t\t\t*\n");
+    printf("*\t\t\tGeophysical Fluids Modeling Framework\t\t\t*\n");
+    printf("*\t\t\t\t\t\t\t\t\t\t*\n");
+    printf("%s", stars);
+    printf("Released under the MIT license, visit https://github.com/OpenNWP/GAME for more information.\n");
+    printf("%s", stars);
+	printf("What you want to do:\n");
+	printf("Run_id:\t\t\t\t%s\n", config_io -> run_id);
+	printf("Run time span:\t\t\t%d s\n", config -> total_run_span);
+	printf("Grid properties file:\t\t%s\n", grid_file);
+	printf("Initialization state file:\t%s\n", init_state_file);
+	printf("Start year:\t\t\t%d\n", config_io -> year);
+	printf("Start month:\t\t\t%d\n", config_io -> month);
+	printf("Start day:\t\t\t%d\n", config_io -> day);
+	printf("Start hour:\t\t\t%d\n", config_io -> hour);
+	printf("%s", stars);
+	printf("Dynamics configuration:\n");
+	printf("Number of layers: %d\n", NO_OF_LAYERS);
+	printf("Number of scalar data points per layer: %d\n", NO_OF_SCALARS_H);
+	printf("Number of horizontal vectors per layer: %d\n", NO_OF_VECTORS_H);
+	printf("Number of scalar data points: %d\n", NO_OF_SCALARS);
+	printf("Number of vectors: %d\n", NO_OF_VECTORS);
+	printf("Number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
+	printf("Ratio of the slow to the fast time step: %d\n", config -> slow_fast_ratio);
+	if (grid -> vert_grid_type == 0)
+	{
+		printf("Terrain handling: terrain following coordinates\n");
+		printf("Number of layers following orography: %d\n", grid -> no_of_oro_layers);
+	}
+	if (grid -> vert_grid_type == 1)
+	{
+		printf("Terrain handling: block structure\n");
+	}
+	if (config -> momentum_diff_h == 0)
+	{
+		printf("Horizontal momentum diffusion is turned off.\n");
+	}
+	if (config -> momentum_diff_h == 1)
+	{
+		printf("Horizontal momentum diffusion is turned on.\n");
+	}
+	if (config -> momentum_diff_v == 0)
+	{
+		printf("Vertical momentum diffusion is turned off.\n");
+	}
+	if (config -> momentum_diff_v == 1)
+	{
+		printf("Vertical momentum diffusion is turned on.\n");
+	}
+	if (config -> explicit_boundary_layer == 0)
+	{
+		printf("Explicit boundary layer friction is turned off.\n");
+	}
+	if (config -> explicit_boundary_layer == 1)
+	{
+		printf("Explicit boundary layer friction is turned on.\n");
+	}
+	if (config -> temperature_diff_h == 0)
+	{
+		printf("Horizontal temperature diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Horizontal temperature diffusion is turned on.\n");
+	}
+	if (config -> temperature_diff_v == 0)
+	{
+		printf("Vertical temperature diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Vertical temperature diffusion is turned on.\n");
+	}
+	if (config -> tracer_diff_h == 0)
+	{
+		printf("Horizontal tracer diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Horizontal tracer diffusion is turned on.\n");
+	}
+	if (config -> tracer_diff_v == 0)
+	{
+		printf("Vertical tracer diffusion is turned off.\n");
+	}
+	else
+	{
+		printf("Vertical tracer diffusion is turned on.\n");
+	}
+	printf("Horizontal diffusion Smagorinsky factor acting on divergent movements: %lf.\n", config -> diff_h_smag_div);
+	printf("Horizontal diffusion Smagorinsky factor acting on vortical movements: %lf.\n", config -> diff_h_smag_rot);
+	printf("Swamp layer starts at %lf m.\n", config -> damping_start_height_over_toa*config -> toa);
+	printf("Maximum swamp layer damping coefficient: %lf 1/s.\n", config -> damping_coeff_max);
+	printf("%s", stars);
+	
+	printf("Physics configuration:\n");
+	printf("Number of constituents: %d\n", NO_OF_CONSTITUENTS);
+	printf("Number of condensed constituents: %d\n", NO_OF_CONDENSED_CONSTITUENTS);
+	printf("Number of gaseous constituents: %d\n", NO_OF_GASEOUS_CONSTITUENTS);
+	if (NO_OF_CONSTITUENTS != 1 && NO_OF_CONSTITUENTS != 6)
+	{
+		printf("Error: NO_OF_CONSTITUENTS must be either 1 or 6.\n");
+		printf("Aborting.\n");
+		exit(1);
+	}
+	if (config -> assume_lte == 0)
+	{
+		printf("Not Assuming local thermodynamic equilibrium.\n");
+	}
+	if (config -> assume_lte == 1)
+	{
+		printf("Assuming local thermodynamic equilibrium.\n");
+	}
+	if (config -> rad_on == 0)
+	{
+		printf("Radiation is turned off.\n");
+	}
+	if (config -> rad_on == 1)
+	{
+		printf("Radiation is turned on.\n");
+	}
+	if (config -> rad_on == 2)
+	{
+		printf("Held-Suarez-forcing is turned on.\n");
+	}
+	
+	printf("%s", stars);
+	printf("I/O configuration:\n");
+	printf("Output written in intervals of %d s\n", config_io -> write_out_interval);
+	if (config_io -> grib_output_switch == 0)
+	{
+		printf("Grib output is turned off.\n");
+	}
+	else
+	{
+		printf("Grib output is turned on.\n");
+	}
+	if (config_io -> netcdf_output_switch == 0)
+	{
+		printf("Netcdf output is turned off.\n");
+	}
+	else
+	{
+		printf("Netcdf output is turned on.\n");
+	}
+	if (config_io -> model_level_output_switch == 0)
+	{
+		printf("Model level output is turned off.\n");
+	}
+	else
+	{
+		printf("Model level output is turned on.\n");
+	}
+	if (config_io -> surface_output_switch == 0)
+	{
+		printf("Surface output is turned off.\n");
+	}
+	else
+	{
+		printf("Surface output is turned on.\n");
+	}
+	if (config_io -> pressure_level_output_switch == 0)
+	{
+		printf("Pressure level output is turned off.\n");
+	}
+	else
+	{
+		printf("Pressure level output is turned on.\n");
+	}
+	printf("%s", stars);
+	printf("Model is fully configured now. Starting to read external data.\n");
+	printf("%s", stars);
+	return 0;
+}
 
 
 
