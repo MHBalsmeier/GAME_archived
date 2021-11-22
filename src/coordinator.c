@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
     double speed;
     while (t_0 < t_init + config -> total_run_span + 300)
     {
-    	// copying the old state to the new state
+    	// copying the new state to the old state
     	linear_combine_two_states(state_new, state_old, state_old, 1, 0, grid);
     	
     	/*
