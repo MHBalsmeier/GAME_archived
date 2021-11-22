@@ -12,6 +12,7 @@ This file contains functions for reading the grid properties as well as setting 
 #include <netcdf.h>
 #include <geos95.h>
 #include "../game_types.h"
+#include "../game_constants.h"
 #include "../spatial_operators/spatial_operators.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
@@ -178,7 +179,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     #pragma omp parallel for
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
-        grid -> roughness_length[i] = 0.02;
+        grid -> roughness_length[i] = ROUGHNESS_LENGTH_GRASS;
     }
     // determining coordinate slopes
     grad_hor_cov(grid -> z_scalar, grid -> slope, grid);

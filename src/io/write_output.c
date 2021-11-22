@@ -223,7 +223,7 @@ int write_out(State *state_write_out, double wind_h_10m_array[], int min_no_of_o
 		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 		{
 			actual_roughness_length = 0.5*(grid -> roughness_length[grid -> from_index[i]] + grid -> roughness_length[grid -> to_index[i]]);
-			roughness_length_extrapolation = 0.02; // grass
+			roughness_length_extrapolation = ROUGHNESS_LENGTH_GRASS;
 			if (grid -> is_land[grid -> from_index[i]] == 0)
 			{
 				roughness_length_extrapolation = actual_roughness_length;

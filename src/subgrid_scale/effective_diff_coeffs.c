@@ -346,6 +346,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	grad(irrev -> tke, diagnostics -> vector_field_placeholder, grid);
 	inner_product(diagnostics -> vector_field_placeholder, state -> wind, diagnostics -> scalar_field_placeholder, grid);
 	double boundary_layer_height = 1000.0;
+	double roughness_length_factor = 1.0/0.08;
 	int i;
 	double decay_constant, production_rate;
 	#pragma omp parallel for private(i, decay_constant, production_rate)
@@ -361,7 +362,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 			{
 				production_rate =
 				// factor taking into account the roughness of the surface
-				grid -> roughness_length[h_index]/0.08
+				roughness_length_factor*grid -> roughness_length[h_index]
 				// height-dependent factor
 				*(boundary_layer_height - (grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index]))/boundary_layer_height
 				*(tke_ke_ratio*0.5*diagnostics -> v_squared[i] - irrev -> tke[i])/tke_approx_time;
