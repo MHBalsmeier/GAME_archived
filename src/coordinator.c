@@ -42,6 +42,10 @@ int main(int argc, char *argv[])
     Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
     Forcings *forcings = calloc(1, sizeof(Forcings));
 	Soil *soil = calloc(1, sizeof(Soil));
+    State *state_write = calloc(1, sizeof(State));
+    State *state_new = calloc(1, sizeof(State));
+    State *state_tendency = calloc(1, sizeof(State));
+    State *state_old = calloc(1, sizeof(State));
     
     /*
     reading command line input
@@ -147,7 +151,6 @@ int main(int argc, char *argv[])
     printf("Grid loaded successfully.\n");
     printf("%s", stars);
     printf("Reading initial state ...\n");
-    State *state_old = calloc(1, sizeof(State));
     set_init_data(init_state_file, state_old, grid);
 	printf("Initial state loaded successfully.\n");
 	printf("%s", stars);
@@ -216,6 +219,7 @@ int main(int argc, char *argv[])
     int min_no_of_10m_wind_avg_steps = 600/delta_t;
     double *wind_h_lowest_layer = calloc(1, min_no_of_10m_wind_avg_steps*NO_OF_VECTORS_H*sizeof(double));
     double t_write = t_init;
+    #pragma omp parallel for
 	for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)
 	{
 		// here, for all output time steps, the initial value is used
@@ -260,12 +264,9 @@ int main(int argc, char *argv[])
     */
     double t_rad_update = t_0;
     int wind_lowest_layer_step_counter = 0;
-    State *state_tendency = calloc(1, sizeof(State));
 	// the maximum horizontal diffusion coefficient (stability constraint)
 	irrev -> max_diff_h_coeff_turb = 0.125*grid -> mean_velocity_area/(config -> slow_fast_ratio*delta_t);
-    State *state_new = calloc(1, sizeof(State));
     linear_combine_two_states(state_old, state_old, state_new, 1, 0, grid);
-    State *state_write = calloc(1, sizeof(State));
     
     /*
     This is the loop over the time steps.
@@ -355,6 +356,7 @@ int main(int argc, char *argv[])
             printf("Run progress: %f h\n", (t_0 + delta_t - t_init)/SECONDS_PER_HOUR);
             
             // resetting the wind in the lowest layer to zero
+            #pragma omp parallel for
             for (int i = 0; i < min_no_of_10m_wind_avg_steps*NO_OF_VECTORS_H; ++i)
             {
             	wind_h_lowest_layer[i] = 0;
