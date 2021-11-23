@@ -333,6 +333,7 @@ int main(int argc, char *argv[])
         {
         	if (wind_lowest_layer_step_counter < min_no_of_10m_wind_avg_steps)
         	{
+        		#pragma omp parallel for
 		    	for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)
        			{
 		    		wind_h_lowest_layer[wind_lowest_layer_step_counter*NO_OF_VECTORS_H + h_index] = state_old -> wind[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + h_index];

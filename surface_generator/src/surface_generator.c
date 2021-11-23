@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
             distance = calculate_distance_h(latitude_scalar[i], longitude_scalar[i], 0, 0, RADIUS);
 			oro[i] = MOUNTAIN_HEIGHT*exp(-pow(distance, 2)/(2*pow(sigma_mountain, 2)));
 		}
-		// reall orography can only be different from zero on land point
+		// real orography can only be different from zero at land points
 		if (ORO_ID == 2 && is_land[i] == 1)
 		{
 	    	double *lat_distance_vector = malloc(no_of_lat_points*sizeof(double));
