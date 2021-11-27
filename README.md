@@ -39,10 +39,6 @@ We try to find a good balance of accuracy, efficiency and self-consistency. Gene
 
 The derivations of both the continuous equations as well as of the discretization techniques can be found in my textbook on theoretical meteorology (in German): [Kompendium Theoretische Meteorologie](https://raw.githubusercontent.com/MHBalsmeier/kompendium/main/kompendium.pdf). The most fundamental numerical techniques have firstly been published in the literature cited below.
 
-### Documentation
-
-The documentation can be found in the subdirectory doc. It does not contain scientific derivations but rather describes the code.
-
 ### Handbook
 
 The handbook of the model can be found in the subdirectory handbook. It is to be understood as a user manual and contains information on how to generate necessary files like grid files, geospatial data files (orography, for example) and input data and explains how to configure, compile and run the model.
