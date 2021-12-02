@@ -209,9 +209,9 @@ int main(int argc, char *argv[])
 	printf("Effective horizontal resolution: %lf km\n", 1e-3*eff_hor_res);
 	printf("Minimum horizontal normal distance: %lf km\n", 1e-3*normal_dist_min_hor);
     double max_speed_hor = 100;
-	printf("Horizontal advective Courant numer: %lf\n", delta_t/normal_dist_min_hor*max_speed_hor);
+	printf("Horizontal advective Courant number: %lf\n", delta_t/normal_dist_min_hor*max_speed_hor);
     double max_speed_vert = 0.1;
-	printf("Vertical advective Courant numer: %lf\n", delta_t/normal_dist_min_vert*max_speed_vert);
+	printf("Vertical advective Courant number: %lf\n", delta_t/normal_dist_min_vert*max_speed_vert);
     printf("%s", stars);
     printf("It begins.\n");
     printf("%s", stars);
