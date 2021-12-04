@@ -145,8 +145,10 @@ int rhombus_averaging(int vorticity_indices_triangles[], int vorticity_signs_tri
 				{
 					dual_scalar_h_index_0 = to_index_dual[vector_h_index_0];
 				}
-				calc_triangle_face(latitude_scalar[density_to_rhombus_indices[4*i + j]], longitude_scalar[density_to_rhombus_indices[4*i + j]], latitude_scalar_dual[dual_scalar_h_index_0], longitude_scalar_dual[dual_scalar_h_index_0], latitude_vector[vector_h_index_0], longitude_vector[vector_h_index_0], &triangle_0);
-				calc_triangle_face(latitude_scalar[density_to_rhombus_indices[4*i + j]], longitude_scalar[density_to_rhombus_indices[4*i + j]], latitude_scalar_dual[dual_scalar_h_index_0], longitude_scalar_dual[dual_scalar_h_index_0], latitude_vector[i], longitude_vector[i], &triangle_1);
+				triangle_0 = calc_triangle_area(latitude_scalar[density_to_rhombus_indices[4*i + j]], longitude_scalar[density_to_rhombus_indices[4*i + j]],
+				latitude_scalar_dual[dual_scalar_h_index_0], longitude_scalar_dual[dual_scalar_h_index_0], latitude_vector[vector_h_index_0], longitude_vector[vector_h_index_0]);
+				triangle_1 = calc_triangle_area(latitude_scalar[density_to_rhombus_indices[4*i + j]], longitude_scalar[density_to_rhombus_indices[4*i + j]],
+				latitude_scalar_dual[dual_scalar_h_index_0], longitude_scalar_dual[dual_scalar_h_index_0], latitude_vector[i], longitude_vector[i]);
 				vector_h_index_1_found = 0;
 				k = 0;
 				while (vector_h_index_1_found == 0)
@@ -177,8 +179,10 @@ int rhombus_averaging(int vorticity_indices_triangles[], int vorticity_signs_tri
 				{
 					dual_scalar_h_index_1 = to_index_dual[vector_h_index_1];
 				}
-				calc_triangle_face(latitude_scalar[density_to_rhombus_indices[4*i + j]], longitude_scalar[density_to_rhombus_indices[4*i + j]], latitude_scalar_dual[dual_scalar_h_index_1], longitude_scalar_dual[dual_scalar_h_index_1], latitude_vector[i], longitude_vector[i], &triangle_2);
-				calc_triangle_face(latitude_scalar[density_to_rhombus_indices[4*i + j]], longitude_scalar[density_to_rhombus_indices[4*i + j]], latitude_scalar_dual[dual_scalar_h_index_1], longitude_scalar_dual[dual_scalar_h_index_1], latitude_vector[vector_h_index_1], longitude_vector[vector_h_index_1], &triangle_3);
+				triangle_2 = calc_triangle_area(latitude_scalar[density_to_rhombus_indices[4*i + j]], longitude_scalar[density_to_rhombus_indices[4*i + j]],
+				latitude_scalar_dual[dual_scalar_h_index_1], longitude_scalar_dual[dual_scalar_h_index_1], latitude_vector[i], longitude_vector[i]);
+				triangle_3 = calc_triangle_area(latitude_scalar[density_to_rhombus_indices[4*i + j]], longitude_scalar[density_to_rhombus_indices[4*i + j]],
+				latitude_scalar_dual[dual_scalar_h_index_1], longitude_scalar_dual[dual_scalar_h_index_1], latitude_vector[vector_h_index_1], longitude_vector[vector_h_index_1]);
 				density_to_rhombus_weights[4*i + j] = pow(RADIUS + z_vector[NO_OF_SCALARS_H], 2)*(triangle_0 + triangle_1 + triangle_2 + triangle_3)/rhombus_area;
 			}
 			else
@@ -215,7 +219,8 @@ int rhombus_averaging(int vorticity_indices_triangles[], int vorticity_signs_tri
 				{
 					dual_scalar_h_index_0 = to_index_dual[vector_h_index_0];
 				}
-				calc_triangle_face(latitude_scalar[density_to_rhombus_indices[4*i + j]], longitude_scalar[density_to_rhombus_indices[4*i + j]], latitude_scalar_dual[dual_scalar_h_index_0], longitude_scalar_dual[dual_scalar_h_index_0], latitude_vector[vector_h_index_0], longitude_vector[vector_h_index_0], &triangle_0);
+				triangle_0 = calc_triangle_area(latitude_scalar[density_to_rhombus_indices[4*i + j]], longitude_scalar[density_to_rhombus_indices[4*i + j]],
+				latitude_scalar_dual[dual_scalar_h_index_0], longitude_scalar_dual[dual_scalar_h_index_0], latitude_vector[vector_h_index_0], longitude_vector[vector_h_index_0]);
 				vector_h_index_1_found = 0;
 				k = 0;
 				while (vector_h_index_1_found == 0)
@@ -230,7 +235,8 @@ int rhombus_averaging(int vorticity_indices_triangles[], int vorticity_signs_tri
 						++k;
 					}
 				}
-				calc_triangle_face(latitude_scalar[density_to_rhombus_indices[4*i + j]], longitude_scalar[density_to_rhombus_indices[4*i + j]], latitude_scalar_dual[dual_scalar_h_index_0], longitude_scalar_dual[dual_scalar_h_index_0], latitude_vector[vector_h_index_1], longitude_vector[vector_h_index_1], &triangle_1);
+				triangle_1 = calc_triangle_area(latitude_scalar[density_to_rhombus_indices[4*i + j]], longitude_scalar[density_to_rhombus_indices[4*i + j]],
+				latitude_scalar_dual[dual_scalar_h_index_0], longitude_scalar_dual[dual_scalar_h_index_0], latitude_vector[vector_h_index_1], longitude_vector[vector_h_index_1]);
 				density_to_rhombus_weights[4*i + j] = pow(RADIUS + z_vector[NO_OF_SCALARS_H], 2)*(triangle_0 + triangle_1)/rhombus_area;
 			}
 		}

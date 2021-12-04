@@ -258,7 +258,7 @@ int set_area_dual(double area_dual[], double z_vector_dual[], double normal_dist
 		        radius_1 = RADIUS + z_vector[primal_vector_index - NO_OF_VECTORS_PER_LAYER];
 		        base_distance = normal_distance[primal_vector_index];
         	}
-            area_dual[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
+            area_dual[i] = calculate_vertical_area(base_distance, radius_0, radius_1);
         }
     }
     return 0;
@@ -287,7 +287,7 @@ int set_area(double area[], double z_vector[], double z_vector_dual[], double no
             radius_0 = RADIUS + z_vector_dual[dual_vector_index];
             radius_1 = RADIUS + z_vector_dual[dual_vector_index - NO_OF_DUAL_VECTORS_PER_LAYER];
             base_distance = normal_distance_dual[dual_vector_index];
-            area[i] = calculate_vertical_face(base_distance, radius_0, radius_1);
+            area[i] = calculate_vertical_area(base_distance, radius_0, radius_1);
         }
     }
     

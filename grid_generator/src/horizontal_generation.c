@@ -106,7 +106,7 @@ int generate_horizontal_generators(double latitude_ico[], double longitude_ico[]
 	return 0;
 }
 
-int calc_cell_face_unity(double pent_hex_face_unity_sphere[], double latitude_scalar_dual[], double longitude_scalar_dual[], int adjacent_vector_indices_h[], int vorticity_indices_pre[])
+int calc_cell_area_unity(double pent_hex_face_unity_sphere[], double latitude_scalar_dual[], double longitude_scalar_dual[], int adjacent_vector_indices_h[], int vorticity_indices_pre[])
 {
     int check_0, check_1, check_2, counter, no_of_edges;
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
@@ -140,7 +140,7 @@ int calc_cell_face_unity(double pent_hex_face_unity_sphere[], double latitude_sc
         {
         	printf("Trouble in calc_cell_face_unity.\n");
         }
-        calc_spherical_polygon_face(lat_points, lon_points, no_of_edges, &pent_hex_face_unity_sphere[i]);
+        pent_hex_face_unity_sphere[i] = calc_spherical_polygon_area(lat_points, lon_points, no_of_edges);
     }
     double pent_hex_sum_unity_sphere = 0;
     double pent_hex_avg_unity_sphere_ideal = 4*M_PI/NO_OF_SCALARS_H;
@@ -166,7 +166,7 @@ int calc_cell_face_unity(double pent_hex_face_unity_sphere[], double latitude_sc
 	return 0;
 }
 
-int calc_triangle_face_unity(double triangle_face_unit_sphere[], double latitude_scalar[], double longitude_scalar[], int face_edges[][3], int face_edges_reverse[][3], int face_vertices[][3], int edge_vertices[][2])
+int calc_triangle_area_unity(double triangle_face_unit_sphere[], double latitude_scalar[], double longitude_scalar[], int face_edges[][3], int face_edges_reverse[][3], int face_vertices[][3], int edge_vertices[][2])
 {
 	int dual_scalar_index, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, small_triangle_edge_index, coord_0_points_amount, coord_0, coord_1, face_index, on_face_index, triangle_on_face_index;
 	double triangle_face;
@@ -180,17 +180,21 @@ int calc_triangle_face_unity(double triangle_face_unit_sphere[], double latitude
             triangle_on_face_index = on_face_index/3;
             find_coords_from_triangle_on_face_index(triangle_on_face_index, RES_ID, &coord_0, &coord_1, &coord_0_points_amount);
             dual_scalar_index = dual_scalar_on_face_index + face_index*NO_OF_TRIANGLES/NO_OF_BASIC_TRIANGLES;
-            calc_triangle_face(latitude_scalar[point_0], longitude_scalar[point_0], latitude_scalar[point_1], longitude_scalar[point_1], latitude_scalar[point_2], longitude_scalar[point_2], &triangle_face);
+            triangle_face = calc_triangle_area(latitude_scalar[point_0], longitude_scalar[point_0], latitude_scalar[point_1], longitude_scalar[point_1],
+            latitude_scalar[point_2], longitude_scalar[point_2]);
             triangle_face_unit_sphere[dual_scalar_index] = triangle_face;
-            calc_triangle_face(latitude_scalar[point_3], longitude_scalar[point_3], latitude_scalar[point_0], longitude_scalar[point_0], latitude_scalar[point_2], longitude_scalar[point_2], &triangle_face);
+            triangle_face = calc_triangle_area(latitude_scalar[point_3], longitude_scalar[point_3], latitude_scalar[point_0], longitude_scalar[point_0],
+            latitude_scalar[point_2], longitude_scalar[point_2]);
             triangle_face_unit_sphere[dual_scalar_index - 1] = triangle_face;
             if (coord_0 == coord_0_points_amount - 1)
             {
-                calc_triangle_face(latitude_scalar[point_0], longitude_scalar[point_0], latitude_scalar[point_4], longitude_scalar[point_4], latitude_scalar[point_1], longitude_scalar[point_1], &triangle_face);
+                triangle_face = calc_triangle_area(latitude_scalar[point_0], longitude_scalar[point_0], latitude_scalar[point_4], longitude_scalar[point_4],
+                latitude_scalar[point_1], longitude_scalar[point_1]);
                 triangle_face_unit_sphere[dual_scalar_index + 1] = triangle_face;
                 if (coord_1 == POINTS_PER_EDGE - 1)
                 {
-                    calc_triangle_face(latitude_scalar[point_2], longitude_scalar[point_2], latitude_scalar[point_1], longitude_scalar[point_1], latitude_scalar[point_5], longitude_scalar[point_5], &triangle_face);
+                    triangle_face = calc_triangle_area(latitude_scalar[point_2], longitude_scalar[point_2], latitude_scalar[point_1], longitude_scalar[point_1],
+                    latitude_scalar[point_5], longitude_scalar[point_5]);
                     triangle_face_unit_sphere[dual_scalar_index + 2] = triangle_face;
                 }
             }

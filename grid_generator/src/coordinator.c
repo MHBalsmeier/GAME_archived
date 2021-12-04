@@ -263,7 +263,7 @@ int main(int argc, char *argv[])
     set_f_vec(latitude_vector, direction, direction_dual, f_vec);
     
     // calculating the dual cells on the unity sphere
-    calc_triangle_face_unity(triangle_face_unit_sphere, latitude_scalar, longitude_scalar, face_edges,
+    calc_triangle_area_unity(triangle_face_unit_sphere, latitude_scalar, longitude_scalar, face_edges,
     face_edges_reverse, face_vertices, edge_vertices);
     
     // finding the vorticity indices
@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
 	vorticity_indices_triangles, ORTH_CRITERION_DEG, vorticity_signs_triangles);
 	
 	// calculating the cell faces on the unity sphere
-	calc_cell_face_unity(pent_hex_face_unity_sphere, latitude_scalar_dual,
+	calc_cell_area_unity(pent_hex_face_unity_sphere, latitude_scalar_dual,
 	longitude_scalar_dual, adjacent_vector_indices_h, vorticity_indices_triangles);
     printf(GREEN "Horizontal grid structure determined.\n" RESET);
 	

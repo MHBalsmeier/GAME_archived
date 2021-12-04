@@ -173,13 +173,16 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 				{
 					if (l == 0)
 					{
-						calc_triangle_face(latitude_scalar[from_or_to_index[i]], longitude_scalar[from_or_to_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[no_of_edges - 1], longitude_edges[no_of_edges - 1], &triangle_0);
+						triangle_0 = calc_triangle_area(latitude_scalar[from_or_to_index[i]], longitude_scalar[from_or_to_index[i]], latitude_vertices[indices_resorted[l]],
+						longitude_vertices[indices_resorted[l]], latitude_edges[no_of_edges - 1], longitude_edges[no_of_edges - 1]);
 					}
 					else
 					{
-						calc_triangle_face(latitude_scalar[from_or_to_index[i]], longitude_scalar[from_or_to_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[l - 1], longitude_edges[l - 1], &triangle_0);
+						triangle_0 = calc_triangle_area(latitude_scalar[from_or_to_index[i]], longitude_scalar[from_or_to_index[i]],
+						latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[l - 1], longitude_edges[l - 1]);
 					}
-					calc_triangle_face(latitude_scalar[from_or_to_index[i]], longitude_scalar[from_or_to_index[i]], latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[l], longitude_edges[l], &triangle_1);
+					triangle_1 = calc_triangle_area(latitude_scalar[from_or_to_index[i]], longitude_scalar[from_or_to_index[i]],
+					latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[l], longitude_edges[l]);
 					vector_of_areas[l] = pow(RADIUS + z_vector[NO_OF_SCALARS_H + i], 2)*(triangle_0 + triangle_1);
 					check_sum += vector_of_areas[l];
 				}
@@ -202,7 +205,7 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 						first_index = (l + 1)%no_of_edges;
 					}
 				}
-				double_sum_gen(vector_of_areas, no_of_edges, first_index, last_index, &sum_of_weights);
+				sum_of_weights = double_sum_gen(vector_of_areas, no_of_edges, first_index, last_index);
 				
 				// dividing by the cell area
 				sum_of_weights = sum_of_weights/(rescale_for_z_offset_2d*area[from_or_to_index[i]]);
