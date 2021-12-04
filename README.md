@@ -5,7 +5,7 @@ The Geophysical Fluids Modeling Framework (GAME) is a non-hydrostatic hexagonal 
 
 ## Overview
 
-It is known that the forecast skill of a NWP model depends more on physics and data assimilation than on the dynamical core. However, all dynamical cores I know of have inconsistencies even in the most fundamental dynamical quantities (mass, energy forms and entropy). That is why the aim of this project is to develop a next generation dynamical core with the following properties:
+It is known that the forecast skill of a NWP model depends more on physics and data assimilation than on the dynamical core. However, all dynamical cores have inconsistencies even in the most fundamental dynamical quantities (mass, energy forms and entropy). That is why the aim of this project is to develop a next generation dynamical core with the following properties:
 
 * stability
 * the numerical dispersion relation shall contain no unphysical branches
@@ -37,7 +37,7 @@ We try to find a good balance of accuracy, efficiency and self-consistency. Gene
 
 ### Scientific derivations
 
-The derivations of both the continuous equations as well as of the discretization techniques can be found in my textbook on theoretical meteorology (in German): [Kompendium Theoretische Meteorologie](https://raw.githubusercontent.com/MHBalsmeier/kompendium/main/kompendium.pdf). The most fundamental numerical techniques have firstly been published in the literature cited below.
+The derivations of both the continuous equations as well as of the discretization techniques can be found in this textbook on theoretical meteorology (in German): [Kompendium Theoretische Meteorologie](https://raw.githubusercontent.com/MHBalsmeier/kompendium/main/kompendium.pdf). The most fundamental numerical techniques have firstly been published in the literature cited below.
 
 ### Handbook
 
