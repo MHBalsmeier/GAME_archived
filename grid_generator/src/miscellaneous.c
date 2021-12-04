@@ -95,7 +95,7 @@ int calc_vorticity_indices_triangles(int from_index_dual[], int to_index_dual[],
                 sign = 1;
                 if (from_index_dual[j] == i)
                 {
-                    find_turn_angle(direction_dual[j], direction[j], &direction_change);
+                    direction_change = find_turn_angle(direction_dual[j], direction[j]);
                     if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
                     {
                         sign = -1;
@@ -103,7 +103,7 @@ int calc_vorticity_indices_triangles(int from_index_dual[], int to_index_dual[],
                 }
                 if (to_index_dual[j] == i)
                 {
-                    find_turn_angle(direction_dual[j], direction[j], &direction_change);
+                    direction_change = find_turn_angle(direction_dual[j], direction[j]);
                     if (rad2deg(direction_change) > ORTH_CRITERION_DEG)
                     {
                         sign = -1;

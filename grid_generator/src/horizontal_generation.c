@@ -503,7 +503,7 @@ int direct_tangential_unity(double latitude_scalar_dual[], double longitude_scal
 	#pragma omp parallel for private(temp_index, direction_change)
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
-	    find_turn_angle(direction[i], direction_dual[i], &direction_change);
+	    direction_change = find_turn_angle(direction[i], direction_dual[i]);
 	    if (rad2deg(direction_change) < -ORTH_CRITERION_DEG)
 	    {
 	    	temp_index = from_index_dual[i];
@@ -518,7 +518,7 @@ int direct_tangential_unity(double latitude_scalar_dual[], double longitude_scal
 	#pragma omp parallel for private(direction_change)
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
-        find_turn_angle(direction[i], direction_dual[i], &direction_change);
+        direction_change = find_turn_angle(direction[i], direction_dual[i]);
         if (fabs(rad2deg(direction_change)) < ORTH_CRITERION_DEG || fabs(rad2deg(direction_change)) > 90 + (90 - ORTH_CRITERION_DEG))
 		{
             printf("Grid non-orthogonal: Intersection angle of %lf degrees detected.\n", fabs(rad2deg(direction_change)));
