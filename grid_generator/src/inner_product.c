@@ -15,6 +15,9 @@ In this file, the inner product weights are computed.
 
 int calc_inner_product(double inner_product_weights[], double normal_distance[], double volume[], int to_index[], int from_index[], double area[], double z_scalar[], double z_vector[], int adjacent_vector_indices_h[])
 {
+	/*
+	This function computes the geometrical weights for computing the inner product.
+	*/
 	int layer_index, h_index;
 	double delta_z;
 	#pragma omp parallel for private(layer_index, h_index, delta_z)
