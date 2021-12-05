@@ -18,6 +18,7 @@ int interpolate_ll(double latitude_scalar[], double longitude_scalar[], int inte
 	/*
 	This function interpolates to the lat-lon grid.
 	*/
+	
 	// latitude resolution of the grid
 	double delta_latitude = M_PI/NO_OF_LAT_IO_POINTS;
 	// longitude resolution of the grid

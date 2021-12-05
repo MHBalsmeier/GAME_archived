@@ -23,6 +23,7 @@ int find_adjacent_vector_indices_h(int from_index[], int to_index[], int adjacen
 	/*
 	This function finds the horizontal vectors that are adjacent to a grid cell.
 	*/
+	
     int trouble_detected = 0;
     int counter;
     #pragma omp parallel for private(trouble_detected, counter)

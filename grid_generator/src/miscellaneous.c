@@ -81,6 +81,10 @@ int set_orography(int RES_ID, int ORO_ID, double z_surface[])
 
 int calc_vorticity_indices_triangles(int from_index_dual[], int to_index_dual[], double direction[], double direction_dual[], int vorticity_indices_triangles[], double ORTH_CRITERION_DEG, int vorticity_signs_pre[])
 {
+	/*
+	This function computes the vector indices needed for calculating the vorticity on triangles.
+	*/
+	
 	int counter, sign;
 	double direction_change;
 	#pragma omp parallel for private(counter, sign, direction_change)
@@ -127,6 +131,7 @@ int write_statistics_file(double pent_hex_face_unity_sphere[], double normal_dis
 	/*
 	This function writes out statistical properties of the grid to a text file.
 	*/
+	
     double area_max, area_min, normal_distance_h_min, normal_distance_h_max, normal_distance_dual_h_min, normal_distance_dual_h_max;
     area_min = pent_hex_face_unity_sphere[find_min_index(pent_hex_face_unity_sphere, NO_OF_SCALARS_H)];
     area_max = pent_hex_face_unity_sphere[find_max_index(pent_hex_face_unity_sphere, NO_OF_SCALARS_H)];

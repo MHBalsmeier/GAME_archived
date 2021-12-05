@@ -19,6 +19,10 @@ In this file, the horizontal grid generation procedure is stored.
 
 int generate_horizontal_generators(double latitude_ico[], double longitude_ico[], double latitude_scalar[], double longitude_scalar[], double x_unity[], double y_unity[], double z_unity[], int face_edges_reverse[][3], int face_edges[][3], int face_vertices[][3])
 {
+	/*
+	This function computes the geographical coordinates of the generators (centers of the pentagons and hexagons).
+	*/
+	
 	int base_index_down_triangles, base_index_old, test_index, last_triangle_bool, old_triangle_on_line_index, base_index_up_triangles, points_downwards, points_upwards, dump, points_per_edge, edgepoint_0, edgepoint_1, edgepoint_2, no_of_triangles_per_face, point_0, point_1, point_2, dual_scalar_on_face_index, coord_0, coord_1, triangle_on_face_index, coord_0_points_amount;
 	double x_res, y_res, z_res;
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
@@ -108,6 +112,10 @@ int generate_horizontal_generators(double latitude_ico[], double longitude_ico[]
 
 int calc_cell_area_unity(double pent_hex_face_unity_sphere[], double latitude_scalar_dual[], double longitude_scalar_dual[], int adjacent_vector_indices_h[], int vorticity_indices_pre[])
 {
+	/*
+	This function computes the areas of the cells (pentagons and hexagons) on the unity sphere.
+	*/
+	
     int check_0, check_1, check_2, counter, no_of_edges;
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
@@ -168,13 +176,18 @@ int calc_cell_area_unity(double pent_hex_face_unity_sphere[], double latitude_sc
 
 int calc_triangle_area_unity(double triangle_face_unit_sphere[], double latitude_scalar[], double longitude_scalar[], int face_edges[][3], int face_edges_reverse[][3], int face_vertices[][3], int edge_vertices[][2])
 {
+	/*
+	This function computes the areas of the triangles on the unity sphere.
+	*/
+	
 	int dual_scalar_index, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, small_triangle_edge_index, coord_0_points_amount, coord_0, coord_1, face_index, on_face_index, triangle_on_face_index;
 	double triangle_face;
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         if (i >= NO_OF_EDGES*(POINTS_PER_EDGE + 1))
         {
-            find_triangle_indices_from_h_vector_index(RES_ID, i, &point_0, &point_1, &point_2, &point_3, &point_4, &point_5, &dual_scalar_on_face_index, &small_triangle_edge_index, face_edges, face_vertices, edge_vertices, face_edges_reverse);
+            find_triangle_indices_from_h_vector_index(RES_ID, i, &point_0, &point_1, &point_2, &point_3, &point_4, &point_5,
+            &dual_scalar_on_face_index, &small_triangle_edge_index, face_edges, face_vertices, edge_vertices, face_edges_reverse);
             face_index = (i - NO_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
             on_face_index = i - (NO_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
             triangle_on_face_index = on_face_index/3;
@@ -226,6 +239,10 @@ int calc_triangle_area_unity(double triangle_face_unit_sphere[], double latitude
 
 int set_vector_h_doubles(int from_index[], int to_index[], double latitude_scalar[], double longitude_scalar[], double latitude_vector[], double longitude_vector[], double direction[])
 {
+	/*
+	This function sets the geographical coordinates and the directions of the horizontal vector points.
+	*/
+	
 	double x_point_0, y_point_0, z_point_0, x_point_1, y_point_1, z_point_1, x_res, y_res, z_res, lat_res, lon_res;
 	#pragma omp parallel for private(x_point_0, y_point_0, z_point_0, x_point_1, y_point_1, z_point_1, x_res, y_res, z_res, lat_res, lon_res)
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
@@ -243,6 +260,10 @@ int set_vector_h_doubles(int from_index[], int to_index[], double latitude_scala
 
 int set_from_to_index(int from_index[], int to_index[], int face_edges[][3], int face_edges_reverse[][3], int face_vertices[][3], int edge_vertices[][2])
 {
+	/*
+	This function computes the neighbourship relationships of the horizontal vectors.
+	*/
+	
 	int edge_index, on_edge_index, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, small_triangle_edge_index;
 	#pragma omp parallel for private(edge_index, on_edge_index, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, small_triangle_edge_index)
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
@@ -292,6 +313,10 @@ int set_from_to_index(int from_index[], int to_index[], int face_edges[][3], int
 
 int set_scalar_h_dual_coords(double latitude_scalar_dual[], double longitude_scalar_dual[], double latitude_scalar[], double longitude_scalar[], int face_edges[][3], int face_edges_reverse[][3], int face_vertices[][3], int edge_vertices[][2])
 {
+	/*
+	This function calculates the geographical coordinates of the dual scalar points.
+	*/
+	
 	double lat_res, lon_res;
 	int point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, small_triangle_edge_index, dual_scalar_index, coord_0, coord_1, coord_0_points_amount, face_index, on_face_index, triangle_on_face_index;
 	#pragma omp parallel for private(lat_res, lon_res, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, small_triangle_edge_index, dual_scalar_index, coord_0, coord_1, coord_0_points_amount, face_index, on_face_index, triangle_on_face_index)
@@ -299,17 +324,20 @@ int set_scalar_h_dual_coords(double latitude_scalar_dual[], double longitude_sca
     {
         if (i >= NO_OF_EDGES*(POINTS_PER_EDGE + 1))
         {
-            find_triangle_indices_from_h_vector_index(RES_ID, i, &point_0, &point_1, &point_2, &point_3, &point_4, &point_5, &dual_scalar_on_face_index, &small_triangle_edge_index, face_edges, face_vertices, edge_vertices, face_edges_reverse);
+            find_triangle_indices_from_h_vector_index(RES_ID, i, &point_0, &point_1, &point_2, &point_3, &point_4, &point_5, &dual_scalar_on_face_index,
+            &small_triangle_edge_index, face_edges, face_vertices, edge_vertices, face_edges_reverse);
             face_index = (i - NO_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
             on_face_index = i - (NO_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
             triangle_on_face_index = on_face_index/3;
             find_coords_from_triangle_on_face_index(triangle_on_face_index, RES_ID, &coord_0, &coord_1, &coord_0_points_amount);
             dual_scalar_index = dual_scalar_on_face_index + face_index*NO_OF_TRIANGLES/NO_OF_BASIC_TRIANGLES;
             // We want to construct a Voronoi gird, that's why we choose this function for calculating the dual cell centers.
-            find_voronoi_center_sphere(latitude_scalar[point_0], longitude_scalar[point_0], latitude_scalar[point_1], longitude_scalar[point_1], latitude_scalar[point_2], longitude_scalar[point_2], &lat_res, &lon_res);
+            find_voronoi_center_sphere(latitude_scalar[point_0], longitude_scalar[point_0], latitude_scalar[point_1], longitude_scalar[point_1],
+            latitude_scalar[point_2], longitude_scalar[point_2], &lat_res, &lon_res);
             latitude_scalar_dual[dual_scalar_index] = lat_res;
             longitude_scalar_dual[dual_scalar_index] = lon_res;
-	        find_voronoi_center_sphere(latitude_scalar[point_3], longitude_scalar[point_3], latitude_scalar[point_0], longitude_scalar[point_0], latitude_scalar[point_2], longitude_scalar[point_2], &lat_res, &lon_res);
+	        find_voronoi_center_sphere(latitude_scalar[point_3], longitude_scalar[point_3], latitude_scalar[point_0], longitude_scalar[point_0],
+	        latitude_scalar[point_2], longitude_scalar[point_2], &lat_res, &lon_res);
             latitude_scalar_dual[dual_scalar_index - 1] = lat_res;
             longitude_scalar_dual[dual_scalar_index - 1] = lon_res;
             if (coord_0 == coord_0_points_amount - 1)
@@ -331,6 +359,10 @@ int set_scalar_h_dual_coords(double latitude_scalar_dual[], double longitude_sca
 
 int set_from_to_index_dual(int from_index_dual[], int to_index_dual[], int face_edges [][3], int face_edges_reverse[][3])
 {
+	/*
+	This function computes the neighbourship relationships of the horizontal dual vectors.
+	*/
+	
 	int coord_0, coord_1, on_face_index, on_edge_index, edge_index, small_triangle_edge_index, coord_0_points_amount, first_face_found, face_index;
     #pragma omp parallel for private(coord_0, coord_1, on_face_index, on_edge_index, edge_index, small_triangle_edge_index, coord_0_points_amount, first_face_found, face_index)
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
@@ -482,15 +514,23 @@ int set_from_to_index_dual(int from_index_dual[], int to_index_dual[], int face_
 
 int set_dual_vector_h_doubles(double latitude_scalar_dual[], double latitude_vector[], double direction_dual[], double longitude_vector[], int to_index_dual[], int from_index_dual[], double longitude_scalar_dual[], double rel_on_line_dual[])
 {
+	/*
+	This function computes the following two properties of horizontal dual vectors:
+	- where they are placed in between the dual scalar points
+	- in which direction they point
+	*/
+	
 	#pragma omp parallel for
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
-        find_min_dist_rel_on_line(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], latitude_vector[i], longitude_vector[i], &rel_on_line_dual[i]);
+        find_min_dist_rel_on_line(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]],
+        latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], latitude_vector[i], longitude_vector[i], &rel_on_line_dual[i]);
         if (fabs(rel_on_line_dual[i] - 0.5) > 0.14)
         {
             printf("Bisection warning.\n");
         }
-        direction_dual[i] = find_geodetic_direction(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]], latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], rel_on_line_dual[i]);
+        direction_dual[i] = find_geodetic_direction(latitude_scalar_dual[from_index_dual[i]], longitude_scalar_dual[from_index_dual[i]],
+        latitude_scalar_dual[to_index_dual[i]], longitude_scalar_dual[to_index_dual[i]], rel_on_line_dual[i]);
     }
     return 0;
 }
@@ -537,6 +577,7 @@ int read_horizontal_explicit(double latitude_scalar[], double longitude_scalar[]
 	This function reads the arrays that fully define the horizontal grid from a previously created grid file.
 	This is an optional feature.
 	*/
+	
 	int ncid, latitude_scalar_id, longitude_scalar_id, retval, from_index_id, to_index_id, from_index_dual_id, to_index_dual_id, no_of_lloyd_cycles_id;
 	retval = 0;
     if ((nc_open(filename, NC_NOWRITE, &ncid)))
