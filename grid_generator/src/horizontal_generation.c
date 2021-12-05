@@ -19,7 +19,7 @@ In this file, the horizontal grid generation procedure is stored.
 
 int generate_horizontal_generators(double latitude_ico[], double longitude_ico[], double latitude_scalar[], double longitude_scalar[], double x_unity[], double y_unity[], double z_unity[], int face_edges_reverse[][3], int face_edges[][3], int face_vertices[][3])
 {
-	int base_index_down_triangles, base_index_old, test_index, last_triangle_bool, old_triangle_on_line_index, base_index_up_triangles, points_downwards, points_upwards, dump, points_per_edge, edgepoint_0, edgepoint_1, edgepoint_2, NO_OF_triangles_per_face, point_0, point_1, point_2, dual_scalar_on_face_index, coord_0, coord_1, triangle_on_face_index, coord_0_points_amount;
+	int base_index_down_triangles, base_index_old, test_index, last_triangle_bool, old_triangle_on_line_index, base_index_up_triangles, points_downwards, points_upwards, dump, points_per_edge, edgepoint_0, edgepoint_1, edgepoint_2, no_of_triangles_per_face, point_0, point_1, point_2, dual_scalar_on_face_index, coord_0, coord_1, triangle_on_face_index, coord_0_points_amount;
 	double x_res, y_res, z_res;
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
@@ -42,8 +42,8 @@ int generate_horizontal_generators(double latitude_ico[], double longitude_ico[]
 	{
 	    for (int j = 0; j < RES_ID; ++j)
 	    {
-	        find_triangles_per_face(j, &NO_OF_triangles_per_face);
-	        for (int k = 0; k < NO_OF_triangles_per_face; ++k)
+	        no_of_triangles_per_face = find_triangles_per_face(j);
+	        for (int k = 0; k < no_of_triangles_per_face; ++k)
 	        {
 	            if (j == 0)
 	            {

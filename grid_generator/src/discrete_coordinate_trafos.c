@@ -70,7 +70,7 @@ int find_triangle_edge_points(int triangle_on_face_index, int face_index, int re
     *dual_scalar_on_face_index = 1 + 2*triangle_on_face_index + coord_1;
     int points_per_edge, scalar_points_per_inner_face;
     find_points_per_edge(res_id, &points_per_edge);
-    find_scalar_points_per_inner_face(res_id, &scalar_points_per_inner_face);
+    scalar_points_per_inner_face = find_scalar_points_per_inner_face(res_id);
     if (coord_1 == 0)
     {
         if (face_edges_reverse[face_index][0] == 0)
@@ -297,7 +297,7 @@ int upscale_scalar_point(int res_id, int old_index, int *new_index)
     int edge_index, face_index;
     int points_per_edge, on_edge_index, scalar_points_per_inner_face, on_face_index, coord_0, coord_1, coord_0_points_amount;
     find_points_per_edge(res_id, &points_per_edge);
-    find_scalar_points_per_inner_face(res_id, &scalar_points_per_inner_face);
+    scalar_points_per_inner_face = find_scalar_points_per_inner_face(res_id);
     if (old_index < NO_OF_PENTAGONS)
     {
         *new_index = old_index;
@@ -441,20 +441,30 @@ int find_points_per_edge(int res_id, int *points_per_edge)
     return 0;
 }
 
-int find_scalar_points_per_inner_face(int res_id, int *scalar_points_per_inner_face)
+int find_scalar_points_per_inner_face(int res_id)
 {
-    *scalar_points_per_inner_face = (int) (0.5*(pow(2, res_id) - 2)*(pow(2, res_id) - 1));
-    return 0;
+	/*
+	This function calculates the number of scalar data points (centers of hexagons) in the inner of a face
+	of the icosahedron given a certain resolution ID.
+	*/
+    int scalar_points_per_inner_face = (int) (0.5*(pow(2, res_id) - 2)*(pow(2, res_id) - 1));
+    return scalar_points_per_inner_face;
 }
 
-int find_triangles_per_face(int res_id, int *NO_OF_triangles_per_face)
+int find_triangles_per_face(int res_id)
 {
-    *NO_OF_triangles_per_face = (int) (pow(4, res_id));
-    return 0;
+	/*
+	This function calculates the numer of triangles per face of the icosahedron given a certain resolution ID.
+	*/
+    int no_of_triangles_per_face = (int) (pow(4, res_id));
+    return no_of_triangles_per_face;
 }
 
 int build_icosahedron(double latitude_ico[], double longitude_ico[], int edge_vertices[][2], int face_vertices[][3], int face_edges[][3], int face_edges_reverse[][3])
 {
+	/*
+	This function sets the properties of the icosahedron the global grid is based on (angles and indices of faces, edges and vertices).
+	*/
     latitude_ico[0] = M_PI/2;
     latitude_ico[1] = atan(0.5);
     latitude_ico[2] = atan(0.5);
