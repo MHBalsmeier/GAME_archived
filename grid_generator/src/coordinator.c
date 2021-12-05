@@ -237,7 +237,8 @@ int main(int argc, char *argv[])
 	*/
 	if (OPTIMIZE_BOOL == 1)
 	{
-		optimize_to_scvt(latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, N_ITERATIONS, face_edges, face_edges_reverse, face_vertices, edge_vertices, adjacent_vector_indices_h, from_index_dual, to_index_dual);
+		optimize_to_scvt(latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, N_ITERATIONS,
+		face_edges, face_edges_reverse, face_vertices, adjacent_vector_indices_h, from_index_dual, to_index_dual);
 		no_of_lloyd_cycles = no_of_lloyd_cycles + N_ITERATIONS;
 	}
 	
@@ -246,7 +247,7 @@ int main(int argc, char *argv[])
 	    ------------------------------------------------------
 	*/
 	// calculation of the horizontal coordinates of the dual scalar points
-	set_scalar_h_dual_coords(latitude_scalar_dual, longitude_scalar_dual, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
+	set_scalar_h_dual_coords(latitude_scalar_dual, longitude_scalar_dual, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices);
 	
 	// calculation of the horizontal coordinates of the vector points
 	set_vector_h_doubles(from_index, to_index, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, direction);
@@ -264,7 +265,7 @@ int main(int argc, char *argv[])
     
     // calculating the dual cells on the unity sphere
     calc_triangle_area_unity(triangle_face_unit_sphere, latitude_scalar, longitude_scalar, face_edges,
-    face_edges_reverse, face_vertices, edge_vertices);
+    face_edges_reverse, face_vertices);
     
     // finding the vorticity indices
 	calc_vorticity_indices_triangles(from_index_dual, to_index_dual, direction, direction_dual,

@@ -15,6 +15,10 @@ This file contains discrete coordinate transformations on the icosahedral grid.
 
 int find_coords_from_triangle_on_face_index(int triangle_on_face_index, int res_id, int *coord_0, int *coord_1, int *coord_0_points_amount)
 {
+	/*
+	This function computes the discrete coordinates of a triangle from its index on face.
+	*/
+	
     int check = 1;
     int coord_1_pre = -1;
     int min_index, max_index, points_per_edge;
@@ -38,6 +42,10 @@ int find_coords_from_triangle_on_face_index(int triangle_on_face_index, int res_
 
 int find_triangle_on_face_index_from_coords(int coord_0, int coord_1, int res_id, int *triangle_on_face_index)
 {
+	/*
+	This function computes the index on face of a triangle from its discrete coordinates.
+	*/
+	
     int i = 0;
     *triangle_on_face_index = 0;
     int points_per_edge;
@@ -53,18 +61,28 @@ int find_triangle_on_face_index_from_coords(int coord_0, int coord_1, int res_id
     return 0;
 }
 
-int find_triangle_indices_from_h_vector_index(int res_id, int i, int *point_0, int *point_1, int *point_2, int *point_3, int *point_4, int *point_5, int *dual_scalar_on_face_index, int *small_triangle_edge_index, int face_edges[][3], int face_vertices[][3], int edge_vertices [][2], int face_edges_reverse[][3])
+int find_triangle_indices_from_h_vector_index(int res_id, int i, int *point_0, int *point_1, int *point_2, int *point_3, int *point_4, int *point_5,
+int *dual_scalar_on_face_index, int *small_triangle_edge_index, int face_edges[][3], int face_vertices[][3], int face_edges_reverse[][3])
 {
+	/*
+	This function finds which triangles a horizontal vector is connected to.
+	*/
+	
     int face_index = (i - NO_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
     int on_face_index = i - (NO_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
     int triangle_on_face_index = on_face_index/3;
     *small_triangle_edge_index = on_face_index - 3*triangle_on_face_index;
-   	find_triangle_edge_points(triangle_on_face_index, face_index, res_id, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, face_vertices, face_edges, face_edges_reverse);
+   	find_triangle_edge_points(triangle_on_face_index, face_index, res_id, point_0, point_1, point_2, point_3, point_4, point_5,
+   	dual_scalar_on_face_index, face_vertices, face_edges, face_edges_reverse);
     return 0;
 }
 
 int find_triangle_edge_points(int triangle_on_face_index, int face_index, int res_id, int *point_0, int *point_1, int *point_2, int *point_3, int *point_4, int *point_5, int *dual_scalar_on_face_index, int face_vertices[][3], int face_edges[][3], int face_edges_reverse[][3])
 {
+	/*
+	This function finds the primal scalar points (pentagon and hexagon centers) a triangle consists of.
+	*/
+	
     int coord_0, coord_1, coord_0_points_amount;
     find_coords_from_triangle_on_face_index(triangle_on_face_index, res_id, &coord_0, &coord_1, &coord_0_points_amount);
     *dual_scalar_on_face_index = 1 + 2*triangle_on_face_index + coord_1;
@@ -172,8 +190,13 @@ int find_triangle_edge_points(int triangle_on_face_index, int face_index, int re
     return 0;
 }
 
-int find_triangle_on_face_index_from_dual_scalar_on_face_index(int dual_scalar_on_face_index, int res_id, int *triangle_on_face_index, int *points_downwards, int *special_case_bool, int *last_triangle_bool)
+int find_triangle_on_face_index_from_dual_scalar_on_face_index(int dual_scalar_on_face_index, int res_id, int *triangle_on_face_index,
+int *points_downwards, int *special_case_bool, int *last_triangle_bool)
 {
+	/*
+	This function finds the on face index of a triangle from the dual scalar on face index.
+	*/
+	
     int value_found = 0;
     int triangle_on_face_index_pre, coord_0_pre, coord_1_pre, coord_0_points_amount_pre, dual_scalar_on_face_index_0, dual_scalar_on_face_index_1, dual_scalar_on_face_index_2, dual_scalar_on_face_index_3, points_per_edge;
     triangle_on_face_index_pre = -1;
@@ -227,8 +250,13 @@ int find_triangle_on_face_index_from_dual_scalar_on_face_index(int dual_scalar_o
     return 0;
 }
 
-int find_triangle_edge_points_from_dual_scalar_on_face_index(int dual_scalar_on_face_index, int face_index, int res_id, int *point_0, int *point_1, int *point_2, int face_vertices[][3], int face_edges[][3], int face_edges_reverse[][3])
+int find_triangle_edge_points_from_dual_scalar_on_face_index(int dual_scalar_on_face_index, int face_index, int res_id,
+int *point_0, int *point_1, int *point_2, int face_vertices[][3], int face_edges[][3], int face_edges_reverse[][3])
 {
+	/*
+	Thi function computes the edge points of a triangle from its dual scalar on face index.
+	*/
+	
     int points_downwards, special_case_bool, last_triangle_bool;
     int triangle_on_face_index, rhombuspoint_0, rhombuspoint_1, rhombuspoint_2, rhombuspoint_3, coord_0, coord_1, coord_0_points_amount, points_per_edge, dump, addpoint_0, addpoint_1;
     find_triangle_on_face_index_from_dual_scalar_on_face_index(dual_scalar_on_face_index, res_id, &triangle_on_face_index, &points_downwards, &special_case_bool, &last_triangle_bool);
@@ -294,6 +322,10 @@ int find_triangle_edge_points_from_dual_scalar_on_face_index(int dual_scalar_on_
 
 int upscale_scalar_point(int res_id, int old_index, int *new_index)
 {
+	/*
+	This function converts an index of a scalar data point to a higher resolution ID.
+	*/
+	
     int edge_index, face_index;
     int points_per_edge, on_edge_index, scalar_points_per_inner_face, on_face_index, coord_0, coord_1, coord_0_points_amount;
     points_per_edge = find_points_per_edge(res_id);
@@ -323,6 +355,10 @@ int upscale_scalar_point(int res_id, int old_index, int *new_index)
 
 int write_scalar_coordinates(int edgepoint_0, int edgepoint_1, int edgepoint_2, int point_0, int point_1, int point_2, int points_upwards, double x_unity[], double y_unity[], double z_unity[], double latitude_scalar[], double longitude_scalar[])
 {
+	/*
+	This function computes the geographical coordinates of a scalar data point.
+	*/
+	
     double x_res, y_res, z_res, lat_res, lon_res;
     // first point
     find_between_point(x_unity[edgepoint_0], y_unity[edgepoint_0], z_unity[edgepoint_0], x_unity[edgepoint_1], y_unity[edgepoint_1], z_unity[edgepoint_1], 0.5, &x_res, &y_res, &z_res);
@@ -407,6 +443,10 @@ int write_scalar_coordinates(int edgepoint_0, int edgepoint_1, int edgepoint_2, 
 
 int find_v_vector_indices_for_dual_scalar_z(int from_index[], int to_index[], int vorticity_indices_triangles[], int dual_scalar_h_index, int index_vector_for_dual_scalar_z[])
 {
+	/*
+	This function computes the vertical vector indices to compute the z-coordinates of a dual scalar data point with.
+	*/
+	
 	int counter = 0;
 	int check_result;
 	index_vector_for_dual_scalar_z[0] = -1;

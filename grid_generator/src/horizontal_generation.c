@@ -174,20 +174,22 @@ int calc_cell_area_unity(double pent_hex_face_unity_sphere[], double latitude_sc
 	return 0;
 }
 
-int calc_triangle_area_unity(double triangle_face_unit_sphere[], double latitude_scalar[], double longitude_scalar[], int face_edges[][3], int face_edges_reverse[][3], int face_vertices[][3], int edge_vertices[][2])
+int calc_triangle_area_unity(double triangle_face_unit_sphere[], double latitude_scalar[], double longitude_scalar[], int face_edges[][3],
+int face_edges_reverse[][3], int face_vertices[][3])
 {
 	/*
 	This function computes the areas of the triangles on the unity sphere.
 	*/
 	
-	int dual_scalar_index, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, small_triangle_edge_index, coord_0_points_amount, coord_0, coord_1, face_index, on_face_index, triangle_on_face_index;
+	int dual_scalar_index, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index,
+	small_triangle_edge_index, coord_0_points_amount, coord_0, coord_1, face_index, on_face_index, triangle_on_face_index;
 	double triangle_face;
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         if (i >= NO_OF_EDGES*(POINTS_PER_EDGE + 1))
         {
             find_triangle_indices_from_h_vector_index(RES_ID, i, &point_0, &point_1, &point_2, &point_3, &point_4, &point_5,
-            &dual_scalar_on_face_index, &small_triangle_edge_index, face_edges, face_vertices, edge_vertices, face_edges_reverse);
+            &dual_scalar_on_face_index, &small_triangle_edge_index, face_edges, face_vertices, face_edges_reverse);
             face_index = (i - NO_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
             on_face_index = i - (NO_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
             triangle_on_face_index = on_face_index/3;
@@ -290,7 +292,8 @@ int set_from_to_index(int from_index[], int to_index[], int face_edges[][3], int
         }
         else
         {
-            find_triangle_indices_from_h_vector_index(RES_ID, i, &point_0, &point_1, &point_2, &point_3, &point_4, &point_5, &dual_scalar_on_face_index, &small_triangle_edge_index, face_edges, face_vertices, edge_vertices, face_edges_reverse);
+            find_triangle_indices_from_h_vector_index(RES_ID, i, &point_0, &point_1, &point_2, &point_3, &point_4, &point_5, &dual_scalar_on_face_index,
+            &small_triangle_edge_index, face_edges, face_vertices, face_edges_reverse);
             if (small_triangle_edge_index == 0)
             {
                 from_index[i] = point_0;
@@ -311,21 +314,23 @@ int set_from_to_index(int from_index[], int to_index[], int face_edges[][3], int
     return 0;
 }
 
-int set_scalar_h_dual_coords(double latitude_scalar_dual[], double longitude_scalar_dual[], double latitude_scalar[], double longitude_scalar[], int face_edges[][3], int face_edges_reverse[][3], int face_vertices[][3], int edge_vertices[][2])
+int set_scalar_h_dual_coords(double latitude_scalar_dual[], double longitude_scalar_dual[], double latitude_scalar[], double longitude_scalar[],
+int face_edges[][3], int face_edges_reverse[][3], int face_vertices[][3])
 {
 	/*
 	This function calculates the geographical coordinates of the dual scalar points.
 	*/
 	
 	double lat_res, lon_res;
-	int point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, small_triangle_edge_index, dual_scalar_index, coord_0, coord_1, coord_0_points_amount, face_index, on_face_index, triangle_on_face_index;
+	int point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, small_triangle_edge_index,
+	dual_scalar_index, coord_0, coord_1, coord_0_points_amount, face_index, on_face_index, triangle_on_face_index;
 	#pragma omp parallel for private(lat_res, lon_res, point_0, point_1, point_2, point_3, point_4, point_5, dual_scalar_on_face_index, small_triangle_edge_index, dual_scalar_index, coord_0, coord_1, coord_0_points_amount, face_index, on_face_index, triangle_on_face_index)
     for (int i = 0; i < NO_OF_VECTORS_H; ++i)
     {
         if (i >= NO_OF_EDGES*(POINTS_PER_EDGE + 1))
         {
             find_triangle_indices_from_h_vector_index(RES_ID, i, &point_0, &point_1, &point_2, &point_3, &point_4, &point_5, &dual_scalar_on_face_index,
-            &small_triangle_edge_index, face_edges, face_vertices, edge_vertices, face_edges_reverse);
+            &small_triangle_edge_index, face_edges, face_vertices, face_edges_reverse);
             face_index = (i - NO_OF_EDGES*(POINTS_PER_EDGE + 1))/VECTOR_POINTS_PER_INNER_FACE;
             on_face_index = i - (NO_OF_EDGES*(POINTS_PER_EDGE + 1) + face_index*VECTOR_POINTS_PER_INNER_FACE);
             triangle_on_face_index = on_face_index/3;
