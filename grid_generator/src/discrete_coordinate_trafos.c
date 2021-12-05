@@ -194,11 +194,13 @@ int find_triangle_on_face_index_from_dual_scalar_on_face_index(int dual_scalar_o
 int *points_downwards, int *special_case_bool, int *last_triangle_bool)
 {
 	/*
-	This function finds the on face index of a triangle from the dual scalar on face index.
+	This function finds the on face index of a triangle from the dual scalar on face index and some further
+	properties of this triangle (wether it points upwards or downwards, ...).
 	*/
 	
     int value_found = 0;
-    int triangle_on_face_index_pre, coord_0_pre, coord_1_pre, coord_0_points_amount_pre, dual_scalar_on_face_index_0, dual_scalar_on_face_index_1, dual_scalar_on_face_index_2, dual_scalar_on_face_index_3, points_per_edge;
+    int triangle_on_face_index_pre, coord_0_pre, coord_1_pre, coord_0_points_amount_pre, dual_scalar_on_face_index_0,
+    dual_scalar_on_face_index_1, dual_scalar_on_face_index_2, dual_scalar_on_face_index_3, points_per_edge;
     triangle_on_face_index_pre = -1;
     points_per_edge = find_points_per_edge(res_id);
     while (value_found == 0)
