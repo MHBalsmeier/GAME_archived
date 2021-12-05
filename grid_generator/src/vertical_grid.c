@@ -78,6 +78,10 @@ int set_z_scalar(double z_scalar[], double z_surface[], int NO_OF_ORO_LAYERS, do
 
 int set_scalar_shading_indices(double z_scalar[], double z_surface[], int no_of_shaded_points_scalar[])
 {
+	/*
+	This function sets which scalar points lie below the surface.
+	*/
+	
 	int counter;
 	#pragma omp parallel for private(counter)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
@@ -97,6 +101,10 @@ int set_scalar_shading_indices(double z_scalar[], double z_surface[], int no_of_
 
 int set_vector_shading_indices(int from_index[], int to_index[], int no_of_shaded_points_scalar[], int no_of_shaded_points_vector[])
 {
+	/*
+	This function sets which vector points lie below the surface.
+	*/
+	
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 	{
@@ -224,6 +232,10 @@ int set_volume(double volume[], double z_vector[], double area[], int from_index
 
 int set_area_dual(double area_dual[], double z_vector_dual[], double normal_distance[], double z_vector[], int from_index[], int to_index[], double triangle_face_unit_sphere[], double TOA)
 {
+	/*
+	This function computes the areas of the dual grid.
+	*/
+	
 	int layer_index, h_index, primal_vector_index;
 	double radius_0, radius_1, base_distance;
 	#pragma omp parallel for private(layer_index, h_index, primal_vector_index, radius_0, radius_1, base_distance)

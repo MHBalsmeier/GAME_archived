@@ -17,6 +17,10 @@ int find_cell_cgs(double [], double [], double [], double [], int [], int [], in
 
 int optimize_to_scvt(double latitude_scalar[], double longitude_scalar[], double latitude_scalar_dual[], double longitude_scalar_dual[], int n_iterations, int face_edges[][3], int face_edges_reverse[][3], int face_vertices[][3], int edge_vertices[][2], int adjacent_vector_indices_h[], int from_index_dual[], int to_index_dual[])
 {
+	/*
+	This function manages the grid optimization with Lloyd's algorithm.
+	The result is (almost) a SCVT.
+	*/
 	for (int i = 0; i < n_iterations; ++i)
 	{
     	set_scalar_h_dual_coords(latitude_scalar_dual, longitude_scalar_dual, latitude_scalar, longitude_scalar, face_edges, face_edges_reverse, face_vertices, edge_vertices);
@@ -28,6 +32,9 @@ int optimize_to_scvt(double latitude_scalar[], double longitude_scalar[], double
 
 int find_cell_cgs(double latitude_scalar[], double longitude_scalar[], double latitude_scalar_dual[], double longitude_scalar_dual[], int adjacent_vector_indices_h[], int from_index_dual[], int to_index_dual[])
 {
+	/*
+	This function calculates the barycenters (centers of gravity) of the cells.
+	*/
 	int no_of_edges, counter, vertex_index_candidate_0, vertex_index_candidate_1, check_result;
 	double lat_res, lon_res, x_res, y_res, z_res, triangle_unity_face, x_0, y_0, z_0, x_1, y_1, z_1, x_2, y_2, z_2, lat_0, lon_0, lat_1, lon_1, lat_2, lon_2;
 	#pragma omp parallel for private(no_of_edges, counter, vertex_index_candidate_0, vertex_index_candidate_1, check_result, lat_res, lon_res, x_res, y_res, z_res, triangle_unity_face, x_0, y_0, z_0, x_1, y_1, z_1, x_2, y_2, z_2, lat_0, lon_0, lat_1, lon_1, lat_2, lon_2)
