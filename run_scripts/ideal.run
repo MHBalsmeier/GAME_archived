@@ -3,6 +3,8 @@
 # This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 # Github repository: https://github.com/OpenNWP/GAME
 
+# This is a run script for idealized simulations.
+
 # basic run properties
 game_home_dir=/home/max/code/GAME
 ideal_input_id=8 # specifies which test scenario to run
