@@ -231,6 +231,8 @@ module radiation
     real(wp)                          :: ice_cloud_weight
     ! liquid cloud particles weight
     real(wp)                          :: liquid_cloud_weight
+    ! security margin
+    real(wp)                          :: security_margin = 1e-10
     
     ! some general preparations
     
@@ -284,13 +286,13 @@ module radiation
         do jk = 1,no_of_layers
           base_index = (jk-1)*no_of_scalars_h
           ! the solid condensates' effective radius
-          ice_precip_weight = mass_densities(base_index+ji)+1e-10
-          ice_cloud_weight = mass_densities(2*no_of_scalars+base_index+ji)+1e-10
+          ice_precip_weight = mass_densities(base_index+ji)+security_margin
+          ice_cloud_weight = mass_densities(2*no_of_scalars+base_index+ji)+security_margin
           ice_eff_radius_value = (ice_precip_weight*ice_precip_radius+ice_cloud_weight*ice_cloud_radius) &
           /(ice_precip_weight+ice_cloud_weight)
           ! the liquid condensates' effective radius
-          liquid_precip_weight = mass_densities(no_of_scalars+base_index+ji)+1e-10
-          liquid_cloud_weight = mass_densities(3*no_of_scalars+base_index+ji)+1e-10
+          liquid_precip_weight = mass_densities(no_of_scalars+base_index+ji)+security_margin
+          liquid_cloud_weight = mass_densities(3*no_of_scalars+base_index+ji)+security_margin
           liquid_eff_radius_value = (liquid_precip_weight*liquid_precip_radius+liquid_cloud_weight*liquid_cloud_radius) &
           /(liquid_precip_weight+liquid_cloud_weight)
           ! thickness of the gridbox
