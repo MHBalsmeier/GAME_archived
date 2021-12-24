@@ -35,6 +35,8 @@ int soil_interaction(State *state, Soil *soil, Diagnostics *diagnostics, Forcing
 		soil -> temperature[i]
 		// sensible heat flux
 		+= (soil -> power_flux_density_sensible[i]
+		// latent heat flux
+		+ soil -> power_flux_density_latent[i]
 		// shortwave inbound radiation
 		+ forcings -> sfc_sw_in[i]
 		// longwave outbound radiation

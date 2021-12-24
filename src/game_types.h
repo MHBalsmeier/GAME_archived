@@ -204,6 +204,7 @@ double radiation_delta_t;
 typedef struct soil {
 double temperature[NO_OF_SCALARS_H];
 double power_flux_density_sensible[NO_OF_SCALARS_H];
+double power_flux_density_latent[NO_OF_SCALARS_H];
 } Soil;
 
 // Contains everything on turbulence parametrizations as well as constituent-related quantities.
