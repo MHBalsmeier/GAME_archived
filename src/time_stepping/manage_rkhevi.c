@@ -96,7 +96,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
     }
     
     // saturation adjustment, calculation of latent heating rates
-    moisturizer(state_new, delta_t, diagnostics, irrev, config, grid);
+    moisturizer(state_new, delta_t, diagnostics, irrev, config, grid, soil);
     
     return 0;
 }

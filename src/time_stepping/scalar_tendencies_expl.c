@@ -239,7 +239,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 	return 0;
 }
 
-int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config *config, Grid *grid)
+int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config *config, Grid *grid, Soil *soil)
 {
 	/*
 	This function manages the calculation of the phase transition rates.
@@ -264,7 +264,8 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 	    grid -> z_vector,
 	    diagnostics -> v_squared,
 	    NO_OF_VECTORS_PER_LAYER,
-	    grid -> roughness_length);
+	    grid -> roughness_length,
+	    soil -> temperature);
 	    int layer_index, h_index, scalar_shift_index, scalar_index;
 	    // loop over all constituents
 		for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
