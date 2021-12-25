@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
    	double *roughness_length = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *sfc_albedo = calloc(NO_OF_SCALARS_H, sizeof(double));
 	double *sfc_rho_c = calloc(NO_OF_SCALARS_H, sizeof(double));
-	double *t_conducticity = calloc(NO_OF_SCALARS_H, sizeof(double));
+	double *t_conductivity = calloc(NO_OF_SCALARS_H, sizeof(double));
 	double c_p_water = 4184.0;
 	double c_p_soil = 830.0;
 	double albedo_water = 0.06;
@@ -199,6 +199,7 @@ int main(int argc, char *argv[])
 	// Radiation in the Atmosphere, 2007, p. 444)
 	double albedo_soil = 0.12;
 	double density_soil = 1442.0;
+	double t_conductivity_soil = 7.5e-7;
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
@@ -206,6 +207,8 @@ int main(int argc, char *argv[])
 		sfc_albedo[i] = albedo_water;
 		sfc_rho_c[i] = RHO_WATER*c_p_water;
 		roughness_length[i] = 0.08;
+		// for water this is set to some land-typical value, will not be used anyway
+		t_conductivity[i] = t_conductivity_soil;
 		// land
 		if (is_land[i] == 1)
 		{
@@ -214,7 +217,7 @@ int main(int argc, char *argv[])
 			roughness_length[i] = 0.2;
 		}
 	}
-	int sfc_albedo_id, sfc_rho_c_id, t_conducticity_id, roughness_length_id;
+	int sfc_albedo_id, sfc_rho_c_id, t_conductivity_id, roughness_length_id;
 	if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
 	  ERR(retval);
 	if ((retval = nc_def_dim(ncid, "scalar_index", NO_OF_SCALARS_H, &scalar_h_dimid)))
@@ -231,9 +234,9 @@ int main(int argc, char *argv[])
 	  ERR(retval);
 	if ((retval = nc_def_var(ncid, "is_land", NC_INT, 1, &scalar_h_dimid, &is_land_id)))
 	  ERR(retval);
-	if ((retval = nc_def_var(ncid, "t_conductivity", NC_DOUBLE, 1, &scalar_h_dimid, &t_conducticity_id)))
+	if ((retval = nc_def_var(ncid, "t_conductivity", NC_DOUBLE, 1, &scalar_h_dimid, &t_conductivity_id)))
 	  ERR(retval);
-	if ((retval = nc_put_att_text(ncid, t_conducticity_id, "units", strlen("m^2/2"), "m^2/2")))
+	if ((retval = nc_put_att_text(ncid, t_conductivity_id, "units", strlen("m^2/2"), "m^2/2")))
 	  ERR(retval);
 	if ((retval = nc_def_var(ncid, "roughness_length", NC_DOUBLE, 1, &scalar_h_dimid, &roughness_length_id)))
 	  ERR(retval);
@@ -247,7 +250,7 @@ int main(int argc, char *argv[])
 	  ERR(retval);
 	if ((retval = nc_put_var_double(ncid, sfc_rho_c_id, &sfc_rho_c[0])))
 	  ERR(retval);
-	if ((retval = nc_put_var_double(ncid, t_conducticity_id, &t_conducticity[0])))
+	if ((retval = nc_put_var_double(ncid, t_conductivity_id, &t_conductivity[0])))
 	  ERR(retval);
 	if ((retval = nc_put_var_double(ncid, roughness_length_id, &roughness_length[0])))
 	  ERR(retval);
@@ -258,7 +261,7 @@ int main(int argc, char *argv[])
 	free(roughness_length);
 	free(sfc_albedo);
 	free(sfc_rho_c);
-	free(t_conducticity);
+	free(t_conductivity);
 	free(is_land);
 	free(oro);
 	
