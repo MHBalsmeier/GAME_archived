@@ -91,6 +91,7 @@ double density_to_rhombi_weights[4*NO_OF_VECTORS_H];
 double trsk_weights[10*NO_OF_VECTORS_H];
 double sfc_albedo[NO_OF_SCALARS_H];
 double sfc_rho_c[NO_OF_SCALARS_H];
+double t_conductivity[NO_OF_SCALARS_H];
 double roughness_length[NO_OF_SCALARS_H];
 int is_land[NO_OF_SCALARS_H];
 int latlon_interpol_indices[5*NO_OF_LATLON_IO_POINTS];
@@ -203,7 +204,6 @@ double radiation_delta_t;
 // soil information
 typedef struct soil {
 double temperature[NO_OF_SCALARS_H];
-double t_conductivity[NO_OF_SCALARS_H];
 double power_flux_density_sensible[NO_OF_SCALARS_H];
 double power_flux_density_latent[NO_OF_SCALARS_H];
 } Soil;

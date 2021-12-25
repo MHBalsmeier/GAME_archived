@@ -194,7 +194,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
 int set_sfc_properties(Grid *grid, char SFC_PROP_FILE[])
 {
     // reading surface properties
-    int ncid, retval, sfc_rho_c_id, sfc_albedo_id, roughness_length_id, is_land_id;
+    int ncid, retval, sfc_rho_c_id, sfc_albedo_id, roughness_length_id, is_land_id, t_conductivity_id;
     if ((retval = nc_open(SFC_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "sfc_rho_c", &sfc_rho_c_id)))
@@ -203,6 +203,8 @@ int set_sfc_properties(Grid *grid, char SFC_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "roughness_length", &roughness_length_id)))
         ERR(retval);
+    if ((retval = nc_inq_varid(ncid, "t_conductivity", &t_conductivity_id)))
+        ERR(retval);
     if ((retval = nc_inq_varid(ncid, "is_land", &is_land_id)))
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, sfc_rho_c_id, &(grid -> sfc_rho_c[0]))))
@@ -210,6 +212,8 @@ int set_sfc_properties(Grid *grid, char SFC_PROP_FILE[])
     if ((retval = nc_get_var_double(ncid, sfc_albedo_id, &(grid -> sfc_albedo[0]))))
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, roughness_length_id, &(grid -> roughness_length[0]))))
+        ERR(retval);
+    if ((retval = nc_get_var_double(ncid, t_conductivity_id, &(grid -> t_conductivity[0]))))
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, is_land_id, &(grid -> is_land[0]))))
         ERR(retval);
