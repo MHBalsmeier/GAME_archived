@@ -203,6 +203,7 @@ double radiation_delta_t;
 // soil information
 typedef struct soil {
 double temperature[NO_OF_SCALARS_H];
+double t_conductivity[NO_OF_SCALARS_H];
 double power_flux_density_sensible[NO_OF_SCALARS_H];
 double power_flux_density_latent[NO_OF_SCALARS_H];
 } Soil;
