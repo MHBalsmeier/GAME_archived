@@ -12,8 +12,8 @@ This file contains the soil component of GAME.
 #include "game_types.h"
 #include "thermodynamics.h"
 
-// one for now constant parameter
-const double thickness = 1;
+const double z_t_const = 1.0;
+const double delta_z_soil = z_t_const/NO_OF_SOIL_LAYERS;
 
 int soil_interaction(State *state, Soil *soil, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, double delta_t)
 {
@@ -37,7 +37,13 @@ int soil_interaction(State *state, Soil *soil, Diagnostics *diagnostics, Forcing
 			+ forcings -> sfc_sw_in[i]
 			// longwave outbound radiation
 			- forcings -> sfc_lw_out[i])
-			/(thickness*grid -> sfc_rho_c[i])*delta_t;
+			/(delta_z_soil*grid -> sfc_rho_c[i])*delta_t;
+			
+			// loop over all soil layers below the first layer
+			for (int soil_index = 1; soil_index < NO_OF_SOIL_LAYERS; ++soil_index)
+			{
+				;
+			}
 		}
 	}
 	return 0;

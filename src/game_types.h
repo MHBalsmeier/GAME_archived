@@ -20,6 +20,8 @@ NO_OF_CONDENSED_CONSTITUENTS = 4,
 // the number of blocks into which the arrays will be split up for the radiation calculation
 // (NO_OF_SCALARS_H must be divisible by this number)
 NO_OF_RAD_BLOCKS = 18,
+// the number of soil layers
+NO_OF_SOIL_LAYERS = 1,
 // Nothing should be changed by the user below this line.
 NO_OF_CONSTITUENTS = (NO_OF_GASEOUS_CONSTITUENTS + NO_OF_CONDENSED_CONSTITUENTS),
 NO_OF_BASIC_TRIANGLES = 20,
@@ -203,7 +205,7 @@ double radiation_delta_t;
 
 // soil information
 typedef struct soil {
-double temperature[NO_OF_SCALARS_H];
+double temperature[NO_OF_SOIL_LAYERS*NO_OF_SCALARS_H];
 double power_flux_density_sensible[NO_OF_SCALARS_H];
 double power_flux_density_latent[NO_OF_SCALARS_H];
 } Soil;
