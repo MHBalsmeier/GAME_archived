@@ -21,7 +21,7 @@ NO_OF_CONDENSED_CONSTITUENTS = 4,
 // (NO_OF_SCALARS_H must be divisible by this number)
 NO_OF_RAD_BLOCKS = 18,
 // the number of soil layers
-NO_OF_SOIL_LAYERS = 1,
+NO_OF_SOIL_LAYERS = 5,
 // Nothing should be changed by the user below this line.
 NO_OF_CONSTITUENTS = (NO_OF_GASEOUS_CONSTITUENTS + NO_OF_CONDENSED_CONSTITUENTS),
 NO_OF_BASIC_TRIANGLES = 20,
@@ -101,6 +101,8 @@ double latlon_interpol_weights[5*NO_OF_LATLON_IO_POINTS];
 double stretching_parameter;
 double mean_velocity_area;
 int vert_grid_type;
+double z_t_const;
+double t_const_soil;
 } Grid;
 
 // Contains properties of the dual grid.

@@ -219,6 +219,9 @@ int set_sfc_properties(Grid *grid, char SFC_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_close(ncid)))
         ERR(retval);
+    
+	grid -> z_t_const = 10.0;
+	grid -> t_const_soil = 290.0;
     return 0;
 }
 

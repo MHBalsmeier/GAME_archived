@@ -81,11 +81,23 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid, Soil *soil)
 		init_state -> exner_pert[i] = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]/(grid -> theta_bg[i] + init_state -> theta_pert[i]) - grid -> exner_bg[i];
 	}
 	
-	// setting the soil temperature equal to the temperature in the lowest layer
-	#pragma omp parallel for
+	int soil_index;
+	double z_soil, t_sfc;
+	// setting the soil temperature
+	#pragma omp parallel for private(soil_index, z_soil, t_sfc)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
-		soil -> temperature[i] = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i];
+		// temperature at the surface
+		t_sfc = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i];
+			
+		// loop over all soil layers
+		for (int soil_layer_index = 0; soil_layer_index < NO_OF_SOIL_LAYERS; ++soil_layer_index)
+		{
+			// index of this soil grid point
+			soil_index = i + soil_layer_index*NO_OF_SCALARS_H;
+			z_soil = grid -> z_t_const/NO_OF_SOIL_LAYERS*(0.5 + soil_layer_index);
+			soil -> temperature[soil_index] = t_sfc + (grid -> t_const_soil - t_sfc)*z_soil/grid -> z_t_const;
+		}
 	}
 	
     // checks
