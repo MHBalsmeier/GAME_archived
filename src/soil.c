@@ -12,7 +12,7 @@ This file contains the soil component of GAME.
 #include "game_types.h"
 #include "thermodynamics.h"
 
-// one for now constant parameters
+// one for now constant parameter
 const double thickness = 1;
 
 int soil_interaction(State *state, Soil *soil, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, double delta_t)
