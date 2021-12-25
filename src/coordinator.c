@@ -520,6 +520,12 @@ int sanity_checker(Config *config, Config_io *config_io, Grid *grid)
     	printf("Aborting.\n");
 		exit(1);
 	}
+	if (NO_OF_SOIL_LAYERS < 1)
+	{
+		printf("NO_OF_SOIL_LAYERS must be >= 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
 	return 0;
 }
 
