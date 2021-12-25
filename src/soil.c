@@ -43,21 +43,6 @@ int soil_interaction(State *state, Soil *soil, Diagnostics *diagnostics, Forcing
 	return 0;
 }
 
-int init_soil(Soil *soil, Diagnostics *diagnostics)
-{
-	/*
-	This function initializes the soil state.
-	*/
-	
-	#pragma omp parallel for
-	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-	{
-		// setting the soil temperature equal to the temperature in the lowest layer
-		soil -> temperature[i] = diagnostics -> temperature_gas[NO_OF_SCALARS - NO_OF_SCALARS_H + i];
-	}
-	return 0;
-}
-
 
 
 

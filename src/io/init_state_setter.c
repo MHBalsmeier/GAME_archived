@@ -16,7 +16,7 @@ In this file, the initial state of the simulation is read in from a netcdf file.
 #include "../thermodynamics.h"
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 
-int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
+int set_init_data(char FILE_NAME[], State *init_state, Grid* grid, Soil *soil)
 {
 	/*
 	This function sets the initial state of the model atmosphere.
@@ -79,6 +79,13 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid)
 		init_state -> theta_pert[i] = pot_temp - grid -> theta_bg[i];
 		// calculating the Exner pressure perturbation
 		init_state -> exner_pert[i] = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]/(grid -> theta_bg[i] + init_state -> theta_pert[i]) - grid -> exner_bg[i];
+	}
+	
+	// setting the soil temperature equal to the temperature in the lowest layer
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+	{
+		soil -> temperature[i] = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i];
 	}
 	
     // checks

@@ -3,5 +3,4 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/OpenNWP/GAME
 */
 
-int init_soil(Soil *, Diagnostics *);
 int soil_interaction(State *, Soil *, Diagnostics *, Forcings *, Grid *, double);

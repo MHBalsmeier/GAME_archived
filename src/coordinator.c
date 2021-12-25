@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
     printf("Grid loaded successfully.\n");
     printf("%s", stars);
     printf("Reading initial state ...\n");
-    set_init_data(init_state_file, state_old, grid);
+    set_init_data(init_state_file, state_old, grid, soil);
 	printf("Initial state loaded successfully.\n");
 	printf("%s", stars);
 	
@@ -230,7 +230,6 @@ int main(int argc, char *argv[])
     }
 	temperature_diagnostics(state_old, grid, diagnostics);
 	inner_product(state_old -> wind, state_old -> wind, diagnostics -> v_squared, grid);
-	init_soil(soil, diagnostics);
     // writing out the initial state of the model run
     write_out(state_old, wind_h_lowest_layer, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, config_io, config, soil);
     t_write += config_io -> write_out_interval;
