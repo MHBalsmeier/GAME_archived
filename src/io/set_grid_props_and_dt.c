@@ -221,8 +221,27 @@ int set_sfc_properties(Grid *grid, char SFC_PROP_FILE[])
     if ((retval = nc_close(ncid)))
         ERR(retval);
     
-	grid -> z_t_const = 10.0;
+    /*
+    constructing the soil grid
+    --------------------------
+    */
+
+	grid -> z_t_const = -10.0;
 	grid -> t_const_soil = T_0 + 15;
+	double sigma_soil = 0.8;
+	
+	// the surface is always at zero
+	grid -> z_soil_interface[0] = 0;
+	for (int i = 1; i < NO_OF_SOIL_LAYERS + 1; ++i)
+	{
+		grid -> z_soil_interface[i] = grid -> z_soil_interface[i - 1] + pow(sigma_soil, NO_OF_SOIL_LAYERS - i);
+	}
+	double rescale_factor = grid -> z_t_const/grid -> z_soil_interface[NO_OF_SOIL_LAYERS];
+	for (int i = 1; i < NO_OF_SOIL_LAYERS + 1; ++i)
+	{
+		grid -> z_soil_interface[i] = rescale_factor*grid -> z_soil_interface[i];
+	}
+	
     return 0;
 }
 
