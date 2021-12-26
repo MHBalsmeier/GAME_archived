@@ -12,8 +12,7 @@ This file contains the implicit vertical solvers.
 #include <atmostracers.h>
 #include "../game_types.h"
 #include "../thermodynamics.h"
-
-int thomas_algorithm(double [], double [], double [], double [], double [], int);
+#include "time_stepping.h"
 
 int three_band_solver_ver_waves(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config *config, double delta_t, Grid *grid, int rk_step)
 {

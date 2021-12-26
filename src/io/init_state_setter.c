@@ -22,10 +22,11 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid, Soil *soil)
 	This function sets the initial state of the model atmosphere.
 	*/
     double *temperatures = malloc((NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS*sizeof(double));
+    double *sst = malloc(NO_OF_SCALARS_H*sizeof(double));
     int retval, ncid;
     if ((retval = nc_open(FILE_NAME, NC_NOWRITE, &ncid)))
         NCERR(retval);
-    int densities_id, temperatures_id, wind_id, stretching_parameter_id;
+    int densities_id, temperatures_id, wind_id, sst_id, stretching_parameter_id, sst_avail;
     double stretching_parameter;
     if ((retval = nc_inq_varid(ncid, "densities", &densities_id)))
         NCERR(retval);
@@ -33,6 +34,12 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid, Soil *soil)
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "wind", &wind_id)))
         NCERR(retval);
+    // figuring out if the netcdf file contains SST
+    sst_avail = 0;
+    if (nc_inq_varid(ncid, "sst", &sst_id) == 0)
+    {
+    	sst_avail = 1;
+    }
     if ((retval = nc_inq_varid(ncid, "stretching_parameter", &stretching_parameter_id)))
         NCERR(retval);
     if ((retval = nc_get_var_double(ncid, densities_id, &init_state -> rho[0])))
@@ -41,6 +48,12 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid, Soil *soil)
         NCERR(retval);
     if ((retval = nc_get_var_double(ncid, wind_id, &init_state -> wind[0])))
         NCERR(retval);
+    // reading the SST data if it is present in the netcdf file
+    if (sst_avail == 1)
+    {
+		if ((retval = nc_get_var_double(ncid, sst_id, &sst[0])))
+		    NCERR(retval);
+    }
     if ((retval = nc_get_var_double(ncid, stretching_parameter_id, &stretching_parameter)))
         NCERR(retval);
     if ((retval = nc_close(ncid)))
@@ -88,8 +101,15 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid, Soil *soil)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// temperature at the surface
-		t_sfc = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i];
-			
+		if (grid -> is_land[i] == 1 || (grid -> is_land[i] == 0 && sst_avail == 0))
+		{
+			t_sfc = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i];
+		}
+		else
+		{
+			t_sfc = sst[i];
+		}
+		
 		// loop over all soil layers
 		for (int soil_layer_index = 0; soil_layer_index < NO_OF_SOIL_LAYERS; ++soil_layer_index)
 		{
@@ -120,6 +140,7 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid, Soil *soil)
     	exit(1);
     }
     
+    free(sst);
     free(temperatures);
     return 0;
 }
