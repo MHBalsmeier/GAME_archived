@@ -213,7 +213,7 @@ int set_sfc_properties(Grid *grid, char SFC_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, roughness_length_id, &(grid -> roughness_length[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, t_conductivity_id, &(grid -> t_conductivity[0]))))
+    if ((retval = nc_get_var_double(ncid, t_conductivity_id, &(grid -> t_conduc_soil[0]))))
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, is_land_id, &(grid -> is_land[0]))))
         ERR(retval);

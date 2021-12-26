@@ -38,7 +38,7 @@ int soil_interaction(State *state, Soil *soil, Diagnostics *diagnostics, Forcing
 			// longwave outbound radiation
 			- forcings -> sfc_lw_out[i]
 			// heat conduction from below
-			+ (soil -> temperature[i + NO_OF_SCALARS_H] - soil -> temperature[i])/delta_z_soil)
+			+ grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]*(soil -> temperature[i + NO_OF_SCALARS_H] - soil -> temperature[i])/delta_z_soil)
 			/(delta_z_soil*grid -> sfc_rho_c[i])*delta_t;
 			
 			// loop over all soil layers below the first layer
@@ -49,19 +49,19 @@ int soil_interaction(State *state, Soil *soil, Diagnostics *diagnostics, Forcing
 				
 				// heat conduction from above
 				soil -> temperature[soil_index]
-				+= (soil -> temperature[soil_index - NO_OF_SCALARS_H] - soil -> temperature[soil_index])/delta_z_soil
+				+= grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]*(soil -> temperature[soil_index - NO_OF_SCALARS_H] - soil -> temperature[soil_index])/delta_z_soil
 				/(delta_z_soil*grid -> sfc_rho_c[i])*delta_t;				
 				// heat conduction from below
 				if (soil_layer_index < NO_OF_SOIL_LAYERS - 1)
 				{
 					soil -> temperature[soil_index]
-					+= (soil -> temperature[soil_index + NO_OF_SCALARS_H] - soil -> temperature[soil_index])/delta_z_soil
+					+= grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]*(soil -> temperature[soil_index + NO_OF_SCALARS_H] - soil -> temperature[soil_index])/delta_z_soil
 					/(delta_z_soil*grid -> sfc_rho_c[i])*delta_t;
 				}
 				else
 				{
 					soil -> temperature[soil_index]
-					+= (grid -> t_const_soil - soil -> temperature[soil_index])/delta_z_soil
+					+= grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]*(grid -> t_const_soil - soil -> temperature[soil_index])/delta_z_soil
 					/(delta_z_soil*grid -> sfc_rho_c[i])*delta_t;
 				}
 			}
