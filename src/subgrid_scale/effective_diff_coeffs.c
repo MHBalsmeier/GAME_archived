@@ -12,7 +12,7 @@ In this file, diffusion coefficients, including Eddy viscosities, are computed.
 #include <math.h>
 #include "../game_types.h"
 #include "../spatial_operators/spatial_operators.h"
-#include "../thermodynamics.h"
+#include "../thermodynamics/thermodynamics.h"
 
 int tke_update(Irreversible_quantities *, double, State *, Diagnostics *, Grid *);
 double ver_hor_viscosity(double, double, double);

@@ -17,9 +17,8 @@ The main organizes the model, manages the time stepping, calls model output, col
 #include "io/io.h"
 #include "spatial_operators/spatial_operators.h"
 #include "radiation/radiation.h"
-#include "thermodynamics.h"
+#include "thermodynamics/thermodynamics.h"
 #include "time_stepping/time_stepping.h"
-#include "soil.h"
 
 int sanity_checker(Config *, Config_io *, Grid *);
 int read_argv(int, char *[], Config *, Config_io *, Grid *, Irreversible_quantities *);

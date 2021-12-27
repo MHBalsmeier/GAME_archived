@@ -13,7 +13,7 @@ This is the horizontal (explicit) part of the constituent integration.
 #include "../game_types.h"
 #include "../game_constants.h"
 #include "../spatial_operators/spatial_operators.h"
-#include "../thermodynamics.h"
+#include "../thermodynamics/thermodynamics.h"
 #include "../subgrid_scale/subgrid_scale.h"
 
 int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Soil *soil, Grid *grid, double delta_t, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config, int no_rk_step, int slow_update_bool)

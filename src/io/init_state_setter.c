@@ -13,7 +13,7 @@ In this file, the initial state of the simulation is read in from a netcdf file.
 #include <atmostracers.h>
 #include "../game_types.h"
 #include "../game_constants.h"
-#include "../thermodynamics.h"
+#include "../thermodynamics/thermodynamics.h"
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 
 int set_init_data(char FILE_NAME[], State *init_state, Grid* grid, Soil *soil)

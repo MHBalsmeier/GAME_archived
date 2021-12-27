@@ -10,7 +10,7 @@ In this file, the explicit component of the pressure gradient acceleration is ma
 #include <stdlib.h>
 #include <stdio.h>
 #include "../game_types.h"
-#include "../thermodynamics.h"
+#include "../thermodynamics/thermodynamics.h"
 #include "../spatial_operators/spatial_operators.h"
 
 double pressure_gradient_1_damping_factor(double);

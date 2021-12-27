@@ -14,9 +14,8 @@ This file manages the RKHEVI time stepping.
 #include "../spatial_operators/spatial_operators.h"
 #include "time_stepping.h"
 #include "../radiation/radiation.h"
-#include "../thermodynamics.h"
+#include "../thermodynamics/thermodynamics.h"
 #include "../io/io.h"
-#include "../soil.h"
 
 int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Dualgrid *dualgrid, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config, double delta_t, double time_coordinate, int total_step_counter)
 {

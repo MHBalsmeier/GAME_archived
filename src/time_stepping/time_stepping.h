@@ -10,4 +10,7 @@ int scalar_tendencies_expl(State *, State *, State *, Soil *, Grid *, double, Di
 int three_band_solver_gen_densitites(State *, State *, State *, Diagnostics *, Config *, double, Grid *);
 int three_band_solver_ver_waves(State *, State *, State *, Diagnostics *, Config *, double, Grid *, int);
 int manage_pressure_gradient(State *, Grid *, Dualgrid *, Diagnostics *, Forcings *,  Irreversible_quantities *, Config *);
-int thomas_algorithm(double [], double [], double [], double [], double [], int);
+int soil_interaction(State *, Soil *, Diagnostics *, Forcings *, Grid *, double);
+
+
+
