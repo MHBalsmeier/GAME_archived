@@ -506,7 +506,7 @@ int soil_interaction(State *state, Soil *soil, Diagnostics *diagnostics, Forcing
 			// old temperature
 			= soil -> temperature[i]
 			// sensible heat flux
-			+ expl_weight*(soil -> power_flux_density_sensible[i]
+			+ (soil -> power_flux_density_sensible[i]
 			// latent heat flux
 			+ soil -> power_flux_density_latent[i]
 			// shortwave inbound radiation
@@ -514,7 +514,7 @@ int soil_interaction(State *state, Soil *soil, Diagnostics *diagnostics, Forcing
 			// longwave outbound radiation
 			- forcings -> sfc_lw_out[i]
 			// heat conduction from below
-			+ heat_flux_density_expl[0])
+			+ expl_weight*heat_flux_density_expl[0])
 			/((grid -> z_soil_interface[0] - grid -> z_soil_interface[1])*grid -> sfc_rho_c[i])*delta_t;
 			
 			// loop over all soil layers below the first layer
