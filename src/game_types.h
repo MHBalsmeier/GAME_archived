@@ -99,6 +99,7 @@ int is_land[NO_OF_SCALARS_H];
 int latlon_interpol_indices[5*NO_OF_LATLON_IO_POINTS];
 double latlon_interpol_weights[5*NO_OF_LATLON_IO_POINTS];
 double z_soil_interface[NO_OF_SOIL_LAYERS + 1];
+double z_soil_center[NO_OF_SOIL_LAYERS];
 double stretching_parameter;
 double mean_velocity_area;
 int vert_grid_type;

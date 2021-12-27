@@ -470,6 +470,9 @@ int soil_interaction(State *state, Soil *soil, Diagnostics *diagnostics, Forcing
 
 	// The z-axis is positive upwards, negative downwards (as usual).	
 	
+	double impl_weight = 0.5;
+	double expl_weight = 1 - impl_weight;
+	
 	// loop over all horizontal cells over land
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
@@ -491,19 +494,19 @@ int soil_interaction(State *state, Soil *soil, Diagnostics *diagnostics, Forcing
 				heat_flux_density_expl[soil_layer_index]
 				= -grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]*(soil -> temperature[i + soil_layer_index*NO_OF_SCALARS_H]
 				- soil -> temperature[i + (soil_layer_index + 1)*NO_OF_SCALARS_H])
-				/(0.5*(grid -> z_soil_interface[soil_layer_index] - grid -> z_soil_interface[soil_layer_index + 2]));
+				/(grid -> z_soil_center[soil_layer_index] - grid -> z_soil_center[soil_layer_index + 1]);
 			}
 			heat_flux_density_expl[NO_OF_SOIL_LAYERS - 1]
 			= -grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]*(soil -> temperature[i + (NO_OF_SOIL_LAYERS - 1)*NO_OF_SCALARS_H]
 			- grid -> t_const_soil)
-			/((grid -> z_soil_interface[NO_OF_SOIL_LAYERS - 1] + grid -> z_soil_interface[NO_OF_SOIL_LAYERS]) - 2*grid -> z_t_const);
+			/(2*(grid -> z_soil_center[NO_OF_SOIL_LAYERS - 1] - grid -> z_t_const));
 			
 			// calculating the explicit part of the temperature change
 			r_vector[0]
 			// old temperature
 			= soil -> temperature[i]
 			// sensible heat flux
-			+ (soil -> power_flux_density_sensible[i]
+			+ expl_weight*(soil -> power_flux_density_sensible[i]
 			// latent heat flux
 			+ soil -> power_flux_density_latent[i]
 			// shortwave inbound radiation
@@ -522,7 +525,7 @@ int soil_interaction(State *state, Soil *soil, Diagnostics *diagnostics, Forcing
 				// old temperature
 				= soil -> temperature[i + soil_layer_index*NO_OF_SCALARS_H]
 				// heat conduction from above
-				+ (-heat_flux_density_expl[soil_layer_index - 1]				
+				+ expl_weight*(-heat_flux_density_expl[soil_layer_index - 1]				
 				// heat conduction from below
 				+ heat_flux_density_expl[soil_layer_index])
 				/((grid -> z_soil_interface[soil_layer_index] - grid -> z_soil_interface[soil_layer_index + 1])*grid -> sfc_rho_c[i])*delta_t;
@@ -531,13 +534,35 @@ int soil_interaction(State *state, Soil *soil, Diagnostics *diagnostics, Forcing
 			// the diagonal component
 			for (int soil_layer_index = 0; soil_layer_index < NO_OF_SOIL_LAYERS; ++soil_layer_index)
 			{
-				d_vector[soil_layer_index] = 1.0;
+				if (soil_layer_index == 0)
+				{
+					d_vector[soil_layer_index] = 1.0 + impl_weight*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
+					/((grid -> z_soil_interface[soil_layer_index] - grid -> z_soil_interface[soil_layer_index + 1])*grid -> sfc_rho_c[i])
+					*1/(grid -> z_soil_center[soil_layer_index] - grid -> z_soil_center[soil_layer_index + 1]);
+				}
+				else if (soil_layer_index == NO_OF_SOIL_LAYERS - 1)
+				{
+					d_vector[soil_layer_index] = 1.0 + impl_weight*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
+					/((grid -> z_soil_interface[soil_layer_index] - grid -> z_soil_interface[soil_layer_index + 1])*grid -> sfc_rho_c[i])
+					*1/(grid -> z_soil_center[soil_layer_index - 1] - grid -> z_soil_center[soil_layer_index]);
+				}
+				else
+				{
+					d_vector[soil_layer_index] = 1.0 + impl_weight*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
+					/((grid -> z_soil_interface[soil_layer_index] - grid -> z_soil_interface[soil_layer_index + 1])*grid -> sfc_rho_c[i])
+					*(1/(grid -> z_soil_center[soil_layer_index - 1] - grid -> z_soil_center[soil_layer_index])
+					+ 1/(grid -> z_soil_center[soil_layer_index] - grid -> z_soil_center[soil_layer_index + 1]));
+				}
 			}
 			// the off-diagonal components
 			for (int soil_layer_index = 0; soil_layer_index < NO_OF_SOIL_LAYERS - 1; ++soil_layer_index)
 			{
-				c_vector[soil_layer_index] = 0;
-				e_vector[soil_layer_index] = 0;
+				c_vector[soil_layer_index] = -impl_weight*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
+				/((grid -> z_soil_interface[soil_layer_index + 1] - grid -> z_soil_interface[soil_layer_index + 2])*grid -> sfc_rho_c[i])
+				/(grid -> z_soil_center[soil_layer_index] - grid -> z_soil_center[soil_layer_index + 1]);
+				e_vector[soil_layer_index] = -impl_weight*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
+				/((grid -> z_soil_interface[soil_layer_index] - grid -> z_soil_interface[soil_layer_index + 1])*grid -> sfc_rho_c[i])
+				/(grid -> z_soil_center[soil_layer_index] - grid -> z_soil_center[soil_layer_index + 1]);
 			}
 			
 			// finally calling the Thomas algorithm to solve the system of linear equations

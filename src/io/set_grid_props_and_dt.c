@@ -241,6 +241,10 @@ int set_sfc_properties(Grid *grid, char SFC_PROP_FILE[])
 	{
 		grid -> z_soil_interface[i] = rescale_factor*grid -> z_soil_interface[i];
 	}
+	for (int i = 0; i < NO_OF_SOIL_LAYERS; ++i)
+	{
+		grid -> z_soil_center[i] = 0.5*(grid -> z_soil_interface[i] - grid -> z_soil_interface[i + 1]);
+	}
 	
     return 0;
 }
