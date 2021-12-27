@@ -14,7 +14,7 @@ This file contains functions that compute properties of the vertical grid.
 #include "../../src/game_types.h"
 #include "../../src/game_constants.h"
 #include "include.h"
-#include "../../src/thermodynamics.h"
+#include "../../src/thermodynamics/thermodynamics.h"
 #include "standard.h"
 
 // constants that are specific to the ICAO standard atmosphere

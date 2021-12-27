@@ -15,7 +15,7 @@ With this program, ideal input states for GAME can be produced.
 #include <geos95.h>
 #include "../../src/game_types.h"
 #include "../../src/game_constants.h"
-#include "../../src/thermodynamics.h"
+#include "../../src/thermodynamics/thermodynamics.h"
 #include "../../src/spatial_operators/spatial_operators.h"
 #include "../../src/io/io.h"
 #include "../../grid_generator/src/standard.h"
