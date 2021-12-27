@@ -228,7 +228,7 @@ int set_sfc_properties(Grid *grid, char SFC_PROP_FILE[])
 
 	grid -> z_t_const = -10.0;
 	grid -> t_const_soil = T_0 + 15;
-	double sigma_soil = 0.5;
+	double sigma_soil = 0.8;
 	
 	// the surface is always at zero
 	grid -> z_soil_interface[0] = 0;
