@@ -41,7 +41,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 	Loop over the RK substeps.
 	*/
 	int vector_index;
-	for (int i = 0; i < 2; ++i)
+	for (int rk_step = 0; rk_step < 2; ++rk_step)
 	{
 		/*
 		state_old remains unchanged the whole time.
@@ -51,12 +51,12 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 		// 1.) explicit component of the momentum equation
 		// -----------------------------------------------
 		// Update of the pressure gradient.
-		if (i == 0)
+		if (rk_step == 0)
 		{
 			manage_pressure_gradient(state_new, grid, dualgrid, diagnostics, forcings, irrev, config);
 		}
 		// Only the horizontal momentum is a forward tendency.
-		vector_tendencies_expl(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, irrev, config, slow_update_bool, i, delta_t);
+		vector_tendencies_expl(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, irrev, config, slow_update_bool, rk_step, delta_t);
 	    // time stepping for the horizontal momentum can be directly executed
 	    
 	    #pragma omp parallel for private(vector_index)
@@ -73,15 +73,15 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 		// 2.) Explicit component of the generalized density equations.
 		// ------------------------------------------------------------
 	    // Radiation is updated here.
-		if (config -> rad_on > 0 && config -> rad_update == 1 && i == 0)
+		if (config -> rad_on > 0 && config -> rad_update == 1 && rk_step == 0)
 		{
 			call_radiation(state_old, soil, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config, delta_t, time_coordinate);
 		}
-		scalar_tendencies_expl(state_old, state_new, state_tendency, soil, grid, delta_t, diagnostics, forcings, irrev, config, i, slow_update_bool);
+		scalar_tendencies_expl(state_old, state_new, state_tendency, soil, grid, delta_t, diagnostics, forcings, irrev, config, rk_step, slow_update_bool);
 
 		// 3.) Vertical sound wave solver.
 		// -------------------------------
-		three_band_solver_ver_waves(state_old, state_new, state_tendency, diagnostics, config, delta_t, grid, i);
+		three_band_solver_ver_waves(state_old, state_new, state_tendency, diagnostics, config, delta_t, grid, rk_step);
 		
 		// 4.) Solving the implicit component of the generalized density equations for tracers.
 		// ------------------------------------------------------------------------------------
