@@ -39,6 +39,11 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid, Soil *soil)
     if (nc_inq_varid(ncid, "sst", &sst_id) == 0)
     {
     	sst_avail = 1;
+    	printf("SST found in initialization file.\n");
+    }
+    else
+    {	
+    	printf("SST not found in initialization file.\n");
     }
     if ((retval = nc_inq_varid(ncid, "stretching_parameter", &stretching_parameter_id)))
         NCERR(retval);
@@ -101,10 +106,12 @@ int set_init_data(char FILE_NAME[], State *init_state, Grid* grid, Soil *soil)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// temperature at the surface
+		// land surface or sea surface if SST is not available
 		if (grid -> is_land[i] == 1 || (grid -> is_land[i] == 0 && sst_avail == 0))
 		{
 			t_sfc = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i];
 		}
+		// sea surface if SST is available
 		else
 		{
 			t_sfc = sst[i];
