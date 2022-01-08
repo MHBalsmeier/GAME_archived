@@ -10,11 +10,6 @@ then
 mkdir grid_generator/grids
 fi
 
-if [ ! -d grid_generator/phys_quantities ]
-then
-mkdir grid_generator/phys_quantities
-fi
-
 if [ ! -d grid_generator/statistics ]
 then
 mkdir grid_generator/statistics
