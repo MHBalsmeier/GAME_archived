@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.6.28)  8 JAN 2022 23:37
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.6.28)  9 JAN 2022 00:01
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1065,12 +1065,8 @@ Chapter 6.
 [11
 
 ]
-Chapter 7.
-[12
-
-]
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 362.
- [13
+ [12
 
 ]
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 362.
@@ -1078,15 +1074,15 @@ Package atveryend Info: Empty hook `AfterLastShipout' on input line 362.
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 362.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 362.
 Package rerunfilecheck Info: File `handbook.out' has not changed.
-(rerunfilecheck)             Checksum: 5C214B15121F1114D24D04EB743FE2C8;2231.
+(rerunfilecheck)             Checksum: 08B712C13D46C32E2C109CC7F104EE67;2242.
 Package logreq Info: Writing requests to 'handbook.run.xml'.
 \openout1 = `handbook.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 16583 strings out of 482480
- 276251 string characters out of 5946190
- 938822 words of memory out of 5000000
+ 16582 strings out of 482480
+ 276248 string characters out of 5946190
+ 938826 words of memory out of 5000000
  31318 multiletter control sequences out of 15000+600000
  591357 words of font info for 106 fonts, out of 8000000 for 9000
  395 hyphenation exceptions out of 8191
@@ -1102,10 +1098,10 @@ fonts/type1/public/fourier/fourier-ms.pfb></usr/share/texlive/texmf-dist/fonts/
 type1/urw/ncntrsbk/uncb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/nc
 ntrsbk/uncr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncri
 8a.pfb>
-Output written on handbook.pdf (14 pages, 131012 bytes).
+Output written on handbook.pdf (13 pages, 130492 bytes).
 PDF statistics:
- 516 PDF objects out of 1000 (max. 8388607)
- 374 compressed objects within 4 object streams
- 74 named destinations out of 1000 (max. 500000)
+ 512 PDF objects out of 1000 (max. 8388607)
+ 371 compressed objects within 4 object streams
+ 73 named destinations out of 1000 (max. 500000)
  259 words of extra memory for PDF output out of 10000 (max. 10000000)
 

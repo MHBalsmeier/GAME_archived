@@ -60,4 +60,4 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {6.3}Coupling to the radiation field}{11}{section.6.3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {7}Configuring output}{12}{chapter.7}%
+\contentsline {section}{\numberline {6.4}Configuring output}{11}{section.6.4}%
