@@ -20,7 +20,7 @@ In this file, the initial state of the simulation is read in from a netcdf file.
 
 int set_soil_temp(Grid *, Soil *, State *, double []);
 
-int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int test_id, char geo_prop_file[])
+int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int ideal_input_id, char grid_file[])
 {
 	/*
 	This function sets the initial state of the model atmosphere for idealized test cases.
@@ -30,7 +30,7 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int
     double *latitude_vector = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *longitude_vector = malloc(NO_OF_VECTORS_H*sizeof(double));
     int ncid_grid, retval, latitude_vector_id, longitude_vector_id;
-    if ((retval = nc_open(geo_prop_file, NC_NOWRITE, &ncid_grid)))
+    if ((retval = nc_open(grid_file, NC_NOWRITE, &ncid_grid)))
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid_grid, "latitude_vector", &latitude_vector_id)))
         NCERR(retval);
@@ -70,19 +70,19 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int
         lon = grid -> longitude_scalar[h_index];
         z_height = grid -> z_scalar[i];
         // standard atmosphere
-        if (test_id == 0 || test_id == 1 || test_id == 2)
+        if (ideal_input_id == 0 || ideal_input_id == 1 || ideal_input_id == 2)
         {
             temperature[i] = standard_temp(z_height);
             pressure[i] = standard_pres(z_height);
         }
         // dry Ullrich test
-        if (test_id == 3 || test_id == 4 || test_id == 5)
+        if (ideal_input_id == 3 || ideal_input_id == 4 || ideal_input_id == 5)
         {
         	baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i],
         	&dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
         }
         // moist Ullrich test
-        if (test_id == 6 || test_id == 7 || test_id == 8)
+        if (ideal_input_id == 6 || ideal_input_id == 7 || ideal_input_id == 8)
         {
         	baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i],
         	&dummy_2, &dummy_4, &dummy_5, &total_density, &specific_humidity);
@@ -100,18 +100,18 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int
             lon = longitude_vector[j];
             z_height = grid -> z_vector[NO_OF_SCALARS_H + j + i*NO_OF_VECTORS_PER_LAYER];
             // standard atmosphere: no wind
-            if (test_id == 0 || test_id == 1 || test_id == 2)
+            if (ideal_input_id == 0 || ideal_input_id == 1 || ideal_input_id == 2)
             {
                 state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = 0;
             }
             // dry Ullrich test
-            if (test_id == 3 || test_id == 4 || test_id == 5)
+            if (ideal_input_id == 3 || ideal_input_id == 4 || ideal_input_id == 5)
             {
         		baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
                 state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
             }
             // moist Ullrich test
-            if (test_id == 6 || test_id == 7 || test_id == 8)
+            if (ideal_input_id == 6 || ideal_input_id == 7 || ideal_input_id == 8)
             {
         		baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
                 state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
@@ -210,6 +210,7 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int
     
     // setting the soil temperature
     set_soil_temp(grid, soil, state, temperatures);
+    free(temperatures);
     
     // returning 0 indicating success
     return 0;
@@ -320,10 +321,10 @@ int read_init_data(char FILE_NAME[], State *state, Grid* grid, Soil *soil)
     }
     
     free(sst);
-    free(temperatures);
     
     // setting the soil temperature
     set_soil_temp(grid, soil, state, temperatures);
+    free(temperatures);
     
     // returning 0 indicating success
     return 0;
