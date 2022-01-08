@@ -7,7 +7,7 @@ import eccodes as ec
 import numpy as np
 import matplotlib.pyplot as plt
 
-run_id = "mslp_min"
+run_id = "ideal"
 output_base_dir = "/home/max/code/GAME/output"
 number_of_days = 15
 
