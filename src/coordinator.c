@@ -453,9 +453,9 @@ int sanity_checker(Config *config, Config_io *config_io, Grid *grid)
     	printf("Aborting.\n");
 		exit(1);
 	}
-	if (config -> rad_on != 0 && config -> rad_on != 1)
+	if (config -> rad_on != 0 && config -> rad_on != 1 && config -> rad_on != 2)
 	{
-		printf("rad_on must be either 0 or 1.\n");
+		printf("rad_on must be either 0, 1 or 2.\n");
     	printf("Aborting.\n");
 		exit(1);
 	}
@@ -747,7 +747,7 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	}
 	if (config -> rad_on == 1)
 	{
-		printf("Radiation is turned on.\n");
+		printf("Real radiation is turned on.\n");
 	}
 	if (config -> rad_on == 2)
 	{
