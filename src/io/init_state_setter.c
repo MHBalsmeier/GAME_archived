@@ -336,6 +336,7 @@ int set_soil_temp(Grid *grid, Soil *soil, State *state, double temperatures[], c
 	This function sets the soil temperature.
 	*/
     
+    // figuring out if the SST is included in the init file and reading it if it exists (important for NWP)
 	double *sst = malloc(NO_OF_SCALARS_H*sizeof(double));
 	int sst_avail = 0;
     if (strlen(init_state_file) != 0)
