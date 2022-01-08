@@ -378,7 +378,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			sprintf(OUTPUT_FILE_PRE, "%s+%ds_surface.grb2", config_io -> run_id, (int) (t_write - t_init));
 			char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
 			sprintf(OUTPUT_FILE, "%s+%ds_surface.grb2", config_io -> run_id, (int) (t_write - t_init));
-			char *SAMPLE_FILENAME = "../../test_generator/test_states/grib_template.grb2";
+			char *SAMPLE_FILENAME = "../../src/io/grib_template.grb2";
 			FILE *SAMPLE_FILE;
 			if (t_init < 0)
 				exit(1);
@@ -394,7 +394,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			codes_handle *handle_sprate = NULL;
 			codes_handle *handle_wind_10m_gusts = NULL;
 			codes_handle *handle_cape = NULL;
-			
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_surface_p = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 			if (err != 0)
@@ -816,7 +815,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		// Grib output.
 		if (config_io -> grib_output_switch == 1)
 		{
-			char *SAMPLE_FILENAME = "../../test_generator/test_states/grib_template.grb2";
+			char *SAMPLE_FILENAME = "../../src/io/grib_template.grb2";
 			FILE *SAMPLE_FILE;
 			int OUTPUT_FILE_PRESSURE_LEVEL_LENGTH = 300;
 			char *OUTPUT_FILE_PRESSURE_LEVEL_PRE = malloc((OUTPUT_FILE_PRESSURE_LEVEL_LENGTH + 1)*sizeof(char));
@@ -1101,7 +1100,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		sprintf(OUTPUT_FILE_PRE, "%s+%ds.grb2", config_io -> run_id, (int) (t_write - t_init));
 		char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
 		sprintf(OUTPUT_FILE, "%s+%ds.grb2", config_io -> run_id, (int) (t_write - t_init));
-		char *SAMPLE_FILENAME = "../../test_generator/test_states/grib_template.grb2";
+		char *SAMPLE_FILENAME = "../../src/io/grib_template.grb2";
 		FILE *SAMPLE_FILE;
 		if (t_init < 0)
 			exit(1);
@@ -1626,6 +1625,7 @@ double pseudopotential(State *state, Grid *grid, int scalar_index)
 	/*
 	This function returns the pseudopotential temperature, which is needed for diagnozing CAPE.
 	*/
+	
 	double result;
 	result = 0;
 	// the dry case
