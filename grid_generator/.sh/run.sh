@@ -29,6 +29,19 @@ echo "model top: "$toa" m"
 echo "type of vertical grid: "$type_of_vertical_grid
 # end verbosity
 
+if [ $oro_id -eq 2 ] && [ ! -f phys_quantities/B${res_id}_is_land.nc ]
+then
+
+if [ ! -f phys_quantities/etopo.nc ]
+then
+./phys_quantities/download_etopo.sh
+fi
+
+echo "Creating land sea mask ..."
+python3 .py/is_land.py $res_id
+echo "Land sea mask created."
+fi
+
 echo ""
 echo "********** Calling the GAME grid generator **********"
 echo ""

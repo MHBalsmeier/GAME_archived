@@ -24,8 +24,11 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
 	This function reads all the grid properties from the grid netcdf file.
 	*/
     int ncid, retval;
-    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_weights_id, area_dual_id, z_vector_dual_id, f_vec_id, to_index_id, from_index_id, to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, trsk_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, direction_id, gravity_potential_id, inner_product_weights_id, density_to_rhombi_weights_id, density_to_rhombi_indices_id, normal_distance_dual_id, vorticity_indices_triangles_id, vorticity_signs_triangles_id, latitude_scalar_id, longitude_scalar_id, stretching_parameter_id, no_of_shaded_points_scalar_id, no_of_shaded_points_vector_id, interpol_indices_id, interpol_weights_id, theta_bg_id, exner_bg_id;
-    double stretching_parameter;
+    int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_weights_id, area_dual_id, z_vector_dual_id, f_vec_id, to_index_id, from_index_id,
+    to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, trsk_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, direction_id,
+    gravity_potential_id, inner_product_weights_id, density_to_rhombi_weights_id, density_to_rhombi_indices_id, normal_distance_dual_id, vorticity_indices_triangles_id,
+    vorticity_signs_triangles_id, latitude_scalar_id, longitude_scalar_id, stretching_parameter_id, no_of_shaded_points_scalar_id, no_of_shaded_points_vector_id,
+    interpol_indices_id, interpol_weights_id, theta_bg_id, exner_bg_id, sfc_rho_c_id, sfc_albedo_id, roughness_length_id, is_land_id, t_conductivity_id;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "normal_distance", &normal_distance_id)))
@@ -96,9 +99,16 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "interpol_weights", &interpol_weights_id)))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, stretching_parameter_id, &stretching_parameter)))
-        ERR(retval);
-    grid -> stretching_parameter = stretching_parameter;
+	if ((retval = nc_inq_varid(ncid, "sfc_rho_c", &sfc_rho_c_id)))
+	    ERR(retval);
+	if ((retval = nc_inq_varid(ncid, "sfc_albedo", &sfc_albedo_id)))
+	    ERR(retval);
+	if ((retval = nc_inq_varid(ncid, "roughness_length", &roughness_length_id)))
+	    ERR(retval);
+	if ((retval = nc_inq_varid(ncid, "t_conductivity", &t_conductivity_id)))
+	    ERR(retval);
+	if ((retval = nc_inq_varid(ncid, "is_land", &is_land_id)))
+	    ERR(retval);
     if ((retval = nc_get_var_double(ncid, normal_distance_id, &(grid -> normal_distance[0]))))
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, inner_product_weights_id, &(grid -> inner_product_weights[0]))))
@@ -165,6 +175,16 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         ERR(retval);
     if ((retval = nc_get_var_int(ncid, interpol_indices_id, &(grid -> latlon_interpol_indices[0]))))
         ERR(retval);
+	if ((retval = nc_get_var_double(ncid, sfc_rho_c_id, &(grid -> sfc_rho_c[0]))))
+	    ERR(retval);
+	if ((retval = nc_get_var_double(ncid, sfc_albedo_id, &(grid -> sfc_albedo[0]))))
+	    ERR(retval);
+	if ((retval = nc_get_var_double(ncid, roughness_length_id, &(grid -> roughness_length[0]))))
+	    ERR(retval);
+	if ((retval = nc_get_var_double(ncid, t_conductivity_id, &(grid -> t_conduc_soil[0]))))
+	    ERR(retval);
+	if ((retval = nc_get_var_int(ncid, is_land_id, &(grid -> is_land[0]))))
+	    ERR(retval);
     if ((retval = nc_close(ncid)))
         ERR(retval);
     #pragma omp parallel for
@@ -182,57 +202,10 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     grad(grid -> gravity_potential, grid -> gravity_m, grid);
     // computing the gradient of the background Exner pressure
     grad(grid -> exner_bg, grid -> exner_bg_grad, grid);
-    printf("Stretching parameter of the vertical grid: %lf\n", stretching_parameter);
-	return 0;
-}
-
-int set_sfc_properties(Grid *grid, Config *config, char SFC_PROP_FILE[])
-{
-	/*
-	This function sets the surface properties.
-	*/
 	
 	// fundamental SFC properties
 	grid -> z_t_const = -10.0;
 	grid -> t_const_soil = T_0 + 15;
-	
-	// this is only relevant for idealized test cases, for other cases, it will be overwritten by the function
-    // set_sfc_properties
-    #pragma omp parallel for
-    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-	{
-        grid -> roughness_length[i] = ROUGHNESS_LENGTH_GRASS;
-    }
-    
-    // reading surface properties (only necessary if real radiation is turned on)
-    if (config -> rad_on == 1)
-    {
-		int ncid, retval, sfc_rho_c_id, sfc_albedo_id, roughness_length_id, is_land_id, t_conductivity_id;
-		if ((retval = nc_open(SFC_PROP_FILE, NC_NOWRITE, &ncid)))
-		    ERR(retval);
-		if ((retval = nc_inq_varid(ncid, "sfc_rho_c", &sfc_rho_c_id)))
-		    ERR(retval);
-		if ((retval = nc_inq_varid(ncid, "sfc_albedo", &sfc_albedo_id)))
-		    ERR(retval);
-		if ((retval = nc_inq_varid(ncid, "roughness_length", &roughness_length_id)))
-		    ERR(retval);
-		if ((retval = nc_inq_varid(ncid, "t_conductivity", &t_conductivity_id)))
-		    ERR(retval);
-		if ((retval = nc_inq_varid(ncid, "is_land", &is_land_id)))
-		    ERR(retval);
-		if ((retval = nc_get_var_double(ncid, sfc_rho_c_id, &(grid -> sfc_rho_c[0]))))
-		    ERR(retval);
-		if ((retval = nc_get_var_double(ncid, sfc_albedo_id, &(grid -> sfc_albedo[0]))))
-		    ERR(retval);
-		if ((retval = nc_get_var_double(ncid, roughness_length_id, &(grid -> roughness_length[0]))))
-		    ERR(retval);
-		if ((retval = nc_get_var_double(ncid, t_conductivity_id, &(grid -> t_conduc_soil[0]))))
-		    ERR(retval);
-		if ((retval = nc_get_var_int(ncid, is_land_id, &(grid -> is_land[0]))))
-		    ERR(retval);
-		if ((retval = nc_close(ncid)))
-		    ERR(retval);
-    }
     
     /*
     constructing the soil grid
@@ -256,11 +229,9 @@ int set_sfc_properties(Grid *grid, Config *config, char SFC_PROP_FILE[])
 	{
 		grid -> z_soil_center[i] = 0.5*(grid -> z_soil_interface[i] + grid -> z_soil_interface[i + 1]);
 	}
-	
-    return 0;
+    
+	return 0;
 }
-
-
 
 
 

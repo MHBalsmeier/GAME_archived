@@ -2193,9 +2193,8 @@
     <bcf:citekey order="9">Du2003</bcf:citekey>
     <bcf:citekey order="10">PEIXOTO201361</bcf:citekey>
     <bcf:citekey order="11">10.1175/MWR2991.1</bcf:citekey>
-    <bcf:citekey order="12">etopo1</bcf:citekey>
-    <bcf:citekey order="13">doi:10.1029/2019MS001621</bcf:citekey>
-    <bcf:citekey order="14">rte-rrtmgp-github</bcf:citekey>
+    <bcf:citekey order="12">doi:10.1029/2019MS001621</bcf:citekey>
+    <bcf:citekey order="13">rte-rrtmgp-github</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nty">

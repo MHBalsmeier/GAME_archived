@@ -21,11 +21,11 @@
 \BOOKMARK [1][-]{section.4.6}{Horizontal grid properties}{chapter.4}% 21
 \BOOKMARK [1][-]{section.4.7}{Vertical grid properties}{chapter.4}% 22
 \BOOKMARK [1][-]{section.4.8}{How to generate a grid}{chapter.4}% 23
-\BOOKMARK [0][-]{chapter.5}{Generating a new surface file}{}% 24
-\BOOKMARK [0][-]{chapter.6}{Ideal test states}{}% 25
-\BOOKMARK [0][-]{chapter.7}{Running the model}{}% 26
-\BOOKMARK [1][-]{section.7.1}{Dynamics configuration}{chapter.7}% 27
-\BOOKMARK [1][-]{section.7.2}{Physics configuration}{chapter.7}% 28
-\BOOKMARK [2][-]{subsection.7.2.1}{Local thermodynamic equilibrium option}{section.7.2}% 29
-\BOOKMARK [1][-]{section.7.3}{Coupling to the radiation field}{chapter.7}% 30
-\BOOKMARK [0][-]{chapter.8}{Configuring output}{}% 31
+\BOOKMARK [1][-]{section.4.9}{Physical surface properties}{chapter.4}% 24
+\BOOKMARK [0][-]{chapter.5}{Ideal test states}{}% 25
+\BOOKMARK [0][-]{chapter.6}{Running the model}{}% 26
+\BOOKMARK [1][-]{section.6.1}{Dynamics configuration}{chapter.6}% 27
+\BOOKMARK [1][-]{section.6.2}{Physics configuration}{chapter.6}% 28
+\BOOKMARK [2][-]{subsection.6.2.1}{Local thermodynamic equilibrium option}{section.6.2}% 29
+\BOOKMARK [1][-]{section.6.3}{Coupling to the radiation field}{chapter.6}% 30
+\BOOKMARK [0][-]{chapter.7}{Configuring output}{}% 31

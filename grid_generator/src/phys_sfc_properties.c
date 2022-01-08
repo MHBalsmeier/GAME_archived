@@ -22,53 +22,19 @@ With this program, orographies can be produced.
 const double MOUNTAIN_HEIGHT = 10e3;
 const double MOUNTAIN_FWHM = 1000e3;
 
-int main(int argc, char *argv[])
+int set_sfc_properties(double latitude_scalar[], double longitude_scalar[], double roughness_length[], double sfc_albedo[],
+double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int oro_id)
 {
-	int ORO_ID;
-   	ORO_ID = strtod(argv[1], NULL);
-   	if (ORO_ID < 1 || ORO_ID > 2)
-   	{
-   		printf("Error: oro_id must not be smaller than 1 or larger than 2.\n");
-   		exit(1);
-	}
-   	char OUTPUT_FILE_PRE[200];
-	sprintf(OUTPUT_FILE_PRE, "surface_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
-   	char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
-	strcpy(OUTPUT_FILE, OUTPUT_FILE_PRE);
-	int ncid, scalar_h_dimid, oro_id, latitude_scalar_id, longitude_scalar_id;
 	double *oro_unfiltered = malloc(NO_OF_SCALARS_H*sizeof(double));
-	double *oro = malloc(NO_OF_SCALARS_H*sizeof(double));
-	char GEO_PROP_FILE_PRE[200];
-    sprintf(GEO_PROP_FILE_PRE, "../grid_generator/grids/B%dL26T41152_O0_OL23_SCVT.nc", RES_ID);
-	char GEO_PROP_FILE[strlen(GEO_PROP_FILE_PRE) + 1];
-    strcpy(GEO_PROP_FILE, GEO_PROP_FILE_PRE);
-	int retval;
-    double *latitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
-    double *longitude_scalar = malloc(NO_OF_SCALARS_H*sizeof(double));
-    double distance;
-    if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
-        ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "latitude_scalar", &latitude_scalar_id)))
-        ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "longitude_scalar", &longitude_scalar_id)))
-        ERR(retval);
-    if ((retval = nc_get_var_double(ncid, latitude_scalar_id, &latitude_scalar[0])))
-        ERR(retval);
-    if ((retval = nc_get_var_double(ncid, longitude_scalar_id, &longitude_scalar[0])))
-        ERR(retval);
-	if ((retval = nc_close(ncid)))
-	  ERR(retval);
 	
-	// reading the land mask
-	int *is_land = calloc(NO_OF_SCALARS_H, sizeof(int));
-	int is_land_id;
-	if (ORO_ID == 2)
+	int ncid, retval, is_land_id;
+	if (oro_id == 2)
 	{
-		char IS_LAND_FILE_PRE[200];
-		sprintf(IS_LAND_FILE_PRE, "real/B%d_is_land.nc", RES_ID);
-		char IS_LAND_FILE[strlen(IS_LAND_FILE_PRE) + 1];
-		strcpy(IS_LAND_FILE, IS_LAND_FILE_PRE);
-		if ((retval = nc_open(IS_LAND_FILE, NC_NOWRITE, &ncid)))
+		char is_land_file_pre[200];
+		sprintf(is_land_file_pre, "real/B%d_is_land.nc", RES_ID);
+		char is_land_file[strlen(is_land_file_pre) + 1];
+		strcpy(is_land_file, is_land_file_pre);
+		if ((retval = nc_open(is_land_file, NC_NOWRITE, &ncid)))
 			ERR(retval);
 		if ((retval = nc_inq_varid(ncid, "is_land", &is_land_id)))
 			ERR(retval);
@@ -85,7 +51,7 @@ int main(int argc, char *argv[])
 	double *latitude_input = malloc(no_of_lat_points*sizeof(double));
    	double *longitude_input = malloc(no_of_lon_points*sizeof(double));
 	int (*z_input)[no_of_lon_points] = malloc(sizeof(int[no_of_lat_points][no_of_lon_points]));
-	if (ORO_ID == 2)
+	if (oro_id == 2)
 	{
 		if ((retval = nc_open("real/etopo.nc", NC_NOWRITE, &ncid)))
 			ERR(retval);
@@ -107,20 +73,21 @@ int main(int argc, char *argv[])
 	
     // setting the unfiltered orography
     int lat_index, lon_index;
-    double sigma_mountain = MOUNTAIN_FWHM/pow(8*log(2), 0.5); // only for ORO_ID == 1
+    double sigma_mountain = MOUNTAIN_FWHM/pow(8*log(2), 0.5); // only for oro_id == 1
+    double distance;
 	#pragma omp parallel for private(distance, lat_index, lon_index)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// default
 		oro[i] = 0;
 		oro_unfiltered[i] = 0;
-		if (ORO_ID == 1)
+		if (oro_id == 1)
 		{
             distance = calculate_distance_h(latitude_scalar[i], longitude_scalar[i], 0, 0, RADIUS);
 			oro[i] = MOUNTAIN_HEIGHT*exp(-pow(distance, 2)/(2*pow(sigma_mountain, 2)));
 		}
 		// real orography can only be different from zero at land points
-		if (ORO_ID == 2 && is_land[i] == 1)
+		if (oro_id == 2 && is_land[i] == 1)
 		{
 	    	double *lat_distance_vector = malloc(no_of_lat_points*sizeof(double));
    			double *lon_distance_vector = malloc(no_of_lon_points*sizeof(double));
@@ -155,7 +122,7 @@ int main(int argc, char *argv[])
 	int no_of_avg_points = 8;
 	int min_indices_vector[no_of_avg_points];
 	double distance_vector[NO_OF_SCALARS_H];
-	if (ORO_ID == 2)
+	if (oro_id == 2)
 	{
 		#pragma omp parallel for private(min_indices_vector, distance_vector)
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
@@ -180,18 +147,11 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
-	free(latitude_scalar);
-	free(longitude_scalar);
 	free(oro_unfiltered);
 	
 	printf("minimum orography: %lf m\n", oro[find_min_index(oro, NO_OF_SCALARS_H)]);
 	printf("maximum orography: %lf m\n", oro[find_max_index(oro, NO_OF_SCALARS_H)]);
 	
-	// surface properties other than orography
-   	double *roughness_length = malloc(NO_OF_SCALARS_H*sizeof(double));
-	double *sfc_albedo = calloc(NO_OF_SCALARS_H, sizeof(double));
-	double *sfc_rho_c = calloc(NO_OF_SCALARS_H, sizeof(double));
-	double *t_conductivity = calloc(NO_OF_SCALARS_H, sizeof(double));
 	double c_p_water = 4184.0;
 	double c_p_soil = 830.0;
 	double albedo_water = 0.06;
@@ -217,53 +177,6 @@ int main(int argc, char *argv[])
 			roughness_length[i] = 0.2;
 		}
 	}
-	int sfc_albedo_id, sfc_rho_c_id, t_conductivity_id, roughness_length_id;
-	if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
-	  ERR(retval);
-	if ((retval = nc_def_dim(ncid, "scalar_index", NO_OF_SCALARS_H, &scalar_h_dimid)))
-	  ERR(retval);
-	if ((retval = nc_def_var(ncid, "z_surface", NC_DOUBLE, 1, &scalar_h_dimid, &oro_id)))
-	  ERR(retval);
-	if ((retval = nc_put_att_text(ncid, oro_id, "units", strlen("m"), "m")))
-	  ERR(retval);
-	if ((retval = nc_def_var(ncid, "sfc_albedo", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_albedo_id)))
-	  ERR(retval);
-	if ((retval = nc_def_var(ncid, "sfc_rho_c", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_rho_c_id)))
-	  ERR(retval);
-	if ((retval = nc_put_att_text(ncid, sfc_rho_c_id, "units", strlen("J/(K*m**3)"), "J/(K*m**3)")))
-	  ERR(retval);
-	if ((retval = nc_def_var(ncid, "is_land", NC_INT, 1, &scalar_h_dimid, &is_land_id)))
-	  ERR(retval);
-	if ((retval = nc_def_var(ncid, "t_conductivity", NC_DOUBLE, 1, &scalar_h_dimid, &t_conductivity_id)))
-	  ERR(retval);
-	if ((retval = nc_put_att_text(ncid, t_conductivity_id, "units", strlen("m^2/2"), "m^2/2")))
-	  ERR(retval);
-	if ((retval = nc_def_var(ncid, "roughness_length", NC_DOUBLE, 1, &scalar_h_dimid, &roughness_length_id)))
-	  ERR(retval);
-	if ((retval = nc_put_att_text(ncid, roughness_length_id, "units", strlen("m"), "m")))
-	  ERR(retval);
-	if ((retval = nc_enddef(ncid)))
-	  ERR(retval);
-	if ((retval = nc_put_var_double(ncid, oro_id, &oro[0])))
-	  ERR(retval);
-	if ((retval = nc_put_var_double(ncid, sfc_albedo_id, &sfc_albedo[0])))
-	  ERR(retval);
-	if ((retval = nc_put_var_double(ncid, sfc_rho_c_id, &sfc_rho_c[0])))
-	  ERR(retval);
-	if ((retval = nc_put_var_double(ncid, t_conductivity_id, &t_conductivity[0])))
-	  ERR(retval);
-	if ((retval = nc_put_var_double(ncid, roughness_length_id, &roughness_length[0])))
-	  ERR(retval);
-	if ((retval = nc_put_var_int(ncid, is_land_id, &is_land[0])))
-	  ERR(retval);
-	if ((retval = nc_close(ncid)))
-	  ERR(retval);
-	free(roughness_length);
-	free(sfc_albedo);
-	free(sfc_rho_c);
-	free(t_conductivity);
-	free(is_land);
-	free(oro);
 	
 	return 0;
 }

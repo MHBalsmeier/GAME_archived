@@ -50,11 +50,10 @@ Therefore, a new, capaple framework for simulating geophysical fluids is necessa
 
 This is only the handbook (manual) of the \texttt{Geophysical Fluids Modeling Framework (GAME)}, it explains how to configure, compile and run (use) the model. For a scientific derivation of the model see \cite{kompendium} and the literature cited therein. The source code of the project is maintained on Github (\url{https://github.com/OpenNWP/GAME}).
 
-The \texttt{GAME} project incorporates three different executables:
+The \texttt{GAME} project incorporates two different executables:
 
 \begin{itemize}
 \item \texttt{grid\_generator}, a program for creating model grids
-\item \texttt{surface\_generator}, a tool for creating surface properties
 \item \texttt{game}, the model executable itself
 \end{itemize}
 
@@ -270,8 +269,8 @@ The grid generator needs to be recompiled for every specific resolution, top hei
 \end{table}
 \renewcommand{\arraystretch}{1}
 
-\chapter{Generating a new surface file}
-\label{chap:generating_a_new_surface_file}
+\section{Physical surface properties}
+\label{sec:physical_surface_properties}
 
 \renewcommand{\arraystretch}{1.2}
 \begin{table}
@@ -288,7 +287,7 @@ The grid generator needs to be recompiled for every specific resolution, top hei
 \end{table}
 \renewcommand{\arraystretch}{1}
 
-The surface generator resides in the directory \texttt{surface\_generator} and is an individual executable meant to produce surface properties (orography, roughness length, radiative properties, etc.) for different cases defined by the \texttt{oro\_id}, given the horizontal positions of the primal scalar points. Execute the script \texttt{run.\_script.sh} with the desired \texttt{\texttt{oro\_id}}. Tab. \ref{tab:oro_id_definition} shows the definition of the orography IDs. ETOPO1 orography \cite{etopo1} can be downloaded with the script \texttt{download\_etopo.sh} which resides in the directory \texttt{surface\_generator/real}. The surface generator interpolates this data to the scalar data points.
+Tab. \ref{tab:oro_id_definition} shows the definition of the orography IDs.
 
 \chapter{Ideal test states}
 \label{chap:ideal_test_states}

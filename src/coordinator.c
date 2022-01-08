@@ -141,8 +141,6 @@ int main(int argc, char *argv[])
     // Reading external data.
 	printf("Reading grid data ...\n");
     set_grid_properties(grid, dualgrid, grid_file);
-    // setting the surface properties
-	set_sfc_properties(grid, config, sfc_file);
     printf("Grid loaded successfully.\n");
     printf("%s", stars);
     printf("Setting initial state ...\n");

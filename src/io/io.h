@@ -4,7 +4,6 @@ Github repository: https://github.com/OpenNWP/GAME
 */
 
 int set_grid_properties(Grid *, Dualgrid *, char[]);
-int set_sfc_properties(Grid *, Config *, char[]);
 int calc_delta_t_and_related(double, double *, Grid *, Dualgrid *, State *, Config *);
 int set_ideal_init(State *, Grid *, Dualgrid *, Soil *, int, char[]);
 int read_init_data(char[], State *, Grid *, Soil *);
