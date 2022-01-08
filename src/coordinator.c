@@ -91,17 +91,18 @@ int main(int argc, char *argv[])
     
 	// Determining the name of the init state file from the IDEAL_INPUT_ID, RES_ID, NO_OF_LAYERS and so on.
     char init_state_file_pre[200];
-    // The NWP case.
+    // the NWP case
     if (config_io -> ideal_input_id == -1)
     {
     	config -> nwp_mode = 1;
     	sprintf(init_state_file_pre, "../../nwp_init/%d%s%s%s_B%dL%dT%d_O%d_OL%d_SCVT.nc",
     	config_io -> year, config_io -> month_string, config_io -> day_string, config_io -> hour_string, RES_ID, NO_OF_LAYERS, config -> toa, config -> oro_id, grid -> no_of_oro_layers);
     }
-    // The idealized input case.
+    // the idealized input case
     else
-    {
+    {	
     	config -> nwp_mode = 0;
+    	sprintf(init_state_file_pre, "placeholder");
     }
     char init_state_file[strlen(init_state_file_pre) + 1];
     strcpy(init_state_file, init_state_file_pre);
