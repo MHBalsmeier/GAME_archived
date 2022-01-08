@@ -9,6 +9,7 @@ In this file, the initial state of the simulation is read in from a netcdf file.
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <netcdf.h>
 #include <atmostracers.h>
 #include "../game_types.h"
@@ -18,7 +19,7 @@ In this file, the initial state of the simulation is read in from a netcdf file.
 #include "../../grid_generator/src/standard.h"
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 
-int set_soil_temp(Grid *, Soil *, State *, double []);
+int set_soil_temp(Grid *, Soil *, State *, double [], char []);
 
 int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int ideal_input_id, char grid_file[])
 {
@@ -209,25 +210,24 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int
     free(water_vapour_density);
     
     // setting the soil temperature
-    set_soil_temp(grid, soil, state, temperatures);
+    set_soil_temp(grid, soil, state, temperatures, "");
     free(temperatures);
     
     // returning 0 indicating success
     return 0;
 }
 
-int read_init_data(char FILE_NAME[], State *state, Grid* grid, Soil *soil)
+int read_init_data(char init_state_file[], State *state, Grid* grid, Soil *soil)
 {
 	/*
 	This function reads the initial state of the model atmosphere from a netcdf file.
 	*/
 	
     double *temperatures = malloc((NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS*sizeof(double));
-    double *sst = malloc(NO_OF_SCALARS_H*sizeof(double));
     int retval, ncid;
-    if ((retval = nc_open(FILE_NAME, NC_NOWRITE, &ncid)))
+    if ((retval = nc_open(init_state_file, NC_NOWRITE, &ncid)))
         NCERR(retval);
-    int densities_id, temperatures_id, wind_id, sst_id, stretching_parameter_id, sst_avail;
+    int densities_id, temperatures_id, wind_id, stretching_parameter_id;
     double stretching_parameter;
     if ((retval = nc_inq_varid(ncid, "densities", &densities_id)))
         NCERR(retval);
@@ -235,17 +235,6 @@ int read_init_data(char FILE_NAME[], State *state, Grid* grid, Soil *soil)
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "wind", &wind_id)))
         NCERR(retval);
-    // figuring out if the netcdf file contains SST
-    sst_avail = 0;
-    if (nc_inq_varid(ncid, "sst", &sst_id) == 0)
-    {
-    	sst_avail = 1;
-    	printf("SST found in initialization file.\n");
-    }
-    else
-    {	
-    	printf("SST not found in initialization file.\n");
-    }
     if ((retval = nc_inq_varid(ncid, "stretching_parameter", &stretching_parameter_id)))
         NCERR(retval);
     if ((retval = nc_get_var_double(ncid, densities_id, &state -> rho[0])))
@@ -254,12 +243,6 @@ int read_init_data(char FILE_NAME[], State *state, Grid* grid, Soil *soil)
         NCERR(retval);
     if ((retval = nc_get_var_double(ncid, wind_id, &state -> wind[0])))
         NCERR(retval);
-    // reading the SST data if it is present in the netcdf file
-    if (sst_avail == 1)
-    {
-		if ((retval = nc_get_var_double(ncid, sst_id, &sst[0])))
-		    NCERR(retval);
-    }
     if ((retval = nc_get_var_double(ncid, stretching_parameter_id, &stretching_parameter)))
         NCERR(retval);
     if ((retval = nc_close(ncid)))
@@ -320,21 +303,52 @@ int read_init_data(char FILE_NAME[], State *state, Grid* grid, Soil *soil)
     	exit(1);
     }
     
-    free(sst);
-    
     // setting the soil temperature
-    set_soil_temp(grid, soil, state, temperatures);
+    set_soil_temp(grid, soil, state, temperatures, init_state_file);
     free(temperatures);
     
     // returning 0 indicating success
     return 0;
 }
 
-int set_soil_temp(Grid *grid, Soil *soil, State *state, double temperatures[])
+int set_soil_temp(Grid *grid, Soil *soil, State *state, double temperatures[], char init_state_file[])
 {
 	/*
 	This function sets the soil temperature.
 	*/
+    
+	double *sst = malloc(NO_OF_SCALARS_H*sizeof(double));
+	int sst_avail = 0;
+    if (strlen(init_state_file) != 0)
+    {
+		int ncid;
+		int retval;
+		if ((retval = nc_open(init_state_file, NC_NOWRITE, &ncid)))
+		    NCERR(retval);
+		
+		int sst_id;
+		// figuring out if the netcdf file contains SST
+		if (nc_inq_varid(ncid, "sst", &sst_id) == 0)
+		{
+			sst_avail = 1;
+			printf("SST found in initialization file.\n");
+		}
+		else
+		{	
+			printf("SST not found in initialization file.\n");
+		}
+		
+		// reading the SST data if it is present in the netcdf file
+		if (sst_avail == 1)
+		{
+			if ((retval = nc_get_var_double(ncid, sst_id, &sst[0])))
+				NCERR(retval);
+		}
+		
+		// we do not need the netcdf file any further
+		if ((retval = nc_close(ncid)))
+		    NCERR(retval);
+	}
 	
 	int soil_index;
 	double z_soil, t_sfc;
@@ -343,15 +357,15 @@ int set_soil_temp(Grid *grid, Soil *soil, State *state, double temperatures[])
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// temperature at the surface
-		// land surface
-		if (grid -> is_land[i] == 1)
+		// land surface or sea surfacf is SST is unavailable
+		if (grid -> is_land[i] == 1 || (grid -> is_land[i] == 0 && sst_avail == 0))
 		{
 			t_sfc = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i];
 		}
-		// sea surface, irrelevant
+		// sea surface if SST is available
 		else
 		{
-			t_sfc = grid -> t_const_soil;
+			t_sfc = sst[i];
 		}
 		
 		// loop over all soil layers
@@ -363,6 +377,9 @@ int set_soil_temp(Grid *grid, Soil *soil, State *state, double temperatures[])
 			soil -> temperature[soil_index] = t_sfc + (grid -> t_const_soil - t_sfc)*z_soil/grid -> z_t_const;
 		}
 	}
+	
+    free(sst);
+    
 	// returning 0 indicating success
 	return 0;
 }
