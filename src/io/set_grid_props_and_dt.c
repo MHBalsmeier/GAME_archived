@@ -175,13 +175,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
         	grid -> adjacent_vector_indices_h[i] = 0;
         }
     }
-	// this is only relevant for idealized test cases, for other cases, it will be overwritten by the function
-    // set_sfc_properties
-    #pragma omp parallel for
-    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-	{
-        grid -> roughness_length[i] = ROUGHNESS_LENGTH_GRASS;
-    }
+	
     // determining coordinate slopes
     grad_hor_cov(grid -> z_scalar, grid -> slope, grid);
     // computing the gradient of the gravity potential
@@ -192,42 +186,59 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
 	return 0;
 }
 
-int set_sfc_properties(Grid *grid, char SFC_PROP_FILE[])
+int set_sfc_properties(Grid *grid, Config *config, char SFC_PROP_FILE[])
 {
-    // reading surface properties
-    int ncid, retval, sfc_rho_c_id, sfc_albedo_id, roughness_length_id, is_land_id, t_conductivity_id;
-    if ((retval = nc_open(SFC_PROP_FILE, NC_NOWRITE, &ncid)))
-        ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "sfc_rho_c", &sfc_rho_c_id)))
-        ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "sfc_albedo", &sfc_albedo_id)))
-        ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "roughness_length", &roughness_length_id)))
-        ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "t_conductivity", &t_conductivity_id)))
-        ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "is_land", &is_land_id)))
-        ERR(retval);
-    if ((retval = nc_get_var_double(ncid, sfc_rho_c_id, &(grid -> sfc_rho_c[0]))))
-        ERR(retval);
-    if ((retval = nc_get_var_double(ncid, sfc_albedo_id, &(grid -> sfc_albedo[0]))))
-        ERR(retval);
-    if ((retval = nc_get_var_double(ncid, roughness_length_id, &(grid -> roughness_length[0]))))
-        ERR(retval);
-    if ((retval = nc_get_var_double(ncid, t_conductivity_id, &(grid -> t_conduc_soil[0]))))
-        ERR(retval);
-    if ((retval = nc_get_var_int(ncid, is_land_id, &(grid -> is_land[0]))))
-        ERR(retval);
-    if ((retval = nc_close(ncid)))
-        ERR(retval);
+	/*
+	This function sets the surface properties.
+	*/
+	
+	// fundamental SFC properties
+	grid -> z_t_const = -10.0;
+	grid -> t_const_soil = T_0 + 15;
+	
+	// this is only relevant for idealized test cases, for other cases, it will be overwritten by the function
+    // set_sfc_properties
+    #pragma omp parallel for
+    for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+	{
+        grid -> roughness_length[i] = ROUGHNESS_LENGTH_GRASS;
+    }
+    
+    // reading surface properties (only necessary if real radiation is turned on)
+    if (config -> rad_on == 1)
+    {
+		int ncid, retval, sfc_rho_c_id, sfc_albedo_id, roughness_length_id, is_land_id, t_conductivity_id;
+		if ((retval = nc_open(SFC_PROP_FILE, NC_NOWRITE, &ncid)))
+		    ERR(retval);
+		if ((retval = nc_inq_varid(ncid, "sfc_rho_c", &sfc_rho_c_id)))
+		    ERR(retval);
+		if ((retval = nc_inq_varid(ncid, "sfc_albedo", &sfc_albedo_id)))
+		    ERR(retval);
+		if ((retval = nc_inq_varid(ncid, "roughness_length", &roughness_length_id)))
+		    ERR(retval);
+		if ((retval = nc_inq_varid(ncid, "t_conductivity", &t_conductivity_id)))
+		    ERR(retval);
+		if ((retval = nc_inq_varid(ncid, "is_land", &is_land_id)))
+		    ERR(retval);
+		if ((retval = nc_get_var_double(ncid, sfc_rho_c_id, &(grid -> sfc_rho_c[0]))))
+		    ERR(retval);
+		if ((retval = nc_get_var_double(ncid, sfc_albedo_id, &(grid -> sfc_albedo[0]))))
+		    ERR(retval);
+		if ((retval = nc_get_var_double(ncid, roughness_length_id, &(grid -> roughness_length[0]))))
+		    ERR(retval);
+		if ((retval = nc_get_var_double(ncid, t_conductivity_id, &(grid -> t_conduc_soil[0]))))
+		    ERR(retval);
+		if ((retval = nc_get_var_int(ncid, is_land_id, &(grid -> is_land[0]))))
+		    ERR(retval);
+		if ((retval = nc_close(ncid)))
+		    ERR(retval);
+    }
     
     /*
     constructing the soil grid
     --------------------------
     */
-
-	grid -> z_t_const = -10.0;
-	grid -> t_const_soil = T_0 + 15;
+    
 	double sigma_soil = 0.8;
 	
 	// the surface is always at zero

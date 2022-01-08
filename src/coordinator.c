@@ -84,10 +84,10 @@ int main(int argc, char *argv[])
 	sprintf(grid_file_PRE, "../../grid_generator/grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, config -> toa, config -> oro_id, grid -> no_of_oro_layers);
     char grid_file[strlen(grid_file_PRE) + 1];
     strcpy(grid_file, grid_file_PRE);
-    char SFC_PROP_FILE_PRE[200];
-	sprintf(SFC_PROP_FILE_PRE, "../../surface_generator/surface_files/B%d_O%d_SCVT.nc", RES_ID, 2);
-    char SFC_PROP_FILE[strlen(SFC_PROP_FILE_PRE) + 1];
-    strcpy(SFC_PROP_FILE, SFC_PROP_FILE_PRE);
+    char sfc_file_PRE[200];
+	sprintf(sfc_file_PRE, "../../surface_generator/surface_files/B%d_O%d_SCVT.nc", RES_ID, 2);
+    char sfc_file[strlen(sfc_file_PRE) + 1];
+    strcpy(sfc_file, sfc_file_PRE);
     
 	// Determining the name of the init state file from the IDEAL_INPUT_ID, RES_ID, NO_OF_LAYERS and so on.
     char init_state_file_pre[200];
@@ -140,11 +140,8 @@ int main(int argc, char *argv[])
     // Reading external data.
 	printf("Reading grid data ...\n");
     set_grid_properties(grid, dualgrid, grid_file);
-    // If we have radiation turned on, we also need soil.
-    if (config -> rad_on == 1)
-    {
-    	set_sfc_properties(grid, SFC_PROP_FILE);
-    }
+    // setting the surface properties
+	set_sfc_properties(grid, config, sfc_file);
     printf("Grid loaded successfully.\n");
     printf("%s", stars);
     printf("Setting initial state ...\n");

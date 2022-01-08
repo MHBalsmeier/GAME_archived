@@ -29,7 +29,7 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int
 	
     double *pressure = malloc(NO_OF_SCALARS*sizeof(double));
     double *temperature = malloc(NO_OF_SCALARS*sizeof(double));
-    double *water_vapour_density = malloc(NO_OF_SCALARS*sizeof(double));
+    double *water_vapour_density = calloc(NO_OF_SCALARS, sizeof(double));
     double z_height;
     double lat, lon, u, v, pressure_value, specific_humidity, total_density;
     // dummy argument
@@ -369,9 +369,9 @@ int set_soil_temp(Grid *grid, Soil *soil, State *state, double temperatures[], c
 		    NCERR(retval);
 	}
 	
+	// setting the soil temperature
 	int soil_index;
 	double z_soil, t_sfc;
-	// setting the soil temperature
 	#pragma omp parallel for private(soil_index, z_soil, t_sfc)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
