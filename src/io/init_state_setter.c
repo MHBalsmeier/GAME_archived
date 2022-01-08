@@ -357,7 +357,7 @@ int set_soil_temp(Grid *grid, Soil *soil, State *state, double temperatures[], c
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// temperature at the surface
-		// land surface or sea surfacf is SST is unavailable
+		// land surface or sea surface if SST is unavailable
 		if (grid -> is_land[i] == 1 || (grid -> is_land[i] == 0 && sst_avail == 0))
 		{
 			t_sfc = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i];
