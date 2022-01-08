@@ -43,42 +43,6 @@ int set_f_vec(double latitude_vector[], double direction[], double direction_dua
  	return 0;   
 }
 
-int set_orography(int RES_ID, int ORO_ID, double z_surface[])
-{
-	/*
-	This function reads the orography from a netcdf file.
-	*/
-
-    if (ORO_ID != 0)
-    {
-    	int retval, z_surface_id, ncid;
-		int ORO_FILE_LENGTH = 100;
-		char *ORO_FILE_PRE = malloc((ORO_FILE_LENGTH + 1)*sizeof(char));
-		sprintf(ORO_FILE_PRE, "../surface_generator/surface_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);
-		ORO_FILE_LENGTH = strlen(ORO_FILE_PRE);
-		free(ORO_FILE_PRE);
-		char *ORO_FILE = malloc((ORO_FILE_LENGTH + 1)*sizeof(char));
-		sprintf(ORO_FILE, "../surface_generator/surface_files/B%d_O%d_SCVT.nc", RES_ID, ORO_ID);	    
-		if ((retval = nc_open(ORO_FILE, NC_NOWRITE, &ncid)))
-		    ERR(retval);
-		if ((retval = nc_inq_varid(ncid, "z_surface", &z_surface_id)))
-		    ERR(retval);		
-		if ((retval = nc_get_var_double(ncid, z_surface_id, &z_surface[0])))
-		    ERR(retval);
-		if ((retval = nc_close(ncid)))
-		    ERR(retval);
-    }
-    else
-    {
-    	#pragma omp parallel for
-    	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-    	{
-    		z_surface[i] = 0;
-    	}
-    }
-	return 0;
-}
-
 int calc_vorticity_indices_triangles(int from_index_dual[], int to_index_dual[], double direction[], double direction_dual[], int vorticity_indices_triangles[], double ORTH_CRITERION_DEG, int vorticity_signs_pre[])
 {
 	/*

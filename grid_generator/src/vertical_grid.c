@@ -25,14 +25,14 @@ const double TROPO_HEIGHT_STANDARD = 11e3;
 const double INVERSE_HEIGHT_STANDARD = 20e3;
 const double TEMP_GRADIENT_INV_STANDARD = 0.1/100;
 
-int set_z_scalar(double z_scalar[], double z_surface[], int NO_OF_ORO_LAYERS, double TOA, double stretching_parameter, int VERT_GRID_TYPE)
+int set_z_scalar(double z_scalar[], double oro[], int NO_OF_ORO_LAYERS, double TOA, double stretching_parameter, int VERT_GRID_TYPE)
 {
 	/*
 	This function sets the z coordinates of the scalar data points.
 	*/
 	
 	double z_vertical_vector_pre[NO_OF_LAYERS + 1];
-	// the heights are defined according to z_k = A_k + B_k*z_surface with A_0 = TOA, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
+	// the heights are defined according to z_k = A_k + B_k*oro with A_0 = TOA, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
 	double A, B, sigma_z, z_rel, max_oro;
 	// loop over all columns
     for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
@@ -52,13 +52,13 @@ int set_z_scalar(double z_scalar[], double z_surface[], int NO_OF_ORO_LAYERS, do
 			{
 				B = 0;
 			}
-			z_vertical_vector_pre[j] = A + B*z_surface[h_index];
+			z_vertical_vector_pre[j] = A + B*oro[h_index];
 		}
 		
 		// doing a check
 		if (h_index == 0 && VERT_GRID_TYPE == 0)
 		{
-			max_oro = z_surface[find_max_index(z_surface, NO_OF_SCALARS_H)];
+			max_oro = oro[find_max_index(oro, NO_OF_SCALARS_H)];
 			if (max_oro >= z_vertical_vector_pre[NO_OF_LAYERS - NO_OF_ORO_LAYERS])
 			{
 				printf("Maximum of orography larger or equal to the height of the lowest flat level.\n");
@@ -76,7 +76,7 @@ int set_z_scalar(double z_scalar[], double z_surface[], int NO_OF_ORO_LAYERS, do
     return 0;
 }
 
-int set_scalar_shading_indices(double z_scalar[], double z_surface[], int no_of_shaded_points_scalar[])
+int set_scalar_shading_indices(double z_scalar[], double oro[], int no_of_shaded_points_scalar[])
 {
 	/*
 	This function sets which scalar points lie below the surface.
@@ -89,7 +89,7 @@ int set_scalar_shading_indices(double z_scalar[], double z_surface[], int no_of_
 		counter = 0;
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
 		{
-			if (z_scalar[j*NO_OF_SCALARS_H + i] < z_surface[i])
+			if (z_scalar[j*NO_OF_SCALARS_H + i] < oro[i])
 			{
 				++counter;
 			}
@@ -113,7 +113,8 @@ int set_vector_shading_indices(int from_index[], int to_index[], int no_of_shade
 	return 0;
 }
 
-int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], double normal_distance[], double latitude_scalar[], double longitude_scalar[], int from_index[], int to_index[], double TOA, int VERT_GRID_TYPE, double z_surface[])
+int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], double normal_distance[], double latitude_scalar[],
+double longitude_scalar[], int from_index[], int to_index[], double TOA, int VERT_GRID_TYPE, double oro[])
 {
 	/*
 	calculates the vertical position of the vector points
@@ -158,7 +159,7 @@ int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], doubl
 			{
 				if (VERT_GRID_TYPE == 0)
 				{
-					z_vector[i] = z_surface[h_index];
+					z_vector[i] = oro[h_index];
                 }
 				if (VERT_GRID_TYPE == 1)
 				{

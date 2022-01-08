@@ -21,7 +21,6 @@ int calc_inner_product(double [], double [], double [], int [], int [], double [
 int coriolis(int [], int [], int [], double [], double [], int [], double [], double [], double [], double [], double [], double [], double [], double [], double [], int [], int [], int [], double [], double []);
 int set_z_scalar(double [], double [], int, double, double, int);
 int set_f_vec(double [], double [], double [], double []);
-int set_orography(int, int, double []);
 int calc_cell_area_unity(double [], double [], double [], int [], int []);
 int calc_triangle_area_unity(double [], double [], double [], int [][3], int [][3], int [][3]);
 int set_vector_h_doubles(int [], int [], double [], double [], double [], double [], double []);

@@ -63,22 +63,22 @@ int main(int argc, char *argv[])
    	}
     
     // Checking wether the RES_ID of the scalar_h_file corresponds to the RES_ID in enum.h.
-    char res_id_as_string[2];
-    res_id_as_string[0] = scalar_h_file[7];
-    res_id_as_string[1] = scalar_h_file[8];
-    int res_id_from_scalar_h_file;
-    if (res_id_as_string[1] == 'L')
+    char RES_ID_as_string[2];
+    RES_ID_as_string[0] = scalar_h_file[7];
+    RES_ID_as_string[1] = scalar_h_file[8];
+    int RES_ID_from_scalar_h_file;
+    if (RES_ID_as_string[1] == 'L')
     {
-    	res_id_from_scalar_h_file = res_id_as_string[0] - '0';
+    	RES_ID_from_scalar_h_file = RES_ID_as_string[0] - '0';
     }
     else
     {
-    	res_id_from_scalar_h_file = strtod(res_id_as_string, NULL);
+    	RES_ID_from_scalar_h_file = strtod(RES_ID_as_string, NULL);
     }
-    if (USE_scalar_h_file == 1 && res_id_from_scalar_h_file != RES_ID)
+    if (USE_scalar_h_file == 1 && RES_ID_from_scalar_h_file != RES_ID)
     {
-    	printf("The resolution (res_id = %d) of the scalar_h_coords_file does not correspond to the resolution (RES_ID = %d) in enum.h.\n", res_id_from_scalar_h_file, RES_ID);
-    	printf("Recompile with RES_ID = %d or choose a scalar_h_coords_file with res_id = %d, then try again.\n", res_id_from_scalar_h_file, RES_ID);
+    	printf("The resolution (RES_ID = %d) of the scalar_h_coords_file does not correspond to the resolution (RES_ID = %d) in enum.h.\n", RES_ID_from_scalar_h_file, RES_ID);
+    	printf("Recompile with RES_ID = %d or choose a scalar_h_coords_file with RES_ID = %d, then try again.\n", RES_ID_from_scalar_h_file, RES_ID);
     	printf("Aborting.\n");
     	exit(1);
     }
@@ -174,7 +174,6 @@ int main(int argc, char *argv[])
     double *triangle_face_unit_sphere = malloc(NO_OF_DUAL_SCALARS_H*sizeof(double));
     double *pent_hex_face_unity_sphere = malloc(NO_OF_SCALARS_H*sizeof(double));
     double *rel_on_line_dual = malloc(NO_OF_VECTORS_H*sizeof(double));
-	double *z_surface = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *inner_product_weights = malloc(8*NO_OF_SCALARS*sizeof(double));
     double *density_to_rhombi_weights = malloc(4*NO_OF_VECTORS_H*sizeof(double));
     double *interpol_weights = malloc(5*NO_OF_LATLON_IO_POINTS*sizeof(double));
@@ -204,15 +203,7 @@ int main(int argc, char *argv[])
     printf(GREEN "finished.\n" RESET);
     
     /*
-    1.) reading the orography
-        ---------------------
-    */
-    printf("Reading orography data ... ");
-	set_orography(RES_ID, oro_id, z_surface);
-    printf(GREEN "finished.\n" RESET);
-    
-    /*
-	2.) creating or reading the properties that determine the horizontal grid
+	1.) creating or reading the properties that determine the horizontal grid
 	    ---------------------------------------------------------------------
 	*/
     printf("Establishing horizontal grid structure ... \n");
@@ -232,13 +223,13 @@ int main(int argc, char *argv[])
     }
     
     /*
-    3.) finding the neighbouring vector points of the cells
+    2.) finding the neighbouring vector points of the cells
         ---------------------------------------------------
     */
 	find_adjacent_vector_indices_h(from_index, to_index, adjacent_signs_h, adjacent_vector_indices_h);
 	
 	/*
-	4.) grid optimization
+	3.) grid optimization
 	    -----------------
 	*/
 	if (OPTIMIZE_BOOL == 1)
@@ -249,7 +240,7 @@ int main(int argc, char *argv[])
 	}
 	
 	/*
-	5.) determining implicit quantities of the horizontal grid
+	4.) determining implicit quantities of the horizontal grid
 	    ------------------------------------------------------
 	*/
 	// calculation of the horizontal coordinates of the dual scalar points
@@ -283,31 +274,32 @@ int main(int argc, char *argv[])
     printf(GREEN "Horizontal grid structure determined.\n" RESET);
 	
 	/*
-	6.) setting the physical surface properties
+	5.) setting the physical surface properties
 	    ---------------------------------------
 	*/
 	set_sfc_properties(latitude_scalar, longitude_scalar, roughness_length, sfc_albedo, sfc_rho_c, t_conductivity, oro, is_land, oro_id);
 	
 	/*
-	7.) setting the explicit property of the vertical grid
+	6.) setting the explicit property of the vertical grid
 	    --------------------------------------------------
 	*/
     printf("Setting the vertical coordinates of the scalar data points ... ");
-	set_z_scalar(z_scalar, z_surface, NO_OF_ORO_LAYERS, TOA, stretching_parameter, VERT_GRID_TYPE);
+	set_z_scalar(z_scalar, oro, NO_OF_ORO_LAYERS, TOA, stretching_parameter, VERT_GRID_TYPE);
     printf(GREEN "finished.\n" RESET);
 	
 	/*
-	8.) setting the implicit quantities of the vertical grid
+	7.) setting the implicit quantities of the vertical grid
 	    ----------------------------------------------------
 	*/
 	if (VERT_GRID_TYPE == 1)
 	{
-		set_scalar_shading_indices(z_scalar, z_surface, no_of_shaded_points_scalar);
+		set_scalar_shading_indices(z_scalar, oro, no_of_shaded_points_scalar);
 		set_vector_shading_indices(from_index, to_index, no_of_shaded_points_scalar, no_of_shaded_points_vector);
 	}
 	
 	printf("Determining vector z coordinates and normal distances of the primal grid ... ");
-	set_z_vector_and_normal_distance(z_vector, z_scalar, normal_distance, latitude_scalar, longitude_scalar, from_index, to_index, TOA, VERT_GRID_TYPE, z_surface);
+	set_z_vector_and_normal_distance(z_vector, z_scalar, normal_distance, latitude_scalar, longitude_scalar, from_index, to_index, TOA, VERT_GRID_TYPE, oro);
+	free(oro);
     printf(GREEN "finished.\n" RESET);	
 	
 	printf("Determining scalar z coordinates of the dual grid ... ");
@@ -332,7 +324,7 @@ int main(int argc, char *argv[])
     printf(GREEN "finished.\n" RESET);
     
     /*
-    9.) Now come the derived quantities, which are needed for differential operators.
+    8.) Now come the derived quantities, which are needed for differential operators.
         -----------------------------------------------------------------------------
     */
     printf("Setting the gravity potential ... ");
@@ -521,26 +513,22 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "no_of_shaded_points_vector", NC_INT, 1, &vector_h_dimid, &no_of_shaded_points_vector_id)))
         ERR(retval);
-	if ((retval = nc_def_var(ncid_g_prop, "z_surface", NC_DOUBLE, 1, &scalar_h_dimid, &oro_id)))
-	  ERR(retval);
-	if ((retval = nc_put_att_text(ncid_g_prop, oro_id, "units", strlen("m"), "m")))
-	  ERR(retval);
 	if ((retval = nc_def_var(ncid_g_prop, "sfc_albedo", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_albedo_id)))
-	  ERR(retval);
+	  	ERR(retval);
 	if ((retval = nc_def_var(ncid_g_prop, "sfc_rho_c", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_rho_c_id)))
-	  ERR(retval);
+	  	ERR(retval);
 	if ((retval = nc_put_att_text(ncid_g_prop, sfc_rho_c_id, "units", strlen("J/(K*m**3)"), "J/(K*m**3)")))
-	  ERR(retval);
+	  	ERR(retval);
 	if ((retval = nc_def_var(ncid_g_prop, "is_land", NC_INT, 1, &scalar_h_dimid, &is_land_id)))
-	  ERR(retval);
+	  	ERR(retval);
 	if ((retval = nc_def_var(ncid_g_prop, "t_conductivity", NC_DOUBLE, 1, &scalar_h_dimid, &t_conductivity_id)))
-	  ERR(retval);
+	  	ERR(retval);
 	if ((retval = nc_put_att_text(ncid_g_prop, t_conductivity_id, "units", strlen("m^2/2"), "m^2/2")))
-	  ERR(retval);
+	  	ERR(retval);
 	if ((retval = nc_def_var(ncid_g_prop, "roughness_length", NC_DOUBLE, 1, &scalar_h_dimid, &roughness_length_id)))
-	  ERR(retval);
+	  	ERR(retval);
 	if ((retval = nc_put_att_text(ncid_g_prop, roughness_length_id, "units", strlen("m"), "m")))
-	  ERR(retval);
+	  	ERR(retval);
     if ((retval = nc_enddef(ncid_g_prop)))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, no_of_shaded_points_scalar_id, &no_of_shaded_points_scalar[0])))
@@ -597,16 +585,14 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, interpol_weights_id, &interpol_weights[0])))
         ERR(retval);
-	if ((retval = nc_put_var_double(ncid_g_prop, oro_id, &oro[0])))
-	  ERR(retval);
 	if ((retval = nc_put_var_double(ncid_g_prop, sfc_albedo_id, &sfc_albedo[0])))
-	  ERR(retval);
+	  	ERR(retval);
 	if ((retval = nc_put_var_double(ncid_g_prop, sfc_rho_c_id, &sfc_rho_c[0])))
-	  ERR(retval);
+	  	ERR(retval);
 	if ((retval = nc_put_var_double(ncid_g_prop, t_conductivity_id, &t_conductivity[0])))
-	  ERR(retval);
+	  	ERR(retval);
 	if ((retval = nc_put_var_double(ncid_g_prop, roughness_length_id, &roughness_length[0])))
-	  ERR(retval);
+	  	ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, from_index_id, &from_index[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, to_index_id, &to_index[0])))
@@ -632,7 +618,7 @@ int main(int argc, char *argv[])
     if ((retval = nc_put_var_int(ncid_g_prop, interpol_indices_id, &interpol_indices[0])))
         ERR(retval);
 	if ((retval = nc_put_var_int(ncid_g_prop, is_land_id, &is_land[0])))
-	  ERR(retval);
+	  	ERR(retval);
     if ((retval = nc_close(ncid_g_prop)))
         ERR(retval);
     printf(GREEN "finished.\n" RESET);
@@ -644,7 +630,6 @@ int main(int argc, char *argv[])
 	free(sfc_rho_c);
 	free(t_conductivity);
 	free(is_land);
-	free(oro);
     free(no_of_shaded_points_scalar);
     free(no_of_shaded_points_vector);
     free(latitude_ico);
@@ -691,7 +676,6 @@ int main(int argc, char *argv[])
     free(adjacent_signs_h);
     free(vorticity_signs_triangles);
     free(area_dual);
-	free(z_surface);
 	free(interpol_indices);
 	free(interpol_weights);
     return 0;

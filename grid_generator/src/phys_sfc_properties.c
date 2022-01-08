@@ -31,7 +31,7 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 	if (oro_id == 2)
 	{
 		char is_land_file_pre[200];
-		sprintf(is_land_file_pre, "real/B%d_is_land.nc", RES_ID);
+		sprintf(is_land_file_pre, "phys_quantities/B%d_is_land.nc", RES_ID);
 		char is_land_file[strlen(is_land_file_pre) + 1];
 		strcpy(is_land_file, is_land_file_pre);
 		if ((retval = nc_open(is_land_file, NC_NOWRITE, &ncid)))
@@ -53,7 +53,7 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 	int (*z_input)[no_of_lon_points] = malloc(sizeof(int[no_of_lat_points][no_of_lon_points]));
 	if (oro_id == 2)
 	{
-		if ((retval = nc_open("real/etopo.nc", NC_NOWRITE, &ncid)))
+		if ((retval = nc_open("phys_quantities/etopo.nc", NC_NOWRITE, &ncid)))
 			ERR(retval);
 		if ((retval = nc_inq_varid(ncid, "y", &lat_in_id)))
 			ERR(retval);
