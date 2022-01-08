@@ -16,10 +16,6 @@ if [ ! -d surface_generator/surface_files ]
 then
 mkdir surface_generator/surface_files
 fi
-if [ ! -d test_generator/test_states ]
-then
-mkdir test_generator/test_states
-fi
 if [ ! -d output ]
 then
 mkdir output

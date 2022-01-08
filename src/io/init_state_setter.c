@@ -27,23 +27,6 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int
 	This function sets the initial state of the model atmosphere for idealized test cases.
 	*/
 	
-    // reading the grid properties which are not part of the struct grid
-    double *latitude_vector = malloc(NO_OF_VECTORS_H*sizeof(double));
-    double *longitude_vector = malloc(NO_OF_VECTORS_H*sizeof(double));
-    int ncid_grid, retval, latitude_vector_id, longitude_vector_id;
-    if ((retval = nc_open(grid_file, NC_NOWRITE, &ncid_grid)))
-        NCERR(retval);
-    if ((retval = nc_inq_varid(ncid_grid, "latitude_vector", &latitude_vector_id)))
-        NCERR(retval);
-    if ((retval = nc_inq_varid(ncid_grid, "longitude_vector", &longitude_vector_id)))
-        NCERR(retval);
-    if ((retval = nc_get_var_double(ncid_grid, latitude_vector_id, &latitude_vector[0])))
-        NCERR(retval);
-    if ((retval = nc_get_var_double(ncid_grid, longitude_vector_id, &longitude_vector[0])))
-        NCERR(retval);
-    if ((retval = nc_close(ncid_grid)))
-        NCERR(retval);
-	
     double *pressure = malloc(NO_OF_SCALARS*sizeof(double));
     double *temperature = malloc(NO_OF_SCALARS*sizeof(double));
     double *water_vapour_density = malloc(NO_OF_SCALARS*sizeof(double));
@@ -92,6 +75,22 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int
     }
 
     // horizontal wind fields are determind here
+    // reading the grid properties which are not part of the struct grid
+    double *latitude_vector = malloc(NO_OF_VECTORS_H*sizeof(double));
+    double *longitude_vector = malloc(NO_OF_VECTORS_H*sizeof(double));
+    int ncid_grid, retval, latitude_vector_id, longitude_vector_id;
+    if ((retval = nc_open(grid_file, NC_NOWRITE, &ncid_grid)))
+        NCERR(retval);
+    if ((retval = nc_inq_varid(ncid_grid, "latitude_vector", &latitude_vector_id)))
+        NCERR(retval);
+    if ((retval = nc_inq_varid(ncid_grid, "longitude_vector", &longitude_vector_id)))
+        NCERR(retval);
+    if ((retval = nc_get_var_double(ncid_grid, latitude_vector_id, &latitude_vector[0])))
+        NCERR(retval);
+    if ((retval = nc_get_var_double(ncid_grid, longitude_vector_id, &longitude_vector[0])))
+        NCERR(retval);
+    if ((retval = nc_close(ncid_grid)))
+        NCERR(retval);
     #pragma omp parallel for private(lat, lon, z_height, u, v, dummy_0, dummy_1, dummy_2, dummy_3, dummy_4, dummy_5, dummy_6)
     for (int i = 0; i < NO_OF_LAYERS; ++i)
     {
@@ -216,6 +215,13 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int
 	free(diagnostics);
     free(temperature);
     free(water_vapour_density);
+    
+    // determining the temperature densities of the condensates
+    #pragma omp parallel for
+	for (int i = 0; i < NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS; ++i)
+	{
+		state -> condensed_density_temperatures[i] = state -> rho[i]*temperatures[i];
+	}
     
     // setting the soil temperature
     set_soil_temp(grid, soil, state, temperatures, "");
