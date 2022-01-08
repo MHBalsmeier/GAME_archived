@@ -18,7 +18,7 @@ In this file, the initial state of the simulation is read in from a netcdf file.
 #include "../../grid_generator/src/standard.h"
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 
-int set_soil_temp(Grid *grid, Soil *, State *, double []);
+int set_soil_temp(Grid *, Soil *, State *, double []);
 
 int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int test_id, char geo_prop_file[])
 {
@@ -325,6 +325,7 @@ int read_init_data(char FILE_NAME[], State *state, Grid* grid, Soil *soil)
     // setting the soil temperature
     set_soil_temp(grid, soil, state, temperatures);
     
+    // returning 0 indicating success
     return 0;
 }
 
@@ -341,12 +342,12 @@ int set_soil_temp(Grid *grid, Soil *soil, State *state, double temperatures[])
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// temperature at the surface
-		// land surface or sea surface if SST is not available
+		// land surface
 		if (grid -> is_land[i] == 1)
 		{
 			t_sfc = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i];
 		}
-		// sea surface if SST is available
+		// sea surface, irrelevant
 		else
 		{
 			t_sfc = grid -> t_const_soil;
