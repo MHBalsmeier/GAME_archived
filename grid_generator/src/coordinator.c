@@ -521,8 +521,6 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "no_of_shaded_points_vector", NC_INT, 1, &vector_h_dimid, &no_of_shaded_points_vector_id)))
         ERR(retval);
-	if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NO_OF_SCALARS_H, &scalar_h_dimid)))
-	  ERR(retval);
 	if ((retval = nc_def_var(ncid_g_prop, "z_surface", NC_DOUBLE, 1, &scalar_h_dimid, &oro_id)))
 	  ERR(retval);
 	if ((retval = nc_put_att_text(ncid_g_prop, oro_id, "units", strlen("m"), "m")))
@@ -599,6 +597,16 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, interpol_weights_id, &interpol_weights[0])))
         ERR(retval);
+	if ((retval = nc_put_var_double(ncid_g_prop, oro_id, &oro[0])))
+	  ERR(retval);
+	if ((retval = nc_put_var_double(ncid_g_prop, sfc_albedo_id, &sfc_albedo[0])))
+	  ERR(retval);
+	if ((retval = nc_put_var_double(ncid_g_prop, sfc_rho_c_id, &sfc_rho_c[0])))
+	  ERR(retval);
+	if ((retval = nc_put_var_double(ncid_g_prop, t_conductivity_id, &t_conductivity[0])))
+	  ERR(retval);
+	if ((retval = nc_put_var_double(ncid_g_prop, roughness_length_id, &roughness_length[0])))
+	  ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, from_index_id, &from_index[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, to_index_id, &to_index[0])))
@@ -623,16 +631,6 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, interpol_indices_id, &interpol_indices[0])))
         ERR(retval);
-	if ((retval = nc_put_var_double(ncid_g_prop, oro_id, &oro[0])))
-	  ERR(retval);
-	if ((retval = nc_put_var_double(ncid_g_prop, sfc_albedo_id, &sfc_albedo[0])))
-	  ERR(retval);
-	if ((retval = nc_put_var_double(ncid_g_prop, sfc_rho_c_id, &sfc_rho_c[0])))
-	  ERR(retval);
-	if ((retval = nc_put_var_double(ncid_g_prop, t_conductivity_id, &t_conductivity[0])))
-	  ERR(retval);
-	if ((retval = nc_put_var_double(ncid_g_prop, roughness_length_id, &roughness_length[0])))
-	  ERR(retval);
 	if ((retval = nc_put_var_int(ncid_g_prop, is_land_id, &is_land[0])))
 	  ERR(retval);
     if ((retval = nc_close(ncid_g_prop)))
