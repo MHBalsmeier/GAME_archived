@@ -184,6 +184,18 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int
     free(pressure);
     free(forcings);
     
+    // substracting the background state
+    #pragma omp parallel for private(scalar_index)
+	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
+	{
+		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
+		{
+			scalar_index = layer_index*NO_OF_SCALARS_H + h_index;
+			state -> exner_pert[scalar_index] = state -> exner_pert[scalar_index] - grid -> exner_bg[layer_index];
+			state -> theta_pert[scalar_index] = state -> theta_pert[scalar_index] - grid -> theta_bg[layer_index];
+		}
+	}
+    
     double *temperatures = malloc((NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS*sizeof(double));
     #pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
@@ -383,6 +395,21 @@ int set_soil_temp(Grid *grid, Soil *soil, State *state, double temperatures[], c
 	// returning 0 indicating success
 	return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
