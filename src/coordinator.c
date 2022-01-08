@@ -149,9 +149,18 @@ int main(int argc, char *argv[])
     }
     printf("Grid loaded successfully.\n");
     printf("%s", stars);
-    printf("Reading initial state ...\n");
-    set_init_data(init_state_file, state_old, grid, soil);
-	printf("Initial state loaded successfully.\n");
+    printf("Setting initial state ...\n");
+    // ideal test case
+    if (config -> nwp_mode == 0)
+    {
+    	set_ideal_init(state_old, grid, soil, config_io -> ideal_input_id);
+	}
+	// NWP mode
+    else
+    {
+    	read_init_data(init_state_file, state_old, grid, soil);
+	}
+	printf("Initial state set successfully.\n");
 	printf("%s", stars);
 	
 	printf("Calculating time step ...\n");

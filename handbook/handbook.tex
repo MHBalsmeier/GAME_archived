@@ -50,12 +50,11 @@ Therefore, a new, capaple framework for simulating geophysical fluids is necessa
 
 This is only the handbook (manual) of the \texttt{Geophysical Fluids Modeling Framework (GAME)}, it explains how to configure, compile and run (use) the model. For a scientific derivation of the model see \cite{kompendium} and the literature cited therein. The source code of the project is maintained on Github (\url{https://github.com/OpenNWP/GAME}).
 
-The \texttt{GAME} project incorporates four different executables:
+The \texttt{GAME} project incorporates three different executables:
 
 \begin{itemize}
 \item \texttt{grid\_generator}, a program for creating model grids
 \item \texttt{surface\_generator}, a tool for creating surface properties
-\item \texttt{test\_generator}, a tool for creating initialization states of test scenarios
 \item \texttt{game}, the model executable itself
 \end{itemize}
 
@@ -291,8 +290,8 @@ The grid generator needs to be recompiled for every specific resolution, top hei
 
 The surface generator resides in the directory \texttt{surface\_generator} and is an individual executable meant to produce surface properties (orography, roughness length, radiative properties, etc.) for different cases defined by the \texttt{oro\_id}, given the horizontal positions of the primal scalar points. Execute the script \texttt{run.\_script.sh} with the desired \texttt{\texttt{oro\_id}}. Tab. \ref{tab:oro_id_definition} shows the definition of the orography IDs. ETOPO1 orography \cite{etopo1} can be downloaded with the script \texttt{download\_etopo.sh} which resides in the directory \texttt{surface\_generator/real}. The surface generator interpolates this data to the scalar data points.
 
-\chapter{Generating a new test state file}
-\label{chap:generating_a_new_test_state_file}
+\chapter{Ideal test states}
+\label{chap:ideal_test_states}
 
 \renewcommand{\arraystretch}{1.2}
 \begin{table}
@@ -314,8 +313,6 @@ The surface generator resides in the directory \texttt{surface\_generator} and i
 \label{tab:test_id_definition}
 \end{table}
 \renewcommand{\arraystretch}{1}
-
-A new test state can be generated with the code in the directory \texttt{test\_generator/src}. Therefore, firstly change the parameters \texttt{RES\_ID}, \texttt{NO\_OF\_LAYERS} and \texttt{NO\_OF\_ORO\_LAYERS} in the file \texttt{test\_generator.c}. Then compile by sourcing the file \texttt{compile.sh} before executing the file \texttt{run.sh} with the specific \texttt{test\_id}. Tab. \ref{tab:test_id_definition} shows the definition of the test IDs.
 
 The so-called \textit{full width at half maximum (FWHM)} is the width of a peak at half its maximum height. For a normal distribution, one finds
 %

@@ -36,6 +36,7 @@ src/subgrid_scale/convection.c
 src/radiation/manage_radiation_calls.c
 src/radiation/held_suar.c
 src/radiation/rterrtmgp_coupler.f90
+grid_generator/src/vertical_grid.c
 ../rte-rrtmgp/rrtmgp/mo_gas_optics.F90
 ../rte-rrtmgp/rrtmgp/mo_gas_optics_rrtmgp.F90
 ../rte-rrtmgp/rrtmgp/mo_rrtmgp_constants.F90
@@ -60,6 +61,7 @@ src/radiation/rterrtmgp_coupler.f90
 ../rte-rrtmgp/examples/mo_load_coefficients.F90
 ../rte-rrtmgp/examples/mo_simple_netcdf.F90
 ../rte-rrtmgp/examples/all-sky/mo_load_cloud_coefficients.F90
+../DCMIP2016/interface/baroclinic_wave_test.f90 
 )
 find_package(OpenMP)
 SET(CMAKE_C_FLAGS "${OpenMP_C_FLAGS} -O2 -Wall")

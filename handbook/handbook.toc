@@ -48,7 +48,7 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {chapter}{\numberline {5}Generating a new surface file}{10}{chapter.5}%
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {6}Generating a new test state file}{11}{chapter.6}%
+\contentsline {chapter}{\numberline {6}Ideal test states}{11}{chapter.6}%
 \defcounter {refsection}{0}\relax 
 \contentsline {chapter}{\numberline {7}Running the model}{12}{chapter.7}%
 \defcounter {refsection}{0}\relax 
