@@ -210,6 +210,9 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int
     
     // setting the soil temperature
     set_soil_temp(grid, soil, state, temperatures);
+    
+    // returning 0 indicating success
+    return 0;
 }
 
 int read_init_data(char FILE_NAME[], State *state, Grid* grid, Soil *soil)
