@@ -5,6 +5,17 @@
 
 # This is a run script for idealized simulations.
 
+# test_ids:
+# 0:	standard atmosphere with oro_id = 0
+# 1:	standard atmosphere with oro_id = 1
+# 2:	standard atmosphere with oro_id = 2
+# 3:	dry Ullrich test with oro_id = 0
+# 4:	dry Ullrich test with oro_id = 1
+# 5:	dry Ullrich test with oro_id = 2
+# 6:	moist Ullrich test with oro_id = 0
+# 7:	moist Ullrich test with oro_id = 1
+# 8:	moist Ullrich test with oro_id = 2
+
 # basic run properties
 game_home_dir=/home/max/code/GAME
 ideal_input_id=8 # specifies which test scenario to run

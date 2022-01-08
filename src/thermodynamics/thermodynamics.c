@@ -24,6 +24,7 @@ int temperature_diagnostics(State *state, Grid *grid, Diagnostics *diagnostics)
 	/*
 	This function diagnoses the temperature of the gas phase.
 	*/
+	
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{

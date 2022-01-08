@@ -174,10 +174,14 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int
 				c = pow(state -> exner_pert[scalar_index + NO_OF_SCALARS_H], 2)*temperature[scalar_index]/temperature[scalar_index + NO_OF_SCALARS_H];
 				state -> exner_pert[scalar_index] = b + pow((pow(b, 2) + c), 0.5);
 			}
+			// this is the full potential temperature here
 			state -> theta_pert[scalar_index] = temperature[scalar_index]/state -> exner_pert[scalar_index];
+			
 			// scalar_field_placeholder is the dry air density here
 			diagnostics -> scalar_field_placeholder[scalar_index] = P_0*pow(state -> exner_pert[scalar_index],
 			spec_heat_capacities_p_gas(0)/specific_gas_constants(0))/(specific_gas_constants(0)*temperature[scalar_index]);
+			
+			// setting rhotheta according to its definitions
 			state -> rhotheta[scalar_index] = diagnostics -> scalar_field_placeholder[scalar_index]*state -> theta_pert[scalar_index];
 		}
 	}
@@ -205,7 +209,7 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int
 		}
 		// the dry air density
 		state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = diagnostics -> scalar_field_placeholder[i];
-		// water vapout density
+		// water vapour density
 		if (NO_OF_CONDENSED_CONSTITUENTS == 4)
 		{
 			state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = water_vapour_density[i];

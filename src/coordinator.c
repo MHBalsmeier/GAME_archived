@@ -90,23 +90,21 @@ int main(int argc, char *argv[])
     strcpy(SFC_PROP_FILE, SFC_PROP_FILE_PRE);
     
 	// Determining the name of the init state file from the IDEAL_INPUT_ID, RES_ID, NO_OF_LAYERS and so on.
-    char init_state_file_PRE[200];
+    char init_state_file_pre[200];
     // The NWP case.
     if (config_io -> ideal_input_id == -1)
     {
     	config -> nwp_mode = 1;
-    	sprintf(init_state_file_PRE, "../../nwp_init/%d%s%s%s_B%dL%dT%d_O%d_OL%d_SCVT.nc",
+    	sprintf(init_state_file_pre, "../../nwp_init/%d%s%s%s_B%dL%dT%d_O%d_OL%d_SCVT.nc",
     	config_io -> year, config_io -> month_string, config_io -> day_string, config_io -> hour_string, RES_ID, NO_OF_LAYERS, config -> toa, config -> oro_id, grid -> no_of_oro_layers);
     }
     // The idealized input case.
     else
     {
     	config -> nwp_mode = 0;
-		sprintf(init_state_file_PRE, "../../test_generator/test_states/test_%d_B%dL%dT%d_O%d_OL%d_SCVT.nc",
-		config_io -> ideal_input_id, RES_ID, NO_OF_LAYERS, config -> toa, config -> oro_id, grid -> no_of_oro_layers);
     }
-    char init_state_file[strlen(init_state_file_PRE) + 1];
-    strcpy(init_state_file, init_state_file_PRE);
+    char init_state_file[strlen(init_state_file_pre) + 1];
+    strcpy(init_state_file, init_state_file_pre);
     
     /*
     Determining the Unix time stamp of the initialization (UTC).
@@ -647,7 +645,10 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	printf("Run_id:\t\t\t\t%s\n", config_io -> run_id);
 	printf("Run time span:\t\t\t%d s\n", config -> total_run_span);
 	printf("Grid properties file:\t\t%s\n", grid_file);
-	printf("Initialization state file:\t%s\n", init_state_file);
+	if (config -> nwp_mode == 1)
+	{
+		printf("Initialization state file:\t%s\n", init_state_file);
+	}
 	printf("Start year:\t\t\t%d\n", config_io -> year);
 	printf("Start month:\t\t\t%d\n", config_io -> month);
 	printf("Start day:\t\t\t%d\n", config_io -> day);
