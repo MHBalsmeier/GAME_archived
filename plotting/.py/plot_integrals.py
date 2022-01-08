@@ -35,7 +35,7 @@ if write_out_dry_mass_integral == 1:
 		# dry mass
 		plt.plot(time_vector, 100*(data[:, 5]/data[0, 5] - 1))
 		# the total amount of water in the atmosphere at the beginning
-		water_masses_init_sum = data[0, 1] + data[0, 2] + data[0, 3] + data[0, 4] + data[0, 6]
+		water_masses_init_sum = data[0, 1] + data[0, 2] + data[0, 3] + data[0, 4] + data[0, 6] + 1
 		# water vapour
 		plt.plot(time_vector, 100*(data[:, 6]/data[0, 6] - 1))
 		# water in all phases
