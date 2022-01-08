@@ -45,7 +45,7 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int
     int one = 1;
     double one_double = 1;
     // 3D scalar fields determined here, apart from density
-    #pragma omp parallel for private(layer_index, h_index, lat, lon, z_height)
+    #pragma omp parallel for private(layer_index, h_index, lat, lon, z_height, total_density, specific_humidity)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	layer_index = i/NO_OF_SCALARS_H;
