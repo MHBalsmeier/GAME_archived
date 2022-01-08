@@ -18,9 +18,9 @@ In this file, the initial state of the simulation is read in from a netcdf file.
 #include "../../grid_generator/src/standard.h"
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 
-int set_soil_temp(Grid *grid, Soil *, State *);
+int set_soil_temp(Grid *grid, Soil *, State *, double []);
 
-int set_ideal_init(State *state, Grid* grid, Soil *soil, int test_id)
+int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int test_id, char geo_prop_file[])
 {
 	/*
 	This function sets the initial state of the model atmosphere for idealized test cases.
@@ -30,7 +30,7 @@ int set_ideal_init(State *state, Grid* grid, Soil *soil, int test_id)
     double *latitude_vector = malloc(NO_OF_VECTORS_H*sizeof(double));
     double *longitude_vector = malloc(NO_OF_VECTORS_H*sizeof(double));
     int ncid_grid, retval, latitude_vector_id, longitude_vector_id;
-    if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid_grid)))
+    if ((retval = nc_open(geo_prop_file, NC_NOWRITE, &ncid_grid)))
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid_grid, "latitude_vector", &latitude_vector_id)))
         NCERR(retval);
@@ -209,7 +209,7 @@ int set_ideal_init(State *state, Grid* grid, Soil *soil, int test_id)
     free(water_vapour_density);
     
     // setting the soil temperature
-    set_soil_temp(grid, soil, state);
+    set_soil_temp(grid, soil, state, temperatures);
 }
 
 int read_init_data(char FILE_NAME[], State *state, Grid* grid, Soil *soil)
@@ -320,12 +320,12 @@ int read_init_data(char FILE_NAME[], State *state, Grid* grid, Soil *soil)
     free(temperatures);
     
     // setting the soil temperature
-    set_soil_temp(grid, soil, state);
+    set_soil_temp(grid, soil, state, temperatures);
     
     return 0;
 }
 
-int set_soil_temp(Grid *grid, Soil *soil, State *state)
+int set_soil_temp(Grid *grid, Soil *soil, State *state, double temperatures[])
 {
 	/*
 	This function sets the soil temperature.
@@ -339,14 +339,14 @@ int set_soil_temp(Grid *grid, Soil *soil, State *state)
 	{
 		// temperature at the surface
 		// land surface or sea surface if SST is not available
-		if (grid -> is_land[i] == 1 || (grid -> is_land[i] == 0 && sst_avail == 0))
+		if (grid -> is_land[i] == 1)
 		{
 			t_sfc = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i];
 		}
 		// sea surface if SST is available
 		else
 		{
-			t_sfc = sst[i];
+			t_sfc = grid -> t_const_soil;
 		}
 		
 		// loop over all soil layers
