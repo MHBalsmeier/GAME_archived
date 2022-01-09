@@ -82,7 +82,7 @@ If you want to use radiation, modify the spectral properties filenames in the fi
 
 	./compile.sh
 
-Before being able to run the model, however, you need to create a grid file, a surface properties file and an initial state. The handbook gives further information on that.
+Before being able to run the model, however, you need to create a grid file. The handbook gives further information on that.
 
 ## Fundamental literature
 
