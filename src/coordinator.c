@@ -310,15 +310,15 @@ int main(int argc, char *argv[])
 		*/
 		if (config_io -> write_out_mass_integrals == 1)
         {
-			write_out_integral(state_new, time_step_counter, grid, dualgrid, diagnostics, 0);
+			write_out_integral(state_new, t_0 - t_init, grid, dualgrid, diagnostics, 0);
     	}
 		if (config_io -> write_out_rhotheta_integral == 1)
         {
-			write_out_integral(state_new, time_step_counter, grid, dualgrid, diagnostics, 1);
+			write_out_integral(state_new, t_0 - t_init, grid, dualgrid, diagnostics, 1);
     	}
 		if (config_io -> write_out_energy_integrals == 1)
         {
-			write_out_integral(state_new, time_step_counter, grid, dualgrid, diagnostics, 2);
+			write_out_integral(state_new, t_0 - t_init, grid, dualgrid, diagnostics, 2);
     	}
     	
     	/*

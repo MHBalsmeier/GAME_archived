@@ -1436,7 +1436,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	return 0;
 }
 
-int write_out_integral(State *state_write_out, int step_counter, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, int integral_id)
+int write_out_integral(State *state_write_out, double time_since_init, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, int integral_id)
 {
 	/*
 	integral_id:
@@ -1462,7 +1462,7 @@ int write_out_integral(State *state_write_out, int step_counter, Grid *grid, Dua
     {
     	// masses
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
-		fprintf(global_integral_file, "%d\t", step_counter);
+		fprintf(global_integral_file, "%lf\t", time_since_init);
     	for (int const_id = 0; const_id < NO_OF_CONSTITUENTS; ++const_id)
     	{
 			#pragma omp parallel for
@@ -1487,7 +1487,7 @@ int write_out_integral(State *state_write_out, int step_counter, Grid *grid, Dua
     	// density times potential temperature
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
     	global_scalar_integrator(state_write_out -> rhotheta, grid, &global_integral);
-    	fprintf(global_integral_file, "%d\t%lf\n", step_counter, global_integral);
+    	fprintf(global_integral_file, "%lf\t%lf\n", time_since_init, global_integral);
     	fclose(global_integral_file);
     }
     if (integral_id == 2)
@@ -1511,7 +1511,7 @@ int write_out_integral(State *state_write_out, int step_counter, Grid *grid, Dua
     	Scalar_field *int_energy_density = malloc(sizeof(Scalar_field));
     	scalar_times_scalar(diagnostics -> scalar_field_placeholder, diagnostics -> temperature_gas, *int_energy_density);
     	global_scalar_integrator(*int_energy_density, grid, &internal_integral);
-    	fprintf(global_integral_file, "%d\t%lf\t%lf\t%lf\n", step_counter, 0.5*kinetic_integral, potential_integral, spec_heat_capacities_v_gas(0)*internal_integral);
+    	fprintf(global_integral_file, "%lf\t%lf\t%lf\t%lf\n", time_since_init, 0.5*kinetic_integral, potential_integral, spec_heat_capacities_v_gas(0)*internal_integral);
     	free(int_energy_density);
     	fclose(global_integral_file);
     }
