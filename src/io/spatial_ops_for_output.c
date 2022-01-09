@@ -4,7 +4,7 @@ Github repository: https://github.com/OpenNWP/GAME
 */
 
 /*
-In this file, spatial operators are collected which are only needed for the output.
+In this file, those spatial operators are collected which are only needed for the output.
 */
 
 #include <stdio.h>
@@ -16,7 +16,10 @@ int inner_product_tangential(Vector_field, Vector_field, Scalar_field, Grid *, D
 
 int epv_diagnostics(Curl_field pot_vort, State *state, Scalar_field epv, Grid *grid, Dualgrid *dualgrid)
 {
-	// diagnozing Ertel's potential vorticity (EPV)
+	/*
+	This function diagnozes Ertel's potential vorticity (EPV).
+	*/
+	
 	// allocating memory for quantities we need in order to determine the EPV
 	Vector_field *grad_pot_temp = calloc(1, sizeof(Vector_field));
 	Vector_field *pot_vort_as_mod_vector_field = calloc(1, sizeof(Vector_field));
@@ -126,6 +129,8 @@ int epv_diagnostics(Curl_field pot_vort, State *state, Scalar_field epv, Grid *g
 	// freeing the memory
 	free(pot_vort_as_mod_vector_field);
 	free(grad_pot_temp);
+	
+	// returning 0 indicating success
 	return 0;
 }
 
@@ -135,6 +140,7 @@ int inner_product_tangential(Vector_field in_field_0, Vector_field in_field_1, S
     This function computes the inner product of the two vector fields in_field_0 and in_field_1.
     The difference to the normal inner product is, that in_field_0 is given in tangential components.
     */
+    
     int layer_index, h_index;
     double tangential_wind_value;
     #pragma omp parallel for private (layer_index, h_index, tangential_wind_value)
@@ -154,6 +160,8 @@ int inner_product_tangential(Vector_field in_field_0, Vector_field in_field_1, S
 	    out_field[i] += grid -> inner_product_weights[8*i + 6]*in_field_0[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]*in_field_1[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
 	    out_field[i] += grid -> inner_product_weights[8*i + 7]*in_field_0[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER]*in_field_1[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
 	}
+	
+	// returning 0 indicating success
     return 0;
 }
 
@@ -162,6 +170,7 @@ int interpolate_to_ll(double in_field[], double out_field[], Grid *grid)
 	/*
 	This function interpolates a single-layer scalar field to a lat-lon grid.
 	*/
+	
 	// loop over all output points
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_LATLON_IO_POINTS; ++i)
@@ -182,6 +191,8 @@ int interpolate_to_ll(double in_field[], double out_field[], Grid *grid)
 			}
 		}
 	}
+	
+	// returning 0 indicating success
 	return 0;
 }
 
@@ -190,6 +201,7 @@ int edges_to_cells_lowest_layer(double in_field[NO_OF_VECTORS_H], double out_fie
 	/*
 	This function averages a horizontal vector field (defined in the lowest layer) from edges to centers.
 	*/
+	
 	int no_of_edges;
 	#pragma omp parallel for private (no_of_edges)
     for (int i = 0; i < NO_OF_SCALARS_H; ++i)
@@ -210,6 +222,8 @@ int edges_to_cells_lowest_layer(double in_field[NO_OF_VECTORS_H], double out_fie
         	*in_field[grid -> adjacent_vector_indices_h[6*i + j]];
     	}
     }
+    
+	// returning 0 indicating success
     return 0;
 }
 
