@@ -249,7 +249,7 @@ B_j \coloneqq \frac{j - \left(N_L - N_O\right)}{N_O}.
 \section{How to generate a grid}
 \label{sec:how_to_generate_a_grid}
 
-The grid generator needs to be recompiled for every specific resolution, top height, number of layers as well as number of orography following layers. Therefore change the respective constants in the file \texttt{grid\_generator.c} and execute the bash script \texttt{compile.sh}. Then run the grid generator using the bash script \texttt{run.sh} with the desired \texttt{\texttt{ORO\_ID}}. Table \ref{tab:grid_generator_run_file_explanation} explains all the parameters to be set in \texttt{run.sh}. Optimized grids have the postfix \texttt{\_SCVT}.
+The grid generator needs to be recompiled for every specific horizontal resolution and number of layers. In order to do that, change the respective constants in the file \texttt{src/game\_types.c} and execute the bash script \texttt{grid\_generator/compile.sh}. Then run the grid generator using the bash script \texttt{grid\_generator/run\_script.sh} with the desired \texttt{\texttt{oro\_id}}. Table \ref{tab:grid_generator_run_file_explanation} explains all the parameters to be set in \texttt{grid\_generator/run\_script.sh}. Optimized grids have the postfix \texttt{\_SCVT}.
 
 \renewcommand{\arraystretch}{1.2}
 \begin{table}
@@ -276,7 +276,7 @@ The grid generator needs to be recompiled for every specific resolution, top hei
 \begin{table}
 \centering
 \begin{tabular}{|>{\centering}p{4.0 cm}|>{\centering}p{8 cm}|}
-\hline \textbf{\texttt{ORO\_ID}} & \textbf{Description} \tabularnewline
+\hline \textbf{\texttt{oro\_id}} & \textbf{Description} \tabularnewline
 \hline\hline 0 & no orography \tabularnewline
 \hline 1 & Gaussian mountain of 8 km height and 224 m standard deviation located ad 0 N / 0 E\tabularnewline
 \hline 2 & real orography \tabularnewline
@@ -287,7 +287,7 @@ The grid generator needs to be recompiled for every specific resolution, top hei
 \end{table}
 \renewcommand{\arraystretch}{1}
 
-Tab. \ref{tab:oro_id_definition} shows the definition of the orography IDs.
+Tab. \ref{tab:oro_id_definition} shows the definition of the orography IDs. Before creating a grid file with real orography (orography ID 2), you have to create a grid file of orography ID 0.
 
 \chapter{Ideal test states}
 \label{chap:ideal_test_states}
