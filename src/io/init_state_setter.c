@@ -246,23 +246,18 @@ int read_init_data(char init_state_file[], State *state, Grid* grid, Soil *soil)
     int retval, ncid;
     if ((retval = nc_open(init_state_file, NC_NOWRITE, &ncid)))
         NCERR(retval);
-    int densities_id, temperatures_id, wind_id, stretching_parameter_id;
-    double stretching_parameter;
+    int densities_id, temperatures_id, wind_id;
     if ((retval = nc_inq_varid(ncid, "densities", &densities_id)))
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "temperatures", &temperatures_id)))
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "wind", &wind_id)))
         NCERR(retval);
-    if ((retval = nc_inq_varid(ncid, "stretching_parameter", &stretching_parameter_id)))
-        NCERR(retval);
     if ((retval = nc_get_var_double(ncid, densities_id, &state -> rho[0])))
         NCERR(retval);    
     if ((retval = nc_get_var_double(ncid, temperatures_id, &temperatures[0])))
         NCERR(retval);
     if ((retval = nc_get_var_double(ncid, wind_id, &state -> wind[0])))
-        NCERR(retval);
-    if ((retval = nc_get_var_double(ncid, stretching_parameter_id, &stretching_parameter)))
         NCERR(retval);
     if ((retval = nc_close(ncid)))
         NCERR(retval);
@@ -314,13 +309,6 @@ int read_init_data(char init_state_file[], State *state, Grid* grid, Soil *soil)
 			exit(1);
     	}
 	}
-	// checking wether the stretching parameters of the grid used for creating the input file and the grid file read in conform
-    if (grid -> stretching_parameter != stretching_parameter)
-    {
-    	printf("Stretching parameters of grid and input file do not conform.\n");
-    	printf("Aborting.\n");
-    	exit(1);
-    }
     
     // setting the soil temperature
     set_soil_temp(grid, soil, state, temperatures, init_state_file);

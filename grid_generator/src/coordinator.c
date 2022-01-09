@@ -368,7 +368,7 @@ int main(int argc, char *argv[])
     vorticity_signs_triangles_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, latlon_dimid_5, scalar_h_dimid_6, vector_h_dimid,
     vector_h_dimid_10, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid,
     inner_product_weights_id, scalar_8_dimid, scalar_2_dimid, vector_h_dual_dimid_2, density_to_rhombi_indices_id, density_to_rhombi_weights_id,
-    vorticity_indices_triangles_id, ncid_g_prop, single_double_dimid, stretching_parameter_id, no_of_shaded_points_vector_id, no_of_shaded_points_scalar_id,
+    vorticity_indices_triangles_id, ncid_g_prop, single_double_dimid, no_of_shaded_points_vector_id, no_of_shaded_points_scalar_id,
     no_of_lloyd_cycles_id, single_int_dimid, interpol_indices_id, interpol_weights_id, theta_bg_id, exner_bg_id, sfc_albedo_id, sfc_rho_c_id, t_conductivity_id,
     roughness_length_id, is_land_id;
     
@@ -412,8 +412,6 @@ int main(int argc, char *argv[])
     if ((retval = nc_def_dim(ncid_g_prop, "single_double_dimid_index", 1, &single_double_dimid)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "single_int_dimid_index", 1, &single_int_dimid)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "stretching_parameter", NC_DOUBLE, 1, &single_double_dimid, &stretching_parameter_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "no_of_lloyd_cycles", NC_INT, 1, &single_int_dimid, &no_of_lloyd_cycles_id)))
         ERR(retval);
@@ -536,8 +534,6 @@ int main(int argc, char *argv[])
     if ((retval = nc_put_var_int(ncid_g_prop, no_of_shaded_points_vector_id, &no_of_shaded_points_vector[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, no_of_lloyd_cycles_id, &no_of_lloyd_cycles)))
-        ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, stretching_parameter_id, &stretching_parameter)))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, latitude_scalar_id, &latitude_scalar[0])))
         ERR(retval);
