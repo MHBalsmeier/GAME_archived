@@ -31,8 +31,8 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 	// diagnosing the temperature
 	temperature_diagnostics(state_old, grid, diagnostics);
     
-    // interaction with soil (only useful if real radiation is on)
-    if (config -> rad_on == 1)
+    // interaction with soil
+    if (config -> soil_on == 1)
     {
     	soil_interaction(state_old, soil, diagnostics, forcings, grid, delta_t);
     }

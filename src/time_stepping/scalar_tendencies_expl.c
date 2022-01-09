@@ -267,7 +267,8 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 	    grid -> roughness_length,
 	    soil -> temperature,
 	    soil -> power_flux_density_sensible,
-	    soil -> power_flux_density_latent);
+	    soil -> power_flux_density_latent,
+	    config -> soil_on);
 	    int layer_index, h_index, scalar_shift_index, scalar_index;
 	    // loop over all constituents
 		for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)

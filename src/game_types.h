@@ -185,6 +185,7 @@ int momentum_diff_v;
 int tracer_diff_h;
 int tracer_diff_v;
 int rad_on;
+int soil_on;
 int rad_update;
 int assume_lte;
 int slow_fast_ratio;

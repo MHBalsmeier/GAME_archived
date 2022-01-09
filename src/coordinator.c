@@ -253,10 +253,12 @@ int main(int argc, char *argv[])
     {
 		write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 2);
 	}
+	config -> soil_on = 0;
     config -> rad_update = 1;
     if (config -> rad_on == 1)
     {
     	radiation_init();
+    	config -> soil_on = 1;
     }
 	
 	/*
