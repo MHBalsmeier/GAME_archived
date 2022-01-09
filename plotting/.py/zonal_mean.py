@@ -20,7 +20,7 @@ begin_since_init = 250*86400 #  when to begin computing the zonal average
 stretching_parameter = 1.3 # stretching parameter of the vertical grid
 toa = 41152 # top of atmosphere
 
-## end of usual input section
+# END OF USUAL INPUT SECTION
 
 # 1.) bureaucracy
 

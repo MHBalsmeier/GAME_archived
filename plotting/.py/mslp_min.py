@@ -12,7 +12,7 @@ output_base_dir = "/home/max/code/GAME/output"
 number_of_days = 15
 save_directory = "/home/max/code/GAME/figs"
 
-# END OF USUAL INOUT SECTION
+# END OF USUAL INPUT SECTION
 
 def scan_for_gid(filename, short_name):
     filee = open(filename, "rb")
