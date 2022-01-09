@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 run_id = "ideal"
 output_base_dir = "/home/max/code/GAME/output"
 number_of_days = 15
+save_directory = "/home/max/code/GAME/figs"
 
 # END OF USUAL INOUT SECTION
 
@@ -52,7 +53,8 @@ plt.ylabel("Global MSLP minimum / hPa")
 plt.plot(0.01*minima)
 plt.xlim([0, len(minima) - 1])
 plt.grid()
-plt.show()
+plt.savefig(save_directory + "/" + run_id + "_" + "mslp_min.png")
+plt.close("all")
 
 
 

@@ -11,7 +11,7 @@ import math as mat
 
 game_output_dir = "/home/max/code/game/output"
 run_id = "held_suarez"
-save_directory = "/home/max/code/game/figs/game_output"
+save_directory = "/home/max/code/GAME/figs"
 short_name = "t"
 no_of_layers = 26
 run_span = 1250*86400 # run length
