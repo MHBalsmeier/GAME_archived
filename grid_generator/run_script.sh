@@ -9,7 +9,7 @@
 # 2			real data interpolated to model grid
 # See handbook for more information.
 
-res_id=5 # the resolution ID
+res_id=5 # the resolution ID (also needs to be set in src/game_types.h)
 oro_id=0 # The orography ID. A corresponding file must exist in surface_generator/surface_files.
 optimize=1 # Determines wether or not the grid will be optimized.
 n_iterations=2000 # The number of iterations to be used for the optimization. Only relevant, if optimize == 1.
