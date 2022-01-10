@@ -47,9 +47,7 @@ mixing_length=100.0 # mixing length for the vertical diffusion scheme
 
 # I/O
 write_out_interval=10800 # every how many seconds an output file will be created
-write_out_mass_integrals=1 # If set to 1, the total masses of the constituents of the atmosphere will be written out at every time step.
-write_out_rhotheta_integral=1 # If set to 1, the global rho*theta-integral of the atmosphere will be written out at every time step.
-write_out_energy_integral=1 # If set to 1, the total integrals of the energy forms of the atmosphere will be written out at every time step.
+write_out_integrals=1 # If set to 1, fundamental integrals of the atmosphere will be written out at every time step.
 model_level_output_switch=0 # If set to 1, variables will be written out on model levels.
 pressure_level_output_switch=1 # If set to 1, additional output on pressure_leveltical pressure levels will be created. The pressure levels can be set in the file core/src/settings.c. The numer of pressure levels must be set in the file core/src/settings.h.
 surface_output_switch=1 # If set to 1, surface variables will be diagnozed and writing to separate files.

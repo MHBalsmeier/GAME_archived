@@ -241,16 +241,10 @@ int main(int argc, char *argv[])
     int time_step_counter = 0;
     clock_t first_time, second_time;
     first_time = clock();
-    if (config_io -> write_out_mass_integrals == 1)
+    if (config_io -> write_out_integrals == 1)
     {
 		write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 0);
-	}
-    if (config_io -> write_out_rhotheta_integral == 1)
-    {
 		write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 1);
-	}
-    if (config_io -> write_out_energy_integrals == 1)
-    {
 		write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 2);
 	}
 	config -> soil_on = 0;
@@ -308,17 +302,11 @@ int main(int argc, char *argv[])
 		Writing out integrals over the model domain if requested by the user.
 		---------------------------------------------------------------------
 		*/
-		if (config_io -> write_out_mass_integrals == 1)
+		if (config_io -> write_out_integrals == 1)
         {
-			write_out_integral(state_new, t_0 - t_init, grid, dualgrid, diagnostics, 0);
-    	}
-		if (config_io -> write_out_rhotheta_integral == 1)
-        {
-			write_out_integral(state_new, t_0 - t_init, grid, dualgrid, diagnostics, 1);
-    	}
-		if (config_io -> write_out_energy_integrals == 1)
-        {
-			write_out_integral(state_new, t_0 - t_init, grid, dualgrid, diagnostics, 2);
+			write_out_integral(state_new, t_0 + delta_t - t_init, grid, dualgrid, diagnostics, 0);
+			write_out_integral(state_new, t_0 + delta_t - t_init, grid, dualgrid, diagnostics, 1);
+			write_out_integral(state_new, t_0 + delta_t - t_init, grid, dualgrid, diagnostics, 2);
     	}
     	
     	/*
@@ -557,11 +545,7 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
     argv++;
     config -> rad_on = strtod(argv[agv_counter], NULL);
     argv++;
-    config_io -> write_out_mass_integrals = strtod(argv[agv_counter], NULL);
-    argv++;
-    config_io -> write_out_rhotheta_integral = strtod(argv[agv_counter], NULL);
-    argv++;
-    config_io -> write_out_energy_integrals = strtod(argv[agv_counter], NULL);
+    config_io -> write_out_integrals = strtod(argv[agv_counter], NULL);
     argv++;
     config -> temperature_diff_h = strtod(argv[agv_counter], NULL);
     argv++;
