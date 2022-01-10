@@ -21,7 +21,7 @@ In this file, the initial state of the simulation is read in from a netcdf file.
 
 int set_soil_temp(Grid *, Soil *, State *, double [], char []);
 
-int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int ideal_input_id, char grid_file[])
+int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, Diagnostics *diagnostics, Forcings *forcings, int ideal_input_id, char grid_file[])
 {
 	/*
 	This function sets the initial state of the model atmosphere for idealized test cases.
@@ -130,8 +130,6 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int
         }
     }    
     
-    Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
-    Forcings *forcings = calloc(1, sizeof(Forcings));
     // this is the density which has not yet been hydrostatically balanced
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
@@ -186,7 +184,6 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int
 		}
 	}
     free(pressure);
-    free(forcings);
     
     // substracting the background state
     #pragma omp parallel for
@@ -217,7 +214,6 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, int
 		// gas temperature
 		temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = temperature[i];
 	}
-	free(diagnostics);
     free(temperature);
     free(water_vapour_density);
     
