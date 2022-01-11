@@ -15,6 +15,7 @@
 # 6:	moist Ullrich test with oro_id = 0
 # 7:	moist Ullrich test with oro_id = 1
 # 8:	moist Ullrich test with oro_id = 2
+# -1:   NWP run
 
 # basic run properties
 game_home_dir=/home/max/code/GAME

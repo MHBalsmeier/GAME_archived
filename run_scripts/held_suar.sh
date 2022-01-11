@@ -3,7 +3,19 @@
 # This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 # Github repository: https://github.com/OpenNWP/GAME
 
-# This is a run script for idealized simulations.
+# This is a run script for the Held-Suarez testcase.
+
+# test_ids:
+# 0:	standard atmosphere with oro_id = 0
+# 1:	standard atmosphere with oro_id = 1
+# 2:	standard atmosphere with oro_id = 2
+# 3:	dry Ullrich test with oro_id = 0
+# 4:	dry Ullrich test with oro_id = 1
+# 5:	dry Ullrich test with oro_id = 2
+# 6:	moist Ullrich test with oro_id = 0
+# 7:	moist Ullrich test with oro_id = 1
+# 8:	moist Ullrich test with oro_id = 2
+# -1:   NWP run
 
 # basic run properties
 game_home_dir=/home/max/code/GAME
