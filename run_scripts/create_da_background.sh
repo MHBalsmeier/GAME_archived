@@ -19,7 +19,7 @@
 # basic run properties
 game_home_dir=/home/max/code/GAME
 ideal_input_id=2 # specifies which test scenario to run
-run_id=standard_oro3 # run_id must only be set if ideal_input_id != -1 (otherwise it is chosen automatically)
+run_id=standard_oro2 # run_id must only be set if ideal_input_id != -1 (otherwise it is chosen automatically)
 run_span=$((0*24*3600)) # how long the model is supposed to run
 valgrind_check=0 # set this to 1 if you want to check the code with Valgrind
 start_year=2000 # defines the start time of the model run
