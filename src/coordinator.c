@@ -367,7 +367,6 @@ int main(int argc, char *argv[])
     ---------
     */
     free(irrev);
-    free(config);
     free(config_io);
     free(diagnostics);
     free(forcings);
@@ -381,6 +380,7 @@ int main(int argc, char *argv[])
     free(stars);
     clock_t end = clock();
     speed = CLOCKS_PER_SEC*(config -> total_run_span + 300)/((double) end - begin);
+    free(config);
     printf("Average speed: %lf\n", speed);
     printf("GAME over.\n");
     return 0;
