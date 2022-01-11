@@ -210,7 +210,7 @@ The vertical grid structure is determined by the following properties:
 \item the number of layers, specified via the parameter \texttt{NO\_OF\_LAYERS} $N_L$
 \item the number of layers following the orography, specified via the parameter \texttt{NO\_OF\_ORO\_LAYERS} $N_O$
 \item the stretching parameter $\beta$, which can be set in the run script
-\item the orography, specified via the parameter \texttt{ORO\_ID}
+\item the orography, specified via the parameter \texttt{oro\_id}
 \end{itemize}
 
 The generation of the vertical position of the grid points works in three steps:
@@ -249,8 +249,8 @@ The grid generator needs to be recompiled for every specific horizontal resoluti
 \centering
 \begin{tabular}{|>{\centering}p{5.0 cm}|>{\centering}p{3 cm}|>{\centering}p{7 cm}|}
 \hline \textbf{name} & \textbf{domain} & \textbf{meaning} \tabularnewline
-\hline\hline \texttt{\texttt{ORO\_ID}} & all value for which an orography is defined & orography ID \tabularnewline
-\hline\hline \texttt{optimize} & 0, 1 & optimization switch (fails if \texttt{\texttt{ORO\_ID}} is not 0) \tabularnewline
+\hline\hline \texttt{\texttt{oro\_id}} & all value for which an orography is defined & orography ID \tabularnewline
+\hline\hline \texttt{optimize} & 0, 1 & optimization switch (fails if \texttt{\texttt{oro\_id}} is not 0) \tabularnewline
 \hline\hline \texttt{n\_iterations} & integer $\geq$ 1 & number of iterations (ignored if \texttt{optimize} = 0), 2000 seems to be a safe value \tabularnewline
 \hline\hline \texttt{use\_scalar\_h\_coords\_file} & 0, 1 & switch to determine wether horizontal coordinates of triangle vertices (generators of the grid) shall be used from a previously generated file \tabularnewline
 \hline\hline \texttt{scalar\_h\_coords\_file} & string & input file for dual triangle vertices (only relevant if \texttt{use\_scalar\_h\_coords\_file} = 1) \tabularnewline
@@ -290,15 +290,15 @@ Tab. \ref{tab:oro_id_definition} shows the definition of the orography IDs. Befo
 \centering
 \begin{tabular}{|>{\centering}p{4.0 cm}|>{\centering}p{8 cm}|}
 \hline \textbf{\texttt{TEST\_ID}} & \textbf{Description} \tabularnewline
-\hline\hline 0 & standard atmosphere without orography (\texttt{ORO\_ID} = 0) \tabularnewline
-\hline 1 & standard atmosphere with Gaussian mountain (\texttt{ORO\_ID} = 1) \tabularnewline
-\hline 2 & standard atmosphere with real orography (\texttt{ORO\_ID} = 2) \tabularnewline
-\hline 3 & dry Ullrich test with \texttt{ORO\_ID} = 0 \tabularnewline
-\hline 4 & dry Ullrich test with \texttt{ORO\_ID} = 1 \tabularnewline
-\hline 5 & dry Ullrich test with \texttt{ORO\_ID} = 2 \tabularnewline
-\hline 6 & moist Ullrich test with \texttt{ORO\_ID} = 0 \tabularnewline
-\hline 7 & moist Ullrich test with \texttt{ORO\_ID} = 1 \tabularnewline
-\hline 8 & moist Ullrich test with \texttt{ORO\_ID} = 2 \tabularnewline
+\hline\hline 0 & standard atmosphere without orography (\texttt{oro\_id} = 0) \tabularnewline
+\hline 1 & standard atmosphere with Gaussian mountain (\texttt{oro\_id} = 1) \tabularnewline
+\hline 2 & standard atmosphere with real orography (\texttt{oro\_id} = 2) \tabularnewline
+\hline 3 & dry Ullrich test with \texttt{oro\_id} = 0 \tabularnewline
+\hline 4 & dry Ullrich test with \texttt{oro\_id} = 1 \tabularnewline
+\hline 5 & dry Ullrich test with \texttt{oro\_id} = 2 \tabularnewline
+\hline 6 & moist Ullrich test with \texttt{oro\_id} = 0 \tabularnewline
+\hline 7 & moist Ullrich test with \texttt{oro\_id} = 1 \tabularnewline
+\hline 8 & moist Ullrich test with \texttt{oro\_id} = 2 \tabularnewline
 \hline
 \end{tabular}
 \caption{Definition of test IDs.}
