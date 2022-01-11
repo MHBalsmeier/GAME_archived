@@ -252,7 +252,7 @@ The grid generator needs to be recompiled for every specific horizontal resoluti
 \hline\hline \texttt{\texttt{ORO\_ID}} & all value for which an orography is defined & orography ID \tabularnewline
 \hline\hline \texttt{optimize} & 0, 1 & optimization switch (fails if \texttt{\texttt{ORO\_ID}} is not 0) \tabularnewline
 \hline\hline \texttt{n\_iterations} & integer $\geq$ 1 & number of iterations (ignored if \texttt{optimize} = 0), 2000 seems to be a safe value \tabularnewline
-\hline\hline \texttt{use\_scalar\_h\_coords\_file} & 0, 1 & switch to determine wether horizontal coordinates of triangle vertices (generators of the grid) shall be used from another file \tabularnewline
+\hline\hline \texttt{use\_scalar\_h\_coords\_file} & 0, 1 & switch to determine wether horizontal coordinates of triangle vertices (generators of the grid) shall be used from a previously generated file \tabularnewline
 \hline\hline \texttt{scalar\_h\_coords\_file} & string & input file for dual triangle vertices (only relevant if \texttt{use\_scalar\_h\_coords\_file} = 1) \tabularnewline
 \hline\hline \texttt{stretching\_parameter} & $\geq$ 1, real & defines the vertical stretching of the grid, one means no stretching \tabularnewline
 \hline
