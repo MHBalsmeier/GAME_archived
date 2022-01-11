@@ -185,7 +185,7 @@ So far, only a horizontal grid has been examined. The grid generator, however, s
 \section{Scalability}
 \label{sec:scalability}
 
-The computation time of the most expensive for loops scale with $N^2$, where $N$ is the number of horizontal grid points. This means that doubling the horizontal resolution (four times as much horizontal grid points) leads to a 16 times longer computation time of the grid generator. This is similar to the model itself, where a doubling of the horizontal and vertical resolution and a halfening of the time step leads to 16 times longer integration times. Therefore, the largely implicit formulation of the grid generator posos no problem to its performance at higher resoultions.
+The computation time of the most expensive for loops scale with $N^2$, where $N$ is the number of horizontal grid points. This means that doubling the horizontal resolution (four times as much horizontal grid points) leads to a 16 times longer computation time of the grid generator. This is similar to the model itself, where a doubling of the horizontal and vertical resolution and a halfening of the time step leads to 16 times longer integration times. Therefore, the largely implicit formulation of the grid generator poses no problem to its performance at higher resoultions.
 
 \subsection{Permutations of the grid points}
 \label{sec:permutations_of_the_grid_points}
@@ -242,7 +242,7 @@ B_j \coloneqq \frac{j - \left(N_L - N_O\right)}{N_O}.
 \section{How to generate a grid}
 \label{sec:how_to_generate_a_grid}
 
-The grid generator needs to be recompiled for every specific horizontal resolution and number of layers. In order to do that, change the respective constants in the file \texttt{src/game\_types.c} and execute the bash script \texttt{grid\_generator/compile.sh}. Then run the grid generator using the bash script \texttt{grid\_generator/run\_script.sh} with the desired \texttt{\texttt{oro\_id}}. Table \ref{tab:grid_generator_run_file_explanation} explains all the parameters to be set in \texttt{grid\_generator/run\_script.sh}. Optimized grids have the postfix \texttt{\_SCVT}.
+The grid generator needs to be recompiled for every specific horizontal resolution and number of layers. In order to do that, change the respective constants in the file \texttt{src/game\_types.h} and execute the bash script \texttt{grid\_generator/compile.sh}. Then run the grid generator using the bash script \texttt{grid\_generator/run\_script.sh} with the desired \texttt{\texttt{oro\_id}}. Table \ref{tab:grid_generator_run_file_explanation} explains all the parameters to be set in \texttt{grid\_generator/run\_script.sh}. Optimized grids have the postfix \texttt{\_SCVT}.
 
 \renewcommand{\arraystretch}{1.2}
 \begin{table}
@@ -325,7 +325,7 @@ This implies
 The configuration of the model must be set in two different files:
 %
 \begin{itemize}
-\item \texttt{src/game\_types.h}: modify \texttt{RES\_ID}, \texttt{NO\_OF\_LAYERS}, \texttt{NO\_OF\_GASEOUS\_CONSTITUENTS} and \texttt{NO\_OF\_CONDENSED\_CONSTITUENTS}. These must conform with the grid file and the initialization state file. It must be done before the compilation.
+\item \texttt{src/game\_types.h}: modify \texttt{RES\_ID}, \texttt{NO\_OF\_LAYERS}, \texttt{NO\_OF\_GASEOUS\_CONSTITUENTS} and \texttt{NO\_OF\_CONDENSED\_CONSTITUENTS}. \texttt{RES\_ID} and \texttt{NO\_OF\_LAYERS} must conform with the grid file. It must be done before the compilation.
 \item The run script: one of the files contained in the directory \texttt{run\_scripts}. The comments in these files explain the meaning of the variables. This can be done at run time.
 \end{itemize}
 
