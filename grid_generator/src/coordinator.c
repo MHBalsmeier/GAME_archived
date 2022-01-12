@@ -104,12 +104,14 @@ int main(int argc, char *argv[])
 		printf("It is NO_OF_ORO_LAYERS >= NO_OF_LAYERS.\n");
 		exit(1);
 	}
-	char OUTPUT_FILE_PRE[200];
-	char STATISTICS_FILE_PRE[200];
+	char grid_name_pre[200];
+	char output_file_pre[200];
+	char statistics_file_pre[200];
 	if (OPTIMIZE_BOOL == 1)
 	{
-		sprintf(OUTPUT_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
-		sprintf(STATISTICS_FILE_PRE, "statistics/B%dL%dT%d_O%d_OL%d_SCVT.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
+		sprintf(grid_name_pre, "B%dL%dT%d_O%d_OL%d_SCVT", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
+		sprintf(output_file_pre, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
+		sprintf(statistics_file_pre, "statistics/B%dL%dT%d_O%d_OL%d_SCVT.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
 	}
 	else
 	{
@@ -118,26 +120,28 @@ int main(int argc, char *argv[])
 			if (scalar_h_file[strlen(scalar_h_file) - 1 - 6] == 'S' && scalar_h_file[strlen(scalar_h_file) - 1 - 5] == 'C' && 
 			scalar_h_file[strlen(scalar_h_file) - 1 - 4] == 'V' && scalar_h_file[strlen(scalar_h_file) - 1 - 3] == 'T')
 			{
-    			sprintf(OUTPUT_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
-    			sprintf(STATISTICS_FILE_PRE, "statistics/B%dL%dT%d_O%d_OL%d_SCVT.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
+    			sprintf(output_file_pre, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
+    			sprintf(statistics_file_pre, "statistics/B%dL%dT%d_O%d_OL%d_SCVT.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
 			}
     		else
     		{
-    			sprintf(OUTPUT_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
-    			sprintf(STATISTICS_FILE_PRE, "statistics/B%dL%dT%d_O%d_OL%d.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
+    			sprintf(output_file_pre, "grids/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
+    			sprintf(statistics_file_pre, "statistics/B%dL%dT%d_O%d_OL%d.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
 			}
 		}
 		else
 		{
-    		sprintf(OUTPUT_FILE_PRE, "grids/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
-    		sprintf(STATISTICS_FILE_PRE, "statistics/B%dL%dT%d_O%d_OL%d.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
+    		sprintf(output_file_pre, "grids/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
+    		sprintf(statistics_file_pre, "statistics/B%dL%dT%d_O%d_OL%d.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
 		}
 	}
-    char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
-    char STATISTICS_FILE[strlen(STATISTICS_FILE_PRE) + 1];
-    strcpy(OUTPUT_FILE, OUTPUT_FILE_PRE);
-    strcpy(STATISTICS_FILE, STATISTICS_FILE_PRE);
-	printf("Output will be written to file %s.\n", OUTPUT_FILE);
+    char grid_name[strlen(grid_name_pre) + 1];
+    char output_file[strlen(output_file_pre) + 1];
+    char statistics_file[strlen(statistics_file_pre) + 1];
+    strcpy(grid_name, grid_name_pre);
+    strcpy(output_file, output_file_pre);
+    strcpy(statistics_file, statistics_file_pre);
+	printf("Output will be written to file %s.\n", output_file);
     double *latitude_ico = malloc(12*sizeof(double));
     double *longitude_ico = malloc(12*sizeof(double));
     int edge_vertices[NO_OF_EDGES][2];
@@ -357,7 +361,7 @@ int main(int argc, char *argv[])
     printf(GREEN "finished.\n" RESET);
     
     // A statistics file is created to compare the fundamental statistical properties of the grid with the literature.
-	write_statistics_file(pent_hex_face_unity_sphere, normal_distance, normal_distance_dual, STATISTICS_FILE);
+	write_statistics_file(pent_hex_face_unity_sphere, normal_distance, normal_distance_dual, grid_name, statistics_file);
 	
 	/*
 	writing the result to a netcdf file
@@ -373,7 +377,7 @@ int main(int argc, char *argv[])
     roughness_length_id, is_land_id;
     
     printf("Starting to write to output file ... ");
-    if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid_g_prop)))
+    if ((retval = nc_create(output_file, NC_CLOBBER, &ncid_g_prop)))
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "scalar_index", NO_OF_SCALARS, &scalar_dimid)))
         ERR(retval);
