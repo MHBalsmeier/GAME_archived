@@ -90,7 +90,8 @@ int calc_vorticity_indices_triangles(int from_index_dual[], int to_index_dual[],
 	return 0;
 }
 
-int write_statistics_file(double pent_hex_face_unity_sphere[], double normal_distance[], double normal_distance_dual[], char grid_name[], char statistics_file_name[])
+int write_statistics_file(double pent_hex_face_unity_sphere[], double normal_distance[], double normal_distance_dual[],
+int no_of_lloyd_cycles, char grid_name[], char statistics_file_name[])
 {
 	/*
 	This function writes out statistical properties of the grid to a text file.
@@ -117,13 +118,14 @@ int write_statistics_file(double pent_hex_face_unity_sphere[], double normal_dis
     normal_distance_dual_h_max = horizontal_distance_dual[find_max_index(horizontal_distance_dual, NO_OF_VECTORS_H)];
     FILE *statistics_file = fopen(statistics_file_name, "w");
     fprintf(statistics_file, "Statistical properties of grid %s:\n\n", grid_name);
+    fprintf(statistics_file, "Number of Lloyd cycles: %d\n", no_of_lloyd_cycles);
     fprintf(statistics_file, "Ratio of minimum to maximum area: %lf\n", area_min/area_max);
-   	fprintf(statistics_file, "Shortest horizontal normal distance (highest layer): %lf m.\n", normal_distance_h_min);
-    fprintf(statistics_file, "Longest horizontal normal distance (highest layer): %lf m.\n", normal_distance_h_max);
-    fprintf(statistics_file, "Ratio of shortest to longest horizontal normal distance: %lf.\n", normal_distance_h_min/normal_distance_h_max);
-    fprintf(statistics_file, "Shortest horizontal normal distance dual (highest level): %lf m.\n", normal_distance_dual_h_min);
-    fprintf(statistics_file, "Longest horizontal normal distance dual (highest level): %lf m.\n", normal_distance_dual_h_max);
-    fprintf(statistics_file, "Ratio of shortest to longest dual horizontal normal distance: %lf.\n", normal_distance_dual_h_min/normal_distance_dual_h_max);
+   	fprintf(statistics_file, "Shortest horizontal normal distance (highest layer): %lf m\n", normal_distance_h_min);
+    fprintf(statistics_file, "Longest horizontal normal distance (highest layer): %lf m\n", normal_distance_h_max);
+    fprintf(statistics_file, "Ratio of shortest to longest horizontal normal distance: %lf\n", normal_distance_h_min/normal_distance_h_max);
+    fprintf(statistics_file, "Shortest horizontal normal distance dual (highest level): %lf m\n", normal_distance_dual_h_min);
+    fprintf(statistics_file, "Longest horizontal normal distance dual (highest level): %lf m\n", normal_distance_dual_h_max);
+    fprintf(statistics_file, "Ratio of shortest to longest dual horizontal normal distance: %lf\n", normal_distance_dual_h_min/normal_distance_dual_h_max);
     fclose(statistics_file);
     free(horizontal_distance);
     free(horizontal_distance_dual);

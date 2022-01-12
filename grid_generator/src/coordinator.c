@@ -42,10 +42,10 @@ int main(int argc, char *argv[])
 {
     int oro_id;
    	oro_id = strtod(argv[1], NULL);
-    int OPTIMIZE_BOOL;
-   	OPTIMIZE_BOOL = strtod(argv[2], NULL);
-    int N_ITERATIONS;
-   	N_ITERATIONS = strtod(argv[3], NULL);
+    int optimize_bool;
+   	optimize_bool = strtod(argv[2], NULL);
+    int n_iterations;
+   	n_iterations = strtod(argv[3], NULL);
     int USE_scalar_h_file;
    	USE_scalar_h_file = strtod(argv[4], NULL);
     int len = strlen(argv[5]);
@@ -53,13 +53,13 @@ int main(int argc, char *argv[])
     strcpy(scalar_h_file, argv[5]);
     double stretching_parameter;
    	stretching_parameter = strtof(argv[6], NULL);
-   	int NO_OF_ORO_LAYERS = strtod(argv[7], NULL);
-   	const int VERT_GRID_TYPE = strtod(argv[8], NULL);
+   	int no_of_oro_layers = strtod(argv[7], NULL);
+   	const int vert_grid_type = strtod(argv[8], NULL);
     double TOA;
    	TOA = strtof(argv[9], NULL);
-   	if (VERT_GRID_TYPE == 1)
+   	if (vert_grid_type == 1)
    	{
-   		NO_OF_ORO_LAYERS = 0;
+   		no_of_oro_layers = 0;
    	}
     
     // Checking wether the RES_ID of the scalar_h_file corresponds to the RES_ID in enum.h.
@@ -83,8 +83,8 @@ int main(int argc, char *argv[])
     	exit(1);
     }
     
-    // checking if the NO_OF_ORO_LAYERS is valid
-    if (NO_OF_ORO_LAYERS < 0 || NO_OF_ORO_LAYERS >= NO_OF_LAYERS)
+    // checking if the no_of_oro_layers is valid
+    if (no_of_oro_layers < 0 || no_of_oro_layers >= NO_OF_LAYERS)
     {
     	printf("It must be 0 <= orography_layers < NO_OF_LAYERS.\n");
     	printf("Aborting.\n");
@@ -99,19 +99,19 @@ int main(int argc, char *argv[])
     	exit(1);
     }
     
-	if (NO_OF_ORO_LAYERS >= NO_OF_LAYERS)
+	if (no_of_oro_layers >= NO_OF_LAYERS)
 	{
-		printf("It is NO_OF_ORO_LAYERS >= NO_OF_LAYERS.\n");
+		printf("It is no_of_oro_layers >= NO_OF_LAYERS.\n");
 		exit(1);
 	}
 	char grid_name_pre[200];
 	char output_file_pre[200];
 	char statistics_file_pre[200];
-	if (OPTIMIZE_BOOL == 1)
+	if (optimize_bool == 1)
 	{
-		sprintf(grid_name_pre, "B%dL%dT%d_O%d_OL%d_SCVT", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
-		sprintf(output_file_pre, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
-		sprintf(statistics_file_pre, "statistics/B%dL%dT%d_O%d_OL%d_SCVT.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
+		sprintf(grid_name_pre, "B%dL%dT%d_O%d_OL%d_SCVT", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
+		sprintf(output_file_pre, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
+		sprintf(statistics_file_pre, "statistics/B%dL%dT%d_O%d_OL%d_SCVT.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
 	}
 	else
 	{
@@ -120,19 +120,22 @@ int main(int argc, char *argv[])
 			if (scalar_h_file[strlen(scalar_h_file) - 1 - 6] == 'S' && scalar_h_file[strlen(scalar_h_file) - 1 - 5] == 'C' && 
 			scalar_h_file[strlen(scalar_h_file) - 1 - 4] == 'V' && scalar_h_file[strlen(scalar_h_file) - 1 - 3] == 'T')
 			{
-    			sprintf(output_file_pre, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
-    			sprintf(statistics_file_pre, "statistics/B%dL%dT%d_O%d_OL%d_SCVT.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
+				sprintf(grid_name_pre, "B%dL%dT%d_O%d_OL%d_SCVT", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
+    			sprintf(output_file_pre, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
+    			sprintf(statistics_file_pre, "statistics/B%dL%dT%d_O%d_OL%d_SCVT.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
 			}
     		else
     		{
-    			sprintf(output_file_pre, "grids/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
-    			sprintf(statistics_file_pre, "statistics/B%dL%dT%d_O%d_OL%d.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
+				sprintf(grid_name_pre, "B%dL%dT%d_O%d_OL%d", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
+    			sprintf(output_file_pre, "grids/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
+    			sprintf(statistics_file_pre, "statistics/B%dL%dT%d_O%d_OL%d.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
 			}
 		}
 		else
 		{
-    		sprintf(output_file_pre, "grids/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
-    		sprintf(statistics_file_pre, "statistics/B%dL%dT%d_O%d_OL%d.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, NO_OF_ORO_LAYERS);
+			sprintf(grid_name_pre, "B%dL%dT%d_O%d_OL%d", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
+    		sprintf(output_file_pre, "grids/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
+    		sprintf(statistics_file_pre, "statistics/B%dL%dT%d_O%d_OL%d.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
 		}
 	}
     char grid_name[strlen(grid_name_pre) + 1];
@@ -236,11 +239,11 @@ int main(int argc, char *argv[])
 	3.) grid optimization
 	    -----------------
 	*/
-	if (OPTIMIZE_BOOL == 1)
+	if (optimize_bool == 1)
 	{
-		optimize_to_scvt(latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, N_ITERATIONS,
+		optimize_to_scvt(latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, n_iterations,
 		face_edges, face_edges_reverse, face_vertices, adjacent_vector_indices_h, from_index_dual, to_index_dual);
-		no_of_lloyd_cycles = no_of_lloyd_cycles + N_ITERATIONS;
+		no_of_lloyd_cycles = no_of_lloyd_cycles + n_iterations;
 	}
 	
 	/*
@@ -288,21 +291,21 @@ int main(int argc, char *argv[])
 	    --------------------------------------------------
 	*/
     printf("Setting the vertical coordinates of the scalar data points ... ");
-	set_z_scalar(z_scalar, oro, NO_OF_ORO_LAYERS, TOA, stretching_parameter, VERT_GRID_TYPE);
+	set_z_scalar(z_scalar, oro, no_of_oro_layers, TOA, stretching_parameter, vert_grid_type);
     printf(GREEN "finished.\n" RESET);
 	
 	/*
 	7.) setting the implicit quantities of the vertical grid
 	    ----------------------------------------------------
 	*/
-	if (VERT_GRID_TYPE == 1)
+	if (vert_grid_type == 1)
 	{
 		set_scalar_shading_indices(z_scalar, oro, no_of_shaded_points_scalar);
 		set_vector_shading_indices(from_index, to_index, no_of_shaded_points_scalar, no_of_shaded_points_vector);
 	}
 	
 	printf("Determining vector z coordinates and normal distances of the primal grid ... ");
-	set_z_vector_and_normal_distance(z_vector, z_scalar, normal_distance, latitude_scalar, longitude_scalar, from_index, to_index, TOA, VERT_GRID_TYPE, oro);
+	set_z_vector_and_normal_distance(z_vector, z_scalar, normal_distance, latitude_scalar, longitude_scalar, from_index, to_index, TOA, vert_grid_type, oro);
 	free(oro);
     printf(GREEN "finished.\n" RESET);	
 	
@@ -361,7 +364,7 @@ int main(int argc, char *argv[])
     printf(GREEN "finished.\n" RESET);
     
     // A statistics file is created to compare the fundamental statistical properties of the grid with the literature.
-	write_statistics_file(pent_hex_face_unity_sphere, normal_distance, normal_distance_dual, grid_name, statistics_file);
+	write_statistics_file(pent_hex_face_unity_sphere, normal_distance, normal_distance_dual, no_of_lloyd_cycles, grid_name, statistics_file);
 	
 	/*
 	writing the result to a netcdf file
