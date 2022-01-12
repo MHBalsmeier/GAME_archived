@@ -7,7 +7,7 @@
 echo "***** GRID FILE CREATION *****"
 echo ""
 echo "Setup:"
-echo "oro_id = $oro_id."
+echo "oro_id = $oro_id"
 if [ $optimize -eq 1 ]
 then
 echo "Optimization is switched on. Number of iterations: $n_iterations."
