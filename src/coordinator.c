@@ -61,15 +61,15 @@ int main(int argc, char *argv[])
     */
 	if (config_io -> ideal_input_id == 0 || config_io -> ideal_input_id == 3 || config_io -> ideal_input_id == 6)
     {
-		config -> oro_id = 0;
+		grid -> oro_id = 0;
     }
 	if (config_io -> ideal_input_id == 1 || config_io -> ideal_input_id == 4 || config_io -> ideal_input_id == 7)
     {
-		config -> oro_id = 1;
+		grid -> oro_id = 1;
     }
 	if (config_io -> ideal_input_id == 2 || config_io -> ideal_input_id == 5 || config_io -> ideal_input_id == 8)
     {
-		config -> oro_id = 2;
+		grid -> oro_id = 2;
     }
     // in the case of block-shaped mountains, no layers follow the orography
 	if (grid -> vert_grid_type == 1)
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     ------------------------------------------------------------------------------
     */
     char grid_file_pre[200];
-	sprintf(grid_file_pre, "../../grid_generator/grids/RES%d_L%d_O%d.nc", RES_ID, NO_OF_LAYERS, config -> oro_id);
+	sprintf(grid_file_pre, "../../grid_generator/grids/RES%d_L%d_O%d.nc", RES_ID, NO_OF_LAYERS, grid -> oro_id);
     char grid_file[strlen(grid_file_pre) + 1];
     strcpy(grid_file, grid_file_pre);
     
@@ -119,6 +119,11 @@ int main(int argc, char *argv[])
     // converting to double in UTC
     double t_init = (double) init_time + init_tm.tm_gmtoff;
     
+    // reading the grid
+	printf("Reading grid data ...\n");
+    set_grid_properties(grid, dualgrid, grid_file);
+    printf("Grid loaded successfully.\n");
+    
     /*
     Giving the user some information on the run to about to be executed.
     --------------------------------------------------------------------
@@ -133,10 +138,6 @@ int main(int argc, char *argv[])
 	readback_config(config, config_io, grid, grid_file, init_state_file, stars);
     // Reading and processing user input finished.
     
-    // Reading external data.
-	printf("Reading grid data ...\n");
-    set_grid_properties(grid, dualgrid, grid_file);
-    printf("Grid loaded successfully.\n");
     printf("%s", stars);
     printf("Setting initial state ...\n");
     // ideal test case
@@ -561,9 +562,7 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
     argv++;
     strcpy(config_io -> run_id, argv[agv_counter]);
     argv++;
-	config -> toa = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> oro_id = strtod(argv[agv_counter], NULL);
+	grid -> oro_id = strtod(argv[agv_counter], NULL);
     argv++;
     config_io -> ideal_input_id = strtod(argv[agv_counter], NULL);
     argv++;
@@ -578,8 +577,6 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
 	config_io -> surface_output_switch = strtod(argv[agv_counter], NULL);
     argv++;
 	grid -> no_of_oro_layers = strtod(argv[agv_counter], NULL);
-    argv++;
-	grid -> vert_grid_type = strtod(argv[agv_counter], NULL);
     argv++;
 	config -> assume_lte = strtod(argv[agv_counter], NULL);
     argv++;
@@ -628,6 +625,17 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	printf("Run_id:\t\t\t\t%s\n", config_io -> run_id);
 	printf("Run time span:\t\t\t%d s\n", config -> total_run_span);
 	printf("Grid properties file:\t\t%s\n", grid_file);
+	printf("Top of atmosphere: %lf m\n", grid -> toa);
+	printf("Stretching parameter: %lf\n", grid -> stretching_parameter);
+	if (grid -> vert_grid_type == 0)
+	{
+		printf("Terrain handling: terrain following coordinates\n");
+		printf("Number of layers following orography: %d\n", grid -> no_of_oro_layers);
+	}
+	if (grid -> vert_grid_type == 1)
+	{
+		printf("Terrain handling: block structure\n");
+	}
 	if (config -> nwp_mode == 1)
 	{
 		printf("Initialization state file:\t%s\n", init_state_file);
@@ -645,15 +653,6 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	printf("Number of vectors: %d\n", NO_OF_VECTORS);
 	printf("Number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
 	printf("Ratio of the slow to the fast time step: %d\n", config -> slow_fast_ratio);
-	if (grid -> vert_grid_type == 0)
-	{
-		printf("Terrain handling: terrain following coordinates\n");
-		printf("Number of layers following orography: %d\n", grid -> no_of_oro_layers);
-	}
-	if (grid -> vert_grid_type == 1)
-	{
-		printf("Terrain handling: block structure\n");
-	}
 	if (config -> momentum_diff_h == 0)
 	{
 		printf("Horizontal momentum diffusion is turned off.\n");
@@ -712,7 +711,7 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	}
 	printf("Horizontal diffusion Smagorinsky factor acting on divergent movements: %lf.\n", config -> diff_h_smag_div);
 	printf("Horizontal diffusion Smagorinsky factor acting on vortical movements: %lf.\n", config -> diff_h_smag_rot);
-	printf("Swamp layer starts at %lf m.\n", config -> damping_start_height_over_toa*config -> toa);
+	printf("Swamp layer starts at %lf m.\n", config -> damping_start_height_over_toa*grid -> toa);
 	printf("Maximum swamp layer damping coefficient: %lf 1/s.\n", config -> damping_coeff_max);
 	printf("%s", stars);
 	

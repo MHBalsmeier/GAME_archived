@@ -104,6 +104,9 @@ double mean_velocity_area;
 int vert_grid_type;
 double z_t_const;
 double t_const_soil;
+double toa;
+int oro_id;
+double stretching_parameter;
 } Grid;
 
 // Contains properties of the dual grid.
@@ -194,8 +197,6 @@ int delta_t_between_analyses;
 int explicit_boundary_layer;
 int waves_on;
 int total_run_span;
-int toa;
-int oro_id;
 double diff_h_smag_div;
 double diff_h_smag_rot;
 double damping_start_height_over_toa;
