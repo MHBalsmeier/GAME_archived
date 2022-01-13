@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     ------------------------------------------------------------------------------
     */
     char grid_file_pre[200];
-	sprintf(grid_file_pre, "../../grid_generator/grids/RES%d_L%d_O%d.nc", RES_ID, NO_OF_LAYERS, grid -> oro_id);
+	sprintf(grid_file_pre, "../../grid_generator/grids/RES%d_L%d_ORO%d.nc", RES_ID, NO_OF_LAYERS, grid -> oro_id);
     char grid_file[strlen(grid_file_pre) + 1];
     strcpy(grid_file, grid_file_pre);
     
@@ -119,15 +119,7 @@ int main(int argc, char *argv[])
     // converting to double in UTC
     double t_init = (double) init_time + init_tm.tm_gmtoff;
     
-    // reading the grid
-	printf("Reading grid data ...\n");
-    set_grid_properties(grid, dualgrid, grid_file);
-    printf("Grid loaded successfully.\n");
-    
-    /*
-    Giving the user some information on the run to about to be executed.
-    --------------------------------------------------------------------
-    */
+    // console output
     char *stars  = malloc(83*sizeof(char));
     for (int i = 0; i < 81; ++i)
     {
@@ -135,6 +127,29 @@ int main(int argc, char *argv[])
     }
     stars[81] = '\n';
     stars[82] = '\0';
+    printf("%s", stars);
+    printf("*\t\t\t\t\t\t\t\t\t\t*\n");
+    printf("*\t\t\t\tThis is the GAME\t\t\t\t*\n");
+    printf("*\t\t\tGeophysical Fluids Modeling Framework\t\t\t*\n");
+    printf("*\t\t\t\t\t\t\t\t\t\t*\n");
+    printf("%s", stars);
+    printf("Released under the MIT license, visit https://github.com/OpenNWP/GAME for more information.\n");
+    printf("%s", stars);
+	printf("What you want to do:\n");
+	printf("Run_id:\t\t\t\t%s\n", config_io -> run_id);
+	printf("Run time span:\t\t\t%d s\n", config -> total_run_span);
+	printf("Grid properties file:\t\t%s\n", grid_file);
+	
+    // reading the grid
+    
+	printf("Reading grid data ...\n");
+    set_grid_properties(grid, dualgrid, grid_file);
+    printf("Grid loaded successfully.\n");
+    
+    /*
+    Giving the user some additional information on the run to about to be executed.
+    --------------------------------------------------------------------
+    */
 	readback_config(config, config_io, grid, grid_file, init_state_file, stars);
     // Reading and processing user input finished.
     
@@ -576,8 +591,6 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
     argv++;
 	config_io -> surface_output_switch = strtod(argv[agv_counter], NULL);
     argv++;
-	grid -> no_of_oro_layers = strtod(argv[agv_counter], NULL);
-    argv++;
 	config -> assume_lte = strtod(argv[agv_counter], NULL);
     argv++;
 	config -> slow_fast_ratio = strtod(argv[agv_counter], NULL);
@@ -611,20 +624,9 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
 int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_file[], char init_state_file[], char stars[])
 {
 	/*
-	This function gives the user information on the model configuration.
+	This function gives the user some additional information on the model configuration.
 	*/
-    printf("%s", stars);
-    printf("*\t\t\t\t\t\t\t\t\t\t*\n");
-    printf("*\t\t\t\tThis is the GAME\t\t\t\t*\n");
-    printf("*\t\t\tGeophysical Fluids Modeling Framework\t\t\t*\n");
-    printf("*\t\t\t\t\t\t\t\t\t\t*\n");
-    printf("%s", stars);
-    printf("Released under the MIT license, visit https://github.com/OpenNWP/GAME for more information.\n");
-    printf("%s", stars);
-	printf("What you want to do:\n");
-	printf("Run_id:\t\t\t\t%s\n", config_io -> run_id);
-	printf("Run time span:\t\t\t%d s\n", config -> total_run_span);
-	printf("Grid properties file:\t\t%s\n", grid_file);
+
 	printf("Top of atmosphere: %lf m\n", grid -> toa);
 	printf("Stretching parameter: %lf\n", grid -> stretching_parameter);
 	if (grid -> vert_grid_type == 0)
