@@ -80,14 +80,10 @@ int main(int argc, char *argv[])
 	Determining the name of the grid file from the RES_ID, NO_OF_LAYERS and so on.
     ------------------------------------------------------------------------------
     */
-    char grid_file_PRE[200];
-	sprintf(grid_file_PRE, "../../grid_generator/grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, config -> toa, config -> oro_id, grid -> no_of_oro_layers);
-    char grid_file[strlen(grid_file_PRE) + 1];
-    strcpy(grid_file, grid_file_PRE);
-    char sfc_file_PRE[200];
-	sprintf(sfc_file_PRE, "../../surface_generator/surface_files/B%d_O%d_SCVT.nc", RES_ID, 2);
-    char sfc_file[strlen(sfc_file_PRE) + 1];
-    strcpy(sfc_file, sfc_file_PRE);
+    char grid_file_pre[200];
+	sprintf(grid_file_pre, "../../grid_generator/grids/RES%d_L%d_O%d.nc", RES_ID, NO_OF_LAYERS, config -> oro_id);
+    char grid_file[strlen(grid_file_pre) + 1];
+    strcpy(grid_file, grid_file_pre);
     
 	// Determining the name of the init state file from the IDEAL_INPUT_ID, RES_ID, NO_OF_LAYERS and so on.
     char init_state_file_pre[200];
@@ -95,8 +91,7 @@ int main(int argc, char *argv[])
     if (config_io -> ideal_input_id == -1)
     {
     	config -> nwp_mode = 1;
-    	sprintf(init_state_file_pre, "../../nwp_init/%d%s%s%s_B%dL%dT%d_O%d_OL%d_SCVT.nc",
-    	config_io -> year, config_io -> month_string, config_io -> day_string, config_io -> hour_string, RES_ID, NO_OF_LAYERS, config -> toa, config -> oro_id, grid -> no_of_oro_layers);
+    	sprintf(init_state_file_pre, "../../nwp_init/%d%s%s%s.nc", config_io -> year, config_io -> month_string, config_io -> day_string, config_io -> hour_string);
     }
     // the idealized input case
     else
