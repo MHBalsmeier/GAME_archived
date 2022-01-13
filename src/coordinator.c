@@ -141,7 +141,6 @@ int main(int argc, char *argv[])
 	printf("Grid properties file:\t\t%s\n", grid_file);
 	
     // reading the grid
-    
 	printf("Reading grid data ...\n");
     set_grid_properties(grid, dualgrid, grid_file);
     printf("Grid loaded successfully.\n");
@@ -627,12 +626,12 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	This function gives the user some additional information on the model configuration.
 	*/
 
-	printf("Top of atmosphere: %lf m\n", grid -> toa);
-	printf("Stretching parameter: %lf\n", grid -> stretching_parameter);
+	printf("Top of atmosphere:\t\t%lf m\n", grid -> toa);
+	printf("Stretching parameter:\t\t%lf\n", grid -> stretching_parameter);
 	if (grid -> vert_grid_type == 0)
 	{
-		printf("Terrain handling: terrain following coordinates\n");
-		printf("Number of layers following orography: %d\n", grid -> no_of_oro_layers);
+		printf("Terrain handling:\t\tterrain following coordinates\n");
+		printf("Number of orography layers:\t%d\n", grid -> no_of_oro_layers);
 	}
 	if (grid -> vert_grid_type == 1)
 	{
