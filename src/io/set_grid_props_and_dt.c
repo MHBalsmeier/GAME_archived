@@ -32,11 +32,11 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     no_of_oro_layers_id, stretching_parameter_id;
     if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
         ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "toa", &toa_id)))
-        ERR(retval);
     if ((retval = nc_inq_varid(ncid, "vert_grid_type", &vert_grid_type_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "no_of_oro_layers", &no_of_oro_layers_id)))
+        ERR(retval);
+    if ((retval = nc_inq_varid(ncid, "toa", &toa_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "stretching_parameter", &stretching_parameter_id)))
         ERR(retval);

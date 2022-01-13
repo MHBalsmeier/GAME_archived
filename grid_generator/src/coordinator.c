@@ -379,6 +379,8 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "toa", NC_DOUBLE, 1, &single_double_dimid, &toa_id)))
         ERR(retval);
+    if ((retval = nc_put_att_text(ncid_g_prop, toa_id, "units", strlen("m"), "m")))
+        ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "latitude_scalar", NC_DOUBLE, 1, &scalar_h_dimid, &latitude_scalar_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "longitude_scalar", NC_DOUBLE, 1, &scalar_h_dimid, &longitude_scalar_id)))
@@ -493,19 +495,19 @@ int main(int argc, char *argv[])
 	  	ERR(retval);
     if ((retval = nc_enddef(ncid_g_prop)))
         ERR(retval);
+    if ((retval = nc_put_var_int(ncid_g_prop, vert_grid_type_id, &vert_grid_type)))
+        ERR(retval);
+    if ((retval = nc_put_var_int(ncid_g_prop, no_of_oro_layers_id, &no_of_oro_layers)))
+        ERR(retval);
+    if ((retval = nc_put_var_int(ncid_g_prop, no_of_lloyd_iterations_id, &no_of_lloyd_iterations)))
+        ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, no_of_shaded_points_scalar_id, &no_of_shaded_points_scalar[0])))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, no_of_shaded_points_vector_id, &no_of_shaded_points_vector[0])))
         ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, no_of_lloyd_iterations_id, &no_of_lloyd_iterations)))
-        ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, vert_grid_type_id, &vert_grid_type)))
-        ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, stretching_parameter_id, &stretching_parameter)))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, toa_id, &toa)))
-        ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, no_of_oro_layers_id, &no_of_oro_layers)))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, latitude_scalar_id, &latitude_scalar[0])))
         ERR(retval);
