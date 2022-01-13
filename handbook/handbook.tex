@@ -241,7 +241,7 @@ B_j \coloneqq \frac{j - \left(N_L - N_O\right)}{N_O}.
 \section{How to generate a grid}
 \label{sec:how_to_generate_a_grid}
 
-The grid generator needs to be recompiled for every specific horizontal resolution and number of layers. In order to do that, change the respective constants in the file \texttt{src/game\_types.h} and execute the bash script \texttt{grid\_generator/compile.sh}. Then run the grid generator using the bash script \texttt{grid\_generator/run\_script.sh} with the desired \texttt{\texttt{oro\_id}}. Table \ref{tab:grid_generator_run_file_explanation} explains all the parameters to be set in \texttt{grid\_generator/run\_script.sh}. Optimized grids have the postfix \texttt{\_SCVT}.
+The grid generator needs to be recompiled for every specific horizontal resolution and number of layers. In order to do that, change the respective constants in the file \texttt{src/game\_types.h} and execute the bash script \texttt{grid\_generator/compile.sh}. Then run the grid generator using the bash script \texttt{grid\_generator/run\_script.sh} with the desired \texttt{\texttt{oro\_id}}. Table \ref{tab:grid_generator_run_file_explanation} explains all the parameters to be set in \texttt{grid\_generator/run\_script.sh}.
 
 \renewcommand{\arraystretch}{1.2}
 \begin{table}
@@ -249,7 +249,6 @@ The grid generator needs to be recompiled for every specific horizontal resoluti
 \begin{tabular}{|>{\centering}p{5.0 cm}|>{\centering}p{3 cm}|>{\centering}p{7 cm}|}
 \hline \textbf{name} & \textbf{domain} & \textbf{meaning} \tabularnewline
 \hline\hline \texttt{\texttt{oro\_id}} & all value for which an orography is defined & orography ID \tabularnewline
-\hline\hline \texttt{optimize} & 0, 1 & optimization switch (fails if \texttt{\texttt{oro\_id}} is not 0) \tabularnewline
 \hline\hline \texttt{n\_iterations} & integer $\geq$ 1 & number of iterations (ignored if \texttt{optimize} = 0), 2000 seems to be a safe value \tabularnewline
 \hline\hline \texttt{use\_scalar\_h\_coords\_file} & 0, 1 & switch to determine wether horizontal coordinates of triangle vertices (generators of the grid) shall be used from a previously generated file \tabularnewline
 \hline\hline \texttt{scalar\_h\_coords\_file} & string & input file for dual triangle vertices (only relevant if \texttt{use\_scalar\_h\_coords\_file} = 1) \tabularnewline

@@ -42,40 +42,38 @@ int main(int argc, char *argv[])
 {
     int oro_id;
    	oro_id = strtod(argv[1], NULL);
-    int optimize_bool;
-   	optimize_bool = strtod(argv[2], NULL);
     int n_iterations;
-   	n_iterations = strtod(argv[3], NULL);
-    int USE_scalar_h_file;
-   	USE_scalar_h_file = strtod(argv[4], NULL);
-    int len = strlen(argv[5]);
+   	n_iterations = strtod(argv[2], NULL);
+    int use_scalar_h_file;
+   	use_scalar_h_file = strtod(argv[3], NULL);
+    int len = strlen(argv[4]);
     char *scalar_h_file = malloc((len + 1)*sizeof(char));
-    strcpy(scalar_h_file, argv[5]);
+    strcpy(scalar_h_file, argv[4]);
     double stretching_parameter;
-   	stretching_parameter = strtof(argv[6], NULL);
-   	int no_of_oro_layers = strtod(argv[7], NULL);
-   	const int vert_grid_type = strtod(argv[8], NULL);
-    double TOA;
-   	TOA = strtof(argv[9], NULL);
+   	stretching_parameter = strtof(argv[5], NULL);
+   	int no_of_oro_layers = strtod(argv[6], NULL);
+   	const int vert_grid_type = strtod(argv[7], NULL);
+    double toa;
+   	toa = strtof(argv[8], NULL);
    	if (vert_grid_type == 1)
    	{
    		no_of_oro_layers = 0;
    	}
     
     // Checking wether the RES_ID of the scalar_h_file corresponds to the RES_ID in enum.h.
-    char RES_ID_as_string[2];
-    RES_ID_as_string[0] = scalar_h_file[7];
-    RES_ID_as_string[1] = scalar_h_file[8];
+    char RES_ID_AS_STRING[2];
+    RES_ID_AS_STRING[0] = scalar_h_file[7];
+    RES_ID_AS_STRING[1] = scalar_h_file[8];
     int RES_ID_from_scalar_h_file;
-    if (RES_ID_as_string[1] == 'L')
+    if (RES_ID_AS_STRING[1] == 'L')
     {
-    	RES_ID_from_scalar_h_file = RES_ID_as_string[0] - '0';
+    	RES_ID_from_scalar_h_file = RES_ID_AS_STRING[0] - '0';
     }
     else
     {
-    	RES_ID_from_scalar_h_file = strtod(RES_ID_as_string, NULL);
+    	RES_ID_from_scalar_h_file = strtod(RES_ID_AS_STRING, NULL);
     }
-    if (USE_scalar_h_file == 1 && RES_ID_from_scalar_h_file != RES_ID)
+    if (use_scalar_h_file == 1 && RES_ID_from_scalar_h_file != RES_ID)
     {
     	printf("The resolution (RES_ID = %d) of the scalar_h_coords_file does not correspond to the resolution (RES_ID = %d) in enum.h.\n", RES_ID_from_scalar_h_file, RES_ID);
     	printf("Recompile with RES_ID = %d or choose a scalar_h_coords_file with RES_ID = %d, then try again.\n", RES_ID_from_scalar_h_file, RES_ID);
@@ -107,37 +105,9 @@ int main(int argc, char *argv[])
 	char grid_name_pre[200];
 	char output_file_pre[200];
 	char statistics_file_pre[200];
-	if (optimize_bool == 1)
-	{
-		sprintf(grid_name_pre, "B%dL%dT%d_O%d_OL%d_SCVT", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
-		sprintf(output_file_pre, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
-		sprintf(statistics_file_pre, "statistics/B%dL%dT%d_O%d_OL%d_SCVT.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
-	}
-	else
-	{
-		if (USE_scalar_h_file == 1)
-		{
-			if (scalar_h_file[strlen(scalar_h_file) - 1 - 6] == 'S' && scalar_h_file[strlen(scalar_h_file) - 1 - 5] == 'C' && 
-			scalar_h_file[strlen(scalar_h_file) - 1 - 4] == 'V' && scalar_h_file[strlen(scalar_h_file) - 1 - 3] == 'T')
-			{
-				sprintf(grid_name_pre, "B%dL%dT%d_O%d_OL%d_SCVT", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
-    			sprintf(output_file_pre, "grids/B%dL%dT%d_O%d_OL%d_SCVT.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
-    			sprintf(statistics_file_pre, "statistics/B%dL%dT%d_O%d_OL%d_SCVT.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
-			}
-    		else
-    		{
-				sprintf(grid_name_pre, "B%dL%dT%d_O%d_OL%d", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
-    			sprintf(output_file_pre, "grids/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
-    			sprintf(statistics_file_pre, "statistics/B%dL%dT%d_O%d_OL%d.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
-			}
-		}
-		else
-		{
-			sprintf(grid_name_pre, "B%dL%dT%d_O%d_OL%d", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
-    		sprintf(output_file_pre, "grids/B%dL%dT%d_O%d_OL%d.nc", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
-    		sprintf(statistics_file_pre, "statistics/B%dL%dT%d_O%d_OL%d.txt", RES_ID, NO_OF_LAYERS, (int) TOA, oro_id, no_of_oro_layers);
-		}
-	}
+	sprintf(grid_name_pre, "RES%d_L%d_ORO%d", RES_ID, NO_OF_LAYERS, oro_id);
+	sprintf(output_file_pre, "grids/RES%d_L%d_ORO%d.nc", RES_ID, NO_OF_LAYERS, oro_id);
+	sprintf(statistics_file_pre, "statistics/RES%d_L%d_ORO%d.txt", RES_ID, NO_OF_LAYERS, oro_id);
     char grid_name[strlen(grid_name_pre) + 1];
     char output_file[strlen(output_file_pre) + 1];
     char statistics_file[strlen(statistics_file_pre) + 1];
@@ -214,8 +184,8 @@ int main(int argc, char *argv[])
 	    ---------------------------------------------------------------------
 	*/
     printf("Establishing horizontal grid structure ... \n");
-   	int no_of_lloyd_cycles = 0;
-    if (USE_scalar_h_file == 0)
+   	int no_of_lloyd_iterations = 0;
+    if (use_scalar_h_file == 0)
     {
     	// Here, the positions of the horizontal generators, i.e. the horizontal scalar points are determined.
     	generate_horizontal_generators(latitude_ico, longitude_ico, latitude_scalar, longitude_scalar, x_unity, y_unity, z_unity, face_edges_reverse, face_edges, face_vertices);
@@ -226,7 +196,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-    	read_horizontal_explicit(latitude_scalar, longitude_scalar, from_index, to_index, from_index_dual, to_index_dual, scalar_h_file, &no_of_lloyd_cycles);
+    	read_horizontal_explicit(latitude_scalar, longitude_scalar, from_index, to_index, from_index_dual, to_index_dual, scalar_h_file, &no_of_lloyd_iterations);
     }
     
     /*
@@ -239,11 +209,11 @@ int main(int argc, char *argv[])
 	3.) grid optimization
 	    -----------------
 	*/
-	if (optimize_bool == 1)
+	if (n_iterations > 0)
 	{
 		optimize_to_scvt(latitude_scalar, longitude_scalar, latitude_scalar_dual, longitude_scalar_dual, n_iterations,
 		face_edges, face_edges_reverse, face_vertices, adjacent_vector_indices_h, from_index_dual, to_index_dual);
-		no_of_lloyd_cycles = no_of_lloyd_cycles + n_iterations;
+		no_of_lloyd_iterations = no_of_lloyd_iterations + n_iterations;
 	}
 	
 	/*
@@ -291,7 +261,7 @@ int main(int argc, char *argv[])
 	    --------------------------------------------------
 	*/
     printf("Setting the vertical coordinates of the scalar data points ... ");
-	set_z_scalar(z_scalar, oro, no_of_oro_layers, TOA, stretching_parameter, vert_grid_type);
+	set_z_scalar(z_scalar, oro, no_of_oro_layers, toa, stretching_parameter, vert_grid_type);
     printf(GREEN "finished.\n" RESET);
 	
 	/*
@@ -305,16 +275,16 @@ int main(int argc, char *argv[])
 	}
 	
 	printf("Determining vector z coordinates and normal distances of the primal grid ... ");
-	set_z_vector_and_normal_distance(z_vector, z_scalar, normal_distance, latitude_scalar, longitude_scalar, from_index, to_index, TOA, vert_grid_type, oro);
+	set_z_vector_and_normal_distance(z_vector, z_scalar, normal_distance, latitude_scalar, longitude_scalar, from_index, to_index, toa, vert_grid_type, oro);
 	free(oro);
     printf(GREEN "finished.\n" RESET);	
 	
 	printf("Determining scalar z coordinates of the dual grid ... ");
-	set_z_scalar_dual(z_scalar_dual, z_vector, from_index, to_index, vorticity_indices_triangles, TOA);
+	set_z_scalar_dual(z_scalar_dual, z_vector, from_index, to_index, vorticity_indices_triangles, toa);
     printf(GREEN "finished.\n" RESET);
 	
 	printf("Determining vector z coordinates of the dual grid and distances of the dual grid ... ");
-	calc_z_vector_dual_and_normal_distance_dual(z_vector_dual, normal_distance_dual, z_scalar_dual, TOA, from_index, to_index, z_vector,
+	calc_z_vector_dual_and_normal_distance_dual(z_vector_dual, normal_distance_dual, z_scalar_dual, toa, from_index, to_index, z_vector,
 	from_index_dual, to_index_dual, latitude_scalar_dual, longitude_scalar_dual, vorticity_indices_triangles);
     printf(GREEN "finished.\n" RESET);
 	
@@ -323,11 +293,11 @@ int main(int argc, char *argv[])
     printf(GREEN "finished.\n" RESET);
     
     printf("Calculating dual areas ... ");
-	set_area_dual(area_dual, z_vector_dual, normal_distance, z_vector, from_index, to_index, triangle_face_unit_sphere, TOA);
+	set_area_dual(area_dual, z_vector_dual, normal_distance, z_vector, from_index, to_index, triangle_face_unit_sphere, toa);
     printf(GREEN "finished.\n" RESET);
     
     printf("Calculating grid box volumes ... ");
-	set_volume(volume, z_vector, area, from_index, to_index, TOA, vorticity_indices_triangles);
+	set_volume(volume, z_vector, area, from_index, to_index, toa, vorticity_indices_triangles);
     printf(GREEN "finished.\n" RESET);
     
     /*
@@ -350,7 +320,7 @@ int main(int argc, char *argv[])
 	rhombus_averaging(vorticity_indices_triangles, vorticity_signs_triangles, from_index_dual,
 	to_index_dual, vorticity_indices_rhombi, density_to_rhombi_indices, from_index, to_index, area_dual,
 	z_vector, latitude_scalar_dual, longitude_scalar_dual, density_to_rhombi_weights, latitude_vector,
-	longitude_vector, latitude_scalar, longitude_scalar, TOA);
+	longitude_vector, latitude_scalar, longitude_scalar, toa);
     printf(GREEN "finished.\n" RESET);
     
     printf("Calculating Coriolis indices and weights ... ");
@@ -364,7 +334,7 @@ int main(int argc, char *argv[])
     printf(GREEN "finished.\n" RESET);
     
     // A statistics file is created to compare the fundamental statistical properties of the grid with the literature.
-	write_statistics_file(pent_hex_face_unity_sphere, normal_distance, normal_distance_dual, no_of_lloyd_cycles, grid_name, statistics_file);
+	write_statistics_file(pent_hex_face_unity_sphere, normal_distance, normal_distance_dual, no_of_lloyd_iterations, grid_name, statistics_file);
 	
 	/*
 	writing the result to a netcdf file
@@ -376,7 +346,7 @@ int main(int argc, char *argv[])
     vector_h_dimid_10, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid,
     inner_product_weights_id, scalar_8_dimid, scalar_2_dimid, vector_h_dual_dimid_2, density_to_rhombi_indices_id, density_to_rhombi_weights_id,
     vorticity_indices_triangles_id, ncid_g_prop, single_double_dimid, no_of_shaded_points_vector_id, no_of_shaded_points_scalar_id,
-    no_of_lloyd_cycles_id, single_int_dimid, interpol_indices_id, interpol_weights_id, theta_bg_id, exner_bg_id, sfc_albedo_id, sfc_rho_c_id, t_conductivity_id,
+    no_of_lloyd_iterations_id, single_int_dimid, interpol_indices_id, interpol_weights_id, theta_bg_id, exner_bg_id, sfc_albedo_id, sfc_rho_c_id, t_conductivity_id,
     roughness_length_id, is_land_id;
     
     printf("Starting to write to output file ... ");
@@ -420,7 +390,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_dim(ncid_g_prop, "single_int_dimid_index", 1, &single_int_dimid)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "no_of_lloyd_cycles", NC_INT, 1, &single_int_dimid, &no_of_lloyd_cycles_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "no_of_lloyd_iterations", NC_INT, 1, &single_int_dimid, &no_of_lloyd_iterations_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "latitude_scalar", NC_DOUBLE, 1, &scalar_h_dimid, &latitude_scalar_id)))
         ERR(retval);
@@ -540,7 +510,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, no_of_shaded_points_vector_id, &no_of_shaded_points_vector[0])))
         ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, no_of_lloyd_cycles_id, &no_of_lloyd_cycles)))
+    if ((retval = nc_put_var_int(ncid_g_prop, no_of_lloyd_iterations_id, &no_of_lloyd_iterations)))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, latitude_scalar_id, &latitude_scalar[0])))
         ERR(retval);

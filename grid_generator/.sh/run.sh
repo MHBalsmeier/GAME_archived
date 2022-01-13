@@ -8,12 +8,8 @@ echo "***** GRID FILE CREATION *****"
 echo ""
 echo "Setup:"
 echo "oro_id = $oro_id"
-if [ $optimize -eq 1 ]
-then
-echo "Optimization is switched on. Number of iterations: $n_iterations."
-else
-echo "Optimization is switched off."
-fi
+echo "number of Lloyd iterations: $n_iterations"
+
 if [ $use_scalar_h_coords_file -eq 1 ]
 then
 if [ ! -f $scalar_h_coords_file ]
@@ -47,11 +43,11 @@ echo "********** Calling the GAME grid generator **********"
 echo ""
 if [ $valgrind_check -eq 0 ]
 then
-./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter $orography_layers $type_of_vertical_grid $toa
+./grid_generator $oro_id $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter $orography_layers $type_of_vertical_grid $toa
 else
 if [ $valgrind_check -eq 1 ]
 then
-valgrind ./grid_generator $oro_id $optimize $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter $orography_layers $type_of_vertical_grid $toa
+valgrind ./grid_generator $oro_id $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter $orography_layers $type_of_vertical_grid $toa
 fi
 fi
 if [ $? -ne 0 ]
