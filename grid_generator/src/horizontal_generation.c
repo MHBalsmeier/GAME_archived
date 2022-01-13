@@ -576,14 +576,14 @@ int direct_tangential_unity(double latitude_scalar_dual[], double longitude_scal
     return 0;
 }
 
-int read_horizontal_explicit(double latitude_scalar[], double longitude_scalar[], int from_index[], int to_index[], int from_index_dual[], int to_index_dual[], char filename[], int *no_of_lloyd_cycles)
+int read_horizontal_explicit(double latitude_scalar[], double longitude_scalar[], int from_index[], int to_index[], int from_index_dual[], int to_index_dual[], char filename[], int *no_of_lloyd_iterations)
 {
 	/*
 	This function reads the arrays that fully define the horizontal grid from a previously created grid file.
 	This is an optional feature.
 	*/
 	
-	int ncid, latitude_scalar_id, longitude_scalar_id, retval, from_index_id, to_index_id, from_index_dual_id, to_index_dual_id, no_of_lloyd_cycles_id;
+	int ncid, latitude_scalar_id, longitude_scalar_id, retval, from_index_id, to_index_id, from_index_dual_id, to_index_dual_id, no_of_lloyd_iterations_id;
 	retval = 0;
     if ((nc_open(filename, NC_NOWRITE, &ncid)))
         ERR(retval);
@@ -599,7 +599,7 @@ int read_horizontal_explicit(double latitude_scalar[], double longitude_scalar[]
         ERR(retval);
     if ((nc_inq_varid(ncid, "to_index_dual", &to_index_dual_id)))
         ERR(retval);
-    if ((nc_inq_varid(ncid, "no_of_lloyd_cycles", &no_of_lloyd_cycles_id)))
+    if ((nc_inq_varid(ncid, "no_of_lloyd_iterations", &no_of_lloyd_iterations_id)))
         ERR(retval);
     if ((nc_get_var_double(ncid, latitude_scalar_id, &latitude_scalar[0])))
         ERR(retval);
@@ -613,7 +613,7 @@ int read_horizontal_explicit(double latitude_scalar[], double longitude_scalar[]
         ERR(retval);
     if ((nc_get_var_int(ncid, to_index_dual_id, &to_index_dual[0])))
         ERR(retval);
-    if ((nc_get_var_int(ncid, no_of_lloyd_cycles_id, no_of_lloyd_cycles)))
+    if ((nc_get_var_int(ncid, no_of_lloyd_iterations_id, no_of_lloyd_iterations)))
         ERR(retval);
     if ((nc_close(ncid)))
         ERR(retval);
