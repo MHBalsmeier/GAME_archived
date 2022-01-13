@@ -29,10 +29,7 @@ start_day=1 # defines the start time of the model run
 start_hour=0 # defines the start time of the model run
 
 # grid properties
-toa=41152 # top of atmosphere
-type_of_vertical_grid=0 # 0: terrain following coordinates, 1: block-like orography
 orography_id=0 # ID of the orography field, for ideal_input_id > -1 orography_id will be set automatically
-orography_layers=23 # number of layers following orography (only relevent if type_of_vertical_grid == 0)
 
 # dynamics settings
 dt_parameter=1.5 # The sound time step will be calculated as follows: delta_t = dt_parameter*delta_x / km. 1.7 (1.5) can be considered a standard value without (with) RRTMGP.
