@@ -60,27 +60,6 @@ int main(int argc, char *argv[])
    		no_of_oro_layers = 0;
    	}
     
-    // Checking wether the RES_ID of the scalar_h_file corresponds to the RES_ID in enum.h.
-    char RES_ID_AS_STRING[2];
-    RES_ID_AS_STRING[0] = scalar_h_file[7];
-    RES_ID_AS_STRING[1] = scalar_h_file[8];
-    int RES_ID_from_scalar_h_file;
-    if (RES_ID_AS_STRING[1] == 'L')
-    {
-    	RES_ID_from_scalar_h_file = RES_ID_AS_STRING[0] - '0';
-    }
-    else
-    {
-    	RES_ID_from_scalar_h_file = strtod(RES_ID_AS_STRING, NULL);
-    }
-    if (use_scalar_h_file == 1 && RES_ID_from_scalar_h_file != RES_ID)
-    {
-    	printf("The resolution (RES_ID = %d) of the scalar_h_coords_file does not correspond to the resolution (RES_ID = %d) in enum.h.\n", RES_ID_from_scalar_h_file, RES_ID);
-    	printf("Recompile with RES_ID = %d or choose a scalar_h_coords_file with RES_ID = %d, then try again.\n", RES_ID_from_scalar_h_file, RES_ID);
-    	printf("Aborting.\n");
-    	exit(1);
-    }
-    
     // checking if the no_of_oro_layers is valid
     if (no_of_oro_layers < 0 || no_of_oro_layers >= NO_OF_LAYERS)
     {
