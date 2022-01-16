@@ -512,7 +512,7 @@ int sanity_checker(Config *config, Config_io *config_io, Grid *grid)
     	printf("Aborting.\n");
 		exit(1);
 	}
-	if ((config_io -> ideal_input_id == 6 || config_io -> ideal_input_id == 7 || config_io -> ideal_input_id == 8) && NO_OF_CONSTITUENTS == 1)
+	if (config_io -> ideal_input_id == 2 && NO_OF_CONSTITUENTS == 1)
 	{
 		printf("You chose a moist test case, but your model is dry.\n");
     	printf("Aborting.\n");
