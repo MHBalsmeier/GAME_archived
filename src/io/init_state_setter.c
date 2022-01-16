@@ -54,19 +54,19 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, Dia
         lon = grid -> longitude_scalar[h_index];
         z_height = grid -> z_scalar[i];
         // standard atmosphere
-        if (ideal_input_id == 0 || ideal_input_id == 1 || ideal_input_id == 2)
+        if (ideal_input_id == 0)
         {
             temperature[i] = standard_temp(z_height);
             pressure[i] = standard_pres(z_height);
         }
         // dry Ullrich test
-        if (ideal_input_id == 3 || ideal_input_id == 4 || ideal_input_id == 5)
+        if (ideal_input_id == 1)
         {
         	baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i],
         	&dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
         }
         // moist Ullrich test
-        if (ideal_input_id == 6 || ideal_input_id == 7 || ideal_input_id == 8)
+        if (ideal_input_id == 2)
         {
         	baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i],
         	&dummy_2, &dummy_4, &dummy_5, &total_density, &specific_humidity);
@@ -100,18 +100,18 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, Dia
             lon = longitude_vector[j];
             z_height = grid -> z_vector[NO_OF_SCALARS_H + j + i*NO_OF_VECTORS_PER_LAYER];
             // standard atmosphere: no wind
-            if (ideal_input_id == 0 || ideal_input_id == 1 || ideal_input_id == 2)
+            if (ideal_input_id == 0)
             {
                 state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = 0;
             }
             // dry Ullrich test
-            if (ideal_input_id == 3 || ideal_input_id == 4 || ideal_input_id == 5)
+            if (ideal_input_id == 1)
             {
         		baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
                 state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
             }
             // moist Ullrich test
-            if (ideal_input_id == 6 || ideal_input_id == 7 || ideal_input_id == 8)
+            if (ideal_input_id == 2)
             {
         		baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
                 state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);

@@ -55,22 +55,6 @@ int main(int argc, char *argv[])
 	// checking the user input
 	sanity_checker(config, config_io, grid);
 	
-    /*
-    This sets the ORO_ID (orography ID) as a function of the IDEAL_INPUT_ID.
-    ---------------------------------------------------------------------------
-    */
-	if (config_io -> ideal_input_id == 0 || config_io -> ideal_input_id == 3 || config_io -> ideal_input_id == 6)
-    {
-		grid -> oro_id = 0;
-    }
-	if (config_io -> ideal_input_id == 1 || config_io -> ideal_input_id == 4 || config_io -> ideal_input_id == 7)
-    {
-		grid -> oro_id = 1;
-    }
-	if (config_io -> ideal_input_id == 2 || config_io -> ideal_input_id == 5 || config_io -> ideal_input_id == 8)
-    {
-		grid -> oro_id = 2;
-    }
     // in the case of block-shaped mountains, no layers follow the orography
 	if (grid -> vert_grid_type == 1)
 	{

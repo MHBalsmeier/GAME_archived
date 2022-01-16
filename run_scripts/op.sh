@@ -6,16 +6,15 @@
 # This is a run script for operational runs (NWP runs).
 
 # test_ids:
-# 0:	standard atmosphere with oro_id = 0
-# 1:	standard atmosphere with oro_id = 1
-# 2:	standard atmosphere with oro_id = 2
-# 3:	dry Ullrich test with oro_id = 0
-# 4:	dry Ullrich test with oro_id = 1
-# 5:	dry Ullrich test with oro_id = 2
-# 6:	moist Ullrich test with oro_id = 0
-# 7:	moist Ullrich test with oro_id = 1
-# 8:	moist Ullrich test with oro_id = 2
+# 0:	standard atmosphere
+# 1:	dry Ullrich test
+# 2:	moist Ullrich test
 # -1:   NWP run
+# oro_id	description
+# 0			no orography
+# 1			Gaussian mountain at 0 N / 0 E, H = 10 km
+# 2			real data interpolated to model grid
+# See handbook for more information.
 
 # basic run properties
 game_home_dir=${BASH_ARGV[4]}
@@ -29,7 +28,7 @@ start_day=${BASH_ARGV[1]} # defines the start time of the model run
 start_hour=${BASH_ARGV[0]} # defines the start time of the model run
 
 # grid properties
-orography_id=${BASH_ARGV[7]} # ID of the orography field. Based on this the grid file will be chosen. For ideal_input_id > -1 orography_id will be set automatically.
+orography_id=${BASH_ARGV[7]} # ID of the orography field. Based on this the grid file will be chosen.
 
 # dynamics settings
 dt_parameter=1.5 # The sound time step will be calculated as follows: delta_t = dt_parameter*delta_x / km. 1.7 (1.5) can be considered a standard value without (with) RRTMGP.

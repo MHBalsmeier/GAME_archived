@@ -18,7 +18,7 @@ This file contains functions for reading the grid properties as well as setting 
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 
-int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
+int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char grid_file_name[])
 {
 	/*
 	This function reads all the grid properties from the grid netcdf file.
@@ -30,7 +30,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char GEO_PROP_FILE[])
     vorticity_signs_triangles_id, latitude_scalar_id, longitude_scalar_id, no_of_shaded_points_scalar_id, no_of_shaded_points_vector_id, toa_id, vert_grid_type_id,
     interpol_indices_id, interpol_weights_id, theta_bg_id, exner_bg_id, sfc_rho_c_id, sfc_albedo_id, roughness_length_id, is_land_id, t_conductivity_id,
     no_of_oro_layers_id, stretching_parameter_id;
-    if ((retval = nc_open(GEO_PROP_FILE, NC_NOWRITE, &ncid)))
+    if ((retval = nc_open(grid_file_name, NC_NOWRITE, &ncid)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "vert_grid_type", &vert_grid_type_id)))
         ERR(retval);
