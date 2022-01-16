@@ -6,10 +6,10 @@
 # This is a run script for creating a standard atmosphere as a background state for data assimilation (GAME-DA).
 
 # test_id	description
-# 0:		standard atmosphere
-# 1:		dry Ullrich test
-# 2:		moist Ullrich test
-# -1:   	NWP run
+# 0			standard atmosphere
+# 1			dry Ullrich test
+# 2			moist Ullrich test
+# -1 	  	NWP run
 # oro_id	description
 # 0			no orography
 # 1			Gaussian mountain at 0 N / 0 E, H = 10 km
