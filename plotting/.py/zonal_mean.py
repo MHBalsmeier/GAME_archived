@@ -9,10 +9,10 @@ import numpy as np
 import toolbox.conversions as conv
 import math as mat
 
-game_output_dir = "/home/max/code/game/output"
-run_id = "held_suarez"
+game_output_dir = "/home/max/code/GAME/output"
+run_id = "held_suar"
 save_directory = "/home/max/code/GAME/figs"
-short_name = "t"
+short_name = "u"
 no_of_layers = 26
 run_span = 1250*86400 # run length
 dt_data = 86400 # output time step
