@@ -21,7 +21,7 @@ In this file, the initial state of the simulation is read in from a netcdf file.
 
 int set_soil_temp(Grid *, Soil *, State *, double [], char []);
 
-int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, Diagnostics *diagnostics, Forcings *forcings, int ideal_input_id, char grid_file[])
+int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, Diagnostics *diagnostics, Forcings *forcings, Config *config, int ideal_input_id, char grid_file[])
 {
 	/*
 	This function sets the initial state of the model atmosphere for idealized test cases.
@@ -102,7 +102,13 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, Dia
             // standard atmosphere: no wind
             if (ideal_input_id == 0)
             {
-                state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = 0;
+                state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = 0;                
+                
+			    // adding a "random" perturbation to the horizontal wind in the case of the Held-Suarez test case
+			    if (config -> rad_on == 2)
+			    {
+			    	state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] += 0.1*fmod(3*j, 17)/17.0;
+			    }
             }
             // dry Ullrich test
             if (ideal_input_id == 1)

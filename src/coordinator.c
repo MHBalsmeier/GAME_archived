@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
     // ideal test case
     if (config -> nwp_mode == 0)
     {
-    	set_ideal_init(state_old, grid, dualgrid, soil, diagnostics, forcings, config_io -> ideal_input_id, grid_file);
+    	set_ideal_init(state_old, grid, dualgrid, soil, diagnostics, forcings, config, config_io -> ideal_input_id, grid_file);
 	}
 	// NWP mode
     else
