@@ -107,7 +107,7 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, Dia
 			    // adding a "random" perturbation to the horizontal wind in the case of the Held-Suarez test case
 			    if (config -> rad_on == 2)
 			    {
-			    	state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] += 0.1*fmod(3*j, 17)/17.0;
+			    	state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] += 0.1*fmod(j, 17)/16.0;
 			    }
             }
             // dry Ullrich test
