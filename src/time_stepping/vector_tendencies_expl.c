@@ -60,34 +60,22 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		if (config -> explicit_boundary_layer == 1)
 		{
 			// some parameters
-			double bndr_lr_height = 1100.0; // boundary layer height
-			double bndr_lr_visc_sfc_land = 1.2/86400.0; // maximum friction coefficient in the boundary layer over land
-			double bndr_lr_visc_sfc_water = 0.8/86400.0; // maximum friction coefficient in the boundary layer over water
-			double bndr_lr_visc_sfc;
-			double e_folding_height = bndr_lr_height/M_PI;
-			double z_agl;
+			double fric_lr_height = 2853.0; // boundary layer height
+			double bndr_lr_visc_sfc = 1.0/86400.0; // maximum friction coefficient in the boundary layer
+			double scale_height = 8000.0;
 			int layer_index, h_index, vector_index;
-			#pragma omp parallel for private(layer_index, h_index, vector_index, z_agl, bndr_lr_visc_sfc)
+			#pragma omp parallel for private(layer_index, h_index, vector_index)
 			for (int i = 0; i < NO_OF_H_VECTORS; ++i)
 			{
 				layer_index = i/NO_OF_VECTORS_H;
 				h_index = i - layer_index*NO_OF_VECTORS_H;
 				vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
-				// height above ground level
-				z_agl = grid -> z_vector[vector_index]
-				- 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[h_index]]
-				+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[h_index]]);
-				bndr_lr_visc_sfc = bndr_lr_visc_sfc_water;
-				if (grid -> is_land[grid -> from_index[h_index]] + grid -> is_land[grid -> to_index[h_index]] >= 1)
-				{
-					bndr_lr_visc_sfc = bndr_lr_visc_sfc_land;
-				}
 				// adding the boundary layer friction
-				if (z_agl < bndr_lr_height)
+				if (grid -> z_vector[vector_index] < fric_lr_height)
 				{
 					irrev -> friction_acc[vector_index]
-					+= -bndr_lr_visc_sfc*(exp(-z_agl/e_folding_height) - exp(-bndr_lr_height/e_folding_height))
-					/(1 - exp(-bndr_lr_height/e_folding_height))
+					+= -bndr_lr_visc_sfc*(exp(-grid -> z_vector[vector_index]/scale_height) - exp(-fric_lr_height/scale_height))
+					/(1 - exp(-fric_lr_height/scale_height))
 					*state -> wind[vector_index];
 				}
 			}
