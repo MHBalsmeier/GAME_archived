@@ -70,8 +70,7 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 	
     // setting the unfiltered orography
     int lat_index, lon_index;
-    double distance;
-	#pragma omp parallel for private(distance, lat_index, lon_index)
+	#pragma omp parallel for private(lat_index, lon_index)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// default
