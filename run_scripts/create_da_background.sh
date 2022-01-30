@@ -12,14 +12,13 @@
 # -1 	  	NWP run
 # oro_id	description
 # 0			no orography
-# 1			Gaussian mountain at 0 N / 0 E, H = 10 km
-# 2			real data interpolated to the model grid
+# 1			real data interpolated to the model grid
 # See handbook for more information.
 
 # basic run properties
 game_home_dir=/home/max/code/GAME
 ideal_input_id=0 # specifies which test scenario to run
-run_id=standard_oro2 # run_id must only be set if ideal_input_id != -1 (otherwise it is chosen automatically)
+run_id=standard_oro1 # run_id must only be set if ideal_input_id != -1 (otherwise it is chosen automatically)
 run_span=$((0*24*3600)) # how long the model is supposed to run
 valgrind_check=0 # set this to 1 if you want to check the code with Valgrind
 start_year=2000 # defines the start time of the model run
@@ -28,7 +27,7 @@ start_day=1 # defines the start time of the model run
 start_hour=0 # defines the start time of the model run
 
 # grid properties
-orography_id=2 # ID of the orography field. Based on this the grid file will be chosen.
+orography_id=1 # ID of the orography field. Based on this the grid file will be chosen.
 
 # dynamics settings
 dt_parameter=1.5 # The sound time step will be calculated as follows: delta_t = dt_parameter*delta_x / km. 1.7 (1.5) can be considered a standard value without (with) RRTMGP.

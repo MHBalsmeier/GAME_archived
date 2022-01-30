@@ -19,16 +19,13 @@ With this program, orographies can be produced.
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 #define P_0 100000.0
 
-const double MOUNTAIN_HEIGHT = 10e3;
-const double MOUNTAIN_FWHM = 1000e3;
-
 int set_sfc_properties(double latitude_scalar[], double longitude_scalar[], double roughness_length[], double sfc_albedo[],
 double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int oro_id)
 {
 	double *oro_unfiltered = malloc(NO_OF_SCALARS_H*sizeof(double));
 	
 	int ncid, retval, is_land_id;
-	if (oro_id == 2)
+	if (oro_id == 1)
 	{
 		char is_land_file_pre[200];
 		sprintf(is_land_file_pre, "phys_quantities/B%d_is_land.nc", RES_ID);
@@ -51,7 +48,7 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 	double *latitude_input = malloc(no_of_lat_points*sizeof(double));
    	double *longitude_input = malloc(no_of_lon_points*sizeof(double));
 	int (*z_input)[no_of_lon_points] = malloc(sizeof(int[no_of_lat_points][no_of_lon_points]));
-	if (oro_id == 2)
+	if (oro_id == 1)
 	{
 		if ((retval = nc_open("phys_quantities/etopo.nc", NC_NOWRITE, &ncid)))
 			ERR(retval);
@@ -73,7 +70,6 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 	
     // setting the unfiltered orography
     int lat_index, lon_index;
-    double sigma_mountain = MOUNTAIN_FWHM/pow(8*log(2), 0.5); // only for oro_id == 1
     double distance;
 	#pragma omp parallel for private(distance, lat_index, lon_index)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
@@ -81,13 +77,8 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 		// default
 		oro[i] = 0;
 		oro_unfiltered[i] = 0;
-		if (oro_id == 1)
-		{
-            distance = calculate_distance_h(latitude_scalar[i], longitude_scalar[i], 0, 0, RADIUS);
-			oro[i] = MOUNTAIN_HEIGHT*exp(-pow(distance, 2)/(2*pow(sigma_mountain, 2)));
-		}
 		// real orography can only be different from zero at land points
-		if (oro_id == 2 && is_land[i] == 1)
+		if (oro_id == 1 && is_land[i] == 1)
 		{
 	    	double *lat_distance_vector = malloc(no_of_lat_points*sizeof(double));
    			double *lon_distance_vector = malloc(no_of_lon_points*sizeof(double));
@@ -122,7 +113,7 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 	int no_of_avg_points = 8;
 	int min_indices_vector[no_of_avg_points];
 	double distance_vector[NO_OF_SCALARS_H];
-	if (oro_id == 2)
+	if (oro_id == 1)
 	{
 		#pragma omp parallel for private(min_indices_vector, distance_vector)
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)

@@ -12,8 +12,7 @@
 # -1 	  	NWP run
 # oro_id	description
 # 0			no orography
-# 1			Gaussian mountain at 0 N / 0 E, H = 10 km
-# 2			real data interpolated to the model grid
+# 1			real data interpolated to the model grid
 # See handbook for more information.
 
 # basic run properties

@@ -12,8 +12,7 @@
 # -1 	  	NWP run
 # oro_id	description
 # 0			no orography
-# 1			Gaussian mountain at 0 N / 0 E, H = 10 km
-# 2			real data interpolated to the model grid
+# 1			real data interpolated to the model grid
 # See handbook for more information.
 
 # basic run properties
@@ -28,7 +27,7 @@ start_day=1 # defines the start time of the model run
 start_hour=0 # defines the start time of the model run
 
 # grid properties
-orography_id=2 # ID of the orography field. Based on this the grid file will be chosen.
+orography_id=1 # ID of the orography field. Based on this the grid file will be chosen.
 
 # dynamics settings
 dt_parameter=1.5 # The sound time step will be calculated as follows: delta_t = dt_parameter*delta_x / km. 1.7 (1.5) can be considered a standard value without (with) RRTMGP.
