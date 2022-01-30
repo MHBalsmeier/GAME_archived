@@ -3,8 +3,8 @@
 
 cmake_minimum_required(VERSION 3.10)
 set(version_major 0)
-set(version_minor 3)
-set(version_patch 20)
+set(version_minor 1)
+set(version_patch 1)
 set(version ${version_major}.${version_minor}.${version_patch})
 project(game VERSION ${version})
 enable_language(Fortran)
@@ -31,8 +31,6 @@ src/io/write_output.c
 src/io/set_grid_props_and_dt.c
 src/io/spatial_ops_for_output.c
 src/subgrid_scale/effective_diff_coeffs.c
-src/subgrid_scale/gravity_waves.c
-src/subgrid_scale/convection.c
 src/radiation/manage_radiation_calls.c
 src/radiation/held_suar.c
 src/radiation/rterrtmgp_coupler.f90

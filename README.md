@@ -11,6 +11,7 @@ It is known that the forecast skill of a NWP model depends more on physics and d
 * the numerical dispersion relation shall contain no unphysical branches
 * the numerical dispersion relation shall contain all relevant physical branches, including a geostrophic mode
 * strong scalability on massively parallel computer architectures
+* at least of second order accuracy
 * mass conservation to machine precision
 * energy conversions shall be based on a spatial discretization of Poisson brackets
 * energy conservation in the spatial discretization
@@ -21,16 +22,11 @@ It is known that the forecast skill of a NWP model depends more on physics and d
 * a capable and flexible framework for coupling to physics and to other components of an Earth system model
 * good self-consistency also in the presence of multiple constituents and radiation
 
-According to my understanding, a hexagonal C-grid is the only discretization where all this can be achieved globally.
-
-### GAME's principles
-
-We try to find a good balance of accuracy, efficiency and self-consistency. Generally speaking, GAME focuses more on self-consistency than other models.
+No discretization is able to achieve all these goals simultaneously. However, a hexagonal C-grid is probably one of the best choices when it comes to finding a reasonable balance of all these aspects.
 
 ### Things to be done
 
 * SLEVE
-* an option for non-uniform resolutions
 * ellipsoidal geometry
 
 ## Documents
