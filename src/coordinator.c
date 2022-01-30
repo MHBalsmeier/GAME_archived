@@ -518,6 +518,12 @@ int sanity_checker(Config *config, Config_io *config_io, Grid *grid)
     	printf("Aborting.\n");
 		exit(1);
 	}
+	if (grid -> oro_id != 0 && grid -> oro_id != 1)
+	{
+		printf("orography_id must be either 0 or 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
 	return 0;
 }
 
