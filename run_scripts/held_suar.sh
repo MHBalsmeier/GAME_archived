@@ -35,8 +35,8 @@ dt_parameter=1.5 # The sound time step will be calculated as follows: delta_t = 
 slow_fast_ratio=1 # the ratio of the slow to the fast time step
 momentum_diff_h=1 # turn on if you want horizontal momentum diffusion
 momentum_diff_v=0 # turn on if you want vertical momentum diffusion
-diff_h_smag_div=0.2 # horizontal diffusion Smagorinsky factor acting on divergent movements
-diff_h_smag_rot=0.06 # horizontal diffusion Smagorinsky factor acting on vortical movements
+diff_h_smag_div=0.01 # horizontal diffusion Smagorinsky factor acting on divergent movements
+diff_h_smag_rot=0.01 # horizontal diffusion Smagorinsky factor acting on vortical movements
 temperature_diff_h=0 # turn on if you want horizontal temperature diffusion
 temperature_diff_v=0 # turn on if you want vetical temperature diffusion
 tracer_diff_h=0 # turn on if you want horizontal tracer concentration diffusion
