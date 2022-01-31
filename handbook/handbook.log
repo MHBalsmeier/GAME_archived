@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.6.28)  30 JAN 2022 20:26
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.11.29)  31 JAN 2022 15:39
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -331,7 +331,7 @@ Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 \bibhang=\skip78
 \blx@bcfin=\read2
 \blx@bcfout=\write3
-\blx@langwohyphens=\language38
+\blx@langwohyphens=\language8
 \c@mincomprange=\count317
 \c@maxcomprange=\count318
 \c@mincompwidth=\count319
@@ -1064,14 +1064,14 @@ Chapter 6.
 [10
 
 ]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 346.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 333.
  [11
 
 ]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 346.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 333.
  (./handbook.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 346.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 346.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 333.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 333.
 Package rerunfilecheck Info: File `handbook.out' has not changed.
 (rerunfilecheck)             Checksum: 08B712C13D46C32E2C109CC7F104EE67;2242.
 Package logreq Info: Writing requests to 'handbook.run.xml'.
@@ -1079,12 +1079,12 @@ Package logreq Info: Writing requests to 'handbook.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 16581 strings out of 482480
- 276241 string characters out of 5946190
- 938824 words of memory out of 5000000
- 31318 multiletter control sequences out of 15000+600000
- 591357 words of font info for 106 fonts, out of 8000000 for 9000
- 395 hyphenation exceptions out of 8191
+ 16576 strings out of 483130
+ 276186 string characters out of 5963882
+ 937203 words of memory out of 5000000
+ 31277 multiletter control sequences out of 15000+600000
+ 590008 words of font info for 103 fonts, out of 8000000 for 9000
+ 14 hyphenation exceptions out of 8191
  38i,11n,45p,1925b,1271s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc} </home/max/.texli
 ve2019/texmf-var/fonts/pk/ljfour/jknappen/ec/ectc1000.600pk> </home/max/.texliv
@@ -1097,10 +1097,10 @@ fonts/type1/public/fourier/fourier-ms.pfb></usr/share/texlive/texmf-dist/fonts/
 type1/urw/ncntrsbk/uncb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/nc
 ntrsbk/uncr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncri
 8a.pfb>
-Output written on handbook.pdf (12 pages, 129479 bytes).
+Output written on handbook.pdf (12 pages, 127106 bytes).
 PDF statistics:
- 505 PDF objects out of 1000 (max. 8388607)
- 365 compressed objects within 4 object streams
- 72 named destinations out of 1000 (max. 500000)
+ 503 PDF objects out of 1000 (max. 8388607)
+ 363 compressed objects within 4 object streams
+ 70 named destinations out of 1000 (max. 500000)
  259 words of extra memory for PDF output out of 10000 (max. 10000000)
 

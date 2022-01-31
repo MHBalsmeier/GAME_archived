@@ -26,12 +26,12 @@ echo "type of vertical grid: "$type_of_vertical_grid
 # end verbosity
 
 # downloading orography if necessary
-if [ ! -f phys_quantities/etopo.nc ]
+if [ $oro_id -eq 1 ] && [ ! -f phys_quantities/etopo.nc ]
 then
 ./phys_quantities/download_etopo.sh
 fi
 
-if [ $oro_id -eq 2 ] && [ ! -f phys_quantities/B${res_id}_is_land.nc ]
+if [ $oro_id -eq 1 ] && [ ! -f phys_quantities/B${res_id}_is_land.nc ]
 then
 echo "Creating land sea mask ..."
 python3 .py/is_land.py $res_id
