@@ -31,7 +31,22 @@ int set_basic_props2grib(codes_handle *, long, long, long, long, long, long);
 double calc_std_dev(double [], int);
 int global_scalar_integrator(Scalar_field, Grid *, double *);
 double pseudopotential(State *, Grid *, int);
-int get_pressure_levels(double []);
+
+int get_pressure_levels(double pressure_levels[])
+{
+	/*
+	This function returns the pressure levels for the pressure_level output.
+	Can be modified by the user.
+	*/
+	
+	pressure_levels[0] = 20000;
+	pressure_levels[1] = 30000;
+	pressure_levels[2] = 50000;
+	pressure_levels[3] = 70000;
+	pressure_levels[4] = 85000;
+	pressure_levels[5] = 92500;
+	return 0;
+}
 
 int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, Config_io *config_io, Config *config, Soil *soil)
 {
@@ -1650,18 +1665,6 @@ double pseudopotential(State *state, Grid *grid, int scalar_index)
 		result = temperature*pow(P_0/pressure, alpha_1)*exp(alpha_2*alpha_3);
 	}
 	return result;
-}
-
-// This function returns the pressure levels for the pressure_level output.
-int get_pressure_levels(double pressure_levels[])
-{
-	pressure_levels[0] = 20000;
-	pressure_levels[1] = 30000;
-	pressure_levels[2] = 50000;
-	pressure_levels[3] = 70000;
-	pressure_levels[4] = 85000;
-	pressure_levels[5] = 92500;
-	return 0;
 }
 
 

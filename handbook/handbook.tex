@@ -326,6 +326,8 @@ Assuming a local thermodynamic equilibrium in a heterogeneous fluid boils down t
 \section{Configuring output}
 \label{sec:configuring_output}
 
+If you want to change the pressure levels to which the output will be interpolated, modify the function \texttt{get\_pressure\_levels} as well as the constant \texttt{NO\_OF\_PRESSURE\_LEVELS} in the file \texttt{src/io/write\_output.c}. This must be done before compiling the model.
+
 \appendix
 
 \printbibliography
