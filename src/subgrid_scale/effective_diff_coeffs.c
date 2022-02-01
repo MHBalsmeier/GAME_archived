@@ -355,9 +355,11 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
 		{
 			i = layer_index*NO_OF_SCALARS_H + h_index;
+			
+			// decay constant, as derived from diffusion
 			decay_constant = 8*pow(M_PI, 2)/grid -> mean_velocity_area*(irrev -> viscosity_div[i] + irrev -> viscosity_curl[i])/density_gas(state, i);
+			
 			production_rate = 0;
-			// the decay constants differ over land vs over water
 			if (grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index] <= boundary_layer_height)
 			{
 				production_rate =
@@ -369,6 +371,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 				// restricting the production rate to positive values
 				production_rate = fmax(0, production_rate);
 			}
+			
 			// prognostic equation for TKE
 			irrev -> tke[i] += delta_t*(
 			// advection

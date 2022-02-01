@@ -170,9 +170,11 @@ double calc_diffusion_coeff(double temperature, double density)
 	/*
 	This function calculates the molecular diffusion coefficient according to the kinetic gas theory.
 	*/
+	
 	// these things are hardly ever modified
 	double particle_radius = 130e-12;
 	double particle_mass = mean_particle_masses_gas(0);
+	
 	// actual calculation
     double thermal_velocity = sqrt(8*K_B*temperature/(M_PI*particle_mass));
     double particle_density = density/particle_mass;
