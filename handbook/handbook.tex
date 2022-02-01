@@ -326,6 +326,11 @@ Assuming a local thermodynamic equilibrium in a heterogeneous fluid boils down t
 \section{Configuring output}
 \label{sec:configuring_output}
 
+\subsection{Output on pressure levels}
+\label{sec:output_on_pressure_levels}
+
+In Meteorology, atmospheric fields are often visualized on pressure levels. To simply this, \texttt{GAME} can interpolate data to pressure levels. This can be turned on and off with the variable \texttt{pressure\_level\_output\_switch} in the run scripts.
+
 If you want to change the pressure levels to which the output will be interpolated, modify the function \texttt{get\_pressure\_levels} as well as the constant \texttt{NO\_OF\_PRESSURE\_LEVELS} in the file \texttt{src/io/write\_output.c}. This must be done before compiling the model.
 
 \appendix
