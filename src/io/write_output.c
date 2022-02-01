@@ -24,19 +24,20 @@ In addition to that, some postprocessing diagnostics are also calculated here.
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 
-// the number of pressure levels for the pressure level output
-const int NO_OF_PRESSURE_LEVELS = 6;
-
 int set_basic_props2grib(codes_handle *, long, long, long, long, long, long);
 double calc_std_dev(double [], int);
 int global_scalar_integrator(Scalar_field, Grid *, double *);
 double pseudopotential(State *, Grid *, int);
 
+// the number of pressure levels for the pressure level output
+const int NO_OF_PRESSURE_LEVELS = 6;
+
 int get_pressure_levels(double pressure_levels[])
 {
 	/*
-	This function returns the pressure levels for the pressure_level output.
-	Can be modified by the user.
+	This function returns the pressure levels for the pressure level output.
+	Can be modified by the user (before compiling). Unit is Pa.
+	Remember to adjust NO_OF_PRESSURE_LEVELS adequately.
 	*/
 	
 	pressure_levels[0] = 20000;
