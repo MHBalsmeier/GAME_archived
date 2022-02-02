@@ -52,7 +52,6 @@ int get_pressure_levels(double pressure_levels[])
 int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, Config_io *config_io, Config *config, Soil *soil)
 {
 	printf("Writing output ...\n");
-	// Diagnostics, forcings and radiation are primarily handed over for checks.
 	
 	// Time stuff.
     time_t t_init_t = (time_t) t_init;
@@ -93,6 +92,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		double *rprate = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *sprate = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *cape = malloc(NO_OF_SCALARS_H*sizeof(double));
+		double *sfc_sw_down = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta,
 		cape_integrand, delta_z, temp_closest, temp_second_closest, delta_z_temp, temperature_gradient, theta_e;
 		double z_tropopause = 12e3;
@@ -168,6 +168,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				--layer_index;
 				z_height = grid -> z_scalar[layer_index*NO_OF_SCALARS_H + i];
 			}
+			
+			sfc_sw_down[i] = forcings -> sfc_sw_in[i]/(1 - grid -> sfc_albedo[i] + EPSILON_SECURITY);
 		    
 		    // Now come the hydrometeors.
 		    if (NO_OF_CONDENSED_CONSTITUENTS == 4)
@@ -308,7 +310,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			sprintf(OUTPUT_FILE_PRE, "%s+%ds_surface.nc", config_io -> run_id, (int) (t_write - t_init));
 			char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
 			sprintf(OUTPUT_FILE, "%s+%ds_surface.nc", config_io -> run_id, (int) (t_write - t_init));
-			int scalar_h_dimid, mslp_id, ncid, retval, surface_p_id, rprate_id, sprate_id, cape_id, tcdc_id, t2_id, u10_id, v10_id, gusts_id;
+			int scalar_h_dimid, mslp_id, ncid, retval, surface_p_id, rprate_id, sprate_id, cape_id, tcdc_id, t2_id, u10_id, v10_id, gusts_id, sfc_sw_down_id;
 			
 			if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
 				NCERR(retval);
@@ -344,17 +346,21 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				NCERR(retval);
 			if ((retval = nc_put_att_text(ncid, cape_id, "units", strlen("J/kg"), "J/kg")))
 				NCERR(retval);
+			if ((retval = nc_def_var(ncid, "sfc_sw_down", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_sw_down_id)))
+				NCERR(retval);
+			if ((retval = nc_put_att_text(ncid, sfc_sw_down_id, "units", strlen("W/m^2"), "W/m^2")))
+				NCERR(retval);
 			if ((retval = nc_def_var(ncid, "10u", NC_DOUBLE, 1, &scalar_h_dimid, &u10_id)))
 				NCERR(retval);
-			if ((retval = nc_put_att_text(ncid, cape_id, "units", strlen("m/s"), "m/s")))
+			if ((retval = nc_put_att_text(ncid, u10_id, "units", strlen("m/s"), "m/s")))
 				NCERR(retval);
 			if ((retval = nc_def_var(ncid, "10v", NC_DOUBLE, 1, &scalar_h_dimid, &v10_id)))
 				NCERR(retval);
-			if ((retval = nc_put_att_text(ncid, cape_id, "units", strlen("m/s"), "m/s")))
+			if ((retval = nc_put_att_text(ncid, v10_id, "units", strlen("m/s"), "m/s")))
 				NCERR(retval);
 			if ((retval = nc_def_var(ncid, "10gusts", NC_DOUBLE, 1, &scalar_h_dimid, &gusts_id)))
 				NCERR(retval);
-			if ((retval = nc_put_att_text(ncid, cape_id, "units", strlen("m/s"), "m/s")))
+			if ((retval = nc_put_att_text(ncid, gusts_id, "units", strlen("m/s"), "m/s")))
 				NCERR(retval);
 			if ((retval = nc_enddef(ncid)))
 				NCERR(retval);
@@ -372,6 +378,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			if ((retval = nc_put_var_double(ncid, sprate_id, &sprate[0])))
 				NCERR(retval);
 			if ((retval = nc_put_var_double(ncid, cape_id, &cape[0])))
+				NCERR(retval);
+			if ((retval = nc_put_var_double(ncid, sfc_sw_down_id, &sfc_sw_down[0])))
 				NCERR(retval);
 			if ((retval = nc_put_var_double(ncid, u10_id, &wind_10_m_mean_u_at_cell[0])))
 				NCERR(retval);
@@ -410,6 +418,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			codes_handle *handle_sprate = NULL;
 			codes_handle *handle_wind_10m_gusts = NULL;
 			codes_handle *handle_cape = NULL;
+			codes_handle *handle_sfc_sw_down = NULL;
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_surface_p = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
 			if (err != 0)
@@ -516,6 +525,27 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    if ((retval = codes_write_message(handle_cape, OUTPUT_FILE, "a")))
 		        ECCERR(retval);
 			codes_handle_delete(handle_cape);
+			
+			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
+			handle_sfc_sw_down = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
+			if (err != 0)
+				ECCERR(err);
+			fclose(SAMPLE_FILE);
+			set_basic_props2grib(handle_sfc_sw_down, data_date, data_time, t_write, t_init, 4, 7);
+		    if ((retval = codes_set_long(handle_sfc_sw_down, "typeOfFirstFixedSurface", 103)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_sfc_sw_down, "scaledValueOfFirstFixedSurface", 0)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_sfc_sw_down, "scaleFactorOfFirstFixedSurface", 1)))
+		        ECCERR(retval);
+		    if ((retval = codes_set_long(handle_sfc_sw_down, "level", 0)))
+		        ECCERR(retval);
+		    interpolate_to_ll(sfc_sw_down, grib_output_field, grid);
+		    if ((retval = codes_set_double_array(handle_sfc_sw_down, "values", grib_output_field, NO_OF_LATLON_IO_POINTS)))
+		        ECCERR(retval);
+		    if ((retval = codes_write_message(handle_sfc_sw_down, OUTPUT_FILE, "a")))
+		        ECCERR(retval);
+			codes_handle_delete(handle_sfc_sw_down);
 			
 			SAMPLE_FILE = fopen(SAMPLE_FILENAME, "r");
 			handle_sprate = codes_handle_new_from_file(NULL, SAMPLE_FILE, PRODUCT_GRIB, &err);
@@ -636,6 +666,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		free(sprate);
 		free(tcdc);
 		free(cape);
+		free(sfc_sw_down);
 	}
     
     // Diagnostics of quantities that are not surface-specific.    

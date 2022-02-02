@@ -79,6 +79,11 @@ if short_name == "cape":
 	unit_string = "J / kg"
 	show_level_on = 0
 	surface_bool = 1
+if short_name == "dswrf":
+	variable_name = "Downward shortwave flux"
+	unit_string = "W / m^2"
+	show_level_on = 0
+	surface_bool = 1
 if short_name == "pres":
 	variable_name = "Pressure"
 	unit_string = "Pa"

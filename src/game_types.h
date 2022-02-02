@@ -150,6 +150,8 @@ Vector_field v_at_edge;
 Scalar_field u_at_cell;
 Scalar_field v_at_cell;
 double dv_hdz[NO_OF_H_VECTORS + NO_OF_VECTORS_H];
+double rain_acc[NO_OF_SCALARS_H];
+double snow_acc[NO_OF_SCALARS_H];
 } Diagnostics;
 
 // needed for the radiation calculation

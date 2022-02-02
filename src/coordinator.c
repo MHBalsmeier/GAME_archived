@@ -226,12 +226,26 @@ int main(int argc, char *argv[])
     }
 	temperature_diagnostics(state_old, grid, diagnostics);
 	inner_product(state_old -> wind, state_old -> wind, diagnostics -> v_squared, grid);
-    // writing out the initial state of the model run
-    write_out(state_old, wind_h_lowest_layer, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, config_io, config, soil);
-    t_write += config_io -> write_out_interval;
-    printf("Run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
+	
+	// time coordinate of the old RK step
     double t_0;
     t_0 = t_init;
+	
+	// configuring radiation and calculating radiative fluxes for the first time
+	config -> soil_on = 0;
+    config -> rad_update = 1;
+    if (config -> rad_on == 1)
+    {
+    	radiation_init();
+    	config -> soil_on = 1;
+    	call_radiation(state_old, soil, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config, delta_t, t_0);
+    }
+    
+    // writing out the initial state of the model run
+    write_out(state_old, wind_h_lowest_layer, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, config_io, config, soil);
+    
+    t_write += config_io -> write_out_interval;
+    printf("Run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
     int time_step_counter = 0;
     clock_t first_time, second_time;
     first_time = clock();
@@ -241,13 +255,6 @@ int main(int argc, char *argv[])
 		write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 1);
 		write_out_integral(state_old, time_step_counter, grid, dualgrid, diagnostics, 2);
 	}
-	config -> soil_on = 0;
-    config -> rad_update = 1;
-    if (config -> rad_on == 1)
-    {
-    	radiation_init();
-    	config -> soil_on = 1;
-    }
 	
 	/*
 	Preparation of the actual integration.
@@ -276,7 +283,7 @@ int main(int argc, char *argv[])
     	Checking if the radiative fluxes need to be updated:
     	----------------------------------------------------
     	*/
-        if (t_0 <= t_rad_update && t_0 + delta_t >= t_rad_update)
+        if (t_0 <= t_rad_update && t_0 + delta_t >= t_rad_update && config -> totally_first_step_bool != 1)
         {
         	config -> rad_update = 1;
         	t_rad_update += config -> radiation_delta_t;
