@@ -11,7 +11,7 @@ In this file, the gravity potential gets computed.
 #include "../../src/game_types.h"
 #include "include.h"
 
-int set_gravity_potential(double z_scalar[], double gravity_potential[], double GRAVITY_MEAN_SFC_ABS)
+int set_gravity_potential(double z_scalar[], double gravity_potential[], double gravity_mean_sfc_abs, double radius)
 {
 	/*
 	This function computes the gravity potential.
@@ -20,7 +20,7 @@ int set_gravity_potential(double z_scalar[], double gravity_potential[], double 
 	#pragma omp parallel for
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
-    	gravity_potential[i] = -GRAVITY_MEAN_SFC_ABS*(RADIUS*RADIUS/(RADIUS + z_scalar[i]) - RADIUS);
+    	gravity_potential[i] = -gravity_mean_sfc_abs*(radius*radius/(radius + z_scalar[i]) - radius);
     }
 	return 0;
 }

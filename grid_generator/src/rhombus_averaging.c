@@ -14,7 +14,7 @@ In this file, remapping indices and weights to rhombi are computed.
 #include "../../src/game_constants.h"
 #include "include.h"
 
-int rhombus_averaging(int vorticity_indices_triangles[], int vorticity_signs_triangles[], int from_index_dual[], int to_index_dual[], int vorticity_indices_rhombi[], int density_to_rhombus_indices[], int from_index[], int to_index[], double area_dual[], double z_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], double density_to_rhombus_weights[], double latitude_vector[], double longitude_vector[], double latitude_scalar[], double longitude_scalar[], double TOA)
+int rhombus_averaging(int vorticity_indices_triangles[], int vorticity_signs_triangles[], int from_index_dual[], int to_index_dual[], int vorticity_indices_rhombi[], int density_to_rhombus_indices[], int from_index[], int to_index[], double area_dual[], double z_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], double density_to_rhombus_weights[], double latitude_vector[], double longitude_vector[], double latitude_scalar[], double longitude_scalar[], double radius)
 {
 	/*
 	This function implements the averaging of scalar quantities to rhombi. Indices and weights are computed here for the highest layer but remain unchanged elsewhere.
@@ -183,7 +183,7 @@ int rhombus_averaging(int vorticity_indices_triangles[], int vorticity_signs_tri
 				latitude_scalar_dual[dual_scalar_h_index_1], longitude_scalar_dual[dual_scalar_h_index_1], latitude_vector[i], longitude_vector[i]);
 				triangle_3 = calc_triangle_area(latitude_scalar[density_to_rhombus_indices[4*i + j]], longitude_scalar[density_to_rhombus_indices[4*i + j]],
 				latitude_scalar_dual[dual_scalar_h_index_1], longitude_scalar_dual[dual_scalar_h_index_1], latitude_vector[vector_h_index_1], longitude_vector[vector_h_index_1]);
-				density_to_rhombus_weights[4*i + j] = pow(RADIUS + z_vector[NO_OF_SCALARS_H], 2)*(triangle_0 + triangle_1 + triangle_2 + triangle_3)/rhombus_area;
+				density_to_rhombus_weights[4*i + j] = pow(radius + z_vector[NO_OF_SCALARS_H], 2)*(triangle_0 + triangle_1 + triangle_2 + triangle_3)/rhombus_area;
 			}
 			else
 			{
@@ -237,7 +237,7 @@ int rhombus_averaging(int vorticity_indices_triangles[], int vorticity_signs_tri
 				}
 				triangle_1 = calc_triangle_area(latitude_scalar[density_to_rhombus_indices[4*i + j]], longitude_scalar[density_to_rhombus_indices[4*i + j]],
 				latitude_scalar_dual[dual_scalar_h_index_0], longitude_scalar_dual[dual_scalar_h_index_0], latitude_vector[vector_h_index_1], longitude_vector[vector_h_index_1]);
-				density_to_rhombus_weights[4*i + j] = pow(RADIUS + z_vector[NO_OF_SCALARS_H], 2)*(triangle_0 + triangle_1)/rhombus_area;
+				density_to_rhombus_weights[4*i + j] = pow(radius + z_vector[NO_OF_SCALARS_H], 2)*(triangle_0 + triangle_1)/rhombus_area;
 			}
 		}
 		if (first_case_counter != 2)

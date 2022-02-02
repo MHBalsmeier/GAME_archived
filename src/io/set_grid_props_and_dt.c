@@ -27,7 +27,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char grid_file_name[])
     int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_weights_id, area_dual_id, z_vector_dual_id, f_vec_id, to_index_id, from_index_id,
     to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, trsk_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, direction_id,
     gravity_potential_id, inner_product_weights_id, density_to_rhombi_weights_id, density_to_rhombi_indices_id, normal_distance_dual_id, vorticity_indices_triangles_id,
-    vorticity_signs_triangles_id, latitude_scalar_id, longitude_scalar_id, no_of_shaded_points_scalar_id, no_of_shaded_points_vector_id, toa_id, vert_grid_type_id,
+    vorticity_signs_triangles_id, latitude_scalar_id, longitude_scalar_id, no_of_shaded_points_scalar_id, no_of_shaded_points_vector_id, toa_id, radius_id, vert_grid_type_id,
     interpol_indices_id, interpol_weights_id, theta_bg_id, exner_bg_id, sfc_rho_c_id, sfc_albedo_id, roughness_length_id, is_land_id, t_conductivity_id,
     no_of_oro_layers_id, stretching_parameter_id;
     if ((retval = nc_open(grid_file_name, NC_NOWRITE, &ncid)))
@@ -37,6 +37,8 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char grid_file_name[])
     if ((retval = nc_inq_varid(ncid, "no_of_oro_layers", &no_of_oro_layers_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "toa", &toa_id)))
+        ERR(retval);
+    if ((retval = nc_inq_varid(ncid, "radius", &radius_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "stretching_parameter", &stretching_parameter_id)))
         ERR(retval);
@@ -121,6 +123,8 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char grid_file_name[])
     if ((retval = nc_get_var_int(ncid, no_of_oro_layers_id, &(grid -> no_of_oro_layers))))
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, toa_id, &(grid -> toa))))
+        ERR(retval);
+    if ((retval = nc_get_var_double(ncid, radius_id, &(grid -> radius))))
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, stretching_parameter_id, &(grid -> stretching_parameter))))
         ERR(retval);

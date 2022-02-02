@@ -40,10 +40,10 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, Dia
     double dummy_4 = 0.0;
     double dummy_5 = 0.0;
     double dummy_6 = 0.0;
+    double small_atmos_rescale = RADIUS/grid -> radius;
     int layer_index, h_index;
     int zero = 0;
     int one = 1;
-    double one_double = 1;
     // 3D scalar fields determined here, apart from density
     #pragma omp parallel for private(layer_index, h_index, lat, lon, z_height, total_density, specific_humidity)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
@@ -62,13 +62,13 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, Dia
         // dry Ullrich test
         if (ideal_input_id == 1)
         {
-        	baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i],
+        	baroclinic_wave_test(&one, &zero, &one, &small_atmos_rescale, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i],
         	&dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
         }
         // moist Ullrich test
         if (ideal_input_id == 2)
         {
-        	baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i],
+        	baroclinic_wave_test(&one, &one, &one, &small_atmos_rescale, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i],
         	&dummy_2, &dummy_4, &dummy_5, &total_density, &specific_humidity);
         	water_vapour_density[i] = total_density*specific_humidity;
         }
@@ -113,13 +113,13 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, Dia
             // dry Ullrich test
             if (ideal_input_id == 1)
             {
-        		baroclinic_wave_test(&one, &zero, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
+        		baroclinic_wave_test(&one, &zero, &one, &small_atmos_rescale, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
                 state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
             }
             // moist Ullrich test
             if (ideal_input_id == 2)
             {
-        		baroclinic_wave_test(&one, &one, &one, &one_double, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
+        		baroclinic_wave_test(&one, &one, &one, &small_atmos_rescale, &lon, &lat, &dummy_0, &z_height, &one, &u, &v, &dummy_1, &dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
                 state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = u*cos(grid -> direction[j]) + v*sin(grid -> direction[j]);
             }
         }

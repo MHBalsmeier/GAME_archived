@@ -280,7 +280,7 @@ int hor_calc_curl_of_vorticity(Curl_field vorticity, double rel_vort_on_triangle
 		{
 			// calculating the tangential slope
 			delta_x = dualgrid -> normal_distance[NO_OF_DUAL_VECTORS - NO_OF_VECTORS_H + h_index];
-			delta_x = delta_x*(RADIUS + grid -> z_vector[vector_index])/RADIUS;
+			delta_x = delta_x*(grid -> radius + grid -> z_vector[vector_index])/grid -> radius;
 			tangential_slope = delta_z/delta_x;
 			
 			// calculating the vertical gradient of the vertical vorticity

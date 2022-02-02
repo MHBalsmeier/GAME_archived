@@ -53,8 +53,9 @@ int main(int argc, char *argv[])
    	stretching_parameter = strtof(argv[5], NULL);
    	int no_of_oro_layers = strtod(argv[6], NULL);
    	const int vert_grid_type = strtod(argv[7], NULL);
-    double toa;
-   	toa = strtof(argv[8], NULL);
+   	double toa = strtof(argv[8], NULL);
+   	double radius_rescale = strtof(argv[9], NULL);
+   	double radius = radius_rescale*RADIUS;
    	if (vert_grid_type == 1)
    	{
    		no_of_oro_layers = 0;
@@ -214,7 +215,7 @@ int main(int argc, char *argv[])
 	to_index_dual, from_index_dual, rel_on_line_dual, ORTH_CRITERION_DEG);
 	
 	// setting the Coriolis vector
-    set_f_vec(latitude_vector, direction, direction_dual, f_vec);
+    set_f_vec(latitude_vector, direction, direction_dual, f_vec, radius_rescale);
     
     // calculating the dual cells on the unity sphere
     calc_triangle_area_unity(triangle_face_unit_sphere, latitude_scalar, longitude_scalar, face_edges,
@@ -254,7 +255,8 @@ int main(int argc, char *argv[])
 	}
 	
 	printf("Determining vector z coordinates and normal distances of the primal grid ... ");
-	set_z_vector_and_normal_distance(z_vector, z_scalar, normal_distance, latitude_scalar, longitude_scalar, from_index, to_index, toa, vert_grid_type, oro);
+	set_z_vector_and_normal_distance(z_vector, z_scalar, normal_distance, latitude_scalar, longitude_scalar,
+	from_index, to_index, toa, vert_grid_type, oro, radius);
 	free(oro);
     printf(GREEN "finished.\n" RESET);	
 	
@@ -264,19 +266,19 @@ int main(int argc, char *argv[])
 	
 	printf("Determining vector z coordinates of the dual grid and distances of the dual grid ... ");
 	calc_z_vector_dual_and_normal_distance_dual(z_vector_dual, normal_distance_dual, z_scalar_dual, toa, from_index, to_index, z_vector,
-	from_index_dual, to_index_dual, latitude_scalar_dual, longitude_scalar_dual, vorticity_indices_triangles);
+	from_index_dual, to_index_dual, latitude_scalar_dual, longitude_scalar_dual, vorticity_indices_triangles, radius);
     printf(GREEN "finished.\n" RESET);
 	
 	printf("Calculating areas ... ");
-	set_area(area, z_vector, z_vector_dual, normal_distance_dual, pent_hex_face_unity_sphere);
+	set_area(area, z_vector, z_vector_dual, normal_distance_dual, pent_hex_face_unity_sphere, radius);
     printf(GREEN "finished.\n" RESET);
     
     printf("Calculating dual areas ... ");
-	set_area_dual(area_dual, z_vector_dual, normal_distance, z_vector, from_index, to_index, triangle_face_unit_sphere, toa);
+	set_area_dual(area_dual, z_vector_dual, normal_distance, z_vector, from_index, to_index, triangle_face_unit_sphere, toa, radius);
     printf(GREEN "finished.\n" RESET);
     
     printf("Calculating grid box volumes ... ");
-	set_volume(volume, z_vector, area, from_index, to_index, toa, vorticity_indices_triangles);
+	set_volume(volume, z_vector, area, from_index, to_index, toa, vorticity_indices_triangles, radius);
     printf(GREEN "finished.\n" RESET);
     
     /*
@@ -284,7 +286,7 @@ int main(int argc, char *argv[])
         -----------------------------------------------------------------------------
     */
     printf("Setting the gravity potential ... ");
-	set_gravity_potential(z_scalar, gravity_potential, GRAVITY_MEAN_SFC_ABS);
+	set_gravity_potential(z_scalar, gravity_potential, GRAVITY_MEAN_SFC_ABS, radius);
     printf(GREEN "finished.\n" RESET);
     
     printf("Setting the hydrostatic background state ... ");
@@ -299,13 +301,13 @@ int main(int argc, char *argv[])
 	rhombus_averaging(vorticity_indices_triangles, vorticity_signs_triangles, from_index_dual,
 	to_index_dual, vorticity_indices_rhombi, density_to_rhombi_indices, from_index, to_index, area_dual,
 	z_vector, latitude_scalar_dual, longitude_scalar_dual, density_to_rhombi_weights, latitude_vector,
-	longitude_vector, latitude_scalar, longitude_scalar, toa);
+	longitude_vector, latitude_scalar, longitude_scalar, radius);
     printf(GREEN "finished.\n" RESET);
     
     printf("Calculating Coriolis indices and weights ... ");
 	coriolis(from_index_dual, to_index_dual, trsk_modified_curl_indices, normal_distance, normal_distance_dual,
 	to_index, area, z_scalar, latitude_scalar, longitude_scalar, latitude_vector, longitude_vector, latitude_scalar_dual,
-	longitude_scalar_dual, trsk_weights, trsk_indices, from_index, adjacent_vector_indices_h, z_vector, z_vector_dual);
+	longitude_scalar_dual, trsk_weights, trsk_indices, from_index, adjacent_vector_indices_h, z_vector, z_vector_dual, radius);
     printf(GREEN "finished.\n" RESET);
     
     printf("Calculating interpolation to the lat-lon grid ... ");
@@ -326,7 +328,7 @@ int main(int argc, char *argv[])
     inner_product_weights_id, scalar_8_dimid, scalar_2_dimid, vector_h_dual_dimid_2, density_to_rhombi_indices_id, density_to_rhombi_weights_id,
     vorticity_indices_triangles_id, ncid_g_prop, single_double_dimid, no_of_shaded_points_vector_id, no_of_shaded_points_scalar_id,
     no_of_lloyd_iterations_id, single_int_dimid, interpol_indices_id, interpol_weights_id, theta_bg_id, exner_bg_id, sfc_albedo_id, sfc_rho_c_id, t_conductivity_id,
-    roughness_length_id, is_land_id, vert_grid_type_id, no_of_oro_layers_id, stretching_parameter_id, toa_id;
+    roughness_length_id, is_land_id, vert_grid_type_id, no_of_oro_layers_id, stretching_parameter_id, toa_id, radius_id;
     
     printf("Starting to write to output file ... ");
     if ((retval = nc_create(output_file, NC_CLOBBER, &ncid_g_prop)))
@@ -380,6 +382,10 @@ int main(int argc, char *argv[])
     if ((retval = nc_def_var(ncid_g_prop, "toa", NC_DOUBLE, 1, &single_double_dimid, &toa_id)))
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, toa_id, "units", strlen("m"), "m")))
+        ERR(retval);
+    if ((retval = nc_def_var(ncid_g_prop, "radius", NC_DOUBLE, 1, &single_double_dimid, &radius_id)))
+        ERR(retval);
+    if ((retval = nc_put_att_text(ncid_g_prop, radius_id, "units", strlen("m"), "m")))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "latitude_scalar", NC_DOUBLE, 1, &scalar_h_dimid, &latitude_scalar_id)))
         ERR(retval);
@@ -508,6 +514,8 @@ int main(int argc, char *argv[])
     if ((retval = nc_put_var_double(ncid_g_prop, stretching_parameter_id, &stretching_parameter)))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, toa_id, &toa)))
+        ERR(retval);
+    if ((retval = nc_put_var_double(ncid_g_prop, radius_id, &radius)))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, latitude_scalar_id, &latitude_scalar[0])))
         ERR(retval);

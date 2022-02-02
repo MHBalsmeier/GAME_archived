@@ -25,14 +25,14 @@ const double TROPO_HEIGHT_STANDARD = 11e3;
 const double INVERSE_HEIGHT_STANDARD = 20e3;
 const double TEMP_GRADIENT_INV_STANDARD = 0.1/100;
 
-int set_z_scalar(double z_scalar[], double oro[], int NO_OF_ORO_LAYERS, double TOA, double stretching_parameter, int VERT_GRID_TYPE)
+int set_z_scalar(double z_scalar[], double oro[], int NO_OF_ORO_LAYERS, double toa, double stretching_parameter, int VERT_GRID_TYPE)
 {
 	/*
 	This function sets the z coordinates of the scalar data points.
 	*/
 	
 	double z_vertical_vector_pre[NO_OF_LAYERS + 1];
-	// the heights are defined according to z_k = A_k + B_k*oro with A_0 = TOA, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
+	// the heights are defined according to z_k = A_k + B_k*oro with A_0 = toa, A_{NO_OF_LEVELS} = 0, B_0 = 0, B_{NO_OF_LEVELS} = 1
 	double A, B, sigma_z, z_rel, max_oro;
 	// loop over all columns
     for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
@@ -40,9 +40,9 @@ int set_z_scalar(double z_scalar[], double oro[], int NO_OF_ORO_LAYERS, double T
     	// filling up z_vertical_vector_pre
 		for (int j = 0; j < NO_OF_LAYERS + 1; ++j)
 		{
-			z_rel = 1 - (j + 0.0)/NO_OF_LAYERS; // z/TOA
+			z_rel = 1 - (j + 0.0)/NO_OF_LAYERS; // z/toa
 			sigma_z = pow(z_rel, stretching_parameter);
-			A = sigma_z*TOA; // the height without orography
+			A = sigma_z*toa; // the height without orography
 			// B corrects for orography
 			if (j >= NO_OF_LAYERS - NO_OF_ORO_LAYERS && VERT_GRID_TYPE == 0)
 			{
@@ -114,7 +114,7 @@ int set_vector_shading_indices(int from_index[], int to_index[], int no_of_shade
 }
 
 int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], double normal_distance[], double latitude_scalar[],
-double longitude_scalar[], int from_index[], int to_index[], double TOA, int VERT_GRID_TYPE, double oro[])
+double longitude_scalar[], int from_index[], int to_index[], double toa, int VERT_GRID_TYPE, double oro[], double radius)
 {
 	/*
 	calculates the vertical position of the vector points
@@ -142,7 +142,7 @@ double longitude_scalar[], int from_index[], int to_index[], double TOA, int VER
             longitude_scalar[from_index[h_index - NO_OF_SCALARS_H]],
             latitude_scalar[to_index[h_index - NO_OF_SCALARS_H]],
             longitude_scalar[to_index[h_index - NO_OF_SCALARS_H]],
-            RADIUS + z_vector[i]);
+            radius + z_vector[i]);
         }
         else
         {
@@ -151,8 +151,8 @@ double longitude_scalar[], int from_index[], int to_index[], double TOA, int VER
             // highest level
             if (layer_index == 0)
 			{
-            	z_vector[i] = TOA;
-                normal_distance[i] = TOA - z_scalar[lower_index];
+            	z_vector[i] = toa;
+                normal_distance[i] = toa - z_scalar[lower_index];
 			}
 			// lowest level
             else if (layer_index == NO_OF_LAYERS)
@@ -186,7 +186,7 @@ double longitude_scalar[], int from_index[], int to_index[], double TOA, int VER
     return 0;
 }
 
-int set_z_scalar_dual(double z_scalar_dual[], double z_vector[], int from_index[], int to_index[], int vorticity_indices_triangles[], double TOA)
+int set_z_scalar_dual(double z_scalar_dual[], double z_vector[], int from_index[], int to_index[], int vorticity_indices_triangles[], double toa)
 {
 	/*
 	This function sets the z coordinates of the dual scalar points.
@@ -210,7 +210,7 @@ int set_z_scalar_dual(double z_scalar_dual[], double z_vector[], int from_index[
 	return 0;
 }
 
-int set_volume(double volume[], double z_vector[], double area[], int from_index[], int to_index[], double TOA, int vorticity_indices_triangles[])
+int set_volume(double volume[], double z_vector[], double area[], int from_index[], int to_index[], double toa, int vorticity_indices_triangles[], double radius)
 {
 	/*
 	This function computes the volumes of the grid boxes.
@@ -224,14 +224,15 @@ int set_volume(double volume[], double z_vector[], double area[], int from_index
         layer_index = i/NO_OF_SCALARS_H;
         h_index = i - layer_index*NO_OF_SCALARS_H;
         base_area = area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
-        radius_0 = RADIUS + z_vector[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
-        radius_1 = RADIUS + z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
+        radius_0 = radius + z_vector[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
+        radius_1 = radius + z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
         volume[i] = find_volume(base_area, radius_0, radius_1);
     }
 	return 0;
 }
 
-int set_area_dual(double area_dual[], double z_vector_dual[], double normal_distance[], double z_vector[], int from_index[], int to_index[], double triangle_face_unit_sphere[], double TOA)
+int set_area_dual(double area_dual[], double z_vector_dual[], double normal_distance[], double z_vector[], int from_index[],
+int to_index[], double triangle_face_unit_sphere[], double toa, double radius)
 {
 	/*
 	This function computes the areas of the dual grid.
@@ -246,29 +247,29 @@ int set_area_dual(double area_dual[], double z_vector_dual[], double normal_dist
         h_index = i - layer_index*NO_OF_DUAL_VECTORS_PER_LAYER;
         if (h_index >= NO_OF_VECTORS_H)
         {
-            area_dual[i] = pow(RADIUS + z_vector_dual[i], 2)*triangle_face_unit_sphere[h_index - NO_OF_VECTORS_H];
+            area_dual[i] = pow(radius + z_vector_dual[i], 2)*triangle_face_unit_sphere[h_index - NO_OF_VECTORS_H];
         }
         else
         {
         	if (layer_index == 0)
         	{
 		        primal_vector_index = NO_OF_SCALARS_H + h_index;
-		        radius_0 = RADIUS + z_vector[primal_vector_index];
-		        radius_1 = RADIUS + TOA;
+		        radius_0 = radius + z_vector[primal_vector_index];
+		        radius_1 = radius + toa;
 		        base_distance = normal_distance[primal_vector_index];
         	}
         	else if (layer_index == NO_OF_LAYERS)
         	{
 		        primal_vector_index = NO_OF_SCALARS_H + (NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + h_index;
-		        radius_0 = RADIUS + 0.5*(z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + from_index[h_index]] + z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + to_index[h_index]]);
-		        radius_1 = RADIUS + z_vector[primal_vector_index];
+		        radius_0 = radius + 0.5*(z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + from_index[h_index]] + z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + to_index[h_index]]);
+		        radius_1 = radius + z_vector[primal_vector_index];
 		        base_distance = normal_distance[primal_vector_index]*radius_0/radius_1;
         	}
         	else
         	{
 		        primal_vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
-		        radius_0 = RADIUS + z_vector[primal_vector_index];
-		        radius_1 = RADIUS + z_vector[primal_vector_index - NO_OF_VECTORS_PER_LAYER];
+		        radius_0 = radius + z_vector[primal_vector_index];
+		        radius_1 = radius + z_vector[primal_vector_index - NO_OF_VECTORS_PER_LAYER];
 		        base_distance = normal_distance[primal_vector_index];
         	}
             area_dual[i] = calculate_vertical_area(base_distance, radius_0, radius_1);
@@ -277,7 +278,7 @@ int set_area_dual(double area_dual[], double z_vector_dual[], double normal_dist
     return 0;
 }
 
-int set_area(double area[], double z_vector[], double z_vector_dual[], double normal_distance_dual[], double pent_hex_face_unity_sphere[])
+int set_area(double area[], double z_vector[], double z_vector_dual[], double normal_distance_dual[], double pent_hex_face_unity_sphere[], double radius)
 {
 	/*
 	This function sets the areas of the grid boxes.
@@ -292,13 +293,13 @@ int set_area(double area[], double z_vector[], double z_vector_dual[], double no
         h_index = i - layer_index*NO_OF_VECTORS_PER_LAYER;
         if (h_index < NO_OF_SCALARS_H)
         {
-            area[i] = pent_hex_face_unity_sphere[h_index]*pow(RADIUS + z_vector[i], 2);
+            area[i] = pent_hex_face_unity_sphere[h_index]*pow(radius + z_vector[i], 2);
         }
         else
         {
             dual_vector_index = (layer_index + 1)*NO_OF_DUAL_VECTORS_PER_LAYER + h_index - NO_OF_SCALARS_H;
-            radius_0 = RADIUS + z_vector_dual[dual_vector_index];
-            radius_1 = RADIUS + z_vector_dual[dual_vector_index - NO_OF_DUAL_VECTORS_PER_LAYER];
+            radius_0 = radius + z_vector_dual[dual_vector_index];
+            radius_1 = radius + z_vector_dual[dual_vector_index - NO_OF_DUAL_VECTORS_PER_LAYER];
             base_distance = normal_distance_dual[dual_vector_index];
             area[i] = calculate_vertical_area(base_distance, radius_0, radius_1);
         }
@@ -307,8 +308,9 @@ int set_area(double area[], double z_vector[], double z_vector_dual[], double no
 	return 0;
 }
 
-int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double normal_distance_dual[], double z_scalar_dual[], double TOA, int from_index[],
-int to_index[], double z_vector[], int from_index_dual[], int to_index_dual[], double latitude_scalar_dual[], double longitude_scalar_dual[], int vorticity_indices_triangles[])
+int calc_z_vector_dual_and_normal_distance_dual(double z_vector_dual[], double normal_distance_dual[], double z_scalar_dual[], double toa, int from_index[],
+int to_index[], double z_vector[], int from_index_dual[], int to_index_dual[], double latitude_scalar_dual[],
+double longitude_scalar_dual[], int vorticity_indices_triangles[], double radius)
 {
 	/*
 	This function sets the z coordinates of the dual vector points as well as the normal distances of the dual grid.
@@ -333,7 +335,7 @@ int to_index[], double z_vector[], int from_index_dual[], int to_index_dual[], d
         {
 			if (layer_index == 0)
 			{
-				z_vector_dual[i] = TOA;
+				z_vector_dual[i] = toa;
 			}
 			else if (layer_index == NO_OF_LAYERS)
 			{
@@ -345,7 +347,7 @@ int to_index[], double z_vector[], int from_index_dual[], int to_index_dual[], d
 			}
             normal_distance_dual[i] = calculate_distance_h(latitude_scalar_dual[from_index_dual[h_index]], longitude_scalar_dual[from_index_dual[h_index]],
             latitude_scalar_dual[to_index_dual[h_index]], longitude_scalar_dual[to_index_dual[h_index]],
-            RADIUS + z_vector_dual[i]);
+            radius + z_vector_dual[i]);
         }
     }
 	return 0;

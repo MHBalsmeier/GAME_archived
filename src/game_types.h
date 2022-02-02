@@ -107,6 +107,7 @@ double t_const_soil;
 double toa;
 int oro_id;
 double stretching_parameter;
+double radius;
 } Grid;
 
 // Contains properties of the dual grid.

@@ -23,6 +23,7 @@ echo "number of layers following orography: "$orography_layers
 echo "stretching parameter: "$stretching_parameter
 echo "model top: "$toa" m"
 echo "type of vertical grid: "$type_of_vertical_grid
+echo "radius rescale factor: "$radius_rescale
 # end verbosity
 
 # downloading orography if necessary
@@ -43,11 +44,11 @@ echo "********** Calling the GAME grid generator **********"
 echo ""
 if [ $valgrind_check -eq 0 ]
 then
-./grid_generator $oro_id $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter $orography_layers $type_of_vertical_grid $toa
+./grid_generator $oro_id $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter $orography_layers $type_of_vertical_grid $toa $radius_rescale
 else
 if [ $valgrind_check -eq 1 ]
 then
-valgrind ./grid_generator $oro_id $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter $orography_layers $type_of_vertical_grid $toa
+valgrind ./grid_generator $oro_id $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter $orography_layers $type_of_vertical_grid $toa $radius_rescale
 fi
 fi
 if [ $? -ne 0 ]

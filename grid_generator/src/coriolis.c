@@ -14,7 +14,7 @@ In this file, everything that is needed for calculating the vorticity flux term 
 #include "../../src/game_constants.h"
 #include "include.h"
 
-int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_indices[], double normal_distance[], double normal_distance_dual[], int to_index[], double area[], double z_scalar[], double latitude_scalar[], double longitude_scalar[], double latitude_vector[], double longitude_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], double trsk_weights[], int trsk_indices[], int from_index[], int adjacent_vector_indices_h[], double z_vector[], double z_vector_dual[])
+int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_indices[], double normal_distance[], double normal_distance_dual[], int to_index[], double area[], double z_scalar[], double latitude_scalar[], double longitude_scalar[], double latitude_vector[], double longitude_vector[], double latitude_scalar_dual[], double longitude_scalar_dual[], double trsk_weights[], int trsk_indices[], int from_index[], int adjacent_vector_indices_h[], double z_vector[], double z_vector_dual[], double radius)
 {
 	/*
 	This function implements the modified TRSK scheme proposed by Gassmann (2018). Indices and weights are computed here for the highest layer but remain unchanged elsewhere.
@@ -22,7 +22,7 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 	
 	int offset, sign_0, sign_1, no_of_edges, index_offset, vertex_index_candidate_0, vertex_index_candidate_1, counter, check_result, first_index, last_index;
 	double check_sum, triangle_0, triangle_1, sum_of_weights;
-	double rescale_for_z_offset_1d = (RADIUS + z_scalar[0])/(RADIUS + z_vector[0]);
+	double rescale_for_z_offset_1d = (radius + z_scalar[0])/(radius + z_vector[0]);
 	double rescale_for_z_offset_2d = pow(rescale_for_z_offset_1d, 2);
 	// loop over all edges
 	#pragma omp parallel for private(offset, sign_0, sign_1, no_of_edges, index_offset, vertex_index_candidate_0, vertex_index_candidate_1, counter, check_result, first_index, last_index, check_sum, triangle_0, triangle_1, sum_of_weights)
@@ -183,7 +183,7 @@ int coriolis(int from_index_dual[], int to_index_dual[], int trsk_modified_curl_
 					}
 					triangle_1 = calc_triangle_area(latitude_scalar[from_or_to_index[i]], longitude_scalar[from_or_to_index[i]],
 					latitude_vertices[indices_resorted[l]], longitude_vertices[indices_resorted[l]], latitude_edges[l], longitude_edges[l]);
-					vector_of_areas[l] = pow(RADIUS + z_vector[NO_OF_SCALARS_H + i], 2)*(triangle_0 + triangle_1);
+					vector_of_areas[l] = pow(radius + z_vector[NO_OF_SCALARS_H + i], 2)*(triangle_0 + triangle_1);
 					check_sum += vector_of_areas[l];
 				}
 				

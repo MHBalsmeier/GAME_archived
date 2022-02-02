@@ -253,6 +253,8 @@ The grid generator needs to be recompiled for every specific horizontal resoluti
 \hline\hline \texttt{use\_scalar\_h\_coords\_file} & 0, 1 & switch to determine wether horizontal coordinates of triangle vertices (generators of the grid) shall be used from a previously generated file \tabularnewline
 \hline\hline \texttt{scalar\_h\_coords\_file} & string & input file for dual triangle vertices (only relevant if \texttt{use\_scalar\_h\_coords\_file} = 1) \tabularnewline
 \hline\hline \texttt{stretching\_parameter} & $\geq$ 1, real & defines the vertical stretching of the grid, one means no stretching \tabularnewline
+\hline\hline \texttt{type\_of\_vertical\_grid} & 0, 1 & specifies the terrain handling; 0: terrain-following coordinates, 1: block-like orography \tabularnewline
+\hline\hline \texttt{radius\_rescale} & $> 0$ & rescale factor for the radius of the grid, radius $r$ will be calculated according to $r = \texttt{radius\_rescale}\cdot a$, where $a$ is the Earth radius; angular velocity $\omega$ will be replaced according to $\omega \to \frac{\omega}{\texttt{radius\_rescale}}$ \tabularnewline
 \hline
 \end{tabular}
 \caption{Grid generator run script explanation.}

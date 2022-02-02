@@ -189,7 +189,8 @@ int calc_rel_vort_on_triangles(Vector_field velocity_field, double result[], Gri
 	    	length_rescale_factor = 1;
 	        if (layer_index >= NO_OF_LAYERS - grid -> no_of_oro_layers)
 	        {
-        		length_rescale_factor = (RADIUS + dualgrid -> z_vector[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + h_index])/(RADIUS + grid -> z_vector[vector_index]);
+        		length_rescale_factor = (grid -> radius + dualgrid -> z_vector[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + h_index])
+        		/(grid -> radius + grid -> z_vector[vector_index]);
 	        	delta_z = dualgrid -> z_vector[NO_OF_VECTORS_H + layer_index*NO_OF_DUAL_VECTORS_PER_LAYER + h_index] - grid -> z_vector[vector_index];
 	        	if (delta_z > 0)
 	        	{

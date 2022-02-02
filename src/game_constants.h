@@ -7,6 +7,12 @@ Github repository: https://github.com/OpenNWP/GAME
 This file collects physical constants that are hardly ever modified.
 */
 
+// calculating the Earth radius
+#define SEMIMAJOR 6378137.0
+#define SEMIMINOR 6356752.314
+#define RADIUS pow(SEMIMAJOR*SEMIMAJOR*SEMIMINOR, 1.0/3)
+
+// other constants
 #define OMEGA (7.292115e-5)
 #define N_A (6.0221409e23)
 #define K_B (1.380649e-23)

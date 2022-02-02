@@ -19,7 +19,7 @@ This function is a collection of some helper functions that are needed for the g
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 
-int set_f_vec(double latitude_vector[], double direction[], double direction_dual[], double f_vec[])
+int set_f_vec(double latitude_vector[], double direction[], double direction_dual[], double f_vec[], double radius_rescale)
 {
 	/*
 	This function sets the Coriolis vector (vertical at horizontal primal vector points,
@@ -32,12 +32,12 @@ int set_f_vec(double latitude_vector[], double direction[], double direction_dua
     	// horizontal component at dual vector points
         if (i < NO_OF_VECTORS_H)
         {
-        	f_vec[i] = 2*OMEGA*cos(latitude_vector[i])*sin(direction_dual[i]);
+        	f_vec[i] = 2*OMEGA/radius_rescale*cos(latitude_vector[i])*sin(direction_dual[i]);
     	}
         // vertical component at primal vector points
         else if (i < 2*NO_OF_VECTORS_H)
         {
-        	f_vec[i] = 2*OMEGA*sin(latitude_vector[i - NO_OF_VECTORS_H]);
+        	f_vec[i] = 2*OMEGA/radius_rescale*sin(latitude_vector[i - NO_OF_VECTORS_H]);
     	}
     }
  	return 0;   
