@@ -6,6 +6,8 @@
 import eccodes as ec
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+mpl.rcParams["savefig.pad_inches"] = 0.05
 
 run_id = "ideal"
 output_base_dir = "/home/max/code/GAME/output"

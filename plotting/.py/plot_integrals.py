@@ -36,7 +36,7 @@ if write_out_dry_mass_integral == 1:
 		# the total amount of water in the atmosphere at the beginning
 		water_masses_init_sum = data[0, 1] + data[0, 2] + data[0, 3] + data[0, 4] + data[0, 6] + 1
 		# water vapour
-		plt.plot(time_vector, 100*(data[:, 6]/data[0, 6] - 1))
+		plt.plot(time_vector, 100*(data[:, 6]/(data[0, 6] + 1) - 1))
 		# water in all phases
 		plt.plot(time_vector, 100*((data[:, 1] + data[:, 2] + data[:, 3] + data[:, 4] + data[:, 6])/water_masses_init_sum - 1))
 		plt.legend(["Dry mass", "Water vapour", "Water (all phases)"])
