@@ -50,6 +50,25 @@ def fetch_model_output(input_file, time_since_init, short_name, level):
 	for i in range(no_of_columns):
 	    lon_vector[i] = lon[i]
 	return lat_vector, lon_vector, vector_2_array(values, no_of_lines, no_of_columns)
-    
-    
-    
+
+def return_analysis_time(input_file):
+	file = open(input_file, "rb")
+	gid = ec.codes_grib_new_from_file(file)
+	file.close()
+	analysis_date = ec.codes_get(gid, "dataDate", ktype = str)
+	analysis_time = ec.codes_get(gid, "dataTime")
+	ec.codes_release(gid)
+	start_year = analysis_date[0:4]
+	start_month = analysis_date[4:6]
+	start_day = analysis_date[6:8]
+	start_hr = int(analysis_time/100)
+	return start_year, start_month, start_day, start_hr
+
+
+
+
+
+
+
+
+

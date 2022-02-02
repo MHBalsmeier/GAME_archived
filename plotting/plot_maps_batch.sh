@@ -8,13 +8,9 @@ run_id=${BASH_ARGV[1]} # the run id which you want to plot
 run_span=${BASH_ARGV[0]} # the length of the run
 output_dir=$game_home_dir/output/$run_id # the directory where the grib files are stored
 fig_save_path=${BASH_ARGV[3]} # the path to which the figures will be saved
-init_year=${BASH_ARGV[4]} # year of the start of the model run
-init_month=${BASH_ARGV[5]} # month of the start of the model run
-init_day=${BASH_ARGV[6]} # day of the start of the model run
-init_hr=${BASH_ARGV[7]} # hour of the start of the model run
-plot_interval=${BASH_ARGV[8]} # the interval between plots in seconds
-start_time_since_init=${BASH_ARGV[9]} # when to begin plotting reative to the model initialization
-omp_num_threads=${BASH_ARGV[10]} # relevant only for OMP
+plot_interval=${BASH_ARGV[4]} # the interval between plots in seconds
+start_time_since_init=${BASH_ARGV[5]} # when to begin plotting reative to the model initialization
+omp_num_threads=${BASH_ARGV[6]} # relevant only for OMP
 disp_shortname_list=(
 2t gust rprate sprate tcc
 ) # short names according to grib as an array 

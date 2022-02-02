@@ -15,7 +15,7 @@ do
 for (( proc_id=$i; $proc_id<$(($i+$omp_num_threads)) ; proc_id=$(($proc_id+1)) )) do
 if [ $proc_id -lt $number_of_variables ]
 then
-python3 $game_home_dir/plotting/.py/plot_maps.py $run_span ${plot_intervals_list[$proc_id]} ${disp_level_list[$proc_id]} ${disp_shortname_list[$proc_id]} $fig_save_path $output_dir ${projections_list[$proc_id]} $run_id ${uniform_colormap_list[$proc_id]} ${scope_list[$proc_id]} ${on_pressure_level_list[$proc_id]} ${synoptical_time_mode[$proc_id]} $init_year $init_month $init_day $init_hr $start_time_since_init &
+python3 $game_home_dir/plotting/.py/plot_maps.py $run_span ${plot_intervals_list[$proc_id]} ${disp_level_list[$proc_id]} ${disp_shortname_list[$proc_id]} $fig_save_path $output_dir ${projections_list[$proc_id]} $run_id ${uniform_colormap_list[$proc_id]} ${scope_list[$proc_id]} ${on_pressure_level_list[$proc_id]} ${synoptical_time_mode[$proc_id]} $start_time_since_init &
 fi
 done
 wait

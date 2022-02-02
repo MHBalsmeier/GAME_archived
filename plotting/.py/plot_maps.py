@@ -32,13 +32,7 @@ uniform_range = int(sys.argv[9])
 scope = sys.argv[10]
 on_pressure_bool = int(sys.argv[11])
 synoptical_time_mode = int(sys.argv[12])
-init_year = int(sys.argv[13])
-init_month = int(sys.argv[14])
-init_day = int(sys.argv[15])
-init_hour = int(sys.argv[16])
-start_time_since_init = int(sys.argv[17])
-
-start_timestamp = tcs.find_time_coord(init_year, init_month, init_day, init_hour, 0, 0, 0)
+start_time_since_init = int(sys.argv[13])
 
 # default values
 shift = 0
@@ -191,6 +185,13 @@ if on_pressure_bool == 0:
 		input_file = grib_dir_name + "/" + run_id + "+" + str(start_time_since_init) + "s.grb2"
 else:
 	input_file = grib_dir_name + "/" + run_id + "+" + str(start_time_since_init) + "s_pressure_levels.grb2"
+
+# finiding the analysis time
+init_year, init_month, init_day, init_hour = rmo.return_analysis_time(input_file)
+init_year = int(init_year)
+init_month = int(init_month)
+init_day = int(init_day)
+start_timestamp = tcs.find_time_coord(int(init_year), int(init_month), int(init_day), init_hour, 0, 0, 0)
 
 if short_name == "surface_wind":
 	lat, lon, values_pre = rmo.fetch_model_output(input_file, start_time_since_init, "gust", level)
