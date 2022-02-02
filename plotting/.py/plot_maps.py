@@ -80,7 +80,7 @@ if short_name == "cape":
 	show_level_on = 0
 	surface_bool = 1
 if short_name == "dswrf":
-	variable_name = "Downward shortwave flux"
+	variable_name = "Downward shortwave flux at the surface"
 	unit_string = "W / m^2"
 	show_level_on = 0
 	surface_bool = 1
