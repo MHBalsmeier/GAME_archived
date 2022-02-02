@@ -19,10 +19,13 @@ echo "Aborting."
 fi
 echo "Horizontal coordinates of the generating points (the scalar points in terms of the model) will be read from file $scalar_h_coords_file."
 fi
-echo "number of layers following orography: "$orography_layers
-echo "stretching parameter: "$stretching_parameter
 echo "model top: "$toa" m"
 echo "type of vertical grid: "$type_of_vertical_grid
+if [ $type_of_vertical_grid -eq 0 ]
+then
+echo "number of layers following orography: "$orography_layers
+fi
+echo "stretching parameter: "$stretching_parameter
 echo "radius rescale factor: "$radius_rescale
 # end verbosity
 
