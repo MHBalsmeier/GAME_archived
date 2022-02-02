@@ -234,11 +234,14 @@ int main(int argc, char *argv[])
 	// configuring radiation and calculating radiative fluxes for the first time
 	config -> soil_on = 0;
     config -> rad_update = 1;
+    double t_rad_update = t_0;
     if (config -> rad_on == 1)
     {
     	radiation_init();
     	config -> soil_on = 1;
     	call_radiation(state_old, soil, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config, delta_t, t_0);
+    	config -> rad_update = 1;
+    	t_rad_update += config -> radiation_delta_t;
     }
     
     // writing out the initial state of the model run
@@ -260,7 +263,6 @@ int main(int argc, char *argv[])
 	Preparation of the actual integration.
     --------------------------------------
     */
-    double t_rad_update = t_0;
     int wind_lowest_layer_step_counter = 0;
 	// the maximum horizontal diffusion coefficient (stability constraint)
 	irrev -> max_diff_h_coeff_turb = 0.125*grid -> mean_velocity_area/(config -> slow_fast_ratio*delta_t);
