@@ -139,9 +139,6 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 	}
 	free(oro_unfiltered);
 	
-	printf("minimum orography: %lf m\n", oro[find_min_index(oro, NO_OF_SCALARS_H)]);
-	printf("maximum orography: %lf m\n", oro[find_max_index(oro, NO_OF_SCALARS_H)]);
-	
 	double c_p_water = 4184.0;
 	double c_p_soil = 830.0;
 	double albedo_water = 0.06;
