@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
     printf("%s", stars);
 	printf("What you want to do:\n");
 	printf("Run_id:\t\t\t\t%s\n", config_io -> run_id);
-	printf("Run time span (neglecting small Earth rescaling):\t\t\t%d s\n", config -> total_run_span);
+	printf("Run time span:\t\t\t%d days\n", config -> total_run_span/86400);
 	printf("Grid properties file:\t\t%s\n", grid_file);
 	
     // reading the grid
@@ -631,7 +631,7 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	This function gives the user some additional information on the model configuration.
 	*/
 
-	printf("Small Earth rescaling factor: %lf\n", grid -> radius/RADIUS);
+	printf("Small Earth rescaling factor:\t%lf\n", grid -> radius/RADIUS);
 	printf("Top of atmosphere:\t\t%lf m\n", grid -> toa);
 	printf("Stretching parameter:\t\t%lf\n", grid -> stretching_parameter);
 	if (grid -> vert_grid_type == 0)

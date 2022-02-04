@@ -13,6 +13,7 @@ run_id = "ideal"
 output_base_dir = "/home/max/code/GAME/output"
 number_of_days = 15
 save_directory = "/home/max/code/GAME/figs"
+small_earth_rescale = 1
 
 # END OF USUAL INPUT SECTION
 
@@ -45,7 +46,7 @@ minima = np.zeros([number_of_days + 1])
 run_id_dir = output_base_dir + "/" + run_id
 
 for day_index in range(len(minima)):
-	minima[day_index] = min(read_grib_array(run_id_dir + "/" + run_id + "+" + str(day_index*86400) + "s_surface.grb2", "prmsl"))
+	minima[day_index] = min(read_grib_array(run_id_dir + "/" + run_id + "+" + str(int(day_index*small_earth_rescale*86400)) + "s_surface.grb2", "prmsl"))
 
 fig_size = 6
 fig = plt.figure(figsize = (fig_size, fig_size))
