@@ -121,13 +121,19 @@ int main(int argc, char *argv[])
     printf("%s", stars);
 	printf("What you want to do:\n");
 	printf("Run_id:\t\t\t\t%s\n", config_io -> run_id);
-	printf("Run time span:\t\t\t%d s\n", config -> total_run_span);
+	printf("Run time span (neglecting small Earth rescaling):\t\t\t%d s\n", config -> total_run_span);
 	printf("Grid properties file:\t\t%s\n", grid_file);
 	
     // reading the grid
 	printf("Reading grid data ...\n");
     set_grid_properties(grid, dualgrid, grid_file);
     printf("Grid loaded successfully.\n");
+    
+    // rescaling times for small Earth experiments
+    double radius_rescale = grid -> radius/RADIUS;
+    config -> radiation_delta_t = radius_rescale*config -> radiation_delta_t;
+    config -> total_run_span = radius_rescale*config -> total_run_span;
+    config_io -> write_out_interval = radius_rescale*config_io -> write_out_interval;
     
     /*
     Giving the user some additional information on the run to about to be executed.
@@ -276,7 +282,7 @@ int main(int argc, char *argv[])
     config -> totally_first_step_bool = 1;
     // this is to store the speed of the model integration
     double speed;
-    while (t_0 < t_init + config -> total_run_span + 300)
+    while (t_0 < t_init + config -> total_run_span + radius_rescale*300)
     {
     	// copying the new state into the old state
     	linear_combine_two_states(state_new, state_old, state_old, 1, 0, grid);
@@ -323,7 +329,7 @@ int main(int argc, char *argv[])
     	}
         
         // 5 minutes before the output time, the wind in the lowest layer needs to be collected for 10 m wind diagnostics.
-        if (t_0 >= t_write - 300)
+        if (t_0 >= t_write - radius_rescale*300)
         {
         	if (wind_lowest_layer_step_counter < min_no_of_10m_wind_avg_steps)
         	{
@@ -336,7 +342,7 @@ int main(int argc, char *argv[])
         	}
         }
         // 5 minutes after the output time, the 10 m wind diagnostics can be executed, so output can actually be written
-        if(t_0 + delta_t >= t_write + 300 && t_0 <= t_write + 300)
+        if(t_0 + delta_t >= t_write + radius_rescale*300 && t_0 <= t_write + radius_rescale*300)
         {
         	// here, output is actually written
             write_out(state_write, wind_h_lowest_layer, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, config_io, config, soil);
