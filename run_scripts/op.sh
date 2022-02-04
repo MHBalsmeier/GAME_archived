@@ -18,7 +18,7 @@
 # basic run properties
 game_home_dir=${BASH_ARGV[4]}
 ideal_input_id=-1 # specifies which test scenario to run (-1 corresponds to an NWP run)
-run_span=${BASH_ARGV[5]} # how long the model is supposed to run
+run_span=${BASH_ARGV[5]} # how long the model is supposed to run; for small Earth experiments this will be rescaled proportional to the radius
 run_id=${BASH_ARGV[6]} # how long the model is supposed to run
 valgrind_check=0 # set this to 1, if you want to check the code with Valgrind
 start_year=${BASH_ARGV[3]} # defines the start time of the model run
@@ -47,14 +47,14 @@ impl_thermo_weight=0.75 # weighting parameter of the time stepping
 
 # "physics" configuration
 rad_on=1 # set to 0 if you want no radiation, 1 for real radiation and 2 for Held-Suarez forcing
-radiation_delta_t=10800 # every how many seconds the radiation fluxes wil be updated
+radiation_delta_t=10800 # every how many seconds the radiation fluxes wil be updated; for small Earth experiments this will be rescaled proportional to the radius
 assume_lte=1 # set this to one if you do not want to assign individual temperatures to tracers
 cloud_droplets_velocity=0.01 # sedimentation velocity of cloud droplets
 precipitation_droplets_velocity=0.1 # sedimentation velocity of precipitation droplets
 mixing_length=100.0 # mixing length for the vertical diffusion scheme
 
 # I/O
-write_out_interval=10800 # every how many seconds an output file will be created
+write_out_interval=10800 # every how many seconds an output file will be created; for small Earth experiments this will be rescaled proportional to the radius
 write_out_integrals=0 # If set to 1, fundamental integrals of the atmosphere will be written out at every time step.
 model_level_output_switch=0 # If set to 1, variables will be written out on model levels.
 pressure_level_output_switch=1 # If set to 1, additional output on pressure_leveltical pressure levels will be created. The pressure levels can be set in the file core/src/settings.c. The numer of pressure levels must be set in the file core/src/settings.h.
