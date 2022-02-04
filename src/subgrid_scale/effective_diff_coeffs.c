@@ -397,8 +397,8 @@ double ver_hor_viscosity(double tke, double delta_z, double mixing_length)
 	/*
 	This function returns the vertical kinematic Eddy viscosity as a function of the specific TKE.
 	*/
-	double prop_constant = 0.03*fmin(delta_z, mixing_length); // unit: m
-	double result = prop_constant*pow(2*tke, 0.5);
+	double prop_constant = 0.01*fmin(delta_z, mixing_length); // unit: m
+	double result = prop_constant*pow(tke, 0.5);
 	return result;
 }
 
