@@ -631,6 +631,7 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	This function gives the user some additional information on the model configuration.
 	*/
 
+	printf("Small Earth rescaling factor: %lf\n", grid -> radius/RADIUS);
 	printf("Top of atmosphere:\t\t%lf m\n", grid -> toa);
 	printf("Stretching parameter:\t\t%lf\n", grid -> stretching_parameter);
 	if (grid -> vert_grid_type == 0)
