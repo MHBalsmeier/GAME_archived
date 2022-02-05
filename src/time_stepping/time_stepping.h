@@ -8,9 +8,8 @@ int moisturizer(State *, double, Diagnostics *, Irreversible_quantities *, Confi
 int vector_tendencies_expl(State *, State *, Grid *, Dualgrid *, Diagnostics *, Forcings *, Irreversible_quantities *, Config *, int, int, double);
 int scalar_tendencies_expl(State *, State *, State *, Soil *, Grid *, double, Diagnostics *, Forcings *, Irreversible_quantities *, Config *, int, int);
 int three_band_solver_gen_densitites(State *, State *, State *, Diagnostics *, Config *, double, Grid *);
-int three_band_solver_ver_waves(State *, State *, State *, Diagnostics *, Config *, double, Grid *, int);
+int three_band_solver_ver_waves(State *, State *, State *, Diagnostics *, Forcings *, Config *, double, Grid *, Soil *, int);
 int manage_pressure_gradient(State *, Grid *, Dualgrid *, Diagnostics *, Forcings *,  Irreversible_quantities *, Config *);
-int soil_interaction(State *, Soil *, Diagnostics *, Forcings *, Grid *, double);
 
 
 

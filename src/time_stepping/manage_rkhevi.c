@@ -30,13 +30,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
        
 	// diagnosing the temperature
 	temperature_diagnostics(state_old, grid, diagnostics);
-    
-    // interaction with soil
-    if (config -> soil_on == 1)
-    {
-    	soil_interaction(state_old, soil, diagnostics, forcings, grid, delta_t);
-    }
-    
+	
 	/*
 	Loop over the RK substeps.
 	*/
@@ -81,7 +75,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 
 		// 3.) Vertical sound wave solver.
 		// -------------------------------
-		three_band_solver_ver_waves(state_old, state_new, state_tendency, diagnostics, config, delta_t, grid, rk_step);
+		three_band_solver_ver_waves(state_old, state_new, state_tendency, diagnostics, forcings, config, delta_t, grid, soil, rk_step);
 		
 		// 4.) Solving the implicit component of the generalized density equations for tracers.
 		// ------------------------------------------------------------------------------------
