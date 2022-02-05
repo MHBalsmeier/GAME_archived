@@ -153,9 +153,13 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 		// ocean
 		sfc_albedo[i] = albedo_water;
 		sfc_rho_c[i] = RHO_WATER*c_p_water;
+		
+		// for water roughness_length is set to some land-typical value, will not be used anyway
 		roughness_length[i] = 0.08;
-		// for water this is set to some land-typical value, will not be used anyway
+		
+		// for water t_conductivity is set to some land-typical value, will not be used anyway
 		t_conductivity[i] = t_conductivity_soil;
+		
 		// land
 		if (is_land[i] == 1)
 		{

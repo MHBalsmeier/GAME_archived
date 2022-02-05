@@ -16,6 +16,8 @@ In this file, diffusion coefficients, including Eddy viscosities, are computed.
 
 int tke_update(Irreversible_quantities *, double, State *, Diagnostics *, Grid *);
 double ver_hor_viscosity(double, double, double);
+double swh_from_u10(double);
+double roughness_length_from_swh(double);
 
 int hori_div_viscosity(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config *config)
 {
@@ -348,10 +350,18 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	double boundary_layer_height = 1000.0;
 	double roughness_length_factor = 1.0/0.08;
 	int i;
-	double decay_constant, production_rate;
-	#pragma omp parallel for private(i, decay_constant, production_rate)
+	double roughness_length, decay_constant, production_rate;
+	#pragma omp parallel for private(i, decay_constant, production_rate, roughness_length)
 	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
 	{
+		// calculatuing the roughness length
+		roughness_length = grid -> roughness_length[h_index];
+		// roughness length over water
+		if (grid -> is_land[h_index] == 1)
+		{
+			roughness_length = roughness_length_from_swh(swh_from_u10(0));
+		}
+		
 		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
 		{
 			i = layer_index*NO_OF_SCALARS_H + h_index;
@@ -364,7 +374,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 			{
 				production_rate =
 				// factor taking into account the roughness of the surface
-				roughness_length_factor*grid -> roughness_length[h_index]
+				roughness_length_factor*roughness_length
 				// height-dependent factor
 				*(boundary_layer_height - (grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index]))/boundary_layer_height
 				*(tke_ke_ratio*0.5*diagnostics -> v_squared[i] - irrev -> tke[i])/tke_approx_time;
@@ -397,12 +407,32 @@ double ver_hor_viscosity(double tke, double delta_z, double mixing_length)
 	/*
 	This function returns the vertical kinematic Eddy viscosity as a function of the specific TKE.
 	*/
+	
 	double prop_constant = 0.01*fmin(delta_z, mixing_length); // unit: m
 	double result = prop_constant*pow(tke, 0.5);
 	return result;
 }
 
+double swh_from_u10(double u10)
+{
+	/*
+	This function returns the significant wave height (SWH) as a function of the 10 m wind velocity.
+	*/
+	
+	double swh = u10/3;
+	return swh;
+}
 
+
+double roughness_length_from_swh(double swh)
+{
+	/*
+	This function returns the roughness length as a function of the significant wave height (SWH).
+	*/
+	
+	double roughness_length = swh/8;
+	return roughness_length;
+}
 
 
 
