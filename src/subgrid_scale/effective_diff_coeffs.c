@@ -350,16 +350,17 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	double boundary_layer_height = 1000.0;
 	double roughness_length_factor = 1.0/0.08;
 	int i;
-	double roughness_length, decay_constant, production_rate;
-	#pragma omp parallel for private(i, decay_constant, production_rate, roughness_length)
+	double decay_constant, production_rate, u10;
+	#pragma omp parallel for private(i, decay_constant, production_rate, u10)
 	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
 	{
-		// calculatuing the roughness length
-		roughness_length = grid -> roughness_length[h_index];
 		// roughness length over water
 		if (grid -> is_land[h_index] == 1)
 		{
-			roughness_length = roughness_length_from_swh(swh_from_u10(0));
+			u10 = pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + h_index], 0.5)
+			*log(10/grid -> roughness_length[h_index])
+			/log((grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + h_index] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index])/grid -> roughness_length[h_index]);
+			grid -> roughness_length[h_index] = roughness_length_from_swh(swh_from_u10(u10));
 		}
 		
 		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
@@ -374,7 +375,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 			{
 				production_rate =
 				// factor taking into account the roughness of the surface
-				roughness_length_factor*roughness_length
+				roughness_length_factor*grid -> roughness_length[h_index]
 				// height-dependent factor
 				*(boundary_layer_height - (grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index]))/boundary_layer_height
 				*(tke_ke_ratio*0.5*diagnostics -> v_squared[i] - irrev -> tke[i])/tke_approx_time;
