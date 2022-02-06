@@ -24,11 +24,6 @@ It is known that the forecast skill of a NWP model depends more on physics and d
 
 No discretization is able to achieve all these goals simultaneously. However, a hexagonal C-grid is probably one of the best choices when it comes to finding a reasonable balance of all these aspects.
 
-### Things to be done
-
-* SLEVE
-* ellipsoidal geometry
-
 ## Documents
 
 ### Scientific derivations
