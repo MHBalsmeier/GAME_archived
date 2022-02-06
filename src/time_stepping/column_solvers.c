@@ -72,7 +72,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 		double alpha[NO_OF_LAYERS];
 		double beta[NO_OF_LAYERS];
 		double gamma[NO_OF_LAYERS];
-		double density_interface_new, temperature_gas_lowest_layers;
+		double density_interface_new, temperature_gas_lowest_layer;
 		
 		// explicit quantities
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
@@ -182,8 +182,8 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			/(2*(grid -> z_soil_center[NO_OF_SOIL_LAYERS - 1] - grid -> z_t_const));
 			
 			// gas temperature in the lowest layer
-			temperature_gas_lowest_layers = (grid -> exner_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_new -> exner_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i])
-			*(grid -> theta_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_new -> theta_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]);
+			temperature_gas_lowest_layer = (grid -> exner_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_old -> exner_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i])
+			*(grid -> theta_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_old -> theta_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]);
 			
 			// calculating the explicit part of the temperature change
 			r_vector[NO_OF_LAYERS - 1]
@@ -191,7 +191,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			= state_old -> temperature_soil[i]
 			// sensible heat flux
 			+ (state_new -> rho[gas_phase_first_index + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
-			*spec_heat_capacities_v_gas_lookup(0)*(temperature_gas_lowest_layers - state_old -> temperature_soil[i])/diagnostics -> flux_resistance[i]
+			*spec_heat_capacities_v_gas_lookup(0)*(temperature_gas_lowest_layer - state_old -> temperature_soil[i])/diagnostics -> flux_resistance[i]
 			// latent heat flux
 			+ diagnostics -> power_flux_density_latent[i]
 			// shortwave inbound radiation
