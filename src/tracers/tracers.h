@@ -3,13 +3,8 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/OpenNWP/GAME
 */
 
-#define DENSITY_WATER 1024.0
-#define GRAVITY 9.8
-#define KARMAN 0.4
-
 double sink_velocity(int, double, double);
-int calc_h2otracers_source_rates(double [], double [], double [], double [], double [], int, double, int, int [], int,
-double [], double [], double [], int, double [], double [], double [], double [], int);
+int calc_h2otracers_source_rates(double [], double [], double [], double [], double [], double, int, Grid *, double [], double [], double [], double [], int);
 double water_vapour_density_from_rel_humidity(double, double, double);
 double saturation_pressure_over_water(double);
 double saturation_pressure_over_ice(double);

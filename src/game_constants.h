@@ -21,3 +21,4 @@ This file collects physical constants that are hardly ever modified.
 #define SECONDS_PER_HOUR 3600
 #define RHO_WATER 1024.0
 #define ROUGHNESS_LENGTH_GRASS 0.02
+#define DENSITY_WATER 1024.0
