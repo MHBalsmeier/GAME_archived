@@ -13,10 +13,10 @@ h:	humid
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <atmostracers.h>
 #include "../game_types.h"
 #include "../game_constants.h"
 #include "../spatial_operators/spatial_operators.h"
+#include "../tracers/tracers.h"
 #include "thermodynamics.h"
 
 int temperature_diagnostics(State *state, Grid *grid, Diagnostics *diagnostics)

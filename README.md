@@ -50,7 +50,6 @@ Everything is easy and quick to install.
 	sudo apt-get install gcc gfortran make cmake wget libeccodes-dev python3 python3-pip libnetcdf-dev libnetcdff-dev
 
 * [geos95](https://github.com/OpenNWP/geos95)
-* [atmostracers](https://github.com/OpenNWP/atmostracers)
 * Clone the DCMIP2016 repository: `git clone https://github.com/ClimateGlobalChange/DCMIP2016`
 * Clone our fork of the RTE+RRTMGP repository: `git clone https://github.com/OpenNWP/rte-rrtmgp`
 * `pip3 install global-land-mask eccodes`

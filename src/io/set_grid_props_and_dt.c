@@ -11,10 +11,10 @@ This file contains functions for reading the grid properties as well as setting 
 #include <stdio.h>
 #include <netcdf.h>
 #include <geos95.h>
-#include <atmostracers.h>
 #include "../game_types.h"
 #include "../game_constants.h"
 #include "../spatial_operators/spatial_operators.h"
+#include "../tracers/tracers.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 

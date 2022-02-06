@@ -9,8 +9,8 @@ This file contains the implicit vertical solvers.
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <atmostracers.h>
 #include "../game_types.h"
+#include "../tracers/tracers.h"
 #include "../thermodynamics/thermodynamics.h"
 
 int thomas_algorithm(double [], double [], double [], double [], double [], int);

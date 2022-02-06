@@ -11,10 +11,10 @@ In this file, the initial state of the simulation is read in from a netcdf file.
 #include <stdlib.h>
 #include <string.h>
 #include <netcdf.h>
-#include <atmostracers.h>
 #include "../game_types.h"
 #include "../game_constants.h"
 #include "../spatial_operators/spatial_operators.h"
+#include "../tracers/tracers.h"
 #include "../thermodynamics/thermodynamics.h"
 #include "../../grid_generator/src/standard.h"
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}

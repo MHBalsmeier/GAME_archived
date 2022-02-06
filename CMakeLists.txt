@@ -34,6 +34,10 @@ src/subgrid_scale/effective_diff_coeffs.c
 src/radiation/manage_radiation_calls.c
 src/radiation/held_suar.c
 src/radiation/rterrtmgp_coupler.f90
+src/tracers/humidity.c
+src/tracers/phase_trans.c
+src/tracers/properties.c
+src/tracers/surface.c
 grid_generator/src/vertical_grid.c
 ../rte-rrtmgp/rrtmgp/mo_gas_optics.F90
 ../rte-rrtmgp/rrtmgp/mo_gas_optics_rrtmgp.F90
@@ -64,7 +68,7 @@ grid_generator/src/vertical_grid.c
 find_package(OpenMP)
 SET(CMAKE_C_FLAGS "${OpenMP_C_FLAGS} -O2 -Wall")
 SET(CMAKE_Fortran_FLAGS "${OpenMP_Fortran_FLAGS} -O2 -Wall -Wno-c-binding-type -Wno-unused-dummy-argument -I/usr/include -L/usr/lib/x86_64-linux-gnu -lnetcdff -lnetcdf")
-target_link_libraries(game eccodes m netcdf netcdff geos95 atmostracers)
+target_link_libraries(game eccodes m netcdf netcdff geos95)
 
 
 

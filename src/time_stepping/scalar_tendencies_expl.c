@@ -9,10 +9,10 @@ This is the horizontal (explicit) part of the constituent integration.
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <atmostracers.h>
 #include "../game_types.h"
 #include "../game_constants.h"
 #include "../spatial_operators/spatial_operators.h"
+#include "../tracers/tracers.h"
 #include "../thermodynamics/thermodynamics.h"
 #include "../subgrid_scale/subgrid_scale.h"
 
