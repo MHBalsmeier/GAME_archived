@@ -17,7 +17,8 @@ This file manages the RKHEVI time stepping.
 #include "../thermodynamics/thermodynamics.h"
 #include "../io/io.h"
 
-int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Dualgrid *dualgrid, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config, double delta_t, double time_coordinate, int total_step_counter)
+int manage_rkhevi(State *state_old, State *state_new, Grid *grid, Dualgrid *dualgrid, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings,
+Irreversible_quantities *irrev, Config *config, double delta_t, double time_coordinate, int total_step_counter)
 {
 	// slow terms (diffusion) update switch
 	int slow_update_bool = 0;
@@ -69,13 +70,13 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
 	    // Radiation is updated here.
 		if (config -> rad_on > 0 && config -> rad_update == 1 && rk_step == 0)
 		{
-			call_radiation(state_old, soil, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config, delta_t, time_coordinate);
+			call_radiation(state_old, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config, delta_t, time_coordinate);
 		}
-		scalar_tendencies_expl(state_old, state_new, state_tendency, soil, grid, delta_t, diagnostics, forcings, irrev, config, rk_step, slow_update_bool);
+		scalar_tendencies_expl(state_old, state_new, state_tendency, grid, delta_t, diagnostics, forcings, irrev, config, rk_step, slow_update_bool);
 
 		// 3.) Vertical sound wave solver.
 		// -------------------------------
-		three_band_solver_ver_waves(state_old, state_new, state_tendency, diagnostics, forcings, config, delta_t, grid, soil, rk_step);
+		three_band_solver_ver_waves(state_old, state_new, state_tendency, diagnostics, forcings, config, delta_t, grid, rk_step);
 		
 		// 4.) Solving the implicit component of the generalized density equations for tracers.
 		// ------------------------------------------------------------------------------------
@@ -89,7 +90,7 @@ int manage_rkhevi(State *state_old, State *state_new, Soil *soil, Grid *grid, Du
     }
     
     // saturation adjustment, calculation of latent heating rates
-    moisturizer(state_new, delta_t, diagnostics, irrev, config, grid, soil);
+    moisturizer(state_new, delta_t, diagnostics, irrev, config, grid);
     
     return 0;
 }

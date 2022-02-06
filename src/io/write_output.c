@@ -49,7 +49,7 @@ int get_pressure_levels(double pressure_levels[])
 	return 0;
 }
 
-int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, Config_io *config_io, Config *config, Soil *soil)
+int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int min_no_of_output_steps, double t_init, double t_write, Diagnostics *diagnostics, Forcings *forcings, Grid *grid, Dualgrid *dualgrid, Config_io *config_io, Config *config)
 {
 	printf("Writing output ...\n");
 	
@@ -127,7 +127,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    // real radiation
 		    if (config -> rad_on == 1)
 		    {
-		    	temperature_gradient = (temp_closest - soil -> temperature[i])/(grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]);
+		    	temperature_gradient = (temp_closest - state_write_out -> temperature_soil[i])
+		    	/(grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]);
 		    }
 			// no real radiation
 		    else

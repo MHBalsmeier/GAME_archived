@@ -129,6 +129,7 @@ Scalar_field theta_pert;
 Scalar_field exner_pert;
 Condensed_density_temperatures condensed_density_temperatures;
 Vector_field wind;
+double temperature_soil[NO_OF_SOIL_LAYERS*NO_OF_SCALARS_H];
 } State;
 
 // Collects diagnostic quantities. Note: in fact, forcings are also diagnostic quantities.
@@ -150,6 +151,8 @@ Vector_field v_at_edge;
 Scalar_field u_at_cell;
 Scalar_field v_at_cell;
 double dv_hdz[NO_OF_H_VECTORS + NO_OF_VECTORS_H];
+double flux_resistance[NO_OF_SCALARS_H];
+double power_flux_density_latent[NO_OF_SCALARS_H];
 } Diagnostics;
 
 // needed for the radiation calculation
@@ -208,13 +211,6 @@ double precipitation_droplets_velocity;
 double dt_parameter;
 double radiation_delta_t;
 } Config;
-
-// soil information
-typedef struct soil {
-double temperature[NO_OF_SOIL_LAYERS*NO_OF_SCALARS_H];
-double flux_resistance[NO_OF_SCALARS_H];
-double power_flux_density_latent[NO_OF_SCALARS_H];
-} Soil;
 
 // Contains everything on turbulence parametrizations as well as constituent-related quantities.
 typedef struct irreversible_quantities {

@@ -13,7 +13,7 @@ This file contains functions calculating everything related to phase transition 
 #include "../subgrid_scale/subgrid_scale.h"
 #include "tracers.h"
 
-int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *grid, Soil *soil, Config *config, Irreversible_quantities *irrev, double delta_t)
+int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *grid, Config *config, Irreversible_quantities *irrev, double delta_t)
 {
 	/*
 	This function calculates phase transition rates and associated heat source rates.
@@ -219,28 +219,30 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
     		if (grid -> is_land[h_index] == 0)
         	{
         		// saturation pressure at surface temperature
-        		if (soil -> temperature[h_index] >= T_0)
+        		if (state -> temperature_soil[h_index] >= T_0)
         		{
-        			saturation_pressure_sfc = saturation_pressure_over_water(soil -> temperature[h_index]);
+        			saturation_pressure_sfc = saturation_pressure_over_water(state -> temperature_soil[h_index]);
         		}
         		else
         		{
-        			saturation_pressure_sfc = saturation_pressure_over_ice(soil -> temperature[h_index]);
+        			saturation_pressure_sfc = saturation_pressure_over_ice(state -> temperature_soil[h_index]);
         		}
         		// difference water vapour density between saturation at ground temperature and actual absolute humidity in the lowest model layer
-        		diff_density_sfc = saturation_pressure_sfc/(specific_gas_constants_lookup(1)*soil -> temperature[h_index])
+        		diff_density_sfc = saturation_pressure_sfc/(specific_gas_constants_lookup(1)*state -> temperature_soil[h_index])
         		- water_vapour_pressure/(specific_gas_constants_lookup(1)*diagnostics -> temperature_gas[i]);
         		// the thickness of the lowest model layer (we need it as a result of Guass' theorem)
         		layer_thickness = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + h_index] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + h_index];
-		    	irrev -> mass_source_rates[4*NO_OF_SCALARS + i] += fmax(0, diff_density_sfc/soil -> flux_resistance[h_index])/layer_thickness;
+		    	irrev -> mass_source_rates[4*NO_OF_SCALARS + i] += fmax(0, diff_density_sfc/diagnostics -> flux_resistance[h_index])/layer_thickness;
 		    	// calculating the latent heat flux density affecting the surface
-        		if (soil -> temperature[h_index] >= T_0)
+        		if (state -> temperature_soil[h_index] >= T_0)
         		{
-        			soil -> power_flux_density_latent[h_index] = -phase_trans_heat(0, soil -> temperature[h_index])*fmax(0, diff_density_sfc/soil -> flux_resistance[h_index]);
+        			diagnostics -> power_flux_density_latent[h_index] = -phase_trans_heat(0, state -> temperature_soil[h_index])
+        			*fmax(0, diff_density_sfc/diagnostics -> flux_resistance[h_index]);
         		}
         		else
         		{
-        			soil -> power_flux_density_latent[h_index] = -phase_trans_heat(1, soil -> temperature[h_index])*fmax(0, diff_density_sfc/soil -> flux_resistance[h_index]);
+        			diagnostics -> power_flux_density_latent[h_index] = -phase_trans_heat(1, state -> temperature_soil[h_index])
+        			*fmax(0, diff_density_sfc/diagnostics -> flux_resistance[h_index]);
         		}
         	}
         }

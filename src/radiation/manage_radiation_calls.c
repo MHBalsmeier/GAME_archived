@@ -19,7 +19,7 @@ int create_rad_array_vector(double [], double [], int);
 int remap_to_original(double [], double [], int);
 int remap_to_original_scalar_h(double [], double [], int);
 
-int call_radiation(State *state, Soil *soil, Grid *grid, Dualgrid *dualgrid, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config, double delta_t, double time_coordinate)
+int call_radiation(State *state, Grid *grid, Dualgrid *dualgrid, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config, double delta_t, double time_coordinate)
 {
 	printf("Starting update of radiative fluxes ...\n");
 	int no_of_scalars = NO_OF_SCALARS_RAD;
@@ -34,7 +34,7 @@ int call_radiation(State *state, Soil *soil, Grid *grid, Dualgrid *dualgrid, Sta
 		// remapping all the arrays
 		create_rad_array_scalar_h(grid -> latitude_scalar, radiation -> lat_scal, rad_block_index);
 		create_rad_array_scalar_h(grid -> longitude_scalar, radiation -> lon_scal, rad_block_index);
-		create_rad_array_scalar_h(soil -> temperature, radiation -> temp_sfc, rad_block_index);
+		create_rad_array_scalar_h(state -> temperature_soil, radiation -> temp_sfc, rad_block_index);
 		create_rad_array_scalar_h(grid -> sfc_albedo, radiation -> sfc_albedo, rad_block_index);
 		create_rad_array_scalar(grid -> z_scalar, radiation -> z_scal, rad_block_index);
 		create_rad_array_vector(grid -> z_vector, radiation -> z_vect, rad_block_index);

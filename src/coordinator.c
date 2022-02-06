@@ -40,7 +40,6 @@ int main(int argc, char *argv[])
     Config_io *config_io = calloc(1, sizeof(Config_io));
     Diagnostics *diagnostics = calloc(1, sizeof(Diagnostics));
     Forcings *forcings = calloc(1, sizeof(Forcings));
-	Soil *soil = calloc(1, sizeof(Soil));
     State *state_write = calloc(1, sizeof(State));
     State *state_new = calloc(1, sizeof(State));
     State *state_tendency = calloc(1, sizeof(State));
@@ -147,12 +146,12 @@ int main(int argc, char *argv[])
     // ideal test case
     if (config -> nwp_mode == 0)
     {
-    	set_ideal_init(state_old, grid, dualgrid, soil, diagnostics, forcings, config, config_io -> ideal_input_id, grid_file);
+    	set_ideal_init(state_old, grid, dualgrid, diagnostics, forcings, config, config_io -> ideal_input_id, grid_file);
 	}
 	// NWP mode
     else
     {
-    	read_init_data(init_state_file, state_old, grid, soil);
+    	read_init_data(init_state_file, state_old, grid);
 	}
 	printf("Initial state set successfully.\n");
 	printf("%s", stars);
@@ -245,13 +244,13 @@ int main(int argc, char *argv[])
     {
     	radiation_init();
     	config -> soil_on = 1;
-    	call_radiation(state_old, soil, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config, delta_t, t_0);
+    	call_radiation(state_old, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config, delta_t, t_0);
     	config -> rad_update = 1;
     	t_rad_update += config -> radiation_delta_t;
     }
     
     // writing out the initial state of the model run
-    write_out(state_old, wind_h_lowest_layer, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, config_io, config, soil);
+    write_out(state_old, wind_h_lowest_layer, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, config_io, config);
     
     t_write += config_io -> write_out_interval;
     printf("Run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
@@ -302,7 +301,7 @@ int main(int argc, char *argv[])
     	}
     	
     	// Time step integration.
-    	manage_rkhevi(state_old, state_new, soil, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config, delta_t, t_0, time_step_counter);
+    	manage_rkhevi(state_old, state_new, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config, delta_t, t_0, time_step_counter);
     	// This switch can be set to zero now and remains there.
     	config -> totally_first_step_bool = 0;
 		time_step_counter += 1;	
@@ -345,7 +344,7 @@ int main(int argc, char *argv[])
         if(t_0 + delta_t >= t_write + radius_rescale*300 && t_0 <= t_write + radius_rescale*300)
         {
         	// here, output is actually written
-            write_out(state_write, wind_h_lowest_layer, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, config_io, config, soil);
+            write_out(state_write, wind_h_lowest_layer, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, config_io, config);
             // setting the next output time
             t_write += config_io -> write_out_interval;
             

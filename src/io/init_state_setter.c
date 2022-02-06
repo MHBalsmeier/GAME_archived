@@ -19,9 +19,9 @@ In this file, the initial state of the simulation is read in from a netcdf file.
 #include "../../grid_generator/src/standard.h"
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 
-int set_soil_temp(Grid *, Soil *, State *, double [], char []);
+int set_soil_temp(Grid *, State *, double [], char []);
 
-int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, Diagnostics *diagnostics, Forcings *forcings, Config *config, int ideal_input_id, char grid_file[])
+int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *diagnostics, Forcings *forcings, Config *config, int ideal_input_id, char grid_file[])
 {
 	/*
 	This function sets the initial state of the model atmosphere for idealized test cases.
@@ -231,14 +231,14 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Soil *soil, Dia
 	}
     
     // setting the soil temperature
-    set_soil_temp(grid, soil, state, temperatures, "");
+    set_soil_temp(grid, state, temperatures, "");
     free(temperatures);
     
     // returning 0 indicating success
     return 0;
 }
 
-int read_init_data(char init_state_file[], State *state, Grid* grid, Soil *soil)
+int read_init_data(char init_state_file[], State *state, Grid* grid)
 {
 	/*
 	This function reads the initial state of the model atmosphere from a netcdf file.
@@ -313,14 +313,14 @@ int read_init_data(char init_state_file[], State *state, Grid* grid, Soil *soil)
 	}
     
     // setting the soil temperature
-    set_soil_temp(grid, soil, state, temperatures, init_state_file);
+    set_soil_temp(grid, state, temperatures, init_state_file);
     free(temperatures);
     
     // returning 0 indicating success
     return 0;
 }
 
-int set_soil_temp(Grid *grid, Soil *soil, State *state, double temperatures[], char init_state_file[])
+int set_soil_temp(Grid *grid, State *state, double temperatures[], char init_state_file[])
 {
 	/*
 	This function sets the soil temperature.
@@ -384,7 +384,7 @@ int set_soil_temp(Grid *grid, Soil *soil, State *state, double temperatures[], c
 			// index of this soil grid point
 			soil_index = i + soil_layer_index*NO_OF_SCALARS_H;
 			z_soil = grid -> z_t_const/NO_OF_SOIL_LAYERS*(0.5 + soil_layer_index);
-			soil -> temperature[soil_index] = t_sfc + (grid -> t_const_soil - t_sfc)*z_soil/grid -> z_t_const;
+			state -> temperature_soil[soil_index] = t_sfc + (grid -> t_const_soil - t_sfc)*z_soil/grid -> z_t_const;
 		}
 	}
 	

@@ -16,7 +16,8 @@ This file contains the implicit vertical solvers.
 
 int thomas_algorithm(double [], double [], double [], double [], double [], int);
 
-int three_band_solver_ver_waves(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Config *config, double delta_t, Grid *grid, Soil *soil, int rk_step)
+int three_band_solver_ver_waves(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings,
+Config *config, double delta_t, Grid *grid, int rk_step)
 {
 	/*
 	This is the implicit vertical solver for the main fluid constituent.
@@ -44,7 +45,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// flux resistance
-		soil -> flux_resistance[i] = sfc_flux_resistance(pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + i], 0.5),
+		diagnostics -> flux_resistance[i] = sfc_flux_resistance(pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + i], 0.5),
     	grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + i] - grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i], grid -> roughness_length[i]);
 	    	
 		soil_switch = config -> soil_on*grid -> is_land[i];
@@ -171,12 +172,12 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			for (int j = 0; j < NO_OF_SOIL_LAYERS - 1; ++j)
 			{
 				heat_flux_density_expl[j]
-				= -grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]*(soil -> temperature[i + j*NO_OF_SCALARS_H]
-				- soil -> temperature[i + (j + 1)*NO_OF_SCALARS_H])
+				= -grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]*(state_old -> temperature_soil[i + j*NO_OF_SCALARS_H]
+				- state_old -> temperature_soil[i + (j + 1)*NO_OF_SCALARS_H])
 				/(grid -> z_soil_center[j] - grid -> z_soil_center[j + 1]);
 			}
 			heat_flux_density_expl[NO_OF_SOIL_LAYERS - 1]
-			= -grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]*(soil -> temperature[i + (NO_OF_SOIL_LAYERS - 1)*NO_OF_SCALARS_H]
+			= -grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]*(state_old -> temperature_soil[i + (NO_OF_SOIL_LAYERS - 1)*NO_OF_SCALARS_H]
 			- grid -> t_const_soil)
 			/(2*(grid -> z_soil_center[NO_OF_SOIL_LAYERS - 1] - grid -> z_t_const));
 			
@@ -187,12 +188,12 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			// calculating the explicit part of the temperature change
 			r_vector[NO_OF_LAYERS - 1]
 			// old temperature
-			= soil -> temperature[i]
+			= state_old -> temperature_soil[i]
 			// sensible heat flux
 			+ (state_new -> rho[gas_phase_first_index + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
-			*spec_heat_capacities_v_gas_lookup(0)*(temperature_gas_lowest_layers - soil -> temperature[i])/soil -> flux_resistance[i]
+			*spec_heat_capacities_v_gas_lookup(0)*(temperature_gas_lowest_layers - state_old -> temperature_soil[i])/diagnostics -> flux_resistance[i]
 			// latent heat flux
-			+ soil -> power_flux_density_latent[i]
+			+ diagnostics -> power_flux_density_latent[i]
 			// shortwave inbound radiation
 			+ forcings -> sfc_sw_in[i]
 			// longwave outbound radiation
@@ -207,7 +208,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 				
 				r_vector[j + NO_OF_LAYERS - 1]
 				// old temperature
-				= soil -> temperature[i + j*NO_OF_SCALARS_H]
+				= state_old -> temperature_soil[i + j*NO_OF_SCALARS_H]
 				// heat conduction from above
 				+ expl_weight*(-heat_flux_density_expl[j - 1]				
 				// heat conduction from below
@@ -349,7 +350,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		{
 			for (int j = 0; j < NO_OF_SOIL_LAYERS; ++j)
 			{
-				soil -> temperature[i + j*NO_OF_SCALARS_H] = solution_vector[NO_OF_LAYERS - 1 + j];
+				state_new -> temperature_soil[i + j*NO_OF_SCALARS_H] = solution_vector[NO_OF_LAYERS - 1 + j];
 			}
 		}
 		

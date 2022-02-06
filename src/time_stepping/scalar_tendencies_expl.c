@@ -16,7 +16,8 @@ This is the horizontal (explicit) part of the constituent integration.
 #include "../thermodynamics/thermodynamics.h"
 #include "../subgrid_scale/subgrid_scale.h"
 
-int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Soil *soil, Grid *grid, double delta_t, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config, int no_rk_step, int slow_update_bool)
+int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Grid *grid, double delta_t, Diagnostics *diagnostics, Forcings *forcings,
+Irreversible_quantities *irrev, Config *config, int no_rk_step, int slow_update_bool)
 {
 	/*
 	This function manages the calculation of the explicit scalar tendencies.
@@ -231,7 +232,7 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 	return 0;
 }
 
-int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config *config, Grid *grid, Soil *soil)
+int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config *config, Grid *grid)
 {
 	/*
 	This function manages the calculation of the phase transition rates.
@@ -241,7 +242,7 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 	if (NO_OF_CONSTITUENTS > 1)
 	{
 		// calculating the source rates
-	    calc_h2otracers_source_rates(state, diagnostics, grid, soil, config, irrev, 2*delta_t);
+	    calc_h2otracers_source_rates(state, diagnostics, grid, config, irrev, 2*delta_t);
 	    int layer_index, h_index, scalar_shift_index, scalar_index;
 	    // loop over all constituents
 		for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)

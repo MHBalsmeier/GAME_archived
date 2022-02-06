@@ -39,6 +39,13 @@ int linear_combine_two_states(State *state_0, State *state_1, State *state_out, 
     {
         state_out -> wind[i] = coeff_0*state_0 -> wind[i] + coeff_1*state_1 -> wind[i];
     }
+    
+    #pragma omp parallel for
+    for (int i = 0; i < NO_OF_SOIL_LAYERS*NO_OF_SCALARS_H; ++i)
+    {
+        state_out -> temperature_soil[i] = coeff_0*state_0 -> temperature_soil[i] + coeff_1*state_1 -> temperature_soil[i];
+    }
+    
     return 0;
 }
 

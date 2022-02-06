@@ -4,7 +4,7 @@ Github repository: https://github.com/OpenNWP/GAME
 */
 
 double sink_velocity(int, double, double);
-int calc_h2otracers_source_rates(State *, Diagnostics *, Grid *, Soil *, Config *, Irreversible_quantities *, double);
+int calc_h2otracers_source_rates(State *, Diagnostics *, Grid *, Config *, Irreversible_quantities *, double);
 double water_vapour_density_from_rel_humidity(double, double, double);
 double saturation_pressure_over_water(double);
 double saturation_pressure_over_ice(double);
