@@ -72,7 +72,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 		double alpha[NO_OF_LAYERS];
 		double beta[NO_OF_LAYERS];
 		double gamma[NO_OF_LAYERS];
-		double density_interface_new, temperature_gas_lowest_layer;
+		double density_interface_new, temperature_gas_lowest_layer_old, temperature_gas_lowest_layer_new, power_flux_density_sensible;
 		
 		// explicit quantities
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
@@ -165,6 +165,8 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 		}
 		
 		// soil components of the matrix
+		// prevent power_flux_density_sensible from being undefined
+		power_flux_density_sensible = 0;
 		if (soil_switch == 1)
 		{
 			// calculating the explicit part of the heat flux density
@@ -182,16 +184,23 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			/(2*(grid -> z_soil_center[NO_OF_SOIL_LAYERS - 1] - grid -> z_t_const));
 			
 			// gas temperature in the lowest layer
-			temperature_gas_lowest_layer = (grid -> exner_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_old -> exner_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i])
+			temperature_gas_lowest_layer_old = (grid -> exner_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_old -> exner_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i])
 			*(grid -> theta_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_old -> theta_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]);
+			temperature_gas_lowest_layer_new = (grid -> exner_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_new -> exner_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i])
+			*(grid -> theta_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_new -> theta_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]);
+			
+			// the sensible power flux density
+			power_flux_density_sensible = 0.5*spec_heat_capacities_v_gas_lookup(0)*(state_new -> rho[gas_phase_first_index + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
+			*(temperature_gas_lowest_layer_old - state_old -> temperature_soil[i])
+			+ state_old -> rho[gas_phase_first_index + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
+			*(temperature_gas_lowest_layer_new - state_new -> temperature_soil[i]))/diagnostics -> flux_resistance[i];
 			
 			// calculating the explicit part of the temperature change
 			r_vector[NO_OF_LAYERS - 1]
 			// old temperature
 			= state_old -> temperature_soil[i]
 			// sensible heat flux
-			+ (state_new -> rho[gas_phase_first_index + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
-			*spec_heat_capacities_v_gas_lookup(0)*(temperature_gas_lowest_layer - state_old -> temperature_soil[i])/diagnostics -> flux_resistance[i]
+			+ (power_flux_density_sensible
 			// latent heat flux
 			+ diagnostics -> power_flux_density_latent[i]
 			// shortwave inbound radiation
@@ -210,7 +219,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 				// old temperature
 				= state_old -> temperature_soil[i + j*NO_OF_SCALARS_H]
 				// heat conduction from above
-				+ expl_weight*(-heat_flux_density_expl[j - 1]				
+				+ expl_weight*(-heat_flux_density_expl[j - 1]
 				// heat conduction from below
 				+ heat_flux_density_expl[j])
 				/((grid -> z_soil_interface[j] - grid -> z_soil_interface[j + 1])*grid -> sfc_rho_c[i])*delta_t;
@@ -309,7 +318,10 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			else if (j == NO_OF_LAYERS - 1)
 			{
 				state_new -> rhotheta[base_index]
-				= rhotheta_expl[j] + delta_t*(-theta_int_new[j - 1]*solution_vector[j - 1])/grid -> volume[base_index];
+				= rhotheta_expl[j] + delta_t*(-theta_int_new[j - 1]*solution_vector[j - 1]
+				// sensible heat
+				- grid -> area[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]*power_flux_density_sensible
+				/((grid -> exner_bg[base_index] + state_new -> exner_pert[base_index])*spec_heat_capacities_p_gas_lookup(0)))/grid -> volume[base_index];
 			}
 			else
 			{
