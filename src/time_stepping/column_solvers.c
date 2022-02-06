@@ -12,6 +12,7 @@ This file contains the implicit vertical solvers.
 #include "../game_types.h"
 #include "../tracers/tracers.h"
 #include "../thermodynamics/thermodynamics.h"
+#include "../subgrid_scale/subgrid_scale.h"
 
 int thomas_algorithm(double [], double [], double [], double [], double [], int);
 
@@ -42,6 +43,10 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 	#pragma omp parallel for private(lower_index, damping_coeff, z_above_damping, base_index, soil_switch)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
+		// flux resistance
+		soil -> flux_resistance[i] = sfc_flux_resistance(pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + i], 0.5),
+    	grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + i] - grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i], grid -> roughness_length[i]);
+	    	
 		soil_switch = config -> soil_on*grid -> is_land[i];
 		
 		// for meanings of these vectors look into the Kompendium
@@ -66,7 +71,7 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 		double alpha[NO_OF_LAYERS];
 		double beta[NO_OF_LAYERS];
 		double gamma[NO_OF_LAYERS];
-		double density_interface_new;
+		double density_interface_new, temperature_gas_lowest_layers;
 		
 		// explicit quantities
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
@@ -175,12 +180,17 @@ int three_band_solver_ver_waves(State *state_old, State *state_new, State *state
 			- grid -> t_const_soil)
 			/(2*(grid -> z_soil_center[NO_OF_SOIL_LAYERS - 1] - grid -> z_t_const));
 			
+			// gas temperature in the lowest layer
+			temperature_gas_lowest_layers = (grid -> exner_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_new -> exner_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i])
+			*(grid -> theta_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_new -> theta_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]);
+			
 			// calculating the explicit part of the temperature change
 			r_vector[NO_OF_LAYERS - 1]
 			// old temperature
 			= soil -> temperature[i]
 			// sensible heat flux
-			+ (soil -> power_flux_density_sensible[i]
+			+ (state_new -> rho[gas_phase_first_index + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
+			*spec_heat_capacities_v_gas_lookup(0)*(temperature_gas_lowest_layers - soil -> temperature[i])/soil -> flux_resistance[i]
 			// latent heat flux
 			+ soil -> power_flux_density_latent[i]
 			// shortwave inbound radiation

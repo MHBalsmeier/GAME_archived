@@ -192,14 +192,6 @@ int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency
 					// phase transitions
 					+ latent_heating_weight*tracer_heating
 					/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j])));
-					// sensible heat in the lowest layer
-					if (layer_index == NO_OF_LAYERS - 1 - grid -> no_of_shaded_points_scalar[h_index])
-					{
-						state_tendency -> rhotheta[j]
-						// the minus-sign is correct (the quantity itself refers to soil)
-						-= soil -> power_flux_density_sensible[h_index]/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j]))
-						/(grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H + h_index] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index]);
-					}
 				 }
 			}
 		}
