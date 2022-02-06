@@ -13,9 +13,7 @@ This file contains functions calculating everything related to phase transition 
 #include "../subgrid_scale/subgrid_scale.h"
 #include "tracers.h"
 
-int calc_h2otracers_source_rates(double mass_source_rates[], double heat_source_rates[], double densities[],
-double tracer_temperature_densities[], double temperature[], double delta_t, int assume_lte, Grid *grid, double v_squared[], double temperature_soil[],
-double power_flux_density_sensible[], double power_flux_density_latent[], int soil_on)
+int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *grid, Soil *soil, Config *config, Irreversible_quantities *irrev, double delta_t)
 {
 	/*
 	This function calculates phase transition rates and associated heat source rates.
@@ -36,81 +34,81 @@ double power_flux_density_sensible[], double power_flux_density_latent[], int so
     {
     	layer_index = i/NO_OF_SCALARS_H;
     	// determining the temperature of the cloud ice
-    	if (densities[2*NO_OF_SCALARS + i] < EPSILON_SECURITY)
+    	if (state -> rho[2*NO_OF_SCALARS + i] < EPSILON_SECURITY)
     	{
     		solid_temperature = T_0;
 		}
-		else if (assume_lte == 1)
+		else if (config -> assume_lte == 1)
 		{
-			solid_temperature = temperature[i];
+			solid_temperature = diagnostics -> temperature_gas[i];
 		}
     	else
     	{
-    		solid_temperature = tracer_temperature_densities[2*NO_OF_SCALARS + i]/densities[2*NO_OF_SCALARS + i];
+    		solid_temperature = state -> condensed_density_temperatures[2*NO_OF_SCALARS + i]/state -> rho[2*NO_OF_SCALARS + i];
 		}
 		
 		// determining the temperature of the liquid cloud water
-    	if (densities[3*NO_OF_SCALARS + i] < EPSILON_SECURITY)
+    	if (state -> rho[3*NO_OF_SCALARS + i] < EPSILON_SECURITY)
     	{
     		liquid_temperature = T_0;
 		}
-		else if (assume_lte == 1)
+		else if (config -> assume_lte == 1)
 		{
-			liquid_temperature = temperature[i];
+			liquid_temperature = diagnostics -> temperature_gas[i];
 		}
     	else
     	{
-    		liquid_temperature = tracer_temperature_densities[3*NO_OF_SCALARS + i]/densities[3*NO_OF_SCALARS + i];
+    		liquid_temperature = state -> condensed_density_temperatures[3*NO_OF_SCALARS + i]/state -> rho[3*NO_OF_SCALARS + i];
 		}
 		
 		// determining the saturation pressure
 		// "positive" temperatures (the saturation pressure is different over water compared to over ice)
-        if (temperature[i] >= T_0)
+        if (diagnostics -> temperature_gas[i] >= T_0)
     	{
-            saturation_pressure = saturation_pressure_over_water(temperature[i]);
+            saturation_pressure = saturation_pressure_over_water(diagnostics -> temperature_gas[i]);
 		}
 		// "negative" temperatures
         else
     	{
-            saturation_pressure = saturation_pressure_over_ice(temperature[i]);
+            saturation_pressure = saturation_pressure_over_ice(diagnostics -> temperature_gas[i]);
 		}
 		
 		// determining the water vapour pressure (using the EOS)
-        water_vapour_pressure = densities[5*NO_OF_SCALARS + i]*specific_gas_constants_lookup(1)*temperature[i];
+        water_vapour_pressure = state -> rho[5*NO_OF_SCALARS + i]*specific_gas_constants_lookup(1)*diagnostics -> temperature_gas[i];
         
     	// the amount of water vapour that the air can still take 
-        diff_density = (saturation_pressure - water_vapour_pressure)/(specific_gas_constants_lookup(1)*temperature[i]);
+        diff_density = (saturation_pressure - water_vapour_pressure)/(specific_gas_constants_lookup(1)*diagnostics -> temperature_gas[i]);
         
         // the case where the air is not over-saturated
         if (diff_density >= 0)
         {
             // temperature >= 0 °C
-            if (temperature[i] >= T_0)
+            if (diagnostics -> temperature_gas[i] >= T_0)
             {
             	// It is assumed that the still present ice vanishes within one time step.
-                mass_source_rates[2*NO_OF_SCALARS + i] = -densities[2*NO_OF_SCALARS + i]/delta_t;
+                irrev -> mass_source_rates[2*NO_OF_SCALARS + i] = -state -> rho[2*NO_OF_SCALARS + i]/delta_t;
                 
                 /*
                 The amount of liquid water per volume that will evaporate.
                 In case the air cannot take all the water, not everything will evaporate.
                 */
-                phase_trans_density = fmin(densities[3*NO_OF_SCALARS + i], diff_density);
+                phase_trans_density = fmin(state -> rho[3*NO_OF_SCALARS + i], diff_density);
                 
                 /*
                 The source rate for the liquid water consists of two terms:
                 1.) the evaporation
                  2.) the melting of ice
                 */
-                mass_source_rates[3*NO_OF_SCALARS + i] = (densities[2*NO_OF_SCALARS + i] - phase_trans_density)/delta_t;
+                irrev -> mass_source_rates[3*NO_OF_SCALARS + i] = (state -> rho[2*NO_OF_SCALARS + i] - phase_trans_density)/delta_t;
                 
                 // the tendency for the water vapour
-                mass_source_rates[4*NO_OF_SCALARS + i] = phase_trans_density/delta_t;
+                irrev -> mass_source_rates[4*NO_OF_SCALARS + i] = phase_trans_density/delta_t;
                 
                 // the heat source rates acting on the ice
-                heat_source_rates[2*NO_OF_SCALARS + i] = mass_source_rates[2*NO_OF_SCALARS + i]*phase_trans_heat(2, solid_temperature);
+                irrev -> constituent_heat_source_rates[2*NO_OF_SCALARS + i] = irrev -> mass_source_rates[2*NO_OF_SCALARS + i]*phase_trans_heat(2, solid_temperature);
                 
                 // the heat source rates acting on the liquid water
-                heat_source_rates[3*NO_OF_SCALARS + i] =
+                irrev -> constituent_heat_source_rates[3*NO_OF_SCALARS + i] =
                 // the evaporation
                 -phase_trans_density*phase_trans_heat(0, T_0)/delta_t;
             }
@@ -118,55 +116,55 @@ double power_flux_density_sensible[], double power_flux_density_latent[], int so
             else
             {
             	// Everything that can sublimate will sublimate.
-                phase_trans_density = fmin(densities[2*NO_OF_SCALARS + i], diff_density);
+                phase_trans_density = fmin(state -> rho[2*NO_OF_SCALARS + i], diff_density);
                 
                 /*
                 the tendency for the ice contains two terms:
                 1.) the freezing
                 2.) the phase transition through sublimation
                 */
-                mass_source_rates[2*NO_OF_SCALARS + i] = (densities[3*NO_OF_SCALARS + i] - phase_trans_density)/delta_t;
+                irrev -> mass_source_rates[2*NO_OF_SCALARS + i] = (state -> rho[3*NO_OF_SCALARS + i] - phase_trans_density)/delta_t;
                 
             	// It is assumed that the still present liquid water vanishes within one time step.
-                mass_source_rates[3*NO_OF_SCALARS + i] = -densities[3*NO_OF_SCALARS + i]/delta_t;
+                irrev -> mass_source_rates[3*NO_OF_SCALARS + i] = -state -> rho[3*NO_OF_SCALARS + i]/delta_t;
                 
                 // the tendency for the water vapour
-                mass_source_rates[4*NO_OF_SCALARS + i] = phase_trans_density/delta_t;
+                irrev -> mass_source_rates[4*NO_OF_SCALARS + i] = phase_trans_density/delta_t;
                 
                 // the heat source rates acting on the ice
-                heat_source_rates[2*NO_OF_SCALARS + i] = (
+                irrev -> constituent_heat_source_rates[2*NO_OF_SCALARS + i] = (
                 // the freezing
-                densities[3*NO_OF_SCALARS + i]*phase_trans_heat(2, solid_temperature)
+                state -> rho[3*NO_OF_SCALARS + i]*phase_trans_heat(2, solid_temperature)
                 // the sublimation
                 - phase_trans_density*phase_trans_heat(1, solid_temperature))/delta_t;
                 
                 // the heat source rates acting on the liquid water
-                heat_source_rates[3*NO_OF_SCALARS + i] = 0;
+                irrev -> constituent_heat_source_rates[3*NO_OF_SCALARS + i] = 0;
             }
         }
         // the case where the air is over-saturated
         else
         {
         	// the vanishing of water vapour through the phase transition
-            mass_source_rates[4*NO_OF_SCALARS + i] = diff_density/delta_t;
+            irrev -> mass_source_rates[4*NO_OF_SCALARS + i] = diff_density/delta_t;
             // temperature >= 0 °C
-            if (temperature[i] >= T_0)
+            if (diagnostics -> temperature_gas[i] >= T_0)
             {
             	// It is assumed that the still present ice vanishes within one time step.
-                mass_source_rates[2*NO_OF_SCALARS + i] = -densities[2*NO_OF_SCALARS + i]/delta_t;
+                irrev -> mass_source_rates[2*NO_OF_SCALARS + i] = -state -> rho[2*NO_OF_SCALARS + i]/delta_t;
                 
                 /*
                 The source rate for the liquid water consists of two terms:
                 1.) the condensation
                 2.) the melting of ice
 				*/
-				mass_source_rates[3*NO_OF_SCALARS + i] = (-diff_density + densities[2*NO_OF_SCALARS + i])/delta_t;
+				irrev -> mass_source_rates[3*NO_OF_SCALARS + i] = (-diff_density + state -> rho[2*NO_OF_SCALARS + i])/delta_t;
                 
                 // the heat source rates acting on the ice
-                heat_source_rates[2*NO_OF_SCALARS + i] = -densities[2*NO_OF_SCALARS + i]*phase_trans_heat(2, solid_temperature)/delta_t;
+                irrev -> constituent_heat_source_rates[2*NO_OF_SCALARS + i] = -state -> rho[2*NO_OF_SCALARS + i]*phase_trans_heat(2, solid_temperature)/delta_t;
                 
                 // the heat source rates acting on the liquid water
-                heat_source_rates[3*NO_OF_SCALARS + i] =
+                irrev -> constituent_heat_source_rates[3*NO_OF_SCALARS + i] =
                 // it is only affected by the condensation
                 -diff_density*phase_trans_heat(0, liquid_temperature)/delta_t;
             }
@@ -178,78 +176,78 @@ double power_flux_density_sensible[], double power_flux_density_latent[], int so
                 1.) the resublimation
                 2.) the melting of ice
                 */
-                mass_source_rates[2*NO_OF_SCALARS + i] = (-diff_density + densities[3*NO_OF_SCALARS + i])/delta_t;
+                irrev -> mass_source_rates[2*NO_OF_SCALARS + i] = (-diff_density + state -> rho[3*NO_OF_SCALARS + i])/delta_t;
                 
                 // It is assumed that the liquid water disappears within one time step.
-                mass_source_rates[3*NO_OF_SCALARS + i] = -densities[3*NO_OF_SCALARS + i]/delta_t;
+                irrev -> mass_source_rates[3*NO_OF_SCALARS + i] = -state -> rho[3*NO_OF_SCALARS + i]/delta_t;
                 
                 // the heat source rates acting on the ice
-                heat_source_rates[2*NO_OF_SCALARS + i] =
+                irrev -> constituent_heat_source_rates[2*NO_OF_SCALARS + i] =
                 // the component through the resublimation
                 (-diff_density*phase_trans_heat(1, solid_temperature)
                 // the component through freezing
-                + densities[3*NO_OF_SCALARS + i]*phase_trans_heat(2, solid_temperature))/delta_t;
+                + state -> rho[3*NO_OF_SCALARS + i]*phase_trans_heat(2, solid_temperature))/delta_t;
                 
                 // the heat source rates acting on the liquid water
-                heat_source_rates[3*NO_OF_SCALARS + i] = 0;
+                irrev -> constituent_heat_source_rates[3*NO_OF_SCALARS + i] = 0;
             }
         }
         
         // creation of precipitation
         // snow
-        mass_source_rates[i] = fmax(densities[2*NO_OF_SCALARS + i] - maximum_cloud_water_content*densities[4*NO_OF_SCALARS + i], 0)/delta_t;
+        irrev -> mass_source_rates[i] = fmax(state -> rho[2*NO_OF_SCALARS + i] - maximum_cloud_water_content*state -> rho[4*NO_OF_SCALARS + i], 0)/delta_t;
         // the snow creation comes at the cost of cloud ice particles
-        mass_source_rates[2*NO_OF_SCALARS + i] -= mass_source_rates[i];
+        irrev -> mass_source_rates[2*NO_OF_SCALARS + i] -= irrev -> mass_source_rates[i];
         // rain
-        mass_source_rates[NO_OF_SCALARS + i] = fmax(densities[3*NO_OF_SCALARS + i] - maximum_cloud_water_content*densities[4*NO_OF_SCALARS + i], 0)/delta_t;
+        irrev -> mass_source_rates[NO_OF_SCALARS + i] = fmax(state -> rho[3*NO_OF_SCALARS + i] - maximum_cloud_water_content*state -> rho[4*NO_OF_SCALARS + i], 0)/delta_t;
         // the rain creation comes at the cost of cloud water particles
-        mass_source_rates[3*NO_OF_SCALARS + i] -= mass_source_rates[NO_OF_SCALARS + i];
+        irrev -> mass_source_rates[3*NO_OF_SCALARS + i] -= irrev -> mass_source_rates[NO_OF_SCALARS + i];
         
         // turning of snow to rain
-        if (temperature[i] > T_0 && densities[i] > 0)
+        if (diagnostics -> temperature_gas[i] > T_0 && state -> rho[i] > 0)
         {
-        	mass_source_rates[i] = -densities[i]/delta_t;
-        	mass_source_rates[NO_OF_SCALARS + i] -= mass_source_rates[i];
+        	irrev -> mass_source_rates[i] = -state -> rho[i]/delta_t;
+        	irrev -> mass_source_rates[NO_OF_SCALARS + i] -= irrev -> mass_source_rates[i];
         }
         
         // surface effects
-        if (layer_index == NO_OF_LAYERS - 1 && soil_on == 1)
+        if (layer_index == NO_OF_LAYERS - 1 && config -> soil_on == 1)
         {
 	    	h_index = i - layer_index*NO_OF_SCALARS_H;	    	
 	    	
     		// flux resistance
-	    	flux_resistance = sfc_flux_resistance(pow(v_squared[i], 0.5),
+	    	flux_resistance = sfc_flux_resistance(pow(diagnostics -> v_squared[i], 0.5),
 	    	grid -> z_scalar[i] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + h_index], grid -> roughness_length[h_index]);
 			// sensible heat flux density through the surface (towards the surface)
-			power_flux_density_sensible[h_index] = densities[4*NO_OF_SCALARS + i]
-			*spec_heat_capacities_v_gas_lookup(0)*(temperature[i] - temperature_soil[h_index])/flux_resistance;
+			soil -> power_flux_density_sensible[h_index] = state -> rho[4*NO_OF_SCALARS + i]
+			*spec_heat_capacities_v_gas_lookup(0)*(diagnostics -> temperature_gas[i] - soil -> temperature[h_index])/flux_resistance;
 	    	
 	    	// evaporation and latent heat rates
     		if (grid -> is_land[h_index] == 0)
         	{
         		// saturation pressure at surface temperature
-        		if (temperature_soil[h_index] >= T_0)
+        		if (soil -> temperature[h_index] >= T_0)
         		{
-        			saturation_pressure_sfc = saturation_pressure_over_water(temperature_soil[h_index]);
+        			saturation_pressure_sfc = saturation_pressure_over_water(soil -> temperature[h_index]);
         		}
         		else
         		{
-        			saturation_pressure_sfc = saturation_pressure_over_ice(temperature_soil[h_index]);
+        			saturation_pressure_sfc = saturation_pressure_over_ice(soil -> temperature[h_index]);
         		}
         		// difference water vapour density between saturation at ground temperature and actual absolute humidity in the lowest model layer
-        		diff_density_sfc = saturation_pressure_sfc/(specific_gas_constants_lookup(1)*temperature_soil[h_index])
-        		- water_vapour_pressure/(specific_gas_constants_lookup(1)*temperature[i]);
+        		diff_density_sfc = saturation_pressure_sfc/(specific_gas_constants_lookup(1)*soil -> temperature[h_index])
+        		- water_vapour_pressure/(specific_gas_constants_lookup(1)*diagnostics -> temperature_gas[i]);
         		// the thickness of the lowest model layer (we need it as a result of Guass' theorem)
         		layer_thickness = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + h_index] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + h_index];
-		    	mass_source_rates[4*NO_OF_SCALARS + i] += fmax(0, diff_density_sfc/flux_resistance)/layer_thickness;
+		    	irrev -> mass_source_rates[4*NO_OF_SCALARS + i] += fmax(0, diff_density_sfc/flux_resistance)/layer_thickness;
 		    	// calculating the latent heat flux density affecting the surface
-        		if (temperature_soil[h_index] >= T_0)
+        		if (soil -> temperature[h_index] >= T_0)
         		{
-        			power_flux_density_latent[h_index] = -phase_trans_heat(0, temperature_soil[h_index])*fmax(0, diff_density_sfc/flux_resistance);
+        			soil -> power_flux_density_latent[h_index] = -phase_trans_heat(0, soil -> temperature[h_index])*fmax(0, diff_density_sfc/flux_resistance);
         		}
         		else
         		{
-        			power_flux_density_latent[h_index] = -phase_trans_heat(1, temperature_soil[h_index])*fmax(0, diff_density_sfc/flux_resistance);
+        			soil -> power_flux_density_latent[h_index] = -phase_trans_heat(1, soil -> temperature[h_index])*fmax(0, diff_density_sfc/flux_resistance);
         		}
         	}
         }
@@ -259,6 +257,10 @@ double power_flux_density_sensible[], double power_flux_density_latent[], int so
 
 double phase_trans_heat(int direction, double temperature)
 {
+	/*
+	This function calculates the phase transition heat.
+	*/
+	
     /*
     directions:
     0:  gas to liquid
@@ -283,6 +285,10 @@ double phase_trans_heat(int direction, double temperature)
 
 double sink_velocity(int solid_or_liquid, double radius, double air_density)
 {
+	/*
+	This function calculates the sink velocity of droplets.
+	*/
+	
 	double dry_air_kinematic_viscosity = 14.8e-6;
 	double reynolds_crit = 10;
 	double drag_coeff = 1;

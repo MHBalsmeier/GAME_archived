@@ -249,20 +249,7 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 	if (NO_OF_CONSTITUENTS > 1)
 	{
 		// calculating the source rates
-	    calc_h2otracers_source_rates(
-	    irrev -> mass_source_rates,
-	    irrev -> constituent_heat_source_rates,
-	    state -> rho,
-	    state -> condensed_density_temperatures,
-	    diagnostics -> temperature_gas,
-	    2*delta_t,
-	    config -> assume_lte,
-	    grid,
-	    diagnostics -> v_squared,
-	    soil -> temperature,
-	    soil -> power_flux_density_sensible,
-	    soil -> power_flux_density_latent,
-	    config -> soil_on);
+	    calc_h2otracers_source_rates(state, diagnostics, grid, soil, config, irrev, 2*delta_t);
 	    int layer_index, h_index, scalar_shift_index, scalar_index;
 	    // loop over all constituents
 		for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
