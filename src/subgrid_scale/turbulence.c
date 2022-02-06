@@ -11,12 +11,17 @@ In this file, diffusion coefficients, including Eddy viscosities, are computed.
 #include <stdio.h>
 #include <math.h>
 #include "../game_types.h"
+#include "../game_constants.h"
 #include "../spatial_operators/spatial_operators.h"
 #include "../thermodynamics/thermodynamics.h"
+#include "subgrid_scale.h"
 
 double ver_hor_viscosity(double, double, double);
 double swh_from_u10(double);
 double roughness_length_from_swh(double);
+double psi(double, double);
+
+const double KARMAN = 0.4;
 
 int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Diagnostics *diagnostics, Grid *grid)
 {
@@ -118,7 +123,63 @@ double roughness_length_from_swh(double swh)
 	return roughness_length;
 }
 
+double sfc_flux_resistance(double wind_h_lowest_layer, double z_agl, double roughness_length)
+{
+	/*
+	This function returns the surface flux resistance.
+	*/
+	
+	double result = 1.0/(KARMAN*(roughness_velocity(wind_h_lowest_layer, z_agl, roughness_length) + EPSILON_SECURITY))*
+	// neutral conditions
+	(log(z_agl/roughness_length)
+	// non-neutral conditions
+	- psi(z_agl, 100)
+	// interfacial sublayer
+	+ log(7));
+	return result;
+}
 
+double roughness_velocity(double wind_speed, double z_agl, double roughness_length)
+{
+	/*
+	This function returns the roughness velocity.
+	*/
+	
+	double result = wind_speed*KARMAN/log(z_agl/roughness_length);
+	return result;
+}
+
+double psi(double z_eff, double l)
+{
+	/*
+	This is a helper function for the correction to the surface flux resistance for non-neutral conditions.
+	*/
+	
+	// z_eff: effective height above the surface
+	// l: Monin-Obukhov length
+	
+	// avoiding l == 0
+	if (l == 0)
+	{
+		l = EPSILON_SECURITY;
+	}
+	
+	// helper variable
+	double x = pow(1 - 15*z_eff/l, 0.25);
+	
+	double result;
+	// unstable conditions
+	if (l < 0)
+	{
+		result = 2*log((1 + pow(x, 2))/2);
+	}
+	// neutral and stable conditions
+	else
+	{
+		result = -4.7*z_eff/l;
+	}
+	return result;
+}
 
 
 

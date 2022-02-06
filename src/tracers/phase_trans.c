@@ -7,8 +7,10 @@ Github repository: https://github.com/OpenNWP/GAME
 This file contains functions calculating everything related to phase transition rates.
 */
 
-#include <stdlib.h>
 #include <math.h>
+#include "../game_types.h"
+#include "../game_constants.h"
+#include "../subgrid_scale/subgrid_scale.h"
 #include "tracers.h"
 
 int calc_h2otracers_source_rates(double mass_source_rates[], double heat_source_rates[], double densities[],

@@ -3,8 +3,6 @@ This source file is part of the Geophysical Fluids Modeling Framework (GAME), wh
 Github repository: https://github.com/OpenNWP/GAME
 */
 
-#define T_0 273.15
-#define EPSILON_SECURITY (1e-10)
 #define DENSITY_WATER 1024.0
 #define GRAVITY 9.8
 #define KARMAN 0.4
@@ -27,5 +25,3 @@ double specific_gas_constants_lookup(int);
 double solve_specific_entropy_for_density(double, double);
 double spec_entropy_from_temp(double, double);
 double calc_o3_vmr(double);
-double sfc_flux_resistance(double, double, double);
-double roughness_velocity(double, double, double);

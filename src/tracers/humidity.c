@@ -8,8 +8,8 @@ This file contains functions calculating everything related to water vapour.
 */
 
 #include <math.h>
+#include "../game_constants.h"
 #include "tracers.h"
-
 
 double saturation_pressure_over_water(double temperature)
 {

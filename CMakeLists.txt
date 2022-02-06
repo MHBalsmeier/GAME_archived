@@ -38,7 +38,6 @@ src/radiation/rterrtmgp_coupler.f90
 src/tracers/humidity.c
 src/tracers/phase_trans.c
 src/tracers/properties.c
-src/tracers/surface.c
 grid_generator/src/vertical_grid.c
 ../rte-rrtmgp/rrtmgp/mo_gas_optics.F90
 ../rte-rrtmgp/rrtmgp/mo_gas_optics_rrtmgp.F90
