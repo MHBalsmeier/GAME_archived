@@ -180,7 +180,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			}
 			heat_flux_density_expl[NO_OF_SOIL_LAYERS - 1]
 			= -grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]*(state_old -> temperature_soil[i + (NO_OF_SOIL_LAYERS - 1)*NO_OF_SCALARS_H]
-			- grid -> t_const_soil)
+			- grid -> t_const_soil[i])
 			/(2*(grid -> z_soil_center[NO_OF_SOIL_LAYERS - 1] - grid -> z_t_const));
 			
 			// gas temperature in the lowest layer

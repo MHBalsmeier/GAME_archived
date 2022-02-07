@@ -384,7 +384,7 @@ int set_soil_temp(Grid *grid, State *state, double temperatures[], char init_sta
 			// index of this soil grid point
 			soil_index = i + soil_layer_index*NO_OF_SCALARS_H;
 			z_soil = grid -> z_t_const/NO_OF_SOIL_LAYERS*(0.5 + soil_layer_index);
-			state -> temperature_soil[soil_index] = t_sfc + (grid -> t_const_soil - t_sfc)*z_soil/grid -> z_t_const;
+			state -> temperature_soil[soil_index] = t_sfc + (grid -> t_const_soil[i] - t_sfc)*z_soil/grid -> z_t_const;
 		}
 	}
 	

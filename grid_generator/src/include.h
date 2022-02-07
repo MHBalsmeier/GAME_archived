@@ -47,7 +47,7 @@ int set_vector_shading_indices(int [], int [], int [], int []);
 int direct_tangential_unity(double [], double [], double [], double [], int [], int [], double [], double);
 int interpolate_ll(double [], double [], int [], double []);
 int set_background_state(double [], double [], double [], double []);
-int set_sfc_properties(double [], double [], double [], double [], double [], double [], double [], int [], int );
+int set_sfc_properties(double [], double [], double [], double [], double [], double [], double [], int [], int, int);
 
 
 

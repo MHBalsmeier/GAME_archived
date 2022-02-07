@@ -20,7 +20,7 @@ With this program, orographies can be produced.
 #define P_0 100000.0
 
 int set_sfc_properties(double latitude_scalar[], double longitude_scalar[], double roughness_length[], double sfc_albedo[],
-double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int oro_id)
+double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int oro_id, int no_of_avg_points)
 {
 	double *oro_unfiltered = malloc(NO_OF_SCALARS_H*sizeof(double));
 	
@@ -109,7 +109,6 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 	free(longitude_input);
 	
 	// smoothing the real orography
-	int no_of_avg_points = 8;
 	int min_indices_vector[no_of_avg_points];
 	double distance_vector[NO_OF_SCALARS_H];
 	if (oro_id == 1)

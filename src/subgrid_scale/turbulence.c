@@ -38,12 +38,12 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	double boundary_layer_height = 1000.0;
 	double roughness_length_factor = 1.0/0.08;
 	int i;
-	double decay_constant, production_rate, u10;
-	#pragma omp parallel for private(i, decay_constant, production_rate, u10)
+	double decay_constant, production_rate, ke, tke_expect, u10;
+	#pragma omp parallel for private(i, decay_constant, production_rate, ke, tke_expect, u10)
 	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
 	{
-		// roughness length over water
-		if (grid -> is_land[h_index] == 1)
+		// updating the roughness length over water
+		if (grid -> is_land[h_index] == 0)
 		{
 			u10 = pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + h_index], 0.5)
 			*log(10/grid -> roughness_length[h_index])
@@ -58,15 +58,21 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 			// decay constant, as derived from diffusion
 			decay_constant = 8*pow(M_PI, 2)/grid -> mean_velocity_area*(irrev -> viscosity_div[i] + irrev -> viscosity_curl[i])/density_gas(state, i);
 			
+			// generation of TKE in the boundary layer
 			production_rate = 0;
 			if (grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index] <= boundary_layer_height)
 			{
+				// kinetic energy in this gridbox
+				ke = 0.5*diagnostics -> v_squared[i];
+				tke_expect = tke_ke_ratio*ke;
+				
 				production_rate =
 				// factor taking into account the roughness of the surface
 				roughness_length_factor*grid -> roughness_length[h_index]
 				// height-dependent factor
 				*(boundary_layer_height - (grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index]))/boundary_layer_height
-				*(tke_ke_ratio*0.5*diagnostics -> v_squared[i] - irrev -> tke[i])/tke_approx_time;
+				*(tke_expect - irrev -> tke[i])/tke_approx_time;
+				
 				// restricting the production rate to positive values
 				production_rate = fmax(0, production_rate);
 			}
@@ -97,7 +103,7 @@ double ver_hor_viscosity(double tke, double delta_z, double mixing_length)
 	This function returns the vertical kinematic Eddy viscosity as a function of the specific TKE.
 	*/
 	
-	double prop_constant = 0.03*fmin(delta_z, mixing_length); // unit: m
+	double prop_constant = 0.004*fmin(delta_z, mixing_length); // unit: m
 	double result = prop_constant*pow(tke, 0.5);
 	return result;
 }

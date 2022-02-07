@@ -224,7 +224,11 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char grid_file_name[])
 	
 	// fundamental SFC properties
 	grid -> z_t_const = -10.0;
-	grid -> t_const_soil = T_0 + 15;
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+    {
+		grid -> t_const_soil[i] = T_0 + 25*cos(2+grid -> latitude_scalar[i]);
+    }
     
     /*
     constructing the soil grid

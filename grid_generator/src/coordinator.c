@@ -56,11 +56,16 @@ int main(int argc, char *argv[])
    	double toa = strtof(argv[8], NULL);
    	double radius_rescale = strtof(argv[9], NULL);
    	double radius = radius_rescale*RADIUS;
+   	int no_of_avg_points = strtof(argv[10], NULL);
    	if (vert_grid_type == 1)
    	{
    		no_of_oro_layers = 0;
    	}
     
+    /*
+    sanity checks
+    -------------
+    */
     // checking if the no_of_oro_layers is valid
     if (no_of_oro_layers < 0 || no_of_oro_layers >= NO_OF_LAYERS)
     {
@@ -82,6 +87,14 @@ int main(int argc, char *argv[])
 		printf("It is no_of_oro_layers >= NO_OF_LAYERS.\n");
 		exit(1);
 	}
+	
+	
+	if (no_of_avg_points < 1)
+	{
+		printf("It is no_of_avg_points < 1.\n");
+		exit(1);
+	}
+	
 	char grid_name_pre[200];
 	char output_file_pre[200];
 	char statistics_file_pre[200];
@@ -237,7 +250,7 @@ int main(int argc, char *argv[])
 	    ---------------------------------------
 	*/
     printf("Setting the physical surface properties ... ");
-	set_sfc_properties(latitude_scalar, longitude_scalar, roughness_length, sfc_albedo, sfc_rho_c, t_conductivity, oro, is_land, oro_id);
+	set_sfc_properties(latitude_scalar, longitude_scalar, roughness_length, sfc_albedo, sfc_rho_c, t_conductivity, oro, is_land, oro_id, no_of_avg_points);
     printf(GREEN "finished" RESET);
     printf(".\n");
 	printf("minimum orography: %lf m\n", oro[find_min_index(oro, NO_OF_SCALARS_H)]);
