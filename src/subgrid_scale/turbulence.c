@@ -28,18 +28,25 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	/*
 	This function updates the specific turbulent kinetic energy (TKE), unit: J/kg.
 	*/
-	// the ratio of global unresolved to resolved kinetic energy
+	
+	// some constants
+	double boundary_layer_height = 1100.0;
+	double mean_roughness_length = 0.12;
+	
+	// the ratio of global unresolved to resolved kinetic energy in the boundary layer
 	double tke_ke_ratio = 0.1*pow(4, 5 - RES_ID);
+	
 	// the e-folding time of TKE approximation
 	double tke_approx_time = 10800*pow(4, 5 - RES_ID);
+	
 	// computing the advection
 	grad(irrev -> tke, diagnostics -> vector_field_placeholder, grid);
 	inner_product(diagnostics -> vector_field_placeholder, state -> wind, diagnostics -> scalar_field_placeholder, grid);
-	double boundary_layer_height = 1000.0;
-	double roughness_length_factor = 1.0/0.08;
+	
+	// loop over all scalar gridpoints
 	int i;
-	double decay_constant, production_rate, ke, tke_expect, u10;
-	#pragma omp parallel for private(i, decay_constant, production_rate, ke, tke_expect, u10)
+	double decay_constant, production_rate, ke, tke_expect, u10, z_agl;
+	#pragma omp parallel for private(i, decay_constant, production_rate, ke, tke_expect, u10, z_agl)
 	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
 	{
 		// updating the roughness length over water
@@ -60,7 +67,8 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 			
 			// generation of TKE in the boundary layer
 			production_rate = 0;
-			if (grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index] <= boundary_layer_height)
+			z_agl = grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index];
+			if (z_agl <= boundary_layer_height)
 			{
 				// kinetic energy in this gridbox
 				ke = 0.5*diagnostics -> v_squared[i];
@@ -69,9 +77,9 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 				
 				production_rate =
 				// factor taking into account the roughness of the surface
-				roughness_length_factor*grid -> roughness_length[h_index]
+				grid -> roughness_length[h_index]/mean_roughness_length
 				// height-dependent factor
-				*(boundary_layer_height - (grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index]))/boundary_layer_height
+				*(boundary_layer_height - z_agl)/boundary_layer_height
 				*(tke_expect - irrev -> tke[i])/tke_approx_time;
 				
 				// restricting the production rate to positive values
@@ -88,6 +96,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 			- decay_constant*irrev -> tke[i]
 			// production through turbulence generation in the boundary layer
 			+ production_rate);
+			
 			// clipping negative values which might occur through advection
 			if (irrev -> tke[i] < 0)
 			{

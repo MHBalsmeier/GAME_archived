@@ -239,8 +239,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				wind_10_m_mean_v[h_index] += 1.0/min_no_of_output_steps*wind_tangential;
 			}
 		}
-		double roughness_length_extrapolation, actual_roughness_length, z_sfc, rescale_factor;
-		#pragma omp parallel for private(wind_u_value, wind_v_value, roughness_length_extrapolation, actual_roughness_length, z_sfc, rescale_factor)
+		double roughness_length_extrapolation, actual_roughness_length, z_sfc, z_agl, rescale_factor;
+		#pragma omp parallel for private(wind_u_value, wind_v_value, roughness_length_extrapolation, actual_roughness_length, z_sfc, z_agl, rescale_factor)
 		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 		{
 			actual_roughness_length = 0.5*(grid -> roughness_length[grid -> from_index[i]] + grid -> roughness_length[grid -> to_index[i]]);
@@ -250,12 +250,16 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				roughness_length_extrapolation = actual_roughness_length;
 			}
 			z_sfc = 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[i]] + grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[i]]);
+			z_agl = grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i] - z_sfc;
 			passive_turn(wind_10_m_mean_u[i], wind_10_m_mean_v[i], -grid -> direction[i], &wind_u_value, &wind_v_value);
+			
 			// rescale factor for computing the wind in a height of 10 m
-			rescale_factor = log(10.0/roughness_length_extrapolation)/log((grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i] - z_sfc)/actual_roughness_length);
+			rescale_factor = log(10.0/roughness_length_extrapolation)/log(z_agl/actual_roughness_length);
+			
 			wind_10_m_mean_u[i] = rescale_factor*wind_u_value;
 			wind_10_m_mean_v[i] = rescale_factor*wind_v_value;
 		}
+		
 		// diagnozing gusts at 10 m above the surface
 		double standard_deviation;
 		double gusts_parameter = 3;

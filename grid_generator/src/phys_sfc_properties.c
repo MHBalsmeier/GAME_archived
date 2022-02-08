@@ -146,6 +146,7 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 	double albedo_soil = 0.12;
 	double density_soil = 1442.0;
 	double t_conductivity_soil = 7.5e-7;
+	double vegetation_height;
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
