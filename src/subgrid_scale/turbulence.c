@@ -64,6 +64,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 			{
 				// kinetic energy in this gridbox
 				ke = 0.5*diagnostics -> v_squared[i];
+				// expected value for the TKE from the energy spectrum
 				tke_expect = tke_ke_ratio*ke;
 				
 				production_rate =
@@ -114,7 +115,17 @@ double swh_from_u10(double u10)
 	This function returns the significant wave height (SWH) as a function of the 10 m wind velocity.
 	*/
 	
-	double swh = u10/3;
+	double swh_max = 12;
+	
+	// formula for the SWH
+	double swh = u10/7;
+	
+	// restricting the maximum wave height
+	if (swh > swh_max)
+	{
+		swh = swh_max;
+	}
+	
 	return swh;
 }
 
