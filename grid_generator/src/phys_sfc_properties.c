@@ -19,6 +19,8 @@ With this program, orographies can be produced.
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 #define P_0 100000.0
 
+double vegetation_height_ideal(double, double);
+
 int set_sfc_properties(double latitude_scalar[], double longitude_scalar[], double roughness_length[], double sfc_albedo[],
 double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int oro_id, int no_of_avg_points)
 {
@@ -146,7 +148,6 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 	double albedo_soil = 0.12;
 	double density_soil = 1442.0;
 	double t_conductivity_soil = 7.5e-7;
-	double vegetation_height;
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
@@ -165,14 +166,27 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 		{
 			sfc_albedo[i] = albedo_soil;
 			sfc_rho_c[i] = density_soil*c_p_soil;
-			roughness_length[i] = 0.2;
+			roughness_length[i] = vegetation_height_ideal(latitude_scalar[i], oro[i])/8;
 		}
 	}
 	
 	return 0;
 }
 
-
+double vegetation_height_ideal(double latitude, double oro)
+{
+	/*
+	calculating a latitude- and height-dependant idealized vegetation height
+	*/
+	
+	double vegetation_height_equator = 20;
+	
+	double result;
+	
+	result = vegetation_height_equator*cos(latitude)*exp(-oro/1500);
+	
+	return result;
+}
 
 
 
