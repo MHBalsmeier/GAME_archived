@@ -81,10 +81,11 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 				// factor taking into account the roughness of the surface
 				tke_expect = pow(grid -> roughness_length[h_index]/mean_roughness_length, roughness_length_exp)*tke_expect;
 				
-				production_rate
 				// height-dependent factor
-				= (boundary_layer_height - z_agl)/boundary_layer_height
-				*(tke_expect - irrev -> tke[i])/tke_approx_time;
+				tke_expect = (1 - z_agl/boundary_layer_height)*tke_expect;
+				
+				// finally calculating the production rate
+				production_rate = (tke_expect - irrev -> tke[i])/tke_approx_time;
 				
 				// restricting the production rate to positive values
 				production_rate = fmax(0, production_rate);
