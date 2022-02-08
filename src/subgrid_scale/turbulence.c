@@ -30,7 +30,8 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	
 	// some constants
 	double boundary_layer_height = 1100.0;
-	double mean_roughness_length = 0.12;
+	double mean_roughness_length = 0.6;
+	double roughness_length_exp = 1.0/5;
 	
 	// the ratio of global unresolved to resolved kinetic energy in the boundary layer
 	double tke_ke_ratio = 0.1*pow(4, 5 - RES_ID);
@@ -51,9 +52,11 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 		// updating the roughness length over water
 		if (grid -> is_land[h_index] == 0)
 		{
+			// calculating the 10 m wind velocity from the logarithmic wind profile
 			u10 = pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + h_index], 0.5)
 			*log(10/grid -> roughness_length[h_index])
 			/log((grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + h_index] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index])/grid -> roughness_length[h_index]);
+			// calculating the roughness length fom the wind velocity
 			grid -> roughness_length[h_index] = roughness_length_from_u10(u10);
 		}
 		
@@ -71,14 +74,16 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 			{
 				// kinetic energy in this gridbox
 				ke = 0.5*diagnostics -> v_squared[i];
+				
 				// expected value for the TKE from the energy spectrum
 				tke_expect = tke_ke_ratio*ke;
 				
-				production_rate =
 				// factor taking into account the roughness of the surface
-				grid -> roughness_length[h_index]/mean_roughness_length
+				tke_expect = pow(grid -> roughness_length[h_index]/mean_roughness_length, roughness_length_exp)*tke_expect;
+				
+				production_rate
 				// height-dependent factor
-				*(boundary_layer_height - z_agl)/boundary_layer_height
+				= (boundary_layer_height - z_agl)/boundary_layer_height
 				*(tke_expect - irrev -> tke[i])/tke_approx_time;
 				
 				// restricting the production rate to positive values
