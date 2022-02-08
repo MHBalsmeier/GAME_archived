@@ -125,7 +125,7 @@ double roughness_length_from_swh(double swh)
 	This function returns the roughness length as a function of the significant wave height (SWH).
 	*/
 	
-	double roughness_length = swh/8;
+	double roughness_length = swh/35;
 	return roughness_length;
 }
 
