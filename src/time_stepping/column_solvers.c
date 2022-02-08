@@ -26,7 +26,6 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 	// declaring and defining some variables that will be needed later on
 	int lower_index, base_index;
 	double impl_weight = config -> impl_thermo_weight;
-	double expl_weight = 1 - impl_weight;
 	double c_v = spec_heat_capacities_v_gas(0);
 	double c_p = spec_heat_capacities_p_gas(0);
 	double r_d = specific_gas_constants(0);
@@ -208,7 +207,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			// longwave outbound radiation
 			- forcings -> sfc_lw_out[i]
 			// heat conduction from below
-			+ expl_weight*heat_flux_density_expl[0])
+			+ 0.5*heat_flux_density_expl[0])
 			/((grid -> z_soil_interface[0] - grid -> z_soil_interface[1])*grid -> sfc_rho_c[i])*delta_t;
 			
 			// loop over all soil layers below the first layer
@@ -219,7 +218,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 				// old temperature
 				= state_old -> temperature_soil[i + j*NO_OF_SCALARS_H]
 				// heat conduction from above
-				+ expl_weight*(-heat_flux_density_expl[j - 1]
+				+ 0.5*(-heat_flux_density_expl[j - 1]
 				// heat conduction from below
 				+ heat_flux_density_expl[j])
 				/((grid -> z_soil_interface[j] - grid -> z_soil_interface[j + 1])*grid -> sfc_rho_c[i])*delta_t;
@@ -230,19 +229,19 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			{
 				if (j == 0)
 				{
-					d_vector[j + NO_OF_LAYERS - 1] = 1.0 + impl_weight*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
+					d_vector[j + NO_OF_LAYERS - 1] = 1.0 + 0.5*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
 					/((grid -> z_soil_interface[j] - grid -> z_soil_interface[j + 1])*grid -> sfc_rho_c[i])
 					*1/(grid -> z_soil_center[j] - grid -> z_soil_center[j + 1]);
 				}
 				else if (j == NO_OF_SOIL_LAYERS - 1)
 				{
-					d_vector[j + NO_OF_LAYERS - 1] = 1.0 + impl_weight*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
+					d_vector[j + NO_OF_LAYERS - 1] = 1.0 + 0.5*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
 					/((grid -> z_soil_interface[j] - grid -> z_soil_interface[j + 1])*grid -> sfc_rho_c[i])
 					*1/(grid -> z_soil_center[j - 1] - grid -> z_soil_center[j]);
 				}
 				else
 				{
-					d_vector[j + NO_OF_LAYERS - 1] = 1.0 + impl_weight*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
+					d_vector[j + NO_OF_LAYERS - 1] = 1.0 + 0.5*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
 					/((grid -> z_soil_interface[j] - grid -> z_soil_interface[j + 1])*grid -> sfc_rho_c[i])
 					*(1/(grid -> z_soil_center[j - 1] - grid -> z_soil_center[j])
 					+ 1/(grid -> z_soil_center[j] - grid -> z_soil_center[j + 1]));
@@ -253,10 +252,10 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			e_vector[NO_OF_LAYERS - 2] = 0;
 			for (int j = 0; j < NO_OF_SOIL_LAYERS - 1; ++j)
 			{
-				c_vector[j + NO_OF_LAYERS - 1] = -impl_weight*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
+				c_vector[j + NO_OF_LAYERS - 1] = -0.5*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
 				/((grid -> z_soil_interface[j + 1] - grid -> z_soil_interface[j + 2])*grid -> sfc_rho_c[i])
 				/(grid -> z_soil_center[j] - grid -> z_soil_center[j + 1]);
-				e_vector[j + NO_OF_LAYERS - 1] = -impl_weight*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
+				e_vector[j + NO_OF_LAYERS - 1] = -0.5*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
 				/((grid -> z_soil_interface[j] - grid -> z_soil_interface[j + 1])*grid -> sfc_rho_c[i])
 				/(grid -> z_soil_center[j] - grid -> z_soil_center[j + 1]);
 			}
