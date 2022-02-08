@@ -17,8 +17,7 @@ In this file, diffusion coefficients, including Eddy viscosities, are computed.
 #include "subgrid_scale.h"
 
 double ver_hor_viscosity(double, double, double);
-double swh_from_u10(double);
-double roughness_length_from_swh(double);
+double roughness_length_from_u10(double);
 double psi(double, double);
 
 const double KARMAN = 0.4;
@@ -55,7 +54,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 			u10 = pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + h_index], 0.5)
 			*log(10/grid -> roughness_length[h_index])
 			/log((grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + h_index] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index])/grid -> roughness_length[h_index]);
-			grid -> roughness_length[h_index] = roughness_length_from_swh(swh_from_u10(u10));
+			grid -> roughness_length[h_index] = roughness_length_from_u10(u10);
 		}
 		
 		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
@@ -118,34 +117,26 @@ double ver_hor_viscosity(double tke, double delta_z, double mixing_length)
 	return result;
 }
 
-double swh_from_u10(double u10)
+double roughness_length_from_u10(double u10)
 {
 	/*
-	This function returns the significant wave height (SWH) as a function of the 10 m wind velocity.
+	This function returns the roughness length as a function of the mean wind speed at 10 m above a fully developed sea.
 	*/
 	
-	double swh_max = 12;
+	// refer to Stensrud, Parameterization schemes (2007), p.130
 	
-	// formula for the SWH
-	double swh = u10/7;
+	// empirically determined formula for the SWH
+	double swh = 0.0248*pow(u10, 2);
 	
-	// restricting the maximum wave height
-	if (swh > swh_max)
-	{
-		swh = swh_max;
-	}
+	// empirically determined period of the waves
+	double period = 0.729*u10;
 	
-	return swh;
-}
-
-
-double roughness_length_from_swh(double swh)
-{
-	/*
-	This function returns the roughness length as a function of the significant wave height (SWH).
-	*/
+	// deep-water gravity waves
+	double wavelength = GRAVITY_MEAN_SFC_ABS*pow(period, 2)/(2*M_PI);
 	
-	double roughness_length = swh/35;
+	// final result
+	double roughness_length = 1200*swh*pow(swh/wavelength, 4.5);
+	
 	return roughness_length;
 }
 
