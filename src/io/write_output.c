@@ -1651,11 +1651,11 @@ double calc_std_dev(double vector_for_std_deviation[], int no_of_values)
 double global_scalar_integrator(Scalar_field density_gen, Grid *grid)
 {
     double result = 0;
-    #pragma omp parallel for shared(result)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         result += density_gen[i]*grid -> volume[i];
     }
+    
     return result;
 }
 

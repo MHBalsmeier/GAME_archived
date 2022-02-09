@@ -43,7 +43,6 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	double ke_glob_int_free = 0;
 	double m_glob_int_free = 0;
 	int i;
-	#pragma omp parallel for shared(i, tke_glob_int_free, ke_glob_int_free, m_glob_int_free)
 	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
 	{
 		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
@@ -62,6 +61,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	
 	// the ratio of global unresolved to resolved kinetic energy above the boundary layer
 	double tke_ke_ratio = tke_glob_int_free/(ke_glob_int_free + EPSILON_SECURITY);
+	tke_ke_ratio = tke_ke_ratio;
 	
 	// computing the advection
 	grad(irrev -> tke, diagnostics -> vector_field_placeholder, grid);
