@@ -1409,13 +1409,15 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		sprintf(OUTPUT_FILE_PRE, "%s+%ds.nc", config_io -> run_id, (int) (t_write - t_init));
 		char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
 		sprintf(OUTPUT_FILE, "%s+%ds.nc", config_io -> run_id, (int) (t_write - t_init));
-		int ncid, retval, scalar_dimid, vector_h_dimid, vector_v_dimid, vector_dimid, densities_dimid, temperatures_dimid,
+		int ncid, retval, scalar_dimid, soil_dimid, vector_h_dimid, vector_v_dimid, vector_dimid, densities_dimid, temperatures_dimid,
 		curl_field_dimid, single_double_dimid, densities_id, temperatures_id, wind_id, rh_id, divv_h_all_layers_id, rel_vort_id,
-		tke_id;
+		tke_id, soil_id;
 		
 		if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
 			NCERR(retval);
 		if ((retval = nc_def_dim(ncid, "scalar_index", NO_OF_SCALARS, &scalar_dimid)))
+			NCERR(retval);
+		if ((retval = nc_def_dim(ncid, "soil_index", NO_OF_SOIL_LAYERS*NO_OF_SCALARS_H, &soil_dimid)))
 			NCERR(retval);
 		if ((retval = nc_def_dim(ncid, "vector_index", NO_OF_VECTORS, &vector_dimid)))
 			NCERR(retval);
@@ -1461,6 +1463,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			NCERR(retval);
 		if ((retval = nc_put_att_text(ncid, tke_id, "units", strlen("J/kg"), "J/kg")))
 			NCERR(retval);
+		if ((retval = nc_def_var(ncid, "t_soil", NC_DOUBLE, 1, &soil_dimid, &soil_id)))
+			NCERR(retval);
+		if ((retval = nc_put_att_text(ncid, soil_id, "units", strlen("K"), "K")))
+			NCERR(retval);
 		if ((retval = nc_enddef(ncid)))
 			NCERR(retval);
 		
@@ -1478,6 +1484,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		if ((retval = nc_put_var_double(ncid, divv_h_all_layers_id, &(*divv_h_all_layers)[0])))
 			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, tke_id, &irrev -> tke[0])))
+			NCERR(retval);
+		if ((retval = nc_put_var_double(ncid, soil_id, &state_write_out -> temperature_soil[0])))
 			NCERR(retval);
 		
 		// Closing the netcdf file.
