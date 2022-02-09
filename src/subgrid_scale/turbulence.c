@@ -29,15 +29,34 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	*/
 	
 	// some constants
-	double boundary_layer_height = 1100.0;
-	double mean_roughness_length = 0.6;
-	double roughness_length_exp = 1.0/5;
-	
-	// the ratio of global unresolved to resolved kinetic energy in the boundary layer
-	double tke_ke_ratio = 0.1*pow(4, 5 - RES_ID);
-	
-	// the e-folding time of TKE approximation
+	double boundary_layer_height = 1100.0; // height of the boundary layer
+	double mean_roughness_length = 0.6; // approximate global mean of the roughness length
+	double roughness_length_exp = 1.0/5; // exponent of the roughness length
+	double turb_prefactor = 2; // coefficient modulating the strength of the turbulence in the boundary layer
+	// the e-folding time of TKE approximation in the boundary layer
 	double tke_approx_time = 10800*pow(4, 5 - RES_ID);
+	
+	// think carefully before you change something below this point
+	
+	// global integrals over the TKE and KE above the boundary layer
+	double tke_glob_int_free = 0;
+	double ke_glob_int_free = 0;
+	double m_glob_int_free = 0;
+	#pragma omp parallel for shared(tke_glob_int_free, ke_glob_int_free, m_glob_int_free)
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		if (grid -> z_scalar[i] > boundary_layer_height)
+		{
+			tke_glob_int_free += irrev -> tke[i]*state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*grid -> volume[i];
+			ke_glob_int_free += 0.5*diagnostics -> v_squared[i]*state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*grid -> volume[i];
+			m_glob_int_free += state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*grid -> volume[i];
+		}
+	}
+	tke_glob_int_free = tke_glob_int_free/m_glob_int_free;
+	ke_glob_int_free = ke_glob_int_free/m_glob_int_free;
+	
+	// the ratio of global unresolved to resolved kinetic energy above the boundary layer
+	double tke_ke_ratio = tke_glob_int_free/(ke_glob_int_free + EPSILON_SECURITY);
 	
 	// computing the advection
 	grad(irrev -> tke, diagnostics -> vector_field_placeholder, grid);
@@ -45,17 +64,19 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	
 	// loop over all scalar gridpoints
 	int i;
-	double decay_constant, production_rate, ke, tke_expect, u10, z_agl;
-	#pragma omp parallel for private(i, decay_constant, production_rate, ke, tke_expect, u10, z_agl)
+	double decay_constant, production_rate, ke, tke_expect, tke_expect_prefactor, u10, z_agl;
+	#pragma omp parallel for private(i, decay_constant, production_rate, ke, tke_expect, tke_expect_prefactor, u10, z_agl)
 	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
 	{
 		// updating the roughness length over water
 		if (grid -> is_land[h_index] == 0)
 		{
 			// calculating the 10 m wind velocity from the logarithmic wind profile
+			z_agl = grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + h_index] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index];
 			u10 = pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + h_index], 0.5)
 			*log(10/grid -> roughness_length[h_index])
-			/log((grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + h_index] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index])/grid -> roughness_length[h_index]);
+			/log(z_agl/grid -> roughness_length[h_index]);
+			
 			// calculating the roughness length fom the wind velocity
 			grid -> roughness_length[h_index] = roughness_length_from_u10(u10);
 		}
@@ -75,14 +96,17 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 				// kinetic energy in this gridbox
 				ke = 0.5*diagnostics -> v_squared[i];
 				
-				// expected value for the TKE from the energy spectrum
+				// expected value for the TKE from the energy spectrum assuming no boundary layer effects
 				tke_expect = tke_ke_ratio*ke;
 				
+				tke_expect_prefactor = 1
 				// factor taking into account the roughness of the surface
-				tke_expect = pow(grid -> roughness_length[h_index]/mean_roughness_length, roughness_length_exp)*tke_expect;
-				
+				+ turb_prefactor*pow(grid -> roughness_length[h_index]/mean_roughness_length, roughness_length_exp)
 				// height-dependent factor
-				tke_expect = (1 - z_agl/boundary_layer_height)*tke_expect;
+				*(exp(-z_agl/boundary_layer_height) - exp(-1.0))/(1 - exp(-1.0));
+				
+				// the amount of TKE that can be expected in this gridbox
+				tke_expect = tke_expect_prefactor*tke_expect;
 				
 				// finally calculating the production rate
 				production_rate = (tke_expect - irrev -> tke[i])/tke_approx_time;
