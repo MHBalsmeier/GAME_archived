@@ -29,9 +29,9 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	*/
 	
 	// some constants
-	double boundary_layer_height = 2500.0; // height of the boundary layer
+	double boundary_layer_height = 1500.0; // height of the boundary layer
 	double mean_roughness_length = 0.6; // approximate global mean of the roughness length
-	double roughness_length_exp = 1.0/2; // exponent of the roughness length
+	double roughness_length_exp = 1.0/3; // exponent of the roughness length
 	double turb_prefactor = 2; // coefficient modulating the strength of the turbulence in the boundary layer
 	// the e-folding time of TKE approximation in the boundary layer
 	double tke_approx_time = 10800*pow(4, 5 - RES_ID);
