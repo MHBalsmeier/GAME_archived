@@ -29,7 +29,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	*/
 	
 	// some constants
-	double boundary_layer_height = 1100.0; // height of the boundary layer
+	double boundary_layer_height = 2500.0; // height of the boundary layer
 	double mean_roughness_length = 0.6; // approximate global mean of the roughness length
 	double roughness_length_exp = 1.0/5; // exponent of the roughness length
 	double turb_prefactor = 2; // coefficient modulating the strength of the turbulence in the boundary layer
