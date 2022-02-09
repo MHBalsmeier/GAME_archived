@@ -255,6 +255,7 @@ int read_init_data(char init_state_file[], State *state, Irreversible_quantities
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "wind", &wind_id)))
         NCERR(retval);
+    tke_avail = 0;
     if (nc_inq_varid(ncid, "tke", &tke_id) == 0)
     {
     	tke_avail = 1;
