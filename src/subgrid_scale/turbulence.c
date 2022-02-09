@@ -42,14 +42,19 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	double tke_glob_int_free = 0;
 	double ke_glob_int_free = 0;
 	double m_glob_int_free = 0;
-	#pragma omp parallel for shared(tke_glob_int_free, ke_glob_int_free, m_glob_int_free)
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	int i;
+	#pragma omp parallel for shared(i, tke_glob_int_free, ke_glob_int_free, m_glob_int_free)
+	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
 	{
-		if (grid -> z_scalar[i] > boundary_layer_height)
+		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
 		{
-			tke_glob_int_free += irrev -> tke[i]*state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*grid -> volume[i];
-			ke_glob_int_free += 0.5*diagnostics -> v_squared[i]*state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*grid -> volume[i];
-			m_glob_int_free += state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*grid -> volume[i];
+			i = layer_index*NO_OF_SCALARS_H + h_index;
+			if (grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS + h_index] > boundary_layer_height)
+			{
+				tke_glob_int_free += irrev -> tke[i]*state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*grid -> volume[i];
+				ke_glob_int_free += 0.5*diagnostics -> v_squared[i]*state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*grid -> volume[i];
+				m_glob_int_free += state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*grid -> volume[i];
+			}
 		}
 	}
 	tke_glob_int_free = tke_glob_int_free/m_glob_int_free;
@@ -63,7 +68,6 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	inner_product(diagnostics -> vector_field_placeholder, state -> wind, diagnostics -> scalar_field_placeholder, grid);
 	
 	// loop over all scalar gridpoints
-	int i;
 	double decay_constant, production_rate, ke, tke_expect, tke_expect_prefactor, u10, z_agl;
 	#pragma omp parallel for private(i, decay_constant, production_rate, ke, tke_expect, tke_expect_prefactor, u10, z_agl)
 	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
