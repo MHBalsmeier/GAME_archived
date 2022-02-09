@@ -36,7 +36,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	// the e-folding time of TKE approximation in the boundary layer
 	double tke_approx_time = 10800*pow(4, 5 - RES_ID);
 	
-	// think carefully before you change something below this point
+	// think carefully before you change anything below this point
 	
 	// global integrals over the TKE and KE above the boundary layer
 	double tke_glob_int_free = 0;
