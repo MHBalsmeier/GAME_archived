@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 	// NWP mode
     else
     {
-    	read_init_data(init_state_file, state_old, grid);
+    	read_init_data(init_state_file, state_old, irrev, grid);
 	}
 	printf("Initial state set successfully.\n");
 	printf("%s", stars);
