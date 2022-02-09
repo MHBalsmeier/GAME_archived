@@ -122,7 +122,7 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 			// prognostic equation for TKE
 			irrev -> tke[i] += delta_t*(
 			// advection
-			- diagnostics -> scalar_field_placeholder[i]
+			-diagnostics -> scalar_field_placeholder[i]
 			// production through dissipation of resolved energy
 			+ irrev -> heating_diss[i]/density_gas(state, i)
 			// decay through molecular dissipation
