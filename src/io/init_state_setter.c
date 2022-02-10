@@ -238,14 +238,14 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
     return 0;
 }
 
-int read_init_data(char init_state_file[], State *state, Grid* grid)
+int read_init_data(char init_state_file[], State *state, Irreversible_quantities *irrev, Grid* grid)
 {
 	/*
 	This function reads the initial state of the model atmosphere from a netcdf file.
 	*/
 	
     double *temperatures = malloc((NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS*sizeof(double));
-    int retval, ncid;
+    int retval, ncid, tke_id, tke_avail;
     if ((retval = nc_open(init_state_file, NC_NOWRITE, &ncid)))
         NCERR(retval);
     int densities_id, temperatures_id, wind_id;
@@ -255,12 +255,27 @@ int read_init_data(char init_state_file[], State *state, Grid* grid)
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "wind", &wind_id)))
         NCERR(retval);
+    tke_avail = 0;
+    if (nc_inq_varid(ncid, "tke", &tke_id) == 0)
+    {
+    	tke_avail = 1;
+    	printf("TKE found in the input file.\n");
+    }
+    else
+    {	
+    	printf("TKE not found in the input file. TKE set to zero.\n");
+    }
     if ((retval = nc_get_var_double(ncid, densities_id, &state -> rho[0])))
         NCERR(retval);    
     if ((retval = nc_get_var_double(ncid, temperatures_id, &temperatures[0])))
         NCERR(retval);
     if ((retval = nc_get_var_double(ncid, wind_id, &state -> wind[0])))
         NCERR(retval);
+    if (tke_avail == 1)
+    {
+		if ((retval = nc_get_var_double(ncid, tke_id, &irrev -> tke[0])))
+		    NCERR(retval);
+    }
     if ((retval = nc_close(ncid)))
         NCERR(retval);
     

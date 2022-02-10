@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 	// NWP mode
     else
     {
-    	read_init_data(init_state_file, state_old, grid);
+    	read_init_data(init_state_file, state_old, irrev, grid);
 	}
 	printf("Initial state set successfully.\n");
 	printf("%s", stars);
@@ -250,7 +250,8 @@ int main(int argc, char *argv[])
     }
     
     // writing out the initial state of the model run
-    write_out(state_old, wind_h_lowest_layer, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, config_io, config);
+    write_out(state_old, wind_h_lowest_layer, min_no_of_10m_wind_avg_steps, t_init, t_write,
+    diagnostics, forcings, grid, dualgrid, config_io, config, irrev);
     
     t_write += config_io -> write_out_interval;
     printf("Run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
@@ -344,7 +345,8 @@ int main(int argc, char *argv[])
         if(t_0 + delta_t >= t_write + radius_rescale*300 && t_0 <= t_write + radius_rescale*300)
         {
         	// here, output is actually written
-            write_out(state_write, wind_h_lowest_layer, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings, grid, dualgrid, config_io, config);
+            write_out(state_write, wind_h_lowest_layer, min_no_of_10m_wind_avg_steps, t_init, t_write, diagnostics, forcings,
+            grid, dualgrid, config_io, config, irrev);
             // setting the next output time
             t_write += config_io -> write_out_interval;
             
