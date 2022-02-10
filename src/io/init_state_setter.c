@@ -259,11 +259,11 @@ int read_init_data(char init_state_file[], State *state, Irreversible_quantities
     if (nc_inq_varid(ncid, "tke", &tke_id) == 0)
     {
     	tke_avail = 1;
-    	printf("TKE found in the input file.\n");
+    	printf("TKE found in initialization file.\n");
     }
     else
     {	
-    	printf("TKE not found in the input file. TKE set to zero.\n");
+    	printf("TKE not found in initialization file. TKE set to zero.\n");
     }
     if ((retval = nc_get_var_double(ncid, densities_id, &state -> rho[0])))
         NCERR(retval);    
