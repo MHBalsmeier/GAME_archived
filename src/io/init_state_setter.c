@@ -4,7 +4,7 @@ Github repository: https://github.com/OpenNWP/GAME
 */
 
 /*
-In this file, the initial state of the simulation is read in from a netcdf file.
+In this file, the initial state of the simulation is read in from a netCDF file.
 */
 
 #include <stdio.h>
@@ -241,7 +241,7 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
 int read_init_data(char init_state_file[], State *state, Irreversible_quantities *irrev, Grid* grid)
 {
 	/*
-	This function reads the initial state of the model atmosphere from a netcdf file.
+	This function reads the initial state of the model atmosphere from a netCDF file.
 	*/
 	
     double *temperatures = malloc((NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS*sizeof(double));
