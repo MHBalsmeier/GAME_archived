@@ -418,7 +418,7 @@ int set_soil_temp(Grid *grid, State *state, double temperatures[], char init_sta
 		// sea surface temperature if SST is unavailable or land surface temperature is soil temperature is unavailable
 		if ((grid -> is_land[i] == 1 && t_soil_avail == 0) || (grid -> is_land[i] == 0 && sst_avail == 0))
 		{
-			// setting the soil temperature in the uppermost layer identical to the air temperature in the lowest layer
+			// setting the surface temperature identical to the air temperature in the lowest layer
 			t_sfc = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i];
 		}
 		// sea surface temperature if SST is available
