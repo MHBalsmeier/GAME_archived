@@ -385,7 +385,7 @@ int set_soil_temp(Grid *grid, State *state, double temperatures[], char init_sta
 		    NCERR(retval);
 		
 		int soil_id;
-		// figuring out if the netcdf file contains SST
+		// figuring out if the netcdf file contains the soil temperature
 		if (nc_inq_varid(ncid, "t_soil", &soil_id) == 0)
 		{
 			t_soil_avail = 1;
@@ -396,7 +396,7 @@ int set_soil_temp(Grid *grid, State *state, double temperatures[], char init_sta
 			printf("Soil temperature not found in initialization file.\n");
 		}
 		
-		// reading the SST data if it is present in the netcdf file
+		// reading the soil temperature if it is present in the netcdf file
 		if (t_soil_avail == 1)
 		{
 			if ((retval = nc_get_var_double(ncid, soil_id, &state -> temperature_soil[0])))
