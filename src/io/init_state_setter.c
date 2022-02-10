@@ -338,16 +338,18 @@ int read_init_data(char init_state_file[], State *state, Irreversible_quantities
 int set_soil_temp(Grid *grid, State *state, double temperatures[], char init_state_file[])
 {
 	/*
-	This function sets the soil temperature.
+	This function sets the soil and SST temperature.
 	*/
     
-    // figuring out if the SST is included in the init file and reading it if it exists (important for NWP)
+    // general NetCDF stuff
+	int ncid;
+	int retval;
+	
+    // figuring out if the SST is included in the initialization file and reading it if it exists (important for NWP)
 	double *sst = malloc(NO_OF_SCALARS_H*sizeof(double));
 	int sst_avail = 0;
     if (strlen(init_state_file) != 0)
     {
-		int ncid;
-		int retval;
 		if ((retval = nc_open(init_state_file, NC_NOWRITE, &ncid)))
 		    NCERR(retval);
 		
@@ -375,31 +377,69 @@ int set_soil_temp(Grid *grid, State *state, double temperatures[], char init_sta
 		    NCERR(retval);
 	}
 	
-	// setting the soil temperature
+    // figuring out if the soil temperature is included in the initialization file and reading it if it exists (important for NWP)
+	int t_soil_avail = 0;
+    if (strlen(init_state_file) != 0)
+    {
+		if ((retval = nc_open(init_state_file, NC_NOWRITE, &ncid)))
+		    NCERR(retval);
+		
+		int soil_id;
+		// figuring out if the netcdf file contains SST
+		if (nc_inq_varid(ncid, "t_soil", &soil_id) == 0)
+		{
+			t_soil_avail = 1;
+			printf("Soil temperature found in initialization file.\n");
+		}
+		else
+		{	
+			printf("Soil temperature not found in initialization file.\n");
+		}
+		
+		// reading the SST data if it is present in the netcdf file
+		if (t_soil_avail == 1)
+		{
+			if ((retval = nc_get_var_double(ncid, soil_id, &state -> temperature_soil[0])))
+				NCERR(retval);
+		}
+		
+		// we do not need the netcdf file any further
+		if ((retval = nc_close(ncid)))
+		    NCERR(retval);
+	}
+	
+	// setting what has not yet been set
 	int soil_index;
-	double z_soil, t_sfc;
-	#pragma omp parallel for private(soil_index, z_soil, t_sfc)
+	double z_soil;
+	#pragma omp parallel for private(soil_index, z_soil)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// temperature at the surface
-		// land surface or sea surface if SST is unavailable
-		if (grid -> is_land[i] == 1 || (grid -> is_land[i] == 0 && sst_avail == 0))
+		// sea surface temperature if SST is unavailable or land surface temperature is soil temperature is unavailable
+		if ((grid -> is_land[i] == 1 && t_soil_avail == 0) || (grid -> is_land[i] == 0 && sst_avail == 0))
 		{
-			t_sfc = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i];
+			// setting the soil temperature in the uppermost layer identical to the temperature in the lowest layer
+			state -> temperature_soil[i] = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i];
 		}
-		// sea surface if SST is available
-		else
+		// sea surface temperature if SST is available
+		if (grid -> is_land[i] == 0 && sst_avail == 1)
 		{
-			t_sfc = sst[i];
+			state -> temperature_soil[i] = sst[i];
 		}
 		
-		// loop over all soil layers
-		for (int soil_layer_index = 0; soil_layer_index < NO_OF_SOIL_LAYERS; ++soil_layer_index)
+		// if the soil temperature is not available in the initialization state file, we obtain it by linearly interpolating between the surface
+		// and the depth of constant temperature		
+		if (grid -> is_land[i] == 1 && t_soil_avail == 0)
 		{
-			// index of this soil grid point
-			soil_index = i + soil_layer_index*NO_OF_SCALARS_H;
-			z_soil = grid -> z_t_const/NO_OF_SOIL_LAYERS*(0.5 + soil_layer_index);
-			state -> temperature_soil[soil_index] = t_sfc + (grid -> t_const_soil[i] - t_sfc)*z_soil/grid -> z_t_const;
+			// loop over all soil layers
+			for (int soil_layer_index = 0; soil_layer_index < NO_OF_SOIL_LAYERS; ++soil_layer_index)
+			{
+				// index of this soil grid point
+				soil_index = i + soil_layer_index*NO_OF_SCALARS_H;
+				z_soil = grid -> z_t_const/NO_OF_SOIL_LAYERS*(0.5 + soil_layer_index);
+				state -> temperature_soil[soil_index] = state -> temperature_soil[i]
+				+ (grid -> t_const_soil[i] - state -> temperature_soil[i])*z_soil/grid -> z_t_const;
+			}
 		}
 	}
 	
