@@ -410,16 +410,16 @@ int set_soil_temp(Grid *grid, State *state, double temperatures[], char init_sta
 	
 	// setting what has not yet been set
 	int soil_index;
-	double z_soil;
-	#pragma omp parallel for private(soil_index, z_soil)
+	double z_soil, t_sfc;
+	#pragma omp parallel for private(soil_index, z_soil, t_sfc)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// temperature at the surface
 		// sea surface temperature if SST is unavailable or land surface temperature is soil temperature is unavailable
 		if ((grid -> is_land[i] == 1 && t_soil_avail == 0) || (grid -> is_land[i] == 0 && sst_avail == 0))
 		{
-			// setting the soil temperature in the uppermost layer identical to the temperature in the lowest layer
-			state -> temperature_soil[i] = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i];
+			// setting the soil temperature in the uppermost layer identical to the air temperature in the lowest layer
+			t_sfc = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i];
 		}
 		// sea surface temperature if SST is available
 		if (grid -> is_land[i] == 0 && sst_avail == 1)
@@ -437,8 +437,7 @@ int set_soil_temp(Grid *grid, State *state, double temperatures[], char init_sta
 				// index of this soil grid point
 				soil_index = i + soil_layer_index*NO_OF_SCALARS_H;
 				z_soil = grid -> z_t_const/NO_OF_SOIL_LAYERS*(0.5 + soil_layer_index);
-				state -> temperature_soil[soil_index] = state -> temperature_soil[i]
-				+ (grid -> t_const_soil[i] - state -> temperature_soil[i])*z_soil/grid -> z_t_const;
+				state -> temperature_soil[soil_index] = t_sfc + (grid -> t_const_soil[i] - t_sfc)*z_soil/grid -> z_t_const;
 			}
 		}
 	}
