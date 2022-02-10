@@ -4,9 +4,6 @@ build
 *.mod
 *.png
 grid_generator/grid_generator
-test_generator/test_generator
-surface_generator/surface_generator
-core/game
 output
 figs
 nwp_init
