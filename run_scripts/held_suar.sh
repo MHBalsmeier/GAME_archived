@@ -30,8 +30,8 @@ start_hour=0 # defines the start time of the model run
 orography_id=0 # ID of the orography field. Based on this the grid file will be chosen.
 
 # dynamics settings
-dt_parameter=1.7 # The sound time step will be calculated as follows: delta_t = dt_parameter*delta_x / km. 1.5 can be considered a standard value.
-slow_fast_ratio=3 # the ratio of the slow to the fast time step
+dt_parameter=1.5 # The sound time step will be calculated as follows: delta_t = dt_parameter*delta_x / km. 1.5 can be considered a standard value.
+slow_fast_ratio=1 # the ratio of the slow to the fast time step
 momentum_diff_h=1 # turn on if you want horizontal momentum diffusion
 momentum_diff_v=0 # turn on if you want vertical momentum diffusion
 diff_h_smag_div=0.01 # horizontal diffusion Smagorinsky factor acting on divergent movements
