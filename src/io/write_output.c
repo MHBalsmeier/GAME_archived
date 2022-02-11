@@ -196,14 +196,14 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    sprate[i] = 0;
 			if (NO_OF_CONDENSED_CONSTITUENTS == 4)
 		    {
-		        sprate[i] += config -> precipitation_droplets_velocity*state_write_out -> rho[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		        sprate[i] += config -> snow_velocity*state_write_out -> rho[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		        sprate[i] += config -> cloud_droplets_velocity*state_write_out -> rho[2*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
 	        // liquid precipitation rate
 		    rprate[i] = 0;
 			if (NO_OF_CONDENSED_CONSTITUENTS == 4)
 		    {
-		        rprate[i] += config -> precipitation_droplets_velocity*state_write_out -> rho[NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		        rprate[i] += config -> rain_velocity*state_write_out -> rho[NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		        rprate[i] += config -> cloud_droplets_velocity*state_write_out -> rho[3*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
 		}

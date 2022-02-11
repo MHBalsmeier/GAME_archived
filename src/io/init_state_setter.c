@@ -414,23 +414,20 @@ int set_soil_temp(Grid *grid, State *state, double temperatures[], char init_sta
 	#pragma omp parallel for private(soil_index, z_soil, t_sfc)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
-		// temperature at the surface
-		// sea surface temperature if SST is unavailable or land surface temperature is soil temperature is unavailable
-		if ((grid -> is_land[i] == 1 && t_soil_avail == 0) || (grid -> is_land[i] == 0 && sst_avail == 0))
-		{
-			// setting the surface temperature identical to the air temperature in the lowest layer
-			t_sfc = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i];
-		}
 		// sea surface temperature if SST is available
 		if (grid -> is_land[i] == 0 && sst_avail == 1)
 		{
 			state -> temperature_soil[i] = sst[i];
 		}
 		
-		// if the soil temperature is not available in the initialization state file, we obtain it by linearly interpolating between the surface
+		// if the soil temperature over land or the SST over water is not available in the initialization
+		// state file, we obtain it by linearly interpolating between the surface
 		// and the depth of constant temperature		
-		if (grid -> is_land[i] == 1 && t_soil_avail == 0)
+		if ((grid -> is_land[i] == 1 && t_soil_avail == 0) || (grid -> is_land[i] == 0 && sst_avail == 0))
 		{
+			// setting the surface temperature identical to the air temperature in the lowest layer
+			t_sfc = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i];
+			
 			// loop over all soil layers
 			for (int soil_layer_index = 0; soil_layer_index < NO_OF_SOIL_LAYERS; ++soil_layer_index)
 			{

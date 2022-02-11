@@ -30,8 +30,8 @@ start_hour=0 # defines the start time of the model run
 orography_id=1 # ID of the orography field. Based on this the grid file will be chosen.
 
 # dynamics settings
-dt_parameter=1.5 # The sound time step will be calculated as follows: delta_t = dt_parameter*delta_x / km. 1.5 can be considered a standard value.
-slow_fast_ratio=1 # the ratio of the slow to the fast time step
+dt_parameter=1.7 # The sound time step will be calculated as follows: delta_t = dt_parameter*delta_x / km. 1.5 can be considered a standard value.
+slow_fast_ratio=3 # the ratio of the slow to the fast time step
 momentum_diff_h=0 # turn on if you want horizontal momentum diffusion
 momentum_diff_v=0 # turn on if you want vertical momentum diffusion
 diff_h_smag_div=0.01 # horizontal diffusion Smagorinsky factor acting on divergent movements
@@ -48,8 +48,6 @@ explicit_boundary_layer=0 # switch for an additional simplified horizontal frict
 rad_on=0 # set to 0 if you want no radiation, 1 for real radiation and 2 for Held-Suarez forcing
 radiation_delta_t=10800 # every how many seconds the radiation fluxes wil be updated; for small Earth experiments this will be rescaled proportional to the radius
 assume_lte=1 # set this to one if you do not want to assign individual temperatures to tracers
-cloud_droplets_velocity=0.01 # sedimentation velocity of cloud droplets
-precipitation_droplets_velocity=1.3 # sedimentation velocity of precipitation droplets
 mixing_length=100.0 # mixing length for the vertical diffusion scheme
 
 # I/O

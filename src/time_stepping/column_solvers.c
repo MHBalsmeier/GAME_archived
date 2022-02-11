@@ -15,7 +15,6 @@ This file contains the implicit vertical solvers.
 #include "../subgrid_scale/subgrid_scale.h"
 
 int thomas_algorithm(double [], double [], double [], double [], double [], int);
-double lin_f_integrator(double, double, double, double);
 
 int three_band_solver_ver_waves(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings,
 Config *config, double delta_t, Grid *grid, int rk_step)
@@ -431,10 +430,17 @@ int three_band_solver_gen_densities(State *state_old, State *state_new, State *s
 						upper_index = base_index;
 						// For condensed constituents, a sink velocity must be added.
 						// precipitation
-						if (k < NO_OF_CONDENSED_CONSTITUENTS/2)
+						// snow
+						if (k < NO_OF_CONDENSED_CONSTITUENTS/4)
 						{
-							vertical_flux_vector_impl[j] -= config -> precipitation_droplets_velocity;
-							vertical_flux_vector_rhs[j] -= config -> precipitation_droplets_velocity;
+							vertical_flux_vector_impl[j] -= config -> snow_velocity;
+							vertical_flux_vector_rhs[j] -= config -> snow_velocity;
+						}
+						// rain
+						else if (k < NO_OF_CONDENSED_CONSTITUENTS/2)
+						{
+							vertical_flux_vector_impl[j] -= config -> rain_velocity;
+							vertical_flux_vector_rhs[j] -= config -> rain_velocity;
 						}
 						// clouds
 						else if (k < NO_OF_CONDENSED_CONSTITUENTS)
@@ -506,9 +512,16 @@ int three_band_solver_gen_densities(State *state_old, State *state_new, State *s
 						{
 							r_vector[j] += -expl_weight*delta_t*vertical_flux_vector_rhs[j - 1]/grid -> volume[base_index];
 							// precipitation
-							if (k < NO_OF_CONDENSED_CONSTITUENTS/2)
+							// snow
+							if (k < NO_OF_CONDENSED_CONSTITUENTS/4)
 							{
-								r_vector[j] += -config -> precipitation_droplets_velocity*delta_t*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
+								r_vector[j] += -config -> snow_velocity*delta_t*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
+								*grid -> area[i + NO_OF_VECTORS - NO_OF_SCALARS_H]/grid -> volume[base_index];
+							}
+							// rain
+							else if (k < NO_OF_CONDENSED_CONSTITUENTS/2)
+							{
+								r_vector[j] += -config -> rain_velocity*delta_t*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
 								*grid -> area[i + NO_OF_VECTORS - NO_OF_SCALARS_H]/grid -> volume[base_index];
 							}
 							// clouds
@@ -615,20 +628,6 @@ int thomas_algorithm(double c_vector[], double d_vector[], double e_vector[], do
 	}
 	return 0;
 }
-
-double lin_f_integrator(double z_0, double z_1, double f_0, double f_1)
-{
-	/*
-	This function integrates a linear function between two points.
-	*/
-	
-	double delta_z = z_1 - z_0;
-	double delta_f = f_1 - f_0;
-	double result = f_0*delta_z - z_0*delta_f + delta_f/(2*delta_z)*(pow(z_1, 2) - pow(z_0, 2));
-	return result;
-}
-
-
 
 
 
