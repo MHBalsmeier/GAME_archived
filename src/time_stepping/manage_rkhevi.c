@@ -78,11 +78,11 @@ Irreversible_quantities *irrev, Config *config, double delta_t, double time_coor
 		// -------------------------------
 		three_band_solver_ver_waves(state_old, state_new, state_tendency, diagnostics, forcings, config, delta_t, grid, rk_step);
 		
-		// 4.) Solving the implicit component of the generalized density equations for tracers.
-		// ------------------------------------------------------------------------------------
+		// 4.) Solving the Lagrangian generalized density equations for tracers.
+		// ---------------------------------------------------------------------
 		if (NO_OF_CONSTITUENTS > 1)
 		{
-			three_band_solver_gen_densitites(state_old, state_new, state_tendency, diagnostics, config, delta_t, grid);
+			three_band_solver_gen_densities(state_old, state_new, state_tendency, diagnostics, config, delta_t, grid);
 		}
 		
 		// At the second RK step slow terms are never updated.

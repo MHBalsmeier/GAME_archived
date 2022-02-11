@@ -31,8 +31,8 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	// some constants
 	double boundary_layer_height = 1500.0; // height of the boundary layer
 	double mean_roughness_length = 0.6; // approximate global mean of the roughness length
-	double roughness_length_exp = 1.0/3; // exponent of the roughness length
-	double turb_prefactor = 2; // coefficient modulating the strength of the turbulence in the boundary layer
+	double roughness_length_exp = 1.0/2; // exponent of the roughness length
+	double turb_prefactor = 3; // coefficient modulating the strength of the turbulence in the boundary layer
 	// the e-folding time of TKE approximation in the boundary layer
 	double tke_approx_time = 10800*pow(4, 5 - RES_ID);
 	
@@ -62,10 +62,6 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	// the ratio of global unresolved to resolved kinetic energy above the boundary layer
 	double tke_ke_ratio = tke_glob_int_free/(ke_glob_int_free + EPSILON_SECURITY);
 	tke_ke_ratio = tke_ke_ratio;
-	
-	// computing the advection
-	grad(irrev -> tke, diagnostics -> vector_field_placeholder, grid);
-	inner_product(diagnostics -> vector_field_placeholder, state -> wind, diagnostics -> scalar_field_placeholder, grid);
 	
 	// loop over all scalar gridpoints
 	double decay_constant, production_rate, ke, tke_expect, tke_expect_prefactor, u10, z_agl;
@@ -121,10 +117,8 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 			
 			// prognostic equation for TKE
 			irrev -> tke[i] += delta_t*(
-			// advection
-			-diagnostics -> scalar_field_placeholder[i]
 			// production through dissipation of resolved energy
-			+ irrev -> heating_diss[i]/density_gas(state, i)
+			irrev -> heating_diss[i]/density_gas(state, i)
 			// decay through molecular dissipation
 			- decay_constant*irrev -> tke[i]
 			// production through turbulence generation in the boundary layer

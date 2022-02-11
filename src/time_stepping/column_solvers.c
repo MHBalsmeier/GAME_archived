@@ -15,6 +15,7 @@ This file contains the implicit vertical solvers.
 #include "../subgrid_scale/subgrid_scale.h"
 
 int thomas_algorithm(double [], double [], double [], double [], double [], int);
+double lin_f_integrator(double, double, double, double);
 
 int three_band_solver_ver_waves(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings,
 Config *config, double delta_t, Grid *grid, int rk_step)
@@ -64,10 +65,8 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 		double rho_int_expl[NO_OF_LAYERS - 1];
 		double alpha_old[NO_OF_LAYERS];
 		double beta_old[NO_OF_LAYERS];
-		double gamma_old[NO_OF_LAYERS];
 		double alpha_new[NO_OF_LAYERS];
 		double beta_new[NO_OF_LAYERS];
-		double gamma_new[NO_OF_LAYERS];
 		double alpha[NO_OF_LAYERS];
 		double beta[NO_OF_LAYERS];
 		double gamma[NO_OF_LAYERS];
@@ -96,15 +95,14 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 				// old time step partial derivatives of theta and Pi
 				alpha_old[j] = -state_old -> rhotheta[base_index]/pow(state_old -> rho[gas_phase_first_index + base_index], 2);
 				beta_old[j] = 1/state_old -> rho[gas_phase_first_index + base_index];
-				gamma_old[j] = r_d/(c_v*state_old -> rhotheta[base_index])*(grid -> exner_bg[base_index] + state_old -> exner_pert[base_index]);
+				gamma[j] = r_d/(c_v*state_old -> rhotheta[base_index])*(grid -> exner_bg[base_index] + state_old -> exner_pert[base_index])
+				/grid -> volume[base_index];
 				// new time step partial derivatives of theta and Pi
 				alpha_new[j] = -state_new -> rhotheta[base_index]/pow(state_new -> rho[gas_phase_first_index + base_index], 2);
 				beta_new[j] = 1/state_new -> rho[gas_phase_first_index + base_index];
-				gamma_new[j] = r_d/(c_v*state_new -> rhotheta[base_index])*(grid -> exner_bg[base_index] + state_new -> exner_pert[base_index]);
 				// interpolation in time and dividing by the volume
 				alpha[j] = ((1 - partial_deriv_new_time_step_weight)*alpha_old[j] + partial_deriv_new_time_step_weight*alpha_new[j])/grid -> volume[base_index];
 				beta[j] = ((1 - partial_deriv_new_time_step_weight)*beta_old[j] + partial_deriv_new_time_step_weight*beta_new[j])/grid -> volume[base_index];
-				gamma[j] = ((1 - partial_deriv_new_time_step_weight)*gamma_old[j] + partial_deriv_new_time_step_weight*gamma_new[j])/grid -> volume[base_index];
 			}
 			// explicit potential temperature perturbation
 			theta_pert_expl[j] = state_old -> theta_pert[base_index] + delta_t*grid -> volume[base_index]*(
@@ -369,7 +367,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 	return 0;
 }
 
-int three_band_solver_gen_densitites(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config *config, double delta_t, Grid *grid)
+int three_band_solver_gen_densities(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config *config, double delta_t, Grid *grid)
 {
 	// Vertical advection of generalized densities (of tracers) with 3-band matrices.
 	// mass densities, density x temperatures
@@ -508,9 +506,15 @@ int three_band_solver_gen_densitites(State *state_old, State *state_new, State *
 						{
 							r_vector[j] += -expl_weight*delta_t*vertical_flux_vector_rhs[j - 1]/grid -> volume[base_index];
 							// precipitation
-							if (k < NO_OF_CONDENSED_CONSTITUENTS)
+							if (k < NO_OF_CONDENSED_CONSTITUENTS/2)
 							{
-								r_vector[j] += -0.1*delta_t*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
+								r_vector[j] += -config -> precipitation_droplets_velocity*delta_t*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
+								*grid -> area[i + NO_OF_VECTORS - NO_OF_SCALARS_H]/grid -> volume[base_index];
+							}
+							// clouds
+							else if (k < NO_OF_CONDENSED_CONSTITUENTS)
+							{
+								r_vector[j] += -config -> cloud_droplets_velocity*delta_t*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
 								*grid -> area[i + NO_OF_VECTORS - NO_OF_SCALARS_H]/grid -> volume[base_index];
 							}
 						}
@@ -611,6 +615,27 @@ int thomas_algorithm(double c_vector[], double d_vector[], double e_vector[], do
 	}
 	return 0;
 }
+
+double lin_f_integrator(double z_0, double z_1, double f_0, double f_1)
+{
+	/*
+	This function integrates a linear function between two points.
+	*/
+	
+	double delta_z = z_1 - z_0;
+	double delta_f = f_1 - f_0;
+	double result = f_0*delta_z - z_0*delta_f + delta_f/(2*delta_z)*(pow(z_1, 2) - pow(z_0, 2));
+	return result;
+}
+
+
+
+
+
+
+
+
+
 
 
 

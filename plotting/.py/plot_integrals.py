@@ -41,7 +41,7 @@ if write_out_dry_mass_integral == 1:
 		plt.plot(time_vector, 100*((data[:, 1] + data[:, 2] + data[:, 3] + data[:, 4] + data[:, 6])/water_masses_init_sum - 1))
 		plt.legend(["Dry mass", "Water vapour", "Water (all phases)"])
 	plt.grid()
-	fig.savefig(fig_save_path + "/" + run_id + "_masses_integral.png", dpi = 500)
+	fig.savefig(fig_save_path + "/" + run_id + "_masses_integrals.png", dpi = 500)
 	plt.close()
 	
 if write_out_rhotheta_integral == 1:

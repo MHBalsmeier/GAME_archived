@@ -43,6 +43,19 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		grad(diagnostics -> v_squared, forcings -> v_squared_grad, grid);
     }
     
+    // updating the TKE, which is done at every time step if vertical momentum diffusion is turned on
+    if ((config -> momentum_diff_v == 1 || config -> temperature_diff_v == 1) && no_rk_step == 0)
+    {
+		grad(irrev -> tke, diagnostics -> vector_field_placeholder, grid);
+		inner_product(diagnostics -> vector_field_placeholder, state -> wind, diagnostics -> scalar_field_placeholder, grid);
+		
+		#pragma omp parallel for
+		for (int i = 0; i < NO_OF_SCALARS; ++i)
+		{
+			irrev -> tke[i] = irrev -> tke[i] - delta_t*diagnostics -> scalar_field_placeholder[i];
+		}
+    }
+    
     // momentum diffusion and dissipation (only updated at the first RK step and if advection is updated as well)
     if (slow_update_bool == 1)
     {
