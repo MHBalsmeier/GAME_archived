@@ -146,7 +146,6 @@ double momentum_flux_resistance(double wind_h_lowest_layer, double z_agl, double
 	(log(z_agl/roughness_length)
 	// non-neutral conditions
 	- psi(z_agl, 100));
-	printf("%lf\n", result);
 	
 	// limitting the result for security
 	if (result < 50.0)
