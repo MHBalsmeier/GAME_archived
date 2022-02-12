@@ -17,7 +17,8 @@ In this file, diffusion coefficients, including Eddy viscosities, are computed.
 #include "subgrid_scale.h"
 
 double roughness_length_from_u10(double);
-double psi(double, double);
+double psi_h(double, double);
+double psi_m(double, double);
 
 const double KARMAN = 0.4;
 
@@ -73,7 +74,7 @@ int update_roughness_length(Grid *grid, Diagnostics *diagnostics)
 			// calculating the 10 m wind velocity from the logarithmic wind profile
 			z_agl = grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i];
 			u10 = pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + i], 0.5)
-			*log(10/grid -> roughness_length[i])
+			*log(10.0/grid -> roughness_length[i])
 			/log(z_agl/grid -> roughness_length[i]);
 			
 			// calculating the roughness length fom the wind velocity
@@ -128,7 +129,7 @@ double scalar_flux_resistance(double wind_h_lowest_layer, double z_agl, double r
 	// neutral conditions
 	(log(z_agl/roughness_length)
 	// non-neutral conditions
-	- psi(z_agl, 100)
+	- psi_h(z_agl, 100)
 	// interfacial sublayer
 	+ log(7));
 	
@@ -151,7 +152,7 @@ double momentum_flux_resistance(double wind_h_lowest_layer, double z_agl, double
 	// neutral conditions
 	(log(z_agl/roughness_length)
 	// non-neutral conditions
-	- psi(z_agl, 100));
+	- psi_m(z_agl, 100));
 	
 	// limitting the result for security
 	if (result < 50.0)
@@ -172,29 +173,61 @@ double roughness_velocity(double wind_speed, double z_agl, double roughness_leng
 	return result;
 }
 
-double psi(double z_eff, double l)
+double psi_h(double z_eff, double l)
 {
 	/*
-	This is a helper function for the correction to the surface flux resistance for non-neutral conditions.
+	This is a helper function for the correction to the surface scalar flux resistance for non-neutral conditions.
 	*/
 	
 	// z_eff: effective height above the surface
 	// l: Monin-Obukhov length
 	
 	// avoiding l == 0
-	if (l == 0)
+	if (l == 0.0)
 	{
 		l = EPSILON_SECURITY;
 	}
 	
-	// helper variable
-	double x = pow(1 - 15*z_eff/l, 0.25);
+	double result;
+	// unstable conditions
+	if (l < 0.0)
+	{
+		// helper variable
+		double x = pow(1.0 - 15.0*z_eff/l, 0.25);
+		
+		result = 2.0*log((1.0 + pow(x, 2.0))/2.0);
+	}
+	// neutral and stable conditions
+	else
+	{
+		result = -4.7*z_eff/l;
+	}
+	return result;
+}
+
+double psi_m(double z_eff, double l)
+{
+	/*
+	This is a helper function for the correction to the surface momentum flux resistance for non-neutral conditions.
+	*/
+	
+	// z_eff: effective height above the surface
+	// l: Monin-Obukhov length
+	
+	// avoiding l == 0
+	if (l == 0.0)
+	{
+		l = EPSILON_SECURITY;
+	}
 	
 	double result;
 	// unstable conditions
-	if (l < 0)
+	if (l < 0.0)
 	{
-		result = 2*log((1 + pow(x, 2))/2);
+		// helper variable
+		double x = pow(1.0 - 15.0*z_eff/l, 0.25);
+		
+		result = 2.0*log((1 + x)/2.0) + log((1.0 + pow(x, 2.0))/2.0) - 2.0*atan(x) + M_PI/2.0;
 	}
 	// neutral and stable conditions
 	else
