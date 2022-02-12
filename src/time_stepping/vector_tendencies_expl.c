@@ -16,7 +16,10 @@ In this file, the calculation of the explicit part of the momentum equation is m
 
 int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config, int no_rk_step, double delta_t)
 {
-	// momentum advection
+	/*
+	Managing momentum advection
+	---------------------------
+	*/
 	if (no_rk_step == 1 || config -> totally_first_step_bool == 1)
 	{
 		// Here, the gaseous flux density is prepared for the generalized Coriolis term.
@@ -43,69 +46,57 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		grad(diagnostics -> v_squared, forcings -> v_squared_grad, grid);
     }
     
-    // updating the TKE, which is done at every time step if vertical momentum diffusion is turned on
-    if ((config -> momentum_diff_v == 1 || config -> temperature_diff_v == 1) && no_rk_step == 0)
+    /*
+    Managing momentum diffusion calculation
+    ---------------------------------------
+    */
+    if (no_rk_step == 0)
     {
-		grad(irrev -> tke, diagnostics -> vector_field_placeholder, grid);
-		inner_product(diagnostics -> vector_field_placeholder, state -> wind, diagnostics -> scalar_field_placeholder, grid);
-		
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_SCALARS; ++i)
+		// momentum diffusion and dissipation (only updated at the first RK step)
+		// horizontal momentum diffusion
+		if (config -> momentum_diff_h == 1)
 		{
-			irrev -> tke[i] = irrev -> tke[i] - delta_t*diagnostics -> scalar_field_placeholder[i];
-			
-			// clipping negative values
-			if (irrev -> tke[i] < 0)
+			hori_momentum_diffusion(state, diagnostics, irrev, config, grid, dualgrid);
+		}
+		// vertical momentum diffusion
+		if (config -> momentum_diff_v == 1)
+		{
+			vert_momentum_diffusion(state, diagnostics, irrev, grid, config, delta_t);
+		}
+		// This is the explicit friction ansatz in the boundary layer from the Held-Suarez (1994) test case.
+		if (config -> explicit_boundary_layer == 1)
+		{
+			// some parameters
+			double fric_lr_height = 2853.0; // boundary layer height
+			double bndr_lr_visc_sfc = 1.0/86400.0; // maximum friction coefficient in the boundary layer
+			double scale_height = 8000.0;
+			int layer_index, h_index, vector_index;
+			#pragma omp parallel for private(layer_index, h_index, vector_index)
+			for (int i = 0; i < NO_OF_H_VECTORS; ++i)
 			{
-				irrev -> tke[i] = 0;
+				layer_index = i/NO_OF_VECTORS_H;
+				h_index = i - layer_index*NO_OF_VECTORS_H;
+				vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
+				// adding the boundary layer friction
+				if (grid -> z_vector[vector_index] < fric_lr_height)
+				{
+					irrev -> friction_acc[vector_index]
+					+= -bndr_lr_visc_sfc*(exp(-grid -> z_vector[vector_index]/scale_height) - exp(-fric_lr_height/scale_height))
+					/(1 - exp(-fric_lr_height/scale_height))
+					*state -> wind[vector_index];
+				}
 			}
 		}
-    }
-    
-    // momentum diffusion and dissipation (only updated at the first RK step and if advection is updated as well)
-	// horizontal momentum diffusion
-	if (config -> momentum_diff_h == 1)
-	{
-		hori_momentum_diffusion(state, diagnostics, irrev, config, grid, dualgrid);
-	}
-	// vertical momentum diffusion
-	if (config -> momentum_diff_v == 1)
-	{
-		vert_momentum_diffusion(state, diagnostics, irrev, grid, config, delta_t);
-	}
-	// This is the explicit friction ansatz in the boundary layer from the Held-Suarez (1994) test case.
-	if (config -> explicit_boundary_layer == 1)
-	{
-		// some parameters
-		double fric_lr_height = 2853.0; // boundary layer height
-		double bndr_lr_visc_sfc = 1.0/86400.0; // maximum friction coefficient in the boundary layer
-		double scale_height = 8000.0;
-		int layer_index, h_index, vector_index;
-		#pragma omp parallel for private(layer_index, h_index, vector_index)
-		for (int i = 0; i < NO_OF_H_VECTORS; ++i)
+		// calculation of the dissipative heating rate
+		if (config -> momentum_diff_h == 1 || config -> momentum_diff_v == 1 || config -> explicit_boundary_layer == 1)
 		{
-			layer_index = i/NO_OF_VECTORS_H;
-			h_index = i - layer_index*NO_OF_VECTORS_H;
-			vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
-			// adding the boundary layer friction
-			if (grid -> z_vector[vector_index] < fric_lr_height)
-			{
-				irrev -> friction_acc[vector_index]
-				+= -bndr_lr_visc_sfc*(exp(-grid -> z_vector[vector_index]/scale_height) - exp(-fric_lr_height/scale_height))
-				/(1 - exp(-fric_lr_height/scale_height))
-				*state -> wind[vector_index];
-			}
+			simple_dissipation_rate(state, irrev, grid);
 		}
-	}
-	// calculation of the dissipative heating rate
-	if (config -> momentum_diff_h == 1 || config -> momentum_diff_v == 1 || config -> explicit_boundary_layer == 1)
-	{
-		simple_dissipation_rate(state, irrev, grid);
-	}
-	// Due to condensates, the friction acceleration needs to get a deceleration factor.
-	if (config -> assume_lte == 0)
-	{
-		scalar_times_vector(irrev -> pressure_gradient_decel_factor, irrev -> friction_acc, irrev -> friction_acc, grid);
+		// Due to condensates, the friction acceleration needs to get a deceleration factor.
+		if (config -> assume_lte == 0)
+		{
+			scalar_times_vector(irrev -> pressure_gradient_decel_factor, irrev -> friction_acc, irrev -> friction_acc, grid);
+		}
 	}
 	
     // Now the explicit forces are added up.

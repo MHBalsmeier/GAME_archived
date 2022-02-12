@@ -27,6 +27,10 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	This function updates the specific turbulent kinetic energy (TKE), unit: J/kg.
 	*/
 	
+	// computing the advection
+	grad(irrev -> tke, diagnostics -> vector_field_placeholder, grid);
+	inner_product(diagnostics -> vector_field_placeholder, state -> wind, diagnostics -> scalar_field_placeholder, grid);
+	
 	double decay_constant;
 	// loop over all scalar gridpoints
 	#pragma omp parallel for private(decay_constant)
@@ -37,8 +41,10 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 		
 		// prognostic equation for TKE
 		irrev -> tke[i] += delta_t*(
+		// advection
+		-diagnostics -> scalar_field_placeholder[i]
 		// production through dissipation of resolved energy
-		irrev -> heating_diss[i]/density_gas(state, i)
+		+ irrev -> heating_diss[i]/density_gas(state, i)
 		// decay through molecular dissipation
 		- decay_constant*irrev -> tke[i]);
 		
