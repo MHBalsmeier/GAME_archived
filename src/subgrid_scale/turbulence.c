@@ -16,7 +16,6 @@ In this file, diffusion coefficients, including Eddy viscosities, are computed.
 #include "../thermodynamics/thermodynamics.h"
 #include "subgrid_scale.h"
 
-double ver_hor_viscosity(double, double, double);
 double roughness_length_from_u10(double);
 double psi(double, double);
 
@@ -30,42 +29,13 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	
 	// some constants
 	double boundary_layer_height = 1500.0; // height of the boundary layer
-	double mean_roughness_length = 0.6; // approximate global mean of the roughness length
-	double roughness_length_exp = 1.0/2; // exponent of the roughness length
-	double turb_prefactor = 3; // coefficient modulating the strength of the turbulence in the boundary layer
-	// the e-folding time of TKE approximation in the boundary layer
-	double tke_approx_time = 10800*pow(4, 5 - RES_ID);
 	
 	// think carefully before you change anything below this point
 	
-	// global integrals over the TKE and KE above the boundary layer
-	double tke_glob_int_free = 0;
-	double ke_glob_int_free = 0;
-	double m_glob_int_free = 0;
-	int i;
-	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
-	{
-		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
-		{
-			i = layer_index*NO_OF_SCALARS_H + h_index;
-			if (grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS + h_index] > boundary_layer_height)
-			{
-				tke_glob_int_free += irrev -> tke[i]*state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*grid -> volume[i];
-				ke_glob_int_free += 0.5*diagnostics -> v_squared[i]*state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*grid -> volume[i];
-				m_glob_int_free += state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*grid -> volume[i];
-			}
-		}
-	}
-	tke_glob_int_free = tke_glob_int_free/m_glob_int_free;
-	ke_glob_int_free = ke_glob_int_free/m_glob_int_free;
-	
-	// the ratio of global unresolved to resolved kinetic energy above the boundary layer
-	double tke_ke_ratio = tke_glob_int_free/(ke_glob_int_free + EPSILON_SECURITY);
-	tke_ke_ratio = tke_ke_ratio;
-	
 	// loop over all scalar gridpoints
-	double decay_constant, production_rate, ke, tke_expect, tke_expect_prefactor, u10, z_agl;
-	#pragma omp parallel for private(i, decay_constant, production_rate, ke, tke_expect, tke_expect_prefactor, u10, z_agl)
+	double decay_constant, u10, z_agl;
+	int i;
+	#pragma omp parallel for private(i, decay_constant, u10, z_agl)
 	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
 	{
 		// updating the roughness length over water
@@ -88,43 +58,14 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 			// decay constant, as derived from diffusion
 			decay_constant = 8*pow(M_PI, 2)/grid -> mean_velocity_area*(irrev -> viscosity_div[i] + irrev -> viscosity_curl[i])/density_gas(state, i);
 			
-			// generation of TKE in the boundary layer
-			production_rate = 0;
-			z_agl = grid -> z_scalar[i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index];
-			if (z_agl <= boundary_layer_height)
-			{
-				// kinetic energy in this gridbox
-				ke = 0.5*diagnostics -> v_squared[i];
-				
-				// expected value for the TKE from the energy spectrum assuming no boundary layer effects
-				tke_expect = tke_ke_ratio*ke;
-				
-				tke_expect_prefactor = 1
-				// factor taking into account the roughness of the surface
-				+ turb_prefactor*pow(grid -> roughness_length[h_index]/mean_roughness_length, roughness_length_exp)
-				// height-dependent factor
-				*(exp(-z_agl/boundary_layer_height) - exp(-1.0))/(1 - exp(-1.0));
-				
-				// the amount of TKE that can be expected in this gridbox
-				tke_expect = tke_expect_prefactor*tke_expect;
-				
-				// finally calculating the production rate
-				production_rate = (tke_expect - irrev -> tke[i])/tke_approx_time;
-				
-				// restricting the production rate to positive values
-				production_rate = fmax(0, production_rate);
-			}
-			
 			// prognostic equation for TKE
 			irrev -> tke[i] += delta_t*(
 			// production through dissipation of resolved energy
 			irrev -> heating_diss[i]/density_gas(state, i)
 			// decay through molecular dissipation
-			- decay_constant*irrev -> tke[i]
-			// production through turbulence generation in the boundary layer
-			+ production_rate);
+			- decay_constant*irrev -> tke[i]);
 			
-			// clipping negative values which might occur through advection
+			// clipping negative values
 			if (irrev -> tke[i] < 0)
 			{
 				irrev -> tke[i] = 0;
@@ -134,13 +75,13 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	return 0;
 }
 
-double ver_hor_viscosity(double tke, double delta_z, double mixing_length)
+double vertical_viscosity(double tke)
 {
 	/*
 	This function returns the vertical kinematic Eddy viscosity as a function of the specific TKE.
 	*/
 	
-	double prop_constant = 0.004*fmin(delta_z, mixing_length); // unit: m
+	double prop_constant = 0.4; // unit: m
 	double result = prop_constant*pow(tke, 0.5);
 	return result;
 }

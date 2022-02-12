@@ -53,6 +53,12 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
 			irrev -> tke[i] = irrev -> tke[i] - delta_t*diagnostics -> scalar_field_placeholder[i];
+			
+			// clipping negative values
+			if (irrev -> tke[i] < 0)
+			{
+				irrev -> tke[i] = 0;
+			}
 		}
     }
     

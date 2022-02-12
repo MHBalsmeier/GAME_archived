@@ -13,3 +13,4 @@ int vert_hor_mom_viscosity(State *, Irreversible_quantities *, Diagnostics *, Co
 int tke_update(Irreversible_quantities *, double, State *, Diagnostics *, Grid *);
 double sfc_flux_resistance(double, double, double);
 double roughness_velocity(double, double, double);
+double vertical_viscosity(double);

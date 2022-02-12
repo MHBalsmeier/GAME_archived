@@ -30,7 +30,7 @@ start_hour=0 # defines the start time of the model run
 orography_id=0 # ID of the orography field. Based on this the grid file will be chosen.
 
 # dynamics settings
-dt_parameter=1.7 # The sound time step will be calculated as follows: delta_t = dt_parameter*delta_x / km. 1.5 can be considered a standard value.
+dt_parameter=1.5 # The sound time step will be calculated as follows: delta_t = dt_parameter*delta_x / km. 1.6 can be considered a standard value.
 slow_fast_ratio=1 # the ratio of the slow to the fast time step
 momentum_diff_h=1 # turn on if you want horizontal momentum diffusion
 momentum_diff_v=0 # turn on if you want vertical momentum diffusion
@@ -48,7 +48,6 @@ explicit_boundary_layer=1 # switch for an additional simplified horizontal frict
 rad_on=2 # set to 0 if you want no radiation, 1 for real radiation and 2 for Held-Suarez forcing
 radiation_delta_t=10800 # every how many seconds the radiation fluxes wil be updated; for small Earth experiments this will be rescaled proportional to the radius
 assume_lte=1 # set this to one if you do not want to assign individual temperatures to tracers
-mixing_length=100.0 # mixing length for the vertical diffusion scheme
 
 # I/O
 write_out_interval=86400 # every how many seconds an output file will be created; for small Earth experiments this will be rescaled proportional to the radius

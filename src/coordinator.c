@@ -628,7 +628,6 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
     argv++;
 	config -> tracer_diff_v = strtod(argv[agv_counter], NULL);
     argv++;
-	irrev -> mixing_length = strtod(argv[agv_counter], NULL);
 	return 0;
 }
 

@@ -231,7 +231,6 @@ double viscosity_curl_triangles[NO_OF_DUAL_V_VECTORS];
 double vert_hor_viscosity[NO_OF_H_VECTORS + NO_OF_VECTORS_H];
 Scalar_field tke;
 double max_diff_h_coeff_turb;
-double mixing_length;
 } Irreversible_quantities;
 
 // Info on input and output is collected here.
