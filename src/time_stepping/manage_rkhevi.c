@@ -27,7 +27,7 @@ Irreversible_quantities *irrev, Config *config, double delta_t, double time_coor
 	*/
     
 	// updating the roughness length if it is necessary
-	if (NO_OF_CONSTITUENTS > 1 || config -> momentum_diff_v == 1)
+	if (config -> soil_on == 1 || config -> momentum_diff_v == 1)
 	{
 		update_roughness_length(grid, diagnostics);
 	}
