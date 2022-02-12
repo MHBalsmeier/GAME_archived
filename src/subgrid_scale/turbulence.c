@@ -126,6 +126,12 @@ double scalar_flux_resistance(double wind_h_lowest_layer, double z_agl, double r
 	// interfacial sublayer
 	+ log(7));
 	
+	// limitting the result for security
+	if (result < 50.0)
+	{
+		result = 50.0;
+	}
+	
 	return result;
 }
 
@@ -140,6 +146,13 @@ double momentum_flux_resistance(double wind_h_lowest_layer, double z_agl, double
 	(log(z_agl/roughness_length)
 	// non-neutral conditions
 	- psi(z_agl, 100));
+	printf("%lf\n", result);
+	
+	// limitting the result for security
+	if (result < 50.0)
+	{
+		result = 50.0;
+	}
 	
 	return result;
 }
