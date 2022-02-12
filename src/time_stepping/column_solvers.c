@@ -44,7 +44,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// flux resistance
-		diagnostics -> flux_resistance[i] = sfc_flux_resistance(pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + i], 0.5),
+		diagnostics -> scalar_flux_resistance[i] = scalar_flux_resistance(pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + i], 0.5),
     	grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + i] - grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i], grid -> roughness_length[i]);
 	    	
 		soil_switch = config -> soil_on*grid -> is_land[i];
@@ -192,7 +192,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			power_flux_density_sensible = 0.5*spec_heat_capacities_v_gas_lookup(0)*(state_new -> rho[gas_phase_first_index + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
 			*(temperature_gas_lowest_layer_old - state_old -> temperature_soil[i])
 			+ state_old -> rho[gas_phase_first_index + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
-			*(temperature_gas_lowest_layer_new - state_new -> temperature_soil[i]))/diagnostics -> flux_resistance[i];
+			*(temperature_gas_lowest_layer_new - state_new -> temperature_soil[i]))/diagnostics -> scalar_flux_resistance[i];
 			
 			// calculating the explicit part of the temperature change
 			r_vector[NO_OF_LAYERS - 1]

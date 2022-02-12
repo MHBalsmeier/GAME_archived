@@ -189,7 +189,6 @@ int main(int argc, char *argv[])
     }
 	printf("Time step set. Information on CFL-related quantities:\n");
     printf("Fast modes time step: %lf s\n", delta_t);
-    printf("Slow modes time step: %lf s\n", config -> slow_fast_ratio*delta_t);
 	
 	// finding the minimum horizontal grid distance
 	double normal_dist_min_hor = eff_hor_res;
@@ -283,7 +282,7 @@ int main(int argc, char *argv[])
     */
     int wind_lowest_layer_step_counter = 0;
 	// the maximum horizontal diffusion coefficient (stability constraint)
-	irrev -> max_diff_h_coeff_turb = 0.125*grid -> mean_velocity_area/(config -> slow_fast_ratio*delta_t);
+	irrev -> max_diff_h_coeff_turb = 0.125*grid -> mean_velocity_area/delta_t;
     linear_combine_two_states(state_old, state_old, state_new, 1, 0, grid);
     
     /*
@@ -510,12 +509,6 @@ int sanity_checker(Config *config, Config_io *config_io, Grid *grid)
     	printf("Aborting.\n");
 		exit(1);
 	}
-	if (config -> slow_fast_ratio <= 0)
-	{
-		printf("slow_fast_ratio cannot be smaller than one.\n");
-    	printf("Aborting.\n");
-		exit(1);
-	}
 	if (config -> momentum_diff_h == 0 && config -> momentum_diff_v == 1)
 	{
 		printf("Horizontal momentum diffusion cannot be off if vertical momentum diffusion is on.\n");
@@ -610,8 +603,6 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
     argv++;
 	config -> assume_lte = strtod(argv[agv_counter], NULL);
     argv++;
-	config -> slow_fast_ratio = strtod(argv[agv_counter], NULL);
-    argv++;
 	config -> delta_t_between_analyses = strtod(argv[agv_counter], NULL);
     argv++;
 	config -> diff_h_smag_div = strtod(argv[agv_counter], NULL);
@@ -665,7 +656,6 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	printf("Number of scalar data points: %d\n", NO_OF_SCALARS);
 	printf("Number of vectors: %d\n", NO_OF_VECTORS);
 	printf("Number of data points: %d\n", NO_OF_SCALARS + NO_OF_VECTORS);
-	printf("Ratio of the slow to the fast time step: %d\n", config -> slow_fast_ratio);
 	if (config -> momentum_diff_h == 0)
 	{
 		printf("Horizontal momentum diffusion is turned off.\n");

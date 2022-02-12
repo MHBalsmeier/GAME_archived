@@ -27,51 +27,54 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	This function updates the specific turbulent kinetic energy (TKE), unit: J/kg.
 	*/
 	
-	// some constants
-	double boundary_layer_height = 1500.0; // height of the boundary layer
-	
-	// think carefully before you change anything below this point
-	
+	double decay_constant;
 	// loop over all scalar gridpoints
-	double decay_constant, u10, z_agl;
-	int i;
-	#pragma omp parallel for private(i, decay_constant, u10, z_agl)
-	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
+	#pragma omp parallel for private(decay_constant)
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		// updating the roughness length over water
-		if (grid -> is_land[h_index] == 0)
-		{
-			// calculating the 10 m wind velocity from the logarithmic wind profile
-			z_agl = grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + h_index] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + h_index];
-			u10 = pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + h_index], 0.5)
-			*log(10/grid -> roughness_length[h_index])
-			/log(z_agl/grid -> roughness_length[h_index]);
-			
-			// calculating the roughness length fom the wind velocity
-			grid -> roughness_length[h_index] = roughness_length_from_u10(u10);
-		}
+		// decay constant, as derived from diffusion
+		decay_constant = 8*pow(M_PI, 2)/grid -> mean_velocity_area*(irrev -> viscosity_div[i] + irrev -> viscosity_curl[i])/density_gas(state, i);
 		
-		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
+		// prognostic equation for TKE
+		irrev -> tke[i] += delta_t*(
+		// production through dissipation of resolved energy
+		irrev -> heating_diss[i]/density_gas(state, i)
+		// decay through molecular dissipation
+		- decay_constant*irrev -> tke[i]);
+		
+		// clipping negative values
+		if (irrev -> tke[i] < 0)
 		{
-			i = layer_index*NO_OF_SCALARS_H + h_index;
-			
-			// decay constant, as derived from diffusion
-			decay_constant = 8*pow(M_PI, 2)/grid -> mean_velocity_area*(irrev -> viscosity_div[i] + irrev -> viscosity_curl[i])/density_gas(state, i);
-			
-			// prognostic equation for TKE
-			irrev -> tke[i] += delta_t*(
-			// production through dissipation of resolved energy
-			irrev -> heating_diss[i]/density_gas(state, i)
-			// decay through molecular dissipation
-			- decay_constant*irrev -> tke[i]);
-			
-			// clipping negative values
-			if (irrev -> tke[i] < 0)
-			{
-				irrev -> tke[i] = 0;
-			}
+			irrev -> tke[i] = 0;
 		}
 	}
+	return 0;
+}
+
+int update_roughness_length(Grid *grid, Diagnostics *diagnostics)
+{
+	/*
+	This function updated the roughness length over water.
+	*/
+	
+	double u10, z_agl;
+	#pragma omp parallel for private(u10, z_agl)
+	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+	{
+		// only over the sea the roughness length is time-dependant (because of the waves)
+		if (grid -> is_land[i] == 0)
+		{
+			// calculating the 10 m wind velocity from the logarithmic wind profile
+			z_agl = grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i];
+			u10 = pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + i], 0.5)
+			*log(10/grid -> roughness_length[i])
+			/log(z_agl/grid -> roughness_length[i]);
+			
+			// calculating the roughness length fom the wind velocity
+			grid -> roughness_length[i] = roughness_length_from_u10(u10);
+		}
+	}
+	
 	return 0;
 }
 
@@ -109,10 +112,10 @@ double roughness_length_from_u10(double u10)
 	return roughness_length;
 }
 
-double sfc_flux_resistance(double wind_h_lowest_layer, double z_agl, double roughness_length)
+double scalar_flux_resistance(double wind_h_lowest_layer, double z_agl, double roughness_length)
 {
 	/*
-	This function returns the surface flux resistance.
+	This function returns the surface flux resistance for scalar quantities.
 	*/
 	
 	double result = 1.0/(KARMAN*(roughness_velocity(wind_h_lowest_layer, z_agl, roughness_length) + EPSILON_SECURITY))*
@@ -122,6 +125,22 @@ double sfc_flux_resistance(double wind_h_lowest_layer, double z_agl, double roug
 	- psi(z_agl, 100)
 	// interfacial sublayer
 	+ log(7));
+	
+	return result;
+}
+
+double momentum_flux_resistance(double wind_h_lowest_layer, double z_agl, double roughness_length)
+{
+	/*
+	This function returns the surface flux resistance for momentum.
+	*/
+	
+	double result = 1.0/(KARMAN*(roughness_velocity(wind_h_lowest_layer, z_agl, roughness_length) + EPSILON_SECURITY))*
+	// neutral conditions
+	(log(z_agl/roughness_length)
+	// non-neutral conditions
+	- psi(z_agl, 100));
+	
 	return result;
 }
 

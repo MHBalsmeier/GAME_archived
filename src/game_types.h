@@ -151,7 +151,7 @@ Vector_field v_at_edge;
 Scalar_field u_at_cell;
 Scalar_field v_at_cell;
 double dv_hdz[NO_OF_H_VECTORS + NO_OF_VECTORS_H];
-double flux_resistance[NO_OF_SCALARS_H];
+double scalar_flux_resistance[NO_OF_SCALARS_H];
 double power_flux_density_latent[NO_OF_SCALARS_H];
 } Diagnostics;
 
@@ -195,7 +195,6 @@ int rad_on;
 int soil_on;
 int rad_update;
 int assume_lte;
-int slow_fast_ratio;
 int nwp_mode;
 int delta_t_between_analyses;
 int explicit_boundary_layer;

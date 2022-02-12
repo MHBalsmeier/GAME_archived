@@ -15,25 +15,29 @@ This file manages the RKHEVI time stepping.
 #include "time_stepping.h"
 #include "../radiation/radiation.h"
 #include "../thermodynamics/thermodynamics.h"
+#include "../subgrid_scale/subgrid_scale.h"
 #include "../io/io.h"
 
 int manage_rkhevi(State *state_old, State *state_new, Grid *grid, Dualgrid *dualgrid, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings,
 Irreversible_quantities *irrev, Config *config, double delta_t, double time_coordinate, int total_step_counter)
 {
-	// slow terms (diffusion) update switch
-	int slow_update_bool = 0;
-	// check if slow terms have to be updated
-	if (fmod(total_step_counter, config -> slow_fast_ratio) == 0)
+	/*
+	preparations
+	------------
+	*/
+    
+	// updating the roughness length if it is necessary
+	if (NO_OF_CONSTITUENTS > 1 || config -> momentum_diff_v == 1)
 	{
-		// setting the respective update switch to one
-		slow_update_bool = 1;
-    }
+		update_roughness_length(grid, diagnostics);
+	}
        
 	// diagnosing the temperature
 	temperature_diagnostics(state_old, grid, diagnostics);
 	
 	/*
-	Loop over the RK substeps.
+	loop over the RK substeps
+	-------------------------
 	*/
 	int vector_index;
 	for (int rk_step = 0; rk_step < 2; ++rk_step)
@@ -51,7 +55,7 @@ Irreversible_quantities *irrev, Config *config, double delta_t, double time_coor
 			manage_pressure_gradient(state_new, grid, dualgrid, diagnostics, forcings, irrev, config);
 		}
 		// Only the horizontal momentum is a forward tendency.
-		vector_tendencies_expl(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, irrev, config, slow_update_bool, rk_step, delta_t);
+		vector_tendencies_expl(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, irrev, config, rk_step, delta_t);
 	    // time stepping for the horizontal momentum can be directly executed
 	    
 	    #pragma omp parallel for private(vector_index)
@@ -72,7 +76,7 @@ Irreversible_quantities *irrev, Config *config, double delta_t, double time_coor
 		{
 			call_radiation(state_old, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config, delta_t, time_coordinate);
 		}
-		scalar_tendencies_expl(state_old, state_new, state_tendency, grid, delta_t, diagnostics, forcings, irrev, config, rk_step, slow_update_bool);
+		scalar_tendencies_expl(state_old, state_new, state_tendency, grid, delta_t, diagnostics, forcings, irrev, config, rk_step);
 
 		// 3.) Vertical sound wave solver.
 		// -------------------------------
@@ -84,9 +88,6 @@ Irreversible_quantities *irrev, Config *config, double delta_t, double time_coor
 		{
 			three_band_solver_gen_densities(state_old, state_new, state_tendency, diagnostics, config, delta_t, grid);
 		}
-		
-		// At the second RK step slow terms are never updated.
-		slow_update_bool = 0;
     }
     
     // saturation adjustment, calculation of latent heating rates

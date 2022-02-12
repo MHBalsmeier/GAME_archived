@@ -146,9 +146,11 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 	// setting the land surface albedo to 0.12 (compare Zdunkowski, Trautmann & Bott:
 	// Radiation in the Atmosphere, 2007, p. 444)
 	double albedo_soil = 0.12;
+	double albedo_ice = 0.8;
 	double density_soil = 1442.0;
 	double t_conductivity_soil = 7.5e-7;
-	#pragma omp parallel for
+	double lat_deg;
+	#pragma omp parallel for private(lat_deg)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// ocean
@@ -164,7 +166,18 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 		// land
 		if (is_land[i] == 1)
 		{
-			sfc_albedo[i] = albedo_soil;
+			lat_deg = 360.0/(2.0*M_PI)*latitude_scalar[i];
+			
+			// setting the surface albedo of land depending on the latitude
+			if (fabs(lat_deg) > 70)
+			{
+				sfc_albedo[i] = albedo_ice;
+			}
+			else
+			{
+				sfc_albedo[i] = albedo_soil;
+			}
+			
 			sfc_rho_c[i] = density_soil*c_p_soil;
 			roughness_length[i] = vegetation_height_ideal(latitude_scalar[i], oro[i])/8;
 		}

@@ -17,7 +17,7 @@ This is the horizontal (explicit) part of the constituent integration.
 #include "../subgrid_scale/subgrid_scale.h"
 
 int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Grid *grid, double delta_t, Diagnostics *diagnostics, Forcings *forcings,
-Irreversible_quantities *irrev, Config *config, int no_rk_step, int slow_update_bool)
+Irreversible_quantities *irrev, Config *config, int no_rk_step)
 {
 	/*
 	This function manages the calculation of the explicit scalar tendencies.
@@ -45,10 +45,10 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step, int slow_update_
     }
     
 	// Temperature diffusion gets updated here, but only at the first RK step and if heat conduction is switched on.
-	if (slow_update_bool == 1 && config -> temperature_diff_h == 1)
+	if (config -> temperature_diff_h == 1)
 	{
 		// Now we need to calculate the temperature diffusion coefficients.
-	    calc_temp_diffusion_coeffs(state, config, irrev, diagnostics, config -> slow_fast_ratio*delta_t, grid);
+	    calc_temp_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid);
 	    // The diffusion of the temperature depends on its gradient.
 		grad(diagnostics -> temperature_gas, diagnostics -> vector_field_placeholder, grid);
 		// Now the diffusive temperature flux density can be obtained.
@@ -85,11 +85,11 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step, int slow_update_
 		
 		// mass diffusion, only for gaseous tracers
 		diff_switch = 0;
-		if (i > NO_OF_CONDENSED_CONSTITUENTS && slow_update_bool == 1 && config -> tracer_diff_h == 1)
+		if (i > NO_OF_CONDENSED_CONSTITUENTS && config -> tracer_diff_h == 1)
 		{
 			diff_switch = 1;
 			// firstly, we need to calculate the mass diffusion coeffcients
-			calc_mass_diffusion_coeffs(state, config, irrev, diagnostics, config -> slow_fast_ratio*delta_t, grid);
+			calc_mass_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid);
     		// The diffusion of the tracer density depends on its gradient.
 			grad(&state -> rho[scalar_shift_index], diagnostics -> vector_field_placeholder, grid);
 			// Now the diffusive mass flux density can be obtained.

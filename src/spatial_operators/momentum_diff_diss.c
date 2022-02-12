@@ -219,6 +219,31 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		/(0.5*(density_gas(state, h_index + layer_index*NO_OF_SCALARS_H) + density_gas(state, h_index + (layer_index + 1)*NO_OF_SCALARS_H)));
 	}
 	
+	/*
+	4.) interaction of the horizontal wind with the surface
+	-------------------------------------------------------
+	*/
+	
+	double flux_resistance, wind_speed_lowest_layer, z_agl, roughness_length;
+	#pragma omp parallel for private(vector_index, flux_resistance, wind_speed_lowest_layer, z_agl, roughness_length)
+	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+	{
+		vector_index = NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i;
+		
+		// averaging some quantities to the vector point
+		wind_speed_lowest_layer = 0.5*(pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + grid -> from_index[i]], 0.5)
+		+ pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + grid -> to_index[i]], 0.5));
+		z_agl = grid -> z_vector[vector_index] - 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[i]]
+		+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[i]]);
+		roughness_length = 0.5*(grid -> roughness_length[grid -> from_index[i]] + grid -> roughness_length[grid -> to_index[i]]);
+		
+		// calculating the flux resistance at the vector point
+		flux_resistance = momentum_flux_resistance(wind_speed_lowest_layer, z_agl, roughness_length);
+		
+		// adding the momentum flux into the surface as an acceleration
+		irrev -> friction_acc[vector_index] += -state -> wind[vector_index]/flux_resistance/z_agl;
+	}
+	
 	return 0;
 }
 
