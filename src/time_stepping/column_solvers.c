@@ -64,8 +64,10 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 		double rho_int_expl[NO_OF_LAYERS - 1];
 		double alpha_old[NO_OF_LAYERS];
 		double beta_old[NO_OF_LAYERS];
+		double gamma_old[NO_OF_LAYERS];
 		double alpha_new[NO_OF_LAYERS];
 		double beta_new[NO_OF_LAYERS];
+		double gamma_new[NO_OF_LAYERS];
 		double alpha[NO_OF_LAYERS];
 		double beta[NO_OF_LAYERS];
 		double gamma[NO_OF_LAYERS];
@@ -94,14 +96,15 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 				// old time step partial derivatives of theta and Pi
 				alpha_old[j] = -state_old -> rhotheta[base_index]/pow(state_old -> rho[gas_phase_first_index + base_index], 2);
 				beta_old[j] = 1/state_old -> rho[gas_phase_first_index + base_index];
-				gamma[j] = r_d/(c_v*state_old -> rhotheta[base_index])*(grid -> exner_bg[base_index] + state_old -> exner_pert[base_index])
-				/grid -> volume[base_index];
+				gamma_old[j] = r_d/(c_v*state_old -> rhotheta[base_index])*(grid -> exner_bg[base_index] + state_old -> exner_pert[base_index]);
 				// new time step partial derivatives of theta and Pi
 				alpha_new[j] = -state_new -> rhotheta[base_index]/pow(state_new -> rho[gas_phase_first_index + base_index], 2);
 				beta_new[j] = 1/state_new -> rho[gas_phase_first_index + base_index];
+				gamma_new[j] = r_d/(c_v*state_new -> rhotheta[base_index])*(grid -> exner_bg[base_index] + state_new -> exner_pert[base_index]);
 				// interpolation in time and dividing by the volume
 				alpha[j] = ((1 - partial_deriv_new_time_step_weight)*alpha_old[j] + partial_deriv_new_time_step_weight*alpha_new[j])/grid -> volume[base_index];
 				beta[j] = ((1 - partial_deriv_new_time_step_weight)*beta_old[j] + partial_deriv_new_time_step_weight*beta_new[j])/grid -> volume[base_index];
+				gamma[j] = ((1 - partial_deriv_new_time_step_weight)*gamma_old[j] + partial_deriv_new_time_step_weight*gamma_new[j])/grid -> volume[base_index];
 			}
 			// explicit potential temperature perturbation
 			theta_pert_expl[j] = state_old -> theta_pert[base_index] + delta_t*grid -> volume[base_index]*(

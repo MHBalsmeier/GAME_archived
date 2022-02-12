@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     */
 	read_argv(argc, argv, config, config_io, grid, irrev);
 	// setting the implicit weight of the thermodynamic vertical time stepping
-	config -> impl_thermo_weight = spec_heat_capacities_v_gas(0)/spec_heat_capacities_p_gas(0);
+	config -> impl_thermo_weight = 0.75;
 	
 	// checking the user input
 	sanity_checker(config, config_io, grid);
