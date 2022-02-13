@@ -152,6 +152,7 @@ Scalar_field u_at_cell;
 Scalar_field v_at_cell;
 double dv_hdz[NO_OF_H_VECTORS + NO_OF_VECTORS_H];
 double scalar_flux_resistance[NO_OF_SCALARS_H];
+double power_flux_density_sensible[NO_OF_SCALARS_H];
 double power_flux_density_latent[NO_OF_SCALARS_H];
 } Diagnostics;
 

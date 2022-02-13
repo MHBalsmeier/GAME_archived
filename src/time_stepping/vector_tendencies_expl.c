@@ -47,8 +47,8 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     }
     
     /*
-    Managing momentum diffusion calculation
-    ---------------------------------------
+    Managing momentum diffusion
+    ---------------------------
     */
     if (no_rk_step == 0)
     {

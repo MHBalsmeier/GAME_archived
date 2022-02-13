@@ -230,9 +230,13 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         		// difference water vapour density between saturation at ground temperature and actual absolute humidity in the lowest model layer
         		diff_density_sfc = saturation_pressure_sfc/(specific_gas_constants_lookup(1)*state -> temperature_soil[h_index])
         		- water_vapour_pressure/(specific_gas_constants_lookup(1)*diagnostics -> temperature_gas[i]);
+        		
         		// the thickness of the lowest model layer (we need it as a result of Guass' theorem)
         		layer_thickness = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + h_index] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + h_index];
+        		
+        		// evporation, sublimation
 		    	irrev -> mass_source_rates[4*NO_OF_SCALARS + i] += fmax(0, diff_density_sfc/diagnostics -> scalar_flux_resistance[h_index])/layer_thickness;
+		    	
 		    	// calculating the latent heat flux density affecting the surface
         		if (state -> temperature_soil[h_index] >= T_0)
         		{

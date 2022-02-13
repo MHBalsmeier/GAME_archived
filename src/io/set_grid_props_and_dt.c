@@ -227,7 +227,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char grid_file_name[])
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
     {
-		grid -> t_const_soil[i] = T_0 + 25*cos(2+grid -> latitude_scalar[i]);
+		grid -> t_const_soil[i] = T_0 + 25.0*cos(2.0 + grid -> latitude_scalar[i]);
     }
     
     /*
@@ -236,7 +236,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char grid_file_name[])
     */
     
 	double sigma_soil = 0.36;
-	sigma_soil = 0.6;
+	sigma_soil = 0.44;
 	
 	// the surface is always at zero
 	grid -> z_soil_interface[0] = 0;

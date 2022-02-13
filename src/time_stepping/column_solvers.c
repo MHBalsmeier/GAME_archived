@@ -30,7 +30,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 	double c_p = spec_heat_capacities_p_gas(0);
 	double r_d = specific_gas_constants(0);
 	// This is for Klemp (2008).
-	double damping_coeff, damping_start_height, z_above_damping;
+	double damping_coeff, damping_start_height, z_above_damping, temperature_gas_lowest_layer_old, temperature_gas_lowest_layer_new;
 	damping_start_height = config -> damping_start_height_over_toa*grid -> z_vector[0];
 	
 	// partial derivatives new time step weight
@@ -39,8 +39,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 	int soil_switch;
 	int gas_phase_first_index = NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS;
 	
-	// updating the surface flux resistance acting on scalar quantities (moisture and sensible heat)
-	// at the first RK step
+	// updating the surface flux resistance acting on scalar quantities (moisture and sensible heat) at the first RK step
 	if (rk_step == 0 && config -> soil_on == 1)
 	{
 		#pragma omp parallel for
@@ -48,6 +47,33 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 		{
 			diagnostics -> scalar_flux_resistance[i] = scalar_flux_resistance(pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + i], 0.5),
 			grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + i] - grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i], grid -> roughness_length[i]);
+		}
+	}
+	
+	// calculating the sensible power flux density
+	if (config -> soil_on == 1)
+	{
+		#pragma omp parallel for private(base_index, temperature_gas_lowest_layer_old, temperature_gas_lowest_layer_new)
+		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+		{
+			base_index = NO_OF_SCALARS - NO_OF_SCALARS_H + i;
+			
+			// gas temperature in the lowest layer
+			temperature_gas_lowest_layer_old = (grid -> exner_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_old -> exner_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i])
+			*(grid -> theta_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_old -> theta_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]);
+			temperature_gas_lowest_layer_new = (grid -> exner_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_new -> exner_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i])
+			*(grid -> theta_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_new -> theta_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]);
+			
+			// the sensible power flux density
+			diagnostics -> power_flux_density_sensible[i] = 0.5*spec_heat_capacities_v_gas_lookup(0)*(state_new -> rho[gas_phase_first_index + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
+			*(temperature_gas_lowest_layer_old - state_old -> temperature_soil[i])
+			+ state_old -> rho[gas_phase_first_index + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
+			*(temperature_gas_lowest_layer_new - state_new -> temperature_soil[i]))/diagnostics -> scalar_flux_resistance[i];
+			
+			// contribution of sensible heat to rhotheta
+			state_new -> rhotheta[base_index] 
+			+= -delta_t*grid -> area[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]*diagnostics -> power_flux_density_sensible[i]
+			/((grid -> exner_bg[base_index] + state_new -> exner_pert[base_index])*spec_heat_capacities_p_gas_lookup(0))/grid -> volume[base_index];
 		}
 	}
 	
@@ -79,7 +105,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 		double alpha[NO_OF_LAYERS];
 		double beta[NO_OF_LAYERS];
 		double gamma[NO_OF_LAYERS];
-		double density_interface_new, temperature_gas_lowest_layer_old, temperature_gas_lowest_layer_new, power_flux_density_sensible;
+		double density_interface_new;
 		
 		// explicit quantities
 		for (int j = 0; j < NO_OF_LAYERS; ++j)
@@ -172,8 +198,6 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 		}
 		
 		// soil components of the matrix
-		// prevent power_flux_density_sensible from being undefined
-		power_flux_density_sensible = 0;
 		if (soil_switch == 1)
 		{
 			// calculating the explicit part of the heat flux density
@@ -190,24 +214,12 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			- grid -> t_const_soil[i])
 			/(2*(grid -> z_soil_center[NO_OF_SOIL_LAYERS - 1] - grid -> z_t_const));
 			
-			// gas temperature in the lowest layer
-			temperature_gas_lowest_layer_old = (grid -> exner_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_old -> exner_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i])
-			*(grid -> theta_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_old -> theta_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]);
-			temperature_gas_lowest_layer_new = (grid -> exner_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_new -> exner_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i])
-			*(grid -> theta_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_new -> theta_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]);
-			
-			// the sensible power flux density
-			power_flux_density_sensible = 0.5*spec_heat_capacities_v_gas_lookup(0)*(state_new -> rho[gas_phase_first_index + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
-			*(temperature_gas_lowest_layer_old - state_old -> temperature_soil[i])
-			+ state_old -> rho[gas_phase_first_index + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
-			*(temperature_gas_lowest_layer_new - state_new -> temperature_soil[i]))/diagnostics -> scalar_flux_resistance[i];
-			
 			// calculating the explicit part of the temperature change
 			r_vector[NO_OF_LAYERS - 1]
 			// old temperature
 			= state_old -> temperature_soil[i]
 			// sensible heat flux
-			+ (power_flux_density_sensible
+			+ (diagnostics -> power_flux_density_sensible[i]
 			// latent heat flux
 			+ diagnostics -> power_flux_density_latent[i]
 			// shortwave inbound radiation
@@ -325,10 +337,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			else if (j == NO_OF_LAYERS - 1)
 			{
 				state_new -> rhotheta[base_index]
-				= rhotheta_expl[j] + delta_t*(-theta_int_new[j - 1]*solution_vector[j - 1]
-				// sensible heat
-				- grid -> area[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]*power_flux_density_sensible
-				/((grid -> exner_bg[base_index] + state_new -> exner_pert[base_index])*spec_heat_capacities_p_gas_lookup(0)))/grid -> volume[base_index];
+				= rhotheta_expl[j] + delta_t*(-theta_int_new[j - 1]*solution_vector[j - 1])/grid -> volume[base_index];
 			}
 			else
 			{
