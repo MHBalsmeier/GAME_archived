@@ -236,7 +236,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char grid_file_name[])
     */
     
 	double sigma_soil = 0.36;
-	sigma_soil = 0.44;
+	sigma_soil = 0.49;
 	
 	// the surface is always at zero
 	grid -> z_soil_interface[0] = 0;
