@@ -224,8 +224,8 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	-------------------------------------------------------
 	*/
 	
-	double flux_resistance, wind_speed_lowest_layer, z_agl, roughness_length;
-	#pragma omp parallel for private(vector_index, flux_resistance, wind_speed_lowest_layer, z_agl, roughness_length)
+	double flux_resistance, wind_speed_lowest_layer, z_agl, roughness_length, layer_thickness;
+	#pragma omp parallel for private(vector_index, flux_resistance, wind_speed_lowest_layer, z_agl, roughness_length, layer_thickness)
 	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 	{
 		vector_index = NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i;
@@ -235,13 +235,17 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		+ pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + grid -> to_index[i]], 0.5));
 		z_agl = grid -> z_vector[vector_index] - 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[i]]
 		+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[i]]);
+		layer_thickness = 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H - NO_OF_VECTORS_PER_LAYER + grid -> from_index[i]]
+		+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H - NO_OF_VECTORS_PER_LAYER + grid -> to_index[i]])
+		- 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[i]]
+		+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[i]]);
 		roughness_length = 0.5*(grid -> roughness_length[grid -> from_index[i]] + grid -> roughness_length[grid -> to_index[i]]);
 		
 		// calculating the flux resistance at the vector point
 		flux_resistance = momentum_flux_resistance(wind_speed_lowest_layer, z_agl, roughness_length);
 		
 		// adding the momentum flux into the surface as an acceleration
-		irrev -> friction_acc[vector_index] += -state -> wind[vector_index]/flux_resistance/z_agl;
+		irrev -> friction_acc[vector_index] += -state -> wind[vector_index]/flux_resistance/layer_thickness;
 	}
 	
 	return 0;
