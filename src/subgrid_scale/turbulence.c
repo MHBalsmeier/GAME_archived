@@ -4,7 +4,7 @@ Github repository: https://github.com/OpenNWP/GAME
 */
 
 /*
-In this file, diffusion coefficients, including Eddy viscosities, are computed.
+In this file, turbulence-related quantities are computed.
 */
 
 #include <stdlib.h>
