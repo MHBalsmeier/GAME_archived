@@ -7,7 +7,6 @@ Github repository: https://github.com/OpenNWP/GAME
 This is the horizontal (explicit) part of the constituent integration.
 */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include "../game_types.h"
 #include "../game_constants.h"

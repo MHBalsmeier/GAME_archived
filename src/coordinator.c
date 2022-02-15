@@ -631,6 +631,7 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	printf("Small Earth rescaling factor:\t%lf\n", grid -> radius/RADIUS);
 	printf("Top of atmosphere:\t\t%lf m\n", grid -> toa);
 	printf("Stretching parameter:\t\t%lf\n", grid -> stretching_parameter);
+	printf("Uppermost soil layer located at %lf m below the ground.\n", -grid -> z_soil_interface[1]);
 	if (grid -> vert_grid_type == 0)
 	{
 		printf("Terrain handling:\t\tterrain following coordinates\n");
