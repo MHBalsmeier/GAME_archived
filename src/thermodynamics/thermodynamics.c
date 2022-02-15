@@ -119,52 +119,6 @@ double density_gas(State *state, int grid_point_index)
 	return result;
 }
 
-double calc_micro_density(double density_macro, double condensates_density_sum)
-{
-	/*
-	In a moist atmosphere one needs to distinguish between the densities with respect to the whole volume and the densities with respect to exclusively the gas phase.
-	*/
-	double result = density_macro/(1 - condensates_density_sum/RHO_WATER);
-	if (result < 0)
-	{
-		printf("Error: microscopic density is negative.\n");
-		printf("Aborting.\n");
-		exit(1);
-	}
-	if (isnan(result))
-	{
-		printf("Error: microscopic density is nan.\n");
-		printf("Aborting.\n");
-		exit(1);
-	}
-	return result;
-}
-
-double calc_condensates_density_sum(int scalar_gridpoint_index, Mass_densities mass_densities)
-{
-	/*
-	This is only needed for calculating the "micro densities".
-	*/
-	double result = 0;
-	for (int i = 0; i < NO_OF_CONDENSED_CONSTITUENTS; ++i)
-	{
-		result += mass_densities[i*NO_OF_SCALARS + scalar_gridpoint_index];
-	}
-	if (result < 0)
-	{
-		printf("Error: condensates_density_sum is negative.\n");
-		printf("Aborting.\n");
-		exit(1);
-	}
-	if (result >= RHO_WATER)
-	{
-		printf("Error: condensates_density_sum >= RHO_WATER.\n");
-		printf("Aborting.\n");
-		exit(1);
-	}
-	return result;
-}
-
 double calc_diffusion_coeff(double temperature, double density)
 {
 	/*

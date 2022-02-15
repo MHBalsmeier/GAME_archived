@@ -10,8 +10,6 @@ double mean_particle_masses_gas(int);
 double spec_heat_capacities_v_gas(int);
 double spec_heat_capacities_p_gas(int);
 double specific_gas_constants(int);
-double calc_micro_density(double, double);
-double calc_condensates_density_sum(int, Mass_densities);
 double density_total(State *, int);
 double density_gas(State *, int);
 double calc_diffusion_coeff(double, double);
