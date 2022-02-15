@@ -39,17 +39,6 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 	int soil_switch;
 	int gas_phase_first_index = NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS;
 	
-	// updating the surface flux resistance acting on scalar quantities (moisture and sensible heat) at the first RK step
-	if (rk_step == 0 && config -> soil_on == 1)
-	{
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-		{
-			diagnostics -> scalar_flux_resistance[i] = scalar_flux_resistance(pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + i], 0.5),
-			grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + i] - grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i], grid -> roughness_length[i]);
-		}
-	}
-	
 	// calculating the sensible power flux density
 	if (config -> soil_on == 1)
 	{

@@ -154,6 +154,8 @@ double dv_hdz[NO_OF_H_VECTORS + NO_OF_VECTORS_H];
 double scalar_flux_resistance[NO_OF_SCALARS_H];
 double power_flux_density_sensible[NO_OF_SCALARS_H];
 double power_flux_density_latent[NO_OF_SCALARS_H];
+double roughness_velocity[NO_OF_SCALARS_H];
+double monin_obukhov_length[NO_OF_SCALARS_H];
 } Diagnostics;
 
 // needed for the radiation calculation

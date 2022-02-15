@@ -28,7 +28,7 @@ Irreversible_quantities *irrev, Config *config, double delta_t, double time_coor
 	// updating the roughness length if it is necessary
 	if (config -> soil_on == 1 || config -> momentum_diff_v == 1)
 	{
-		update_roughness_length(grid, diagnostics);
+		update_sfc_turb_quantities(state_old, grid, diagnostics, config, delta_t);
 	}
        
 	// diagnosing the temperature

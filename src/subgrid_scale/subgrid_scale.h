@@ -11,8 +11,7 @@ int hori_curl_viscosity_triangles(State *, Irreversible_quantities *, Grid *, Du
 int vert_w_viscosity(State *, Grid *, Diagnostics *, Irreversible_quantities *, double);
 int vert_hor_mom_viscosity(State *, Irreversible_quantities *, Diagnostics *, Config *, Grid *, double);
 int tke_update(Irreversible_quantities *, double, State *, Diagnostics *, Grid *);
-int update_roughness_length(Grid *, Diagnostics *);
-double scalar_flux_resistance(double, double, double);
-double momentum_flux_resistance(double, double, double);
+int update_sfc_turb_quantities(State *, Grid *, Diagnostics *, Config *, double);
+double momentum_flux_resistance(double, double, double, double);
 double roughness_velocity(double, double, double);
 double vertical_viscosity(double);

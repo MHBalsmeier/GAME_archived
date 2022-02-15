@@ -17,6 +17,7 @@ In this file, diffusion coefficients, including Eddy viscosities, are computed.
 #include "subgrid_scale.h"
 
 double roughness_length_from_u10(double);
+double scalar_flux_resistance(double, double, double, double);
 double psi_h(double, double);
 double psi_m(double, double);
 
@@ -58,27 +59,73 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	return 0;
 }
 
-int update_roughness_length(Grid *grid, Diagnostics *diagnostics)
+int update_sfc_turb_quantities(State *state, Grid *grid, Diagnostics *diagnostics, Config *config, double delta_t)
 {
 	/*
-	This function updated the roughness length over water.
+	This function updates surface-related turbulence quantities.
 	*/
 	
-	double u10, z_agl;
-	#pragma omp parallel for private(u10, z_agl)
+	double u_lowest_layer, u10, z_agl, theta_lowest_layer, theta_second_layer, dz, dtheta_dz, w_pert, theta_pert, w_pert_theta_pert_avg;
+	// semi-empirical coefficient
+	double prop_coeff = 0.5;
+	#pragma omp parallel for private(u_lowest_layer, u10, z_agl, theta_lowest_layer, theta_second_layer, dz, dtheta_dz, w_pert, theta_pert, w_pert_theta_pert_avg)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
+		z_agl = grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i];
+		
+		// wind speed in the lowest layer
+		u_lowest_layer = pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + i], 0.5);
+			
+		// calculating the 10 m wind velocity from the logarithmic wind profile
+		u10 = u_lowest_layer*log(10.0/grid -> roughness_length[i])/log(z_agl/grid -> roughness_length[i]);
+		
 		// only over the sea the roughness length is time-dependant (because of the waves)
 		if (grid -> is_land[i] == 0)
 		{
-			// calculating the 10 m wind velocity from the logarithmic wind profile
-			z_agl = grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i];
-			u10 = pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + i], 0.5)
-			*log(10.0/grid -> roughness_length[i])
-			/log(z_agl/grid -> roughness_length[i]);
 			
 			// calculating the roughness length fom the wind velocity
 			grid -> roughness_length[i] = roughness_length_from_u10(u10);
+		}
+		
+		// updating the roughness velocity
+		diagnostics -> roughness_velocity[i] = roughness_velocity(u_lowest_layer, z_agl, grid -> roughness_length[i]);
+		
+		// theta in the lowest layer
+		theta_lowest_layer = grid  -> theta_bg[NO_OF_SCALARS - NO_OF_SCALARS_H + i] + state -> theta_pert[NO_OF_SCALARS - NO_OF_SCALARS_H + i];
+		// theta in the second-lowest layer
+		theta_second_layer = grid  -> theta_bg[NO_OF_SCALARS - 2*NO_OF_SCALARS_H + i] + state -> theta_pert[NO_OF_SCALARS - 2*NO_OF_SCALARS_H + i];
+		
+		// delta z
+		dz = grid -> z_scalar[NO_OF_SCALARS - 2*NO_OF_SCALARS_H + i] - grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + i];
+		
+		// vertical gradient of theta
+		dtheta_dz = (theta_second_layer - theta_lowest_layer)/dz;
+		
+		// the perturbation of the vertical velocity is assumed to be proportional to the 10 m wind speed
+		// times a stability-dependant factor
+		w_pert = u10*fmax(0.001, 0.02*(1.0 - dtheta_dz/0.01));
+		theta_pert = -0.2*delta_t*w_pert*dtheta_dz;
+		w_pert_theta_pert_avg = prop_coeff*w_pert*theta_pert;
+		
+		// security
+		if (w_pert_theta_pert_avg == 0.0)
+		{
+			w_pert_theta_pert_avg = EPSILON_SECURITY;
+		}
+		
+		// the result
+		diagnostics -> monin_obukhov_length[i] = -theta_lowest_layer*pow(diagnostics -> roughness_velocity[i], 3.0)/(KARMAN*GRAVITY_MEAN_SFC_ABS*w_pert_theta_pert_avg);
+	}
+	
+	// updating the surface flux resistance acting on scalar quantities (moisture and sensible heat)
+	if (config -> soil_on == 1)
+	{
+		#pragma omp parallel for
+		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+		{
+			diagnostics -> scalar_flux_resistance[i] = scalar_flux_resistance(diagnostics -> roughness_velocity[i],
+			grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + i] - grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i],
+			grid -> roughness_length[i], diagnostics -> monin_obukhov_length[i]);
 		}
 	}
 	
@@ -119,17 +166,17 @@ double roughness_length_from_u10(double u10)
 	return roughness_length;
 }
 
-double scalar_flux_resistance(double wind_h_lowest_layer, double z_agl, double roughness_length)
+double scalar_flux_resistance(double roughness_velocity_value, double z_agl, double roughness_length_value, double monin_obukhov_length_value)
 {
 	/*
 	This function returns the surface flux resistance for scalar quantities.
 	*/
 	
-	double result = 1.0/(KARMAN*(roughness_velocity(wind_h_lowest_layer, z_agl, roughness_length) + EPSILON_SECURITY))*
+	double result = 1.0/(KARMAN*roughness_velocity_value)*
 	// neutral conditions
-	(log(z_agl/roughness_length)
+	(log(z_agl/roughness_length_value)
 	// non-neutral conditions
-	- psi_h(z_agl, 100)
+	- psi_h(z_agl, monin_obukhov_length_value)
 	// interfacial sublayer
 	+ log(7));
 	
@@ -142,17 +189,17 @@ double scalar_flux_resistance(double wind_h_lowest_layer, double z_agl, double r
 	return result;
 }
 
-double momentum_flux_resistance(double wind_h_lowest_layer, double z_agl, double roughness_length)
+double momentum_flux_resistance(double wind_h_lowest_layer, double z_agl, double roughness_length_value, double monin_obukhov_length_value)
 {
 	/*
 	This function returns the surface flux resistance for momentum.
 	*/
 	
-	double result = 1.0/(KARMAN*(roughness_velocity(wind_h_lowest_layer, z_agl, roughness_length) + EPSILON_SECURITY))*
+	double result = 1.0/(KARMAN*roughness_velocity(wind_h_lowest_layer, z_agl, roughness_length_value))*
 	// neutral conditions
-	(log(z_agl/roughness_length)
+	(log(z_agl/roughness_length_value)
 	// non-neutral conditions
-	- psi_m(z_agl, 100));
+	- psi_m(z_agl, monin_obukhov_length_value));
 	
 	// limitting the result for security
 	if (result < 50.0)
@@ -163,13 +210,21 @@ double momentum_flux_resistance(double wind_h_lowest_layer, double z_agl, double
 	return result;
 }
 
-double roughness_velocity(double wind_speed, double z_agl, double roughness_length)
+double roughness_velocity(double wind_speed, double z_agl, double roughness_length_value)
 {
 	/*
 	This function returns the roughness velocity.
 	*/
 	
-	double result = wind_speed*KARMAN/log(z_agl/roughness_length);
+	double denominator = log(z_agl/roughness_length_value);
+	
+	// security
+	if (denominator == 0.0)
+	{
+		denominator = EPSILON_SECURITY;
+	}
+	
+	double result = wind_speed*KARMAN/denominator;
 	return result;
 }
 

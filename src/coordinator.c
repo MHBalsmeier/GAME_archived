@@ -121,9 +121,9 @@ int main(int argc, char *argv[])
     printf("Released under the MIT license, visit https://github.com/OpenNWP/GAME for more information.\n");
     printf("%s", stars);
 	printf("What you want to do:\n");
-	printf("Run_id:\t\t\t\t%s\n", config_io -> run_id);
-	printf("Run time span:\t\t\t%d days\n", config -> total_run_span/86400);
-	printf("Grid properties file:\t\t%s\n", grid_file);
+	printf("Run_id:\t\t\t\t\t%s\n", config_io -> run_id);
+	printf("Run time span:\t\t\t\t%d days\n", config -> total_run_span/86400);
+	printf("Grid properties file:\t\t\t%s\n", grid_file);
 	
     // reading the grid
 	printf("Reading grid data ...\n");
@@ -628,14 +628,14 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	This function gives the user some additional information on the model configuration.
 	*/
 
-	printf("Small Earth rescaling factor:\t%lf\n", grid -> radius/RADIUS);
-	printf("Top of atmosphere:\t\t%lf m\n", grid -> toa);
-	printf("Stretching parameter:\t\t%lf\n", grid -> stretching_parameter);
-	printf("Uppermost soil layer located at %lf m below the ground.\n", -grid -> z_soil_interface[1]);
+	printf("Small Earth rescaling factor:\t\t%lf\n", grid -> radius/RADIUS);
+	printf("Top of atmosphere:\t\t\t%lf m\n", grid -> toa);
+	printf("Stretching parameter:\t\t\t%lf\n", grid -> stretching_parameter);
+	printf("Thickness of uppermost soil layer:\t%lf m\n", -grid -> z_soil_interface[1]);
 	if (grid -> vert_grid_type == 0)
 	{
-		printf("Terrain handling:\t\tterrain following coordinates\n");
-		printf("Number of orography layers:\t%d\n", grid -> no_of_oro_layers);
+		printf("Terrain handling:\t\t\tterrain following coordinates\n");
+		printf("Number of orography layers:\t\t%d\n", grid -> no_of_oro_layers);
 	}
 	if (grid -> vert_grid_type == 1)
 	{
@@ -643,12 +643,12 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	}
 	if (config -> nwp_mode == 1)
 	{
-		printf("Initialization state file:\t%s\n", init_state_file);
+		printf("Initialization state file:\t\t%s\n", init_state_file);
 	}
-	printf("Start year:\t\t\t%d\n", config_io -> year);
-	printf("Start month:\t\t\t%d\n", config_io -> month);
-	printf("Start day:\t\t\t%d\n", config_io -> day);
-	printf("Start hour:\t\t\t%d\n", config_io -> hour);
+	printf("Start year:\t\t\t\t%d\n", config_io -> year);
+	printf("Start month:\t\t\t\t%d\n", config_io -> month);
+	printf("Start day:\t\t\t\t%d\n", config_io -> day);
+	printf("Start hour:\t\t\t\t%d\n", config_io -> hour);
 	printf("%s", stars);
 	printf("Dynamics configuration:\n");
 	printf("Number of layers: %d\n", NO_OF_LAYERS);
