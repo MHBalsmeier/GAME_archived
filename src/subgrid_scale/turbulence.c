@@ -108,7 +108,7 @@ int update_sfc_turb_quantities(State *state, Grid *grid, Diagnostics *diagnostic
 		w_pert_theta_pert_avg = prop_coeff*w_pert*theta_pert;
 		
 		// security
-		if (w_pert_theta_pert_avg == 0.0)
+		if (fabs(w_pert_theta_pert_avg) < EPSILON_SECURITY)
 		{
 			w_pert_theta_pert_avg = EPSILON_SECURITY;
 		}
@@ -219,7 +219,7 @@ double roughness_velocity(double wind_speed, double z_agl, double roughness_leng
 	double denominator = log(z_agl/roughness_length_value);
 	
 	// security
-	if (denominator == 0.0)
+	if (fabs(denominator) < EPSILON_SECURITY)
 	{
 		denominator = EPSILON_SECURITY;
 	}
@@ -238,7 +238,7 @@ double psi_h(double z_eff, double l)
 	// l: Monin-Obukhov length
 	
 	// avoiding l == 0
-	if (l == 0.0)
+	if (fabs(l) < EPSILON_SECURITY)
 	{
 		l = EPSILON_SECURITY;
 	}
@@ -257,6 +257,7 @@ double psi_h(double z_eff, double l)
 	{
 		result = -4.7*z_eff/l;
 	}
+	
 	return result;
 }
 
@@ -270,7 +271,7 @@ double psi_m(double z_eff, double l)
 	// l: Monin-Obukhov length
 	
 	// avoiding l == 0
-	if (l == 0.0)
+	if (fabs(l) < EPSILON_SECURITY)
 	{
 		l = EPSILON_SECURITY;
 	}
@@ -289,6 +290,7 @@ double psi_m(double z_eff, double l)
 	{
 		result = -4.7*z_eff/l;
 	}
+	
 	return result;
 }
 
