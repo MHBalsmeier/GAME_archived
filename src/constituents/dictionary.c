@@ -63,7 +63,7 @@ gaseous constituents IDs:
 11: N2O
 */
 
-double mean_particle_masses_gas_lookup(int gas_constituent_id)
+double mean_particle_masses_gas(int gas_constituent_id)
 {
 	double result = 0;
 	if (gas_constituent_id == 0)
@@ -77,7 +77,7 @@ double mean_particle_masses_gas_lookup(int gas_constituent_id)
 	return result;
 }
 
-double spec_heat_capacities_v_gas_lookup(int gas_constituent_id)
+double spec_heat_capacities_v_gas(int gas_constituent_id)
 {
 	double result = 0;
 	if (gas_constituent_id == 0)
@@ -91,7 +91,7 @@ double spec_heat_capacities_v_gas_lookup(int gas_constituent_id)
 	return result;
 }
 
-double spec_heat_capacities_p_gas_lookup(int gas_constituent_id)
+double spec_heat_capacities_p_gas(int gas_constituent_id)
 {
 	double result = 0;
 	if (gas_constituent_id == 0)
@@ -105,7 +105,7 @@ double spec_heat_capacities_p_gas_lookup(int gas_constituent_id)
 	return result;
 }
 
-double specific_gas_constants_lookup(int gas_constituent_id)
+double specific_gas_constants(int gas_constituent_id)
 {
 	double result = 0;
 	if (gas_constituent_id == 0)
@@ -184,7 +184,6 @@ double calc_o3_vmr(double z_height)
 	double result = max_vmr*exp(-pow(distance, 2)/(2*pow(sigma, 2)));
 	return result;
 }
-
 
 
 

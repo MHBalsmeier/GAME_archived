@@ -12,7 +12,7 @@ In this file, the calculation of the explicit part of the momentum equation is m
 #include <math.h>
 #include "../game_types.h"
 #include "../spatial_operators/spatial_operators.h"
-#include "../thermodynamics/thermodynamics.h"
+#include "../constituents/constituents.h"
 
 int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config, int no_rk_step, double delta_t)
 {

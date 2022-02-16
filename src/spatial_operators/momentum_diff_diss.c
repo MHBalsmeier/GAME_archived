@@ -15,7 +15,7 @@ The momentum diffusion acceleration is computed here (apart from the diffusion c
 #include "../game_constants.h"
 #include "spatial_operators.h"
 #include "../subgrid_scale/subgrid_scale.h"
-#include "../thermodynamics/thermodynamics.h"
+#include "../constituents/constituents.h"
 
 int hor_calc_curl_of_vorticity(Curl_field, Vector_field, double [], Grid *, Dualgrid *);
 

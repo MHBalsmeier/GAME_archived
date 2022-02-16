@@ -17,9 +17,9 @@ In addition to that, some postprocessing diagnostics are also calculated here.
 #include "../game_types.h"
 #include "../game_constants.h"
 #include "io.h"
-#include "../thermodynamics/thermodynamics.h"
+#include "../constituents/constituents.h"
 #include "../spatial_operators/spatial_operators.h"
-#include "../tracers/tracers.h"
+#include "../constituents/constituents.h"
 #define ERRCODE 3
 #define ECCERR(e) {printf("Error: Eccodes failed with error code %d. See http://download.ecmwf.int/test-data/eccodes/html/group__errors.html for meaning of the error codes.\n", e); exit(ERRCODE);}
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}

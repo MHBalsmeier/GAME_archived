@@ -4,20 +4,13 @@ Github repository: https://github.com/OpenNWP/GAME
 */
 
 /*
-In this file, algebraic conversions and calculations of thermodynamic quantities of a moist atmosphere are collected.
-indices as usual:
-d:	dry
-v:	water vapour
-h:	humid
+This file contains functions calculating derived thermodynamic quantities of the atmosphere.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "../game_types.h"
+#include <math.h>
 #include "../game_constants.h"
-#include "../spatial_operators/spatial_operators.h"
-#include "../tracers/tracers.h"
-#include "thermodynamics.h"
+#include "../game_types.h"
+#include "constituents.h"
 
 int temperature_diagnostics(State *state, Grid *grid, Diagnostics *diagnostics)
 {
@@ -130,41 +123,10 @@ double calc_diffusion_coeff(double temperature, double density)
 	double particle_mass = mean_particle_masses_gas(0);
 	
 	// actual calculation
-    double thermal_velocity = sqrt(8*K_B*temperature/(M_PI*particle_mass));
+    double thermal_velocity = sqrt(8.0*K_B*temperature/(M_PI*particle_mass));
     double particle_density = density/particle_mass;
-    double cross_section = 4*M_PI*pow(particle_radius, 2);
-    double mean_free_path = 1/(sqrt(2)*particle_density*cross_section);
-    double result = 1.0/3*thermal_velocity*mean_free_path;
+    double cross_section = 4.0*M_PI*pow(particle_radius, 2.0);
+    double mean_free_path = 1.0/(sqrt(2.0)*particle_density*cross_section);
+    double result = 1.0/3.0*thermal_velocity*mean_free_path;
     return result;
 }
-
-
-double mean_particle_masses_gas(int gas_constituent_id)
-{
-	// binding to atmostracers
-	return mean_particle_masses_gas_lookup(gas_constituent_id);
-}
-
-double spec_heat_capacities_v_gas(int gas_constituent_id)
-{
-	// binding to atmostracers
-	return spec_heat_capacities_v_gas_lookup(gas_constituent_id);
-}
-
-double spec_heat_capacities_p_gas(int gas_constituent_id)
-{
-	// binding to atmostracers
-	return spec_heat_capacities_p_gas_lookup(gas_constituent_id);
-}
-
-double specific_gas_constants(int gas_constituent_id)
-{
-	// binding to atmostracers
-	return specific_gas_constants_lookup(gas_constituent_id);
-}
-
-
-
-
-
-

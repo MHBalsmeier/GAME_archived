@@ -25,7 +25,6 @@ src/spatial_operators/gradient_operators.c
 src/spatial_operators/inner_product.c
 src/spatial_operators/averaging.c
 src/spatial_operators/linear_combine_two_states.c
-src/thermodynamics/thermodynamics.c
 src/io/init_state_setter.c
 src/io/write_output.c
 src/io/set_grid_props_and_dt.c
@@ -35,9 +34,10 @@ src/subgrid_scale/turbulence.c
 src/radiation/manage_radiation_calls.c
 src/radiation/held_suar.c
 src/radiation/rterrtmgp_coupler.f90
-src/tracers/humidity.c
-src/tracers/phase_trans.c
-src/tracers/properties.c
+src/constituents/humidity.c
+src/constituents/phase_trans.c
+src/constituents/dictionary.c
+src/constituents/derived_quantities.c
 grid_generator/src/vertical_grid.c
 ../rte-rrtmgp/rrtmgp/mo_gas_optics.F90
 ../rte-rrtmgp/rrtmgp/mo_gas_optics_rrtmgp.F90

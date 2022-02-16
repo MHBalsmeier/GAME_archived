@@ -13,7 +13,7 @@ This file manages the RKHEVI time stepping.
 #include "../spatial_operators/spatial_operators.h"
 #include "time_stepping.h"
 #include "../radiation/radiation.h"
-#include "../thermodynamics/thermodynamics.h"
+#include "../constituents/constituents.h"
 #include "../subgrid_scale/subgrid_scale.h"
 #include "../io/io.h"
 

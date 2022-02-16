@@ -10,7 +10,7 @@ Here, vorticities are calculated. The word "vorticity" hereby refers to both ver
 #include <stdio.h>
 #include "../game_types.h"
 #include "geos95.h"
-#include "../thermodynamics/thermodynamics.h"
+#include "../constituents/constituents.h"
 #include "spatial_operators.h"
 
 int calc_rel_vort_on_triangles(Vector_field, double [], Grid *, Dualgrid *);

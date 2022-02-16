@@ -11,7 +11,7 @@ This file contains functions calculating everything related to phase transition 
 #include "../game_types.h"
 #include "../game_constants.h"
 #include "../subgrid_scale/subgrid_scale.h"
-#include "tracers.h"
+#include "constituents.h"
 
 int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *grid, Config *config, Irreversible_quantities *irrev, double delta_t)
 {
@@ -74,10 +74,10 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
 		}
 		
 		// determining the water vapour pressure (using the EOS)
-        water_vapour_pressure = state -> rho[5*NO_OF_SCALARS + i]*specific_gas_constants_lookup(1)*diagnostics -> temperature_gas[i];
+        water_vapour_pressure = state -> rho[5*NO_OF_SCALARS + i]*specific_gas_constants(1)*diagnostics -> temperature_gas[i];
         
     	// the amount of water vapour that the air can still take 
-        diff_density = (saturation_pressure - water_vapour_pressure)/(specific_gas_constants_lookup(1)*diagnostics -> temperature_gas[i]);
+        diff_density = (saturation_pressure - water_vapour_pressure)/(specific_gas_constants(1)*diagnostics -> temperature_gas[i]);
         
         // the case where the air is not over-saturated
         if (diff_density >= 0)
@@ -228,7 +228,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         			saturation_pressure_sfc = saturation_pressure_over_ice(state -> temperature_soil[h_index]);
         		}
         		// difference water vapour density between saturation at ground temperature and actual absolute humidity in the lowest model layer
-        		diff_density_sfc = saturation_pressure_sfc/(specific_gas_constants_lookup(1)*state -> temperature_soil[h_index]) - state -> rho[5*NO_OF_SCALARS + i];
+        		diff_density_sfc = saturation_pressure_sfc/(specific_gas_constants(1)*state -> temperature_soil[h_index]) - state -> rho[5*NO_OF_SCALARS + i];
         		
         		// the thickness of the lowest model layer (we need it as a result of Guass' theorem)
         		layer_thickness = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + h_index] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + h_index];

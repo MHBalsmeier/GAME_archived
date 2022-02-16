@@ -10,7 +10,7 @@ In this file, algebraic multiplications of fields are collected.
 #include <stdio.h>
 #include "../game_types.h"
 #include "spatial_operators.h"
-#include "../thermodynamics/thermodynamics.h"
+#include "../constituents/constituents.h"
 
 int scalar_times_scalar(Scalar_field in_field_0, Scalar_field in_field_1, Scalar_field out_field)
 {

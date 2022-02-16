@@ -17,7 +17,7 @@ The main organizes the model, manages the time stepping, calls model output, col
 #include "io/io.h"
 #include "spatial_operators/spatial_operators.h"
 #include "radiation/radiation.h"
-#include "thermodynamics/thermodynamics.h"
+#include "constituents/constituents.h"
 #include "time_stepping/time_stepping.h"
 
 int sanity_checker(Config *, Config_io *, Grid *);

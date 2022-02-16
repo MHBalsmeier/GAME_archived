@@ -12,7 +12,7 @@ In this file, diffusion coefficients, including Eddy viscosities, are computed.
 #include <math.h>
 #include "../game_types.h"
 #include "../spatial_operators/spatial_operators.h"
-#include "../thermodynamics/thermodynamics.h"
+#include "../constituents/constituents.h"
 #include "subgrid_scale.h"
 
 double swh_from_u10(double);

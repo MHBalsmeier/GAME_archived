@@ -13,7 +13,7 @@ In this file, turbulence-related quantities are computed.
 #include "../game_types.h"
 #include "../game_constants.h"
 #include "../spatial_operators/spatial_operators.h"
-#include "../thermodynamics/thermodynamics.h"
+#include "../constituents/constituents.h"
 #include "subgrid_scale.h"
 
 double roughness_length_from_u10(double);
