@@ -67,7 +67,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	scalar_times_vector(diagnostics -> scalar_field_placeholder, grid -> exner_bg_grad, forcings -> pressure_gradient_acc_neg_l, grid);
 	
 	// 4.) The pressure gradient has to get a deceleration factor due to condensates.
-	// --------------------------------------------------------------------------------
+	// ------------------------------------------------------------------------------
 	if (config -> assume_lte == 0)
 	{
 		#pragma omp parallel for

@@ -8,44 +8,12 @@ This file contains look-up functions for properties of the atmosphere.
 */
 
 #include <math.h>
+#include "../game_constants.h"
 
-double c_v_cond(int solid_or_liquid, int subcategory, double temp)
-{
-	/*
-	This function returns c_v of condensates.
-	*/
-    double result;
-    if (solid_or_liquid == 0)
-    {
-        result = 2060;
-    }
-    if (solid_or_liquid == 1)
-    {
-        result = 4184;
-    }
-    return result;
-}
-
-double c_p_cond(int solid_or_liquid, int subcategory, double temp)
-{
-	/*
-	This function returns c_p of condensates.
-	*/
-    double result;
-    if (solid_or_liquid == 0)
-    {
-        result = 2060;
-    }
-    if (solid_or_liquid == 1)
-    {
-        result = 4184;
-    }
-    return result;
-}
-
-
-// gas quantities
-// ------------------------
+/*
+Gas quantities
+--------------
+*/
 
 /*
 gaseous constituents IDs:
@@ -184,6 +152,126 @@ double calc_o3_vmr(double z_height)
 	double result = max_vmr*exp(-pow(distance, 2)/(2*pow(sigma, 2)));
 	return result;
 }
+
+/*
+Condensate properties
+---------------------
+*/
+
+double c_v_cond(int solid_or_liquid, int subcategory, double temp)
+{
+	/*
+	This function returns c_v of condensates.
+	*/
+	
+    double result;
+    if (solid_or_liquid == 0)
+    {
+        result = 2060;
+    }
+    if (solid_or_liquid == 1)
+    {
+        result = 4184;
+    }
+    return result;
+}
+
+double c_p_cond(int solid_or_liquid, int subcategory, double temp)
+{
+	/*
+	This function returns c_p of condensates.
+	*/
+	
+    double result;
+    if (solid_or_liquid == 0)
+    {
+        result = 2060;
+    }
+    if (solid_or_liquid == 1)
+    {
+        result = 4184;
+    }
+    return result;
+}
+
+double phase_trans_heat(int direction, double temperature)
+{
+	/*
+	This function calculates the phase transition heat.
+	*/
+	
+    /*
+    directions:
+    0:  gas to liquid
+    1:  gas to solid
+    2: liquid to solid
+    */
+    
+    double result;
+    if (direction == 0)
+    {
+        result = 2257000;
+	}
+    if (direction == 1)
+    {
+        result = 2257000 + 333500;
+	}
+    if (direction == 2)
+    {
+        result = 333500;
+	}
+    return result;
+}
+
+
+double sink_velocity(int solid_or_liquid, double radius, double air_density)
+{
+	/*
+	This function calculates the sink velocity of droplets.
+	*/
+	
+	double dry_air_kinematic_viscosity = 14.8e-6;
+	double reynolds_crit = 10;
+	double drag_coeff = 1;
+	
+	// First of all, a laminar sink velocity is calculated from the Stokes law.
+	double laminar_velocity_candidate = 0;
+	// The solid case.
+	if (solid_or_liquid == 0)
+	{
+		laminar_velocity_candidate = 2*M_PI*pow(radius, 2)*DENSITY_WATER*GRAVITY_MEAN_SFC_ABS/(9*M_PI*air_density*dry_air_kinematic_viscosity);
+	}
+	
+	// The liquid case.
+	if (solid_or_liquid == 1)
+	{
+		laminar_velocity_candidate = 2*M_PI*pow(radius, 2)*DENSITY_WATER*GRAVITY_MEAN_SFC_ABS/(9*M_PI*air_density*dry_air_kinematic_viscosity);
+	}
+	
+	// calculating the Reynolds number resulting from the laminar velocity
+	double reynolds_from_laminar;
+	reynolds_from_laminar = laminar_velocity_candidate*radius/dry_air_kinematic_viscosity;
+	
+	// calculating the resulting sink velocity
+	double result;
+	// the laminar case
+	if (reynolds_from_laminar <= reynolds_crit)
+	{
+		result = laminar_velocity_candidate;
+	}
+	// the turbulent case
+	else
+	{
+		result = pow(8*radius*DENSITY_WATER*GRAVITY_MEAN_SFC_ABS/(3*air_density*drag_coeff), 0.5);
+	}
+	
+    return result;
+}
+
+
+
+
+
 
 
 
