@@ -178,7 +178,7 @@ double scalar_flux_resistance(double roughness_velocity_value, double z_agl, dou
 	// non-neutral conditions
 	- psi_h(z_agl, monin_obukhov_length_value)
 	// interfacial sublayer
-	+ log(7));
+	+ log(7.0));
 	
 	// limitting the result for security
 	if (result < 50.0)
