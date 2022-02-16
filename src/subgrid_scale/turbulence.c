@@ -16,7 +16,7 @@ In this file, turbulence-related quantities are computed.
 #include "../constituents/constituents.h"
 #include "subgrid_scale.h"
 
-double roughness_length_from_u10(double);
+double roughness_length_from_u10_sea(double);
 double scalar_flux_resistance(double, double, double, double);
 double psi_h(double, double);
 double psi_m(double, double);
@@ -84,7 +84,7 @@ int update_sfc_turb_quantities(State *state, Grid *grid, Diagnostics *diagnostic
 		{
 			
 			// calculating the roughness length fom the wind velocity
-			grid -> roughness_length[i] = roughness_length_from_u10(u10);
+			grid -> roughness_length[i] = roughness_length_from_u10_sea(u10);
 		}
 		
 		// updating the roughness velocity
@@ -143,7 +143,7 @@ double vertical_viscosity(double tke)
 	return result;
 }
 
-double roughness_length_from_u10(double u10)
+double roughness_length_from_u10_sea(double u10)
 {
 	/*
 	This function returns the roughness length as a function of the mean wind speed at 10 m above a fully developed sea.
