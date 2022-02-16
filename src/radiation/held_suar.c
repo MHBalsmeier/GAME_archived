@@ -33,24 +33,24 @@ int held_suar(double latitude_scalar[], double z_scalar[], double mass_densities
 
 double t_eq(double latitude, double pressure)
 {
-	double delta_t_y = 60;
-	double delta_theta_z = 10;
-	double kappa = 2.0/7;
-	double result = 315;
-	result = result - delta_t_y*pow(sin(latitude), 2);
-	result = result - delta_theta_z*log(pressure/P_0)*pow(cos(latitude), 2);
+	double delta_t_y = 60.0;
+	double delta_theta_z = 10.0;
+	double kappa = 2.0/7.0;
+	double result = 315.0;
+	result = result - delta_t_y*pow(sin(latitude), 2.0);
+	result = result - delta_theta_z*log(pressure/P_0)*pow(cos(latitude), 2.0);
 	result = result*pow(pressure/P_0, kappa);
-	result = fmax(200, result);
+	result = fmax(200.0, result);
 	return result;
 }
 
 double k_T(double latitude, double pressure)
 {
-	double k_a = 1.0/40*1.0/86400;
-	double k_s = 1.0/4*1.0/86400;
+	double k_a = 1.0/40.0*1.0/86400.0;
+	double k_s = 1.0/4.0*1.0/86400.0;
 	double sigma_b = 0.7;
 	double sigma = pressure/P_0;
-	double result = k_a + (k_s - k_a)*fmax(0, (sigma - sigma_b)/(1 - sigma_b))*pow(cos(latitude), 4);
+	double result = k_a + (k_s - k_a)*fmax(0.0, (sigma - sigma_b)/(1.0 - sigma_b))*pow(cos(latitude), 4.0);
 	return result;
 }
 
