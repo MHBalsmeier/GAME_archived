@@ -155,7 +155,7 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 	{
 		// ocean
 		sfc_albedo[i] = albedo_water;
-		sfc_rho_c[i] = RHO_WATER*c_p_water;
+		sfc_rho_c[i] = DENSITY_WATER*c_p_water;
 		
 		// for water roughness_length is set to some sea-typical value, will not be used anyway
 		roughness_length[i] = 0.08;

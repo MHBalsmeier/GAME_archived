@@ -244,7 +244,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 		{
 			actual_roughness_length = 0.5*(grid -> roughness_length[grid -> from_index[i]] + grid -> roughness_length[grid -> to_index[i]]);
-			roughness_length_extrapolation = ROUGHNESS_LENGTH_GRASS;
+			// roughness length of grass according to WMO
+			roughness_length_extrapolation = 0.02;
 			if (grid -> is_land[grid -> from_index[i]] == 0)
 			{
 				roughness_length_extrapolation = actual_roughness_length;
@@ -767,7 +768,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 					(fabs(log((*pressure)[closest_index*NO_OF_SCALARS_H + i]/(*pressure)[second_closest_index*NO_OF_SCALARS_H + i])) + EPSILON_SECURITY);
 					geopotential_height[i][j] = closest_weight*grid -> gravity_potential[closest_index*NO_OF_SCALARS_H + i]
 					+ (1 - closest_weight)*grid -> gravity_potential[second_closest_index*NO_OF_SCALARS_H + i];
-					geopotential_height[i][j] = geopotential_height[i][j]/GRAVITY_MEAN_SFC_ABS;
+					geopotential_height[i][j] = geopotential_height[i][j]/G_MEAN_SFC_ABS;
 					t_on_pressure_levels[i][j] = closest_weight*diagnostics -> temperature_gas[closest_index*NO_OF_SCALARS_H + i]
 					+ (1 - closest_weight)*diagnostics -> temperature_gas[second_closest_index*NO_OF_SCALARS_H + i];
 					rh_on_pressure_levels[i][j] = closest_weight*(*rh)[closest_index*NO_OF_SCALARS_H + i]

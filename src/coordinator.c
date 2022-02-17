@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
     diagnostics, forcings, grid, dualgrid, config_io, config, irrev);
     
     t_write += config_io -> write_out_interval;
-    printf("Run progress: %f h\n", (t_init - t_init)/SECONDS_PER_HOUR);
+    printf("Run progress: %f h\n", (t_init - t_init)/3600);
     int time_step_counter = 0;
     clock_t first_time, second_time;
     first_time = clock();
@@ -366,7 +366,7 @@ int main(int argc, char *argv[])
         	speed = CLOCKS_PER_SEC*config_io -> write_out_interval/((double) second_time - first_time);
             printf("Current speed: %lf\n", speed);
             first_time = clock();
-            printf("Run progress: %f h\n", (t_0 + delta_t - t_init)/SECONDS_PER_HOUR);
+            printf("Run progress: %f h\n", (t_0 + delta_t - t_init)/3600);
             
             // resetting the wind in the lowest layer to zero
             #pragma omp parallel for

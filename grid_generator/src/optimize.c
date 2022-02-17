@@ -11,7 +11,7 @@ The Lloyd algorithm is implemented here.
 #include <stdio.h>
 #include <geos95.h>
 #include "../../src/game_types.h"
-#include "include.h"
+#include "grid_generator.h"
 
 int find_cell_cgs(double [], double [], double [], double [], int [], int [], int []);
 

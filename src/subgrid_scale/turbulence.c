@@ -67,7 +67,7 @@ int update_sfc_turb_quantities(State *state, Grid *grid, Diagnostics *diagnostic
 	
 	double u_lowest_layer, u10, z_agl, theta_lowest_layer, theta_second_layer, dz, dtheta_dz, w_pert, theta_pert, w_pert_theta_pert_avg;
 	// semi-empirical coefficient
-	double prop_coeff = 0.5;
+	double prop_coeff = 0.2;
 	#pragma omp parallel for private(u_lowest_layer, u10, z_agl, theta_lowest_layer, theta_second_layer, dz, dtheta_dz, w_pert, theta_pert, w_pert_theta_pert_avg)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
@@ -114,7 +114,7 @@ int update_sfc_turb_quantities(State *state, Grid *grid, Diagnostics *diagnostic
 		}
 		
 		// the result
-		diagnostics -> monin_obukhov_length[i] = -theta_lowest_layer*pow(diagnostics -> roughness_velocity[i], 3.0)/(KARMAN*GRAVITY_MEAN_SFC_ABS*w_pert_theta_pert_avg);
+		diagnostics -> monin_obukhov_length[i] = -theta_lowest_layer*pow(diagnostics -> roughness_velocity[i], 3.0)/(KARMAN*G_MEAN_SFC_ABS*w_pert_theta_pert_avg);
 	}
 	
 	// updating the surface flux resistance acting on scalar quantities (moisture and sensible heat)
@@ -158,7 +158,7 @@ double roughness_length_from_u10_sea(double u10)
 	double period = 0.729*u10;
 	
 	// deep-water gravity waves
-	double wavelength = GRAVITY_MEAN_SFC_ABS*pow(period, 2)/(2*M_PI);
+	double wavelength = G_MEAN_SFC_ABS*pow(period, 2)/(2*M_PI);
 	
 	// final result
 	double roughness_length = 1200*swh*pow(swh/wavelength, 4.5);

@@ -15,7 +15,7 @@ The grid generation procedure is manged from this file. Memory allocation and IO
 #include <geos95.h>
 #include "../../src/game_types.h"
 #include "../../src/game_constants.h"
-#include "include.h"
+#include "grid_generator.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 #define RESET "\033[0m"
@@ -313,7 +313,7 @@ int main(int argc, char *argv[])
         -----------------------------------------------------------------------------
     */
     printf("Setting the gravity potential ... ");
-	set_gravity_potential(z_scalar, gravity_potential, GRAVITY_MEAN_SFC_ABS, radius);
+	set_gravity_potential(z_scalar, gravity_potential, radius);
     printf(GREEN "finished" RESET);
     printf(".\n");
     

@@ -14,7 +14,7 @@ This file collects functions that are relevant for the neighbourship relations o
 #include <netcdf.h>
 #include <math.h>
 #include "../../src/game_types.h"
-#include "include.h"
+#include "grid_generator.h"
 #define ERRCODE 2
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 

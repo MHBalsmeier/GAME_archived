@@ -248,13 +248,13 @@ double sink_velocity(int solid_or_liquid, double radius, double air_density)
 	// The solid case.
 	if (solid_or_liquid == 0)
 	{
-		laminar_velocity_candidate = 2.0*M_PI*pow(radius, 2.0)*DENSITY_WATER*GRAVITY_MEAN_SFC_ABS/(9.0*M_PI*air_density*dry_air_kinematic_viscosity);
+		laminar_velocity_candidate = 2.0*M_PI*pow(radius, 2.0)*DENSITY_WATER*G_MEAN_SFC_ABS/(9.0*M_PI*air_density*dry_air_kinematic_viscosity);
 	}
 	
 	// The liquid case.
 	if (solid_or_liquid == 1)
 	{
-		laminar_velocity_candidate = 2.0*M_PI*pow(radius, 2.0)*DENSITY_WATER*GRAVITY_MEAN_SFC_ABS/(9.0*M_PI*air_density*dry_air_kinematic_viscosity);
+		laminar_velocity_candidate = 2.0*M_PI*pow(radius, 2.0)*DENSITY_WATER*G_MEAN_SFC_ABS/(9.0*M_PI*air_density*dry_air_kinematic_viscosity);
 	}
 	
 	// calculating the Reynolds number resulting from the laminar velocity
@@ -271,7 +271,7 @@ double sink_velocity(int solid_or_liquid, double radius, double air_density)
 	// the turbulent case
 	else
 	{
-		result = pow(8.0*radius*DENSITY_WATER*GRAVITY_MEAN_SFC_ABS/(3.0*air_density*drag_coeff), 0.5);
+		result = pow(8.0*radius*DENSITY_WATER*G_MEAN_SFC_ABS/(3.0*air_density*drag_coeff), 0.5);
 	}
 	
     return result;
