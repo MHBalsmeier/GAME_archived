@@ -46,7 +46,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 	if (config -> temperature_diff_h == 1)
 	{
 		// Now we need to calculate the temperature diffusion coefficients.
-	    calc_temp_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid);
+	    temp_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid);
 	    // The diffusion of the temperature depends on its gradient.
 		grad(diagnostics -> temperature_gas, diagnostics -> vector_field_placeholder, grid);
 		// Now the diffusive temperature flux density can be obtained.
@@ -87,7 +87,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 		{
 			diff_switch = 1;
 			// firstly, we need to calculate the mass diffusion coeffcients
-			calc_mass_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid);
+			mass_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid);
     		// The diffusion of the tracer density depends on its gradient.
 			grad(&state -> rho[scalar_shift_index], diagnostics -> vector_field_placeholder, grid);
 			// Now the diffusive mass flux density can be obtained.

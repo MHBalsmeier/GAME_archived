@@ -123,7 +123,7 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		}
 	}
 	// calculating the respective diffusion coefficient
-	vert_hor_mom_viscosity(state, irrev, diagnostics, config, grid, delta_t);
+	vert_hori_mom_viscosity(state, irrev, diagnostics, config, grid, delta_t);
 	// now, the second derivative needs to be taken
 	double z_upper, z_lower, delta_z;
 	#pragma omp parallel for private(layer_index, h_index, vector_index, z_upper, z_lower, delta_z)
@@ -154,7 +154,7 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	// computing something like dw/dz
 	add_vertical_divv(state -> wind, diagnostics -> scalar_field_placeholder, grid);
 	// computing and multiplying by the respective diffusion coefficient
-	vert_w_viscosity(state, grid, diagnostics, irrev, delta_t);
+	vert_vert_mom_viscosity(state, grid, diagnostics, irrev, delta_t);
 	// taking the second derivative to compute the diffusive tendency
 	grad_vert_cov(diagnostics -> scalar_field_placeholder, irrev -> friction_acc, grid);
 	

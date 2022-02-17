@@ -13,6 +13,8 @@ In this file, diffusion coefficients, including Eddy viscosities, are computed.
 #include "../constituents/constituents.h"
 #include "subgrid_scale.h"
 
+double tke2vertical_diff_coeff(double);
+
 int hori_div_viscosity(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config *config)
 {
 	/*
@@ -134,13 +136,14 @@ int hori_curl_viscosity_triangles(State *state, Irreversible_quantities *irrev, 
 	return 0;
 }
 
-int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnostics *diagnostics, Config *config, Grid *grid, double delta_t)
+int vert_hori_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnostics *diagnostics, Config *config, Grid *grid, double delta_t)
 {
 	/*
 	This function computes the effective viscosity (Eddy + molecular viscosity) for the vertical diffusion of horizontal velocity.
 	This quantity is located at the half level edges.
 	To obey the symmetry of the stress tensor, the same coefficient must be used for the horizontal diffusion of vertical velocity.
 	*/
+	
 	double max_diff_v_coeff_turb = 0.125*pow(
 	grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H]
 	, 2)/delta_t;
@@ -156,10 +159,10 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 		h_index = i - layer_index*NO_OF_VECTORS_H;
 		scalar_base_index = layer_index*NO_OF_SCALARS_H;
 		// the turbulent component
-		mom_diff_coeff = 0.25*(vertical_viscosity(irrev -> tke[scalar_base_index + grid -> from_index[h_index]])
-		+ vertical_viscosity(irrev -> tke[scalar_base_index + grid -> to_index[h_index]])
-		+ vertical_viscosity(irrev -> tke[(layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]])
-		+ vertical_viscosity(irrev -> tke[(layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]));
+		mom_diff_coeff = 0.25*(tke2vertical_diff_coeff(irrev -> tke[scalar_base_index + grid -> from_index[h_index]])
+		+ tke2vertical_diff_coeff(irrev -> tke[scalar_base_index + grid -> to_index[h_index]])
+		+ tke2vertical_diff_coeff(irrev -> tke[(layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]])
+		+ tke2vertical_diff_coeff(irrev -> tke[(layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]));
 		// computing and adding the molecular viscosity
 		// the scalar variables need to be averaged to the vector points at half levels
 		molecuar_viscosity = calc_diffusion_coeff(0.25*(diagnostics -> temperature_gas[scalar_base_index + grid -> from_index[h_index]]
@@ -201,7 +204,7 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 	return 0;
 }
 
-int vert_w_viscosity(State *state, Grid *grid, Diagnostics *diagnostics, Irreversible_quantities *irrev, double delta_t)
+int vert_vert_mom_viscosity(State *state, Grid *grid, Diagnostics *diagnostics, Irreversible_quantities *irrev, double delta_t)
 {
 	/*
 	This function multiplies scalar_field_placeholder (containing dw/dz) by the diffusion coefficient acting on w because of w.
@@ -222,7 +225,7 @@ int vert_w_viscosity(State *state, Grid *grid, Diagnostics *diagnostics, Irrever
 			// molecular viscosity
 			= irrev -> molecular_diffusion_coeff[i]
 			// turbulent component
-			+ vertical_viscosity(irrev -> tke[i])*fabs(diagnostics -> scalar_field_placeholder[i]);
+			+ tke2vertical_diff_coeff(irrev -> tke[i])*fabs(diagnostics -> scalar_field_placeholder[i]);
 			// stability criterion
 			if (mom_diff_coeff > max_diff_v_coeff_turb)
 			{
@@ -235,7 +238,7 @@ int vert_w_viscosity(State *state, Grid *grid, Diagnostics *diagnostics, Irrever
 	return 0;
 }
 
-int calc_temp_diffusion_coeffs(State *state, Config *config, Irreversible_quantities *irrev, Diagnostics *diagnostics, double delta_t, Grid *grid)
+int temp_diffusion_coeffs(State *state, Config *config, Irreversible_quantities *irrev, Diagnostics *diagnostics, double delta_t, Grid *grid)
 {
 	/*
 	This function computes the viscous temperature diffusion coefficient (including eddies).
@@ -270,12 +273,12 @@ int calc_temp_diffusion_coeffs(State *state, Config *config, Irreversible_quanti
 		// molecular component
 		= density_gas(state, i)*c_g_v*(irrev -> molecular_diffusion_coeff[i]
 		// turbulent component
-		+ vertical_viscosity(irrev -> tke[i]));
+		+ tke2vertical_diff_coeff(irrev -> tke[i]));
 	}
 	return 0;
 }
 
-int calc_mass_diffusion_coeffs(State *state, Config *config, Irreversible_quantities *irrev, Diagnostics *diagnostics, double delta_t, Grid *grid)
+int mass_diffusion_coeffs(State *state, Config *config, Irreversible_quantities *irrev, Diagnostics *diagnostics, double delta_t, Grid *grid)
 {
 	/*
 	This function computes the viscous tracer diffusion coefficient (including eddies).
@@ -309,12 +312,12 @@ int calc_mass_diffusion_coeffs(State *state, Config *config, Irreversible_quanti
 		// molecular component
 		= irrev -> molecular_diffusion_coeff[i]
 		// turbulent component
-		+ vertical_viscosity(irrev -> tke[i]);
+		+ tke2vertical_diff_coeff(irrev -> tke[i]);
 	}
 	return 0;
 }
 
-double vertical_viscosity(double tke)
+double tke2vertical_diff_coeff(double tke)
 {
 	/*
 	This function returns the vertical kinematic Eddy viscosity as a function of the specific TKE.
