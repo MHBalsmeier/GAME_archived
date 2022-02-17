@@ -23,42 +23,6 @@ double psi_m(double, double);
 
 const double KARMAN = 0.4;
 
-int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Diagnostics *diagnostics, Grid *grid)
-{
-	/*
-	This function updates the specific turbulent kinetic energy (TKE), unit: J/kg.
-	*/
-	
-	// computing the advection
-	grad(irrev -> tke, diagnostics -> vector_field_placeholder, grid);
-	inner_product(diagnostics -> vector_field_placeholder, state -> wind, diagnostics -> scalar_field_placeholder, grid);
-	
-	double decay_constant;
-	// loop over all scalar gridpoints
-	#pragma omp parallel for private(decay_constant)
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
-	{
-		// decay constant, as derived from diffusion
-		decay_constant = 8*pow(M_PI, 2)/grid -> mean_velocity_area*(irrev -> viscosity_div[i] + irrev -> viscosity_curl[i])/density_gas(state, i);
-		
-		// prognostic equation for TKE
-		irrev -> tke[i] += delta_t*(
-		// advection
-		-diagnostics -> scalar_field_placeholder[i]
-		// production through dissipation of resolved energy
-		+ irrev -> heating_diss[i]/density_gas(state, i)
-		// decay through molecular dissipation
-		- decay_constant*irrev -> tke[i]);
-		
-		// clipping negative values
-		if (irrev -> tke[i] < 0)
-		{
-			irrev -> tke[i] = 0;
-		}
-	}
-	return 0;
-}
-
 int update_sfc_turb_quantities(State *state, Grid *grid, Diagnostics *diagnostics, Config *config, double delta_t)
 {
 	/*
@@ -130,17 +94,6 @@ int update_sfc_turb_quantities(State *state, Grid *grid, Diagnostics *diagnostic
 	}
 	
 	return 0;
-}
-
-double vertical_viscosity(double tke)
-{
-	/*
-	This function returns the vertical kinematic Eddy viscosity as a function of the specific TKE.
-	*/
-	
-	double prop_constant = 0.4; // unit: m
-	double result = prop_constant*pow(tke, 0.5);
-	return result;
 }
 
 double roughness_length_from_u10_sea(double u10)

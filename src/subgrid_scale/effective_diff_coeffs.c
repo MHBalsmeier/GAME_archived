@@ -7,16 +7,11 @@ Github repository: https://github.com/OpenNWP/GAME
 In this file, diffusion coefficients, including Eddy viscosities, are computed.
 */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
 #include "../game_types.h"
 #include "../spatial_operators/spatial_operators.h"
 #include "../constituents/constituents.h"
 #include "subgrid_scale.h"
-
-double swh_from_u10(double);
-double roughness_length_from_swh(double);
 
 int hori_div_viscosity(State *state, Irreversible_quantities *irrev, Grid *grid, Diagnostics *diagnostics, Config *config)
 {
@@ -33,7 +28,7 @@ int hori_div_viscosity(State *state, Irreversible_quantities *irrev, Grid *grid,
 		
 		// turbulent component (the divergence is approximately one order of magnitude smaller than the vorticity, that is where the prefactor of 6 comes from)
 		// 4.0/3 is a result of the stress tensor
-		irrev -> viscosity_div[i] += config -> diff_h_smag_div*grid -> mean_velocity_area*fabs(4.0/3*diagnostics -> wind_divv[i]);
+		irrev -> viscosity_div[i] += config -> diff_h_smag_div*grid -> mean_velocity_area*fabs(4.0/3.0*diagnostics -> wind_divv[i]);
 		
 		// maximum (stability constraint)
 		if (irrev -> viscosity_div[i] > irrev -> max_diff_h_coeff_turb)
@@ -108,7 +103,7 @@ int hori_curl_viscosity_triangles(State *state, Irreversible_quantities *irrev, 
 		rho_base_index = NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + layer_index*NO_OF_SCALARS_H;
 		// calculating and adding the molecular viscosity
 		density_value =
-		1.0/6*(
+		1.0/6.0*(
 		state -> rho[rho_base_index + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
 		+ state -> rho[rho_base_index + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
 		+ state -> rho[rho_base_index + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
@@ -117,7 +112,7 @@ int hori_curl_viscosity_triangles(State *state, Irreversible_quantities *irrev, 
 		+ state -> rho[rho_base_index + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 2]]]);
 		temp_base_index = layer_index*NO_OF_SCALARS_H ;
 		molecular_viscosity = calc_diffusion_coeff(
-		1.0/6*(
+		1.0/6.0*(
 		diagnostics -> temperature_gas[temp_base_index + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
 		+ diagnostics -> temperature_gas[temp_base_index + grid -> to_index[dualgrid -> vorticity_indices_triangles[3*h_index + 0]]]
 		+ diagnostics -> temperature_gas[temp_base_index + grid -> from_index[dualgrid -> vorticity_indices_triangles[3*h_index + 1]]]
@@ -319,7 +314,16 @@ int calc_mass_diffusion_coeffs(State *state, Config *config, Irreversible_quanti
 	return 0;
 }
 
-
+double vertical_viscosity(double tke)
+{
+	/*
+	This function returns the vertical kinematic Eddy viscosity as a function of the specific TKE.
+	*/
+	
+	double prop_constant = 0.4; // unit: m
+	double result = prop_constant*pow(tke, 0.5);
+	return result;
+}
 
 
 

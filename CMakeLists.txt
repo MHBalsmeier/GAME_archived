@@ -30,7 +30,8 @@ src/io/write_output.c
 src/io/set_grid_properties.c
 src/io/spatial_ops_for_output.c
 src/subgrid_scale/effective_diff_coeffs.c
-src/subgrid_scale/turbulence.c
+src/subgrid_scale/tke.c
+src/subgrid_scale/planetary_boundary_layer.c
 src/radiation/manage_radiation_calls.c
 src/radiation/held_suar.c
 src/radiation/rterrtmgp_coupler.f90
