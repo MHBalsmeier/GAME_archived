@@ -164,6 +164,9 @@ double c_v_cond(int solid_or_liquid, int subcategory, double temp)
 	This function returns c_v of condensates.
 	*/
 	
+	// solid_or_liquid == 0: ice
+	// solid_or_liquid == 1: liquid water
+	
     double result;
     if (solid_or_liquid == 0)
     {
@@ -181,6 +184,9 @@ double c_p_cond(int solid_or_liquid, int subcategory, double temp)
 	/*
 	This function returns c_p of condensates.
 	*/
+	
+	// solid_or_liquid == 0: ice
+	// solid_or_liquid == 1: liquid water
 	
     double result;
     if (solid_or_liquid == 0)
@@ -230,22 +236,25 @@ double sink_velocity(int solid_or_liquid, double radius, double air_density)
 	This function calculates the sink velocity of droplets.
 	*/
 	
+	// solid_or_liquid == 0: ice
+	// solid_or_liquid == 1: liquid water
+	
 	double dry_air_kinematic_viscosity = 14.8e-6;
-	double reynolds_crit = 10;
-	double drag_coeff = 1;
+	double reynolds_crit = 10.0;
+	double drag_coeff = 1.0;
 	
 	// First of all, a laminar sink velocity is calculated from the Stokes law.
 	double laminar_velocity_candidate = 0;
 	// The solid case.
 	if (solid_or_liquid == 0)
 	{
-		laminar_velocity_candidate = 2*M_PI*pow(radius, 2)*DENSITY_WATER*GRAVITY_MEAN_SFC_ABS/(9*M_PI*air_density*dry_air_kinematic_viscosity);
+		laminar_velocity_candidate = 2.0*M_PI*pow(radius, 2.0)*DENSITY_WATER*GRAVITY_MEAN_SFC_ABS/(9.0*M_PI*air_density*dry_air_kinematic_viscosity);
 	}
 	
 	// The liquid case.
 	if (solid_or_liquid == 1)
 	{
-		laminar_velocity_candidate = 2*M_PI*pow(radius, 2)*DENSITY_WATER*GRAVITY_MEAN_SFC_ABS/(9*M_PI*air_density*dry_air_kinematic_viscosity);
+		laminar_velocity_candidate = 2.0*M_PI*pow(radius, 2.0)*DENSITY_WATER*GRAVITY_MEAN_SFC_ABS/(9.0*M_PI*air_density*dry_air_kinematic_viscosity);
 	}
 	
 	// calculating the Reynolds number resulting from the laminar velocity
@@ -262,7 +271,7 @@ double sink_velocity(int solid_or_liquid, double radius, double air_density)
 	// the turbulent case
 	else
 	{
-		result = pow(8*radius*DENSITY_WATER*GRAVITY_MEAN_SFC_ABS/(3*air_density*drag_coeff), 0.5);
+		result = pow(8.0*radius*DENSITY_WATER*GRAVITY_MEAN_SFC_ABS/(3.0*air_density*drag_coeff), 0.5);
 	}
 	
     return result;
