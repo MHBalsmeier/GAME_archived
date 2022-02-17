@@ -4,7 +4,7 @@ Github repository: https://github.com/OpenNWP/GAME
 */
 
 /*
-In this file, turbulence-related quantities are computed.
+In this file, quantities referring to the planetary boundary layer are computed.
 */
 
 #include <stdlib.h>
