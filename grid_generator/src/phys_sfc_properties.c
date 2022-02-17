@@ -169,7 +169,7 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 			lat_deg = 360.0/(2.0*M_PI)*latitude_scalar[i];
 			
 			// setting the surface albedo of land depending on the latitude
-			if (fabs(lat_deg) > 70)
+			if (fabs(lat_deg) > 70.0)
 			{
 				sfc_albedo[i] = albedo_ice;
 			}
@@ -179,7 +179,7 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 			}
 			
 			sfc_rho_c[i] = density_soil*c_p_soil;
-			roughness_length[i] = vegetation_height_ideal(latitude_scalar[i], oro[i])/8;
+			roughness_length[i] = vegetation_height_ideal(latitude_scalar[i], oro[i])/8.0;
 		}
 	}
 	
@@ -192,11 +192,11 @@ double vegetation_height_ideal(double latitude, double oro)
 	calculating a latitude- and height-dependant idealized vegetation height
 	*/
 	
-	double vegetation_height_equator = 20;
+	double vegetation_height_equator = 20.0;
 	
 	double result;
 	
-	result = vegetation_height_equator*cos(latitude)*exp(-oro/1500);
+	result = vegetation_height_equator*cos(latitude)*exp(-oro/1500.0);
 	
 	return result;
 }
