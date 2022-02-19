@@ -114,9 +114,10 @@ double roughness_length_from_u10_sea(double u10)
 	double wavelength = G_MEAN_SFC_ABS*pow(period, 2)/(2*M_PI);
 	
 	// final result
-	double roughness_length = 1200*swh*pow(swh/wavelength, 4.5);
+	double roughness_length = 1200*swh*pow(swh/fmax(wavelength, EPSILON_SECURITY), 4.5);
 	
-	return roughness_length;
+	// avoid too small values for stability
+	return fmax(0.001, roughness_length);
 }
 
 double scalar_flux_resistance(double roughness_velocity_value, double z_agl, double roughness_length_value, double monin_obukhov_length_value)
@@ -178,7 +179,8 @@ double roughness_velocity(double wind_speed, double z_agl, double roughness_leng
 	}
 	
 	double result = wind_speed*KARMAN/denominator;
-	return result;
+	
+	return fmax(EPSILON_SECURITY, result);
 }
 
 double psi_h(double z_eff, double l)
