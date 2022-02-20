@@ -4,7 +4,7 @@ Github repository: https://github.com/OpenNWP/GAME
 */
 
 /*
-This file collects physical constants that are hardly ever modified.
+This file collects physical constants that are not modified within the code.
 */
 
 #define RADIUS 6371000.789927
@@ -15,3 +15,4 @@ This file collects physical constants that are hardly ever modified.
 #define G_MEAN_SFC_ABS 9.80616
 #define EPSILON_SECURITY (1e-10)
 #define DENSITY_WATER 1024.0
+#define PRANDTL_HEIGHT 100.0

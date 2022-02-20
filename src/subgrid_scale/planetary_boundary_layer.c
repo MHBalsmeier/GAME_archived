@@ -114,7 +114,7 @@ double roughness_length_from_u10_sea(double u10)
 	double wavelength = G_MEAN_SFC_ABS*pow(period, 2)/(2*M_PI);
 	
 	// final result
-	double roughness_length = 1200*swh*pow(swh/fmax(wavelength, EPSILON_SECURITY), 4.5);
+	double roughness_length = 1200.0*swh*pow(swh/fmax(wavelength, EPSILON_SECURITY), 4.5);
 	
 	// avoid too small values for stability
 	return fmax(0.0001, roughness_length);
@@ -126,18 +126,21 @@ double scalar_flux_resistance(double roughness_velocity_value, double z_agl, dou
 	This function returns the surface flux resistance for scalar quantities.
 	*/
 	
+	// height of the prandtl layer
+	double used_vertical_height = fmin(z_agl, PRANDTL_HEIGHT);
+	
 	double result = 1.0/(KARMAN*roughness_velocity_value)*
 	// neutral conditions
-	(log(z_agl/roughness_length_value)
+	(log(used_vertical_height/roughness_length_value)
 	// non-neutral conditions
-	- psi_h(z_agl, monin_obukhov_length_value)
+	- psi_h(used_vertical_height, monin_obukhov_length_value)
 	// interfacial sublayer
 	+ log(7.0));
 	
 	// limitting the result for security
-	if (result < 50.0)
+	if (result < 1.0)
 	{
-		result = 50.0;
+		result = 1.0;
 	}
 	
 	return result;
@@ -149,16 +152,19 @@ double momentum_flux_resistance(double wind_h_lowest_layer, double z_agl, double
 	This function returns the surface flux resistance for momentum.
 	*/
 	
+	// height of the prandtl layer
+	double used_vertical_height = fmin(z_agl, PRANDTL_HEIGHT);
+	
 	double result = 1.0/(KARMAN*roughness_velocity(wind_h_lowest_layer, z_agl, roughness_length_value))*
 	// neutral conditions
-	(log(z_agl/roughness_length_value)
+	(log(used_vertical_height/roughness_length_value)
 	// non-neutral conditions
-	- psi_m(z_agl, monin_obukhov_length_value));
+	- psi_m(used_vertical_height, monin_obukhov_length_value));
 	
 	// limitting the result for security
-	if (result < 50.0)
+	if (result < 1.0)
 	{
-		result = 50.0;
+		result = 1.0;
 	}
 	
 	return result;

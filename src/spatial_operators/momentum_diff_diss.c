@@ -224,8 +224,8 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	-------------------------------------------------------
 	*/
 	
-	double flux_resistance, wind_speed_lowest_layer, z_agl, roughness_length, layer_thickness, monin_obukhov_length_value;
-	#pragma omp parallel for private(vector_index, flux_resistance, wind_speed_lowest_layer, z_agl, roughness_length, layer_thickness, monin_obukhov_length_value)
+	double flux_resistance, wind_speed_lowest_layer, z_agl, roughness_length, layer_thickness, monin_obukhov_length_value, wind_rescale_factor;
+	#pragma omp parallel for private(vector_index, flux_resistance, wind_speed_lowest_layer, z_agl, roughness_length, layer_thickness, monin_obukhov_length_value, wind_rescale_factor)
 	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 	{
 		vector_index = NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i;
@@ -245,8 +245,15 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		// calculating the flux resistance at the vector point
 		flux_resistance = momentum_flux_resistance(wind_speed_lowest_layer, z_agl, roughness_length, monin_obukhov_length_value);
 		
+		// rescaling the wind if the lowest wind vector is above the height of the Prandtl layer
+		wind_rescale_factor = 1.0;
+		if (z_agl < PRANDTL_HEIGHT)
+		{
+			wind_rescale_factor = log(PRANDTL_HEIGHT/roughness_length)/log(z_agl/roughness_length);
+		}
+		
 		// adding the momentum flux into the surface as an acceleration
-		irrev -> friction_acc[vector_index] += -state -> wind[vector_index]/flux_resistance/layer_thickness;
+		irrev -> friction_acc[vector_index] += -wind_rescale_factor*state -> wind[vector_index]/flux_resistance/layer_thickness;
 	}
 	
 	return 0;
