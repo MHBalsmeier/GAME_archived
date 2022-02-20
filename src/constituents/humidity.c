@@ -32,16 +32,6 @@ double saturation_pressure_over_ice(double temperature)
     return result;
 }
 
-double water_vapour_density_from_rel_humidity(double rel_humidity, double temperature, double density)
-{
-	/*
-	This function returns the absolute humidity (water vapour density) in kg/m^3 as a function of the relative humidity (NOT in percent),
-	the temperature in K and the density in kg/m^3.
-	*/
-    double water_vapour_density = rel_humidity*saturation_pressure_over_water(temperature)/(specific_gas_constants(1)*temperature);
-    return water_vapour_density;
-}
-
 double rel_humidity(double abs_humidity, double temperature)
 {
 	/*
