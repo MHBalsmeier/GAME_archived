@@ -13,4 +13,3 @@ int mass_diffusion_coeffs(State *, Config *, Irreversible_quantities *, Diagnost
 int tke_update(Irreversible_quantities *, double, State *, Diagnostics *, Grid *);
 int update_sfc_turb_quantities(State *, Grid *, Diagnostics *, Config *, double);
 double momentum_flux_resistance(double, double, double, double);
-double roughness_velocity(double, double, double);

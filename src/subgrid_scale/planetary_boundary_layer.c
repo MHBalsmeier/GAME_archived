@@ -18,6 +18,7 @@ In this file, quantities referring to the planetary boundary layer are computed.
 
 double roughness_length_from_u10_sea(double);
 double scalar_flux_resistance(double, double, double, double);
+double roughness_velocity(double, double, double);
 double psi_h(double, double);
 double psi_m(double, double);
 
