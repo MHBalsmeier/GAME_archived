@@ -105,13 +105,13 @@ double roughness_length_from_u10_sea(double u10)
 	// refer to Stensrud, Parameterization schemes (2007), p.130
 	
 	// empirically determined formula for the SWH
-	double swh = 0.0248*pow(u10, 2);
+	double swh = 0.0248*pow(u10, 2.0);
 	
 	// empirically determined period of the waves
 	double period = 0.729*u10;
 	
 	// deep-water gravity waves
-	double wavelength = G_MEAN_SFC_ABS*pow(period, 2)/(2*M_PI);
+	double wavelength = G_MEAN_SFC_ABS*pow(period, 2.0)/(2.0*M_PI);
 	
 	// final result
 	double roughness_length = 1200.0*swh*pow(swh/fmax(wavelength, EPSILON_SECURITY), 4.5);
@@ -244,7 +244,7 @@ double psi_m(double z_eff, double l)
 		// helper variable
 		double x = pow(1.0 - 15.0*z_eff/l, 0.25);
 		
-		result = 2.0*log((1 + x)/2.0) + log((1.0 + pow(x, 2.0))/2.0) - 2.0*atan(x) + M_PI/2.0;
+		result = 2.0*log((1.0 + x)/2.0) + log((1.0 + pow(x, 2.0))/2.0) - 2.0*atan(x) + M_PI/2.0;
 	}
 	// neutral and stable conditions
 	else
