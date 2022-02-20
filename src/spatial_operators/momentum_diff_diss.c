@@ -247,7 +247,7 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		
 		// rescaling the wind if the lowest wind vector is above the height of the Prandtl layer
 		wind_rescale_factor = 1.0;
-		if (z_agl < PRANDTL_HEIGHT)
+		if (z_agl > PRANDTL_HEIGHT)
 		{
 			wind_rescale_factor = log(PRANDTL_HEIGHT/roughness_length)/log(z_agl/roughness_length);
 		}
