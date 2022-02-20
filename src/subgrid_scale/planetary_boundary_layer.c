@@ -117,7 +117,7 @@ double roughness_length_from_u10_sea(double u10)
 	double roughness_length = 1200*swh*pow(swh/fmax(wavelength, EPSILON_SECURITY), 4.5);
 	
 	// avoid too small values for stability
-	return fmax(0.001, roughness_length);
+	return fmax(0.0001, roughness_length);
 }
 
 double scalar_flux_resistance(double roughness_velocity_value, double z_agl, double roughness_length_value, double monin_obukhov_length_value)
