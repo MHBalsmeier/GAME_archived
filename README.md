@@ -32,7 +32,7 @@ The derivations of both the continuous equations as well as of the discretizatio
 
 ### Handbook
 
-The handbook of the model can be found in the subdirectory handbook. It is to be understood as a user manual and contains information on how to generate necessary files like grid files, geospatial data files (orography, for example) and input data and explains how to configure, compile and run the model.
+The handbook of the model can be found in the subdirectory handbook. It is to be understood as a user manual and contains information on how to generate grid files and explains how to configure, compile and run the model.
 
 ## Installing the model
 
