@@ -23,11 +23,16 @@ int temperature_diagnostics(State *state, Grid *grid, Diagnostics *diagnostics)
 	{
 		diagnostics -> temperature_gas[i] = (grid -> theta_bg[i] + state -> theta_pert[i])*(grid -> exner_bg[i] + state -> exner_pert[i]);
 	}
+	
 	return 0;
 }
 
 double spec_heat_cap_diagnostics_v(State *state, int grid_point_index, Config *config)
 {
+	/*
+	This function calculates the specific heat capacity of the air at constant volume.
+	*/
+	
 	double rho_g = 0;
 	int no_of_relevant_constituents = 0;
 	if (config -> assume_lte == 0)
@@ -45,11 +50,16 @@ double spec_heat_cap_diagnostics_v(State *state, int grid_point_index, Config *c
 	{
 		result += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*spec_heat_capacities_v_gas(i);
 	}
+	
 	return result;
 }
 
 double spec_heat_cap_diagnostics_p(State *state, int grid_point_index, Config *config)
 {
+	/*
+	This function calculates the specific heat capacity of the air at constant pressure.
+	*/
+	
 	double rho_g = 0;
 	int no_of_relevant_constituents = 0;
 	if (config -> assume_lte == 0)
@@ -67,11 +77,16 @@ double spec_heat_cap_diagnostics_p(State *state, int grid_point_index, Config *c
 	{
 		result += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*spec_heat_capacities_p_gas(i);
 	}
+	
 	return result;
 }
 
 double gas_constant_diagnostics(State *state, int grid_point_index, Config *config)
 {
+	/*
+	This function calculates the specific gas constant of the gas phase.
+	*/
+	
 	double rho_g = 0;
 	int no_of_relevant_constituents = 0;
 	if (config -> assume_lte == 0)
@@ -89,11 +104,16 @@ double gas_constant_diagnostics(State *state, int grid_point_index, Config *conf
 	{
 		result += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*specific_gas_constants(i);
 	}
+	
 	return result;
 }
 
 double density_total(State *state, int grid_point_index)
 {
+	/*
+	This function calculates the density of the air.
+	*/
+	
 	double result = 0;
 	for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
 	{
@@ -104,6 +124,10 @@ double density_total(State *state, int grid_point_index)
 
 double density_gas(State *state, int grid_point_index)
 {
+	/*
+	This function calculates the density of the gas phase.
+	*/
+	
 	double result = 0;
 	for (int i = 0; i < NO_OF_GASEOUS_CONSTITUENTS; ++i)
 	{
@@ -130,3 +154,11 @@ double calc_diffusion_coeff(double temperature, double density)
     double result = 1.0/3.0*thermal_velocity*mean_free_path;
     return result;
 }
+
+
+
+
+
+
+
+
