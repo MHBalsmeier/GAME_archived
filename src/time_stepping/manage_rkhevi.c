@@ -88,7 +88,7 @@ Irreversible_quantities *irrev, Config *config, double delta_t, double time_coor
 		}
     }
     
-    // saturation adjustment, calculation of latent heating rates
+    // saturation adjustment, calculation of latent heating rates, evaporation at the surface
     moisturizer(state_new, delta_t, diagnostics, irrev, config, grid);
     
     return 0;
