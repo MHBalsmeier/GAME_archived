@@ -78,7 +78,7 @@ int update_sfc_turb_quantities(State *state, Grid *grid, Diagnostics *diagnostic
 			w_pert_theta_pert_avg = EPSILON_SECURITY;
 		}
 		
-		// the result
+		// finally computing the Monin-Obukhov length
 		diagnostics -> monin_obukhov_length[i] = -theta_lowest_layer*pow(diagnostics -> roughness_velocity[i], 3.0)/(KARMAN*G_MEAN_SFC_ABS*w_pert_theta_pert_avg);
 	}
 	

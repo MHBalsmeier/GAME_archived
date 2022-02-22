@@ -67,8 +67,8 @@ Irreversible_quantities *irrev, Config *config, double delta_t, double time_coor
 	    }
 		// Horizontal velocity can be considered to be updated from now on.
 
-		// 2.) Explicit component of the generalized density equations.
-		// ------------------------------------------------------------
+		// 2.) explicit component of the generalized density equations
+		// -----------------------------------------------------------
 	    // Radiation is updated here.
 		if (config -> rad_on > 0 && config -> rad_update == 1 && rk_step == 0)
 		{
@@ -76,12 +76,12 @@ Irreversible_quantities *irrev, Config *config, double delta_t, double time_coor
 		}
 		scalar_tendencies_expl(state_old, state_new, state_tendency, grid, delta_t, diagnostics, forcings, irrev, config, rk_step);
 
-		// 3.) Vertical sound wave solver.
-		// -------------------------------
+		// 3.) vertical sound wave solver
+		// ------------------------------
 		three_band_solver_ver_waves(state_old, state_new, state_tendency, diagnostics, forcings, config, delta_t, grid, rk_step);
 		
-		// 4.) Solving the Lagrangian generalized density equations for tracers.
-		// ---------------------------------------------------------------------
+		// 4.) vertical tracer advection
+		// -----------------------------
 		if (NO_OF_CONSTITUENTS > 1)
 		{
 			three_band_solver_gen_densities(state_old, state_new, state_tendency, diagnostics, config, delta_t, grid);
