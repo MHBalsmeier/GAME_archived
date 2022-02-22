@@ -446,7 +446,7 @@ module radiation
     gas_concentrations_sw)
     
     ! initializing the short wave fluxes
-    call init_fluxes(fluxes_day,no_of_day_points,no_of_layers+1,no_of_sw_bands)
+    call init_fluxes(fluxes_day,no_of_day_points,no_of_layers+1)
     
     ! setting the bands for the SW cloud properties
     call handle_error(cloud_props_sw%init(k_dist_sw%get_band_lims_wavenumber()))
@@ -513,7 +513,7 @@ module radiation
     gas_concentrations_lw)
     
     ! initializing the long wave fluxes
-    call init_fluxes(fluxes,no_of_scalars_h,no_of_layers+1,no_of_lw_bands)
+    call init_fluxes(fluxes,no_of_scalars_h,no_of_layers+1)
     
     ! setting the bands for the LW cloud properties
     call handle_error(cloud_props_lw%init(k_dist_lw%get_band_lims_wavenumber()))
@@ -825,7 +825,7 @@ module radiation
   
   end subroutine set_vol_mix_ratios
   
-  subroutine init_fluxes(fluxes,n_hor,n_vert,n_bands)
+  subroutine init_fluxes(fluxes,n_hor,n_vert)
   
     ! initializing a flux object
     ! the fluxes to initialize
@@ -834,8 +834,6 @@ module radiation
     integer,intent(in)                   :: n_hor
     ! the number of levels
     integer,intent(in)                   :: n_vert
-    ! the number of bads
-    integer,intent(in)                   :: n_bands
  	
  	! broad band fluxes
     allocate(fluxes%flux_up (n_hor,n_vert))
