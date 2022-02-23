@@ -15,8 +15,8 @@ module radiation
   use mo_source_functions,  only: ty_source_func_lw
   use mo_rte_sw,            only: rte_sw
   use mo_rte_lw,            only: rte_lw
-  use mo_optical_props,     only: ty_optical_props_1scl,&
-                                  ty_optical_props_2str,&
+  use mo_optical_props,     only: ty_optical_props_1scl, &
+                                  ty_optical_props_2str, &
                                   ty_optical_props_arry
   use mo_cloud_optics,      only: ty_cloud_optics
   use mo_load_cloud_coefficients, &
