@@ -78,33 +78,31 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 		// default
 		oro[i] = 0;
 		oro_unfiltered[i] = 0;
-		// real orography can only be different from zero at land points
-		if (oro_id == 1 && is_land[i] == 1)
+	
+    	double *lat_distance_vector = malloc(no_of_lat_points*sizeof(double));
+		double *lon_distance_vector = malloc(no_of_lon_points*sizeof(double));
+		for (int j = 0; j < no_of_lat_points; ++j)
 		{
-	    	double *lat_distance_vector = malloc(no_of_lat_points*sizeof(double));
-   			double *lon_distance_vector = malloc(no_of_lon_points*sizeof(double));
-   			for (int j = 0; j < no_of_lat_points; ++j)
-   			{
-   				lat_distance_vector[j] = fabs(deg2rad(latitude_input[j]) - latitude_scalar[i]);
-   			}
-   			for (int j = 0; j < no_of_lon_points; ++j)
-   			{
-   				lon_distance_vector[j] = fabs(deg2rad(longitude_input[j]) - longitude_scalar[i]);
-   			}
-			lat_index = find_min_index(lat_distance_vector, no_of_lat_points);
-			lon_index = find_min_index(lon_distance_vector, no_of_lon_points);
-			oro_unfiltered[i] = z_input[lat_index][lon_index];
-			
-			// check
-			if (oro_unfiltered[i] < -382 || oro_unfiltered[i] > 8850)
-			{
-				printf("Warning: value out of usual range.\n");		
-			}
-			
-			// freeing the memory
-			free(lat_distance_vector);
-			free(lon_distance_vector);
+			lat_distance_vector[j] = fabs(deg2rad(latitude_input[j]) - latitude_scalar[i]);
 		}
+		for (int j = 0; j < no_of_lon_points; ++j)
+		{
+			lon_distance_vector[j] = fabs(deg2rad(longitude_input[j]) - longitude_scalar[i]);
+		}
+		lat_index = find_min_index(lat_distance_vector, no_of_lat_points);
+		lon_index = find_min_index(lon_distance_vector, no_of_lon_points);
+		oro_unfiltered[i] = z_input[lat_index][lon_index];
+		
+		// check
+		if (oro_unfiltered[i] < -382 || oro_unfiltered[i] > 8850)
+		{
+			printf("Warning: value out of usual range.\n");		
+		}
+		
+		// freeing the memory
+		free(lat_distance_vector);
+		free(lon_distance_vector);
+		
 	}
 	free(z_input);
 	free(latitude_input);
