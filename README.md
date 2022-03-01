@@ -66,7 +66,7 @@ The following packages are additionally required if you want to make use of the 
 	cd GAME
 	./create_directories.sh
 
-### Build and install
+### Compiling the code
 
 If you want to use radiation, modify the spectral properties filenames in the file `src/radiation/rterrtmgp_coupler.f90`. Then run
 
