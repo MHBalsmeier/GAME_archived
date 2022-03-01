@@ -215,8 +215,8 @@ int main(int argc, char *argv[])
     config -> rain_velocity = fmin(0.8*normal_dist_min_vert/delta_t, 10);
     config -> snow_velocity = fmin(0.8*normal_dist_min_vert/delta_t, 5);
     printf("Cloud droplets falling velocity set to %lf m/s.\n", config -> cloud_droplets_velocity);
-    printf("Snow falling velocity set to %lf m/s.\n", config -> rain_velocity);
-    printf("Rain falling velocity set to %lf m/s.\n", config -> snow_velocity);
+    printf("Rain falling velocity set to %lf m/s.\n", config -> rain_velocity);
+    printf("Snow falling velocity set to %lf m/s.\n", config -> snow_velocity);
 	
 	printf("Effective horizontal resolution: %lf km\n", 1e-3*eff_hor_res);
 	printf("Minimum horizontal normal distance: %lf km\n", 1e-3*normal_dist_min_hor);
