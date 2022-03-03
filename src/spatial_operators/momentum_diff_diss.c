@@ -183,22 +183,9 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
 		{
 			vector_index = NO_OF_SCALARS_H + h_index + layer_index*NO_OF_VECTORS_PER_LAYER;
-			if (layer_index == 0)
-			{
-				diagnostics -> vector_field_placeholder[vector_index] = 0.5*irrev -> vert_hor_viscosity[layer_index*NO_OF_VECTORS_H + h_index]
-				*diagnostics -> vector_field_placeholder[vector_index];
-			}
-			else if (layer_index == NO_OF_LAYERS - 1)
-			{
-				diagnostics -> vector_field_placeholder[vector_index] = 0.5*irrev -> vert_hor_viscosity[(layer_index - 1)*NO_OF_VECTORS_H + h_index]
-				*diagnostics -> vector_field_placeholder[vector_index];
-			}
-			else
-			{
-				diagnostics -> vector_field_placeholder[vector_index] = 0.5
-				*(irrev -> vert_hor_viscosity[(layer_index - 1)*NO_OF_VECTORS_H + h_index] + irrev -> vert_hor_viscosity[layer_index*NO_OF_VECTORS_H + h_index])
-				*diagnostics -> vector_field_placeholder[vector_index];
-			}
+			diagnostics -> vector_field_placeholder[vector_index] = 0.5
+			*(irrev -> vert_hor_viscosity[layer_index*NO_OF_VECTORS_H + h_index] + irrev -> vert_hor_viscosity[(layer_index + 1)*NO_OF_VECTORS_H + h_index])
+			*diagnostics -> vector_field_placeholder[vector_index];
 		}
 	}
 	// the divergence of the diffusive flux density results in the diffusive acceleration
