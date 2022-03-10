@@ -32,7 +32,7 @@ int update_sfc_turb_quantities(State *state, Grid *grid, Diagnostics *diagnostic
 	
 	double u_lowest_layer, u10, z_agl, theta_lowest_layer, theta_second_layer, dz, dtheta_dz, w_pert, theta_pert, w_pert_theta_pert_avg;
 	// semi-empirical coefficient
-	double prop_coeff = 0.2;
+	double w_theta_corr = 0.2;
 	#pragma omp parallel for private(u_lowest_layer, u10, z_agl, theta_lowest_layer, theta_second_layer, dz, dtheta_dz, w_pert, theta_pert, w_pert_theta_pert_avg)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
@@ -70,7 +70,7 @@ int update_sfc_turb_quantities(State *state, Grid *grid, Diagnostics *diagnostic
 		// times a stability-dependant factor
 		w_pert = u10*fmax(0.001, 0.02*(1.0 - dtheta_dz/0.01));
 		theta_pert = -0.2*delta_t*w_pert*dtheta_dz;
-		w_pert_theta_pert_avg = prop_coeff*w_pert*theta_pert;
+		w_pert_theta_pert_avg = w_theta_corr*w_pert*theta_pert;
 		
 		// security
 		if (fabs(w_pert_theta_pert_avg) < EPSILON_SECURITY)
