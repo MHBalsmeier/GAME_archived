@@ -94,8 +94,8 @@ module radiation
   time_coord) &
   
     ! This is the function that is called by the dynamical core. The dycore hands over
-    ! the thermodynamic state as well as meta data (time stamp,coordinates) and gets
-    ! back radiative fux convergences in W/m^3.
+    ! the thermodynamic state as well as meta data (time stamp, coordinates) and gets
+    ! back radiative flux convergences in W/m^3.
   
     bind(c,name = "calc_radiative_flux_convergence")
     
