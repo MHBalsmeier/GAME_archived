@@ -109,7 +109,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 				// old time step partial derivatives of theta and Pi (divided by the volume)
 				alpha[j] = -state_old -> rhotheta[base_index]/pow(state_old -> rho[gas_phase_first_index + base_index], 2)
 				/grid -> volume[base_index];
-				beta[j] = 1/state_old -> rho[gas_phase_first_index + base_index]/grid -> volume[base_index];
+				beta[j] = 1.0/state_old -> rho[gas_phase_first_index + base_index]/grid -> volume[base_index];
 				gamma[j] = r_d/(c_v*state_old -> rhotheta[base_index])
 				*(grid -> exner_bg[base_index] + state_old -> exner_pert[base_index])/grid -> volume[base_index];
 			}
@@ -117,16 +117,16 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			{
 				// old time step partial derivatives of theta and Pi
 				alpha_old[j] = -state_old -> rhotheta[base_index]/pow(state_old -> rho[gas_phase_first_index + base_index], 2);
-				beta_old[j] = 1/state_old -> rho[gas_phase_first_index + base_index];
+				beta_old[j] = 1.0/state_old -> rho[gas_phase_first_index + base_index];
 				gamma_old[j] = r_d/(c_v*state_old -> rhotheta[base_index])*(grid -> exner_bg[base_index] + state_old -> exner_pert[base_index]);
 				// new time step partial derivatives of theta and Pi
 				alpha_new[j] = -state_new -> rhotheta[base_index]/pow(state_new -> rho[gas_phase_first_index + base_index], 2);
-				beta_new[j] = 1/state_new -> rho[gas_phase_first_index + base_index];
+				beta_new[j] = 1.0/state_new -> rho[gas_phase_first_index + base_index];
 				gamma_new[j] = r_d/(c_v*state_new -> rhotheta[base_index])*(grid -> exner_bg[base_index] + state_new -> exner_pert[base_index]);
 				// interpolation in time and dividing by the volume
-				alpha[j] = ((1 - partial_deriv_new_time_step_weight)*alpha_old[j] + partial_deriv_new_time_step_weight*alpha_new[j])/grid -> volume[base_index];
-				beta[j] = ((1 - partial_deriv_new_time_step_weight)*beta_old[j] + partial_deriv_new_time_step_weight*beta_new[j])/grid -> volume[base_index];
-				gamma[j] = ((1 - partial_deriv_new_time_step_weight)*gamma_old[j] + partial_deriv_new_time_step_weight*gamma_new[j])/grid -> volume[base_index];
+				alpha[j] = ((1.0 - partial_deriv_new_time_step_weight)*alpha_old[j] + partial_deriv_new_time_step_weight*alpha_new[j])/grid -> volume[base_index];
+				beta[j] = ((1.0 - partial_deriv_new_time_step_weight)*beta_old[j] + partial_deriv_new_time_step_weight*beta_new[j])/grid -> volume[base_index];
+				gamma[j] = ((1.0 - partial_deriv_new_time_step_weight)*gamma_old[j] + partial_deriv_new_time_step_weight*gamma_new[j])/grid -> volume[base_index];
 			}
 			// explicit potential temperature perturbation
 			theta_pert_expl[j] = state_old -> theta_pert[base_index] + delta_t*grid -> volume[base_index]*(
@@ -156,8 +156,8 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			+ 0.5*(grid -> exner_bg[base_index] - grid -> exner_bg[lower_index])
 			*(alpha[j + 1] - alpha[j] + theta_int_new[j]*(beta[j + 1] - beta[j]))
 			- (grid -> z_scalar[base_index] - grid -> z_scalar[lower_index])/(impl_weight*pow(delta_t, 2)*c_p*rho_int_old[j])
-			*(2/grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] + delta_t*state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*0.5
-			*(-1/grid -> volume[base_index] + 1/grid -> volume[lower_index]));
+			*(2.0/grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] + delta_t*state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*0.5
+			*(-1.0/grid -> volume[base_index] + 1/grid -> volume[lower_index]));
 			// right hand side
 			r_vector[j] = -(state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] + delta_t*state_tendency -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER])
 			*(grid -> z_scalar[base_index] - grid -> z_scalar[lower_index])
@@ -239,25 +239,25 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 				{
 					d_vector[j + NO_OF_LAYERS - 1] = 1.0 + 0.5*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
 					/((grid -> z_soil_interface[j] - grid -> z_soil_interface[j + 1])*grid -> sfc_rho_c[i])
-					*1/(grid -> z_soil_center[j] - grid -> z_soil_center[j + 1]);
+					*1.0/(grid -> z_soil_center[j] - grid -> z_soil_center[j + 1]);
 				}
 				else if (j == NO_OF_SOIL_LAYERS - 1)
 				{
 					d_vector[j + NO_OF_LAYERS - 1] = 1.0 + 0.5*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
 					/((grid -> z_soil_interface[j] - grid -> z_soil_interface[j + 1])*grid -> sfc_rho_c[i])
-					*1/(grid -> z_soil_center[j - 1] - grid -> z_soil_center[j]);
+					*1.0/(grid -> z_soil_center[j - 1] - grid -> z_soil_center[j]);
 				}
 				else
 				{
 					d_vector[j + NO_OF_LAYERS - 1] = 1.0 + 0.5*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
 					/((grid -> z_soil_interface[j] - grid -> z_soil_interface[j + 1])*grid -> sfc_rho_c[i])
-					*(1/(grid -> z_soil_center[j - 1] - grid -> z_soil_center[j])
-					+ 1/(grid -> z_soil_center[j] - grid -> z_soil_center[j + 1]));
+					*(1.0/(grid -> z_soil_center[j - 1] - grid -> z_soil_center[j])
+					+ 1.0/(grid -> z_soil_center[j] - grid -> z_soil_center[j + 1]));
 				}
 			}
 			// the off-diagonal components
-			c_vector[NO_OF_LAYERS - 2] = 0;
-			e_vector[NO_OF_LAYERS - 2] = 0;
+			c_vector[NO_OF_LAYERS - 2] = 0.0;
+			e_vector[NO_OF_LAYERS - 2] = 0.0;
 			for (int j = 0; j < NO_OF_SOIL_LAYERS - 1; ++j)
 			{
 				c_vector[j + NO_OF_LAYERS - 1] = -0.5*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
@@ -278,15 +278,15 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 		{
 			base_index = i + j*NO_OF_SCALARS_H;
 			z_above_damping = grid -> z_vector[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] - damping_start_height;
-			if (z_above_damping < 0)
+			if (z_above_damping < 0.0)
 			{
-				damping_coeff = 0;
+				damping_coeff = 0.0;
 			}
 			else
 			{
 				damping_coeff = config -> damping_coeff_max*pow(sin(0.5*M_PI*z_above_damping/(grid -> z_vector[0] - damping_start_height)), 2);
 			}
-			solution_vector[j] = solution_vector[j]/(1 + delta_t*damping_coeff);
+			solution_vector[j] = solution_vector[j]/(1.0 + delta_t*damping_coeff);
 		}
 		
 		/*
@@ -342,7 +342,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			= 0.5*(state_new -> rho[gas_phase_first_index + base_index]
 			+ state_new -> rho[gas_phase_first_index + i + (j + 1)*NO_OF_SCALARS_H]);
 			state_new -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]
-			= (2*solution_vector[j]/grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] - density_interface_new*state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER])
+			= (2.0*solution_vector[j]/grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] - density_interface_new*state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER])
 			/rho_int_old[j];
 		}
 		// potential temperature perturbation
