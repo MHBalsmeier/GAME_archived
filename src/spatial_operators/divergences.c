@@ -86,7 +86,7 @@ int divv_h_limited(Vector_field in_field, Scalar_field out_field, Grid *grid, Sc
 		{
 			i = layer_index*NO_OF_SCALARS_H + h_index;
 			// Negative mass densities are not possible. This is the case we want to look at.
-			if (current_value[i] - delta_t*out_field[i] < 0)
+			if (current_value[i] - delta_t*out_field[i] < 0.0)
 			{
 				// this is the excess divergence (negative)
 				added_divergence = current_value[i]/delta_t - out_field[i];
@@ -95,14 +95,14 @@ int divv_h_limited(Vector_field in_field, Scalar_field out_field, Grid *grid, Sc
 				// this is the additional mass source rate that is being produced by the limiter and that violates the mass conservation
 				added_mass_rate = -added_divergence*grid -> volume[i];
 				// determining how much mass flows out of the grid box per time interval
-				out_flow_rate_sum = 0;
+				out_flow_rate_sum = 0.0;
 				for (int j = 0; j < no_of_edges; ++j)
 				{
 					outflow_rate = in_field[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]
 					*grid -> adjacent_signs_h[6*h_index + j]
 					*grid -> area[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]];
 					// only positive values are counted here because we are only interestedin what flows out of the grid box
-					if (outflow_rate > 0)
+					if (outflow_rate > 0.0)
 					{
 						out_flow_rate_sum += outflow_rate;
 					}

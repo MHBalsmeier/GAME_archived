@@ -78,7 +78,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 		}
 		else
 		{
-        	divv_h_limited(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid, &state -> rho[scalar_shift_index], delta_t);
+        	divv_h_limited(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid, &state_old -> rho[scalar_shift_index], delta_t);
 		}
 		
 		// mass diffusion, only for gaseous tracers
@@ -119,7 +119,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 				// the diffusion
 				+ diff_switch*diagnostics -> scalar_field_placeholder[j]);
 				// the horizontal brute-force limiter
-				if (state_old -> rho[scalar_index] + delta_t*state_tendency -> rho[scalar_index] < 0)
+				if (state_old -> rho[scalar_index] + delta_t*state_tendency -> rho[scalar_index] < 0.0)
 				{
 					state_tendency -> rho[scalar_index] = -state_old -> rho[scalar_index]/delta_t;
 				}
@@ -135,7 +135,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
 				scalar_index = scalar_shift_index + j;
-				if (state -> rho[scalar_index] != 0)
+				if (state -> rho[scalar_index] != 0.0)
 				{
 					diagnostics -> scalar_field_placeholder[j] = state -> rhotheta[j]/state -> rho[scalar_index];
 				}
