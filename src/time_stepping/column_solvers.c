@@ -157,7 +157,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			*(alpha[j + 1] - alpha[j] + theta_int_new[j]*(beta[j + 1] - beta[j]))
 			- (grid -> z_scalar[base_index] - grid -> z_scalar[lower_index])/(impl_weight*pow(delta_t, 2)*c_p*rho_int_old[j])
 			*(2.0/grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] + delta_t*state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*0.5
-			*(-1.0/grid -> volume[base_index] + 1/grid -> volume[lower_index]));
+			*(-1.0/grid -> volume[base_index] + 1.0/grid -> volume[lower_index]));
 			// right hand side
 			r_vector[j] = -(state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] + delta_t*state_tendency -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER])
 			*(grid -> z_scalar[base_index] - grid -> z_scalar[lower_index])
