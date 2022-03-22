@@ -274,7 +274,7 @@ int hor_calc_curl_of_vorticity(Curl_field vorticity, double rel_vort_on_triangle
 		{
 			out_field[vector_index] +=
 			// This prefactor accounts for the fact that we average over three rhombi and the weighting of the triangle voritcities.
-			+ 1.0/3*(1 - checkerboard_damping_weight)*(
+			+ 1.0/3.0*(1 - checkerboard_damping_weight)*(
 			// vertical length at the to_index_dual point
 			dualgrid -> normal_distance[base_index + dualgrid -> to_index[h_index]]
 			// vorticity at the to_index_dual point
@@ -284,7 +284,7 @@ int hor_calc_curl_of_vorticity(Curl_field vorticity, double rel_vort_on_triangle
 			// vorticity at the from_index_dual point
 			*vorticity[NO_OF_VECTORS_H + layer_index*2*NO_OF_VECTORS_H + dualgrid -> vorticity_indices_triangles[3*dualgrid -> from_index[h_index] + j]]);
 			// preparation of the tangential slope
-			delta_z += 1.0/3*(
+			delta_z += 1.0/3.0*(
 			grid -> z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> vorticity_indices_triangles[3*dualgrid -> to_index[h_index] + j]]
 			- grid -> z_vector[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + dualgrid -> vorticity_indices_triangles[3*dualgrid -> from_index[h_index] + j]]);
 		}
