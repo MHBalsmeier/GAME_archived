@@ -78,7 +78,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 		}
 		else
 		{
-        	divv_h_limited(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid, &state -> rho[scalar_shift_index], delta_t);
+        	divv_h_limited(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid, &state_old -> rho[scalar_shift_index], delta_t);
 		}
 		
 		// mass diffusion, only for gaseous tracers
