@@ -17,7 +17,7 @@ In this file, quantities referring to the planetary boundary layer are computed.
 #include "subgrid_scale.h"
 
 double roughness_length_from_u10_sea(double);
-double scalar_flux_resistance(double, double, double, double);
+double scalar_flux_resistance(double, double, double, double, double);
 double roughness_velocity(double, double, double);
 double psi_h(double, double);
 double psi_m(double, double);
@@ -90,7 +90,7 @@ int update_sfc_turb_quantities(State *state, Grid *grid, Diagnostics *diagnostic
 		{
 			diagnostics -> scalar_flux_resistance[i] = scalar_flux_resistance(diagnostics -> roughness_velocity[i],
 			grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + i] - grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i],
-			grid -> roughness_length[i], diagnostics -> monin_obukhov_length[i]);
+			grid -> roughness_length[i], diagnostics -> monin_obukhov_length[i], delta_t);
 		}
 	}
 	
@@ -121,7 +121,7 @@ double roughness_length_from_u10_sea(double u10)
 	return fmax(0.0001, roughness_length);
 }
 
-double scalar_flux_resistance(double roughness_velocity_value, double z_agl, double roughness_length_value, double monin_obukhov_length_value)
+double scalar_flux_resistance(double roughness_velocity_value, double z_agl, double roughness_length_value, double monin_obukhov_length_value, double delta_t)
 {
 	/*
 	This function returns the surface flux resistance for scalar quantities.
@@ -139,15 +139,15 @@ double scalar_flux_resistance(double roughness_velocity_value, double z_agl, dou
 	+ log(7.0));
 	
 	// limitting the result for security
-	if (result < 50.0)
+	if (result < delta_t/z_agl)
 	{
-		result = 50.0;
+		result = delta_t/z_agl;
 	}
 	
 	return result;
 }
 
-double momentum_flux_resistance(double wind_h_lowest_layer, double z_agl, double roughness_length_value, double monin_obukhov_length_value)
+double momentum_flux_resistance(double wind_h_lowest_layer, double z_agl, double roughness_length_value, double monin_obukhov_length_value, double delta_t)
 {
 	/*
 	This function returns the surface flux resistance for momentum.
@@ -163,9 +163,9 @@ double momentum_flux_resistance(double wind_h_lowest_layer, double z_agl, double
 	- psi_m(used_vertical_height, monin_obukhov_length_value));
 	
 	// limitting the result for security
-	if (result < 50.0)
+	if (result < delta_t/z_agl)
 	{
-		result = 50.0;
+		result = delta_t/z_agl;
 	}
 	
 	return result;

@@ -230,7 +230,7 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		monin_obukhov_length_value = 0.5*(diagnostics -> monin_obukhov_length[grid -> from_index[i]] + diagnostics -> monin_obukhov_length[grid -> to_index[i]]);
 		
 		// calculating the flux resistance at the vector point
-		flux_resistance = momentum_flux_resistance(wind_speed_lowest_layer, z_agl, roughness_length, monin_obukhov_length_value);
+		flux_resistance = momentum_flux_resistance(wind_speed_lowest_layer, z_agl, roughness_length, monin_obukhov_length_value, delta_t);
 		
 		// rescaling the wind if the lowest wind vector is above the height of the Prandtl layer
 		wind_rescale_factor = 1.0;
