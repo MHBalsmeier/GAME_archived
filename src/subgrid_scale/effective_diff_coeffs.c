@@ -256,8 +256,7 @@ int temp_diffusion_coeffs(State *state, Config *config, Irreversible_quantities 
 		c_g_v = spec_heat_cap_diagnostics_v(state, i, config);
 		// horizontal diffusion coefficient
 		irrev -> scalar_diffusion_coeff_numerical_h[i]
-		= c_g_v*(density_gas(state, i)*irrev -> molecular_diffusion_coeff[i]
-		+ irrev -> viscosity_div[i] + irrev -> viscosity_curl[i]);
+		= c_g_v*0.5*(irrev -> viscosity_div[i] + irrev -> viscosity_curl[i]);
 		// vertical diffusion coefficient
 		irrev -> scalar_diffusion_coeff_numerical_v[i]
 		// molecular component
@@ -292,8 +291,7 @@ int mass_diffusion_coeffs(State *state, Config *config, Irreversible_quantities 
 	{
 		// horizontal diffusion coefficient
 		irrev -> scalar_diffusion_coeff_numerical_h[i]
-		= irrev -> molecular_diffusion_coeff[i]
-		+ (irrev -> viscosity_div[i] + irrev -> viscosity_curl[i])/density_gas(state, i);
+		= 2.0*(irrev -> viscosity_div[i] + irrev -> viscosity_curl[i])/density_gas(state, i);
 		// vertical diffusion coefficient
 		irrev -> scalar_diffusion_coeff_numerical_v[i]
 		// molecular component
