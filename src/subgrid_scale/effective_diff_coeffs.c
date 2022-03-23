@@ -217,7 +217,7 @@ int vert_vert_mom_viscosity(State *state, Grid *grid, Diagnostics *diagnostics, 
 			// molecular viscosity
 			= irrev -> molecular_diffusion_coeff[i]
 			// turbulent component
-			+ tke2vertical_diff_coeff(irrev -> tke[i])*fabs(diagnostics -> scalar_field_placeholder[i]);
+			+ tke2vertical_diff_coeff(irrev -> tke[i]);
 			// stability criterion
 			if (mom_diff_coeff > max_diff_v_coeff_turb)
 			{
