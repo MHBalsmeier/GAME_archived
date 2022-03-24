@@ -291,8 +291,8 @@ int mass_diffusion_coeffs(State *state, Config *config, Irreversible_quantities 
 	{
 		// horizontal diffusion coefficient
 		irrev -> scalar_diffusion_coeff_numerical_h[i]
-		// 2.0 is an empirical factor here
-		= 2.0*(irrev -> viscosity_div[i] + irrev -> viscosity_curl[i])/density_gas(state, i);
+		// 4.0 is an empirical factor here
+		= 4.0*0.5*(irrev -> viscosity_div[i] + irrev -> viscosity_curl[i])/density_gas(state, i);
 		// vertical diffusion coefficient
 		irrev -> scalar_diffusion_coeff_numerical_v[i]
 		// molecular component
