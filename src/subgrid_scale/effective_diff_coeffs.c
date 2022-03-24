@@ -256,7 +256,8 @@ int temp_diffusion_coeffs(State *state, Config *config, Irreversible_quantities 
 		c_g_v = spec_heat_cap_diagnostics_v(state, i, config);
 		// horizontal diffusion coefficient
 		irrev -> scalar_diffusion_coeff_numerical_h[i]
-		= c_g_v*0.5*(irrev -> viscosity_div[i] + irrev -> viscosity_curl[i]);
+		// 3.0 is an empirical factor here
+		= 3.0*c_g_v*0.5*(irrev -> viscosity_div[i] + irrev -> viscosity_curl[i]);
 		// vertical diffusion coefficient
 		irrev -> scalar_diffusion_coeff_numerical_v[i]
 		// molecular component
