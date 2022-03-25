@@ -139,9 +139,9 @@ double scalar_flux_resistance(double roughness_velocity_value, double z_agl, dou
 	+ log(7.0));
 	
 	// limitting the result for security
-	if (result < 2.0*delta_t/z_agl)
+	if (result < 4.0*delta_t/z_agl)
 	{
-		result = 2.0*delta_t/z_agl;
+		result = 4.0*delta_t/z_agl;
 	}
 	
 	return result;
@@ -163,9 +163,9 @@ double momentum_flux_resistance(double wind_h_lowest_layer, double z_agl, double
 	- psi_m(used_vertical_height, monin_obukhov_length_value));
 	
 	// limitting the result for security
-	if (result < 2.0*delta_t/z_agl)
+	if (result < 4.0*delta_t/z_agl)
 	{
-		result = 2.0*delta_t/z_agl;
+		result = 4.0*delta_t/z_agl;
 	}
 	
 	return result;
