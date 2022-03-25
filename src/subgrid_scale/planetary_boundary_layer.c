@@ -139,9 +139,9 @@ double scalar_flux_resistance(double roughness_velocity_value, double z_agl, dou
 	+ log(7.0));
 	
 	// limitting the result for security
-	if (result < 4.0*delta_t/z_agl)
+	if (result < 8.0*delta_t/z_agl)
 	{
-		result = 4.0*delta_t/z_agl;
+		result = 8.0*delta_t/z_agl;
 	}
 	
 	return result;
