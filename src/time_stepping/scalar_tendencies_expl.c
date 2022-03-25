@@ -78,7 +78,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 		}
 		else
 		{
-        	divv_h_limited(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid, &state_old -> rho[scalar_shift_index], 2.0*delta_t);
+        	divv_h_limited(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid, &state_old -> rho[scalar_shift_index], delta_t);
 		}
 		
 		// mass diffusion, only for gaseous tracers
@@ -240,7 +240,7 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 	if (NO_OF_CONSTITUENTS > 1)
 	{
 		// calculating the source rates
-	    calc_h2otracers_source_rates(state, diagnostics, grid, config, irrev, 2*delta_t);
+	    calc_h2otracers_source_rates(state, diagnostics, grid, config, irrev, 2.0*delta_t);
 	    int layer_index, h_index, scalar_shift_index, scalar_index;
 	    // loop over all constituents
 		for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
