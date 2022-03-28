@@ -47,21 +47,21 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			base_index = NO_OF_SCALARS - NO_OF_SCALARS_H + i;
 			
 			// gas temperature in the lowest layer
-			temperature_gas_lowest_layer_old = (grid -> exner_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_old -> exner_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i])
-			*(grid -> theta_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_old -> theta_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]);
-			temperature_gas_lowest_layer_new = (grid -> exner_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_new -> exner_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i])
-			*(grid -> theta_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] + state_new -> theta_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]);
+			temperature_gas_lowest_layer_old = (grid -> exner_bg[base_index] + state_old -> exner_pert[base_index])
+			*(grid -> theta_bg[base_index] + state_old -> theta_pert[base_index]);
+			temperature_gas_lowest_layer_new = (grid -> exner_bg[base_index] + state_new -> exner_pert[base_index])
+			*(grid -> theta_bg[base_index] + state_new -> theta_pert[base_index]);
 			
 			// the sensible power flux density
-			diagnostics -> power_flux_density_sensible[i] = 0.5*spec_heat_capacities_v_gas(0)*(state_new -> rho[gas_phase_first_index + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
+			diagnostics -> power_flux_density_sensible[i] = 0.5*c_v*(state_new -> rho[gas_phase_first_index + base_index]
 			*(temperature_gas_lowest_layer_old - state_old -> temperature_soil[i])
-			+ state_old -> rho[gas_phase_first_index + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
+			+ state_old -> rho[gas_phase_first_index + base_index]
 			*(temperature_gas_lowest_layer_new - state_new -> temperature_soil[i]))/diagnostics -> scalar_flux_resistance[i];
 			
 			// contribution of sensible heat to rhotheta
-			state_new -> rhotheta[base_index] 
-			+= -delta_t*grid -> area[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]*diagnostics -> power_flux_density_sensible[i]
-			/((grid -> exner_bg[base_index] + state_new -> exner_pert[base_index])*spec_heat_capacities_p_gas(0))/grid -> volume[base_index];
+			state_tendency -> rhotheta[base_index] 
+			+= -grid -> area[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]*diagnostics -> power_flux_density_sensible[i]
+			/((grid -> exner_bg[base_index] + state_new -> exner_pert[base_index])*c_p)/grid -> volume[base_index];
 		}
 	}
 	
