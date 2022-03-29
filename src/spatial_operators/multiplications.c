@@ -44,6 +44,10 @@ int scalar_times_vector(Scalar_field scalar_field, Vector_field vector_field, Ve
 
 int scalar_times_vector_h(Scalar_field in_field_h, Vector_field vector_field, Vector_field out_field, Grid *grid)
 {
+	/*
+	This function multiplies a vector field by a scalar field.
+	*/
+	
     int vector_index;
     double scalar_value;
     #pragma omp parallel for private (vector_index, scalar_value)
@@ -64,6 +68,11 @@ int scalar_times_vector_h(Scalar_field in_field_h, Vector_field vector_field, Ve
 
 int scalar_times_vector_h_upstream(Scalar_field in_field_h, Vector_field vector_field, Vector_field out_field, Grid *grid)
 {
+	/*
+	This function multiplies a vector field by a scalar field.
+	The scalar field value from the upstream gridpoint is used.
+	*/
+	
     int vector_index;
     double scalar_value;
     #pragma omp parallel for private (vector_index, scalar_value)
