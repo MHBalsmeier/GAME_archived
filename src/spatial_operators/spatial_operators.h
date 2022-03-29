@@ -19,6 +19,7 @@ int add_vertical_divv(Vector_field, Scalar_field, Grid *);
 int scalar_times_scalar(Scalar_field, Scalar_field, Scalar_field);
 int scalar_times_vector(Scalar_field, Vector_field, Vector_field, Grid *);
 int scalar_times_vector_h(Scalar_field, Vector_field, Vector_field, Grid *);
+int scalar_times_vector_h_upstream(Scalar_field, Vector_field, Vector_field, Grid *);
 int scalar_times_vector_v(Scalar_field, Vector_field, Vector_field, Grid *);
 int vector_times_vector(Vector_field, Vector_field, Vector_field);
 int linear_combine_two_states(State *, State *, State *, double, double, Grid *);

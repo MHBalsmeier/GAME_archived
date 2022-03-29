@@ -71,13 +71,16 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 		scalar_shift_index = i*NO_OF_SCALARS;
         // This is the mass advection, which needs to be carried out for all constituents.
         // -------------------------------------------------------------------------------
-		scalar_times_vector_h(&state -> rho[scalar_shift_index], state -> wind, diagnostics -> flux_density, grid);
+        // main gaseous constituent
 		if (i == NO_OF_CONDENSED_CONSTITUENTS)
 		{
+			scalar_times_vector_h(&state -> rho[scalar_shift_index], state -> wind, diagnostics -> flux_density, grid);
         	divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 		}
+		// all other constituents
 		else
 		{
+			scalar_times_vector_h_upstream(&state -> rho[scalar_shift_index], state -> wind, diagnostics -> flux_density, grid);
         	divv_h_limited(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid, &state_old -> rho[scalar_shift_index], 2.0*delta_t);
 		}
 		

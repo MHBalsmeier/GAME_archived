@@ -62,6 +62,30 @@ int scalar_times_vector_h(Scalar_field in_field_h, Vector_field vector_field, Ve
     return 0;
 }
 
+int scalar_times_vector_h_upstream(Scalar_field in_field_h, Vector_field vector_field, Vector_field out_field, Grid *grid)
+{
+    int vector_index;
+    double scalar_value;
+    #pragma omp parallel for private (vector_index, scalar_value)
+    for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)
+    {
+    	for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
+    	{
+		    vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
+		    if (vector_field[vector_index] >= 0.0)
+		    {
+		    	scalar_value = in_field_h[grid -> from_index[h_index] + layer_index*NO_OF_SCALARS_H];
+		    }
+		    else
+		    {
+		    	scalar_value = in_field_h[grid -> to_index[h_index] + layer_index*NO_OF_SCALARS_H];
+		    }
+			out_field[vector_index] = scalar_value*vector_field[vector_index];
+    	}
+    }
+    return 0;
+}
+
 int scalar_times_vector_v(Scalar_field in_field_v, Vector_field vector_field, Vector_field out_field, Grid *grid)
 {
     int i, lower_index, upper_index;
