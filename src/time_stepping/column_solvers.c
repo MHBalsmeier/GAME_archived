@@ -424,7 +424,7 @@ int three_band_solver_gen_densities(State *state_old, State *state_new, State *s
 					double vertical_flux_vector_impl[NO_OF_LAYERS - 1];
 					double vertical_flux_vector_rhs[NO_OF_LAYERS - 1];
 					double solution_vector[NO_OF_LAYERS];
-					double density_old_at_interface, area, added_mass;
+					double density_old_at_interface, area;
 					int lower_index, upper_index, base_index;
 					
 					// diagnozing the vertical fluxes
@@ -461,9 +461,14 @@ int three_band_solver_gen_densities(State *state_old, State *state_new, State *s
 						vertical_flux_vector_impl[j] = area*vertical_flux_vector_impl[j];
 						vertical_flux_vector_rhs[j] = area*vertical_flux_vector_rhs[j];
 						// old density at the interface
-						density_old_at_interface
-						= 0.5*(state_old -> rho[k*NO_OF_SCALARS + upper_index]
-						+ state_old -> rho[k*NO_OF_SCALARS + lower_index]);
+						if (vertical_flux_vector_rhs[j] >= 0.0)
+						{
+							density_old_at_interface = state_old -> rho[k*NO_OF_SCALARS + lower_index];
+						}
+						else
+						{
+							density_old_at_interface = state_old -> rho[k*NO_OF_SCALARS + upper_index];
+						}
 						vertical_flux_vector_rhs[j] = density_old_at_interface*vertical_flux_vector_rhs[j];
 					}
 					
@@ -474,27 +479,53 @@ int three_band_solver_gen_densities(State *state_old, State *state_new, State *s
 					for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 					{
 						base_index = i + j*NO_OF_SCALARS_H;
-						c_vector[j] = impl_weight*0.5*delta_t/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j];
-						e_vector[j] = -impl_weight*0.5*delta_t/grid -> volume[base_index]*vertical_flux_vector_impl[j];
+						if (vertical_flux_vector_impl[j] >= 0.0)
+						{
+							c_vector[j] = 0.0;
+							e_vector[j] = -impl_weight*delta_t/grid -> volume[base_index]*vertical_flux_vector_impl[j];
+						}
+						else
+						{
+							c_vector[j] = impl_weight*delta_t/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j];
+							e_vector[j] = 0.0;
+						}
 					}
 					for (int j = 0; j < NO_OF_LAYERS; ++j)
 					{
 						base_index = i + j*NO_OF_SCALARS_H;
 						if (j == 0)
 						{
-							d_vector[j] = 1
-							- impl_weight*0.5*delta_t/grid -> volume[base_index]*vertical_flux_vector_impl[0];
+							if (vertical_flux_vector_impl[0] >= 0.0)
+							{
+								d_vector[j] = 1.0;
+							}
+							else
+							{
+								d_vector[j] = 1.0 - impl_weight*delta_t/grid -> volume[base_index]*vertical_flux_vector_impl[0];
+							}
 						}
 						else if (j == NO_OF_LAYERS - 1)
 						{
-							d_vector[j] = 1
-							+ impl_weight*0.5*delta_t/grid -> volume[base_index]*vertical_flux_vector_impl[j - 1];
+							if (vertical_flux_vector_impl[j - 1] >= 0.0)
+							{
+								d_vector[j] = 1.0 + impl_weight*delta_t/grid -> volume[base_index]*vertical_flux_vector_impl[j - 1];
+							}
+							else
+							{
+								d_vector[j] = 1.0;
+							}
 						}
 						else
 						{
-							d_vector[j] = 1
-							+ impl_weight*delta_t/grid -> volume[base_index]
-							*0.5*(vertical_flux_vector_impl[j - 1] - vertical_flux_vector_impl[j]);
+							d_vector[j] = 1.0;
+							if (vertical_flux_vector_impl[j - 1] >= 0.0)
+							{
+								d_vector[j] += impl_weight*delta_t/grid -> volume[base_index]*vertical_flux_vector_impl[j - 1];
+							}
+							if (vertical_flux_vector_impl[j] < 0.0)
+							{
+								d_vector[j] -= impl_weight*delta_t/grid -> volume[base_index]*vertical_flux_vector_impl[j];	
+							}
 						}
 						// the explicit component
 						// mass densities
@@ -548,39 +579,12 @@ int three_band_solver_gen_densities(State *state_old, State *state_new, State *s
 					// calling the algorithm to solve the system of linear equations
 					thomas_algorithm(c_vector, d_vector, e_vector, r_vector, solution_vector, NO_OF_LAYERS);
 					
-					
-					// limiter: none of the densities may be negative
-					for (int j = 0; j < NO_OF_LAYERS; ++j)
-					{
-						base_index = i + j*NO_OF_SCALARS_H;
-						if (solution_vector[j] < 0)
-						{
-							added_mass = -solution_vector[j]*grid -> volume[base_index];
-							solution_vector[j] = 0;
-							if (j == 0)
-							{
-								solution_vector[j + 1] -= added_mass/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H];
-							}
-							else if (j == NO_OF_LAYERS - 1)
-							{
-								if (k >= NO_OF_CONDENSED_CONSTITUENTS)
-								{
-									solution_vector[j - 1] -= added_mass/grid -> volume[i + (j - 1)*NO_OF_SCALARS_H];
-								}
-							}
-							else
-							{
-								solution_vector[j - 1] -= 0.5*added_mass/grid -> volume[i + (j - 1)*NO_OF_SCALARS_H];
-								solution_vector[j + 1] -= 0.5*added_mass/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H];
-							}
-						}
-					}
 					// the final brute-force limiter
 					for (int j = 0; j < NO_OF_LAYERS; ++j)
 					{
-						if (solution_vector[j] < 0)
+						if (solution_vector[j] < 0.0)
 						{
-							solution_vector[j] = 0;
+							solution_vector[j] = 0.0;
 						}
 					}
 					
