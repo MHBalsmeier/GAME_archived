@@ -514,6 +514,25 @@ int three_band_solver_gen_densities(State *state_old, State *state_new, State *s
 							{
 								d_vector[j] = 1.0;
 							}
+							// precipitation
+							// snow
+							if (k < NO_OF_CONDENSED_CONSTITUENTS/4)
+							{
+								d_vector[j] += impl_weight*config -> snow_velocity*delta_t
+								*grid -> area[i + NO_OF_VECTORS - NO_OF_SCALARS_H]/grid -> volume[base_index];
+							}
+							// rain
+							else if (k < NO_OF_CONDENSED_CONSTITUENTS/2)
+							{
+								d_vector[j] += impl_weight*config -> rain_velocity*delta_t
+								*grid -> area[i + NO_OF_VECTORS - NO_OF_SCALARS_H]/grid -> volume[base_index];
+							}
+							// clouds
+							else if (k < NO_OF_CONDENSED_CONSTITUENTS)
+							{
+								d_vector[j] += impl_weight*config -> cloud_droplets_velocity*delta_t
+								*grid -> area[i + NO_OF_VECTORS - NO_OF_SCALARS_H]/grid -> volume[base_index];
+							}
 						}
 						else
 						{
@@ -554,19 +573,19 @@ int three_band_solver_gen_densities(State *state_old, State *state_new, State *s
 							// snow
 							if (k < NO_OF_CONDENSED_CONSTITUENTS/4)
 							{
-								r_vector[j] += -config -> snow_velocity*delta_t*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
+								r_vector[j] += -expl_weight*config -> snow_velocity*delta_t*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
 								*grid -> area[i + NO_OF_VECTORS - NO_OF_SCALARS_H]/grid -> volume[base_index];
 							}
 							// rain
 							else if (k < NO_OF_CONDENSED_CONSTITUENTS/2)
 							{
-								r_vector[j] += -config -> rain_velocity*delta_t*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
+								r_vector[j] += -expl_weight*config -> rain_velocity*delta_t*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
 								*grid -> area[i + NO_OF_VECTORS - NO_OF_SCALARS_H]/grid -> volume[base_index];
 							}
 							// clouds
 							else if (k < NO_OF_CONDENSED_CONSTITUENTS)
 							{
-								r_vector[j] += -config -> cloud_droplets_velocity*delta_t*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
+								r_vector[j] += -expl_weight*config -> cloud_droplets_velocity*delta_t*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
 								*grid -> area[i + NO_OF_VECTORS - NO_OF_SCALARS_H]/grid -> volume[base_index];
 							}
 						}
