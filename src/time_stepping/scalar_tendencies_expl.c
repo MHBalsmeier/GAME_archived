@@ -120,11 +120,6 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 				-diagnostics -> flux_density_divv[j]
 				// the diffusion
 				+ diff_switch*diagnostics -> scalar_field_placeholder[j]);
-				// the horizontal brute-force limiter
-				if (state_old -> rho[scalar_index] + delta_t*state_tendency -> rho[scalar_index] < 0.0)
-				{
-					state_tendency -> rho[scalar_index] = -state_old -> rho[scalar_index]/delta_t;
-				}
 		    }
 	    }
 	    
