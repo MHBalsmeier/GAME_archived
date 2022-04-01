@@ -17,7 +17,7 @@
 
 # basic run properties
 game_home_dir=/home/max/code/GAME
-ideal_input_id=1 # specifies which test scenario to run
+ideal_input_id=2 # specifies which test scenario to run
 run_id=ideal # run_id must only be set if ideal_input_id != -1 (otherwise it is chosen automatically)
 run_span=$((100*24*3600)) # how long the model is supposed to run; for small Earth experiments this will be rescaled proportional to the radius
 valgrind_check=0 # set this to 1 if you want to check the code with Valgrind
