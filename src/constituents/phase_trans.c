@@ -80,7 +80,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         diff_density = (saturation_pressure - water_vapour_pressure)/(specific_gas_constants(1)*diagnostics -> temperature_gas[i]);
         
         // the case where the air is not over-saturated
-        if (diff_density >= 0)
+        if (diff_density >= 0.0)
         {
             // temperature >= 0 °C
             if (diagnostics -> temperature_gas[i] >= T_0)
@@ -204,7 +204,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         irrev -> mass_source_rates[3*NO_OF_SCALARS + i] -= irrev -> mass_source_rates[NO_OF_SCALARS + i];
         
         // turning of snow to rain
-        if (diagnostics -> temperature_gas[i] > T_0 && state -> rho[i] > 0)
+        if (diagnostics -> temperature_gas[i] > T_0 && state -> rho[i] > 0.0)
         {
         	irrev -> mass_source_rates[i] = -state -> rho[i]/delta_t;
         	irrev -> mass_source_rates[NO_OF_SCALARS + i] -= irrev -> mass_source_rates[i];
