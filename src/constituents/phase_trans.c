@@ -195,11 +195,11 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         
         // creation of precipitation
         // snow
-        irrev -> mass_source_rates[i] = fmax(state -> rho[2*NO_OF_SCALARS + i] - maximum_cloud_water_content*state -> rho[4*NO_OF_SCALARS + i], 0)/delta_t;
+        irrev -> mass_source_rates[i] = fmax(state -> rho[2*NO_OF_SCALARS + i] - maximum_cloud_water_content*state -> rho[4*NO_OF_SCALARS + i], 0.0)/delta_t;
         // the snow creation comes at the cost of cloud ice particles
         irrev -> mass_source_rates[2*NO_OF_SCALARS + i] -= irrev -> mass_source_rates[i];
         // rain
-        irrev -> mass_source_rates[NO_OF_SCALARS + i] = fmax(state -> rho[3*NO_OF_SCALARS + i] - maximum_cloud_water_content*state -> rho[4*NO_OF_SCALARS + i], 0)/delta_t;
+        irrev -> mass_source_rates[NO_OF_SCALARS + i] = fmax(state -> rho[3*NO_OF_SCALARS + i] - maximum_cloud_water_content*state -> rho[4*NO_OF_SCALARS + i], 0.0)/delta_t;
         // the rain creation comes at the cost of cloud water particles
         irrev -> mass_source_rates[3*NO_OF_SCALARS + i] -= irrev -> mass_source_rates[NO_OF_SCALARS + i];
         
@@ -234,18 +234,18 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         		layer_thickness = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + h_index] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + h_index];
         		
         		// evporation, sublimation
-		    	irrev -> mass_source_rates[4*NO_OF_SCALARS + i] += fmax(0, diff_density_sfc/diagnostics -> scalar_flux_resistance[h_index])/layer_thickness;
+		    	irrev -> mass_source_rates[4*NO_OF_SCALARS + i] += fmax(0.0, diff_density_sfc/diagnostics -> scalar_flux_resistance[h_index])/layer_thickness;
 		    	
 		    	// calculating the latent heat flux density affecting the surface
         		if (state -> temperature_soil[h_index] >= T_0)
         		{
-        			diagnostics -> power_flux_density_latent[h_index] = -phase_trans_heat(0, state -> temperature_soil[h_index])
-        			*fmax(0, diff_density_sfc/diagnostics -> scalar_flux_resistance[h_index]);
+        			diagnostics -> power_flux_density_latent[h_index] = -phase_trans_heat(0.0, state -> temperature_soil[h_index])
+        			*fmax(0.0, diff_density_sfc/diagnostics -> scalar_flux_resistance[h_index]);
         		}
         		else
         		{
         			diagnostics -> power_flux_density_latent[h_index] = -phase_trans_heat(1, state -> temperature_soil[h_index])
-        			*fmax(0, diff_density_sfc/diagnostics -> scalar_flux_resistance[h_index]);
+        			*fmax(0.0, diff_density_sfc/diagnostics -> scalar_flux_resistance[h_index]);
         		}
         	}
         }
