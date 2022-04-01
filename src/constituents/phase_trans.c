@@ -139,7 +139,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
                 - phase_trans_density*phase_trans_heat(1, solid_temperature))/delta_t;
                 
                 // the heat source rates acting on the liquid water
-                irrev -> constituent_heat_source_rates[3*NO_OF_SCALARS + i] = 0;
+                irrev -> constituent_heat_source_rates[3*NO_OF_SCALARS + i] = 0.0;
             }
         }
         // the case where the air is over-saturated
@@ -189,7 +189,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
                 + state -> rho[3*NO_OF_SCALARS + i]*phase_trans_heat(2, solid_temperature))/delta_t;
                 
                 // the heat source rates acting on the liquid water
-                irrev -> constituent_heat_source_rates[3*NO_OF_SCALARS + i] = 0;
+                irrev -> constituent_heat_source_rates[3*NO_OF_SCALARS + i] = 0.0;
             }
         }
         
