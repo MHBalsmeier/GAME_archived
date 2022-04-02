@@ -239,7 +239,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
 		    	// calculating the latent heat flux density affecting the surface
         		if (state -> temperature_soil[h_index] >= T_0)
         		{
-        			diagnostics -> power_flux_density_latent[h_index] = -phase_trans_heat(0.0, state -> temperature_soil[h_index])
+        			diagnostics -> power_flux_density_latent[h_index] = -phase_trans_heat(0, state -> temperature_soil[h_index])
         			*fmax(0.0, diff_density_sfc/diagnostics -> scalar_flux_resistance[h_index]);
         		}
         		else
