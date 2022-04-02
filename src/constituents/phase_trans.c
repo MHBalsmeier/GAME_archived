@@ -172,9 +172,9 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
             else
             {
             	/*
-                The source rate for the ice consists of two terms:
+                The source rate for the cloud ice consists of two terms:
                 1.) the resublimation
-                2.) the melting of ice
+                2.) the freezing of cloud water
                 */
                 irrev -> mass_source_rates[2*NO_OF_SCALARS + i] = (-diff_density + state -> rho[3*NO_OF_SCALARS + i])/delta_t;
                 

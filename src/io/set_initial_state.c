@@ -69,7 +69,7 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
         {
         	baroclinic_wave_test(&one, &one, &one, &small_atmos_rescale, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i],
         	&dummy_2, &dummy_4, &dummy_5, &total_density, &specific_humidity);
-        	water_vapour_density[i] = total_density*specific_humidity;
+        	water_vapour_density[i] = total_density*specific_humidity/(1.0 - specific_humidity);
         }
     }
 
