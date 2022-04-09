@@ -154,9 +154,9 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 				{
 					scalar_index = scalar_shift_index + j;
 					// determining the heating rate that comes from the tracers
-					tracer_heating = 0;
+					tracer_heating = 0.0;
 					density_total_weight = density_total(state, j);
-					latent_heating_weight = 1;
+					latent_heating_weight = 1.0;
 					if (config -> assume_lte == 0)
 					{
 						latent_heating_weight = state -> rho[scalar_index]/density_gas(state, j);
