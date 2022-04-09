@@ -34,12 +34,12 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
     double new_weight[NO_OF_CONSTITUENTS];
     for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
     {
-		new_weight[i] = 1;
+		new_weight[i] = 1.0;
 		if (no_rk_step == 1 && i != NO_OF_CONDENSED_CONSTITUENTS)
 		{
 			new_weight[i] = 0.5;
 		}
-		old_weight[i] = 1 - new_weight[i];
+		old_weight[i] = 1.0 - new_weight[i];
     }
     
 	// Temperature diffusion gets updated here, but only at the first RK step and if heat conduction is switched on.
@@ -217,7 +217,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 					// the source terms
 					+ state -> rho[scalar_index]/(EPSILON_SECURITY + c_v_cond_value*density_total(state, j))
 					*(irrev -> temperature_diffusion_heating[j] + irrev -> heating_diss[j] + forcings -> radiation_tendency[j])
-					+ 1/c_v_cond_value*irrev -> constituent_heat_source_rates[scalar_index]
+					+ 1.0/c_v_cond_value*irrev -> constituent_heat_source_rates[scalar_index]
 					+ state -> condensed_density_temperatures[scalar_index]*(irrev -> mass_source_rates[scalar_index]));
 				}
 			}
