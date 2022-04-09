@@ -63,10 +63,10 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
     return 0;
 }
 
-int divv_h_moisture(Vector_field in_field, Scalar_field density_field, Vector_field wind_field, Scalar_field out_field, Grid *grid)
+int divv_h_tracer(Vector_field in_field, Scalar_field density_field, Vector_field wind_field, Scalar_field out_field, Grid *grid)
 {
 	/*
-	This function computes the divergence of a horizontal moisture flux density field.
+	This function computes the divergence of a horizontal tracer flux density field.
 	*/
 	
     int i, no_of_edges;
