@@ -14,6 +14,7 @@ int add_f_to_rel_vort(Curl_field, Curl_field, Dualgrid *);
 int calc_rel_vort(Vector_field, Diagnostics *, Grid *, Dualgrid *);
 int vorticity_flux(Vector_field, Dual_vector_field, Vector_field, Grid *, Dualgrid *);
 int divv_h(Vector_field, Scalar_field, Grid *);
+int divv_h_moisture(Vector_field, Scalar_field, Vector_field, Scalar_field, Grid *);
 int add_vertical_divv(Vector_field, Scalar_field, Grid *);
 int scalar_times_scalar(Scalar_field, Scalar_field, Scalar_field);
 int scalar_times_vector(Scalar_field, Vector_field, Vector_field, Grid *);

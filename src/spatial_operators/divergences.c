@@ -14,7 +14,7 @@ In this file, divergences get computed.
 int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
 {
 	/*
-	This computes the divergence of a horizontal vector field.
+	This function computes the divergence of a horizontal vector field.
 	*/
 	
     int i, no_of_edges;
@@ -56,6 +56,90 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
 		        comp_v
 		        = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
 		        - contra_lower*grid -> area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
+		    }
+		    out_field[i] = 1.0/grid -> volume[i]*(comp_h + comp_v);
+        }
+    }
+    return 0;
+}
+
+int divv_h_moisture(Vector_field in_field, Scalar_field density_field, Vector_field wind_field, Scalar_field out_field, Grid *grid)
+{
+	/*
+	This function computes the divergence of a horizontal moisture flux density field.
+	*/
+	
+    int i, no_of_edges;
+    double contra_upper, contra_lower, comp_h, comp_v, density_lower, density_upper;
+	#pragma omp parallel for private(i, no_of_edges, contra_upper, contra_lower, comp_h, comp_v, density_lower, density_upper)
+    for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
+    {
+	    no_of_edges = 6;
+	    if (h_index < NO_OF_PENTAGONS)
+	    {
+	    	no_of_edges = 5;
+	    }
+    	for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
+    	{
+		    i = layer_index*NO_OF_SCALARS_H + h_index;
+		    comp_h = 0.0;
+		    for (int j = 0; j < no_of_edges; ++j)
+		    {
+				comp_h
+				+= in_field[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]]
+				*grid -> adjacent_signs_h[6*h_index + j]
+				*grid -> area[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]];
+		    }
+		    comp_v = 0.0;
+		    if (layer_index == NO_OF_LAYERS - grid -> no_of_oro_layers - 1)
+		    {
+		        vertical_contravariant_corr(wind_field, layer_index + 1, h_index, grid, &contra_lower);
+		        if (contra_lower <= 0.0)
+		        {
+		        	density_lower = density_field[i];
+		        }
+		        else
+		        {
+		        	density_lower = density_field[i + NO_OF_SCALARS_H];
+		        }
+		        comp_v = -density_lower*contra_lower*grid -> area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
+		    }
+		    else if (layer_index == NO_OF_LAYERS - 1)
+		    {
+				vertical_contravariant_corr(wind_field, layer_index, h_index, grid, &contra_upper);
+		        if (contra_upper <= 0.0)
+		        {
+		        	density_upper = density_field[i - NO_OF_SCALARS_H];
+		        }
+		        else
+		        {
+		        	density_upper = density_field[i];
+		        }
+				comp_v = density_upper*contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
+		    }
+		    else if (layer_index > NO_OF_LAYERS - grid -> no_of_oro_layers - 1)
+		    {
+		        vertical_contravariant_corr(wind_field, layer_index, h_index, grid, &contra_upper);
+		        if (contra_upper <= 0.0)
+		        {
+		        	density_upper = density_field[i - NO_OF_SCALARS_H];
+		        }
+		        else
+		        {
+		        	density_upper = density_field[i];
+		        }
+		        vertical_contravariant_corr(wind_field, layer_index + 1, h_index, grid, &contra_lower);
+		        if (contra_lower <= 0.0)
+		        {
+		        	density_lower = density_field[i];
+		        }
+		        else
+		        {
+		        	density_lower = density_field[i + NO_OF_SCALARS_H];
+		        }
+		        comp_v
+		        = density_upper*contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
+		        - density_lower*contra_lower*grid -> area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
 		    }
 		    out_field[i] = 1.0/grid -> volume[i]*(comp_h + comp_v);
         }
