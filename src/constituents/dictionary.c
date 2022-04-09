@@ -147,9 +147,9 @@ double calc_o3_vmr(double z_height)
 	double max_vmr = 8.5e-6;
 	
 	// calculation of the result
-	double sigma = fwhm/pow(8*log(2), 0.5);
+	double sigma = fwhm/pow(8.0*log(2.0), 0.5);
     double distance = z_height - z_max;
-	double result = max_vmr*exp(-pow(distance, 2)/(2*pow(sigma, 2)));
+	double result = max_vmr*exp(-pow(distance, 2)/(2.0*pow(sigma, 2)));
 	return result;
 }
 
@@ -170,11 +170,11 @@ double c_v_cond(int solid_or_liquid, int subcategory, double temp)
     double result;
     if (solid_or_liquid == 0)
     {
-        result = 2060;
+        result = 2060.0;
     }
     if (solid_or_liquid == 1)
     {
-        result = 4184;
+        result = 4184.0;
     }
     return result;
 }
@@ -191,11 +191,11 @@ double c_p_cond(int solid_or_liquid, int subcategory, double temp)
     double result;
     if (solid_or_liquid == 0)
     {
-        result = 2060;
+        result = 2060.0;
     }
     if (solid_or_liquid == 1)
     {
-        result = 4184;
+        result = 4184.0;
     }
     return result;
 }
@@ -216,15 +216,15 @@ double phase_trans_heat(int direction, double temperature)
     double result;
     if (direction == 0)
     {
-        result = 2257000;
+        result = 2257000.0;
 	}
     if (direction == 1)
     {
-        result = 2257000 + 333500;
+        result = 2257000.0 + 333500.0;
 	}
     if (direction == 2)
     {
-        result = 333500;
+        result = 333500.0;
 	}
     return result;
 }
