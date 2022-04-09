@@ -229,12 +229,14 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         {
         	irrev -> mass_source_rates[i] = -state -> rho[i]/delta_t;
         	irrev -> mass_source_rates[NO_OF_SCALARS + i] -= irrev -> mass_source_rates[i];
+        	irrev -> constituent_heat_source_rates[i] = irrev -> mass_source_rates[i]*phase_trans_heat(2, T_0);
         }
         // turning of rain to snow
         if (diagnostics -> temperature_gas[i] < T_0 && state -> rho[NO_OF_SCALARS + i] > 0.0)
         {
         	irrev -> mass_source_rates[NO_OF_SCALARS + i] = -state -> rho[NO_OF_SCALARS + i]/delta_t;
         	irrev -> mass_source_rates[i] -= irrev -> mass_source_rates[NO_OF_SCALARS + i];
+        	irrev -> constituent_heat_source_rates[i] = -irrev -> mass_source_rates[NO_OF_SCALARS + i]*phase_trans_heat(2, T_0);
         }
         
         /*
@@ -280,6 +282,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         	}
         }
     }
+	
     return 0;
 }
 
