@@ -30,7 +30,7 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
     	for (int layer_index = 0; layer_index < NO_OF_LAYERS; ++layer_index)
     	{
 		    i = layer_index*NO_OF_SCALARS_H + h_index;
-		    comp_h = 0;
+		    comp_h = 0.0;
 		    for (int j = 0; j < no_of_edges; ++j)
 		    {
 				comp_h
@@ -38,7 +38,7 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
 				*grid -> adjacent_signs_h[6*h_index + j]
 				*grid -> area[NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + grid -> adjacent_vector_indices_h[6*h_index + j]];
 		    }
-		    comp_v = 0;
+		    comp_v = 0.0;
 		    if (layer_index == NO_OF_LAYERS - grid -> no_of_oro_layers - 1)
 		    {
 		        vertical_contravariant_corr(in_field, layer_index + 1, h_index, grid, &contra_lower);
@@ -57,7 +57,7 @@ int divv_h(Vector_field in_field, Scalar_field out_field, Grid *grid)
 		        = contra_upper*grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
 		        - contra_lower*grid -> area[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
 		    }
-		    out_field[i] = 1/grid -> volume[i]*(comp_h + comp_v);
+		    out_field[i] = 1.0/grid -> volume[i]*(comp_h + comp_v);
         }
     }
     return 0;

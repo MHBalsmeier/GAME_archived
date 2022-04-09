@@ -381,7 +381,7 @@ int three_band_solver_gen_densities(State *state_old, State *state_new, State *s
 	int no_of_relevant_constituents;
 	double impl_weight, expl_weight;
 	impl_weight = 0.5;
-	expl_weight = 1 - impl_weight;
+	expl_weight = 1.0 - impl_weight;
 	for (int quantity_id = 0; quantity_id < 2; ++quantity_id)
 	{
 		no_of_relevant_constituents = 0;
