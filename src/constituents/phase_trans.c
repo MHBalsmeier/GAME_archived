@@ -169,7 +169,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
 				irrev -> mass_source_rates[3*NO_OF_SCALARS + i] = (-diff_density + state -> rho[2*NO_OF_SCALARS + i])/delta_t;
                 
                 // the heat source rates acting on the ice
-                irrev -> constituent_heat_source_rates[2*NO_OF_SCALARS + i] = -state -> rho[2*NO_OF_SCALARS + i]*phase_trans_heat(2, solid_temperature)/delta_t;
+                irrev -> constituent_heat_source_rates[2*NO_OF_SCALARS + i] = irrev -> mass_source_rates[2*NO_OF_SCALARS + i]*phase_trans_heat(2, solid_temperature);
                 
                 // the heat source rates acting on the liquid water
                 irrev -> constituent_heat_source_rates[3*NO_OF_SCALARS + i] =

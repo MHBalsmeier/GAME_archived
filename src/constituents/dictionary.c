@@ -208,8 +208,8 @@ double phase_trans_heat(int direction, double temperature)
 	
     /*
     directions:
-    0:  gas to liquid
-    1:  gas to solid
+    0: gas to liquid
+    1: gas to solid
     2: liquid to solid
     */
     
