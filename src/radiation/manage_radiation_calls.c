@@ -118,6 +118,10 @@ int create_rad_array_mass_den(double in[], double out[], int rad_block_index)
 			h_index = i - layer_index*NO_OF_SCALARS_RAD_PER_LAYER;
 			out[const_id*NO_OF_SCALARS_RAD + i]
 			= in[const_id*NO_OF_SCALARS + rad_block_index*NO_OF_SCALARS_RAD_PER_LAYER + h_index + layer_index*NO_OF_SCALARS_H];
+			if (const_id != NO_OF_CONDENSED_CONSTITUENTS)
+			{
+				out[const_id*NO_OF_SCALARS_RAD + i] = 0.0;
+			}
 		}
 	}
 	return 0;
