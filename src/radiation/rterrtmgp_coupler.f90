@@ -276,10 +276,10 @@ module radiation
     
     ! reformatting the clouds for RTE+RRTMGP
     ! the moist case
-    ice_precip_radius = 0.5_wp*(cloud_optics_sw%get_min_radius_ice()+cloud_optics_sw%get_max_radius_ice())
-    liquid_precip_radius = 0.5_wp*(cloud_optics_sw%get_min_radius_liq()+cloud_optics_sw%get_max_radius_liq())
-    ice_cloud_radius = cloud_optics_sw%get_min_radius_ice()
-    liquid_cloud_radius = cloud_optics_sw%get_min_radius_liq()
+    ice_precip_radius = cloud_optics_sw%get_max_radius_ice()
+    liquid_precip_radius = cloud_optics_sw%get_max_radius_liq()
+    ice_cloud_radius = 0.5_wp*(cloud_optics_sw%get_min_radius_ice()+cloud_optics_sw%get_max_radius_ice())
+    liquid_cloud_radius = 0.5_wp*(cloud_optics_sw%get_min_radius_liq()+cloud_optics_sw%get_max_radius_liq())
     if (no_of_condensed_constituents==4) then
       do ji=1,no_of_scalars_h
         do jk=1,no_of_layers
