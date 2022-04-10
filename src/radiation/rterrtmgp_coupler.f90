@@ -235,7 +235,7 @@ module radiation
     
     ! some general preparations
     
-    ! here,the names of the gases are written to the gas_concentrations object
+    ! here, the names of the gases are written to the gas_concentrations object
     call handle_error(gas_concentrations_sw%init(gases_lowercase))
     call handle_error(gas_concentrations_lw%init(gases_lowercase))
     
@@ -267,7 +267,7 @@ module radiation
     do ji=1,no_of_scalars_h
       do jk=1,no_of_layers
         temperature_rad(ji,jk) = temperature_gas((jk-1)*no_of_scalars_h+ji)
-        ! the pressure is diagnozed here,using the equation of state for ideal gases
+        ! the pressure is diagnozed here, using the equation of state for ideal gases
         pressure_rad(ji,jk) = specific_gas_constants(0) &
         *mass_densities(no_of_condensed_constituents*no_of_scalars &
         + (jk-1)*no_of_scalars_h+ji)*temperature_rad(ji,jk)
@@ -352,7 +352,7 @@ module radiation
           ! times delta_z
           *(z_vector(ji)-z_scalar(ji+(jk-1)*no_of_scalars_h))
           ! pressure at TOA
-          ! here,the barometric height formula is used
+          ! here, the barometric height formula is used
           pressure_interface_rad   (ji,jk) = pressure_rad   (ji,jk) &
           *EXP(-(z_vector(ji)-z_scalar(ji+(jk-1)*no_of_scalars_h))/scale_height)
         ! values at the surface
