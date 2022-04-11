@@ -207,6 +207,8 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
     	*/
         irrev -> mass_source_rates[i] = 0.0;
         irrev -> mass_source_rates[NO_OF_SCALARS + i] = 0.0;
+        irrev -> constituent_heat_source_rates[i] = 0.0;
+        irrev -> constituent_heat_source_rates[NO_OF_SCALARS + i] = 0.0;
         // snow
         // this only happens if the air is saturated
         if (diagnostics -> temperature_gas[i] < T_0 && diff_density <= 0.0)
