@@ -93,6 +93,12 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 		lon_index = find_min_index(lon_distance_vector, no_of_lon_points);
 		oro_unfiltered[i] = z_input[lat_index][lon_index];
 		
+		// over the sea there is no orography
+		if (is_land[i] == 0)
+		{
+			oro_unfiltered[i] = 0.0;
+		}
+		
 		// check
 		if (oro_unfiltered[i] < -382 || oro_unfiltered[i] > 8850)
 		{
