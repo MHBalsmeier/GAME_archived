@@ -68,7 +68,6 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 	#pragma omp parallel for private(lower_index, damping_coeff, z_above_damping, base_index)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
-		config -> soil_on = config -> soil_on;
 		
 		// for meanings of these vectors look into the Kompendium
 		double c_vector[NO_OF_LAYERS - 2 + config -> soil_on*NO_OF_SOIL_LAYERS];
