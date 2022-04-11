@@ -428,7 +428,11 @@ int set_soil_temp(Grid *grid, State *state, double temperatures[], char init_sta
 		// sea surface temperature if SST is available
 		if (grid -> is_land[i] == 0 && sst_avail == 1)
 		{
-			state -> temperature_soil[i] = sst[i];
+			// loop over all soil layers
+			for (int soil_layer_index = 0; soil_layer_index < NO_OF_SOIL_LAYERS; ++soil_layer_index)
+			{
+				state -> temperature_soil[i + soil_layer_index*NO_OF_SCALARS_H] = sst[i];
+			}
 		}
 		
 		// if the soil temperature over land or the SST over water is not available in the initialization
