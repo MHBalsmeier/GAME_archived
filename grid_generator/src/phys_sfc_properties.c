@@ -146,6 +146,7 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 	double albedo_soil = 0.12;
 	double albedo_ice = 0.8;
 	double density_soil = 1442.0;
+	double t_conductivity_water = 1.4e-7;
 	double t_conductivity_soil = 7.5e-7;
 	double lat_deg;
 	#pragma omp parallel for private(lat_deg)
@@ -158,13 +159,14 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 		// for water roughness_length is set to some sea-typical value, will not be used anyway
 		roughness_length[i] = 0.08;
 		
-		// for water t_conductivity is set to some land-typical value, will not be used anyway
-		t_conductivity[i] = t_conductivity_soil;
+		t_conductivity[i] = t_conductivity_water;
 		
 		// land
 		if (is_land[i] == 1)
 		{
 			lat_deg = 360.0/(2.0*M_PI)*latitude_scalar[i];
+			
+			t_conductivity[i] = t_conductivity_soil;
 			
 			// setting the surface albedo of land depending on the latitude
 			if (fabs(lat_deg) > 70.0)
