@@ -46,7 +46,7 @@ explicit_boundary_layer=1 # switch for an additional simplified horizontal frict
 # "physics" configuration
 rad_on=2 # set to 0 if you want no radiation, 1 for real radiation and 2 for Held-Suarez forcing
 radiation_delta_t=10800 # every how many seconds the radiation fluxes wil be updated; for small Earth experiments this will be rescaled proportional to the radius
-no_rad_moisture_layer=12 # number of layers in which radiation-moisture interaction is neglected
+no_rad_moisture_layers=12 # number of layers in which radiation-moisture interaction is neglected
 assume_lte=1 # set this to one if you do not want to assign individual temperatures to tracers
 
 # I/O

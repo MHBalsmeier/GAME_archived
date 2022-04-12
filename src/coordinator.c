@@ -52,7 +52,6 @@ int main(int argc, char *argv[])
 	read_argv(argc, argv, config, config_io, grid, irrev);
 	// setting the implicit weight of the thermodynamic vertical time stepping
 	config -> impl_thermo_weight = 0.75;
-	config -> no_rad_moisture_layer = 12;
 	
 	// checking the user input
 	sanity_checker(config, config_io, grid);
@@ -567,7 +566,7 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
     argv++;
     config -> rad_on = strtod(argv[agv_counter], NULL);
     argv++;
-    config -> no_rad_moisture_layer = strtod(argv[agv_counter], NULL);
+    config -> no_rad_moisture_layers = strtod(argv[agv_counter], NULL);
     argv++;
     config_io -> write_out_integrals = strtod(argv[agv_counter], NULL);
     argv++;
@@ -750,7 +749,7 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 		if (NO_OF_CONSTITUENTS > 1)
 		{
 			printf("Radiation-moisture interaction off above approximately %lf m.\n",
-			grid -> z_vector[config -> no_rad_moisture_layer*NO_OF_VECTORS_PER_LAYER]);
+			grid -> z_vector[config -> no_rad_moisture_layers*NO_OF_VECTORS_PER_LAYER]);
 		}
 	}
 	if (config -> rad_on == 2)
