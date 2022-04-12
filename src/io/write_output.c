@@ -190,17 +190,17 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
             }
             else
             {
-            	tcdc[i] = 0;
+            	tcdc[i] = 0.0;
             }
             // solid precipitation rate
-		    sprate[i] = 0;
+		    sprate[i] = 0.0;
 			if (NO_OF_CONDENSED_CONSTITUENTS == 4)
 		    {
 		        sprate[i] += config -> snow_velocity*state_write_out -> rho[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		        sprate[i] += config -> cloud_droplets_velocity*state_write_out -> rho[2*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
 	        // liquid precipitation rate
-		    rprate[i] = 0;
+		    rprate[i] = 0.0;
 			if (NO_OF_CONDENSED_CONSTITUENTS == 4)
 		    {
 		        rprate[i] += config -> rain_velocity*state_write_out -> rho[NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
@@ -223,8 +223,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)
 		{
 			// initializing the means with zero
-			wind_10_m_mean_u[h_index] = 0;
-			wind_10_m_mean_v[h_index] = 0;
+			wind_10_m_mean_u[h_index] = 0.0;
+			wind_10_m_mean_v[h_index] = 0.0;
 			// loop over the time steps
 			for (int time_step_10_m_wind = 0; time_step_10_m_wind < min_no_of_output_steps; ++time_step_10_m_wind)
 			{
