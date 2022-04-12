@@ -203,6 +203,7 @@ int delta_t_between_analyses;
 int explicit_boundary_layer;
 int waves_on;
 int total_run_span;
+int no_rad_moisture_layer;
 double diff_h_smag_div;
 double diff_h_smag_rot;
 double damping_start_height_over_toa;
