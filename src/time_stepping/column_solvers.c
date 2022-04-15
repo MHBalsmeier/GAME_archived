@@ -596,7 +596,7 @@ int three_band_solver_gen_densities(State *state_old, State *state_new, State *s
 					// calling the algorithm to solve the system of linear equations
 					thomas_algorithm(c_vector, d_vector, e_vector, r_vector, solution_vector, NO_OF_LAYERS);
 					
-					// the final brute-force limiter
+					// this should account for round-off errors only
 					for (int j = 0; j < NO_OF_LAYERS; ++j)
 					{
 						if (solution_vector[j] < 0.0)
