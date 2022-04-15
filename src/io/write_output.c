@@ -179,10 +179,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
         		cloudy_box_counter = 0.0;
     	        for (int k = 0; k < NO_OF_LAYERS; ++k)
 			    {
-			        if (state_write_out -> rho[k*NO_OF_SCALARS_H + i] > EPSILON_SECURITY
-			        || state_write_out -> rho[NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > EPSILON_SECURITY
-			        || state_write_out -> rho[2*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > EPSILON_SECURITY
-			        || state_write_out -> rho[3*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > EPSILON_SECURITY)
+			        if (state_write_out -> rho[k*NO_OF_SCALARS_H + i] > 1e-9
+			        || state_write_out -> rho[NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > 1e-9
+			        || state_write_out -> rho[2*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > 1e-9
+			        || state_write_out -> rho[3*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > 1e-9)
 			        {
 			    		cloudy_box_counter += 1.0;
 		            }
