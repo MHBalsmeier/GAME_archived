@@ -206,6 +206,14 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		        rprate[i] += config -> rain_velocity*state_write_out -> rho[NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		        rprate[i] += config -> cloud_droplets_velocity*state_write_out -> rho[3*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
+	        if (rprate[i] < EPSILON_SECURITY)
+	        {
+	        	rprate[i] = 0.0;
+	        }
+	        if (sprate[i] < EPSILON_SECURITY)
+	        {
+	        	sprate[i] = 0.0;
+	        }
 		}
 		
 		/*
