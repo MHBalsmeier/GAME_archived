@@ -64,6 +64,12 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     long data_date = 10000*(init_year + 1900) + 100*(init_month + 1) + init_day;
     long data_time = 100*init_hour;
 	
+	// precipitation rates smaller than this value are set to zero to not confuse users
+	double min_precip_rate_mmh = 0.01;
+	double min_precip_rate = min_precip_rate_mmh/(1000.0*3600.0/1024.0);
+	// minimum density for calling a box cloudy
+	double min_cloudy_box_density = 1e-9;
+	
 	// Needed for netcdf.
     int retval;
 	int err = 0;
@@ -179,8 +185,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
         		cloudy_box_counter = 0.0;
     	        for (int k = 0; k < NO_OF_LAYERS; ++k)
 			    {
-			        if (state_write_out -> rho[2*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > 1e-9
-			        || state_write_out -> rho[3*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > 1e-9)
+			        if (state_write_out -> rho[2*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > min_cloudy_box_density
+			        || state_write_out -> rho[3*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > min_cloudy_box_density)
 			        {
 			    		cloudy_box_counter += 1.0;
 		            }
@@ -206,13 +212,13 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    {
 		        rprate[i] = config -> rain_velocity*state_write_out -> rho[NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
-	        // this eliminates grib encoding artifacts
-	        if (rprate[i] < EPSILON_SECURITY)
+	        // setting very small values to zero
+	        if (rprate[i] < min_precip_rate)
 	        {
 	        	rprate[i] = 0.0;
 	        }
-	        // this eliminates grib encoding artifacts
-	        if (sprate[i] < EPSILON_SECURITY)
+	        // setting very small values to zero
+	        if (sprate[i] < min_precip_rate)
 	        {
 	        	sprate[i] = 0.0;
 	        }
