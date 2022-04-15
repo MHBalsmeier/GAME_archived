@@ -68,7 +68,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	double min_precip_rate_mmh = 0.01;
 	double min_precip_rate = min_precip_rate_mmh/(1000.0*3600.0/1024.0);
 	// minimum density for calling a box cloudy
-	double min_cloudy_box_density = 1e-9;
+	double min_cloudy_box_density = 1e-8;
 	
 	// Needed for netcdf.
     int retval;
