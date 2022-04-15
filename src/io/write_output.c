@@ -71,7 +71,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	int layer_index, closest_index, second_closest_index;
 	double wind_u_value, wind_v_value, cloudy_box_counter;
 	double vector_to_minimize[NO_OF_LAYERS];
-	double min_density_cloudy_box = 1e-4;
 	
 	double *grib_output_field = malloc(NO_OF_LATLON_IO_POINTS*sizeof(double));
 	
@@ -162,7 +161,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				cape_integrand
 				= grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i]*(theta_e - theta)/theta;
 				// we do not add negative values to CAPE (see the definition of CAPE)
-				if (cape_integrand > 0)
+				if (cape_integrand > 0.0)
 				{
 					cape[i] += cape_integrand*delta_z;
 				}
@@ -170,23 +169,28 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				z_height = grid -> z_scalar[layer_index*NO_OF_SCALARS_H + i];
 			}
 			
-			sfc_sw_down[i] = forcings -> sfc_sw_in[i]/(1 - grid -> sfc_albedo[i] + EPSILON_SECURITY);
+			sfc_sw_down[i] = forcings -> sfc_sw_in[i]/(1.0 - grid -> sfc_albedo[i] + EPSILON_SECURITY);
 		    
 		    // Now come the hydrometeors.
+		    // Calculation of the total cloud cover
 		    if (NO_OF_CONDENSED_CONSTITUENTS == 4)
 		    {
+		    	// counting the boxes in this column in which a cloud is present
         		cloudy_box_counter = 0.0;
     	        for (int k = 0; k < NO_OF_LAYERS; ++k)
 			    {
-			        if (state_write_out -> rho[k*NO_OF_SCALARS_H + i] > min_density_cloudy_box
-			        || state_write_out -> rho[NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > min_density_cloudy_box
-			        || state_write_out -> rho[2*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > min_density_cloudy_box
-			        || state_write_out -> rho[3*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > min_density_cloudy_box)
+			        if (state_write_out -> rho[k*NO_OF_SCALARS_H + i] > EPSILON_SECURITY
+			        || state_write_out -> rho[NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > EPSILON_SECURITY
+			        || state_write_out -> rho[2*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > EPSILON_SECURITY
+			        || state_write_out -> rho[3*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > EPSILON_SECURITY)
 			        {
-			    		cloudy_box_counter += 1;
+			    		cloudy_box_counter += 1.0;
 		            }
 			    }
-            	tcdc[i] = fmin(100.0*cloudy_box_counter/(NO_OF_LAYERS/10.0), 100.0);
+			    // some heuristic ansatz for the total cloud cover
+            	tcdc[i] = fmin(10.0*cloudy_box_counter/NO_OF_LAYERS, 1.0);
+            	// conversion of the total cloud cover into a percentage
+            	tcdc[i] = 100.0*tcdc[i];
             }
             else
             {
@@ -206,10 +210,12 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		        rprate[i] += config -> rain_velocity*state_write_out -> rho[NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		        rprate[i] += config -> cloud_droplets_velocity*state_write_out -> rho[3*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
+	        // this eliminates Grib encoding artifacts
 	        if (rprate[i] < EPSILON_SECURITY)
 	        {
 	        	rprate[i] = 0.0;
 	        }
+	        // this eliminates Grib encoding artifacts
 	        if (sprate[i] < EPSILON_SECURITY)
 	        {
 	        	sprate[i] = 0.0;
@@ -703,7 +709,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     {    
 	    if (NO_OF_CONSTITUENTS >= 4)
 	    {
-    		(*rh)[i] = 100*rel_humidity(state_write_out -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i], diagnostics -> temperature_gas[i]);
+    		(*rh)[i] = 100.0*rel_humidity(state_write_out -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i], diagnostics -> temperature_gas[i]);
     	}
     	(*pressure)[i] = density_gas(state_write_out, i)*gas_constant_diagnostics(state_write_out, i, config)*diagnostics -> temperature_gas[i];
     }
