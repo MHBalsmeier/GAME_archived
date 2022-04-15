@@ -147,7 +147,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    
 		    // diagnozing CAPE
 			// initializing CAPE with zero
-			cape[i] = 0;
+			cape[i] = 0.0;
 			layer_index = NO_OF_LAYERS - 1;
 		    z_height = grid -> z_scalar[layer_index*NO_OF_SCALARS_H + i];
 		    // pseduopotential temperature of the particle in the lowest layer
@@ -175,7 +175,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    // Now come the hydrometeors.
 		    if (NO_OF_CONDENSED_CONSTITUENTS == 4)
 		    {
-        		cloudy_box_counter = 0;
+        		cloudy_box_counter = 0.0;
     	        for (int k = 0; k < NO_OF_LAYERS; ++k)
 			    {
 			        if (state_write_out -> rho[k*NO_OF_SCALARS_H + i] > min_density_cloudy_box
@@ -271,7 +271,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		
 		// diagnozing gusts at 10 m above the surface
 		double standard_deviation;
-		double gusts_parameter = 3;
+		double gusts_parameter = 3.0;
 		double *wind_10_m_gusts_speed = malloc(NO_OF_VECTORS_H*sizeof(double));
 		double *vector_for_std_deviation = malloc(min_no_of_output_steps*sizeof(double));
 		double wind_speed_10_m_mean;
@@ -280,7 +280,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 		{
 			// initializing the mean with zero
-			wind_speed_10_m_mean = 0;
+			wind_speed_10_m_mean = 0.0;
 			// loop over all steps that are in the 10 minutes window around the output time
 			for (int j = 0; j < min_no_of_output_steps; ++j)
 			{
@@ -1658,12 +1658,12 @@ int set_basic_props2grib(codes_handle *handle, long data_date, long data_time, l
 
 double calc_std_dev(double vector_for_std_deviation[], int no_of_values)
 {
-	double mean = 0;
+	double mean = 0.0;
 	for (int i = 0; i < no_of_values; ++i)
 	{
 		mean += 1.0/no_of_values*vector_for_std_deviation[i];
 	}
-	double result = 0;
+	double result = 0.0;
 	for (int i = 0; i < no_of_values; ++i)
 	{
 		result += pow(vector_for_std_deviation[i] - mean, 2);
@@ -1674,7 +1674,7 @@ double calc_std_dev(double vector_for_std_deviation[], int no_of_values)
 
 double global_scalar_integrator(Scalar_field density_gen, Grid *grid)
 {
-    double result = 0;
+    double result = 0.0;
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
         result += density_gen[i]*grid -> volume[i];
@@ -1699,8 +1699,7 @@ double pseudopotential(State *state, Grid *grid, int scalar_index)
 	This function returns the pseudopotential temperature, which is needed for diagnozing CAPE.
 	*/
 	
-	double result;
-	result = 0;
+	double result = 0.0;
 	// the dry case
 	if (NO_OF_CONSTITUENTS == 1)
 	{
