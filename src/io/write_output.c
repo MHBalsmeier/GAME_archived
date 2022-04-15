@@ -186,7 +186,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			    		cloudy_box_counter += 1;
 		            }
 			    }
-            	tcdc[i] = fmin(100.0*cloudy_box_counter/(NO_OF_LAYERS/10.0), 99.9);
+            	tcdc[i] = fmin(100.0*cloudy_box_counter/(NO_OF_LAYERS/10.0), 100.0);
             }
             else
             {
