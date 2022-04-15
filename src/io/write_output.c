@@ -179,9 +179,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
         		cloudy_box_counter = 0.0;
     	        for (int k = 0; k < NO_OF_LAYERS; ++k)
 			    {
-			        if (state_write_out -> rho[k*NO_OF_SCALARS_H + i] > 1e-9
-			        || state_write_out -> rho[NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > 1e-9
-			        || state_write_out -> rho[2*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > 1e-9
+			        if (state_write_out -> rho[2*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > 1e-9
 			        || state_write_out -> rho[3*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > 1e-9)
 			        {
 			    		cloudy_box_counter += 1.0;
@@ -200,22 +198,20 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    sprate[i] = 0.0;
 			if (NO_OF_CONDENSED_CONSTITUENTS == 4)
 		    {
-		        sprate[i] += config -> snow_velocity*state_write_out -> rho[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
-		        sprate[i] += config -> cloud_droplets_velocity*state_write_out -> rho[2*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		        sprate[i] = config -> snow_velocity*state_write_out -> rho[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
 	        // liquid precipitation rate
 		    rprate[i] = 0.0;
 			if (NO_OF_CONDENSED_CONSTITUENTS == 4)
 		    {
-		        rprate[i] += config -> rain_velocity*state_write_out -> rho[NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
-		        rprate[i] += config -> cloud_droplets_velocity*state_write_out -> rho[3*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		        rprate[i] = config -> rain_velocity*state_write_out -> rho[NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 	        }
-	        // this eliminates Grib encoding artifacts
+	        // this eliminates grib encoding artifacts
 	        if (rprate[i] < EPSILON_SECURITY)
 	        {
 	        	rprate[i] = 0.0;
 	        }
-	        // this eliminates Grib encoding artifacts
+	        // this eliminates grib encoding artifacts
 	        if (sprate[i] < EPSILON_SECURITY)
 	        {
 	        	sprate[i] = 0.0;
@@ -243,7 +239,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			for (int time_step_10_m_wind = 0; time_step_10_m_wind < min_no_of_output_steps; ++time_step_10_m_wind)
 			{
 				j = time_step_10_m_wind*NO_OF_VECTORS_H + h_index;
-				wind_tangential = 0;
+				wind_tangential = 0.0;
 				for (int i = 0; i < 10; ++i)
 				{
 					wind_tangential += grid -> trsk_weights[10*h_index + i]*wind_h_lowest_layer_array[time_step_10_m_wind*NO_OF_VECTORS_H + grid -> trsk_indices[10*h_index + i]];
