@@ -67,15 +67,15 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	// precipitation rates smaller than this value are set to zero to not confuse users
 	double min_precip_rate_mmh = 0.01;
 	double min_precip_rate = min_precip_rate_mmh/(1000.0*3600.0/1024.0);
-	// minimum density for calling a box cloudy
-	double min_cloudy_box_density = 1e-4;
+	// this heuristic coefficient converts the cloud water content to cloud cover
+	double cloud_water2cloudiness = 10.0;
 	
 	// Needed for netcdf.
     int retval;
 	int err = 0;
 	
 	int layer_index, closest_index, second_closest_index;
-	double wind_u_value, wind_v_value, cloudy_box_counter;
+	double wind_u_value, wind_v_value, cloud_water_content;
 	double vector_to_minimize[NO_OF_LAYERS];
 	
 	double *grib_output_field = malloc(NO_OF_LATLON_IO_POINTS*sizeof(double));
@@ -102,7 +102,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		cape_integrand, delta_z, temp_closest, temp_second_closest, delta_z_temp, temperature_gradient, theta_e;
 		double z_tropopause = 12e3;
 		double standard_vert_lapse_rate = 0.0065;
-		#pragma omp parallel for private(temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta, cape_integrand, delta_z, temp_closest, temp_second_closest, delta_z_temp, temperature_gradient, theta_e, layer_index, closest_index, second_closest_index, cloudy_box_counter, vector_to_minimize)
+		#pragma omp parallel for private(temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta, cape_integrand, delta_z, temp_closest, temp_second_closest, delta_z_temp, temperature_gradient, theta_e, layer_index, closest_index, second_closest_index, cloud_water_content, vector_to_minimize)
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 		{
 			// Now the aim is to determine the value of the MSLP.
@@ -181,18 +181,19 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    // Calculation of the total cloud cover
 		    if (NO_OF_CONDENSED_CONSTITUENTS == 4)
 		    {
-		    	// counting the boxes in this column in which a cloud is present
-        		cloudy_box_counter = 0.0;
+		    	// calculating the cloud water content in this column
+        		cloud_water_content = 0.0;
     	        for (int k = 0; k < NO_OF_LAYERS; ++k)
 			    {
-			        if (state_write_out -> rho[2*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > min_cloudy_box_density
-			        || state_write_out -> rho[3*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i] > min_cloudy_box_density)
-			        {
-			    		cloudy_box_counter += 1.0;
-		            }
+			    	if (grid -> z_scalar[k*NO_OF_SCALARS_H + i] < z_tropopause)
+			    	{
+			    		cloud_water_content += (state_write_out -> rho[2*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i]
+			    		+ state_write_out -> rho[3*NO_OF_SCALARS + k*NO_OF_SCALARS_H + i])
+			    		*(grid -> z_vector[i + k*NO_OF_VECTORS_PER_LAYER] - grid -> z_vector[i + (k + 1)*NO_OF_VECTORS_PER_LAYER]);
+			    	}
 			    }
 			    // some heuristic ansatz for the total cloud cover
-            	tcdc[i] = fmin(10.0*cloudy_box_counter/NO_OF_LAYERS, 1.0);
+            	tcdc[i] = fmin(cloud_water2cloudiness*cloud_water_content, 1.0);
             	// conversion of the total cloud cover into a percentage
             	tcdc[i] = 100.0*tcdc[i];
             }
