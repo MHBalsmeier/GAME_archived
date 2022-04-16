@@ -313,7 +313,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			// This is the case at the first step or if not enough steps in the output window are available.
 			else
 			{
-				wind_10_m_gusts_speed[i] = (1.0 + 0.2)*wind_speed_10_m_mean;
+				wind_10_m_gusts_speed[i] = (1.0 + 0.67)*wind_speed_10_m_mean;
 			}
 		}
 		// freeing memory we do not need anymore
