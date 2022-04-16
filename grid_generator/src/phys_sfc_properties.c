@@ -24,6 +24,13 @@ double vegetation_height_ideal(double, double);
 int set_sfc_properties(double latitude_scalar[], double longitude_scalar[], double roughness_length[], double sfc_albedo[],
 double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int oro_id, int no_of_avg_points)
 {
+	/*
+	This function sets the physical surface properties.
+	*/
+	
+	/*
+	Orography
+	*/
 	double *oro_unfiltered = malloc(NO_OF_SCALARS_H*sizeof(double));
 	
 	int ncid, retval, is_land_id;
@@ -76,8 +83,8 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		// default
-		oro[i] = 0;
-		oro_unfiltered[i] = 0;
+		oro[i] = 0.0;
+		oro_unfiltered[i] = 0.0;
 	
     	double *lat_distance_vector = malloc(no_of_lat_points*sizeof(double));
 		double *lon_distance_vector = malloc(no_of_lon_points*sizeof(double));
@@ -100,7 +107,7 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 		}
 		
 		// check
-		if (oro_unfiltered[i] < -382 || oro_unfiltered[i] > 8850)
+		if (oro_unfiltered[i] < -382.0 || oro_unfiltered[i] > 8850.0)
 		{
 			printf("Warning: value out of usual range.\n");		
 		}
@@ -143,6 +150,10 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 		}
 	}
 	free(oro_unfiltered);
+	
+	/*
+	Other physical properties of the surface
+	*/
 	
 	double c_p_water = 4184.0;
 	double c_p_soil = 830.0;
