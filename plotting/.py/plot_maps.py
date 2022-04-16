@@ -200,6 +200,9 @@ if short_name == "surface_wind":
 else:
 	lat, lon, values_pre = rmo.fetch_model_output(input_file, start_time_since_init, short_name, level)
 
+if short_name == "tcc":
+	values[np.where(values > 100.0)] = 100.0
+
 values = np.zeros([len(lat), len(lon), int((run_span - start_time_since_init)/plot_interval) + 1])
 values[:, :, 0] = rescale*values_pre + shift
 if short_name == "surface_wind":

@@ -68,7 +68,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	double min_precip_rate_mmh = 0.01;
 	double min_precip_rate = min_precip_rate_mmh/(1000.0*3600.0/1024.0);
 	// this heuristic coefficient converts the cloud water content to cloud cover
-	double cloud_water2cloudiness = 12.0;
+	double cloud_water2cloudiness = 10.0;
 	
 	// Needed for netcdf.
     int retval;
