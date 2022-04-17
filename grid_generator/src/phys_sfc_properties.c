@@ -142,7 +142,7 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 			{
 				min_indices_vector[j] = find_min_index_exclude(distance_vector, NO_OF_SCALARS_H, min_indices_vector, no_of_avg_points);
 			}
-			oro[i] = 0;
+			oro[i] = 0.0;
 			for (int j = 0; j < no_of_avg_points; ++j)
 			{
 				oro[i] += oro_unfiltered[min_indices_vector[j]]/no_of_avg_points;

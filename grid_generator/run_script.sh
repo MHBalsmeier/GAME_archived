@@ -18,7 +18,7 @@ toa=41152 # height of the top of the atmosphere
 type_of_vertical_grid=0 # 0: terrain-following coordinates, 1: block-like orography
 orography_layers=23 # number of layers following orography (only relevant if type_of_vertical_grid == 0)
 radius_rescale=1.0 # rescaling factor for the Earth radius for small Earth experiments; omega will be replaced by omega -> omega/radius_rescale
-no_of_avg_points=12 # number of points used for smoothing the orography
+no_of_avg_points=13 # number of points used for smoothing the orography
 valgrind_check=0 # set this to 1 if you want to check the code with Valgrind
 export OMP_NUM_THREADS=6 # relevant only for OMP
 source .sh/run.sh
