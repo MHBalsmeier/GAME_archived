@@ -173,7 +173,15 @@ int main(int argc, char *argv[])
 	}
 	eff_hor_res = eff_hor_res/NO_OF_VECTORS_H;
     // delta_t is the time step
-    double delta_t = config -> dt_parameter*eff_hor_res*1e-3;
+    double delta_t = 1.5*eff_hor_res*1e-3;
+    
+	// setting the radiation time step
+	config -> radiation_delta_t = 1e-3*eff_hor_res;
+    // the radiation time step is never longer then three hours
+    if (config -> radiation_delta_t > 10800.0)
+    {
+    	config -> radiation_delta_t = 10800.0; 
+    }
     
     // calculating the mean area of the cells
 	int layer_index, h_index;
@@ -254,13 +262,11 @@ int main(int argc, char *argv[])
     t_0 = t_init;
 	
 	// configuring radiation and calculating radiative fluxes for the first time
-	config -> soil_on = 0;
     config -> rad_update = 1;
     double t_rad_update = t_0;
     if (config -> rad_on == 1)
     {
     	radiation_init();
-    	config -> soil_on = 1;
     	call_radiation(state_old, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config, delta_t, t_0);
     	config -> rad_update = 1;
     	t_rad_update += config -> radiation_delta_t;
@@ -287,8 +293,10 @@ int main(int argc, char *argv[])
     --------------------------------------
     */
     int wind_lowest_layer_step_counter = 0;
+    // ratio between the horizontal diffusion time step and the dynamical core time step
+    config -> slow_fast_ratio = 5;
 	// the maximum horizontal diffusion coefficient (stability constraint)
-	irrev -> max_diff_h_coeff_turb = 0.125*grid -> mean_velocity_area/delta_t;
+	irrev -> max_diff_h_coeff_turb = 0.125*grid -> mean_velocity_area/delta_t/config -> slow_fast_ratio;
     linear_combine_two_states(state_old, state_old, state_new, 1, 0, grid);
     
     /*
@@ -564,21 +572,19 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
     argv++;
     config_io -> write_out_interval = strtod(argv[agv_counter], NULL);
     argv++;
-    config -> dt_parameter = strtod(argv[agv_counter], NULL);
-    argv++;
     config -> momentum_diff_h = strtod(argv[agv_counter], NULL);
     argv++;
     config -> momentum_diff_v = strtod(argv[agv_counter], NULL);
     argv++;
     config -> rad_on = strtod(argv[agv_counter], NULL);
     argv++;
+    config -> soil_on = strtod(argv[agv_counter], NULL);
+    argv++;
     config -> no_rad_moisture_layers = strtod(argv[agv_counter], NULL);
     argv++;
     config_io -> write_out_integrals = strtod(argv[agv_counter], NULL);
     argv++;
     config -> temperature_diff_h = strtod(argv[agv_counter], NULL);
-    argv++;
-    config -> radiation_delta_t = strtod(argv[agv_counter], NULL);
     argv++;
     config_io -> year = strtod(argv[agv_counter], NULL);
     argv++;

@@ -14,7 +14,7 @@ In this file, the calculation of the explicit part of the momentum equation is m
 #include "../spatial_operators/spatial_operators.h"
 #include "../constituents/constituents.h"
 
-int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config, int no_rk_step, double delta_t)
+int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config, int no_rk_step, double delta_t, int total_step_counter)
 {
 	/*
 	Managing momentum advection
@@ -54,7 +54,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     {
 		// momentum diffusion and dissipation (only updated at the first RK step)
 		// horizontal momentum diffusion
-		if (config -> momentum_diff_h == 1)
+		if (config -> momentum_diff_h == 1 && fmod(total_step_counter, config -> slow_fast_ratio) == 0)
 		{
 			hori_momentum_diffusion(state, diagnostics, irrev, config, grid, dualgrid);
 		}

@@ -196,6 +196,7 @@ int tracer_diff_h;
 int tracer_diff_v;
 int rad_on;
 int soil_on;
+int slow_fast_ratio;
 int rad_update;
 int assume_lte;
 int nwp_mode;
@@ -212,7 +213,6 @@ double impl_thermo_weight;
 double cloud_droplets_velocity;
 double rain_velocity;
 double snow_velocity;
-double dt_parameter;
 double radiation_delta_t;
 } Config;
 
