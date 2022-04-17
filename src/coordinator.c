@@ -136,6 +136,12 @@ int main(int argc, char *argv[])
     config -> total_run_span = radius_rescale*config -> total_run_span;
     config_io -> write_out_interval = radius_rescale*config_io -> write_out_interval;
     
+    // diffusion coefficients
+    // horizontal diffusion Smagorinsky factor acting on divergent movements
+	config -> diff_h_smag_div = 0.01;
+	// horizontal diffusion Smagorinsky factor acting on vortical movements
+	config -> diff_h_smag_rot = 0.01;
+    
     /*
     Giving the user some additional information on the run to about to be executed.
     --------------------------------------------------------------------
@@ -606,10 +612,6 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
 	config -> assume_lte = strtod(argv[agv_counter], NULL);
     argv++;
 	config -> delta_t_between_analyses = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> diff_h_smag_div = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> diff_h_smag_rot = strtod(argv[agv_counter], NULL);
     argv++;
 	config -> damping_start_height_over_toa = strtod(argv[agv_counter], NULL);
     argv++;
