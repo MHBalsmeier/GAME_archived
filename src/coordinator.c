@@ -132,7 +132,6 @@ int main(int argc, char *argv[])
     
     // rescaling times for small Earth experiments
     double radius_rescale = grid -> radius/RADIUS;
-    config -> radiation_delta_t = radius_rescale*config -> radiation_delta_t;
     config -> total_run_span = radius_rescale*config -> total_run_span;
     config_io -> write_out_interval = radius_rescale*config_io -> write_out_interval;
     
@@ -176,7 +175,7 @@ int main(int argc, char *argv[])
     double delta_t = 1.5*eff_hor_res*1e-3;
     
 	// setting the radiation time step
-	config -> radiation_delta_t = 1e-3*eff_hor_res;
+	config -> radiation_delta_t = 60.0*1e-3*eff_hor_res;
     // the radiation time step is never longer then three hours
     if (config -> radiation_delta_t > 10800.0)
     {
@@ -185,14 +184,14 @@ int main(int argc, char *argv[])
     
     // calculating the mean area of the cells
 	int layer_index, h_index;
-	double cell_area_sum = 0;
+	double cell_area_sum = 0.0;
 	for (int i = 0; i < NO_OF_LEVELS*NO_OF_SCALARS_H; ++i)
 	{
 		layer_index = i/NO_OF_SCALARS_H;
 		h_index = i - layer_index*NO_OF_SCALARS_H;
 		cell_area_sum += grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
 	}
-	grid -> mean_velocity_area = 2.0/3*cell_area_sum/(NO_OF_LEVELS*NO_OF_SCALARS_H);
+	grid -> mean_velocity_area = 2.0/3.0*cell_area_sum/(NO_OF_LEVELS*NO_OF_SCALARS_H);
     
     // some more checks and info
     if (config -> radiation_delta_t < delta_t)
@@ -487,6 +486,12 @@ int sanity_checker(Config *config, Config_io *config_io, Grid *grid)
     	printf("Aborting.\n");
 		exit(1);
 	}
+	if (config -> soil_on != 0 && config -> soil_on != 1)
+	{
+		printf("soil_on must be either 0 or 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
 	if (config_io -> grib_output_switch != 0 && config_io -> grib_output_switch != 1)
 	{
 		printf("grib_output_switch must be either 0 or 1.\n");
@@ -763,6 +768,14 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	if (config -> rad_on == 2)
 	{
 		printf("Held-Suarez-forcing is turned on.\n");
+	}
+	if (config -> soil_on == 0)
+	{
+		printf("Soil is turned off.");
+	}
+	if (config -> soil_on == 1)
+	{
+		printf("Soil is turned on.");
 	}
 	
 	printf("%s", stars);
