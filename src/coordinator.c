@@ -148,7 +148,6 @@ int main(int argc, char *argv[])
 	readback_config(config, config_io, grid, grid_file, init_state_file, stars);
     // Reading and processing user input finished.
     
-    printf("%s", stars);
     printf("Setting initial state ...\n");
     // ideal test case
     if (config -> nwp_mode == 0)
