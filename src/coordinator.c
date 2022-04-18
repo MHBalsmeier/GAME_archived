@@ -775,11 +775,11 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	}
 	if (config -> soil_on == 0)
 	{
-		printf("Soil is turned off.");
+		printf("Soil is turned off.\n");
 	}
 	if (config -> soil_on == 1)
 	{
-		printf("Soil is turned on.");
+		printf("Soil is turned on.\n");
 	}
 	
 	printf("%s", stars);
