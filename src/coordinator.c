@@ -202,6 +202,10 @@ int main(int argc, char *argv[])
     }
 	printf("Time step set. Information on CFL-related quantities:\n");
     printf("Fast modes time step: %lf s\n", delta_t);
+    if (config -> rad_on == 1)
+    {
+    	printf("Radiation time step: %lf s\n", config -> radiation_delta_t);
+	}
 	
 	// finding the minimum horizontal grid distance
 	double normal_dist_min_hor = eff_hor_res;
@@ -293,7 +297,7 @@ int main(int argc, char *argv[])
     */
     int wind_lowest_layer_step_counter = 0;
     // ratio between the horizontal diffusion time step and the dynamical core time step
-    config -> slow_fast_ratio = 5;
+    config -> slow_fast_ratio = 1;
 	// the maximum horizontal diffusion coefficient (stability constraint)
 	irrev -> max_diff_h_coeff_turb = 0.125*grid -> mean_velocity_area/delta_t/config -> slow_fast_ratio;
     linear_combine_two_states(state_old, state_old, state_new, 1, 0, grid);
