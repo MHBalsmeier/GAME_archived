@@ -200,8 +200,8 @@ int main(int argc, char *argv[])
     	printf("Aborting.\n");
     	exit(1);
     }
-	printf("Time step set. Information on CFL-related quantities:\n");
-    printf("Fast modes time step: %lf s\n", delta_t);
+	printf("Time step set. Information on time step-related quantities:\n");
+    printf("Dynamical core time step: %lf s\n", delta_t);
     if (config -> rad_on == 1)
     {
     	printf("Radiation time step: %lf s\n", config -> radiation_delta_t);
