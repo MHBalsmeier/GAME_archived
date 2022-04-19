@@ -106,12 +106,6 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 			oro_unfiltered[i] = 0.0;
 		}
 		
-		// check
-		if (oro_unfiltered[i] < -382.0 || oro_unfiltered[i] > 8850.0)
-		{
-			printf("Warning: value out of usual range.\n");		
-		}
-		
 		// freeing the memory
 		free(lat_distance_vector);
 		free(lon_distance_vector);
