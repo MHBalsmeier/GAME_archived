@@ -6,7 +6,7 @@ from global_land_mask import globe
 res_id = int(sys.argv[1])
 
 # reading the model grid
-input_filename = "../grid_generator/grids/B" + str(res_id) + "L26T41152_O0_OL23_SCVT.nc"
+input_filename = "../grid_generator/grids/RES" + str(res_id) + "_L26_ORO0.nc"
 ds = nc.Dataset(input_filename, "r", format="NETCDF4")
 lat_vector = ds["latitude_scalar"][:]
 lon_vector = ds["longitude_scalar"][:]
