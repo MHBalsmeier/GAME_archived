@@ -163,24 +163,6 @@ int main(int argc, char *argv[])
 	printf("%s", stars);
 	
 	printf("Calculating time step ...\n");
-    // calculating the average horizontal resolution
-	double eff_hor_res = 0;
-	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-	{
-		eff_hor_res += grid -> normal_distance[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i];
-	}
-	eff_hor_res = eff_hor_res/NO_OF_VECTORS_H;
-    // delta_t is the time step
-    double delta_t = 1.5*eff_hor_res*1e-3;
-    
-	// setting the radiation time step
-	config -> radiation_delta_t = 60.0*1e-3*eff_hor_res;
-    // the radiation time step is never longer then three hours
-    if (config -> radiation_delta_t > 10800.0)
-    {
-    	config -> radiation_delta_t = 10800.0; 
-    }
-    
     // calculating the mean area of the cells
 	int layer_index, h_index;
 	double cell_area_sum = 0.0;
@@ -191,6 +173,20 @@ int main(int argc, char *argv[])
 		cell_area_sum += grid -> area[h_index + layer_index*NO_OF_VECTORS_PER_LAYER];
 	}
 	grid -> mean_velocity_area = 2.0/3.0*cell_area_sum/(NO_OF_LEVELS*NO_OF_SCALARS_H);
+    
+    // calculating the average horizontal resolution
+    double eff_hor_res = pow(cell_area_sum/(NO_OF_LEVELS*NO_OF_SCALARS_H), 0.5);
+    
+    // delta_t is the time step
+    double delta_t = 1.61*1e-3*eff_hor_res;
+    
+	// setting the radiation time step
+	config -> radiation_delta_t = 60.0*1e-3*eff_hor_res;
+    // the radiation time step is never longer then three hours
+    if (config -> radiation_delta_t > 10800.0)
+    {
+    	config -> radiation_delta_t = 10800.0; 
+    }
     
     // some more checks and info
     if (config -> radiation_delta_t < delta_t)
