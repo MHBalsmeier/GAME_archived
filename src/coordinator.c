@@ -496,6 +496,12 @@ int sanity_checker(Config *config, Config_io *config_io, Grid *grid)
     	printf("Aborting.\n");
 		exit(1);
 	}
+	if (config -> sfc_sensible_heat_flux != 0 && config -> sfc_sensible_heat_flux != 1)
+	{
+		printf("sfc_sensible_heat_flux must be either 0 or 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
 	if (config_io -> grib_output_switch != 0 && config_io -> grib_output_switch != 1)
 	{
 		printf("grib_output_switch must be either 0 or 1.\n");
@@ -635,6 +641,8 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
 	config -> tracer_diff_v = strtod(argv[agv_counter], NULL);
     argv++;
 	config -> sfc_phase_trans = strtod(argv[agv_counter], NULL);
+    argv++;
+	config -> sfc_sensible_heat_flux = strtod(argv[agv_counter], NULL);
     argv++;
 	return 0;
 }
@@ -793,6 +801,14 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	if (config -> sfc_phase_trans == 1 && NO_OF_GASEOUS_CONSTITUENTS == 1)
 	{
 		printf("Phase transitions at the surface are turned on, but your model is dry, so this will have no effect.\n");
+	}
+	if (config -> sfc_sensible_heat_flux == 0)
+	{
+		printf("Sensible heat flux at the surface is turned off.\n");
+	}
+	if (config -> sfc_sensible_heat_flux == 1)
+	{
+		printf("Sensible heat flux at the surface is turned on.\n");
 	}
 	
 	printf("%s", stars);

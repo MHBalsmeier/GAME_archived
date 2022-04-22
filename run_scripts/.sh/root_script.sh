@@ -25,6 +25,6 @@ fi
 
 cp $game_home_dir/build/game .
 
-./game $run_span $write_out_interval $momentum_diff_h $momentum_diff_v $rad_on $soil_heat_conduction_on $no_rad_moisture_layers $write_out_integrals $temperature_diff_h $start_year $start_month $start_day $start_hour $temperature_diff_v $run_id $orography_id $ideal_input_id $grib_output_switch $netcdf_output_switch $pressure_level_output_switch $model_level_output_switch $surface_output_switch $assume_lte $time_to_next_analysis $held_suarez_pbl $tracer_diff_h $tracer_diff_v $sfc_phase_trans
+./game $run_span $write_out_interval $momentum_diff_h $momentum_diff_v $rad_on $soil_heat_conduction_on $no_rad_moisture_layers $write_out_integrals $temperature_diff_h $start_year $start_month $start_day $start_hour $temperature_diff_v $run_id $orography_id $ideal_input_id $grib_output_switch $netcdf_output_switch $pressure_level_output_switch $model_level_output_switch $surface_output_switch $assume_lte $time_to_next_analysis $held_suarez_pbl $tracer_diff_h $tracer_diff_v $sfc_phase_trans $sfc_sensible_heat_flux
 
 cd - > /dev/null

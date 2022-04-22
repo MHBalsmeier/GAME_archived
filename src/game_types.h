@@ -197,6 +197,7 @@ int tracer_diff_v;
 int rad_on;
 int soil_heat_conduction_on;
 int sfc_phase_trans;
+int sfc_sensible_heat_flux;
 int rad_update;
 int assume_lte;
 int time_to_next_analysis;

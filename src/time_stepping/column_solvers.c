@@ -38,7 +38,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 	int gas_phase_first_index = NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS;
 	
 	// calculating the sensible power flux density
-	if (config -> soil_heat_conduction_on == 1)
+	if (config -> sfc_sensible_heat_flux == 1)
 	{
 		#pragma omp parallel for private(base_index, temperature_gas_lowest_layer_old, temperature_gas_lowest_layer_new)
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)

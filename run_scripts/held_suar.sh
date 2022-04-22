@@ -40,6 +40,7 @@ rad_on=2 # set to 0 if you want no radiation, 1 for real radiation and 2 for Hel
 no_rad_moisture_layers=12 # number of layers in which radiation-moisture interaction is neglected
 soil_heat_conduction_on=0 # switch for heat conduction in the soil
 sfc_phase_trans=0 # switch for phase transitions at the surface
+sfc_sensible_heat_flux=0 # switch for sensible heat flux at the surface
 held_suarez_pbl=1 # switch for an additional simplified horizontal friction in the boundary layer according to the Held-Suarez test
 
 # I/O
