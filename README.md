@@ -56,10 +56,6 @@ The following packages are additionally required if you want to make use of the 
 * Python visualization library scitools-iris (installation manual: https://scitools-iris.readthedocs.io/en/latest/installing.html#installing-from-source-without-conda-on-debian-based-linux-distros-developers)
 * FFMPEG (Ubuntu: `sudo apt-get install ffmpeg`)
 
-#### For developing
-
-* Valgrind (Ubuntu: `sudo apt-get install valgrind`, for doing checks)
-
 ### Download
 
 	git clone https://github.com/OpenNWP/GAME

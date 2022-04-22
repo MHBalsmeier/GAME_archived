@@ -18,9 +18,8 @@
 # basic run properties
 game_home_dir=${BASH_ARGV[4]}
 ideal_input_id=-1 # specifies which test scenario to run (-1 corresponds to an NWP run)
-run_span=${BASH_ARGV[5]} # how long the model is supposed to run; for small Earth experiments this will be rescaled proportional to the radius
 run_id=${BASH_ARGV[6]} # how long the model is supposed to run
-valgrind_check=0 # set this to 1, if you want to check the code with Valgrind
+run_span=${BASH_ARGV[5]} # how long the model is supposed to run; for small Earth experiments this will be rescaled proportional to the radius
 start_year=${BASH_ARGV[3]} # defines the start time of the model run
 start_month=${BASH_ARGV[2]} # defines the start time of the model run
 start_day=${BASH_ARGV[1]} # defines the start time of the model run
