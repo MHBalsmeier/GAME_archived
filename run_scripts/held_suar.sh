@@ -36,8 +36,6 @@ temperature_diff_h=0 # turn on if you want horizontal temperature diffusion
 temperature_diff_v=0 # turn on if you want vetical temperature diffusion
 tracer_diff_h=0 # turn on if you want horizontal tracer concentration diffusion
 tracer_diff_v=0 # turn on if you want vertical tracer concentration diffusion
-damping_start_height_over_toa=0.53 # swamp layer boundary in relation to the TOA
-damping_coeff_max=0.25 # maximum swamp layer damping coefficient
 explicit_boundary_layer=1 # switch for an additional simplified horizontal friction in the boundary layer
 
 # "physics" configuration

@@ -52,6 +52,9 @@ int main(int argc, char *argv[])
 	read_argv(argc, argv, config, config_io, grid, irrev);
 	// setting the implicit weight of the thermodynamic vertical time stepping
 	config -> impl_thermo_weight = 0.75;
+	// setting hte vertical swamp layer properties
+	config -> damping_start_height_over_toa = 0.53;
+	config -> damping_coeff_max = 0.25;
 	
 	// checking the user input
 	sanity_checker(config, config_io, grid);
@@ -620,10 +623,6 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
 	config -> assume_lte = strtod(argv[agv_counter], NULL);
     argv++;
 	config -> delta_t_between_analyses = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> damping_start_height_over_toa = strtod(argv[agv_counter], NULL);
-    argv++;
-	config -> damping_coeff_max = strtod(argv[agv_counter], NULL);
     argv++;
 	config -> explicit_boundary_layer = strtod(argv[agv_counter], NULL);
     argv++;
