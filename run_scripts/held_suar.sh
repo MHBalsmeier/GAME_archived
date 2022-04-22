@@ -40,7 +40,7 @@ assume_lte=1 # set this to one if you do not want to assign individual temperatu
 rad_on=2 # set to 0 if you want no radiation, 1 for real radiation and 2 for Held-Suarez forcing
 no_rad_moisture_layers=12 # number of layers in which radiation-moisture interaction is neglected
 soil_on=0 # switch for the soil component of the model
-explicit_boundary_layer=1 # switch for an additional simplified horizontal friction in the boundary layer
+held_suarez_pbl=1 # switch for an additional simplified horizontal friction in the boundary layer according to the Held-Suarez test
 
 # I/O
 write_out_interval=86400 # every how many seconds an output file will be created; for small Earth experiments this will be rescaled proportional to the radius

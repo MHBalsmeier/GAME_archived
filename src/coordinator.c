@@ -624,7 +624,7 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
     argv++;
 	config -> time_to_next_analysis = strtod(argv[agv_counter], NULL);
     argv++;
-	config -> explicit_boundary_layer = strtod(argv[agv_counter], NULL);
+	config -> held_suarez_pbl = strtod(argv[agv_counter], NULL);
     argv++;
 	config -> tracer_diff_h = strtod(argv[agv_counter], NULL);
     argv++;
@@ -684,13 +684,13 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	{
 		printf("Vertical momentum diffusion is turned on.\n");
 	}
-	if (config -> explicit_boundary_layer == 0)
+	if (config -> held_suarez_pbl == 0)
 	{
-		printf("Explicit boundary layer friction is turned off.\n");
+		printf("Held-Suarez boundary layer friction is turned off.\n");
 	}
-	if (config -> explicit_boundary_layer == 1)
+	if (config -> held_suarez_pbl == 1)
 	{
-		printf("Explicit boundary layer friction is turned on.\n");
+		printf("Held-Suarez boundary layer friction is turned on.\n");
 	}
 	if (config -> temperature_diff_h == 0)
 	{

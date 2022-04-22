@@ -64,7 +64,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 			vert_momentum_diffusion(state, diagnostics, irrev, grid, config, delta_t);
 		}
 		// This is the explicit friction ansatz in the boundary layer from the Held-Suarez (1994) test case.
-		if (config -> explicit_boundary_layer == 1)
+		if (config -> held_suarez_pbl == 1)
 		{
 			// some parameters
 			double fric_lr_height = 2853.0; // boundary layer height
@@ -82,13 +82,13 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 				{
 					irrev -> friction_acc[vector_index]
 					+= -bndr_lr_visc_sfc*(exp(-grid -> z_vector[vector_index]/scale_height) - exp(-fric_lr_height/scale_height))
-					/(1 - exp(-fric_lr_height/scale_height))
+					/(1.0 - exp(-fric_lr_height/scale_height))
 					*state -> wind[vector_index];
 				}
 			}
 		}
 		// calculation of the dissipative heating rate
-		if (config -> momentum_diff_h == 1 || config -> explicit_boundary_layer == 1)
+		if (config -> momentum_diff_h == 1 || config -> held_suarez_pbl == 1)
 		{
 			simple_dissipation_rate(state, irrev, grid);
 		}
