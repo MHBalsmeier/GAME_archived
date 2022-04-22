@@ -198,7 +198,6 @@ int rad_on;
 int soil_heat_conduction_on;
 int rad_update;
 int assume_lte;
-int nwp_mode;
 int time_to_next_analysis;
 int held_suarez_pbl;
 int total_run_span;

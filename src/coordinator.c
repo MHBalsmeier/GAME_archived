@@ -78,13 +78,11 @@ int main(int argc, char *argv[])
     // the NWP case
     if (config_io -> ideal_input_id == -1)
     {
-    	config -> nwp_mode = 1;
     	sprintf(init_state_file_pre, "../../nwp_init/%d%s%s%s.nc", config_io -> year, config_io -> month_string, config_io -> day_string, config_io -> hour_string);
     }
     // the idealized input case
     else
     {	
-    	config -> nwp_mode = 0;
     	sprintf(init_state_file_pre, "placeholder");
     }
     char init_state_file[strlen(init_state_file_pre) + 1];
@@ -153,7 +151,7 @@ int main(int argc, char *argv[])
     
     printf("Setting initial state ...\n");
     // ideal test case
-    if (config -> nwp_mode == 0)
+    if (config_io -> ideal_input_id != -1)
     {
     	set_ideal_init(state_old, grid, dualgrid, diagnostics, forcings, config, config_io -> ideal_input_id, grid_file);
 	}
@@ -655,7 +653,7 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	{
 		printf("Terrain handling: block structure\n");
 	}
-	if (config -> nwp_mode == 1)
+	if (config_io -> ideal_input_id == -1)
 	{
 		printf("Initialization state file:\t\t%s\n", init_state_file);
 	}
