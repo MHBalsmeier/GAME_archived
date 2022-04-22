@@ -29,20 +29,20 @@ start_hour=${BASH_ARGV[0]} # defines the start time of the model run
 # grid properties
 orography_id=${BASH_ARGV[7]} # ID of the orography field. Based on this the grid file will be chosen.
 
-# dynamics settings
+# diffusion settings
 momentum_diff_h=1 # turn on if you want horizontal momentum diffusion
 momentum_diff_v=1 # turn on if you want vertical momentum diffusion
 temperature_diff_h=1 # turn on if you want horizontal temperature diffusion
 temperature_diff_v=1 # turn on if you want vetical temperature diffusion
 tracer_diff_h=1 # turn on if you want horizontal tracer concentration diffusion
 tracer_diff_v=1 # turn on if you want vertical tracer concentration diffusion
-explicit_boundary_layer=0 # switch for an additional simplified horizontal friction in the boundary layer
 
 # "physics" configuration
 assume_lte=1 # set this to one if you do not want to assign individual temperatures to tracers
 rad_on=1 # set to 0 if you want no radiation, 1 for real radiation and 2 for Held-Suarez forcing
 no_rad_moisture_layers=12 # number of layers in which radiation-moisture interaction is neglected
 soil_on=1 # switch for the soil component of the model
+explicit_boundary_layer=0 # switch for an additional simplified horizontal friction in the boundary layer
 
 # I/O
 write_out_interval=10800 # every how many seconds an output file will be created; for small Earth experiments this will be rescaled proportional to the radius
