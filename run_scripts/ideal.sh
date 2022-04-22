@@ -41,8 +41,8 @@ explicit_boundary_layer=0 # switch for an additional simplified horizontal frict
 # "physics" configuration
 assume_lte=1 # set this to one if you do not want to assign individual temperatures to tracers
 rad_on=1 # set to 0 if you want no radiation, 1 for real radiation and 2 for Held-Suarez forcing
-soil_on=1 # switch for the soil component of the model
 no_rad_moisture_layers=12 # number of layers in which radiation-moisture interaction is neglected
+soil_on=1 # switch for the soil component of the model
 
 # I/O
 write_out_interval=86400 # every how many seconds an output file will be created; for small Earth experiments this will be rescaled proportional to the radius
