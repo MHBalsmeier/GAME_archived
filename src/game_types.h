@@ -199,7 +199,7 @@ int soil_on;
 int rad_update;
 int assume_lte;
 int nwp_mode;
-int delta_t_between_analyses;
+int time_to_next_analysis;
 int explicit_boundary_layer;
 int waves_on;
 int total_run_span;

@@ -622,7 +622,7 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
     argv++;
 	config -> assume_lte = strtod(argv[agv_counter], NULL);
     argv++;
-	config -> delta_t_between_analyses = strtod(argv[agv_counter], NULL);
+	config -> time_to_next_analysis = strtod(argv[agv_counter], NULL);
     argv++;
 	config -> explicit_boundary_layer = strtod(argv[agv_counter], NULL);
     argv++;

@@ -1397,7 +1397,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	
 	// Netcdf output.
 	if ((config_io -> model_level_output_switch == 1 && config_io -> netcdf_output_switch == 1)
-	|| (config -> nwp_mode == 1 && (int) (t_write - t_init) == config -> delta_t_between_analyses))
+	|| (config -> nwp_mode == 1 && (int) (t_write - t_init) == config -> time_to_next_analysis))
 	{
 		// diagnozing the temperatures of all constituents
 		double *temperatures = malloc((NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS*sizeof(double));

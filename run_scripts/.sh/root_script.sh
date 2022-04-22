@@ -27,10 +27,10 @@ cp $game_home_dir/build/game .
 
 if [ $valgrind_check -eq 0 ]
 then
-./game $run_span $write_out_interval $momentum_diff_h $momentum_diff_v $rad_on $soil_on $no_rad_moisture_layers $write_out_integrals $temperature_diff_h $start_year $start_month $start_day $start_hour $temperature_diff_v $run_id $orography_id $ideal_input_id $grib_output_switch $netcdf_output_switch $pressure_level_output_switch $model_level_output_switch $surface_output_switch $assume_lte $delta_t_between_analyses $explicit_boundary_layer $tracer_diff_h $tracer_diff_v
+./game $run_span $write_out_interval $momentum_diff_h $momentum_diff_v $rad_on $soil_on $no_rad_moisture_layers $write_out_integrals $temperature_diff_h $start_year $start_month $start_day $start_hour $temperature_diff_v $run_id $orography_id $ideal_input_id $grib_output_switch $netcdf_output_switch $pressure_level_output_switch $model_level_output_switch $surface_output_switch $assume_lte $time_to_next_analysis $explicit_boundary_layer $tracer_diff_h $tracer_diff_v
 fi
 if [ $valgrind_check -eq 1 ]
 then
-valgrind ./game $run_span $write_out_interval $momentum_diff_h $momentum_diff_v $rad_on $soil_on $no_rad_moisture_layers $write_out_integrals $temperature_diff_h $start_year $start_month $start_day $start_hour $temperature_diff_v $run_id $orography_id $ideal_input_id $grib_output_switch $netcdf_output_switch $pressure_level_output_switch $model_level_output_switch $surface_output_switch $assume_lte $delta_t_between_analyses $explicit_boundary_layer $tracer_diff_h $tracer_diff_v
+valgrind ./game $run_span $write_out_interval $momentum_diff_h $momentum_diff_v $rad_on $soil_on $no_rad_moisture_layers $write_out_integrals $temperature_diff_h $start_year $start_month $start_day $start_hour $temperature_diff_v $run_id $orography_id $ideal_input_id $grib_output_switch $netcdf_output_switch $pressure_level_output_switch $model_level_output_switch $surface_output_switch $assume_lte $time_to_next_analysis $explicit_boundary_layer $tracer_diff_h $tracer_diff_v
 fi
 cd - > /dev/null

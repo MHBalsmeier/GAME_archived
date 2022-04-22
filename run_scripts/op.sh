@@ -52,7 +52,7 @@ pressure_level_output_switch=1 # If set to 1, additional output on pressure leve
 surface_output_switch=1 # If set to 1, surface variables will be diagnozed and writing to separate files.
 grib_output_switch=1 # If set to 1, output will be written to grib files.
 netcdf_output_switch=0 # If set to 1, output will be written to netcdf files.
-delta_t_between_analyses=${BASH_ARGV[8]} # the time difference between two analyses, only relevant in NWP mode
+time_to_next_analysis=${BASH_ARGV[8]} # the time between this model run and the next analysis, only relevant in NWP mode for data assimilation
 
 # parallelization
 export OMP_NUM_THREADS=${BASH_ARGV[9]} # relevant for OMP
