@@ -486,9 +486,9 @@ int sanity_checker(Config *config, Config_io *config_io, Grid *grid)
     	printf("Aborting.\n");
 		exit(1);
 	}
-	if (config -> soil_on != 0 && config -> soil_on != 1)
+	if (config -> soil_heat_conduction_on != 0 && config -> soil_heat_conduction_on != 1)
 	{
-		printf("soil_on must be either 0 or 1.\n");
+		printf("soil_heat_conduction_on must be either 0 or 1.\n");
     	printf("Aborting.\n");
 		exit(1);
 	}
@@ -583,7 +583,7 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
     argv++;
     config -> rad_on = strtod(argv[agv_counter], NULL);
     argv++;
-    config -> soil_on = strtod(argv[agv_counter], NULL);
+    config -> soil_heat_conduction_on = strtod(argv[agv_counter], NULL);
     argv++;
     config -> no_rad_moisture_layers = strtod(argv[agv_counter], NULL);
     argv++;
@@ -642,7 +642,10 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	printf("Small Earth rescaling factor:\t\t%lf\n", grid -> radius/RADIUS);
 	printf("Top of atmosphere:\t\t\t%lf m\n", grid -> toa);
 	printf("Stretching parameter:\t\t\t%lf\n", grid -> stretching_parameter);
-	printf("Thickness of uppermost soil layer:\t%lf m\n", -grid -> z_soil_interface[1]);
+	if (config -> soil_heat_conduction_on == 1)
+	{
+		printf("Thickness of uppermost soil layer:\t%lf m\n", -grid -> z_soil_interface[1]);
+	}
 	if (grid -> vert_grid_type == 0)
 	{
 		printf("Terrain handling:\t\t\tterrain following coordinates\n");
@@ -765,13 +768,13 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	{
 		printf("Held-Suarez-forcing is turned on.\n");
 	}
-	if (config -> soil_on == 0)
+	if (config -> soil_heat_conduction_on == 0)
 	{
-		printf("Soil is turned off.\n");
+		printf("Heat conduction in the soil is turned off.\n");
 	}
-	if (config -> soil_on == 1)
+	if (config -> soil_heat_conduction_on == 1)
 	{
-		printf("Soil is turned on.\n");
+		printf("Heat conduction in the soil is turned on.\n");
 	}
 	
 	printf("%s", stars);

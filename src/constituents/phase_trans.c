@@ -245,7 +245,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         Surface effects
         ---------------
         */
-        if (layer_index == NO_OF_LAYERS - 1 && config -> soil_on == 1)
+        if (layer_index == NO_OF_LAYERS - 1 && config -> soil_heat_conduction_on == 1)
         {
 	    	h_index = i - layer_index*NO_OF_SCALARS_H;
 	    	

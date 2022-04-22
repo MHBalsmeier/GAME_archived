@@ -195,7 +195,7 @@ int momentum_diff_v;
 int tracer_diff_h;
 int tracer_diff_v;
 int rad_on;
-int soil_on;
+int soil_heat_conduction_on;
 int rad_update;
 int assume_lte;
 int nwp_mode;

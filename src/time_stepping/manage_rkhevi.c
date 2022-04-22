@@ -26,7 +26,7 @@ Irreversible_quantities *irrev, Config *config, double delta_t, double time_coor
 	*/
     
 	// updating surface-related turbulence quantities if it is necessary
-	if (config -> soil_on == 1 || config -> momentum_diff_v == 1)
+	if (config -> soil_heat_conduction_on == 1 || config -> momentum_diff_v == 1)
 	{
 		update_sfc_turb_quantities(state_old, grid, diagnostics, config, delta_t);
 	}

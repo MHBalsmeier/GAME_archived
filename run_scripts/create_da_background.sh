@@ -39,7 +39,7 @@ tracer_diff_v=0 # turn on if you want vertical tracer concentration diffusion
 assume_lte=1 # set this to one if you do not want to assign individual temperatures to tracers
 rad_on=0 # set to 0 if you want no radiation, 1 for real radiation and 2 for Held-Suarez forcing
 no_rad_moisture_layers=12 # number of layers in which radiation-moisture interaction is neglected
-soil_on=0 # switch for the soil component of the model
+soil_heat_conduction_on=0 # switch for heat conduction in the soil
 held_suarez_pbl=0 # switch for an additional simplified horizontal friction in the boundary layer according to the Held-Suarez test
 
 # I/O
