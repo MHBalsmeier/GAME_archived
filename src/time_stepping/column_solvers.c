@@ -23,7 +23,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 	*/
 	
 	// declaring and defining some variables that will be needed later on
-	int lower_index, base_index;
+	int lower_index, base_index, soil_switch;
 	double impl_weight = config -> impl_thermo_weight;
 	double c_v = spec_heat_capacities_v_gas(0);
 	double c_p = spec_heat_capacities_p_gas(0);
@@ -65,21 +65,23 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 	}
 	
 	// loop over all columns
-	#pragma omp parallel for private(lower_index, damping_coeff, z_above_damping, base_index)
+	#pragma omp parallel for private(lower_index, damping_coeff, z_above_damping, base_index, soil_switch)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		
+		soil_switch = grid -> is_land[i]*config -> soil_heat_conduction_on;
+		
 		// for meanings of these vectors look into the Kompendium
-		double c_vector[NO_OF_LAYERS - 2 + config -> soil_heat_conduction_on*NO_OF_SOIL_LAYERS];
-		double d_vector[NO_OF_LAYERS - 1 + config -> soil_heat_conduction_on*NO_OF_SOIL_LAYERS];
-		double e_vector[NO_OF_LAYERS - 2 + config -> soil_heat_conduction_on*NO_OF_SOIL_LAYERS];
-		double r_vector[NO_OF_LAYERS - 1 + config -> soil_heat_conduction_on*NO_OF_SOIL_LAYERS];
+		double c_vector[NO_OF_LAYERS - 2 + soil_switch*NO_OF_SOIL_LAYERS];
+		double d_vector[NO_OF_LAYERS - 1 + soil_switch*NO_OF_SOIL_LAYERS];
+		double e_vector[NO_OF_LAYERS - 2 + soil_switch*NO_OF_SOIL_LAYERS];
+		double r_vector[NO_OF_LAYERS - 1 + soil_switch*NO_OF_SOIL_LAYERS];
 		double rho_expl[NO_OF_LAYERS];
 		double rhotheta_expl[NO_OF_LAYERS];
 		double theta_pert_expl[NO_OF_LAYERS];
 		double exner_pert_expl[NO_OF_LAYERS];
 		double theta_int_new[NO_OF_LAYERS - 1];
-		double solution_vector[NO_OF_LAYERS - 1 + config -> soil_heat_conduction_on*NO_OF_SOIL_LAYERS];
+		double solution_vector[NO_OF_LAYERS - 1 + soil_switch*NO_OF_SOIL_LAYERS];
 		double rho_int_old[NO_OF_LAYERS - 1];
 		double rho_int_expl[NO_OF_LAYERS - 1];
 		double alpha_old[NO_OF_LAYERS];
@@ -184,7 +186,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 		}
 		
 		// soil components of the matrix
-		if (config -> soil_heat_conduction_on == 1)
+		if (soil_switch == 1)
 		{
 			// calculating the explicit part of the heat flux density
 			double heat_flux_density_expl[NO_OF_SOIL_LAYERS];
@@ -269,7 +271,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 		
 		
 		// calling the algorithm to solve the system of linear equations
-		thomas_algorithm(c_vector, d_vector, e_vector, r_vector, solution_vector, NO_OF_LAYERS - 1 + config -> soil_heat_conduction_on*NO_OF_SOIL_LAYERS);
+		thomas_algorithm(c_vector, d_vector, e_vector, r_vector, solution_vector, NO_OF_LAYERS - 1 + soil_switch*NO_OF_SOIL_LAYERS);
 		
 		// Klemp (2008) upper boundary layer
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
@@ -360,7 +362,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 		}
 		
 		// soil temperature
-		if (config -> soil_heat_conduction_on == 1)
+		if (soil_switch == 1)
 		{
 			for (int j = 0; j < NO_OF_SOIL_LAYERS; ++j)
 			{
