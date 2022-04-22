@@ -25,8 +25,6 @@ start_year=${BASH_ARGV[3]} # defines the start time of the model run
 start_month=${BASH_ARGV[2]} # defines the start time of the model run
 start_day=${BASH_ARGV[1]} # defines the start time of the model run
 start_hour=${BASH_ARGV[0]} # defines the start time of the model run
-
-# grid properties
 orography_id=${BASH_ARGV[7]} # ID of the orography field. Based on this the grid file will be chosen.
 
 # diffusion settings

@@ -25,8 +25,6 @@ start_year=2000 # defines the start time of the model run
 start_month=1 # defines the start time of the model run
 start_day=1 # defines the start time of the model run
 start_hour=0 # defines the start time of the model run
-
-# grid properties
 orography_id=0 # ID of the orography field. Based on this the grid file will be chosen.
 
 # diffusion settings
