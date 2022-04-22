@@ -490,6 +490,12 @@ int sanity_checker(Config *config, Config_io *config_io, Grid *grid)
     	printf("Aborting.\n");
 		exit(1);
 	}
+	if (config -> sfc_phase_trans != 0 && config -> sfc_phase_trans != 1)
+	{
+		printf("sfc_phase_trans must be either 0 or 1.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
 	if (config_io -> grib_output_switch != 0 && config_io -> grib_output_switch != 1)
 	{
 		printf("grib_output_switch must be either 0 or 1.\n");
@@ -627,6 +633,8 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
 	config -> tracer_diff_h = strtod(argv[agv_counter], NULL);
     argv++;
 	config -> tracer_diff_v = strtod(argv[agv_counter], NULL);
+    argv++;
+	config -> sfc_phase_trans = strtod(argv[agv_counter], NULL);
     argv++;
 	return 0;
 }
@@ -773,6 +781,14 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	if (config -> soil_heat_conduction_on == 1)
 	{
 		printf("Heat conduction in the soil is turned on.\n");
+	}
+	if (config -> sfc_phase_trans == 0)
+	{
+		printf("Phase transitions at the surface are turned off.\n");
+	}
+	if (config -> sfc_phase_trans == 1)
+	{
+		printf("Phase transitions at the surface are turned on.\n");
 	}
 	
 	printf("%s", stars);
