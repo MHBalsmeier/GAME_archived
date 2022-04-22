@@ -782,13 +782,17 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	{
 		printf("Heat conduction in the soil is turned on.\n");
 	}
-	if (config -> sfc_phase_trans == 0)
+	if (config -> sfc_phase_trans == 0 && NO_OF_GASEOUS_CONSTITUENTS > 1)
 	{
 		printf("Phase transitions at the surface are turned off.\n");
 	}
-	if (config -> sfc_phase_trans == 1)
+	if (config -> sfc_phase_trans == 1 && NO_OF_GASEOUS_CONSTITUENTS > 1)
 	{
 		printf("Phase transitions at the surface are turned on.\n");
+	}
+	if (config -> sfc_phase_trans == 1 && NO_OF_GASEOUS_CONSTITUENTS == 1)
+	{
+		printf("Phase transitions at the surface are turned on, but your model is dry, so this will have no effect.\n");
 	}
 	
 	printf("%s", stars);
