@@ -13,6 +13,7 @@ In this file, the calculation of the explicit part of the momentum equation is m
 #include "../game_types.h"
 #include "../spatial_operators/spatial_operators.h"
 #include "../constituents/constituents.h"
+#include "../subgrid_scale/subgrid_scale.h"
 
 int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config, int no_rk_step, double delta_t)
 {
@@ -62,6 +63,11 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		if (config -> momentum_diff_v == 1)
 		{
 			vert_momentum_diffusion(state, diagnostics, irrev, grid, config, delta_t);
+		}
+		// planetary boundary layer
+		if (config -> pbl_scheme > 0)
+		{
+			pbl_wind_tendency(state, diagnostics, irrev, grid, config, delta_t);
 		}
 		// calculation of the dissipative heating rate
 		if (config -> momentum_diff_h == 1 || config -> pbl_scheme > 0)
