@@ -634,7 +634,7 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
     argv++;
 	config -> time_to_next_analysis = strtod(argv[agv_counter], NULL);
     argv++;
-	config -> held_suarez_pbl = strtod(argv[agv_counter], NULL);
+	config -> pbl_scheme = strtod(argv[agv_counter], NULL);
     argv++;
 	config -> tracer_diff_h = strtod(argv[agv_counter], NULL);
     argv++;
@@ -700,14 +700,6 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	if (config -> momentum_diff_v == 1)
 	{
 		printf("Vertical momentum diffusion is turned on.\n");
-	}
-	if (config -> held_suarez_pbl == 0)
-	{
-		printf("Held-Suarez boundary layer friction is turned off.\n");
-	}
-	if (config -> held_suarez_pbl == 1)
-	{
-		printf("Held-Suarez boundary layer friction is turned on.\n");
 	}
 	if (config -> temperature_diff_h == 0)
 	{
@@ -780,7 +772,19 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	}
 	if (config -> rad_on == 2)
 	{
-		printf("Held-Suarez-forcing is turned on.\n");
+		printf("Held-Suarez radiation forcing is turned on.\n");
+	}
+	if (config -> pbl_scheme == 0)
+	{
+		printf("Boundary layer friction is turned off.\n");
+	}
+	if (config -> pbl_scheme == 1)
+	{
+		printf("NWP boundary layer friction is turned on.\n");
+	}
+	if (config -> pbl_scheme == 2)
+	{
+		printf("Held-Suarez boundary layer friction is turned on.\n");
 	}
 	if (config -> soil_heat_conduction_on == 0)
 	{

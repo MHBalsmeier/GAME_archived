@@ -63,32 +63,8 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		{
 			vert_momentum_diffusion(state, diagnostics, irrev, grid, config, delta_t);
 		}
-		// This is the explicit friction ansatz in the boundary layer from the Held-Suarez (1994) test case.
-		if (config -> held_suarez_pbl == 1)
-		{
-			// some parameters
-			double fric_lr_height = 2853.0; // boundary layer height
-			double bndr_lr_visc_sfc = 1.0/86400.0; // maximum friction coefficient in the boundary layer
-			double scale_height = 8000.0;
-			int layer_index, h_index, vector_index;
-			#pragma omp parallel for private(layer_index, h_index, vector_index)
-			for (int i = 0; i < NO_OF_H_VECTORS; ++i)
-			{
-				layer_index = i/NO_OF_VECTORS_H;
-				h_index = i - layer_index*NO_OF_VECTORS_H;
-				vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
-				// adding the boundary layer friction
-				if (grid -> z_vector[vector_index] < fric_lr_height)
-				{
-					irrev -> friction_acc[vector_index]
-					+= -bndr_lr_visc_sfc*(exp(-grid -> z_vector[vector_index]/scale_height) - exp(-fric_lr_height/scale_height))
-					/(1.0 - exp(-fric_lr_height/scale_height))
-					*state -> wind[vector_index];
-				}
-			}
-		}
 		// calculation of the dissipative heating rate
-		if (config -> momentum_diff_h == 1 || config -> held_suarez_pbl == 1)
+		if (config -> momentum_diff_h == 1 || config -> pbl_scheme > 0)
 		{
 			simple_dissipation_rate(state, irrev, grid);
 		}

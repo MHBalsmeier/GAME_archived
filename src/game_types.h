@@ -201,7 +201,7 @@ int sfc_sensible_heat_flux;
 int rad_update;
 int assume_lte;
 int time_to_next_analysis;
-int held_suarez_pbl;
+int pbl_scheme;
 int total_run_span;
 int no_rad_moisture_layers;
 double diff_h_smag_div;

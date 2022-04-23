@@ -97,43 +97,71 @@ int update_sfc_turb_quantities(State *state, Grid *grid, Diagnostics *diagnostic
 	return 0;
 }
 
-int pbl_wind_tendency(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Grid *grid, double delta_t)
+int pbl_wind_tendency(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Grid *grid, Config *config, double delta_t)
 {
 	/*
 	This function computes the interaction of the horizontal wind with the surface.
 	*/
 	
-	int vector_index;
-	double flux_resistance, wind_speed_lowest_layer, z_agl, roughness_length, layer_thickness, monin_obukhov_length_value, wind_rescale_factor;
-	#pragma omp parallel for private(vector_index, flux_resistance, wind_speed_lowest_layer, z_agl, roughness_length, layer_thickness, monin_obukhov_length_value, wind_rescale_factor)
-	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
+	if (config -> pbl_scheme == 1)
 	{
-		vector_index = NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i;
-		
-		// averaging some quantities to the vector point
-		wind_speed_lowest_layer = 0.5*(pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + grid -> from_index[i]], 0.5)
-		+ pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + grid -> to_index[i]], 0.5));
-		z_agl = grid -> z_vector[vector_index] - 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[i]]
-		+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[i]]);
-		layer_thickness = 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H - NO_OF_VECTORS_PER_LAYER + grid -> from_index[i]]
-		+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H - NO_OF_VECTORS_PER_LAYER + grid -> to_index[i]])
-		- 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[i]]
-		+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[i]]);
-		roughness_length = 0.5*(grid -> roughness_length[grid -> from_index[i]] + grid -> roughness_length[grid -> to_index[i]]);
-		monin_obukhov_length_value = 0.5*(diagnostics -> monin_obukhov_length[grid -> from_index[i]] + diagnostics -> monin_obukhov_length[grid -> to_index[i]]);
-		
-		// calculating the flux resistance at the vector point
-		flux_resistance = momentum_flux_resistance(wind_speed_lowest_layer, z_agl, roughness_length, monin_obukhov_length_value, delta_t);
-		
-		// rescaling the wind if the lowest wind vector is above the height of the Prandtl layer
-		wind_rescale_factor = 1.0;
-		if (z_agl > PRANDTL_HEIGHT)
+		int vector_index;
+		double flux_resistance, wind_speed_lowest_layer, z_agl, roughness_length, layer_thickness, monin_obukhov_length_value, wind_rescale_factor;
+		#pragma omp parallel for private(vector_index, flux_resistance, wind_speed_lowest_layer, z_agl, roughness_length, layer_thickness, monin_obukhov_length_value, wind_rescale_factor)
+		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 		{
-			wind_rescale_factor = log(PRANDTL_HEIGHT/roughness_length)/log(z_agl/roughness_length);
+			vector_index = NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i;
+			
+			// averaging some quantities to the vector point
+			wind_speed_lowest_layer = 0.5*(pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + grid -> from_index[i]], 0.5)
+			+ pow(diagnostics -> v_squared[NO_OF_SCALARS - NO_OF_SCALARS_H + grid -> to_index[i]], 0.5));
+			z_agl = grid -> z_vector[vector_index] - 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[i]]
+			+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[i]]);
+			layer_thickness = 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H - NO_OF_VECTORS_PER_LAYER + grid -> from_index[i]]
+			+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H - NO_OF_VECTORS_PER_LAYER + grid -> to_index[i]])
+			- 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[i]]
+			+ grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[i]]);
+			roughness_length = 0.5*(grid -> roughness_length[grid -> from_index[i]] + grid -> roughness_length[grid -> to_index[i]]);
+			monin_obukhov_length_value = 0.5*(diagnostics -> monin_obukhov_length[grid -> from_index[i]] + diagnostics -> monin_obukhov_length[grid -> to_index[i]]);
+			
+			// calculating the flux resistance at the vector point
+			flux_resistance = momentum_flux_resistance(wind_speed_lowest_layer, z_agl, roughness_length, monin_obukhov_length_value, delta_t);
+			
+			// rescaling the wind if the lowest wind vector is above the height of the Prandtl layer
+			wind_rescale_factor = 1.0;
+			if (z_agl > PRANDTL_HEIGHT)
+			{
+				wind_rescale_factor = log(PRANDTL_HEIGHT/roughness_length)/log(z_agl/roughness_length);
+			}
+			
+			// adding the momentum flux into the surface as an acceleration
+			irrev -> friction_acc[vector_index] += -wind_rescale_factor*state -> wind[vector_index]/flux_resistance/layer_thickness;
 		}
-		
-		// adding the momentum flux into the surface as an acceleration
-		irrev -> friction_acc[vector_index] += -wind_rescale_factor*state -> wind[vector_index]/flux_resistance/layer_thickness;
+	}
+	
+	// This is the explicit friction ansatz in the boundary layer from the Held-Suarez (1994) test case.
+	if (config -> pbl_scheme == 2)
+	{
+		// some parameters
+		double fric_lr_height = 2853.0; // boundary layer height
+		double bndr_lr_visc_sfc = 1.0/86400.0; // maximum friction coefficient in the boundary layer
+		double scale_height = 8000.0;
+		int layer_index, h_index, vector_index;
+		#pragma omp parallel for private(layer_index, h_index, vector_index)
+		for (int i = 0; i < NO_OF_H_VECTORS; ++i)
+		{
+			layer_index = i/NO_OF_VECTORS_H;
+			h_index = i - layer_index*NO_OF_VECTORS_H;
+			vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
+			// adding the boundary layer friction
+			if (grid -> z_vector[vector_index] < fric_lr_height)
+			{
+				irrev -> friction_acc[vector_index]
+				+= -bndr_lr_visc_sfc*(exp(-grid -> z_vector[vector_index]/scale_height) - exp(-fric_lr_height/scale_height))
+				/(1.0 - exp(-fric_lr_height/scale_height))
+				*state -> wind[vector_index];
+			}
+		}
 	}
 	
 	return 0;

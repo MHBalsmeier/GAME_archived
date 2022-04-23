@@ -41,7 +41,7 @@ no_rad_moisture_layers=12 # number of layers in which radiation-moisture interac
 soil_heat_conduction_on=1 # switch for heat conduction in the soil
 sfc_phase_trans=1 # switch for phase transitions at the surface
 sfc_sensible_heat_flux=1 # switch for sensible heat flux at the surface
-held_suarez_pbl=0 # switch for an additional simplified horizontal friction in the boundary layer according to the Held-Suarez test
+pbl_scheme=1 # planetary boundary scheme: 0: off, 1: NWP, 2: Held-Suarez
 
 # I/O
 write_out_interval=86400 # every how many seconds an output file will be created; for small Earth experiments this will be rescaled proportional to the radius
