@@ -35,7 +35,7 @@ tracer_diff_h=0 # turn on if you want horizontal tracer concentration diffusion
 tracer_diff_v=0 # turn on if you want vertical tracer concentration diffusion
 
 # "physics" configuration
-assume_lte=1 # set this to one if you do not want to assign individual temperatures to tracers
+assume_lte=1 # set this to 1 if you do not want to assign individual temperatures to tracers
 rad_on=2 # set to 0 if you want no radiation, 1 for real radiation and 2 for Held-Suarez forcing
 no_rad_moisture_layers=12 # number of layers in which radiation-moisture interaction is neglected
 prog_soil_temp=0 # switch for prognostic soil temperature
