@@ -195,7 +195,7 @@ int momentum_diff_v;
 int tracer_diff_h;
 int tracer_diff_v;
 int rad_on;
-int soil_heat_conduction_on;
+int prog_soil_temp;
 int sfc_phase_trans;
 int sfc_sensible_heat_flux;
 int rad_update;

@@ -69,7 +69,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		
-		soil_switch = grid -> is_land[i]*config -> soil_heat_conduction_on;
+		soil_switch = grid -> is_land[i]*config -> prog_soil_temp;
 		
 		// for meanings of these vectors look into the Kompendium
 		double c_vector[NO_OF_LAYERS - 2 + soil_switch*NO_OF_SOIL_LAYERS];

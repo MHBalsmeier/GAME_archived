@@ -83,7 +83,7 @@ int update_sfc_turb_quantities(State *state, Grid *grid, Diagnostics *diagnostic
 	}
 	
 	// updating the surface flux resistance acting on scalar quantities (moisture and sensible heat)
-	if (config -> soil_heat_conduction_on == 1)
+	if (config -> prog_soil_temp == 1)
 	{
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
