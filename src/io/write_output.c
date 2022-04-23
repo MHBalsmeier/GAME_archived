@@ -130,7 +130,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		    temp_closest = diagnostics -> temperature_gas[closest_index*NO_OF_SCALARS_H + i];
 			delta_z_temp = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i] + 2 - grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H];
 		    // real radiation
-		    if (config -> rad_on == 1)
+		    if (config -> prog_soil_temp == 1)
 		    {
 		    	temperature_gradient = (temp_closest - state_write_out -> temperature_soil[i])
 		    	/(grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]);
