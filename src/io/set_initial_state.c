@@ -4,7 +4,7 @@ Github repository: https://github.com/OpenNWP/GAME
 */
 
 /*
-In this file, the initial state of the simulation is read in from a netCDF file.
+In this file, the initial state of the simulation is set.
 */
 
 #include <stdio.h>
