@@ -41,7 +41,7 @@ no_rad_moisture_layers=12 # number of layers in which radiation-moisture interac
 prog_soil_temp=1 # switch for prognostic soil temperature
 sfc_phase_trans=1 # switch for phase transitions at the surface
 sfc_sensible_heat_flux=1 # switch for sensible heat flux at the surface
-pbl_scheme=1 # planetary boundary scheme: 0: off, 1: NWP, 2: Held-Suarez
+pbl_scheme=1 # planetary boundary layer scheme: 0: off, 1: NWP, 2: Held-Suarez
 
 # I/O
 write_out_interval=10800 # every how many seconds an output file will be created; for small Earth experiments this will be rescaled proportional to the radius

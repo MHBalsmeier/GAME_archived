@@ -41,7 +41,7 @@ no_rad_moisture_layers=12 # number of layers in which radiation-moisture interac
 prog_soil_temp=0 # switch for prognostic soil temperature
 sfc_phase_trans=0 # switch for phase transitions at the surface
 sfc_sensible_heat_flux=0 # switch for sensible heat flux at the surface
-pbl_scheme=0 # planetary boundary scheme: 0: off, 1: NWP, 2: Held-Suarez
+pbl_scheme=0 # planetary boundary layer scheme: 0: off, 1: NWP, 2: Held-Suarez
 
 # I/O
 write_out_interval=86400 # every how many seconds an output file will be created; for small Earth experiments this will be rescaled proportional to the radius
@@ -54,7 +54,7 @@ netcdf_output_switch=1 # If set to 1, output will be written to netcdf files on 
 time_to_next_analysis=-1 # the time between this model run and the next analysis, only relevant in NWP runs for data assimilation
 
 # parallelization
-export OMP_NUM_THREADS=2 # relevant for OMP
+export OMP_NUM_THREADS=8 # relevant for OMP
 
 # that's it, now the basic run script will be sourced
 source $game_home_dir/run_scripts/.sh/root_script.sh
