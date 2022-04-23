@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
     }
 	printf("Time step set. Information on time step-related quantities:\n");
     printf("Dynamical core time step: %lf s\n", delta_t);
-    if (config -> rad_on == 1)
+    if (config -> rad_on > 0)
     {
     	printf("Radiation time step: %lf s\n", config -> radiation_delta_t);
 	}
@@ -263,9 +263,12 @@ int main(int argc, char *argv[])
 	// configuring radiation and calculating radiative fluxes for the first time
     config -> rad_update = 1;
     double t_rad_update = t_0;
-    if (config -> rad_on == 1)
+    if (config -> rad_on > 0)
     {
-    	radiation_init();
+    	if (config -> rad_on == 1)
+    	{
+    		radiation_init();
+    	}
     	call_radiation(state_old, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config, delta_t, t_0);
     	config -> rad_update = 1;
     	t_rad_update += config -> radiation_delta_t;
