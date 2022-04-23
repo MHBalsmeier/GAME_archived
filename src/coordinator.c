@@ -556,6 +556,12 @@ int sanity_checker(Config *config, Config_io *config_io, Grid *grid)
     	printf("Aborting.\n");
 		exit(1);
 	}
+	if (config -> momentum_diff_h == 0 && config -> pbl_scheme > 0)
+	{
+		printf("Horizontal momentum diffusion cannot be off if a boundary layer scheme is on.\n");
+    	printf("Aborting.\n");
+		exit(1);
+	}
 	if (NO_OF_SOIL_LAYERS < 2)
 	{
 		printf("NO_OF_SOIL_LAYERS must be >= 2.\n");
