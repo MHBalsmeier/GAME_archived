@@ -31,6 +31,9 @@ gaseous constituents IDs:
 11: N2O
 */
 
+double enthalpy_evaporation(double);
+double enthalpy_melting(double);
+
 double mean_particle_masses_gas(int gas_constituent_id)
 {
 	double result = 0;
@@ -213,70 +216,160 @@ double phase_trans_heat(int direction, double temperature)
     2: liquid to solid
     */
     
-    double result;
+    double result = 0.0;
     if (direction == 0)
     {
-        result = 2257000.0;
+    	result = enthalpy_evaporation(temperature);
 	}
     if (direction == 1)
     {
-        result = 2257000.0 + 333500.0;
+        result = enthalpy_evaporation(temperature) + enthalpy_melting(temperature);
 	}
     if (direction == 2)
     {
-        result = 333500.0;
+        result = enthalpy_melting(temperature);
 	}
+	
     return result;
 }
 
-
-double sink_velocity(int solid_or_liquid, double radius, double air_density)
+double enthalpy_evaporation(double temperature)
 {
 	/*
-	This function calculates the sink velocity of droplets.
+	This function returns the enthalpy of evaporation depending on the temperature.
+	It follows Pruppacher and Klett (2010), p. 97, Eq. (3-24a).
 	*/
 	
-	// solid_or_liquid == 0: ice
-	// solid_or_liquid == 1: liquid water
+	// temperature in degrees Celsius
+	double temp_c = temperature - T_0;
 	
-	double dry_air_kinematic_viscosity = 14.8e-6;
-	double reynolds_crit = 10.0;
-	double drag_coeff = 1.0;
-	
-	// First of all, a laminar sink velocity is calculated from the Stokes law.
-	double laminar_velocity_candidate = 0;
-	// The solid case.
-	if (solid_or_liquid == 0)
+	// clipping values that are too extreme for these approximations
+	if (temp_c < -20.0)
 	{
-		laminar_velocity_candidate = 2.0*M_PI*pow(radius, 2.0)*DENSITY_WATER*G_MEAN_SFC_ABS/(9.0*M_PI*air_density*dry_air_kinematic_viscosity);
+		temp_c = -20.0;
+	}
+	if (temp_c > 40.0)
+	{
+		temp_c = 40.0;
 	}
 	
-	// The liquid case.
-	if (solid_or_liquid == 1)
-	{
-		laminar_velocity_candidate = 2.0*M_PI*pow(radius, 2.0)*DENSITY_WATER*G_MEAN_SFC_ABS/(9.0*M_PI*air_density*dry_air_kinematic_viscosity);
-	}
+	double result = 597.3 - 0.561*temp_c;
 	
-	// calculating the Reynolds number resulting from the laminar velocity
-	double reynolds_from_laminar;
-	reynolds_from_laminar = laminar_velocity_candidate*radius/dry_air_kinematic_viscosity;
-	
-	// calculating the resulting sink velocity
-	double result;
-	// the laminar case
-	if (reynolds_from_laminar <= reynolds_crit)
-	{
-		result = laminar_velocity_candidate;
-	}
-	// the turbulent case
-	else
-	{
-		result = pow(8.0*radius*DENSITY_WATER*G_MEAN_SFC_ABS/(3.0*air_density*drag_coeff), 0.5);
-	}
-	
-    return result;
+	// unit conversion
+	return 4186.8*result;
 }
 
+double enthalpy_melting(double temperature)
+{
+	/*
+	This function returns the enthalpy of melting depending on the temperature.
+	It follows Pruppacher and Klett (2010), p. 97, Eq. (3-26).
+	*/
+	
+	// temperature in degrees Celsius
+	double temp_c = temperature - T_0;
+	
+	// clipping values that are too extreme for this approximation
+	if (temp_c < -44.0)
+	{
+		temp_c = -44.0;
+	}
+	if (temp_c > 0.0)
+	{
+		temp_c = 0.0;
+	}
+	
+	double result = 79.7 - 0.12*temp_c - 8.0481e-2*pow(temp_c, 2) - 3.2376e-3*pow(temp_c, 3) - 4.2553e-5*pow(temp_c, 4);
+	
+	// unit conversion
+	return 4186.8*result;
+}
+
+double saturation_pressure_over_water(double temperature)
+{
+	/*
+	This function returns the saturation pressure in Pa over liquid water as a function of the temperature in K.
+	It is based on Pruppacher and Klett (2010), p. 854, Eq. (A.4-1).
+	*/
+    
+	// calculating the temperature in degrees Celsius
+    double temp_c = temperature - T_0;
+    
+    // clipping too extreme values for this approximation
+    if (temp_c < -50.0)
+    {
+    	temp_c = -50.0;
+    }
+    if (temp_c > 50.0)
+    {
+    	temp_c = 50.0;
+    }
+    
+    double result
+    = 6.107799961
+    + 4.436518521e-1*temp_c
+    + 1.428945805e-2*pow(temp_c, 2)
+    + 2.650648471e-4*pow(temp_c, 3)
+    + 3.031240396e-6*pow(temp_c, 4)
+    + 2.034080948e-8*pow(temp_c, 5)
+    + 6.136820929e-11*pow(temp_c, 6);
+    
+    // unit conversion
+    return 100.0*result;
+}
+
+double saturation_pressure_over_ice(double temperature)
+{
+	/*
+	This function returns the saturation pressure in Pa over ice as a function of the temperature in K.
+	It is based on Pruppacher and Klett (2010), p. 854, Eq. (A.4-1).
+	*/
+	
+	// calculating the temperature in degrees Celsius
+    double temp_c = temperature - T_0;
+    
+    // clipping too extreme values for this approximation
+    if (temp_c < -50.0)
+    {
+    	temp_c = -50.0;
+    }
+    if (temp_c > 0.0)
+    {
+    	temp_c = 0.0;
+    }
+    
+    double result
+    = 6.10690449
+    + 5.02660639e-1*temp_c
+    + 1.87743264e-2*pow(temp_c, 2)
+    + 4.13476180e-4*pow(temp_c, 3)
+    + 5.72333773e-6*pow(temp_c, 4)
+    + 4.71651246e-8*pow(temp_c, 5)
+    + 1.78086695e-10*pow(temp_c, 6);
+    
+    // unit conversion
+    return 100.0*result;
+}
+
+double rel_humidity(double abs_humidity, double temperature)
+{
+	/*
+	This function returns the relative humidity (NOT in percent) as a function of the absolute humidity in kg/m^3 and the temperature in K.
+	*/
+	
+	double vapour_pressure = abs_humidity*specific_gas_constants(1)*temperature;
+	double saturation_pressure;
+	if (temperature > T_0)
+	{
+		saturation_pressure = saturation_pressure_over_water(temperature);
+	}
+	if (temperature <= T_0)
+	{
+		saturation_pressure = saturation_pressure_over_ice(temperature);
+	}
+	double result = vapour_pressure/saturation_pressure;
+	return result;
+}
 
 
 

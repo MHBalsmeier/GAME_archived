@@ -30,7 +30,7 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
     double *temperature = malloc(NO_OF_SCALARS*sizeof(double));
     double *water_vapour_density = calloc(NO_OF_SCALARS, sizeof(double));
     double z_height;
-    double lat, lon, u, v, pressure_value, specific_humidity, total_density;
+    double lat, lon, u, v, pressure_value, specific_humidity, dry_density;
     // dummy argument
     double dummy_0 = 0.0;
     double dummy_1 = 0.0;
@@ -44,7 +44,7 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
     int zero = 0;
     int one = 1;
     // 3D scalar fields determined here, apart from density
-    #pragma omp parallel for private(layer_index, h_index, lat, lon, z_height, total_density, specific_humidity)
+    #pragma omp parallel for private(layer_index, h_index, lat, lon, z_height, dry_density, specific_humidity)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	layer_index = i/NO_OF_SCALARS_H;
@@ -68,8 +68,8 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
         if (ideal_input_id == 2)
         {
         	baroclinic_wave_test(&one, &one, &one, &small_atmos_rescale, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i],
-        	&dummy_2, &dummy_4, &dummy_5, &total_density, &specific_humidity);
-        	water_vapour_density[i] = total_density*specific_humidity/(1.0 - specific_humidity);
+        	&dummy_2, &dummy_4, &dummy_5, &dry_density, &specific_humidity);
+        	water_vapour_density[i] = dry_density*specific_humidity/(1.0 - specific_humidity);
         }
     }
 	// resricting the maximum relative humidity to 100 %

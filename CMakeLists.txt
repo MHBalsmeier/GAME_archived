@@ -35,7 +35,6 @@ src/subgrid_scale/planetary_boundary_layer.c
 src/radiation/manage_radiation_calls.c
 src/radiation/held_suar.c
 src/radiation/rterrtmgp_coupler.f90
-src/constituents/humidity.c
 src/constituents/phase_trans.c
 src/constituents/dictionary.c
 src/constituents/derived_quantities.c

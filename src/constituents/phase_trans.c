@@ -76,6 +76,8 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
     	{
             saturation_pressure = saturation_pressure_over_ice(diagnostics -> temperature_gas[i]);
 		}
+		// assuming clouds form at 101 % relative humidity
+		saturation_pressure = 1.01*saturation_pressure;
 		
 		// determining the water vapour pressure (using the EOS)
         water_vapour_pressure = state -> rho[5*NO_OF_SCALARS + i]*specific_gas_constants(1)*diagnostics -> temperature_gas[i];
