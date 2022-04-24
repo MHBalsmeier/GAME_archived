@@ -20,10 +20,15 @@ fig_size = 6
 if write_out_dry_mass_integral == 1:
 	fig = plt.figure(figsize = (fig_size, fig_size))
 	plt.title("Masses")
-	plt.xlabel("time since init / hr")
 	plt.ylabel("change relative to init value / %")
 	data = np.genfromtxt(output_dir + "/masses")
-	time_vector = 1/3600*(data[:, 0] - data[0, 0])
+	time_rescale = 1/3600
+	time_unit = "hr"
+	if (max(data[:, 0]) > 864000):
+		time_rescale = 1/86400
+		time_unit = "days"
+	time_vector = time_rescale*(data[:, 0] - data[0, 0])
+	plt.xlabel("time since init / " + time_unit)
 	plt.xlim([min(time_vector), max(time_vector)])
 	data = np.genfromtxt(output_dir + "/masses")
 	no_of_constituents = len(data[0, :]) - 1
@@ -49,10 +54,15 @@ if write_out_rhotheta_integral == 1:
 	ax = plt.axes()
 	ax.grid()
 	plt.title("Rho x theta")
-	plt.xlabel("time since init / hr")
 	plt.ylabel("change relative to init value / %")
 	data = np.genfromtxt(output_dir + "/potential_temperature_density")
-	time_vector = 1/3600*(data[:, 0] - data[0, 0])
+	time_rescale = 1/3600
+	time_unit = "hr"
+	if (max(data[:, 0]) > 864000):
+		time_rescale = 1/86400
+		time_unit = "days"
+	time_vector = time_rescale*(data[:, 0] - data[0, 0])
+	plt.xlabel("time since init / " + time_unit)
 	plt.xlim([min(time_vector), max(time_vector)])
 	entropy_vector = data[:, 1]
 	plt.plot(time_vector, 100*(entropy_vector/entropy_vector[0] - 1))
@@ -62,10 +72,15 @@ if write_out_rhotheta_integral == 1:
 if write_out_energy_integral == 1:
 	fig = plt.figure(figsize = (fig_size, fig_size))
 	plt.title("Energy")
-	plt.xlabel("time since init / hr")
 	plt.ylabel("change relative to init value of total energy / %")
 	data = np.genfromtxt(output_dir + "/energy")
-	time_vector = 1/3600*(data[:, 0] - data[0, 0])
+	time_rescale = 1/3600
+	time_unit = "hr"
+	if (max(data[:, 0]) > 864000):
+		time_rescale = 1/86400
+		time_unit = "days"
+	time_vector = time_rescale*(data[:, 0] - data[0, 0])
+	plt.xlabel("time since init / " + time_unit)
 	plt.xlim([min(time_vector), max(time_vector)])
 	kinetic_vector = data[:, 1]
 	potential_vector = data[:, 2]
