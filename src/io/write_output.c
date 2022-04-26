@@ -25,7 +25,6 @@ In addition to that, some postprocessing diagnostics are also calculated here.
 #define NCERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(2);}
 
 int set_basic_props2grib(codes_handle *, long, long, long, long, long, long);
-double calc_std_dev(double [], int);
 double global_scalar_integrator(Scalar_field, Grid *);
 double pseudopotential(State *, Grid *, int);
 
@@ -284,13 +283,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		}
 		
 		// diagnozing gusts at 10 m above the surface
-		double standard_deviation;
-		double gusts_parameter = 3.0;
 		double *wind_10_m_gusts_speed = malloc(NO_OF_VECTORS_H*sizeof(double));
-		double *vector_for_std_deviation = malloc(min_no_of_output_steps*sizeof(double));
 		double wind_speed_10_m_mean;
 		// loop over all horizontal vectors
-		#pragma omp parallel for private(wind_speed_10_m_mean, standard_deviation)
+		#pragma omp parallel for private(wind_speed_10_m_mean)
 		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 		{
 			// initializing the mean with zero
@@ -298,26 +294,24 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			// loop over all steps that are in the 10 minutes window around the output time
 			for (int j = 0; j < min_no_of_output_steps; ++j)
 			{
-				// collecting all the wind speed values at this data point
-				vector_for_std_deviation[j] = wind_10_m_speed[j*NO_OF_VECTORS_H + i];
 				// updating the mean wind speed
 				wind_speed_10_m_mean += 1.0/min_no_of_output_steps*wind_10_m_speed[j*NO_OF_VECTORS_H + i];
 			}
-			// calculating the standard deviation
-			standard_deviation = calc_std_dev(vector_for_std_deviation, min_no_of_output_steps);
 			// this is the case where the gust diagnostics is actually used
-			if (t_write != t_init && min_no_of_output_steps >= 10)
+			if ((config -> sfc_sensible_heat_flux == 1 || config -> sfc_phase_trans == 1 || config -> pbl_scheme == 1)
+			&& fabs(diagnostics -> monin_obukhov_length[i]) > EPSILON_SECURITY)
 			{
-				wind_10_m_gusts_speed[i] = wind_speed_10_m_mean + gusts_parameter*standard_deviation;
+				// This follows "IFS DOCUMENTATION – Cy43r1 - Operational implementation 22 Nov 2016 - PART IV: PHYSICAL PROCESSES".
+				wind_10_m_gusts_speed[i] = wind_speed_10_m_mean + 7.71*diagnostics -> roughness_velocity[i]
+				*pow(1.0 - 0.5/12.0*1000.0/diagnostics -> monin_obukhov_length[i], 1.0/3.0);
 			}
-			// This is the case at the first step or if not enough steps in the output window are available.
+			// This is used if the turbulence quantities are not populated.
 			else
 			{
 				wind_10_m_gusts_speed[i] = (1.0 + 0.67)*wind_speed_10_m_mean;
 			}
 		}
 		// freeing memory we do not need anymore
-		free(vector_for_std_deviation);
 		free(wind_10_m_speed);
 		// allocating memory for output diagnostics
 		double *wind_10_m_mean_u_at_cell = malloc(NO_OF_SCALARS_H*sizeof(double));
@@ -1668,22 +1662,6 @@ int set_basic_props2grib(codes_handle *handle, long data_date, long data_time, l
     if ((retval = codes_set_long(handle, "stepUnits", 13)))
         ECCERR(retval);
 	return 0;
-}
-
-double calc_std_dev(double vector_for_std_deviation[], int no_of_values)
-{
-	double mean = 0.0;
-	for (int i = 0; i < no_of_values; ++i)
-	{
-		mean += 1.0/no_of_values*vector_for_std_deviation[i];
-	}
-	double result = 0.0;
-	for (int i = 0; i < no_of_values; ++i)
-	{
-		result += pow(vector_for_std_deviation[i] - mean, 2);
-	}
-	result = 1/sqrt(no_of_values)*sqrt(result);
-	return result;
 }
 
 double global_scalar_integrator(Scalar_field density_gen, Grid *grid)
