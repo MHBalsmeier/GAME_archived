@@ -235,11 +235,9 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		*/
 		double wind_tangential;
 		int j;
-		// 10 m wind is measured over grass by WMO definition
-		double *wind_10_m_speed = malloc(min_no_of_output_steps*NO_OF_VECTORS_H*sizeof(double));
 		double *wind_10_m_mean_u = malloc(NO_OF_VECTORS_H*sizeof(double));
 		double *wind_10_m_mean_v = malloc(NO_OF_VECTORS_H*sizeof(double));
-		// loop over the horizontal vector points
+		// temporal average over the ten minutes output interval
 		#pragma omp parallel for private(j, wind_tangential)
 		for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)
 		{
@@ -255,11 +253,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				{
 					wind_tangential += grid -> trsk_weights[10*h_index + i]*wind_h_lowest_layer_array[time_step_10_m_wind*NO_OF_VECTORS_H + grid -> trsk_indices[10*h_index + i]];
 				}
-				wind_10_m_speed[j] = sqrt(pow(wind_h_lowest_layer_array[j], 2) + pow(wind_tangential, 2));
 				wind_10_m_mean_u[h_index] += 1.0/min_no_of_output_steps*wind_h_lowest_layer_array[j];
 				wind_10_m_mean_v[h_index] += 1.0/min_no_of_output_steps*wind_tangential;
 			}
 		}
+		// vertically extrapolating to ten meters above the surface
 		double roughness_length_extrapolation, actual_roughness_length, z_sfc, z_agl, rescale_factor;
 		#pragma omp parallel for private(wind_u_value, wind_v_value, roughness_length_extrapolation, actual_roughness_length, z_sfc, z_agl, rescale_factor)
 		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
@@ -282,24 +280,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			wind_10_m_mean_v[i] = rescale_factor*wind_v_value;
 		}
 		
-		// diagnozing the 10 m mean wind
-		double wind_speed_10_m_mean;
-		// loop over all horizontal vectors
-		#pragma omp parallel for private(wind_speed_10_m_mean)
-		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-		{
-			// initializing the mean with zero
-			wind_speed_10_m_mean = 0.0;
-			// loop over all steps that are in the 10 minutes window around the output time
-			for (int j = 0; j < min_no_of_output_steps; ++j)
-			{
-				// updating the mean wind speed
-				wind_speed_10_m_mean += 1.0/min_no_of_output_steps*wind_10_m_speed[j*NO_OF_VECTORS_H + i];
-			}
-		}
-		// freeing memory we do not need anymore
-		free(wind_10_m_speed);
-		
 		// averaging the wind quantities to cell centers for output
 		double *wind_10_m_mean_u_at_cell = malloc(NO_OF_SCALARS_H*sizeof(double));
 		edges_to_cells_lowest_layer(wind_10_m_mean_u, wind_10_m_mean_u_at_cell, grid);
@@ -310,7 +290,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		
 		// gust diagnostics
 		double *wind_10_m_gusts_speed_at_cell = malloc(NO_OF_SCALARS_H*sizeof(double));
-		#pragma omp parallel for private(wind_speed_10_m_mean)
+		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 		{
 			// This is the normal case.
