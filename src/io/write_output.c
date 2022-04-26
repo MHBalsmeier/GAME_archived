@@ -282,8 +282,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			wind_10_m_mean_v[i] = rescale_factor*wind_v_value;
 		}
 		
-		// diagnozing gusts at 10 m above the surface
-		double *wind_10_m_gusts_speed = malloc(NO_OF_VECTORS_H*sizeof(double));
+		// diagnozing the 10 m mean wind
 		double wind_speed_10_m_mean;
 		// loop over all horizontal vectors
 		#pragma omp parallel for private(wind_speed_10_m_mean)
@@ -297,33 +296,37 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				// updating the mean wind speed
 				wind_speed_10_m_mean += 1.0/min_no_of_output_steps*wind_10_m_speed[j*NO_OF_VECTORS_H + i];
 			}
-			// this is the case where the gust diagnostics is actually used
+		}
+		// freeing memory we do not need anymore
+		free(wind_10_m_speed);
+		
+		// averaging the wind quantities to cell centers for output
+		double *wind_10_m_mean_u_at_cell = malloc(NO_OF_SCALARS_H*sizeof(double));
+		edges_to_cells_lowest_layer(wind_10_m_mean_u, wind_10_m_mean_u_at_cell, grid);
+		free(wind_10_m_mean_u);
+		double *wind_10_m_mean_v_at_cell = malloc(NO_OF_SCALARS_H*sizeof(double));
+		edges_to_cells_lowest_layer(wind_10_m_mean_v, wind_10_m_mean_v_at_cell, grid);
+		free(wind_10_m_mean_v);
+		
+		// gust diagnostics
+		double *wind_10_m_gusts_speed_at_cell = malloc(NO_OF_SCALARS_H*sizeof(double));
+		#pragma omp parallel for private(wind_speed_10_m_mean)
+		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
+		{
+			// This is the normal case.
 			if ((config -> sfc_sensible_heat_flux == 1 || config -> sfc_phase_trans == 1 || config -> pbl_scheme == 1)
 			&& fabs(diagnostics -> monin_obukhov_length[i]) > EPSILON_SECURITY)
 			{
-				// This follows "IFS DOCUMENTATION – Cy43r1 - Operational implementation 22 Nov 2016 - PART IV: PHYSICAL PROCESSES".
-				wind_10_m_gusts_speed[i] = wind_speed_10_m_mean + 7.71*diagnostics -> roughness_velocity[i]
-				*pow(1.0 - 0.5/12.0*1000.0/diagnostics -> monin_obukhov_length[i], 1.0/3.0);
+				// This follows IFS DOCUMENTATION – Cy43r1 - Operational implementation 22 Nov 2016 - PART IV: PHYSICAL PROCESSES.
+				wind_10_m_gusts_speed_at_cell[i] = pow(pow(wind_10_m_mean_u_at_cell[i], 2) + pow(wind_10_m_mean_v_at_cell[i], 2), 0.5)
+				+ 7.71*diagnostics -> roughness_velocity[i]*pow(fmax(1.0 - 0.5/12.0*1000.0/diagnostics -> monin_obukhov_length[i], 0.0), 1.0/3.0);
 			}
 			// This is used if the turbulence quantities are not populated.
 			else
 			{
-				wind_10_m_gusts_speed[i] = (1.0 + 0.67)*wind_speed_10_m_mean;
+				wind_10_m_gusts_speed_at_cell[i] = 1.67*pow(pow(wind_10_m_mean_u_at_cell[i], 2) + pow(wind_10_m_mean_v_at_cell[i], 2), 0.5);
 			}
 		}
-		// freeing memory we do not need anymore
-		free(wind_10_m_speed);
-		// allocating memory for output diagnostics
-		double *wind_10_m_mean_u_at_cell = malloc(NO_OF_SCALARS_H*sizeof(double));
-		double *wind_10_m_mean_v_at_cell = malloc(NO_OF_SCALARS_H*sizeof(double));
-		double *wind_10_m_gusts_speed_at_cell = malloc(NO_OF_SCALARS_H*sizeof(double));
-		// averaging the wind quantities to cell centers for output
-		edges_to_cells_lowest_layer(wind_10_m_mean_u, wind_10_m_mean_u_at_cell, grid);
-		free(wind_10_m_mean_u);
-		edges_to_cells_lowest_layer(wind_10_m_mean_v, wind_10_m_mean_v_at_cell, grid);
-		free(wind_10_m_mean_v);
-		edges_to_cells_lowest_layer(wind_10_m_gusts_speed, wind_10_m_gusts_speed_at_cell, grid);
-		free(wind_10_m_gusts_speed);
 		
 		// Netcdf output.
 		if (config_io -> netcdf_output_switch == 1)
