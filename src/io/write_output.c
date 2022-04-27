@@ -321,7 +321,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				u_850_surrogate = pow(diagnostics -> v_squared[i + closest_index*NO_OF_SCALARS_H], 0.5)
 				+ (pow(diagnostics -> v_squared[i + closest_index*NO_OF_SCALARS_H], 0.5) - pow(diagnostics -> v_squared[i + second_closest_index*NO_OF_SCALARS_H], 0.5))
 				/(grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] - grid -> z_scalar[i + second_closest_index*NO_OF_SCALARS_H])
-				*(u_850_proxy_height - grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H]);
+				*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i] + u_850_proxy_height - grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H]);
 				// calculating the wind speed in a height representing 950 hPa
 				for (int j = 0; j < NO_OF_LAYERS; ++j)
 				{
@@ -337,7 +337,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				u_950_surrogate = pow(diagnostics -> v_squared[i + closest_index*NO_OF_SCALARS_H], 0.5)
 				+ (pow(diagnostics -> v_squared[i + closest_index*NO_OF_SCALARS_H], 0.5) - pow(diagnostics -> v_squared[i + second_closest_index*NO_OF_SCALARS_H], 0.5))
 				/(grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] - grid -> z_scalar[i + second_closest_index*NO_OF_SCALARS_H])
-				*(u_950_proxy_height - grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H]);
+				*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i] + u_950_proxy_height - grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H]);
 				// adding the baroclinic and convective component to the gusts
 				wind_10_m_gusts_speed_at_cell[i] += 0.6*fmax(0.0, u_850_surrogate - u_950_surrogate);
 			}
