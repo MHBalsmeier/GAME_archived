@@ -340,6 +340,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i] + u_950_proxy_height - grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H]);
 				// adding the baroclinic and convective component to the gusts
 				wind_10_m_gusts_speed_at_cell[i] += 0.6*fmax(0.0, u_850_surrogate - u_950_surrogate);
+				wind_10_m_gusts_speed_at_cell[i] = fmin(wind_10_m_gusts_speed_at_cell[i], 3.0*pow(pow(wind_10_m_mean_u_at_cell[i], 2) + pow(wind_10_m_mean_v_at_cell[i], 2), 0.5));
 			}
 			// This is used if the turbulence quantities are not populated.
 			else
