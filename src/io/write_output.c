@@ -74,7 +74,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	int err = 0;
 	
 	int layer_index, closest_index, second_closest_index;
-	double wind_u_value, wind_v_value, cloud_water_content;
+	double cloud_water_content;
 	double vector_to_minimize[NO_OF_LAYERS];
 	
 	double *grib_output_field = malloc(NO_OF_LATLON_IO_POINTS*sizeof(double));
@@ -233,12 +233,12 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		10 m wind diagnostics
 		---------------------
 		*/
-		double wind_tangential;
+		double wind_tangential, wind_u_value, wind_v_value;
 		int j;
 		double *wind_10_m_mean_u = malloc(NO_OF_VECTORS_H*sizeof(double));
 		double *wind_10_m_mean_v = malloc(NO_OF_VECTORS_H*sizeof(double));
 		// temporal average over the ten minutes output interval
-		#pragma omp parallel for private(j, wind_tangential)
+		#pragma omp parallel for private(j, wind_tangential, wind_u_value, wind_v_value)
 		for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)
 		{
 			// initializing the means with zero
@@ -256,10 +256,14 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				wind_10_m_mean_u[h_index] += 1.0/min_no_of_output_steps*wind_h_lowest_layer_array[j];
 				wind_10_m_mean_v[h_index] += 1.0/min_no_of_output_steps*wind_tangential;
 			}
+			// passive turn to obtain the u- and v-components of the wind
+			passive_turn(wind_10_m_mean_u[h_index], wind_10_m_mean_v[h_index], -grid -> direction[h_index], &wind_u_value, &wind_v_value);
+			wind_10_m_mean_u[h_index] = wind_u_value;
+			wind_10_m_mean_v[h_index] = wind_v_value;
 		}
 		// vertically extrapolating to ten meters above the surface
 		double roughness_length_extrapolation, actual_roughness_length, z_sfc, z_agl, rescale_factor;
-		#pragma omp parallel for private(wind_u_value, wind_v_value, roughness_length_extrapolation, actual_roughness_length, z_sfc, z_agl, rescale_factor)
+		#pragma omp parallel for private(roughness_length_extrapolation, actual_roughness_length, z_sfc, z_agl, rescale_factor)
 		for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 		{
 			actual_roughness_length = 0.5*(grid -> roughness_length[grid -> from_index[i]] + grid -> roughness_length[grid -> to_index[i]]);
@@ -271,13 +275,12 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			}
 			z_sfc = 0.5*(grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[i]] + grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[i]]);
 			z_agl = grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i] - z_sfc;
-			passive_turn(wind_10_m_mean_u[i], wind_10_m_mean_v[i], -grid -> direction[i], &wind_u_value, &wind_v_value);
 			
 			// rescale factor for computing the wind in a height of 10 m
 			rescale_factor = log(10.0/roughness_length_extrapolation)/log(z_agl/actual_roughness_length);
 			
-			wind_10_m_mean_u[i] = rescale_factor*wind_u_value;
-			wind_10_m_mean_v[i] = rescale_factor*wind_v_value;
+			wind_10_m_mean_u[i] = rescale_factor*wind_10_m_mean_u[i];
+			wind_10_m_mean_v[i] = rescale_factor*wind_10_m_mean_v[i];
 		}
 		
 		// averaging the wind quantities to cell centers for output
@@ -289,8 +292,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		free(wind_10_m_mean_v);
 		
 		// gust diagnostics
+		double u_850_surrogate, u_950_surrogate;
+		double u_850_proxy_height = 8000.0*log(1000.0/850.0);
+		double u_950_proxy_height = 8000.0*log(1000.0/950.0);
 		double *wind_10_m_gusts_speed_at_cell = malloc(NO_OF_SCALARS_H*sizeof(double));
-		#pragma omp parallel for
+		#pragma omp parallel for private(closest_index, second_closest_index, u_850_surrogate, u_950_surrogate)
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 		{
 			// This is the normal case.
@@ -300,6 +306,40 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				// This follows IFS DOCUMENTATION – Cy43r1 - Operational implementation 22 Nov 2016 - PART IV: PHYSICAL PROCESSES.
 				wind_10_m_gusts_speed_at_cell[i] = pow(pow(wind_10_m_mean_u_at_cell[i], 2) + pow(wind_10_m_mean_v_at_cell[i], 2), 0.5)
 				+ 7.71*diagnostics -> roughness_velocity[i]*pow(fmax(1.0 - 0.5/12.0*1000.0/diagnostics -> monin_obukhov_length[i], 0.0), 1.0/3.0);
+				// calculating the wind speed in a height representing 850 hPa
+				for (int j = 0; j < NO_OF_LAYERS; ++j)
+				{
+					vector_to_minimize[j] = fabs(grid -> z_scalar[j*NO_OF_SCALARS_H + i] - (grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i] + u_850_proxy_height));
+				}
+				closest_index = find_min_index(vector_to_minimize, NO_OF_LAYERS);
+				second_closest_index = closest_index - 1;
+				if (closest_index < NO_OF_LAYERS - 1
+				&& grid -> z_scalar[closest_index*NO_OF_SCALARS_H + i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i] > u_850_proxy_height)
+				{
+					second_closest_index = closest_index + 1;
+				}
+				u_850_surrogate = pow(diagnostics -> v_squared[i + closest_index*NO_OF_SCALARS_H], 0.5)
+				+ (pow(diagnostics -> v_squared[i + closest_index*NO_OF_SCALARS_H], 0.5) - pow(diagnostics -> v_squared[i + second_closest_index*NO_OF_SCALARS_H], 0.5))
+				/(grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] - grid -> z_scalar[i + second_closest_index*NO_OF_SCALARS_H])
+				*(u_850_proxy_height - grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H]);
+				// calculating the wind speed in a height representing 950 hPa
+				for (int j = 0; j < NO_OF_LAYERS; ++j)
+				{
+					vector_to_minimize[j] = fabs(grid -> z_scalar[j*NO_OF_SCALARS_H + i] - (grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i] + u_950_proxy_height));
+				}
+				closest_index = find_min_index(vector_to_minimize, NO_OF_LAYERS);
+				second_closest_index = closest_index - 1;
+				if (closest_index < NO_OF_LAYERS - 1
+				&& grid -> z_scalar[closest_index*NO_OF_SCALARS_H + i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i] > u_950_proxy_height)
+				{
+					second_closest_index = closest_index + 1;
+				}
+				u_950_surrogate = pow(diagnostics -> v_squared[i + closest_index*NO_OF_SCALARS_H], 0.5)
+				+ (pow(diagnostics -> v_squared[i + closest_index*NO_OF_SCALARS_H], 0.5) - pow(diagnostics -> v_squared[i + second_closest_index*NO_OF_SCALARS_H], 0.5))
+				/(grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] - grid -> z_scalar[i + second_closest_index*NO_OF_SCALARS_H])
+				*(u_950_proxy_height - grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H]);
+				// adding the baroclinic and convective component to the gusts
+				wind_10_m_gusts_speed_at_cell[i] += 0.6*fmax(0.0, u_850_surrogate - u_950_surrogate);
 			}
 			// This is used if the turbulence quantities are not populated.
 			else
