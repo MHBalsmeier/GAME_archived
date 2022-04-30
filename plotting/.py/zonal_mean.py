@@ -75,18 +75,20 @@ if short_name == "t":
 
 # 4.) plotting
 
+pressure_vector = 1000.0*np.exp(-height_vector/8000.0)
+
 fig = plt.figure()
-plt.contourf(np.rad2deg(latitudes_vector), height_vector, result_array, cmap = "jet", levels = 1000)
-cb = plt.colorbar()
-cb.set_label(unit)
+bounds = np.arange(np.floor(np.min(result_array)), np.ceil(np.max(result_array)), 4.0)
+c = plt.contour(np.rad2deg(latitudes_vector), pressure_vector, result_array, levels = bounds, colors = "black")
+plt.clabel(c, inline = 1)
 plt.xlim([-90, 90])
-plt.ylim([0, max(height_vector)])
+plt.ylim([max(pressure_vector), 0])
 if no_of_steps == 1:
 	plt.title("Zonal mean of " + short_name)
 else:
 	plt.title("Zonal and temporal mean of " + short_name)
 plt.xlabel("latitude / deg")
-plt.ylabel("height above MSL / m")
+plt.ylabel("pressure / hPa")
 plt.savefig(save_directory + "/" + run_id + "_" + "zonal_mean" + "_" + short_name + ".png")
 plt.close("all")
 
