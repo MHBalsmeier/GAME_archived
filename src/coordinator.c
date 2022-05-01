@@ -188,6 +188,11 @@ int main(int argc, char *argv[])
     {
     	config -> radiation_delta_t = 10800.0; 
     }
+    // In the Held-Suarez test case, radiation is updated at every time step.
+    if (config -> rad_on == 2)
+    {
+    	config -> radiation_delta_t = delta_t;
+    }
     
     // some more checks and info
     if (config -> radiation_delta_t < delta_t)

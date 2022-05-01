@@ -21,7 +21,10 @@ int remap_to_original_scalar_h(double [], double [], int);
 
 int call_radiation(State *state, Grid *grid, Dualgrid *dualgrid, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config, double delta_t, double time_coordinate)
 {
-	printf("Starting update of radiative fluxes ...\n");
+	if (config -> rad_on == 1)
+	{
+		printf("Starting update of radiative fluxes ...\n");
+	}
 	int no_of_scalars = NO_OF_SCALARS_RAD;
 	int no_of_constituents = NO_OF_CONSTITUENTS;
 	int no_of_condensed_constituents = NO_OF_CONDENSED_CONSTITUENTS;
@@ -70,7 +73,10 @@ int call_radiation(State *state, Grid *grid, Dualgrid *dualgrid, State *state_te
 		remap_to_original_scalar_h(radiation -> sfc_lw_out, forcings -> sfc_lw_out, rad_block_index);
 		free(radiation);
 	}
-	printf("Update of radiative fluxes completed.\n");
+	if (config -> rad_on == 1)
+	{
+		printf("Update of radiative fluxes completed.\n");
+	}
 	return 0;
 }
 
