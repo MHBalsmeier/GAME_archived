@@ -66,7 +66,7 @@ The code of the model resides in the directory \texttt{src}.
 \section{Time stepping}
 \label{sec:time_stepping}
 
-A fully Eulerian time stepping is employed. The basic building structure is Runge-Kutta second order (RK2). In the vertical, at every substep, an implicit column solver is used, which makes it possible to violate the CFL criterion of vertically propagating sound and fast gravity waves. This has the cost of decreasing the accuracy of these modes, which is however a bearable trade-off, since these waves are of low meteorological relevance. Furthermore, a forward-backward scheme is used, where the divergence term is backward.
+A fully Eulerian time stepping is employed. The basic building structure is a two-time-level predictor-corrector scheme. In the vertical, at every substep, an implicit column solver is used, which makes it possible to violate the CFL criterion of vertically propagating sound and fast gravity waves. This has the cost of decreasing the accuracy of these modes, which is however a bearable trade-off, since these waves are of low meteorological relevance. Furthermore, a forward-backward scheme is used, where the divergence term is backward.
 
 \chapter{Installation}
 \label{chap:installation}

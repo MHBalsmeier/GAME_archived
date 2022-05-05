@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2021.6.28)  30 APR 2022 21:50
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2020.10.12)  6 MAY 2022 00:10
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -331,7 +331,7 @@ Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 \bibhang=\skip78
 \blx@bcfin=\read2
 \blx@bcfout=\write3
-\blx@langwohyphens=\language38
+\blx@langwohyphens=\language12
 \c@mincomprange=\count317
 \c@maxcomprange=\count318
 \c@mincompwidth=\count319
@@ -1092,12 +1092,12 @@ Package logreq Info: Writing requests to 'handbook.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 16580 strings out of 482480
- 276258 string characters out of 5946190
- 939846 words of memory out of 5000000
- 31320 multiletter control sequences out of 15000+600000
+ 16580 strings out of 483057
+ 276258 string characters out of 5962300
+ 938473 words of memory out of 5000000
+ 31286 multiletter control sequences out of 15000+600000
  590008 words of font info for 103 fonts, out of 8000000 for 9000
- 395 hyphenation exceptions out of 8191
+ 59 hyphenation exceptions out of 8191
  38i,15n,45p,1925b,1275s stack positions out of 5000i,500n,10000p,200000b,80000s
  </home/max/.texlive2019/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.600pk
 >{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc} </home/max/.texliv
@@ -1111,7 +1111,7 @@ onts/type1/public/fourier/fourier-ms.pfb></usr/share/texlive/texmf-dist/fonts/t
 ype1/urw/ncntrsbk/uncb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncn
 trsbk/uncr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ncntrsbk/uncri8
 a.pfb>
-Output written on handbook.pdf (13 pages, 132881 bytes).
+Output written on handbook.pdf (13 pages, 132861 bytes).
 PDF statistics:
  529 PDF objects out of 1000 (max. 8388607)
  378 compressed objects within 4 object streams
