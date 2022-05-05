@@ -1,7 +1,7 @@
 # This source file is part of the Geophysical Fluids Modeling Framework (GAME), which is released under the MIT license.
 # Github repository: https://github.com/OpenNWP/GAME
 
-# Thi file is for plotting maps.
+# This file is for plotting maps.
 
 import numpy as np
 import sys
