@@ -78,7 +78,10 @@ if short_name == "t":
 pressure_vector = 1000.0*np.exp(-height_vector/8000.0)
 
 fig = plt.figure()
-bounds = np.arange(np.floor(np.min(result_array)), np.ceil(np.max(result_array)), 4.0)
+if short_name == "u":
+	bounds = np.arange(-32.0, 32.0, 4.0)
+if short_name == "t":
+	bounds = np.arange(100.0, 400.0, 10.0)
 c = plt.contour(np.rad2deg(latitudes_vector), pressure_vector, result_array, levels = bounds, colors = "black")
 plt.clabel(c, inline = 1)
 plt.xlim([-90, 90])
