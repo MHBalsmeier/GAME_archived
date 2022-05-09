@@ -143,24 +143,56 @@ int pbl_wind_tendency(State *state, Diagnostics *diagnostics, Irreversible_quant
 	if (config -> pbl_scheme == 2)
 	{
 		// some parameters
-		double fric_lr_height = 2853.0; // boundary layer height
-		double bndr_lr_visc_sfc = 1.0/86400.0; // maximum friction coefficient in the boundary layer
-		double scale_height = 8000.0;
+		double bndr_lr_visc_max = 1.0/86400.0; // maximum friction coefficient in the boundary layer
+		double sigma_b = 0.7; // boundary layer height in sigma-p coordinates
+		double standard_vert_lapse_rate = 0.0065;
 		int layer_index, h_index, vector_index;
-		#pragma omp parallel for private(layer_index, h_index, vector_index)
+		double exner_from, exner_to, pressure_from, pressure_to, pressure, temp_lowest_layer, pressure_value_lowest_layer, temp_surface, surface_p_factor,
+		pressure_sfc_from, pressure_sfc_to, pressure_sfc, sigma;
+		#pragma omp parallel for private(layer_index, h_index, vector_index, exner_from, exner_to, pressure_from, pressure_to, pressure, temp_lowest_layer, pressure_value_lowest_layer, temp_surface, surface_p_factor, pressure_sfc_from, pressure_sfc_to, pressure_sfc, sigma)
 		for (int i = 0; i < NO_OF_H_VECTORS; ++i)
 		{
 			layer_index = i/NO_OF_VECTORS_H;
 			h_index = i - layer_index*NO_OF_VECTORS_H;
 			vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
-			// adding the boundary layer friction
-			if (grid -> z_vector[vector_index] < fric_lr_height)
-			{
-				irrev -> friction_acc[vector_index]
-				+= -bndr_lr_visc_sfc*(exp(-grid -> z_vector[vector_index]/scale_height) - exp(-fric_lr_height/scale_height))
-				/(1.0 - exp(-fric_lr_height/scale_height))
-				*state -> wind[vector_index];
-			}
+			// calculating the pressure at the horizontal vector point
+			exner_from = grid -> exner_bg[layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]]
+			+ state -> exner_pert[layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]];
+			exner_to = grid -> exner_bg[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]]
+			+ state -> exner_pert[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]];
+			pressure_from = P_0*pow(exner_from, spec_heat_capacities_p_gas(0)/specific_gas_constants(0));
+			pressure_to = P_0*pow(exner_to, spec_heat_capacities_p_gas(0)/specific_gas_constants(0));
+			pressure = 0.5*(pressure_from + pressure_to);
+			
+			// calculating the surface pressure at the horizontal vecor point
+			// calculating the surface pressure at the from scalar point
+		    temp_lowest_layer = diagnostics -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]];
+			exner_from = grid -> exner_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]]
+			+ state -> exner_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]];
+		    pressure_value_lowest_layer = P_0*pow(exner_from, spec_heat_capacities_p_gas(0)/specific_gas_constants(0));
+			temp_surface = temp_lowest_layer + standard_vert_lapse_rate*(grid -> z_scalar[grid -> from_index[h_index] + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]
+			- grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[h_index]]);
+		    surface_p_factor = pow(1.0 - (temp_surface - temp_lowest_layer)/temp_surface, grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]]/
+		    (gas_constant_diagnostics(state, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index], config)*standard_vert_lapse_rate));
+			pressure_sfc_from = pressure_value_lowest_layer/surface_p_factor;
+			// calculating the surface pressure at the to scalar point
+		    temp_lowest_layer = diagnostics -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]];
+			exner_to = grid -> exner_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]
+			+ state -> exner_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]];
+		    pressure_value_lowest_layer = P_0*pow(exner_to, spec_heat_capacities_p_gas(0)/specific_gas_constants(0));
+			temp_surface = temp_lowest_layer + standard_vert_lapse_rate*(grid -> z_scalar[grid -> to_index[h_index] + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]
+			- grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[h_index]]);
+		    surface_p_factor = pow(1.0 - (temp_surface - temp_lowest_layer)/temp_surface, grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index]]/
+		    (gas_constant_diagnostics(state, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index], config)*standard_vert_lapse_rate));
+			pressure_sfc_to = pressure_value_lowest_layer/surface_p_factor;
+			// averaging the surface pressure to the vector point
+			pressure_sfc = 0.5*(pressure_sfc_from + pressure_sfc_to);
+			
+			// calculating sigma
+			sigma = pressure/pressure_sfc;
+			// finally calculating the friction acceleration
+			irrev -> friction_acc[vector_index]
+			+= -bndr_lr_visc_max*fmax(0.0, (sigma - sigma_b)/(1.0 - sigma_b))*state -> wind[vector_index];
 		}
 	}
 	

@@ -14,9 +14,9 @@ run_id = "held_suar"
 save_directory = "/home/max/code/GAME/figs"
 short_name = "u"
 no_of_layers = 26
-run_span = 1250*86400 # run length
+run_span = 1200*86400 # run length
 dt_data = 86400 # output time step
-begin_since_init = 250*86400 #  when to begin computing the zonal average
+begin_since_init = 200*86400 #  when to begin computing the zonal average
 stretching_parameter = 1.3 # stretching parameter of the vertical grid
 toa = 41152 # top of atmosphere
 
