@@ -289,66 +289,44 @@ double saturation_pressure_over_water(double temperature)
 {
 	/*
 	This function returns the saturation pressure in Pa over liquid water as a function of the temperature in K.
-	It is based on Pruppacher and Klett (2010), p. 854, Eq. (A.4-1).
+	It uses the same formula as in WRF.
 	*/
     
-	// calculating the temperature in degrees Celsius
-    double temp_c = temperature - T_0;
-    
-    // clipping too extreme values for this approximation
-    if (temp_c < -50.0)
+    // clipping too extreme values for stability reasons
+    if (temperature < T_0 - 50.0)
     {
-    	temp_c = -50.0;
-    }
-    if (temp_c > 50.0)
-    {
-    	temp_c = 50.0;
+    	temperature = T_0 - 50.0;
     }
     
-    double result
-    = 6.107799961
-    + 4.436518521e-1*temp_c
-    + 1.428945805e-2*pow(temp_c, 2)
-    + 2.650648471e-4*pow(temp_c, 3)
-    + 3.031240396e-6*pow(temp_c, 4)
-    + 2.034080948e-8*pow(temp_c, 5)
-    + 6.136820929e-11*pow(temp_c, 6);
+    double a = 611.2;
+    double b = 17.67;
+    double c = 29.65;
     
-    // unit conversion
-    return 100.0*result;
+    double result = a*exp(b*(temperature - T_0)/(temperature - c));
+    
+    return result;
 }
 
 double saturation_pressure_over_ice(double temperature)
 {
 	/*
 	This function returns the saturation pressure in Pa over ice as a function of the temperature in K.
-	It is based on Pruppacher and Klett (2010), p. 854, Eq. (A.4-1).
+	It uses the same formula as in WRF.
 	*/
-	
-	// calculating the temperature in degrees Celsius
-    double temp_c = temperature - T_0;
     
-    // clipping too extreme values for this approximation
-    if (temp_c < -50.0)
+    // clipping too extreme values for stability reasons
+    if (temperature < T_0 - 50.0)
     {
-    	temp_c = -50.0;
-    }
-    if (temp_c > 0.0)
-    {
-    	temp_c = 0.0;
+    	temperature = T_0 - 50.0;
     }
     
-    double result
-    = 6.10690449
-    + 5.02660639e-1*temp_c
-    + 1.87743264e-2*pow(temp_c, 2)
-    + 4.13476180e-4*pow(temp_c, 3)
-    + 5.72333773e-6*pow(temp_c, 4)
-    + 4.71651246e-8*pow(temp_c, 5)
-    + 1.78086695e-10*pow(temp_c, 6);
+    double a = 611.2;
+    double b = 17.67;
+    double c = 29.65;
     
-    // unit conversion
-    return 100.0*result;
+    double result = a*exp(b*(temperature - T_0)/(temperature - c));
+    
+    return result;
 }
 
 double rel_humidity(double abs_humidity, double temperature)
