@@ -14,7 +14,7 @@ This file manages the calls to the radiation routines.
 
 int create_rad_array_scalar(double [], double [], int);
 int create_rad_array_scalar_h(double [], double [], int);
-int create_rad_array_mass_den(double [], double [], int, int);
+int create_rad_array_mass_den(double [], double [], int);
 int create_rad_array_vector(double [], double [], int);
 int remap_to_original(double [], double [], int);
 int remap_to_original_scalar_h(double [], double [], int);
@@ -41,7 +41,7 @@ int call_radiation(State *state, Grid *grid, Dualgrid *dualgrid, State *state_te
 		create_rad_array_scalar_h(grid -> sfc_albedo, radiation -> sfc_albedo, rad_block_index);
 		create_rad_array_scalar(grid -> z_scalar, radiation -> z_scal, rad_block_index);
 		create_rad_array_vector(grid -> z_vector, radiation -> z_vect, rad_block_index);
-		create_rad_array_mass_den(state -> rho, radiation -> rho, rad_block_index, config -> no_rad_moisture_layers);
+		create_rad_array_mass_den(state -> rho, radiation -> rho, rad_block_index);
 		create_rad_array_scalar(diagnostics -> temperature_gas, radiation -> temp, rad_block_index);
 		// calling the radiation routine
 		// RTE+RRTMGP
@@ -109,7 +109,7 @@ int create_rad_array_scalar_h(double in[], double out[], int rad_block_index)
 	return 0;
 }
 
-int create_rad_array_mass_den(double in[], double out[], int rad_block_index, int no_rad_moisture_layers)
+int create_rad_array_mass_den(double in[], double out[], int rad_block_index)
 {
 	/*
 	same thing as create_rad_array_scalar, only for a mass density field
@@ -124,11 +124,6 @@ int create_rad_array_mass_den(double in[], double out[], int rad_block_index, in
 			h_index = i - layer_index*NO_OF_SCALARS_RAD_PER_LAYER;
 			out[const_id*NO_OF_SCALARS_RAD + i]
 			= in[const_id*NO_OF_SCALARS + rad_block_index*NO_OF_SCALARS_RAD_PER_LAYER + h_index + layer_index*NO_OF_SCALARS_H];
-			// setting water densities to zero in the higher atmosphere
-			if (layer_index < no_rad_moisture_layers && const_id != NO_OF_CONDENSED_CONSTITUENTS)
-			{
-				out[const_id*NO_OF_SCALARS_RAD + i] = 0.0;
-			}
 		}
 	}
 	return 0;

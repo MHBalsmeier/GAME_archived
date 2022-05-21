@@ -203,7 +203,6 @@ int assume_lte;
 int time_to_next_analysis;
 int pbl_scheme;
 int total_run_span;
-int no_rad_moisture_layers;
 double diff_h_smag_div;
 double diff_h_smag_rot;
 double damping_start_height_over_toa;
