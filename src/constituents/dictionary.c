@@ -293,9 +293,9 @@ double saturation_pressure_over_water(double temperature)
 	*/
     
     // clipping too extreme values for stability reasons
-    if (temperature < T_0 - 50.0)
+    if (temperature < T_0 - 60.0)
     {
-    	temperature = T_0 - 50.0;
+    	temperature = T_0 - 60.0;
     }
     
     double a = 611.2;
@@ -315,9 +315,9 @@ double saturation_pressure_over_ice(double temperature)
 	*/
     
     // clipping too extreme values for stability reasons
-    if (temperature < T_0 - 50.0)
+    if (temperature < T_0 - 60.0)
     {
-    	temperature = T_0 - 50.0;
+    	temperature = T_0 - 60.0;
     }
     
     double a = 611.2;
