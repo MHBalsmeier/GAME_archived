@@ -290,7 +290,7 @@ double enthalpy_melting(double temperature)
 double saturation_pressure_over_water(double temperature)
 {
 	/*
-	This function returns the saturation pressure in Pa over liquid water as a function of the temperature in K.
+	This function returns the saturation pressure in Pa of pure water vapour over plane liquid water as a function of the temperature in K.
 	It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
 	*/
     
@@ -321,7 +321,7 @@ double saturation_pressure_over_water(double temperature)
 double saturation_pressure_over_ice(double temperature)
 {
 	/*
-	This function returns the saturation pressure in Pa over ice as a function of the temperature in K.
+	This function returns the saturation pressure in Pa of pure water vapour over plane ice as a function of the temperature in K.
 	It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
 	*/
     
@@ -344,6 +344,26 @@ double saturation_pressure_over_ice(double temperature)
 	result = exp(43.494 - 6545.8/(temp_c + 278.0))/pow(temp_c + 868.0, 2);
     
     return result;
+}
+
+double enhancement_factor(double temperature, double air_pressure)
+{
+	/*
+	This function calculates the enhancement factor, which accounts for the fact the the saturation vapour pressure is different in moist air compared to pure water vapour.
+	It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
+	*/
+	
+	double result;
+	if (temperature > T_0)
+	{
+		result = 1.00071*exp(0.000000045*air_pressure);
+	}
+	else
+	{
+		result = 0.99882*exp(0.00000008*air_pressure);
+	}
+	
+	return result;
 }
 
 double rel_humidity(double abs_humidity, double temperature)

@@ -22,14 +22,14 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
 	*/
 	
     double diff_density, phase_trans_density, saturation_pressure, water_vapour_pressure, solid_temperature, liquid_temperature,
-    layer_thickness, diff_density_sfc, saturation_pressure_sfc;
+    layer_thickness, diff_density_sfc, saturation_pressure_sfc, dry_pressure, air_pressure;
     
     //  maximum cloud water content in (kg cloud)/(kg dry air).
     double maximum_cloud_water_content = 0.2e-3;
     
     // loop over all grid boxes
     int layer_index, h_index;
-    #pragma omp parallel for private(diff_density, phase_trans_density, saturation_pressure, water_vapour_pressure, solid_temperature, liquid_temperature, layer_index, h_index, layer_thickness, diff_density_sfc, saturation_pressure_sfc)
+    #pragma omp parallel for private(diff_density, phase_trans_density, saturation_pressure, water_vapour_pressure, solid_temperature, liquid_temperature, layer_index, h_index, layer_thickness, diff_density_sfc, saturation_pressure_sfc, dry_pressure, air_pressure)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	/*
@@ -76,11 +76,18 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
     	{
             saturation_pressure = saturation_pressure_over_ice(diagnostics -> temperature_gas[i]);
 		}
-		// assuming clouds form at 101 % relative humidity
-		saturation_pressure = 1.01*saturation_pressure;
 		
 		// determining the water vapour pressure (using the EOS)
-        water_vapour_pressure = state -> rho[5*NO_OF_SCALARS + i]*specific_gas_constants(1)*diagnostics -> temperature_gas[i];
+        water_vapour_pressure = state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i]*specific_gas_constants(1)*diagnostics -> temperature_gas[i];
+		
+		// determining the water vapour pressure (using the EOS)
+        dry_pressure = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*specific_gas_constants(0)*diagnostics -> temperature_gas[i];
+        
+        // calculating the total air pressure
+        air_pressure = dry_pressure + water_vapour_pressure;
+        
+        // multiplying the saturation pressure by the enhancement factor
+        saturation_pressure = enhancement_factor(diagnostics -> temperature_gas[i], air_pressure)*saturation_pressure;
         
     	// the amount of water vapour that the air can still take 
         diff_density = (saturation_pressure - water_vapour_pressure)/(specific_gas_constants(1)*diagnostics -> temperature_gas[i]);
@@ -263,14 +270,18 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         		{
         			saturation_pressure_sfc = saturation_pressure_over_ice(state -> temperature_soil[h_index]);
         		}
+		        // multiplying the saturation pressure by the enhancement factor
+        		saturation_pressure_sfc = enhancement_factor(state -> temperature_soil[h_index], air_pressure)*saturation_pressure_sfc;
+        		
         		// difference water vapour density between saturation at ground temperature and actual absolute humidity in the lowest model layer
-        		diff_density_sfc = saturation_pressure_sfc/(specific_gas_constants(1)*state -> temperature_soil[h_index]) - state -> rho[5*NO_OF_SCALARS + i];
+        		diff_density_sfc = saturation_pressure_sfc/(specific_gas_constants(1)*state -> temperature_soil[h_index])
+        		- state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i];
         		
         		// the thickness of the lowest model layer (we need it as a result of Guass' theorem)
         		layer_thickness = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + h_index] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + h_index];
         		
         		// evporation, sublimation
-		    	irrev -> mass_source_rates[4*NO_OF_SCALARS + i] += fmax(0.0, diff_density_sfc/diagnostics -> scalar_flux_resistance[h_index])/layer_thickness;
+		    	irrev -> mass_source_rates[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] += fmax(0.0, diff_density_sfc/diagnostics -> scalar_flux_resistance[h_index])/layer_thickness;
 		    	
 		    	// calculating the latent heat flux density affecting the surface
         		if (state -> temperature_soil[h_index] >= T_0)
