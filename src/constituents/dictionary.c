@@ -363,22 +363,26 @@ double saturation_pressure_over_ice(double temperature)
     return result;
 }
 
-double enhancement_factor(double temperature, double air_pressure)
+double enhancement_factor_over_water(double air_pressure)
 {
 	/*
-	This function calculates the enhancement factor, which accounts for the fact the the saturation vapour pressure is different in moist air compared to pure water vapour.
+	This function calculates the enhancement factor over water, which accounts for the fact the the saturation vapour pressure is different in moist air compared to pure water vapour.
 	It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
 	*/
 	
-	double result;
-	if (temperature > T_0)
-	{
-		result = 1.00071*exp(0.000000045*air_pressure);
-	}
-	else
-	{
-		result = 0.99882*exp(0.00000008*air_pressure);
-	}
+	double result = 1.00071*exp(0.000000045*air_pressure);
+	
+	return result;
+}
+
+double enhancement_factor_over_ice(double air_pressure)
+{
+	/*
+	This function calculates the enhancement factor over ice, which accounts for the fact the the saturation vapour pressure is different in moist air compared to pure water vapour.
+	It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
+	*/
+	
+	double result = 0.99882*exp(0.00000008*air_pressure);
 	
 	return result;
 }

@@ -87,7 +87,15 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         air_pressure = dry_pressure + water_vapour_pressure;
         
         // multiplying the saturation pressure by the enhancement factor
-        saturation_pressure = enhancement_factor(diagnostics -> temperature_gas[i], air_pressure)*saturation_pressure;
+        if (diagnostics -> temperature_gas[i] >= T_0)
+    	{
+            saturation_pressure = enhancement_factor_over_water(air_pressure)*saturation_pressure;
+		}
+		// "negative" temperatures
+        else
+    	{
+            saturation_pressure = enhancement_factor_over_ice(air_pressure)*saturation_pressure;
+		}
         
     	// the amount of water vapour that the air can still take 
         diff_density = (saturation_pressure - water_vapour_pressure)/(specific_gas_constants(1)*diagnostics -> temperature_gas[i]);
@@ -265,13 +273,13 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         		if (state -> temperature_soil[h_index] >= T_0)
         		{
         			saturation_pressure_sfc = saturation_pressure_over_water(state -> temperature_soil[h_index]);
+		    		saturation_pressure_sfc = enhancement_factor_over_water(air_pressure)*saturation_pressure_sfc;
         		}
         		else
         		{
         			saturation_pressure_sfc = saturation_pressure_over_ice(state -> temperature_soil[h_index]);
+		    		saturation_pressure_sfc = enhancement_factor_over_ice(air_pressure)*saturation_pressure_sfc;
         		}
-		        // multiplying the saturation pressure by the enhancement factor
-        		saturation_pressure_sfc = enhancement_factor(state -> temperature_soil[h_index], air_pressure)*saturation_pressure_sfc;
         		
         		// difference water vapour density between saturation at ground temperature and actual absolute humidity in the lowest model layer
         		diff_density_sfc = saturation_pressure_sfc/(specific_gas_constants(1)*state -> temperature_soil[h_index])
