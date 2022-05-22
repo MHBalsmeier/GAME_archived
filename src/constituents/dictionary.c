@@ -9,6 +9,8 @@ This file contains look-up functions for properties of the atmosphere.
 
 #include <math.h>
 #include "../game_constants.h"
+#include "../game_types.h"
+#include "constituents.h"
 
 /*
 Gas quantities
@@ -289,20 +291,29 @@ double saturation_pressure_over_water(double temperature)
 {
 	/*
 	This function returns the saturation pressure in Pa over liquid water as a function of the temperature in K.
-	It uses the same formula as in WRF.
+	It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
 	*/
     
-    // clipping too extreme values for stability reasons
-    if (temperature < T_0 - 60.0)
+    // calculating the temperature in degrees Celsius
+    double temp_c = temperature - T_0;
+    
+    // clipping too low values for stability reasons
+    if (temp_c < -60.0)
     {
-    	temperature = T_0 - 60.0;
+    	temp_c = -60.0;
     }
     
-    double a = 611.2;
-    double b = 17.67;
-    double c = 29.65;
+    double result;
     
-    double result = a*exp(b*(temperature - T_0)/(temperature - c));
+    if (temp_c > 0.0)
+    {
+    	result = exp(34.494 - 4924.99/(temp_c + 237.1))/pow(temp_c + 105.0, 1.57);
+    }
+    // for super-cooled water we use the formula for ice
+    else
+    {
+    	result = saturation_pressure_over_ice(temperature);
+    }
     
     return result;
 }
@@ -311,20 +322,26 @@ double saturation_pressure_over_ice(double temperature)
 {
 	/*
 	This function returns the saturation pressure in Pa over ice as a function of the temperature in K.
-	It uses the same formula as in WRF.
+	It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
 	*/
     
-    // clipping too extreme values for stability reasons
-    if (temperature < T_0 - 60.0)
+    // calculating the temperature in degrees Celsius
+    double temp_c = temperature - T_0;
+    
+    // clipping too low values for stability reasons
+    if (temp_c < -60.0)
     {
-    	temperature = T_0 - 60.0;
+    	temp_c = -60.0;
+    }
+    // at temperatures > 0 degrees C ice cannot exist in equilibrium which is why this is clipped
+    if (temp_c > 0.0)
+    {
+    	temp_c = 0.0;
     }
     
-    double a = 611.2;
-    double b = 17.67;
-    double c = 29.65;
+    double result;
     
-    double result = a*exp(b*(temperature - T_0)/(temperature - c));
+	result = exp(43.494 - 6545.8/(temp_c + 278.0))/pow(temp_c + 868.0, 2);
     
     return result;
 }
