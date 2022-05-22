@@ -314,10 +314,22 @@ double saturation_pressure_over_water(double temperature)
     {
     	result = exp(34.494 - 4924.99/(temp_c + 237.1))/pow(temp_c + 105.0, 1.57);
     }
-    // for super-cooled water we use the formula for ice
+    // For super-cooled water we use the formula cited in Pruppacher and Klett (2010), p. 854, Eq. (A.4-1).
     else
     {
-    	result = saturation_pressure_over_ice(temperature);
+    	// Clipping values that are too extreme for this approximation.
+    	if (temp_c < -50.0)
+    	{
+    		temp_c = -50.0;
+    	}
+    	result 
+		= 6.107799961
+		+ 4.436518521e-1*temp_c
+		+ 1.428945805e-2*pow(temp_c, 2)
+		+ 2.650648471e-4*pow(temp_c, 3)
+		+ 3.031240396e-6*pow(temp_c, 4)
+		+ 2.034080948e-8*pow(temp_c, 5)
+		+ 6.136820929e-11*pow(temp_c, 6);
     }
     
     return result;
