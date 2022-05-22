@@ -302,6 +302,11 @@ double saturation_pressure_over_water(double temperature)
     {
     	temp_c = -60.0;
     }
+    // this is the boundary of this approximation
+    if (temp_c > 100.0)
+    {
+    	temp_c = 100.0;
+    }
     
     double result;
     
