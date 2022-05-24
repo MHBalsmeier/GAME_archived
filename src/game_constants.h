@@ -11,6 +11,7 @@ This file collects physical constants that are not modified within the code.
 #define OMEGA (7.292115e-5)
 #define T_0 273.15
 #define K_B (1.380649e-23)
+#define N_A (6.02214076e23)
 #define P_0 100000.0
 #define G_MEAN_SFC_ABS 9.80616
 #define EPSILON_SECURITY (1e-10)

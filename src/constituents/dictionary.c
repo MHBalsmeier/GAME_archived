@@ -34,7 +34,7 @@ gaseous constituents IDs:
 */
 
 double enthalpy_evaporation(double);
-double enthalpy_melting(double);
+double enthalpy_sublimation(double);
 
 double mean_particle_masses_gas(int gas_constituent_id)
 {
@@ -163,28 +163,7 @@ Condensate properties
 ---------------------
 */
 
-double c_v_cond(int solid_or_liquid, int subcategory, double temp)
-{
-	/*
-	This function returns c_v of condensates.
-	*/
-	
-	// solid_or_liquid == 0: ice
-	// solid_or_liquid == 1: liquid water
-	
-    double result;
-    if (solid_or_liquid == 0)
-    {
-        result = 2060.0;
-    }
-    if (solid_or_liquid == 1)
-    {
-        result = 4184.0;
-    }
-    return result;
-}
-
-double c_p_cond(int solid_or_liquid, int subcategory, double temp)
+double c_p_cond(int solid_or_liquid, int subcategory, double temperature)
 {
 	/*
 	This function returns c_p of condensates.
@@ -193,10 +172,26 @@ double c_p_cond(int solid_or_liquid, int subcategory, double temp)
 	// solid_or_liquid == 0: ice
 	// solid_or_liquid == 1: liquid water
 	
-    double result;
+    double result = 0.0;
     if (solid_or_liquid == 0)
     {
-        result = 2060.0;
+    	/*
+		This follows Eq. (4) in Murphy DM, Koop T. Review of the vapour pressures of ice and supercooled water for atmospheric applications.
+		QUARTERLY JOURNAL OF THE ROYAL METEOROLOGICAL SOCIETY. 2005;131(608):1539-1565.
+    	*/
+    	// ice cannot exist in equilibrium at temperatures > T_0
+    	if (temperature > T_0)
+    	{
+    		temperature = T_0;
+    	}
+    	// clipping values that are too extreme for this approximation
+    	if (temperature < 20.0)
+    	{
+    		temperature = 20.0;
+    	}
+		result = -2.0572 + 0.14644*temperature + 0.06163*temperature*exp(-pow(temperature/125.1, 2));
+		// unit conversion from J/(mol*K) to J/(kg*K)
+		result = result/(N_A*mean_particle_masses_gas(1));
     }
     if (solid_or_liquid == 1)
     {
@@ -225,11 +220,11 @@ double phase_trans_heat(int direction, double temperature)
 	}
     if (direction == 1)
     {
-        result = enthalpy_evaporation(temperature) + enthalpy_melting(temperature);
+        result = enthalpy_sublimation(temperature);
 	}
     if (direction == 2)
     {
-        result = enthalpy_melting(temperature);
+        result = enthalpy_sublimation(temperature) - enthalpy_evaporation(temperature);
 	}
 	
     return result;
@@ -239,52 +234,65 @@ double enthalpy_evaporation(double temperature)
 {
 	/*
 	This function returns the enthalpy of evaporation depending on the temperature.
-	It follows Pruppacher and Klett (2010), p. 97, Eq. (3-24a).
 	*/
 	
-	// temperature in degrees Celsius
-	double temp_c = temperature - T_0;
+	double result;
 	
-	// clipping values that are too extreme for these approximations
-	if (temp_c < -20.0)
+	if (temperature < T_0)
 	{
-		temp_c = -20.0;
+		/*
+		This follows Eq. (5) in Murphy DM, Koop T. Review of the vapour pressures of ice and supercooled water for atmospheric applications.
+		QUARTERLY JOURNAL OF THE ROYAL METEOROLOGICAL SOCIETY. 2005;131(608):1539-1565.
+		*/
+		// clipping values that are too extreme for these approximations
+		if (temperature < 30.0)
+		{
+			temperature = 30.0;
+		}
+		result = 56579.0 - 42.212*temperature + exp(0.1149*(281.6 - temperature));
+		// unit conversion from J/mol to J/kg
+		result = result/(N_A*mean_particle_masses_gas(1));
 	}
-	if (temp_c > 40.0)
+	else
 	{
-		temp_c = 40.0;
+		// This follows the formula cited by Huang:
+		// A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
+		// clipping values that are too extreme for these approximations
+		if (temperature > T_0 + 100.0)
+		{
+			temperature = T_0 + 100.0;
+		}
+		result = 3151378.0 - 2386.0*temperature;	
 	}
 	
-	double result = 597.3 - 0.561*temp_c;
-	
-	// unit conversion
-	return 4186.8*result;
+	return result;
 }
 
-double enthalpy_melting(double temperature)
+double enthalpy_sublimation(double temperature)
 {
 	/*
-	This function returns the enthalpy of melting depending on the temperature.
-	It follows Pruppacher and Klett (2010), p. 97, Eq. (3-26).
+	This function returns the enthalpy of sublimation depending on the temperature.
+	It follows Eq. (5) in Murphy DM, Koop T. Review of the vapour pressures of ice and supercooled water for atmospheric applications.
+	QUARTERLY JOURNAL OF THE ROYAL METEOROLOGICAL SOCIETY. 2005;131(608):1539-1565.
 	*/
 	
-	// temperature in degrees Celsius
-	double temp_c = temperature - T_0;
-	
 	// clipping values that are too extreme for this approximation
-	if (temp_c < -44.0)
+	if (temperature < 30.0)
 	{
-		temp_c = -44.0;
+		temperature = 30.0;
 	}
-	if (temp_c > 0.0)
+	// sublimation is not happening in thermodynamic equilibrium at temperatures > T_0
+	if (temperature > T_0)
 	{
-		temp_c = 0.0;
+		temperature = T_0;
 	}
 	
-	double result = 79.7 - 0.12*temp_c - 8.0481e-2*pow(temp_c, 2) - 3.2376e-3*pow(temp_c, 3) - 4.2553e-5*pow(temp_c, 4);
+	double result = 46782.5 + 35.8925*temperature - 0.07414*pow(temperature, 2) + 541.5*exp(-pow(temperature/123.75, 2));
 	
-	// unit conversion
-	return 4186.8*result;
+	// unit conversion from J/mol to J/kg
+	result = result/(N_A*mean_particle_masses_gas(1));
+	
+	return result;
 }
 
 double saturation_pressure_over_water(double temperature)
@@ -330,6 +338,8 @@ double saturation_pressure_over_water(double temperature)
 		+ 3.031240396e-6*pow(temp_c, 4)
 		+ 2.034080948e-8*pow(temp_c, 5)
 		+ 6.136820929e-11*pow(temp_c, 6);
+		// unit conversion from hPa to Pa
+		result = 100.0*result;
     }
     
     return result;

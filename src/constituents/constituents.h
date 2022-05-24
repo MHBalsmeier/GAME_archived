@@ -10,7 +10,6 @@ double saturation_pressure_over_ice(double);
 double enhancement_factor_over_water(double);
 double enhancement_factor_over_ice(double);
 double c_p_cond(int, int, double);
-double c_v_cond(int, int, double);
 double phase_trans_heat(int, double);
 double rel_humidity(double, double);
 double calc_o3_vmr(double);
