@@ -217,7 +217,7 @@ double c_p_cond(int solid_or_liquid, int subcategory, double temperature)
     		// clipping values that are too extreme for this approximation
     		if (temp_c < -37.0)
     		{
-    			temp_c = 37.0;
+    			temp_c = -37.0;
     		}
     		result = 1.000938 - 2.7052e-3*temp_c - 2.3235e-5*pow(temp_c, 2) + 4.3778e-6*pow(temp_c, 3) + 2.7136e-7*pow(temp_c, 4);
     	}
