@@ -195,7 +195,34 @@ double c_p_cond(int solid_or_liquid, int subcategory, double temperature)
     }
     if (solid_or_liquid == 1)
     {
-        result = 4184.0;
+    	// calculating the temperature in degrees Celsius
+    	double temp_c = temperature - T_0;
+    	/*
+    	We use the formula cited in Pruppacher and Klett (2010), p. 93, Eq. (3-15).
+    	*/
+    	if (temp_c >= 0.0)
+    	{
+    		// clipping values that are too extreme for this approximation
+    		if (temp_c > 35.0)
+    		{
+    			temp_c = 35.0;
+    		}
+    		result = 0.9979 + 3.1e-6*pow(temp_c - 35.0, 2) + 3.8e-9*pow(temp_c - 35.0, 4);
+    	}
+    	/*
+    	This is the case of supercooled water. We use the formula cited in Pruppacher and Klett (2010), p. 93, Eq. (3-16).
+    	*/
+    	else
+    	{
+    		// clipping values that are too extreme for this approximation
+    		if (temp_c < -37.0)
+    		{
+    			temp_c = 37.0;
+    		}
+    		result = 1.000938 - 2.7052e-3*temp_c - 2.3235e-5*pow(temp_c, 2) + 4.3778e-6*pow(temp_c, 3) + 2.7136e-7*pow(temp_c, 4);
+    	}
+    	// unit conversion from IT cal/(g*K) to J/(kg*K)
+        result = 4186.8*result;
     }
     return result;
 }
