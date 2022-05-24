@@ -241,7 +241,7 @@ double enthalpy_evaporation(double temperature)
 	if (temperature < T_0)
 	{
 		/*
-		This follows Eq. (5) in Murphy DM, Koop T. Review of the vapour pressures of ice and supercooled water for atmospheric applications.
+		This follows Eq. (9) in Murphy DM, Koop T. Review of the vapour pressures of ice and supercooled water for atmospheric applications.
 		QUARTERLY JOURNAL OF THE ROYAL METEOROLOGICAL SOCIETY. 2005;131(608):1539-1565.
 		*/
 		// clipping values that are too extreme for these approximations
@@ -255,7 +255,7 @@ double enthalpy_evaporation(double temperature)
 	}
 	else
 	{
-		// This follows the formula cited by Huang:
+		// This follows the formula (Eq. (8)) cited by Huang:
 		// A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
 		// clipping values that are too extreme for these approximations
 		if (temperature > T_0 + 100.0)
@@ -299,7 +299,6 @@ double saturation_pressure_over_water(double temperature)
 {
 	/*
 	This function returns the saturation pressure in Pa of pure water vapour over plane liquid water as a function of the temperature in K.
-	It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
 	*/
     
     // calculating the temperature in degrees Celsius
@@ -318,6 +317,10 @@ double saturation_pressure_over_water(double temperature)
     
     double result;
     
+    /*
+	For "positive" temperatures we use the formula (Eq. (17)) by Huang:
+	A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
+    */
     if (temp_c > 0.0)
     {
     	result = exp(34.494 - 4924.99/(temp_c + 237.1))/pow(temp_c + 105.0, 1.57);
@@ -349,7 +352,7 @@ double saturation_pressure_over_ice(double temperature)
 {
 	/*
 	This function returns the saturation pressure in Pa of pure water vapour over plane ice as a function of the temperature in K.
-	It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
+	It uses the formula (Eq. (18)) by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
 	*/
     
     // calculating the temperature in degrees Celsius
@@ -377,7 +380,7 @@ double enhancement_factor_over_water(double air_pressure)
 {
 	/*
 	This function calculates the enhancement factor over water, which accounts for the fact the the saturation vapour pressure is different in moist air compared to pure water vapour.
-	It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
+	It uses the formula (Eq. (21)) by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
 	*/
 	
 	double result = 1.00071*exp(0.000000045*air_pressure);
@@ -389,7 +392,7 @@ double enhancement_factor_over_ice(double air_pressure)
 {
 	/*
 	This function calculates the enhancement factor over ice, which accounts for the fact the the saturation vapour pressure is different in moist air compared to pure water vapour.
-	It uses the formula by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
+	It uses the formula (Eq. (22)) by Huang: A Simple Accurate Formula for Calculating Saturation Vapor Pressure of Water and Ice, 2018, DOI: 10.1175/JAMC-D-17-0334.1.
 	*/
 	
 	double result = 0.99882*exp(0.00000008*air_pressure);
