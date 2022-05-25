@@ -198,7 +198,7 @@ double c_p_cond(int solid_or_liquid, int subcategory, double temperature)
     	// calculating the temperature in degrees Celsius
     	double temp_c = temperature - T_0;
     	/*
-    	We use the formula cited in Pruppacher and Klett (2010), p. 93, Eq. (3-15).
+    	For "positive" temperatures we use the formula cited in Pruppacher and Klett (2010), p. 93, Eq. (3-15).
     	*/
     	if (temp_c >= 0.0)
     	{
