@@ -35,6 +35,8 @@ gaseous constituents IDs:
 
 double enthalpy_evaporation(double);
 double enthalpy_sublimation(double);
+double c_p_ice(double);
+double c_p_water(double);
 
 double mean_particle_masses_gas(int gas_constituent_id)
 {
@@ -163,68 +165,85 @@ Condensate properties
 ---------------------
 */
 
-double c_p_cond(int solid_or_liquid, int subcategory, double temperature)
+double c_p_ice(double temperature)
 {
 	/*
-	This function returns c_p of condensates.
+	This function returns c_p of ice.
+	It follows Eq. (4) in Murphy DM, Koop T. Review of the vapour pressures of ice and supercooled water for atmospheric applications.
+	QUARTERLY JOURNAL OF THE ROYAL METEOROLOGICAL SOCIETY. 2005;131(608):1539-1565.
+	*/
+	// ice cannot exist in equilibrium at temperatures > T_0
+	if (temperature > T_0)
+	{
+		temperature = T_0;
+	}
+	// clipping values that are too extreme for this approximation
+	if (temperature < 20.0)
+	{
+		temperature = 20.0;
+	}
+	double result = -2.0572 + 0.14644*temperature + 0.06163*temperature*exp(-pow(temperature/125.1, 2));
+	// unit conversion from J/(mol*K) to J/(kg*K)
+	result = result/(N_A*mean_particle_masses_gas(1));
+    return result;
+}
+
+double c_p_water(double temperature)
+{
+	/*
+	This function returns c_p of water.
 	*/
 	
-	// solid_or_liquid == 0: ice
-	// solid_or_liquid == 1: liquid water
+	// calculating the temperature in degrees Celsius
+	double temp_c = temperature - T_0;
 	
-    double result = 0.0;
-    if (solid_or_liquid == 0)
-    {
-    	/*
-		This follows Eq. (4) in Murphy DM, Koop T. Review of the vapour pressures of ice and supercooled water for atmospheric applications.
-		QUARTERLY JOURNAL OF THE ROYAL METEOROLOGICAL SOCIETY. 2005;131(608):1539-1565.
-    	*/
-    	// ice cannot exist in equilibrium at temperatures > T_0
-    	if (temperature > T_0)
-    	{
-    		temperature = T_0;
-    	}
-    	// clipping values that are too extreme for this approximation
-    	if (temperature < 20.0)
-    	{
-    		temperature = 20.0;
-    	}
-		result = -2.0572 + 0.14644*temperature + 0.06163*temperature*exp(-pow(temperature/125.1, 2));
-		// unit conversion from J/(mol*K) to J/(kg*K)
-		result = result/(N_A*mean_particle_masses_gas(1));
-    }
-    if (solid_or_liquid == 1)
-    {
-    	// calculating the temperature in degrees Celsius
-    	double temp_c = temperature - T_0;
-    	/*
-    	For "positive" temperatures we use the formula cited in Pruppacher and Klett (2010), p. 93, Eq. (3-15).
-    	*/
-    	if (temp_c >= 0.0)
-    	{
-    		// clipping values that are too extreme for this approximation
-    		if (temp_c > 35.0)
-    		{
-    			temp_c = 35.0;
-    		}
-    		result = 0.9979 + 3.1e-6*pow(temp_c - 35.0, 2) + 3.8e-9*pow(temp_c - 35.0, 4);
-    	}
-    	/*
-    	This is the case of supercooled water. We use the formula cited in Pruppacher and Klett (2010), p. 93, Eq. (3-16).
-    	*/
-    	else
-    	{
-    		// clipping values that are too extreme for this approximation
-    		if (temp_c < -37.0)
-    		{
-    			temp_c = -37.0;
-    		}
-    		result = 1.000938 - 2.7052e-3*temp_c - 2.3235e-5*pow(temp_c, 2) + 4.3778e-6*pow(temp_c, 3) + 2.7136e-7*pow(temp_c, 4);
-    	}
-    	// unit conversion from IT cal/(g*K) to J/(kg*K)
-        result = 4186.8*result;
-    }
+    double result;
+	/*
+	For "positive" temperatures we use the formula cited in Pruppacher and Klett (2010), p. 93, Eq. (3-15).
+	*/
+	if (temp_c >= 0.0)
+	{
+		// clipping values that are too extreme for this approximation
+		if (temp_c > 35.0)
+		{
+			temp_c = 35.0;
+		}
+		result = 0.9979 + 3.1e-6*pow(temp_c - 35.0, 2) + 3.8e-9*pow(temp_c - 35.0, 4);
+	}
+	/*
+	This is the case of supercooled water. We use the formula cited in Pruppacher and Klett (2010), p. 93, Eq. (3-16).
+	*/
+	else
+	{
+		// clipping values that are too extreme for this approximation
+		if (temp_c < -37.0)
+		{
+			temp_c = -37.0;
+		}
+		result = 1.000938 - 2.7052e-3*temp_c - 2.3235e-5*pow(temp_c, 2) + 4.3778e-6*pow(temp_c, 3) + 2.7136e-7*pow(temp_c, 4);
+	}
+	// unit conversion from IT cal/(g*K) to J/(kg*K)
+    result = 4186.8*result;
     return result;
+}
+
+double c_p_cond(int const_id, double temperature)
+{
+	/*
+	This function resturns c_p of a specific condensed constituent.
+	*/
+	double result;
+	
+	if (fmod(const_id, 2) == 0)
+	{
+		result = c_p_ice(temperature);
+	}
+	else
+	{
+		result = c_p_water(temperature);
+	}
+	
+	return result;
 }
 
 double phase_trans_heat(int direction, double temperature)

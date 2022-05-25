@@ -139,7 +139,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 				}
 				else
 				{
-					diagnostics -> scalar_field_placeholder[j] = 0;
+					diagnostics -> scalar_field_placeholder[j] = 0.0;
 				}
 			}
 			scalar_times_vector_h(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
@@ -209,7 +209,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 				if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
 				{
 					scalar_index = scalar_shift_index + j;
-					c_p_cond_value = c_p_cond(i, 0, state -> condensed_density_temperatures[scalar_index]/(EPSILON_SECURITY + state -> rho[scalar_index]));
+					c_p_cond_value = c_p_cond(i, state -> condensed_density_temperatures[scalar_index]/(EPSILON_SECURITY + state -> rho[scalar_index]));
 					state_tendency -> condensed_density_temperatures[scalar_index]
 					= old_weight[i]*state_tendency -> condensed_density_temperatures[scalar_index]
 					+ new_weight[i]*(
