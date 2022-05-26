@@ -14,15 +14,21 @@ enum grid_integers {
 RES_ID = 5,
 // This has to conform with the grid file and the initialization state file.
 NO_OF_LAYERS = 26,
-// The number of layers affected by orography. This also has to conform with the grid file and the initialization state file.
-NO_OF_GASEOUS_CONSTITUENTS = 2,
-NO_OF_CONDENSED_CONSTITUENTS = 4,
+// moisture switch
+MOISTURE_ON = 1,
+// the number of soil layers
+NO_OF_SOIL_LAYERS = 5,
 // the number of blocks into which the arrays will be split up for the radiation calculation
 // (NO_OF_SCALARS_H must be divisible by this number)
 NO_OF_RAD_BLOCKS = 18,
-// the number of soil layers
-NO_OF_SOIL_LAYERS = 5,
-// Nothing should be changed by the user below this line.
+
+/*
+Nothing should be changed by the user below this line.
+------------------------------------------------------
+*/
+
+NO_OF_GASEOUS_CONSTITUENTS = 1 + MOISTURE_ON,
+NO_OF_CONDENSED_CONSTITUENTS = MOISTURE_ON*4,
 NO_OF_CONSTITUENTS = (NO_OF_GASEOUS_CONSTITUENTS + NO_OF_CONDENSED_CONSTITUENTS),
 NO_OF_BASIC_TRIANGLES = 20,
 NO_OF_PENTAGONS = 12,
@@ -59,8 +65,6 @@ typedef double Dual_vector_field[NO_OF_DUAL_VECTORS];
 typedef double Curl_field[NO_OF_LAYERS*2*NO_OF_VECTORS_H + NO_OF_VECTORS_H];
 // all constituents have a mass density
 typedef double Mass_densities[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
-// only the condensed constituents have a density x temperature field
-typedef double Condensed_density_temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS];
 
 // Contains properties of the primal grid.
 typedef struct grid {
@@ -127,7 +131,6 @@ Mass_densities rho; // density order: solid, liquid, vapour
 Scalar_field rhotheta;
 Scalar_field theta_pert;
 Scalar_field exner_pert;
-Condensed_density_temperatures condensed_density_temperatures;
 Vector_field wind;
 double temperature_soil[NO_OF_SOIL_LAYERS*NO_OF_SCALARS_H];
 } State;
@@ -199,7 +202,6 @@ int prog_soil_temp;
 int sfc_phase_trans;
 int sfc_sensible_heat_flux;
 int rad_update;
-int assume_lte;
 int time_to_next_analysis;
 int pbl_scheme;
 int total_run_span;

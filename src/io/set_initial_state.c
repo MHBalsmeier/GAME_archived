@@ -234,13 +234,6 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
     free(temperature);
     free(water_vapour_density);
     
-    // determining the temperature densities of the condensates
-    #pragma omp parallel for
-	for (int i = 0; i < NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS; ++i)
-	{
-		state -> condensed_density_temperatures[i] = state -> rho[i]*temperatures[i];
-	}
-    
     // setting the soil temperature
     set_soil_temp(grid, state, temperatures, "");
     free(temperatures);
@@ -303,13 +296,6 @@ int read_init_data(char init_state_file[], State *state, Irreversible_quantities
 			}
 		}
     }
-	
-    // determining the temperature densities of the condensates
-    #pragma omp parallel for
-	for (int i = 0; i < NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS; ++i)
-	{
-		state -> condensed_density_temperatures[i] = state -> rho[i]*temperatures[i];
-	}
 	
 	// diagnostic thermodynamical quantities
 	double pressure, pot_temp;

@@ -438,12 +438,6 @@ int sanity_checker(Config *config, Config_io *config_io, Grid *grid)
     	printf("Aborting.\n");
     	exit(1);
     }
-	if (config -> assume_lte != 0 && config -> assume_lte != 1)
-	{
-		printf("assume_lte must be either 0 or 1.\n");
-    	printf("Aborting.\n");
-		exit(1);
-	}
 	if (config -> momentum_diff_h != 0 && config -> momentum_diff_h != 1)
 	{
 		printf("momentum_diff_h must be either 0 or 1.\n");
@@ -636,8 +630,6 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
     argv++;
 	config_io -> surface_output_switch = strtod(argv[agv_counter], NULL);
     argv++;
-	config -> assume_lte = strtod(argv[agv_counter], NULL);
-    argv++;
 	config -> time_to_next_analysis = strtod(argv[agv_counter], NULL);
     argv++;
 	config -> pbl_scheme = strtod(argv[agv_counter], NULL);
@@ -752,14 +744,6 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 		printf("Error: NO_OF_CONSTITUENTS must be either 1 or 6.\n");
 		printf("Aborting.\n");
 		exit(1);
-	}
-	if (config -> assume_lte == 0)
-	{
-		printf("Not assuming local thermodynamic equilibrium.\n");
-	}
-	if (config -> assume_lte == 1)
-	{
-		printf("Assuming local thermodynamic equilibrium.\n");
 	}
 	if (config -> rad_on == 0)
 	{

@@ -37,15 +37,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		if (config -> assume_lte == 0)
-		{
-			diagnostics -> c_g_p_field[i] = c_p_mass_weighted_gas(state, i)/density_gas(state, i);
-			diagnostics -> scalar_field_placeholder[i] = diagnostics -> c_g_p_field[i]*(grid -> theta_bg[i] + state -> theta_pert[i]);
-		}
-		else
-		{
-			diagnostics -> scalar_field_placeholder[i] = c_p*(grid -> theta_bg[i] + state -> theta_pert[i]);
-		}
+		diagnostics -> scalar_field_placeholder[i] = c_p*(grid -> theta_bg[i] + state -> theta_pert[i]);
 	}
 	grad(state -> exner_pert, forcings -> pressure_gradient_acc_neg_nl, grid);
 	scalar_times_vector(diagnostics -> scalar_field_placeholder, forcings -> pressure_gradient_acc_neg_nl, forcings -> pressure_gradient_acc_neg_nl, grid);
@@ -55,29 +47,21 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		if (config -> assume_lte == 0)
-		{
-			diagnostics -> scalar_field_placeholder[i] = diagnostics -> c_g_p_field[i]*state -> theta_pert[i];
-		}
-		else
-		{
-			diagnostics -> scalar_field_placeholder[i] = c_p*state -> theta_pert[i];
-		}
+		diagnostics -> scalar_field_placeholder[i] = c_p*state -> theta_pert[i];
 	}
 	scalar_times_vector(diagnostics -> scalar_field_placeholder, grid -> exner_bg_grad, forcings -> pressure_gradient_acc_neg_l, grid);
 	
 	// 4.) The pressure gradient has to get a deceleration factor due to condensates.
 	// ------------------------------------------------------------------------------
-	if (config -> assume_lte == 0)
+	/*
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_SCALARS; ++i)
-		{
-			irrev -> pressure_gradient_decel_factor[i] = density_gas(state, i)/density_total(state, i);
-		}
-		scalar_times_vector(irrev -> pressure_gradient_decel_factor, forcings -> pressure_gradient_acc_neg_nl, forcings -> pressure_gradient_acc_neg_nl, grid);
-		scalar_times_vector(irrev -> pressure_gradient_decel_factor, forcings -> pressure_gradient_acc_neg_l, forcings -> pressure_gradient_acc_neg_l, grid);
+		irrev -> pressure_gradient_decel_factor[i] = density_gas(state, i)/density_total(state, i);
 	}
+	scalar_times_vector(irrev -> pressure_gradient_decel_factor, forcings -> pressure_gradient_acc_neg_nl, forcings -> pressure_gradient_acc_neg_nl, grid);
+	scalar_times_vector(irrev -> pressure_gradient_decel_factor, forcings -> pressure_gradient_acc_neg_l, forcings -> pressure_gradient_acc_neg_l, grid);
+	*/
 	
 	// at the very fist step, the old time step pressure gradient acceleration must be saved here
 	if (config -> totally_first_step_bool == 1)

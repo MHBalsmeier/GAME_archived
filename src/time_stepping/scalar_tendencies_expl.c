@@ -27,7 +27,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 	*/
 	// declaring needed variables
     int h_index, layer_index, diff_switch, scalar_shift_index, scalar_index;
-    double c_p_cond_value, tracer_heating, latent_heating_weight, density_total_weight;
+    double tracer_heating, latent_heating_weight;
     
     // determining the RK weights
     double old_weight[NO_OF_CONSTITUENTS];
@@ -145,7 +145,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 			scalar_times_vector_h(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
 			divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			// adding the tendencies in all grid boxes
-			#pragma omp parallel for private(layer_index, h_index, tracer_heating, latent_heating_weight, density_total_weight, scalar_index)
+			#pragma omp parallel for private(layer_index, h_index, tracer_heating, latent_heating_weight, scalar_index)
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
 				layer_index = j/NO_OF_SCALARS_H;
@@ -155,20 +155,10 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 					scalar_index = scalar_shift_index + j;
 					// determining the heating rate that comes from the tracers
 					tracer_heating = 0.0;
-					density_total_weight = density_total(state, j);
 					latent_heating_weight = 1.0;
-					if (config -> assume_lte == 0)
+					for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS; ++k)
 					{
-						latent_heating_weight = state -> rho[scalar_index]/density_gas(state, j);
-						// this is not yet implemented
-					}
-					if (config -> assume_lte == 1)
-					{
-						latent_heating_weight = state -> rho[scalar_index]/density_total_weight;
-						for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS; ++k)
-						{
-							tracer_heating += irrev -> constituent_heat_source_rates[k*NO_OF_SCALARS + j];
-						}
+						tracer_heating += irrev -> constituent_heat_source_rates[k*NO_OF_SCALARS + j];
 					}
 					state_tendency -> rhotheta[j]
 					= old_weight[i]*state_tendency -> rhotheta[j]
@@ -177,7 +167,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 					-diagnostics -> flux_density_divv[j]
 					// the diabatic forcings
 					// weighting factor
-					+ state -> rho[scalar_index]/density_total_weight*(
+					+ 1.0*(
 					// dissipation of molecular + turbulent momentum diffusion
 					irrev -> heating_diss[j]
 					// molecular + turbulent heat transport
@@ -190,37 +180,6 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 					+ latent_heating_weight*tracer_heating
 					/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j])));
 				 }
-			}
-		}
-    
-		// This is the integration of the "density x temperature" fields. It only needs to be done for condensed constituents.
-		// -------------------------------------------------------------------------------------------------------------------
-		if (i < NO_OF_CONDENSED_CONSTITUENTS && config -> assume_lte == 0)
-		{
-			// The constituent velocity has already been calculated.
-		    scalar_times_vector_h(&state -> condensed_density_temperatures[scalar_shift_index], state -> wind, diagnostics -> flux_density, grid);
-		    divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
-			// adding the tendencies in all grid boxes
-			#pragma omp parallel for private(layer_index, h_index, c_p_cond_value, scalar_index)
-			for (int j = 0; j < NO_OF_SCALARS; ++j)
-			{
-				layer_index = j/NO_OF_SCALARS_H;
-				h_index = j - layer_index*NO_OF_SCALARS_H;
-				if (NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_scalar[h_index])
-				{
-					scalar_index = scalar_shift_index + j;
-					c_p_cond_value = c_p_cond(i, state -> condensed_density_temperatures[scalar_index]/(EPSILON_SECURITY + state -> rho[scalar_index]));
-					state_tendency -> condensed_density_temperatures[scalar_index]
-					= old_weight[i]*state_tendency -> condensed_density_temperatures[scalar_index]
-					+ new_weight[i]*(
-					// the advection
-					-diagnostics -> flux_density_divv[j]
-					// the source terms
-					+ state -> rho[scalar_index]/(EPSILON_SECURITY + c_p_cond_value*density_total(state, j))
-					*(irrev -> temperature_diffusion_heating[j] + irrev -> heating_diss[j] + forcings -> radiation_tendency[j])
-					+ 1.0/c_p_cond_value*irrev -> constituent_heat_source_rates[scalar_index]
-					+ state -> condensed_density_temperatures[scalar_index]*(irrev -> mass_source_rates[scalar_index]));
-				}
 			}
 		}
 	} // constituent loop

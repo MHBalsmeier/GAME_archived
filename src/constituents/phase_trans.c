@@ -42,13 +42,9 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
     	{
     		solid_temperature = T_0;
 		}
-		else if (config -> assume_lte == 1)
+		else
 		{
 			solid_temperature = diagnostics -> temperature_gas[i];
-		}
-    	else
-    	{
-    		solid_temperature = state -> condensed_density_temperatures[2*NO_OF_SCALARS + i]/state -> rho[2*NO_OF_SCALARS + i];
 		}
 		
 		// determining the temperature of the liquid cloud water
@@ -56,13 +52,9 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
     	{
     		liquid_temperature = T_0;
 		}
-		else if (config -> assume_lte == 1)
+		else
 		{
 			liquid_temperature = diagnostics -> temperature_gas[i];
-		}
-    	else
-    	{
-    		liquid_temperature = state -> condensed_density_temperatures[3*NO_OF_SCALARS + i]/state -> rho[3*NO_OF_SCALARS + i];
 		}
 		
 		// determining the saturation pressure

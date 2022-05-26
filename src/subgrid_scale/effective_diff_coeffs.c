@@ -260,11 +260,10 @@ int temp_diffusion_coeffs(State *state, Config *config, Irreversible_quantities 
 			state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]);
 		}
 	}
-	double c_g_v;
-	#pragma omp parallel for private(c_g_v)
+	double c_g_v = spec_heat_capacities_v_gas(0);
+	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		c_g_v = spec_heat_cap_diagnostics_v(state, i, config);
 		// horizontal diffusion coefficient
 		irrev -> scalar_diffusion_coeff_numerical_h[i]
 		= c_g_v*0.5*(irrev -> viscosity_div[i] + irrev -> viscosity_curl[i]);

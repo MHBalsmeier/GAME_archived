@@ -1426,23 +1426,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			// loop over all condensed constituents
 			for (int j = 0; j < NO_OF_CONDENSED_CONSTITUENTS; ++j)
 			{
-				// the non-LTE case
-				if (config -> assume_lte == 0)
-				{
-					if (state_write_out -> rho[j*NO_OF_SCALARS + i] >= EPSILON_SECURITY)
-					{
-						temperatures[j*NO_OF_SCALARS + i] = state_write_out -> condensed_density_temperatures[j*NO_OF_SCALARS + i]/state_write_out -> rho[j*NO_OF_SCALARS + i];
-					}
-					else
-					{
-						temperatures[j*NO_OF_SCALARS + i] = diagnostics -> temperature_gas[i];
-					}
-				}
-				// the LTE case
-				if (config -> assume_lte == 1)
-				{
-					temperatures[j*NO_OF_SCALARS + i] = diagnostics -> temperature_gas[i];
-				}
+				temperatures[j*NO_OF_SCALARS + i] = diagnostics -> temperature_gas[i];
 			}
 			temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = diagnostics -> temperature_gas[i];
 		}

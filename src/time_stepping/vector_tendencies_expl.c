@@ -23,22 +23,9 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 	*/
 	if (no_rk_step == 1 || config -> totally_first_step_bool == 1)
 	{
-		// Here, the gaseous flux density is prepared for the generalized Coriolis term.
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_SCALARS; ++i)
-		{
-			if (config -> assume_lte == 0)
-			{
-				diagnostics -> scalar_field_placeholder[i] = density_gas(state, i);
-			}
-			else
-			{
-				diagnostics -> scalar_field_placeholder[i] = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
-			}
-		}
-		scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> wind, diagnostics -> flux_density, grid);
+		scalar_times_vector(&state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS], state -> wind, diagnostics -> flux_density, grid);
 		// Now, the "potential vorticity" is evaluated.
-		calc_pot_vort(state -> wind, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
+		calc_pot_vort(state -> wind, &state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS], diagnostics, grid, dualgrid);
 		// Now, the generalized Coriolis term is evaluated.
 		vorticity_flux(diagnostics -> flux_density, diagnostics -> pot_vort, forcings -> pot_vort_tend, grid, dualgrid);
 		// Kinetic energy is prepared for the gradient term of the Lamb transformation.
@@ -75,10 +62,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 			simple_dissipation_rate(state, irrev, grid);
 		}
 		// Due to condensates, the friction acceleration needs to get a deceleration factor.
-		if (config -> assume_lte == 0)
-		{
-			scalar_times_vector(irrev -> pressure_gradient_decel_factor, irrev -> friction_acc, irrev -> friction_acc, grid);
-		}
+		// scalar_times_vector(irrev -> pressure_gradient_decel_factor, irrev -> friction_acc, irrev -> friction_acc, grid);
 	}
 	
     // Now the explicit forces are added up.
