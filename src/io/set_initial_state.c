@@ -143,7 +143,7 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
     {
         for (int j = 0; j < NO_OF_SCALARS_H; ++j)
         {
-            state -> wind[i*NO_OF_VECTORS_PER_LAYER + j] = 0;
+            state -> wind[i*NO_OF_VECTORS_PER_LAYER + j] = 0.0;
         }
     }    
     
@@ -192,11 +192,11 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
 			// this is the full potential temperature here
 			state -> theta_pert[scalar_index] = temperature[scalar_index]/state -> exner_pert[scalar_index];
 			
-			// scalar_field_placeholder is the dry air density here
+			// scalar_field_placeholder is the moist air gas density here
 			diagnostics -> scalar_field_placeholder[scalar_index] = P_0*pow(state -> exner_pert[scalar_index],
 			spec_heat_capacities_p_gas(0)/specific_gas_constants(0))/(specific_gas_constants(0)*temperature[scalar_index]);
 			
-			// setting rhotheta according to its definitions
+			// setting rhotheta according to its definition
 			state -> rhotheta[scalar_index] = diagnostics -> scalar_field_placeholder[scalar_index]*state -> theta_pert[scalar_index];
 		}
 	}

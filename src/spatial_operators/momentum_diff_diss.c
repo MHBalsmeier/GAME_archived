@@ -160,7 +160,6 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	
 	// 3.) horizontal diffusion of vertical velocity
 	// ---------------------------------------------
-	// the diffusion coefficient is the same as the one for vertical diffusion of horizontal velocity
 	// averaging the vertical velocity vertically to cell centers, using the inner product weights
 	int i;
 	#pragma omp parallel for private(i)
@@ -184,7 +183,8 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		{
 			vector_index = NO_OF_SCALARS_H + h_index + layer_index*NO_OF_VECTORS_PER_LAYER;
 			diagnostics -> vector_field_placeholder[vector_index] = 0.5
-			*(irrev -> vert_hor_viscosity[layer_index*NO_OF_VECTORS_H + h_index] + irrev -> vert_hor_viscosity[(layer_index + 1)*NO_OF_VECTORS_H + h_index])
+			*(irrev -> viscosity_div[layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]]
+			+ irrev -> viscosity_div[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]])
 			*diagnostics -> vector_field_placeholder[vector_index];
 		}
 	}

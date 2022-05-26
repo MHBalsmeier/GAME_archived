@@ -39,7 +39,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	{
 		if (config -> assume_lte == 0)
 		{
-			diagnostics -> c_g_p_field[i] = spec_heat_cap_diagnostics_p(state, i, config);
+			diagnostics -> c_g_p_field[i] = c_p_mass_weighted_gas(state, i)/density_gas(state, i);
 			diagnostics -> scalar_field_placeholder[i] = diagnostics -> c_g_p_field[i]*(grid -> theta_bg[i] + state -> theta_pert[i]);
 		}
 		else

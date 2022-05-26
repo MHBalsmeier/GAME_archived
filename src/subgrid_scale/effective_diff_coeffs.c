@@ -319,7 +319,7 @@ double tke2hor_diff_coeff(double tke)
 	This function returns the horizontal kinematic Eddy viscosity as a function of the specific TKE.
 	*/
 	
-	double prop_constant = 20000.0; // unit: m
+	double prop_constant = 10000.0; // unit: m
 	double result = prop_constant*pow(tke, 0.5);
 	return result;
 }
