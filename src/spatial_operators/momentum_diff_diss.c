@@ -19,7 +19,7 @@ The momentum diffusion acceleration is computed here (apart from the diffusion c
 
 int hor_calc_curl_of_vorticity(Curl_field, Vector_field, double [], Grid *, Dualgrid *);
 
-int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config *config, Grid *grid, Dualgrid *dualgrid)
+int hor_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config *config, Grid *grid, Dualgrid *dualgrid)
 {
 	/*
 	This is the horizontal momentum diffusion operator (horizontal diffusion of horizontal velocity).
@@ -31,12 +31,12 @@ int hori_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	calc_rel_vort(state -> wind, diagnostics, grid, dualgrid);
     
     // calculating the effective horizontal kinematic viscosity acting on divergences (eddy viscosity)
-	hori_div_viscosity(state, irrev, grid, diagnostics, config);
+	hor_div_viscosity(state, irrev, grid, diagnostics, config);
 	
     // calculating the effective horizontal kinematic viscosity acting on vorticities on rhombi (eddy viscosity)
-	hori_curl_viscosity_rhombi(state, irrev, grid, diagnostics, config);
+	hor_curl_viscosity_rhombi(state, irrev, grid, diagnostics, config);
     // calculating the effective horizontal kinematic viscosity acting on vorticities on triangles (eddy viscosity)
-	hori_curl_viscosity_triangles(state, irrev, grid, dualgrid, diagnostics, config);
+	hor_curl_viscosity_triangles(state, irrev, grid, dualgrid, diagnostics, config);
 	
 	/*
 	gradient of divergence component
@@ -123,7 +123,7 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		}
 	}
 	// calculating the respective diffusion coefficient
-	vert_hori_mom_viscosity(state, irrev, diagnostics, config, grid, delta_t);
+	vert_hor_mom_viscosity(state, irrev, diagnostics, config, grid, delta_t);
 	// now, the second derivative needs to be taken
 	double z_upper, z_lower, delta_z;
 	#pragma omp parallel for private(layer_index, h_index, vector_index, z_upper, z_lower, delta_z)
