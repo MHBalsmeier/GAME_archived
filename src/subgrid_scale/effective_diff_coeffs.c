@@ -25,6 +25,20 @@ int hor_div_viscosity(State *state, Irreversible_quantities *irrev, Grid *grid, 
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
+		// molecular component
+		irrev -> molecular_diffusion_coeff[i] = calc_diffusion_coeff(diagnostics -> temperature_gas[i], state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]);
+		irrev -> viscosity_div[i] = irrev -> molecular_diffusion_coeff[i];
+		
+		// turbulent component
+		irrev -> viscosity_div[i] += tke2hor_diff_coeff(irrev -> tke[i]);
+		
+		// maximum (stability constraint)
+		if (irrev -> viscosity_div[i] > irrev -> max_diff_h_coeff_turb)
+		{
+			irrev -> viscosity_div[i] = irrev -> max_diff_h_coeff_turb;
+		}
+		
+		// multiplying by the density
 		irrev -> viscosity_div[i] = density_gas(state, i)*tke2hor_diff_coeff(irrev -> tke[i]);
 	}
 	return 0;
@@ -305,7 +319,7 @@ double tke2hor_diff_coeff(double tke)
 	This function returns the horizontal kinematic Eddy viscosity as a function of the specific TKE.
 	*/
 	
-	double prop_constant = 48400.0; // unit: m
+	double prop_constant = 20000.0; // unit: m
 	double result = prop_constant*pow(tke, 0.5);
 	return result;
 }

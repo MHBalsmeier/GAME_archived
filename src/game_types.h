@@ -203,8 +203,6 @@ int assume_lte;
 int time_to_next_analysis;
 int pbl_scheme;
 int total_run_span;
-double diff_h_smag_div;
-double diff_h_smag_rot;
 double damping_start_height_over_toa;
 double damping_coeff_max;
 double impl_thermo_weight;

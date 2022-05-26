@@ -136,12 +136,6 @@ int main(int argc, char *argv[])
     config -> total_run_span = radius_rescale*config -> total_run_span;
     config_io -> write_out_interval = radius_rescale*config_io -> write_out_interval;
     
-    // diffusion coefficients
-    // horizontal diffusion Smagorinsky factor acting on divergent movements
-	config -> diff_h_smag_div = 0.01;
-	// horizontal diffusion Smagorinsky factor acting on vortical movements
-	config -> diff_h_smag_rot = 0.01;
-    
     /*
     Giving the user some additional information on the run to about to be executed.
     --------------------------------------------------------------------
@@ -745,8 +739,6 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	{
 		printf("Vertical tracer diffusion is turned on.\n");
 	}
-	printf("Horizontal diffusion Smagorinsky factor acting on divergent movements: %lf.\n", config -> diff_h_smag_div);
-	printf("Horizontal diffusion Smagorinsky factor acting on vortical movements: %lf.\n", config -> diff_h_smag_rot);
 	printf("Swamp layer starts at %lf m.\n", config -> damping_start_height_over_toa*grid -> toa);
 	printf("Maximum swamp layer damping coefficient: %lf 1/s.\n", config -> damping_coeff_max);
 	printf("%s", stars);
