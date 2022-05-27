@@ -119,15 +119,15 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 			+ diff_switch*diagnostics -> scalar_field_placeholder[j]);
 	    }
 	    
-		// explicit rho*theta integration
+		// explicit rho*theta_v integration
 		// ------------------------------
 		if (i == NO_OF_CONDENSED_CONSTITUENTS)
 		{
-			// Determining the potential temperature of the constituent at hand.
+			// Determining the virtual potential temperature of the constituent at hand.
 			#pragma omp parallel for
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
-				diagnostics -> scalar_field_placeholder[j] = state -> rhotheta[j]/state -> rho[scalar_shift_index + j];
+				diagnostics -> scalar_field_placeholder[j] = state -> rhotheta_v[j]/state -> rho[scalar_shift_index + j];
 			}
 			scalar_times_vector_h(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
 			divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
@@ -143,8 +143,8 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 				{
 					tracer_heating += irrev -> constituent_heat_source_rates[k*NO_OF_SCALARS + j];
 				}
-				state_tendency -> rhotheta[j]
-				= old_weight[i]*state_tendency -> rhotheta[j]
+				state_tendency -> rhotheta_v[j]
+				= old_weight[i]*state_tendency -> rhotheta_v[j]
 				+ new_weight[i]*(
 				// the advection (resolved transport)
 				-diagnostics -> flux_density_divv[j]

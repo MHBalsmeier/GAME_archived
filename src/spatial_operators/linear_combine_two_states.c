@@ -22,8 +22,8 @@ int linear_combine_two_states(State *state_0, State *state_1, State *state_out, 
             state_out -> rho[j*NO_OF_SCALARS + i] = coeff_0*state_0 -> rho[j*NO_OF_SCALARS + i] + coeff_1*state_1 -> rho[j*NO_OF_SCALARS + i];
         }
         
-        state_out -> rhotheta[i] = coeff_0*state_0 -> rhotheta[i] + coeff_1*state_1 -> rhotheta[i];
-        state_out -> theta_pert[i] = state_out -> rhotheta[i]/state_out -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] - grid -> theta_bg[i];
+        state_out -> rhotheta_v[i] = coeff_0*state_0 -> rhotheta_v[i] + coeff_1*state_1 -> rhotheta_v[i];
+        state_out -> theta_v_pert[i] = state_out -> rhotheta_v[i]/state_out -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] - grid -> theta_v_bg[i];
         state_out -> exner_pert[i] = coeff_0*state_0 -> exner_pert[i] + coeff_1*state_1 -> exner_pert[i];
     }
     

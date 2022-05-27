@@ -30,10 +30,10 @@ int update_sfc_turb_quantities(State *state, Grid *grid, Diagnostics *diagnostic
 	This function updates surface-related turbulence quantities.
 	*/
 	
-	double u_lowest_layer, u10, z_agl, theta_lowest_layer, theta_second_layer, dz, dtheta_dz, w_pert, theta_pert, w_pert_theta_pert_avg;
+	double u_lowest_layer, u10, z_agl, theta_v_lowest_layer, theta_v_second_layer, dz, dtheta_v_dz, w_pert, theta_v_pert, w_pert_theta_v_pert_avg;
 	// semi-empirical coefficient
-	double w_theta_corr = 0.2;
-	#pragma omp parallel for private(u_lowest_layer, u10, z_agl, theta_lowest_layer, theta_second_layer, dz, dtheta_dz, w_pert, theta_pert, w_pert_theta_pert_avg)
+	double w_theta_v_corr = 0.2;
+	#pragma omp parallel for private(u_lowest_layer, u10, z_agl, theta_v_lowest_layer, theta_v_second_layer, dz, dtheta_v_dz, w_pert, theta_v_pert, w_pert_theta_v_pert_avg)
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
 		z_agl = grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + i] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + i];
@@ -55,31 +55,31 @@ int update_sfc_turb_quantities(State *state, Grid *grid, Diagnostics *diagnostic
 		// updating the roughness velocity
 		diagnostics -> roughness_velocity[i] = roughness_velocity(u_lowest_layer, z_agl, grid -> roughness_length[i]);
 		
-		// theta in the lowest layer
-		theta_lowest_layer = grid  -> theta_bg[NO_OF_SCALARS - NO_OF_SCALARS_H + i] + state -> theta_pert[NO_OF_SCALARS - NO_OF_SCALARS_H + i];
-		// theta in the second-lowest layer
-		theta_second_layer = grid  -> theta_bg[NO_OF_SCALARS - 2*NO_OF_SCALARS_H + i] + state -> theta_pert[NO_OF_SCALARS - 2*NO_OF_SCALARS_H + i];
+		// theta_v in the lowest layer
+		theta_v_lowest_layer = grid  -> theta_v_bg[NO_OF_SCALARS - NO_OF_SCALARS_H + i] + state -> theta_v_pert[NO_OF_SCALARS - NO_OF_SCALARS_H + i];
+		// theta_v in the second-lowest layer
+		theta_v_second_layer = grid  -> theta_v_bg[NO_OF_SCALARS - 2*NO_OF_SCALARS_H + i] + state -> theta_v_pert[NO_OF_SCALARS - 2*NO_OF_SCALARS_H + i];
 		
 		// delta z
 		dz = grid -> z_scalar[NO_OF_SCALARS - 2*NO_OF_SCALARS_H + i] - grid -> z_scalar[NO_OF_SCALARS - NO_OF_SCALARS_H + i];
 		
-		// vertical gradient of theta
-		dtheta_dz = (theta_second_layer - theta_lowest_layer)/dz;
+		// vertical gradient of theta_v
+		dtheta_v_dz = (theta_v_second_layer - theta_v_lowest_layer)/dz;
 		
 		// the perturbation of the vertical velocity is assumed to be proportional to the 10 m wind speed
 		// times a stability-dependant factor
-		w_pert = u10*fmax(0.001, 0.02*(1.0 - dtheta_dz/0.01));
-		theta_pert = -0.2*delta_t*w_pert*dtheta_dz;
-		w_pert_theta_pert_avg = w_theta_corr*w_pert*theta_pert;
+		w_pert = u10*fmax(0.001, 0.02*(1.0 - dtheta_v_dz/0.01));
+		theta_v_pert = -0.2*delta_t*w_pert*dtheta_v_dz;
+		w_pert_theta_v_pert_avg = w_theta_v_corr*w_pert*theta_v_pert;
 		
 		// security
-		if (fabs(w_pert_theta_pert_avg) < EPSILON_SECURITY)
+		if (fabs(w_pert_theta_v_pert_avg) < EPSILON_SECURITY)
 		{
-			w_pert_theta_pert_avg = EPSILON_SECURITY;
+			w_pert_theta_v_pert_avg = EPSILON_SECURITY;
 		}
 		
 		// finally computing the Monin-Obukhov length
-		diagnostics -> monin_obukhov_length[i] = -theta_lowest_layer*pow(diagnostics -> roughness_velocity[i], 3.0)/(KARMAN*G_MEAN_SFC_ABS*w_pert_theta_pert_avg);
+		diagnostics -> monin_obukhov_length[i] = -theta_v_lowest_layer*pow(diagnostics -> roughness_velocity[i], 3.0)/(KARMAN*G_MEAN_SFC_ABS*w_pert_theta_v_pert_avg);
 	}
 	
 	// updating the surface flux resistance acting on scalar quantities (moisture and sensible heat)

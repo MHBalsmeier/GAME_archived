@@ -77,7 +77,7 @@ Vector_field z_vector;
 Scalar_field gravity_potential;
 Vector_field gravity_m;
 Vector_field slope;
-Scalar_field theta_bg;
+Scalar_field theta_v_bg;
 Scalar_field exner_bg;
 Vector_field exner_bg_grad;
 int trsk_indices[10*NO_OF_VECTORS_H];
@@ -125,8 +125,8 @@ double f_vec[2*NO_OF_VECTORS_H];
 
 typedef struct state {
 Mass_densities rho; // density order: solid, liquid, vapour
-Scalar_field rhotheta;
-Scalar_field theta_pert;
+Scalar_field rhotheta_v;
+Scalar_field theta_v_pert;
 Scalar_field exner_pert;
 Vector_field wind;
 double temperature_soil[NO_OF_SOIL_LAYERS*NO_OF_SCALARS_H];

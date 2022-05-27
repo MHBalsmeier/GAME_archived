@@ -309,7 +309,7 @@ double longitude_scalar_dual[], int vorticity_indices_triangles[], double radius
 	return 0;
 }
 
-int set_background_state(double z_scalar[], double gravity_potential[], double theta_bg[], double exner_bg[])
+int set_background_state(double z_scalar[], double gravity_potential[], double theta_v_bg[], double exner_bg[])
 {
 	/*
 	This sets the hydrostatic background state.
@@ -329,7 +329,7 @@ int set_background_state(double z_scalar[], double gravity_potential[], double t
 			{
 				pressure = standard_pres(z_scalar[scalar_index]);
 				exner_bg[scalar_index] = pow(pressure/P_0, specific_gas_constants(0)/spec_heat_capacities_p_gas(0));
-				theta_bg[scalar_index] = temperature/exner_bg[scalar_index];
+				theta_v_bg[scalar_index] = temperature/exner_bg[scalar_index];
 			}
 			// other layers
 			else
@@ -340,7 +340,7 @@ int set_background_state(double z_scalar[], double gravity_potential[], double t
 				+ 2/spec_heat_capacities_p_gas(0)*(gravity_potential[scalar_index] - gravity_potential[scalar_index + NO_OF_SCALARS_H]));
 				c = pow(exner_bg[scalar_index + NO_OF_SCALARS_H], 2)*temperature/standard_temp(z_scalar[scalar_index + NO_OF_SCALARS_H]);
 				exner_bg[scalar_index] = b + pow((pow(b, 2) + c), 0.5);
-				theta_bg[scalar_index] = temperature/exner_bg[scalar_index];
+				theta_v_bg[scalar_index] = temperature/exner_bg[scalar_index];
 			}
 		}
 	}

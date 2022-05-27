@@ -27,7 +27,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char grid_file_name[])
     int normal_distance_id, volume_id, area_id, z_scalar_id, z_vector_id, trsk_weights_id, area_dual_id, z_vector_dual_id, f_vec_id, to_index_id, from_index_id,
     to_index_dual_id, from_index_dual_id, adjacent_vector_indices_h_id, trsk_indices_id, trsk_modified_curl_indices_id, adjacent_signs_h_id, direction_id,
     gravity_potential_id, inner_product_weights_id, density_to_rhombi_weights_id, density_to_rhombi_indices_id, normal_distance_dual_id, vorticity_indices_triangles_id,
-    vorticity_signs_triangles_id, latitude_scalar_id, longitude_scalar_id, toa_id, radius_id, interpol_indices_id, interpol_weights_id, theta_bg_id,
+    vorticity_signs_triangles_id, latitude_scalar_id, longitude_scalar_id, toa_id, radius_id, interpol_indices_id, interpol_weights_id, theta_v_bg_id,
     exner_bg_id, sfc_rho_c_id, sfc_albedo_id, roughness_length_id, is_land_id, t_conductivity_id, no_of_oro_layers_id, stretching_parameter_id;
     if ((retval = nc_open(grid_file_name, NC_NOWRITE, &ncid)))
         ERR(retval);
@@ -47,7 +47,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char grid_file_name[])
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "z_scalar", &z_scalar_id)))
         ERR(retval);
-    if ((retval = nc_inq_varid(ncid, "theta_bg", &theta_bg_id)))
+    if ((retval = nc_inq_varid(ncid, "theta_v_bg", &theta_v_bg_id)))
         ERR(retval);
     if ((retval = nc_inq_varid(ncid, "exner_bg", &exner_bg_id)))
         ERR(retval);
@@ -129,7 +129,7 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char grid_file_name[])
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, z_scalar_id, &(grid -> z_scalar[0]))))
         ERR(retval);
-    if ((retval = nc_get_var_double(ncid, theta_bg_id, &(grid -> theta_bg[0]))))
+    if ((retval = nc_get_var_double(ncid, theta_v_bg_id, &(grid -> theta_v_bg[0]))))
         ERR(retval);
     if ((retval = nc_get_var_double(ncid, exner_bg_id, &(grid -> exner_bg[0]))))
         ERR(retval);

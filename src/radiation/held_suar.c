@@ -34,11 +34,11 @@ int held_suar(double latitude_scalar[], double z_scalar[], double mass_densities
 double t_eq(double latitude, double pressure)
 {
 	double delta_t_y = 60.0;
-	double delta_theta_z = 10.0;
+	double delta_theta_v_z = 10.0;
 	double kappa = 2.0/7.0;
 	double result = 315.0;
 	result = result - delta_t_y*pow(sin(latitude), 2.0);
-	result = result - delta_theta_z*log(pressure/P_0)*pow(cos(latitude), 2.0);
+	result = result - delta_theta_v_z*log(pressure/P_0)*pow(cos(latitude), 2.0);
 	result = result*pow(pressure/P_0, kappa);
 	result = fmax(200.0, result);
 	return result;

@@ -114,16 +114,16 @@ int epv_diagnostics(Curl_field pot_vort, State *state, Scalar_field epv, Grid *g
 			}
 		}
 	}
-	// taking the gradient of the potential temperature
+	// taking the gradient of the virtual potential temperature
 	// misuse of name
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
-		state -> theta_pert[i] += grid -> theta_bg[i];
+		state -> theta_v_pert[i] += grid -> theta_v_bg[i];
 	}
-	grad(state -> theta_pert, *grad_pot_temp, grid);
+	grad(state -> theta_v_pert, *grad_pot_temp, grid);
 	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 	{
-		state -> theta_pert[i] -= grid -> theta_bg[i];
+		state -> theta_v_pert[i] -= grid -> theta_v_bg[i];
 	}
 	inner_product_tangential(*pot_vort_as_mod_vector_field, *grad_pot_temp, epv, grid, dualgrid);
 	// freeing the memory

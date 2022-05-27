@@ -97,11 +97,11 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		double *sprate = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *cape = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *sfc_sw_down = malloc(NO_OF_SCALARS_H*sizeof(double));
-		double temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta,
-		cape_integrand, delta_z, temp_closest, temp_second_closest, delta_z_temp, temperature_gradient, theta_e;
+		double temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta_v,
+		cape_integrand, delta_z, temp_closest, temp_second_closest, delta_z_temp, temperature_gradient, theta_v_e;
 		double z_tropopause = 12e3;
 		double standard_vert_lapse_rate = 0.0065;
-		#pragma omp parallel for private(temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta, cape_integrand, delta_z, temp_closest, temp_second_closest, delta_z_temp, temperature_gradient, theta_e, layer_index, closest_index, second_closest_index, cloud_water_content, vector_to_minimize)
+		#pragma omp parallel for private(temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta_v, cape_integrand, delta_z, temp_closest, temp_second_closest, delta_z_temp, temperature_gradient, theta_v_e, layer_index, closest_index, second_closest_index, cloud_water_content, vector_to_minimize)
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 		{
 			// Now the aim is to determine the value of the MSLP.
@@ -154,17 +154,17 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			cape[i] = 0.0;
 			layer_index = NO_OF_LAYERS - 1;
 		    z_height = grid -> z_scalar[layer_index*NO_OF_SCALARS_H + i];
-		    // pseduopotential temperature of the particle in the lowest layer
-		    theta_e = pseudopotential(state_write_out, grid, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i);
+		    // pseduovirtual potential temperature of the particle in the lowest layer
+		    theta_v_e = pseudopotential(state_write_out, grid, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i);
 			while (z_height < z_tropopause)
 			{
-				// full potential temperature in the grid box
-			    theta = grid -> theta_bg[layer_index*NO_OF_SCALARS_H + i] + state_write_out -> theta_pert[layer_index*NO_OF_SCALARS_H + i];
+				// full virtual potential temperature in the grid box
+			    theta_v = grid -> theta_v_bg[layer_index*NO_OF_SCALARS_H + i] + state_write_out -> theta_v_pert[layer_index*NO_OF_SCALARS_H + i];
 			    // thickness of the gridbox
 				delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + i];
 				// this is the candidate that we might want to add to the integral
 				cape_integrand
-				= grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i]*(theta_e - theta)/theta;
+				= grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i]*(theta_v_e - theta_v)/theta_v;
 				// we do not add negative values to CAPE (see the definition of CAPE)
 				if (cape_integrand > 0.0)
 				{
@@ -1576,9 +1576,9 @@ int write_out_integral(State *state_write_out, double time_since_init, Grid *gri
     }
     if (integral_id == 1)
     {
-    	// density times potential temperature
+    	// density times virtual potential temperature
     	global_integral_file = fopen(INTEGRAL_FILE, "a");
-    	global_integral = global_scalar_integrator(state_write_out -> rhotheta, grid);
+    	global_integral = global_scalar_integrator(state_write_out -> rhotheta_v, grid);
     	fprintf(global_integral_file, "%lf\t%lf\n", time_since_init, global_integral);
     	fclose(global_integral_file);
     }
@@ -1696,14 +1696,14 @@ int interpolation_t(State *state_0, State *state_p1, State *state_write, double 
 double pseudopotential(State *state, Grid *grid, int scalar_index)
 {
 	/*
-	This function returns the pseudopotential temperature, which is needed for diagnozing CAPE.
+	This function returns the pseudovirtual potential temperature, which is needed for diagnozing CAPE.
 	*/
 	
 	double result = 0.0;
 	// the dry case
 	if (NO_OF_CONSTITUENTS == 1)
 	{
-		result = grid -> theta_bg[scalar_index] + state -> theta_pert[scalar_index];
+		result = grid -> theta_v_bg[scalar_index] + state -> theta_v_pert[scalar_index];
 	}
 	// the moist case, based on Bolton (1980)
 	else
@@ -1713,14 +1713,14 @@ double pseudopotential(State *state, Grid *grid, int scalar_index)
 		/state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index];
 		temperature
 		= (grid -> exner_bg[scalar_index] + state -> exner_pert[scalar_index])
-		*(grid -> theta_bg[scalar_index] + state -> theta_pert[scalar_index]);
+		*(grid -> theta_v_bg[scalar_index] + state -> theta_v_pert[scalar_index]);
 		pressure = P_0*pow(grid -> exner_bg[scalar_index] + state -> exner_pert[scalar_index],
 		spec_heat_capacities_p_gas(0)/specific_gas_constants(0));
 		alpha_1 = 0.2854*(1.0 - 0.28e-3*r);
 		// this is just an estimate for now
 		t_lcl
 		= (grid -> exner_bg[scalar_index - NO_OF_SCALARS_H] + state -> exner_pert[scalar_index - NO_OF_SCALARS_H])
-		*(grid -> theta_bg[scalar_index - NO_OF_SCALARS_H] + state -> theta_pert[scalar_index - NO_OF_SCALARS_H]);
+		*(grid -> theta_v_bg[scalar_index - NO_OF_SCALARS_H] + state -> theta_v_pert[scalar_index - NO_OF_SCALARS_H]);
 		alpha_2 = 3.376/t_lcl - 0.00254;
 		alpha_3 = r*(1.0 + 0.81e-3*r);
 		result = temperature*pow(P_0/pressure, alpha_1)*exp(alpha_2*alpha_3);

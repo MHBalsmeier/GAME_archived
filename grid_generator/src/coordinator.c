@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
     double *density_to_rhombi_weights = malloc(4*NO_OF_VECTORS_H*sizeof(double));
     double *interpol_weights = malloc(5*NO_OF_LATLON_IO_POINTS*sizeof(double));
     double *exner_bg = malloc(NO_OF_SCALARS*sizeof(double));
-    double *theta_bg = malloc(NO_OF_SCALARS*sizeof(double));
+    double *theta_v_bg = malloc(NO_OF_SCALARS*sizeof(double));
 	double *oro = calloc(NO_OF_SCALARS_H, sizeof(double));
    	double *roughness_length = malloc(NO_OF_SCALARS_H*sizeof(double));
 	double *sfc_albedo = calloc(NO_OF_SCALARS_H, sizeof(double));
@@ -306,7 +306,7 @@ int main(int argc, char *argv[])
     printf(".\n");
     
     printf("Setting the hydrostatic background state ... ");
-	set_background_state(z_scalar, gravity_potential, theta_bg, exner_bg);
+	set_background_state(z_scalar, gravity_potential, theta_v_bg, exner_bg);
     printf(GREEN "finished" RESET);
     printf(".\n");
     
@@ -348,7 +348,7 @@ int main(int argc, char *argv[])
     vector_h_dimid_10, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid,
     inner_product_weights_id, scalar_8_dimid, scalar_2_dimid, vector_h_dual_dimid_2, density_to_rhombi_indices_id, density_to_rhombi_weights_id,
     vorticity_indices_triangles_id, ncid_g_prop, single_double_dimid, no_of_lloyd_iterations_id, single_int_dimid, interpol_indices_id, interpol_weights_id,
-    theta_bg_id, exner_bg_id, sfc_albedo_id, sfc_rho_c_id, t_conductivity_id, roughness_length_id, is_land_id, no_of_oro_layers_id, stretching_parameter_id,
+    theta_v_bg_id, exner_bg_id, sfc_albedo_id, sfc_rho_c_id, t_conductivity_id, roughness_length_id, is_land_id, no_of_oro_layers_id, stretching_parameter_id,
     toa_id, radius_id;
     
     printf("Starting to write to output file ... ");
@@ -418,9 +418,9 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_att_text(ncid_g_prop, z_scalar_id, "units", strlen("m"), "m")))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "theta_bg", NC_DOUBLE, 1, &scalar_dimid, &theta_bg_id)))
+    if ((retval = nc_def_var(ncid_g_prop, "theta_v_bg", NC_DOUBLE, 1, &scalar_dimid, &theta_v_bg_id)))
         ERR(retval);
-    if ((retval = nc_put_att_text(ncid_g_prop, theta_bg_id, "units", strlen("K"), "K")))
+    if ((retval = nc_put_att_text(ncid_g_prop, theta_v_bg_id, "units", strlen("K"), "K")))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "exner_bg", NC_DOUBLE, 1, &scalar_dimid, &exner_bg_id)))
         ERR(retval);
@@ -536,7 +536,7 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, z_scalar_id, &z_scalar[0])))
         ERR(retval);
-    if ((retval = nc_put_var_double(ncid_g_prop, theta_bg_id, &theta_bg[0])))
+    if ((retval = nc_put_var_double(ncid_g_prop, theta_v_bg_id, &theta_v_bg[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, exner_bg_id, &exner_bg[0])))
         ERR(retval);
@@ -651,7 +651,7 @@ int main(int argc, char *argv[])
     free(to_index);
     free(from_index);
     free(exner_bg);
-    free(theta_bg);
+    free(theta_v_bg);
     free(to_index_dual);
     free(from_index_dual);
     free(adjacent_vector_indices_h);

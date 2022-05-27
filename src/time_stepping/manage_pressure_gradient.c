@@ -37,7 +37,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		diagnostics -> scalar_field_placeholder[i] = c_p*(grid -> theta_bg[i] + state -> theta_pert[i]);
+		diagnostics -> scalar_field_placeholder[i] = c_p*(grid -> theta_v_bg[i] + state -> theta_v_pert[i]);
 	}
 	grad(state -> exner_pert, forcings -> pressure_gradient_acc_neg_nl, grid);
 	scalar_times_vector(diagnostics -> scalar_field_placeholder, forcings -> pressure_gradient_acc_neg_nl, forcings -> pressure_gradient_acc_neg_nl, grid);
@@ -47,7 +47,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		diagnostics -> scalar_field_placeholder[i] = c_p*state -> theta_pert[i];
+		diagnostics -> scalar_field_placeholder[i] = c_p*state -> theta_v_pert[i];
 	}
 	scalar_times_vector(diagnostics -> scalar_field_placeholder, grid -> exner_bg_grad, forcings -> pressure_gradient_acc_neg_l, grid);
 	

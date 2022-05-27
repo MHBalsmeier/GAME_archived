@@ -163,7 +163,7 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
     // density is determined out of the hydrostatic equation
     int scalar_index;
     double b, c;
-    // theta_pert and exner_pert are a misuse of name here, they contain the full values here
+    // theta_v_pert and exner_pert are a misuse of name here, they contain the full values here
     #pragma omp parallel for private(scalar_index, b, c, pressure_value)
 	for (int h_index = 0; h_index < NO_OF_SCALARS_H; ++h_index)
 	{
@@ -189,15 +189,15 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
 				c = pow(state -> exner_pert[scalar_index + NO_OF_SCALARS_H], 2)*temperature[scalar_index]/temperature[scalar_index + NO_OF_SCALARS_H];
 				state -> exner_pert[scalar_index] = b + pow((pow(b, 2) + c), 0.5);
 			}
-			// this is the full potential temperature here
-			state -> theta_pert[scalar_index] = temperature[scalar_index]/state -> exner_pert[scalar_index];
+			// this is the full virtual potential temperature here
+			state -> theta_v_pert[scalar_index] = temperature[scalar_index]/state -> exner_pert[scalar_index];
 			
 			// scalar_field_placeholder is the moist air gas density here
 			diagnostics -> scalar_field_placeholder[scalar_index] = P_0*pow(state -> exner_pert[scalar_index],
 			spec_heat_capacities_p_gas(0)/specific_gas_constants(0))/(specific_gas_constants(0)*temperature[scalar_index]);
 			
-			// setting rhotheta according to its definition
-			state -> rhotheta[scalar_index] = diagnostics -> scalar_field_placeholder[scalar_index]*state -> theta_pert[scalar_index];
+			// setting rhotheta_v according to its definition
+			state -> rhotheta_v[scalar_index] = diagnostics -> scalar_field_placeholder[scalar_index]*state -> theta_v_pert[scalar_index];
 		}
 	}
     free(pressure);
@@ -207,7 +207,7 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		state -> exner_pert[i] = state -> exner_pert[i] - grid -> exner_bg[i];
-		state -> theta_pert[i] = state -> theta_pert[i] - grid -> theta_bg[i];
+		state -> theta_v_pert[i] = state -> theta_v_pert[i] - grid -> theta_v_bg[i];
 	}
     
     double *temperatures = malloc((NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS*sizeof(double));
@@ -304,11 +304,11 @@ int read_init_data(char init_state_file[], State *state, Irreversible_quantities
 	{
 		pressure = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*specific_gas_constants(0)*temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
 		pot_temp = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*pow(P_0/pressure, specific_gas_constants(0)/spec_heat_capacities_p_gas(0));
-		state -> rhotheta[i] = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*pot_temp;
-		// calculating the potential temperature perturbation
-		state -> theta_pert[i] = pot_temp - grid -> theta_bg[i];
+		state -> rhotheta_v[i] = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*pot_temp;
+		// calculating the virtual potential temperature perturbation
+		state -> theta_v_pert[i] = pot_temp - grid -> theta_v_bg[i];
 		// calculating the Exner pressure perturbation
-		state -> exner_pert[i] = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]/(grid -> theta_bg[i] + state -> theta_pert[i]) - grid -> exner_bg[i];
+		state -> exner_pert[i] = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]/(grid -> theta_v_bg[i] + state -> theta_v_pert[i]) - grid -> exner_bg[i];
 	}
 	
     // checks

@@ -21,7 +21,7 @@ int temperature_diagnostics(State *state, Grid *grid, Diagnostics *diagnostics)
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		diagnostics -> temperature_gas[i] = (grid -> theta_bg[i] + state -> theta_pert[i])*(grid -> exner_bg[i] + state -> exner_pert[i]);
+		diagnostics -> temperature_gas[i] = (grid -> theta_v_bg[i] + state -> theta_v_pert[i])*(grid -> exner_bg[i] + state -> exner_pert[i]);
 	}
 	
 	return 0;
