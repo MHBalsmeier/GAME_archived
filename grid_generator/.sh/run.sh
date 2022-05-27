@@ -20,11 +20,7 @@ fi
 echo "Horizontal coordinates of the generating points (the scalar points in terms of the model) will be read from file $scalar_h_coords_file."
 fi
 echo "model top: "$toa" m"
-echo "type of vertical grid: "$type_of_vertical_grid
-if [ $type_of_vertical_grid -eq 0 ]
-then
 echo "number of layers following orography: "$orography_layers
-fi
 echo "stretching parameter: "$stretching_parameter
 echo "radius rescale factor: "$radius_rescale
 echo "number of points used for averaging the orography: "$no_of_avg_points
@@ -46,15 +42,7 @@ fi
 echo ""
 echo "********** Calling the GAME grid generator **********"
 echo ""
-if [ $valgrind_check -eq 0 ]
-then
-./grid_generator $oro_id $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter $orography_layers $type_of_vertical_grid $toa $radius_rescale $no_of_avg_points
-else
-if [ $valgrind_check -eq 1 ]
-then
-valgrind ./grid_generator $oro_id $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter $orography_layers $type_of_vertical_grid $toa $radius_rescale $no_of_avg_points
-fi
-fi
+./grid_generator $oro_id $n_iterations $use_scalar_h_coords_file $scalar_h_coords_file $stretching_parameter $orography_layers $toa $radius_rescale $no_of_avg_points
 if [ $? -ne 0 ]
 then
 echo -e ${RED}Grid file creation failed.$NC

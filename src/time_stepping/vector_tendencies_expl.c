@@ -61,8 +61,6 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 		{
 			simple_dissipation_rate(state, irrev, grid);
 		}
-		// Due to condensates, the friction acceleration needs to get a deceleration factor.
-		// scalar_times_vector(irrev -> pressure_gradient_decel_factor, irrev -> friction_acc, irrev -> friction_acc, grid);
 	}
 	
     // Now the explicit forces are added up.
@@ -90,9 +88,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
             state_tendency -> wind[i] = 0;
         }
         // horizontal case
-        else if (h_index >= NO_OF_SCALARS_H
-    	// checking for shading
-    	&& NO_OF_LAYERS - 1 - layer_index >= grid -> no_of_shaded_points_vector[h_index - NO_OF_SCALARS_H])
+        else if (h_index >= NO_OF_SCALARS_H)
     	{
     		state_tendency -> wind[i] =
     		old_weight*state_tendency -> wind[i] + new_weight*(
@@ -109,9 +105,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     		+ irrev -> friction_acc[i]);
     	}
         // vertical case
-    	else if (h_index < NO_OF_SCALARS_H
-    	// checking for shading
-    	&& NO_OF_LAYERS - layer_index > grid -> no_of_shaded_points_scalar[h_index])
+    	else if (h_index < NO_OF_SCALARS_H)
 		{
     		state_tendency -> wind[i] =
     		old_weight*state_tendency -> wind[i] + new_weight*(

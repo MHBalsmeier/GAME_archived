@@ -78,7 +78,7 @@ int hor_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_
 			scalar_index_to = layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index];
 			irrev -> friction_acc[vector_index] =
 			(diagnostics -> vector_field_placeholder[vector_index] - diagnostics -> curl_of_vorticity[vector_index])
-			/(0.5*(density_gas(state, scalar_index_from) + density_gas(state, scalar_index_to)));
+			/(0.5*(density_total(state, scalar_index_from) + density_total(state, scalar_index_to)));
 		}
 	}
 	return 0;
@@ -203,7 +203,7 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		+ diagnostics -> scalar_field_placeholder[h_index + (layer_index + 1)*NO_OF_SCALARS_H]);
 		// dividing by the density
 		irrev -> friction_acc[vector_index] = irrev -> friction_acc[vector_index]
-		/(0.5*(density_gas(state, h_index + layer_index*NO_OF_SCALARS_H) + density_gas(state, h_index + (layer_index + 1)*NO_OF_SCALARS_H)));
+		/(0.5*(density_total(state, h_index + layer_index*NO_OF_SCALARS_H) + density_total(state, h_index + (layer_index + 1)*NO_OF_SCALARS_H)));
 	}
 	
 	return 0;

@@ -25,7 +25,7 @@ const double TROPO_HEIGHT_STANDARD = 11e3;
 const double INVERSE_HEIGHT_STANDARD = 20e3;
 const double TEMP_GRADIENT_INV_STANDARD = 0.1/100;
 
-int set_z_scalar(double z_scalar[], double oro[], int NO_OF_ORO_LAYERS, double toa, double stretching_parameter, int VERT_GRID_TYPE)
+int set_z_scalar(double z_scalar[], double oro[], int NO_OF_ORO_LAYERS, double toa, double stretching_parameter)
 {
 	/*
 	This function sets the z coordinates of the scalar data points.
@@ -44,7 +44,7 @@ int set_z_scalar(double z_scalar[], double oro[], int NO_OF_ORO_LAYERS, double t
 			sigma_z = pow(z_rel, stretching_parameter);
 			A = sigma_z*toa; // the height without orography
 			// B corrects for orography
-			if (j >= NO_OF_LAYERS - NO_OF_ORO_LAYERS && VERT_GRID_TYPE == 0)
+			if (j >= NO_OF_LAYERS - NO_OF_ORO_LAYERS)
 			{
 				B = (j - (NO_OF_LAYERS - NO_OF_ORO_LAYERS) + 0.0)/NO_OF_ORO_LAYERS;
 			}
@@ -56,7 +56,7 @@ int set_z_scalar(double z_scalar[], double oro[], int NO_OF_ORO_LAYERS, double t
 		}
 		
 		// doing a check
-		if (h_index == 0 && VERT_GRID_TYPE == 0)
+		if (h_index == 0)
 		{
 			max_oro = oro[find_max_index(oro, NO_OF_SCALARS_H)];
 			if (max_oro >= z_vertical_vector_pre[NO_OF_LAYERS - NO_OF_ORO_LAYERS])
@@ -76,45 +76,8 @@ int set_z_scalar(double z_scalar[], double oro[], int NO_OF_ORO_LAYERS, double t
     return 0;
 }
 
-int set_scalar_shading_indices(double z_scalar[], double oro[], int no_of_shaded_points_scalar[])
-{
-	/*
-	This function sets which scalar points lie below the surface.
-	*/
-	
-	int counter;
-	#pragma omp parallel for private(counter)
-	for (int i = 0; i < NO_OF_SCALARS_H; ++i)
-	{
-		counter = 0;
-		for (int j = 0; j < NO_OF_LAYERS; ++j)
-		{
-			if (z_scalar[j*NO_OF_SCALARS_H + i] < oro[i])
-			{
-				++counter;
-			}
-		}
-		no_of_shaded_points_scalar[i] = counter;
-	}
-	return 0;
-}
-
-int set_vector_shading_indices(int from_index[], int to_index[], int no_of_shaded_points_scalar[], int no_of_shaded_points_vector[])
-{
-	/*
-	This function sets which vector points lie below the surface.
-	*/
-	
-	#pragma omp parallel for
-	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
-	{
-		no_of_shaded_points_vector[i] = fmax(no_of_shaded_points_scalar[from_index[i]], no_of_shaded_points_scalar[to_index[i]]);
-	}
-	return 0;
-}
-
 int set_z_vector_and_normal_distance(double z_vector[], double z_scalar[], double normal_distance[], double latitude_scalar[],
-double longitude_scalar[], int from_index[], int to_index[], double toa, int VERT_GRID_TYPE, double oro[], double radius)
+double longitude_scalar[], int from_index[], int to_index[], double toa, double oro[], double radius)
 {
 	/*
 	calculates the vertical position of the vector points
@@ -157,14 +120,7 @@ double longitude_scalar[], int from_index[], int to_index[], double toa, int VER
 			// lowest level
             else if (layer_index == NO_OF_LAYERS)
 			{
-				if (VERT_GRID_TYPE == 0)
-				{
-					z_vector[i] = oro[h_index];
-                }
-				if (VERT_GRID_TYPE == 1)
-				{
-					z_vector[i] = 0;
-                }
+				z_vector[i] = oro[h_index];
                 normal_distance[i] = z_scalar[upper_index] - z_vector[i];
                 lowest_thicknesses[h_index] = z_vector[i - NO_OF_VECTORS_PER_LAYER] - z_vector[i];
 			}

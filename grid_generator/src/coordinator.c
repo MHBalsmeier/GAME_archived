@@ -52,15 +52,10 @@ int main(int argc, char *argv[])
     double stretching_parameter;
    	stretching_parameter = strtof(argv[5], NULL);
    	int no_of_oro_layers = strtod(argv[6], NULL);
-   	const int vert_grid_type = strtod(argv[7], NULL);
-   	double toa = strtof(argv[8], NULL);
-   	double radius_rescale = strtof(argv[9], NULL);
+   	double toa = strtof(argv[7], NULL);
+   	double radius_rescale = strtof(argv[8], NULL);
    	double radius = radius_rescale*RADIUS;
-   	int no_of_avg_points = strtof(argv[10], NULL);
-   	if (vert_grid_type == 1)
-   	{
-   		no_of_oro_layers = 0;
-   	}
+   	int no_of_avg_points = strtof(argv[9], NULL);
     
     /*
     sanity checks
@@ -159,8 +154,6 @@ int main(int argc, char *argv[])
     int *from_index = malloc(NO_OF_VECTORS_H*sizeof(int));
     int *trsk_indices = calloc(10*NO_OF_VECTORS_H, sizeof(int));
     int *trsk_modified_curl_indices = calloc(10*NO_OF_VECTORS_H, sizeof(int));
-    int *no_of_shaded_points_scalar = calloc(NO_OF_SCALARS_H, sizeof(int));
-    int *no_of_shaded_points_vector = calloc(NO_OF_VECTORS_H, sizeof(int));
     int *adjacent_vector_indices_h = malloc(6*NO_OF_SCALARS_H*sizeof(int));
     int *vorticity_indices_triangles = malloc(3*NO_OF_DUAL_SCALARS_H*sizeof(int));
     int *vorticity_indices_rhombi = malloc(4*NO_OF_VECTORS_H*sizeof(int));
@@ -261,7 +254,7 @@ int main(int argc, char *argv[])
 	    --------------------------------------------------
 	*/
     printf("Setting the vertical coordinates of the scalar data points ... ");
-	set_z_scalar(z_scalar, oro, no_of_oro_layers, toa, stretching_parameter, vert_grid_type);
+	set_z_scalar(z_scalar, oro, no_of_oro_layers, toa, stretching_parameter);
     printf(GREEN "finished" RESET);
     printf(".\n");
 	
@@ -269,15 +262,10 @@ int main(int argc, char *argv[])
 	7.) setting the implicit quantities of the vertical grid
 	    ----------------------------------------------------
 	*/
-	if (vert_grid_type == 1)
-	{
-		set_scalar_shading_indices(z_scalar, oro, no_of_shaded_points_scalar);
-		set_vector_shading_indices(from_index, to_index, no_of_shaded_points_scalar, no_of_shaded_points_vector);
-	}
 	
 	printf("Determining vector z coordinates and normal distances of the primal grid ... ");
 	set_z_vector_and_normal_distance(z_vector, z_scalar, normal_distance, latitude_scalar, longitude_scalar,
-	from_index, to_index, toa, vert_grid_type, oro, radius);
+	from_index, to_index, toa, oro, radius);
 	free(oro);
     printf(GREEN "finished" RESET);
     printf(".\n");
@@ -359,9 +347,9 @@ int main(int argc, char *argv[])
     vorticity_signs_triangles_id, f_vec_dimid, scalar_dimid, scalar_h_dimid, scalar_dual_h_dimid, vector_dimid, latlon_dimid_5, scalar_h_dimid_6, vector_h_dimid,
     vector_h_dimid_10, vector_h_dimid_4, vector_v_dimid_6, vector_dual_dimid, gravity_potential_id, scalar_dual_h_dimid_3, vector_dual_area_dimid,
     inner_product_weights_id, scalar_8_dimid, scalar_2_dimid, vector_h_dual_dimid_2, density_to_rhombi_indices_id, density_to_rhombi_weights_id,
-    vorticity_indices_triangles_id, ncid_g_prop, single_double_dimid, no_of_shaded_points_vector_id, no_of_shaded_points_scalar_id,
-    no_of_lloyd_iterations_id, single_int_dimid, interpol_indices_id, interpol_weights_id, theta_bg_id, exner_bg_id, sfc_albedo_id, sfc_rho_c_id, t_conductivity_id,
-    roughness_length_id, is_land_id, vert_grid_type_id, no_of_oro_layers_id, stretching_parameter_id, toa_id, radius_id;
+    vorticity_indices_triangles_id, ncid_g_prop, single_double_dimid, no_of_lloyd_iterations_id, single_int_dimid, interpol_indices_id, interpol_weights_id,
+    theta_bg_id, exner_bg_id, sfc_albedo_id, sfc_rho_c_id, t_conductivity_id, roughness_length_id, is_land_id, no_of_oro_layers_id, stretching_parameter_id,
+    toa_id, radius_id;
     
     printf("Starting to write to output file ... ");
     if ((retval = nc_create(output_file, NC_CLOBBER, &ncid_g_prop)))
@@ -405,8 +393,6 @@ int main(int argc, char *argv[])
     if ((retval = nc_def_dim(ncid_g_prop, "single_int_dimid_index", 1, &single_int_dimid)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "no_of_lloyd_iterations", NC_INT, 1, &single_int_dimid, &no_of_lloyd_iterations_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "vert_grid_type", NC_INT, 1, &single_int_dimid, &vert_grid_type_id)))
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "no_of_oro_layers", NC_INT, 1, &single_int_dimid, &no_of_oro_layers_id)))
         ERR(retval);
@@ -512,10 +498,6 @@ int main(int argc, char *argv[])
         ERR(retval);
     if ((retval = nc_def_var(ncid_g_prop, "density_to_rhombi_indices", NC_INT, 1, &vector_h_dimid_4, &density_to_rhombi_indices_id)))
         ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "no_of_shaded_points_scalar", NC_INT, 1, &scalar_h_dimid, &no_of_shaded_points_scalar_id)))
-        ERR(retval);
-    if ((retval = nc_def_var(ncid_g_prop, "no_of_shaded_points_vector", NC_INT, 1, &vector_h_dimid, &no_of_shaded_points_vector_id)))
-        ERR(retval);
 	if ((retval = nc_def_var(ncid_g_prop, "sfc_albedo", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_albedo_id)))
 	  	ERR(retval);
 	if ((retval = nc_def_var(ncid_g_prop, "sfc_rho_c", NC_DOUBLE, 1, &scalar_h_dimid, &sfc_rho_c_id)))
@@ -534,15 +516,9 @@ int main(int argc, char *argv[])
 	  	ERR(retval);
     if ((retval = nc_enddef(ncid_g_prop)))
         ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, vert_grid_type_id, &vert_grid_type)))
-        ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, no_of_oro_layers_id, &no_of_oro_layers)))
         ERR(retval);
     if ((retval = nc_put_var_int(ncid_g_prop, no_of_lloyd_iterations_id, &no_of_lloyd_iterations)))
-        ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, no_of_shaded_points_scalar_id, &no_of_shaded_points_scalar[0])))
-        ERR(retval);
-    if ((retval = nc_put_var_int(ncid_g_prop, no_of_shaded_points_vector_id, &no_of_shaded_points_vector[0])))
         ERR(retval);
     if ((retval = nc_put_var_double(ncid_g_prop, stretching_parameter_id, &stretching_parameter)))
         ERR(retval);
@@ -642,8 +618,6 @@ int main(int argc, char *argv[])
 	free(sfc_rho_c);
 	free(t_conductivity);
 	free(is_land);
-    free(no_of_shaded_points_scalar);
-    free(no_of_shaded_points_vector);
     free(latitude_ico);
     free(longitude_ico);
     free(x_unity);

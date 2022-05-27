@@ -59,11 +59,6 @@ int main(int argc, char *argv[])
 	// checking the user input
 	sanity_checker(config, config_io, grid);
 	
-    // in the case of block-shaped mountains, no layers follow the orography
-	if (grid -> vert_grid_type == 1)
-	{
-		grid -> no_of_oro_layers = 0;
-	}
     /*
 	Determining the name of the grid file from the RES_ID, NO_OF_LAYERS and so on.
     ------------------------------------------------------------------------------
@@ -658,15 +653,8 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	{
 		printf("Thickness of uppermost soil layer:\t%lf m\n", -grid -> z_soil_interface[1]);
 	}
-	if (grid -> vert_grid_type == 0)
-	{
-		printf("Terrain handling:\t\t\tterrain following coordinates\n");
-		printf("Number of orography layers:\t\t%d\n", grid -> no_of_oro_layers);
-	}
-	if (grid -> vert_grid_type == 1)
-	{
-		printf("Terrain handling: block structure\n");
-	}
+	printf("Terrain handling:\t\t\tterrain following coordinates\n");
+	printf("Number of orography layers:\t\t%d\n", grid -> no_of_oro_layers);
 	if (config_io -> ideal_input_id == -1)
 	{
 		printf("Initialization state file:\t\t%s\n", init_state_file);
