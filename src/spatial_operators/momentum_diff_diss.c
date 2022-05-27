@@ -140,7 +140,7 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 		irrev -> friction_acc[vector_index] +=
 		(irrev -> vert_hor_viscosity[i]*diagnostics -> dv_hdz[i]
 		- irrev -> vert_hor_viscosity[i + NO_OF_VECTORS_H]*diagnostics -> dv_hdz[i + NO_OF_VECTORS_H])/delta_z
-		/(0.5*(density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]) + density_gas(state, layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index])));
+		/(0.5*(density_total(state, layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]) + density_total(state, layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index])));
 	}
 	
 	// 2.) vertical diffusion of vertical velocity
@@ -149,7 +149,7 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		diagnostics -> scalar_field_placeholder[i] = 0;
+		diagnostics -> scalar_field_placeholder[i] = 0.0;
 	}
 	// computing something like dw/dz
 	add_vertical_divv(state -> wind, diagnostics -> scalar_field_placeholder, grid);

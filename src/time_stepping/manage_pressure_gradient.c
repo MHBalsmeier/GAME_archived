@@ -13,8 +13,6 @@ In this file, the explicit component of the pressure gradient acceleration is ma
 #include "../constituents/constituents.h"
 #include "../spatial_operators/spatial_operators.h"
 
-double pressure_gradient_1_damping_factor(double);
-
 int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config)
 {
 	/*
@@ -56,7 +54,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		irrev -> pressure_gradient_decel_factor[i] = density_gas(state, i)/density_total(state, i);
+		irrev -> pressure_gradient_decel_factor[i] = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]/density_total(state, i);
 	}
 	scalar_times_vector(irrev -> pressure_gradient_decel_factor, forcings -> pressure_gradient_acc_neg_nl, forcings -> pressure_gradient_acc_neg_nl, grid);
 	scalar_times_vector(irrev -> pressure_gradient_decel_factor, forcings -> pressure_gradient_acc_neg_l, forcings -> pressure_gradient_acc_neg_l, grid);
@@ -71,18 +69,6 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		}
 	}
 	return 0;
-}
-
-double pressure_gradient_1_damping_factor(double density_value)
-{
-	double safe_density = 1e-8;
-	double result;
-	result = density_value/safe_density;
-	if (result > 1)
-	{
-		result = 1;
-	}
-	return result;
 }
 
 
