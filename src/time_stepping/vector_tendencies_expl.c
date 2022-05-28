@@ -15,13 +15,13 @@ In this file, the calculation of the explicit part of the momentum equation is m
 #include "../constituents/constituents.h"
 #include "../subgrid_scale/subgrid_scale.h"
 
-int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config, int no_rk_step, double delta_t)
+int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, Diagnostics *diagnostics, Forcings *forcings, Irreversible_quantities *irrev, Config *config, int rk_step, double delta_t)
 {
 	/*
 	Managing momentum advection
 	---------------------------
 	*/
-	if (no_rk_step == 1 || config -> totally_first_step_bool == 1)
+	if (rk_step == 1 || config -> totally_first_step_bool == 1)
 	{
 		scalar_times_vector(&state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS], state -> wind, diagnostics -> flux_density, grid);
 		// Now, the "potential vorticity" is evaluated.
@@ -38,8 +38,14 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     Managing momentum diffusion
     ---------------------------
     */
-    if (no_rk_step == 0)
+    if (rk_step == 0)
     {
+		// updating the TKE if any diffusion is switched on because it is required for computing the diffusion coefficients
+    	if (config -> momentum_diff_h == 1 || config -> mass_diff_h == 1 || config -> temperature_diff_h == 1)
+    	{
+			tke_update(irrev, delta_t, state, diagnostics, grid);
+    	}
+    	
 		// momentum diffusion and dissipation (only updated at the first RK step)
 		// horizontal momentum diffusion
 		if (config -> momentum_diff_h == 1)
@@ -65,17 +71,17 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
 	
     // Now the explicit forces are added up.
     double old_weight, new_weight;
-    new_weight = 1;
-    if (no_rk_step == 1)
+    new_weight = 1.0;
+    if (rk_step == 1)
     {
     	new_weight = 0.5;
     }
-	old_weight = 1 - new_weight;
+	old_weight = 1.0 - new_weight;
 	// the weights for the pressure gradient
 	double old_hor_pgrad_weight, current_hor_pgrad_weight, current_ver_pgrad_weight;
 	current_hor_pgrad_weight = 0.5 + config -> impl_thermo_weight;
-	old_hor_pgrad_weight = 1 - current_hor_pgrad_weight;
-	current_ver_pgrad_weight = 1 - config -> impl_thermo_weight;
+	old_hor_pgrad_weight = 1.0 - current_hor_pgrad_weight;
+	current_ver_pgrad_weight = 1.0 - config -> impl_thermo_weight;
     int layer_index, h_index;
     #pragma omp parallel for private(layer_index, h_index)
     for (int i = 0; i < NO_OF_VECTORS; ++i)
@@ -85,7 +91,7 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     	// upper and lower boundary
         if (i < NO_OF_SCALARS_H || i >= NO_OF_VECTORS - NO_OF_SCALARS_H)
         {
-            state_tendency -> wind[i] = 0;
+            state_tendency -> wind[i] = 0.0;
         }
         // horizontal case
         else if (h_index >= NO_OF_SCALARS_H)

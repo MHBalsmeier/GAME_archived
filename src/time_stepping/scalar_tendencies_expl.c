@@ -15,10 +15,10 @@ This is the horizontal (explicit) part of the constituent integration.
 #include "../subgrid_scale/subgrid_scale.h"
 
 int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Diagnostics *diagnostics, Forcings *forcings,
-Irreversible_quantities *irrev, Config *config, int no_rk_step)
+Irreversible_quantities *irrev, Config *config, int rk_step)
 {
 	/*
-	This function manages the calculation of the explicit scalar tendencies.
+	This function manages the calculation of the explicit part of the scalar tendencies.
 	*/
 	
 	/*
@@ -29,24 +29,31 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
     int scalar_shift_index, scalar_index;
     double tracer_heating, latent_heating_weight;
     
+    // specific heat capacity of dry air at constant pressure
+    double c_g_v = spec_heat_capacities_v_gas(0);
+    
     // determining the RK weights
     double old_weight[NO_OF_CONSTITUENTS];
     double new_weight[NO_OF_CONSTITUENTS];
     for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
     {
 		new_weight[i] = 1.0;
-		if (no_rk_step == 1 && i != NO_OF_CONDENSED_CONSTITUENTS)
+		if (rk_step == 1 && i != NO_OF_CONDENSED_CONSTITUENTS)
 		{
 			new_weight[i] = 0.5;
 		}
 		old_weight[i] = 1.0 - new_weight[i];
     }
     
-	// Temperature diffusion gets updated here, but only at the first RK step and if heat conduction is switched on.
-	if (config -> temperature_diff_h == 1)
+    // updating the scalar diffusion coefficient if required
+    if (rk_step == 0 && (config -> mass_diff_h == 1 || config -> temperature_diff_h == 1))
+    {
+	    mass_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid, dualgrid);
+    }
+    
+	// Temperature diffusion gets updated at the first RK step if required.
+	if (config -> temperature_diff_h == 1 && rk_step == 0)
 	{
-		// Now we need to calculate the temperature diffusion coefficients.
-	    temp_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid, dualgrid);
 	    // The diffusion of the temperature depends on its gradient.
 		grad(diagnostics -> temperature_gas, diagnostics -> vector_field_placeholder, grid);
 		// Now the diffusive temperature flux density can be obtained.
@@ -87,11 +94,6 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 		// mass diffusion
 		if (config -> mass_diff_h == 1)
 		{
-			// firstly, we need to calculate the mass diffusion coeffcients (the same for all densities)
-			if (i == 0)
-			{
-				mass_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid, dualgrid);
-    		}
     		// The diffusion of the tracer density depends on its gradient.
 			grad(&state -> rho[scalar_shift_index], diagnostics -> vector_field_placeholder, grid);
 			// Now the diffusive mass flux density can be obtained.
@@ -120,11 +122,13 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 			+ config -> mass_diff_h*diagnostics -> scalar_field_placeholder[j]);
 	    }
 	    
-		// explicit rho*theta_v integration
-		// ------------------------------
+	    /*
+		Explicit component of the rho*theta_v integration
+		-------------------------------------------------
+		*/
 		if (i == NO_OF_CONDENSED_CONSTITUENTS)
 		{
-			// Determining the virtual potential temperature of the constituent at hand.
+			// determining the virtual potential temperature
 			#pragma omp parallel for
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
@@ -152,10 +156,10 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 				// the diabatic forcings
 				// weighting factor
 				+ 1.0*(
-				// dissipation of molecular + turbulent momentum diffusion
+				// dissipation through molecular + turbulent momentum diffusion
 				irrev -> heating_diss[j]
 				// molecular + turbulent heat transport
-				+ irrev -> temperature_diffusion_heating[j]
+				+ c_g_v*irrev -> temperature_diffusion_heating[j]
 				// radiation
 				+ forcings -> radiation_tendency[j]
 				// this has to be divided by c_p*exner

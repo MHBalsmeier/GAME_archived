@@ -34,13 +34,13 @@ int hor_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible_
 	hor_viscosity(state, irrev, grid, dualgrid, diagnostics, config);
 	
 	/*
-	gradient of divergence component
+	diagonal component
 	*/
 	scalar_times_scalar(irrev -> viscosity, diagnostics -> wind_divv, diagnostics -> wind_divv);
 	grad_hor(diagnostics -> wind_divv, diagnostics -> vector_field_placeholder, grid);
     
     /*
-    curl of vorticity component
+    off-diagonal component
     */
 	#pragma omp parallel for
 	for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)

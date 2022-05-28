@@ -21,7 +21,7 @@ int manage_rkhevi(State *state_old, State *state_new, Grid *grid, Dualgrid *dual
 Irreversible_quantities *irrev, Config *config, double delta_t, double time_coordinate, int total_step_counter)
 {
 	/*
-	preparations
+	Preparations
 	------------
 	*/
     
@@ -35,7 +35,7 @@ Irreversible_quantities *irrev, Config *config, double delta_t, double time_coor
 	temperature_diagnostics(state_old, grid, diagnostics);
 	
 	/*
-	loop over the RK substeps
+	Loop over the RK substeps
 	-------------------------
 	*/
 	int vector_index;

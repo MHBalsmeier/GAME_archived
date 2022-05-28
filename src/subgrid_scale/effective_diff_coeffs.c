@@ -21,7 +21,7 @@ int hor_viscosity(State *state, Irreversible_quantities *irrev, Grid *grid, Dual
 	/*
 	This function computes the effective diffusion coefficient (molecular + turbulent).
 	*/
-	
+			
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
@@ -29,7 +29,7 @@ int hor_viscosity(State *state, Irreversible_quantities *irrev, Grid *grid, Dual
 		irrev -> molecular_diffusion_coeff[i] = calc_diffusion_coeff(diagnostics -> temperature_gas[i], state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]);
 		irrev -> viscosity[i] = irrev -> molecular_diffusion_coeff[i];
 		
-		// turbulent component
+		// computing and adding the turbulent component
 		irrev -> viscosity[i] += tke2hor_diff_coeff(irrev -> tke[i]);
 		
 		// maximum (stability constraint)
@@ -39,7 +39,10 @@ int hor_viscosity(State *state, Irreversible_quantities *irrev, Grid *grid, Dual
 		}
 	}
 	
-	// averaging the viscosity to rhombi
+	/*
+	Averaging the viscosity to rhombi
+	---------------------------------
+	*/
 	int scalar_index_from, scalar_index_to, vector_index;
 	#pragma omp parallel for private(scalar_index_from, scalar_index_to, vector_index)
 	for (int h_index = 0; h_index < NO_OF_VECTORS_H; ++h_index)
@@ -61,7 +64,10 @@ int hor_viscosity(State *state, Irreversible_quantities *irrev, Grid *grid, Dual
 		}
 	}
 	
-	// averaging the viscosity to triangles
+	/*
+	Averaging the viscosity to triangles
+	------------------------------------
+	*/
 	int layer_index, h_index, rho_base_index, scalar_base_index;
 	double density_value;
 	#pragma omp parallel for private(layer_index, h_index, density_value, rho_base_index, scalar_base_index)
@@ -96,7 +102,10 @@ int hor_viscosity(State *state, Irreversible_quantities *irrev, Grid *grid, Dual
 		irrev -> viscosity_triangles[i] = density_value*irrev -> viscosity_triangles[i];
 	}
 	
-	// multiplying the viscosity in the cell centers by the gas density
+	/*
+	Multiplying the viscosity in the cell centers by the gas density
+	----------------------------------------------------------------
+	*/
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
@@ -120,8 +129,6 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 	, 2)/delta_t;
 	int layer_index, h_index, scalar_base_index;
 	double mom_diff_coeff, molecular_viscosity;
-	// updating the TKE
-	tke_update(irrev, delta_t, state, diagnostics, grid);
 	// loop over horizontal vector points at half levels
 	#pragma omp parallel for private(layer_index, h_index, mom_diff_coeff, molecular_viscosity, scalar_base_index)
 	for (int i = 0; i < NO_OF_H_VECTORS - NO_OF_VECTORS_H; ++i)
@@ -205,65 +212,23 @@ int vert_vert_mom_viscosity(State *state, Grid *grid, Diagnostics *diagnostics, 
 	return 0;
 }
 
-int temp_diffusion_coeffs(State *state, Config *config, Irreversible_quantities *irrev, Diagnostics *diagnostics, double delta_t, Grid *grid, Dualgrid *dualgrid)
-{
-	/*
-	This function computes the viscous temperature diffusion coefficient (including eddies).
-	*/
-	// The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
-	if (config -> momentum_diff_h == 0)
-	{
-		hor_viscosity(state, irrev, grid, dualgrid, diagnostics, config);
-		tke_update(irrev, delta_t, state, diagnostics, grid);
-		// molecular viscosity
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_SCALARS; ++i)
-		{
-			irrev -> molecular_diffusion_coeff[i] = calc_diffusion_coeff(diagnostics -> temperature_gas[i],
-			state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]);
-		}
-	}
-	double c_g_v = spec_heat_capacities_v_gas(0);
-	#pragma omp parallel for
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
-	{
-		// horizontal diffusion coefficient
-		irrev -> scalar_diffusion_coeff_numerical_h[i]
-		= c_g_v*irrev -> viscosity[i];
-		// vertical diffusion coefficient
-		irrev -> scalar_diffusion_coeff_numerical_v[i]
-		// molecular component
-		= density_gas(state, i)*c_g_v*(irrev -> molecular_diffusion_coeff[i]
-		// turbulent component
-		+ tke2vert_diff_coeff(irrev -> tke[i]));
-	}
-	return 0;
-}
-
 int mass_diffusion_coeffs(State *state, Config *config, Irreversible_quantities *irrev, Diagnostics *diagnostics, double delta_t, Grid *grid, Dualgrid *dualgrid)
 {
 	/*
-	This function computes the viscous tracer diffusion coefficient (including eddies).
+	This function computes the scalar mass diffusion coefficients (including eddies).
 	*/
-	// The eddy viscosity coefficient and the TKE only has to be calculated if it has not yet been done.
-	if (config -> momentum_diff_h == 0 && config -> temperature_diff_h == 0)
+	
+	// The diffusion coefficient only has to be calculated if it has not yet been done.
+	if (config -> momentum_diff_h == 0)
 	{
 		hor_viscosity(state, irrev, grid, dualgrid, diagnostics, config);
-		tke_update(irrev, delta_t, state, diagnostics, grid);
-		// molecular viscosity
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_SCALARS; ++i)
-		{
-			irrev -> molecular_diffusion_coeff[i] = calc_diffusion_coeff(diagnostics -> temperature_gas[i],
-			state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]);
-		}
 	}
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		// horizontal diffusion coefficient
 		irrev -> scalar_diffusion_coeff_numerical_h[i]
-		= 0.5*irrev -> viscosity[i]/density_gas(state, i);
+		= irrev -> viscosity[i]/density_gas(state, i);
 		// vertical diffusion coefficient
 		irrev -> scalar_diffusion_coeff_numerical_v[i]
 		// molecular component
