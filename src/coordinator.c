@@ -457,15 +457,15 @@ int sanity_checker(Config *config, Config_io *config_io, Grid *grid)
     	printf("Aborting.\n");
 		exit(1);
 	}
-	if (config -> tracer_diff_h != 0 && config -> tracer_diff_h != 1)
+	if (config -> mass_diff_h != 0 && config -> mass_diff_h != 1)
 	{
-		printf("tracer_diff_h must be either 0 or 1.\n");
+		printf("mass_diff_h must be either 0 or 1.\n");
     	printf("Aborting.\n");
 		exit(1);
 	}
-	if (config -> tracer_diff_v != 0 && config -> tracer_diff_v != 1)
+	if (config -> mass_diff_v != 0 && config -> mass_diff_v != 1)
 	{
-		printf("tracer_diff_v must be either 0 or 1.\n");
+		printf("mass_diff_v must be either 0 or 1.\n");
     	printf("Aborting.\n");
 		exit(1);
 	}
@@ -541,9 +541,9 @@ int sanity_checker(Config *config, Config_io *config_io, Grid *grid)
     	printf("Aborting.\n");
 		exit(1);
 	}
-	if (config -> tracer_diff_h == 0 && config -> tracer_diff_v == 1)
+	if (config -> mass_diff_h == 0 && config -> mass_diff_v == 1)
 	{
-		printf("Horizontal tracer diffusion cannot be off if vertical tracer diffusion is on.\n");
+		printf("Horizontal mass diffusion cannot be off if vertical mass diffusion is on.\n");
     	printf("Aborting.\n");
 		exit(1);
 	}
@@ -629,9 +629,9 @@ int read_argv(int argc, char *argv[], Config *config, Config_io *config_io, Grid
     argv++;
 	config -> pbl_scheme = strtod(argv[agv_counter], NULL);
     argv++;
-	config -> tracer_diff_h = strtod(argv[agv_counter], NULL);
+	config -> mass_diff_h = strtod(argv[agv_counter], NULL);
     argv++;
-	config -> tracer_diff_v = strtod(argv[agv_counter], NULL);
+	config -> mass_diff_v = strtod(argv[agv_counter], NULL);
     argv++;
 	config -> sfc_phase_trans = strtod(argv[agv_counter], NULL);
     argv++;
@@ -703,21 +703,21 @@ int readback_config(Config *config, Config_io *config_io, Grid *grid, char grid_
 	{
 		printf("Vertical temperature diffusion is turned on.\n");
 	}
-	if (config -> tracer_diff_h == 0)
+	if (config -> mass_diff_h == 0)
 	{
-		printf("Horizontal tracer diffusion is turned off.\n");
+		printf("Horizontal mass diffusion is turned off.\n");
 	}
 	else
 	{
-		printf("Horizontal tracer diffusion is turned on.\n");
+		printf("Horizontal mass diffusion is turned on.\n");
 	}
-	if (config -> tracer_diff_v == 0)
+	if (config -> mass_diff_v == 0)
 	{
-		printf("Vertical tracer diffusion is turned off.\n");
+		printf("Vertical mass diffusion is turned off.\n");
 	}
 	else
 	{
-		printf("Vertical tracer diffusion is turned on.\n");
+		printf("Vertical mass diffusion is turned on.\n");
 	}
 	printf("Swamp layer starts at %lf m.\n", config -> damping_start_height_over_toa*grid -> toa);
 	printf("Maximum swamp layer damping coefficient: %lf 1/s.\n", config -> damping_coeff_max);

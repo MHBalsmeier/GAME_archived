@@ -26,7 +26,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 	--------------------------------------
 	*/
 	// declaring needed variables
-    int diff_switch, scalar_shift_index, scalar_index;
+    int scalar_shift_index, scalar_index;
     double tracer_heating, latent_heating_weight;
     
     // determining the RK weights
@@ -71,7 +71,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 		scalar_shift_index = i*NO_OF_SCALARS;
         // This is the mass advection, which needs to be carried out for all constituents.
         // -------------------------------------------------------------------------------
-        // main gaseous constituent
+        // moist air
 		if (i == NO_OF_CONDENSED_CONSTITUENTS)
 		{
 			scalar_times_vector_h(&state -> rho[scalar_shift_index], state -> wind, diagnostics -> flux_density, grid);
@@ -84,13 +84,14 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
     		divv_h_tracer(diagnostics -> flux_density, &state -> rho[scalar_shift_index], state -> wind, diagnostics -> flux_density_divv, grid);
 		}
 		
-		// mass diffusion, only for gaseous tracers
-		diff_switch = 0;
-		if (i > NO_OF_CONDENSED_CONSTITUENTS && config -> tracer_diff_h == 1)
+		// mass diffusion
+		if (config -> mass_diff_h == 1)
 		{
-			diff_switch = 1;
-			// firstly, we need to calculate the mass diffusion coeffcients
-			mass_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid);
+			// firstly, we need to calculate the mass diffusion coeffcients (the same for all densities)
+			if (i == 0)
+			{
+				mass_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid);
+    		}
     		// The diffusion of the tracer density depends on its gradient.
 			grad(&state -> rho[scalar_shift_index], diagnostics -> vector_field_placeholder, grid);
 			// Now the diffusive mass flux density can be obtained.
@@ -98,7 +99,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 	    	// The divergence of the diffusive mass flux density is the diffusive mass source rate.
 			divv_h(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
 			// vertical mass diffusion
-			if (config -> tracer_diff_v == 1)
+			if (config -> mass_diff_v == 1)
 			{
 				scalar_times_vector_v(irrev -> scalar_diffusion_coeff_numerical_v, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
 				add_vertical_divv(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
@@ -116,7 +117,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 			// the advection
 			-diagnostics -> flux_density_divv[j]
 			// the diffusion
-			+ diff_switch*diagnostics -> scalar_field_placeholder[j]);
+			+ config -> mass_diff_h*diagnostics -> scalar_field_placeholder[j]);
 	    }
 	    
 		// explicit rho*theta_v integration

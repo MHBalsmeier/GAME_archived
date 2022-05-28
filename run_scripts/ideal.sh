@@ -31,8 +31,8 @@ momentum_diff_h=1 # turn on if you want horizontal momentum diffusion
 momentum_diff_v=1 # turn on if you want vertical momentum diffusion
 temperature_diff_h=1 # turn on if you want horizontal temperature diffusion
 temperature_diff_v=1 # turn on if you want vetical temperature diffusion
-tracer_diff_h=1 # turn on if you want horizontal tracer concentration diffusion
-tracer_diff_v=1 # turn on if you want vertical tracer concentration diffusion
+mass_diff_h=1 # turn on if you want horizontal mass diffusion
+mass_diff_v=1 # turn on if you want vertical mass diffusion
 
 # "physics" configuration
 rad_on=1 # set to 0 if you want no radiation, 1 for real radiation and 2 for Held-Suarez forcing
