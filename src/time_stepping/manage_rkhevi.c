@@ -74,7 +74,7 @@ Irreversible_quantities *irrev, Config *config, double delta_t, double time_coor
 		{
 			call_radiation(state_old, grid, dualgrid, state_tendency, diagnostics, forcings, irrev, config, delta_t, time_coordinate);
 		}
-		scalar_tendencies_expl(state_old, state_new, state_tendency, grid, delta_t, diagnostics, forcings, irrev, config, rk_step);
+		scalar_tendencies_expl(state_old, state_new, state_tendency, grid, dualgrid, delta_t, diagnostics, forcings, irrev, config, rk_step);
 
 		// 3.) vertical sound wave solver
 		// ------------------------------

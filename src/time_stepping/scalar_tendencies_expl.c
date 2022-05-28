@@ -14,7 +14,7 @@ This is the horizontal (explicit) part of the constituent integration.
 #include "../constituents/constituents.h"
 #include "../subgrid_scale/subgrid_scale.h"
 
-int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Grid *grid, double delta_t, Diagnostics *diagnostics, Forcings *forcings,
+int scalar_tendencies_expl(State *state_old, State *state, State *state_tendency, Grid *grid, Dualgrid *dualgrid, double delta_t, Diagnostics *diagnostics, Forcings *forcings,
 Irreversible_quantities *irrev, Config *config, int no_rk_step)
 {
 	/*
@@ -46,7 +46,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 	if (config -> temperature_diff_h == 1)
 	{
 		// Now we need to calculate the temperature diffusion coefficients.
-	    temp_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid);
+	    temp_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid, dualgrid);
 	    // The diffusion of the temperature depends on its gradient.
 		grad(diagnostics -> temperature_gas, diagnostics -> vector_field_placeholder, grid);
 		// Now the diffusive temperature flux density can be obtained.
@@ -90,7 +90,7 @@ Irreversible_quantities *irrev, Config *config, int no_rk_step)
 			// firstly, we need to calculate the mass diffusion coeffcients (the same for all densities)
 			if (i == 0)
 			{
-				mass_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid);
+				mass_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid, dualgrid);
     		}
     		// The diffusion of the tracer density depends on its gradient.
 			grad(&state -> rho[scalar_shift_index], diagnostics -> vector_field_placeholder, grid);
