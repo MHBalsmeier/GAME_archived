@@ -1417,25 +1417,12 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	if ((config_io -> model_level_output_switch == 1 && config_io -> netcdf_output_switch == 1)
 	|| (config_io -> ideal_input_id == -1 && (int) (t_write - t_init) == config -> time_to_next_analysis))
 	{
-		// diagnozing the temperatures of all constituents
-		double *temperatures = malloc((NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS*sizeof(double));
-		// loop over all gridpoints
-		#pragma omp parallel for
-		for (int i = 0; i < NO_OF_SCALARS; ++i)
-		{
-			// loop over all condensed constituents
-			for (int j = 0; j < NO_OF_CONDENSED_CONSTITUENTS; ++j)
-			{
-				temperatures[j*NO_OF_SCALARS + i] = diagnostics -> temperature_gas[i];
-			}
-			temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = diagnostics -> temperature_gas[i];
-		}
 		char OUTPUT_FILE_PRE[300];
 		sprintf(OUTPUT_FILE_PRE, "%s+%ds.nc", config_io -> run_id, (int) (t_write - t_init));
 		char OUTPUT_FILE[strlen(OUTPUT_FILE_PRE) + 1];
 		sprintf(OUTPUT_FILE, "%s+%ds.nc", config_io -> run_id, (int) (t_write - t_init));
-		int ncid, retval, scalar_dimid, soil_dimid, vector_h_dimid, vector_v_dimid, vector_dimid, densities_dimid, temperatures_dimid,
-		curl_field_dimid, single_double_dimid, densities_id, temperatures_id, wind_id, rh_id, divv_h_all_layers_id, rel_vort_id,
+		int ncid, retval, scalar_dimid, soil_dimid, vector_h_dimid, vector_v_dimid, vector_dimid, densities_dimid,
+		curl_field_dimid, single_double_dimid, densities_id, temperature_id, wind_id, rh_id, divv_h_all_layers_id, rel_vort_id,
 		tke_id, soil_id;
 		
 		if ((retval = nc_create(OUTPUT_FILE, NC_CLOBBER, &ncid)))
@@ -1447,8 +1434,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		if ((retval = nc_def_dim(ncid, "vector_index", NO_OF_VECTORS, &vector_dimid)))
 			NCERR(retval);
 		if ((retval = nc_def_dim(ncid, "densities_index", NO_OF_CONSTITUENTS*NO_OF_SCALARS, &densities_dimid)))
-			NCERR(retval);
-		if ((retval = nc_def_dim(ncid, "temperatures_index", (NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS, &temperatures_dimid)))
 			NCERR(retval);
 		if ((retval = nc_def_dim(ncid, "vector_index_h", NO_OF_H_VECTORS, &vector_h_dimid)))
 			NCERR(retval);
@@ -1464,9 +1449,9 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			NCERR(retval);
 		if ((retval = nc_put_att_text(ncid, densities_id, "units", strlen("kg/m^3"), "kg/m^3")))
 			NCERR(retval);
-		if ((retval = nc_def_var(ncid, "temperatures", NC_DOUBLE, 1, &temperatures_dimid, &temperatures_id)))
+		if ((retval = nc_def_var(ncid, "temperature", NC_DOUBLE, 1, &scalar_dimid, &temperature_id)))
 			NCERR(retval);
-		if ((retval = nc_put_att_text(ncid, temperatures_id, "units", strlen("K"), "K")))
+		if ((retval = nc_put_att_text(ncid, temperature_id, "units", strlen("K"), "K")))
 			NCERR(retval);
 		if ((retval = nc_def_var(ncid, "wind", NC_DOUBLE, 1, &vector_dimid, &wind_id)))
 			NCERR(retval);
@@ -1498,7 +1483,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		// setting the variables
 		if ((retval = nc_put_var_double(ncid, densities_id, &state_write_out -> rho[0])))
 			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, temperatures_id, &temperatures[0])))
+		if ((retval = nc_put_var_double(ncid, temperature_id, &diagnostics -> temperature_gas[0])))
 			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, wind_id, &state_write_out -> wind[0])))
 			NCERR(retval);
@@ -1516,7 +1501,6 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		// Closing the netcdf file.
 		if ((retval = nc_close(ncid)))
 			NCERR(retval);
-		free(temperatures);
 	}
 	free(grib_output_field);
 	free(divv_h_all_layers);

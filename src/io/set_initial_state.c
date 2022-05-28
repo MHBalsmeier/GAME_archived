@@ -210,7 +210,6 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
 		state -> theta_v_pert[i] = state -> theta_v_pert[i] - grid -> theta_v_bg[i];
 	}
     
-    double *temperatures = malloc((NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS*sizeof(double));
     #pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
@@ -218,8 +217,6 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
 		{
 			// condensed densities are zero in all test states
 			state -> rho[j*NO_OF_SCALARS + i] = 0;
-			// a local LTE is assumed in all test states
-			temperatures[j*NO_OF_SCALARS + i] = temperature[i];
 		}
 		// the dry air density
 		state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = diagnostics -> scalar_field_placeholder[i];
@@ -228,15 +225,12 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
 		{
 			state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = water_vapour_density[i];
 		}
-		// gas temperature
-		temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = temperature[i];
 	}
-    free(temperature);
     free(water_vapour_density);
     
     // setting the soil temperature
-    set_soil_temp(grid, state, temperatures, "");
-    free(temperatures);
+    set_soil_temp(grid, state, temperature, "");
+    free(temperature);
     
     // returning 0 indicating success
     return 0;
@@ -248,14 +242,14 @@ int read_init_data(char init_state_file[], State *state, Irreversible_quantities
 	This function reads the initial state of the model atmosphere from a netCDF file.
 	*/
 	
-    double *temperatures = malloc((NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS*sizeof(double));
+    double *temperature = malloc(NO_OF_SCALARS*sizeof(double));
     int retval, ncid, tke_id, tke_avail;
     if ((retval = nc_open(init_state_file, NC_NOWRITE, &ncid)))
         NCERR(retval);
-    int densities_id, temperatures_id, wind_id;
+    int densities_id, temperature_id, wind_id;
     if ((retval = nc_inq_varid(ncid, "densities", &densities_id)))
         NCERR(retval);
-    if ((retval = nc_inq_varid(ncid, "temperatures", &temperatures_id)))
+    if ((retval = nc_inq_varid(ncid, "temperature", &temperature_id)))
         NCERR(retval);
     if ((retval = nc_inq_varid(ncid, "wind", &wind_id)))
         NCERR(retval);
@@ -271,7 +265,7 @@ int read_init_data(char init_state_file[], State *state, Irreversible_quantities
     }
     if ((retval = nc_get_var_double(ncid, densities_id, &state -> rho[0])))
         NCERR(retval);    
-    if ((retval = nc_get_var_double(ncid, temperatures_id, &temperatures[0])))
+    if ((retval = nc_get_var_double(ncid, temperature_id, &temperature[0])))
         NCERR(retval);
     if ((retval = nc_get_var_double(ncid, wind_id, &state -> wind[0])))
         NCERR(retval);
@@ -289,10 +283,10 @@ int read_init_data(char init_state_file[], State *state, Irreversible_quantities
 		#pragma omp parallel for
 		for (int i = 0; i < NO_OF_SCALARS; ++i)
 		{
-			if (rel_humidity(state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i], temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]) > 1.0)
+			if (rel_humidity(state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i], temperature[i]) > 1.0)
 			{
 				state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i] = state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i]
-				/rel_humidity(state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i], temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]);
+				/rel_humidity(state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i], temperature[i]);
 			}
 		}
     }
@@ -302,13 +296,13 @@ int read_init_data(char init_state_file[], State *state, Irreversible_quantities
 	#pragma omp parallel for private(pressure, pot_temp)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		pressure = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*specific_gas_constants(0)*temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
-		pot_temp = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*pow(P_0/pressure, specific_gas_constants(0)/spec_heat_capacities_p_gas(0));
+		pressure = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*specific_gas_constants(0)*temperature[i];
+		pot_temp = temperature[i]*pow(P_0/pressure, specific_gas_constants(0)/spec_heat_capacities_p_gas(0));
 		state -> rhotheta_v[i] = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*pot_temp;
 		// calculating the virtual potential temperature perturbation
 		state -> theta_v_pert[i] = pot_temp - grid -> theta_v_bg[i];
 		// calculating the Exner pressure perturbation
-		state -> exner_pert[i] = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]/(grid -> theta_v_bg[i] + state -> theta_v_pert[i]) - grid -> exner_bg[i];
+		state -> exner_pert[i] = temperature[i]/(grid -> theta_v_bg[i] + state -> theta_v_pert[i]) - grid -> exner_bg[i];
 	}
 	
     // checks
@@ -325,14 +319,14 @@ int read_init_data(char init_state_file[], State *state, Irreversible_quantities
 	}
     
     // setting the soil temperature
-    set_soil_temp(grid, state, temperatures, init_state_file);
-    free(temperatures);
+    set_soil_temp(grid, state, temperature, init_state_file);
+    free(temperature);
     
     // returning 0 indicating success
     return 0;
 }
 
-int set_soil_temp(Grid *grid, State *state, double temperatures[], char init_state_file[])
+int set_soil_temp(Grid *grid, State *state, double temperature[], char init_state_file[])
 {
 	/*
 	This function sets the soil and SST temperature.
@@ -427,7 +421,7 @@ int set_soil_temp(Grid *grid, State *state, double temperatures[], char init_sta
 		if ((grid -> is_land[i] == 1 && t_soil_avail == 0) || (grid -> is_land[i] == 0 && sst_avail == 0))
 		{
 			// setting the surface temperature identical to the air temperature in the lowest layer
-			t_sfc = temperatures[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + NO_OF_SCALARS - NO_OF_SCALARS_H + i];
+			t_sfc = temperature[NO_OF_SCALARS - NO_OF_SCALARS_H + i];
 			
 			// loop over all soil layers
 			for (int soil_layer_index = 0; soil_layer_index < NO_OF_SOIL_LAYERS; ++soil_layer_index)
