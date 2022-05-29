@@ -122,10 +122,10 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
                 irrev -> mass_source_rates[4*NO_OF_SCALARS + i] = phase_trans_density/delta_t;
                 
                 // the heat source rates acting on the ice
-                irrev -> constituent_heat_source_rates[2*NO_OF_SCALARS + i] = irrev -> mass_source_rates[2*NO_OF_SCALARS + i]*phase_trans_heat(2, solid_temperature);
+                irrev -> phase_trans_heating_rate[i] = irrev -> mass_source_rates[2*NO_OF_SCALARS + i]*phase_trans_heat(2, solid_temperature);
                 
                 // the heat source rates acting on the liquid water
-                irrev -> constituent_heat_source_rates[3*NO_OF_SCALARS + i] =
+                irrev -> phase_trans_heating_rate[i] +=
                 // the evaporation
                 -phase_trans_density*phase_trans_heat(0, T_0)/delta_t;
             }
@@ -149,14 +149,11 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
                 irrev -> mass_source_rates[4*NO_OF_SCALARS + i] = phase_trans_density/delta_t;
                 
                 // the heat source rates acting on the ice
-                irrev -> constituent_heat_source_rates[2*NO_OF_SCALARS + i] = (
+                irrev -> phase_trans_heating_rate[i] = (
                 // the freezing
                 state -> rho[3*NO_OF_SCALARS + i]*phase_trans_heat(2, solid_temperature)
                 // the sublimation
                 - phase_trans_density*phase_trans_heat(1, solid_temperature))/delta_t;
-                
-                // the heat source rates acting on the liquid water
-                irrev -> constituent_heat_source_rates[3*NO_OF_SCALARS + i] = 0.0;
             }
         }
         // the case where the air is over-saturated
@@ -178,10 +175,10 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
 				irrev -> mass_source_rates[3*NO_OF_SCALARS + i] = (-diff_density + state -> rho[2*NO_OF_SCALARS + i])/delta_t;
                 
                 // the heat source rates acting on the ice
-                irrev -> constituent_heat_source_rates[2*NO_OF_SCALARS + i] = irrev -> mass_source_rates[2*NO_OF_SCALARS + i]*phase_trans_heat(2, solid_temperature);
+                irrev -> phase_trans_heating_rate[i] = irrev -> mass_source_rates[2*NO_OF_SCALARS + i]*phase_trans_heat(2, solid_temperature);
                 
                 // the heat source rates acting on the liquid water
-                irrev -> constituent_heat_source_rates[3*NO_OF_SCALARS + i] =
+                irrev -> phase_trans_heating_rate[i] +=
                 // it is only affected by the condensation
                 -diff_density*phase_trans_heat(0, liquid_temperature)/delta_t;
             }
@@ -199,14 +196,11 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
                 irrev -> mass_source_rates[3*NO_OF_SCALARS + i] = -state -> rho[3*NO_OF_SCALARS + i]/delta_t;
                 
                 // the heat source rates acting on the ice
-                irrev -> constituent_heat_source_rates[2*NO_OF_SCALARS + i] =
+                irrev -> phase_trans_heating_rate[i] =
                 // the component through the resublimation
                 (-diff_density*phase_trans_heat(1, solid_temperature)
                 // the component through freezing
                 + state -> rho[3*NO_OF_SCALARS + i]*phase_trans_heat(2, solid_temperature))/delta_t;
-                
-                // the heat source rates acting on the liquid water
-                irrev -> constituent_heat_source_rates[3*NO_OF_SCALARS + i] = 0.0;
             }
         }
         
@@ -216,8 +210,6 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
     	*/
         irrev -> mass_source_rates[i] = 0.0;
         irrev -> mass_source_rates[NO_OF_SCALARS + i] = 0.0;
-        irrev -> constituent_heat_source_rates[i] = 0.0;
-        irrev -> constituent_heat_source_rates[NO_OF_SCALARS + i] = 0.0;
         // snow
         // this only happens if the air is saturated
         if (diagnostics -> temperature_gas[i] < T_0 && diff_density <= 0.0)
@@ -240,14 +232,14 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         {
         	irrev -> mass_source_rates[i] = -state -> rho[i]/delta_t;
         	irrev -> mass_source_rates[NO_OF_SCALARS + i] -= irrev -> mass_source_rates[i];
-        	irrev -> constituent_heat_source_rates[i] = irrev -> mass_source_rates[i]*phase_trans_heat(2, T_0);
+        	irrev -> phase_trans_heating_rate[i] += irrev -> mass_source_rates[i]*phase_trans_heat(2, T_0);
         }
         // turning of rain to snow
         if (diagnostics -> temperature_gas[i] < T_0 && state -> rho[NO_OF_SCALARS + i] > 0.0)
         {
         	irrev -> mass_source_rates[NO_OF_SCALARS + i] = -state -> rho[NO_OF_SCALARS + i]/delta_t;
         	irrev -> mass_source_rates[i] -= irrev -> mass_source_rates[NO_OF_SCALARS + i];
-        	irrev -> constituent_heat_source_rates[i] = -irrev -> mass_source_rates[NO_OF_SCALARS + i]*phase_trans_heat(2, T_0);
+        	irrev -> phase_trans_heating_rate[i] += -irrev -> mass_source_rates[NO_OF_SCALARS + i]*phase_trans_heat(2, T_0);
         }
         
         /*

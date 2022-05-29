@@ -27,7 +27,6 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 	*/
 	// declaring needed variables
     int scalar_shift_index, scalar_index;
-    double tracer_heating, latent_heating_weight;
     
     // specific heat capacity of dry air at constant pressure
     double c_g_v = spec_heat_capacities_v_gas(0);
@@ -137,17 +136,10 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 			scalar_times_vector_h(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
 			divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			// adding the tendencies in all grid boxes
-			#pragma omp parallel for private(tracer_heating, latent_heating_weight, scalar_index)
+			#pragma omp parallel for private(scalar_index)
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
 				scalar_index = scalar_shift_index + j;
-				// determining the heating rate that comes from the tracers
-				tracer_heating = 0.0;
-				latent_heating_weight = 1.0;
-				for (int k = 0; k < NO_OF_CONDENSED_CONSTITUENTS; ++k)
-				{
-					tracer_heating += irrev -> constituent_heat_source_rates[k*NO_OF_SCALARS + j];
-				}
 				state_tendency -> rhotheta_v[j]
 				= old_weight[i]*state_tendency -> rhotheta_v[j]
 				+ new_weight[i]*(
@@ -162,11 +154,10 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 				+ c_g_v*irrev -> temperature_diffusion_heating[j]
 				// radiation
 				+ forcings -> radiation_tendency[j]
-				// this has to be divided by c_p*exner
-				)/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j]))
 				// phase transitions
-				+ latent_heating_weight*tracer_heating
-				/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j])));
+				+ irrev -> phase_trans_heating_rate[j]
+				// this has to be divided by c_p*exner
+				)/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j])));
 			}
 		}
 	} // constituent loop
