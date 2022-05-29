@@ -28,9 +28,6 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 	// declaring needed variables
     int scalar_shift_index, scalar_index;
     
-    // specific heat capacity of dry air at constant pressure
-    double c_g_v = spec_heat_capacities_v_gas(0);
-    
     // determining the RK weights
     double old_weight[NO_OF_CONSTITUENTS];
     double new_weight[NO_OF_CONSTITUENTS];
@@ -47,7 +44,7 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
     // updating the scalar diffusion coefficient if required
     if (rk_step == 0 && (config -> mass_diff_h == 1 || config -> temperature_diff_h == 1))
     {
-	    mass_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid, dualgrid);
+	    scalar_diffusion_coeffs(state, config, irrev, diagnostics, delta_t, grid, dualgrid);
     }
     
 	// Temperature diffusion gets updated at the first RK step if required.
@@ -56,13 +53,13 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 	    // The diffusion of the temperature depends on its gradient.
 		grad(diagnostics -> temperature_gas, diagnostics -> vector_field_placeholder, grid);
 		// Now the diffusive temperature flux density can be obtained.
-	    scalar_times_vector_h(irrev -> scalar_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid);
+	    scalar_times_vector_h(irrev -> temp_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid);
 	    // The divergence of the diffusive temperature flux density is the diffusive temperature heating.
 	    divv_h(diagnostics -> flux_density, irrev -> temperature_diffusion_heating, grid);
     	// vertical temperature diffusion
 	    if (config -> temperature_diff_v == 1)
 	    {
-	    	scalar_times_vector_v(irrev -> scalar_diffusion_coeff_numerical_v, diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid);
+	    	scalar_times_vector_v(irrev -> temp_diffusion_coeff_numerical_v, diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid);
 	    	add_vertical_divv(diagnostics -> flux_density, irrev -> temperature_diffusion_heating, grid);
 		}
 	}
@@ -75,6 +72,7 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 	for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
 	{
 		scalar_shift_index = i*NO_OF_SCALARS;
+		
         // This is the mass advection, which needs to be carried out for all constituents.
         // -------------------------------------------------------------------------------
         // moist air
@@ -96,13 +94,13 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
     		// The diffusion of the tracer density depends on its gradient.
 			grad(&state -> rho[scalar_shift_index], diagnostics -> vector_field_placeholder, grid);
 			// Now the diffusive mass flux density can be obtained.
-			scalar_times_vector_h(irrev -> scalar_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
+			scalar_times_vector_h(irrev -> mass_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
 	    	// The divergence of the diffusive mass flux density is the diffusive mass source rate.
 			divv_h(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
 			// vertical mass diffusion
 			if (config -> mass_diff_v == 1)
 			{
-				scalar_times_vector_v(irrev -> scalar_diffusion_coeff_numerical_v, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
+				scalar_times_vector_v(irrev -> mass_diffusion_coeff_numerical_v, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
 				add_vertical_divv(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
 			}
 		}
@@ -151,7 +149,7 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 				// dissipation through molecular + turbulent momentum diffusion
 				irrev -> heating_diss[j]
 				// molecular + turbulent heat transport
-				+ c_g_v*irrev -> temperature_diffusion_heating[j]
+				+ irrev -> temperature_diffusion_heating[j]
 				// radiation
 				+ forcings -> radiation_tendency[j]
 				// phase transitions
@@ -160,7 +158,7 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 				)/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j])));
 			}
 		}
-	} // constituent loop
+	}
 	
 	return 0;
 }

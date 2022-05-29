@@ -216,10 +216,12 @@ typedef struct irreversible_quantities {
 Scalar_field temperature_diffusion_heating;
 Vector_field friction_acc;
 Scalar_field heating_diss;
-Scalar_field scalar_diffusion_coeff_numerical_h;
-Scalar_field scalar_diffusion_coeff_numerical_v;
-Scalar_field pressure_gradient_decel_factor;
 Scalar_field molecular_diffusion_coeff;
+Scalar_field mass_diffusion_coeff_numerical_h;
+Scalar_field mass_diffusion_coeff_numerical_v;
+Scalar_field temp_diffusion_coeff_numerical_h;
+Scalar_field temp_diffusion_coeff_numerical_v;
+Scalar_field pressure_gradient_decel_factor;
 double mass_source_rates[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS];
 double phase_trans_heating_rate[MOISTURE_ON*NO_OF_SCALARS];
 Scalar_field viscosity;

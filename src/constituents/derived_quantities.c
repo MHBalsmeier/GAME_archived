@@ -72,36 +72,22 @@ double density_gas(State *state, int grid_point_index)
 	return result;
 }
 
-double c_p_mass_weighted_air(State *state, Diagnostics *diag, int grid_point_index)
+double c_v_mass_weighted_air(State *state, int grid_point_index)
 {
 	/*
-	This function calculates the mass-weighted c_p of the air.
+	This function calculates the mass-weighted c_v of the air.
 	*/
 	
 	double result = 0.0;
 	for (int i = 0; i < NO_OF_CONDENSED_CONSTITUENTS; ++i)
 	{
+		// It is correct to use c_p here because the compression of the condensates has almsot no effect on the air pressure.
 		result += state -> rho[i*NO_OF_SCALARS + grid_point_index]*c_p_cond(i, T_0);
 	}
 	for (int i = 0; i < NO_OF_GASEOUS_CONSTITUENTS; ++i)
 	{
-		result += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]*spec_heat_capacities_p_gas(i);
+		result += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]*spec_heat_capacities_v_gas(i);
 	}
-	return result;
-}
-
-double c_p_mass_weighted_gas(State *state, int grid_point_index)
-{
-	/*
-	This function calculates the mass-weighted c_p of the gas phase.
-	*/
-	
-	double result = 0.0;
-	for (int i = 0; i < NO_OF_GASEOUS_CONSTITUENTS; ++i)
-	{
-		result += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]*spec_heat_capacities_p_gas(i);
-	}
-	
 	return result;
 }
 

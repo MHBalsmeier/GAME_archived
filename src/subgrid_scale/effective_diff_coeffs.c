@@ -212,10 +212,10 @@ int vert_vert_mom_viscosity(State *state, Grid *grid, Diagnostics *diagnostics, 
 	return 0;
 }
 
-int mass_diffusion_coeffs(State *state, Config *config, Irreversible_quantities *irrev, Diagnostics *diagnostics, double delta_t, Grid *grid, Dualgrid *dualgrid)
+int scalar_diffusion_coeffs(State *state, Config *config, Irreversible_quantities *irrev, Diagnostics *diagnostics, double delta_t, Grid *grid, Dualgrid *dualgrid)
 {
 	/*
-	This function computes the scalar mass diffusion coefficients (including eddies).
+	This function computes the scalar diffusion coefficients (including eddies).
 	*/
 	
 	// The diffusion coefficient only has to be calculated if it has not yet been done.
@@ -226,15 +226,26 @@ int mass_diffusion_coeffs(State *state, Config *config, Irreversible_quantities 
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
+		/*
+		Computing the mass diffusion coefficient
+		----------------------------------------
+		*/
 		// horizontal diffusion coefficient
-		irrev -> scalar_diffusion_coeff_numerical_h[i]
+		irrev -> mass_diffusion_coeff_numerical_h[i]
 		= irrev -> viscosity[i]/density_gas(state, i);
 		// vertical diffusion coefficient
-		irrev -> scalar_diffusion_coeff_numerical_v[i]
+		irrev -> mass_diffusion_coeff_numerical_v[i]
 		// molecular component
 		= irrev -> molecular_diffusion_coeff[i]
 		// turbulent component
 		+ tke2vert_diff_coeff(irrev -> tke[i]);
+		
+		/*
+		Computing the temperature diffusion coefficient
+		-----------------------------------------------
+		*/
+		irrev -> temp_diffusion_coeff_numerical_h[i] = c_v_mass_weighted_air(state, i)*irrev -> mass_diffusion_coeff_numerical_h[i];
+		irrev -> temp_diffusion_coeff_numerical_v[i] = c_v_mass_weighted_air(state, i)*irrev -> mass_diffusion_coeff_numerical_v[i];
 	}
 	return 0;
 }
