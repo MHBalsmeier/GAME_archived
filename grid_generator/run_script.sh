@@ -17,6 +17,6 @@ stretching_parameter=1.3 # stretching parameter of the vertical grid, must be >=
 toa=41152 # height of the top of the atmosphere
 orography_layers=23 # number of layers following orography (only relevant if type_of_vertical_grid == 0)
 radius_rescale=1.0 # rescaling factor for the Earth radius for small Earth experiments; omega will be replaced by omega -> omega/radius_rescale
-no_of_avg_points=13 # number of points used for smoothing the orography
+no_of_avg_points=7 # number of points used for smoothing the orography
 export OMP_NUM_THREADS=4 # relevant only for OMP
 source .sh/run.sh
