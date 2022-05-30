@@ -19,3 +19,5 @@ This file collects physical constants that are not modified within the code.
 #define PRANDTL_HEIGHT 100.0
 #define C_D_V 717.942189
 #define C_V_V 1396.475121
+#define C_D_P 1005.0
+#define C_V_P 1858.0

@@ -161,7 +161,7 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 				// phase transitions
 				+ irrev -> phase_trans_heating_rate[j]
 				// this has to be divided by c_p*exner
-				)/(spec_heat_capacities_p_gas(0)*(grid -> exner_bg[j] + state -> exner_pert[j])));
+				)/(C_D_P*(grid -> exner_bg[j] + state -> exner_pert[j])));
 			}
 		}
 	}

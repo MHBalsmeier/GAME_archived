@@ -59,7 +59,8 @@ int hor_viscosity(State *state, Irreversible_quantities *irrev, Grid *grid, Dual
 			irrev -> viscosity_rhombi[vector_index] = 0.5*(irrev -> viscosity[scalar_index_from] + irrev -> viscosity[scalar_index_to]);
 			
 			// multiplying by the mass density of the gas phase
-			irrev -> viscosity_rhombi[vector_index] = 0.5*(density_gas(state, scalar_index_from) + density_gas(state, scalar_index_to))
+			irrev -> viscosity_rhombi[vector_index] = 0.5*(state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_from]
+			+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index_to])
 			*irrev -> viscosity_rhombi[vector_index] ;
 		}
 	}
@@ -110,7 +111,7 @@ int hor_viscosity(State *state, Irreversible_quantities *irrev, Grid *grid, Dual
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		// multiplying by the density
-		irrev -> viscosity[i] = density_gas(state, i)*tke2hor_diff_coeff(irrev -> tke[i]);
+		irrev -> viscosity[i] = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*tke2hor_diff_coeff(irrev -> tke[i]);
 	}
 	
 	return 0;
@@ -157,10 +158,10 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 		
 		// multiplying by the density (averaged to the half level edge)
 		irrev -> vert_hor_viscosity[i + NO_OF_VECTORS_H] = 
-		0.25*(density_gas(state, scalar_base_index + grid -> from_index[h_index])
-		+ density_gas(state, scalar_base_index + grid -> to_index[h_index])
-		+ density_gas(state, (layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index])
-		+ density_gas(state, (layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]))
+		0.25*(state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_base_index + grid -> from_index[h_index]]
+		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_base_index + grid -> to_index[h_index]]
+		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]]
+		+ state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]])
 		*mom_diff_coeff;
 	}
 	// for now, we set the vertical diffusion coefficient at the TOA equal to the vertical diffusion coefficient in the layer below
@@ -206,7 +207,7 @@ int vert_vert_mom_viscosity(State *state, Grid *grid, Diagnostics *diagnostics, 
 				mom_diff_coeff = max_diff_v_coeff_turb;
 			}
 			
-			diagnostics -> scalar_field_placeholder[i] = density_gas(state, i)*mom_diff_coeff*diagnostics -> scalar_field_placeholder[i];
+			diagnostics -> scalar_field_placeholder[i] = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*mom_diff_coeff*diagnostics -> scalar_field_placeholder[i];
 		}
 	}
 	return 0;
@@ -232,7 +233,7 @@ int scalar_diffusion_coeffs(State *state, Config *config, Irreversible_quantitie
 		*/
 		// horizontal diffusion coefficient
 		irrev -> mass_diffusion_coeff_numerical_h[i]
-		= irrev -> viscosity[i]/density_gas(state, i);
+		= irrev -> viscosity[i]/state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
 		// vertical diffusion coefficient
 		irrev -> mass_diffusion_coeff_numerical_v[i]
 		// molecular component

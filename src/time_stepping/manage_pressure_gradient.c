@@ -10,6 +10,7 @@ In this file, the explicit component of the pressure gradient acceleration is ma
 #include <stdlib.h>
 #include <stdio.h>
 #include "../game_types.h"
+#include "../game_constants.h"
 #include "../constituents/constituents.h"
 #include "../spatial_operators/spatial_operators.h"
 
@@ -30,12 +31,11 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 		}
 	}
 	
-	// diagnozing c_g_p and multiplying by the full potential tempertature
-	double c_p = spec_heat_capacities_p_gas(0);
+	// multiplying c_p by the full potential tempertature
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		diagnostics -> scalar_field_placeholder[i] = c_p*(grid -> theta_v_bg[i] + state -> theta_v_pert[i]);
+		diagnostics -> scalar_field_placeholder[i] = C_D_P*(grid -> theta_v_bg[i] + state -> theta_v_pert[i]);
 	}
 	grad(state -> exner_pert, forcings -> pressure_gradient_acc_neg_nl, grid);
 	scalar_times_vector(diagnostics -> scalar_field_placeholder, forcings -> pressure_gradient_acc_neg_nl, forcings -> pressure_gradient_acc_neg_nl, grid);
@@ -45,7 +45,7 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		diagnostics -> scalar_field_placeholder[i] = c_p*state -> theta_v_pert[i];
+		diagnostics -> scalar_field_placeholder[i] = C_D_P*state -> theta_v_pert[i];
 	}
 	scalar_times_vector(diagnostics -> scalar_field_placeholder, grid -> exner_bg_grad, forcings -> pressure_gradient_acc_neg_l, grid);
 	

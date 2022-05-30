@@ -301,7 +301,7 @@ int simple_dissipation_rate(State *state, Irreversible_quantities *irrev, Grid *
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		irrev -> heating_diss[i] = -density_gas(state, i)*irrev -> heating_diss[i];
+		irrev -> heating_diss[i] = -density_total(state, i)*irrev -> heating_diss[i];
 	}
 	return 0;
 }

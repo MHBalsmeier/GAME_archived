@@ -26,7 +26,6 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 	// declaring and defining some variables that will be needed later on
 	int lower_index, base_index, soil_switch;
 	double impl_weight = config -> impl_thermo_weight;
-	double c_p = spec_heat_capacities_p_gas(0);
 	double r_d = specific_gas_constants(0);
 	// This is for Klemp (2008).
 	double damping_coeff, damping_start_height, z_above_damping, temperature_gas_lowest_layer_old, temperature_gas_lowest_layer_new;
@@ -60,7 +59,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			// contribution of sensible heat to rhotheta_v
 			state_tendency -> rhotheta_v[base_index] 
 			+= -grid -> area[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i]*diagnostics -> power_flux_density_sensible[i]
-			/((grid -> exner_bg[base_index] + state_new -> exner_pert[base_index])*c_p)/grid -> volume[base_index];
+			/((grid -> exner_bg[base_index] + state_new -> exner_pert[base_index])*C_D_P)/grid -> volume[base_index];
 		}
 	}
 	
@@ -155,16 +154,16 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			d_vector[j] = -pow(theta_v_int_new[j], 2)*(gamma[j] + gamma[j + 1])
 			+ 0.5*(grid -> exner_bg[base_index] - grid -> exner_bg[lower_index])
 			*(alpha[j + 1] - alpha[j] + theta_v_int_new[j]*(beta[j + 1] - beta[j]))
-			- (grid -> z_scalar[base_index] - grid -> z_scalar[lower_index])/(impl_weight*pow(delta_t, 2)*c_p*rho_int_old[j])
+			- (grid -> z_scalar[base_index] - grid -> z_scalar[lower_index])/(impl_weight*pow(delta_t, 2)*C_D_P*rho_int_old[j])
 			*(2.0/grid -> area[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] + delta_t*state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*0.5
 			*(-1.0/grid -> volume[base_index] + 1.0/grid -> volume[lower_index]));
 			// right hand side
 			r_vector[j] = -(state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER] + delta_t*state_tendency -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER])
 			*(grid -> z_scalar[base_index] - grid -> z_scalar[lower_index])
-			/(impl_weight*pow(delta_t, 2)*c_p)
+			/(impl_weight*pow(delta_t, 2)*C_D_P)
 			+ theta_v_int_new[j]*(exner_pert_expl[j] - exner_pert_expl[j + 1])/delta_t
 			+ 0.5/delta_t*(theta_v_pert_expl[j] + theta_v_pert_expl[j + 1])*(grid -> exner_bg[base_index] - grid -> exner_bg[lower_index])
-			- (grid -> z_scalar[base_index] - grid -> z_scalar[lower_index])/(impl_weight*pow(delta_t, 2)*c_p)
+			- (grid -> z_scalar[base_index] - grid -> z_scalar[lower_index])/(impl_weight*pow(delta_t, 2)*C_D_P)
 			*state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]*rho_int_expl[j]/rho_int_old[j];
 		}
 		for (int j = 0; j < NO_OF_LAYERS - 2; ++j)
@@ -175,13 +174,13 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			C_D_Vector[j] = theta_v_int_new[j + 1]*gamma[j + 1]*theta_v_int_new[j]
 			+ 0.5*(grid -> exner_bg[lower_index] - grid -> exner_bg[(j + 2)*NO_OF_SCALARS_H + i])
 			*(alpha[j + 1] + beta[j + 1]*theta_v_int_new[j])
-			- (grid -> z_scalar[lower_index] - grid -> z_scalar[(j + 2)*NO_OF_SCALARS_H + i])/(impl_weight*delta_t*c_p)*0.5
+			- (grid -> z_scalar[lower_index] - grid -> z_scalar[(j + 2)*NO_OF_SCALARS_H + i])/(impl_weight*delta_t*C_D_P)*0.5
 			*state_old -> wind[i + (j + 2)*NO_OF_VECTORS_PER_LAYER]/(grid -> volume[lower_index]*rho_int_old[j + 1]);
 			// upper diagonal
 			e_vector[j] = theta_v_int_new[j]*gamma[j + 1]*theta_v_int_new[j + 1]
 			- 0.5*(grid -> exner_bg[base_index] - grid -> exner_bg[lower_index])
 			*(alpha[j + 1] + beta[j + 1]*theta_v_int_new[j + 1])
-			+ (grid -> z_scalar[base_index] - grid -> z_scalar[lower_index])/(impl_weight*delta_t*c_p)*0.5
+			+ (grid -> z_scalar[base_index] - grid -> z_scalar[lower_index])/(impl_weight*delta_t*C_D_P)*0.5
 			*state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER]/(grid -> volume[lower_index]*rho_int_old[j]);
 		}
 		

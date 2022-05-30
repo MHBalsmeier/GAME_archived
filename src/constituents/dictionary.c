@@ -52,20 +52,6 @@ double mean_particle_masses_gas(int gas_constituent_id)
 	return result;
 }
 
-double spec_heat_capacities_p_gas(int gas_constituent_id)
-{
-	double result = 0;
-	if (gas_constituent_id == 0)
-	{
-		result = 1005.0;
-	}
-	if (gas_constituent_id == 1)
-	{
-		result = 1858.0;
-	}
-	return result;
-}
-
 double specific_gas_constants(int gas_constituent_id)
 {
 	double result = 0;

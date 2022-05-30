@@ -106,7 +106,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		{
 			// Now the aim is to determine the value of the MSLP.
 		    temp_lowest_layer = diagnostics -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
-		    pressure_value = density_gas(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i)
+		    pressure_value = state_write_out -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
 		    *gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i, config)
 		    *temp_lowest_layer;
 		    temp_mslp = temp_lowest_layer + standard_vert_lapse_rate*grid -> z_scalar[i + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H];
@@ -737,13 +737,13 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 	    {
     		(*rh)[i] = 100.0*rel_humidity(state_write_out -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i], diagnostics -> temperature_gas[i]);
     	}
-    	(*pressure)[i] = density_gas(state_write_out, i)*gas_constant_diagnostics(state_write_out, i, config)*diagnostics -> temperature_gas[i];
+    	(*pressure)[i] = state_write_out -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*gas_constant_diagnostics(state_write_out, i, config)*diagnostics -> temperature_gas[i];
     }
     
 	#pragma omp parallel for
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		diagnostics -> scalar_field_placeholder[i] = density_gas(state_write_out, i);
+		diagnostics -> scalar_field_placeholder[i] = state_write_out -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
 	}
     calc_pot_vort(state_write_out -> wind, diagnostics -> scalar_field_placeholder, diagnostics, grid, dualgrid);
     epv_diagnostics(diagnostics -> pot_vort, state_write_out, *epv, grid, dualgrid);
@@ -1699,7 +1699,7 @@ double pseudopotential(State *state, Grid *grid, int scalar_index)
 		= (grid -> exner_bg[scalar_index] + state -> exner_pert[scalar_index])
 		*(grid -> theta_v_bg[scalar_index] + state -> theta_v_pert[scalar_index]);
 		pressure = P_0*pow(grid -> exner_bg[scalar_index] + state -> exner_pert[scalar_index],
-		spec_heat_capacities_p_gas(0)/specific_gas_constants(0));
+		C_D_P/specific_gas_constants(0));
 		alpha_1 = 0.2854*(1.0 - 0.28e-3*r);
 		// this is just an estimate for now
 		t_lcl

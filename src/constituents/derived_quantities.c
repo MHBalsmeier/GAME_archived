@@ -58,20 +58,6 @@ double density_total(State *state, int grid_point_index)
 	return result;
 }
 
-double density_gas(State *state, int grid_point_index)
-{
-	/*
-	This function calculates the density of the gas phase.
-	*/
-	
-	double result = 0.0;
-	for (int i = 0; i < 1; ++i)
-	{
-		result += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index];
-	}
-	return result;
-}
-
 double c_v_mass_weighted_air(State *state, int grid_point_index)
 {
 	/*
