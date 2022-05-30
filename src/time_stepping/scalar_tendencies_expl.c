@@ -64,6 +64,29 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 		}
 	}
 	
+	// Mass diffusion gets updated at the first RK step if required.
+	if (config -> mass_diff_h == 1 && rk_step == 0)
+	{
+		// loop over all constituents
+		for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
+		{
+			scalar_shift_index = i*NO_OF_SCALARS;
+
+    		// The diffusion of the tracer density depends on its gradient.
+			grad(&state -> rho[scalar_shift_index], diagnostics -> vector_field_placeholder, grid);
+			// Now the diffusive mass flux density can be obtained.
+			scalar_times_vector_h(irrev -> mass_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
+	    	// The divergence of the diffusive mass flux density is the diffusive mass source rate.
+			divv_h(diagnostics -> vector_field_placeholder, &irrev -> mass_diff_tendency[scalar_shift_index], grid);
+			// vertical mass diffusion
+			if (config -> mass_diff_v == 1)
+			{
+				scalar_times_vector_v(irrev -> mass_diffusion_coeff_numerical_v, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
+				add_vertical_divv(diagnostics -> vector_field_placeholder, &irrev -> mass_diff_tendency[scalar_shift_index], grid);
+			}
+		}
+	}
+		
 	/*
 	Now, the actual scalar tendencies can be computed.
 	--------------------------------------------------
@@ -88,23 +111,6 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
     		divv_h_tracer(diagnostics -> flux_density, &state -> rho[scalar_shift_index], state -> wind, diagnostics -> flux_density_divv, grid);
 		}
 		
-		// mass diffusion
-		if (config -> mass_diff_h == 1)
-		{
-    		// The diffusion of the tracer density depends on its gradient.
-			grad(&state -> rho[scalar_shift_index], diagnostics -> vector_field_placeholder, grid);
-			// Now the diffusive mass flux density can be obtained.
-			scalar_times_vector_h(irrev -> mass_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
-	    	// The divergence of the diffusive mass flux density is the diffusive mass source rate.
-			divv_h(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
-			// vertical mass diffusion
-			if (config -> mass_diff_v == 1)
-			{
-				scalar_times_vector_v(irrev -> mass_diffusion_coeff_numerical_v, diagnostics -> vector_field_placeholder, diagnostics -> vector_field_placeholder, grid);
-				add_vertical_divv(diagnostics -> vector_field_placeholder, diagnostics -> scalar_field_placeholder, grid);
-			}
-		}
-		
 		// adding the tendencies in all grid boxes
 		#pragma omp parallel for private(scalar_index)
 		for (int j = 0; j < NO_OF_SCALARS; ++j)
@@ -116,7 +122,7 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 			// the advection
 			-diagnostics -> flux_density_divv[j]
 			// the diffusion
-			+ config -> mass_diff_h*diagnostics -> scalar_field_placeholder[j]);
+			+ config -> mass_diff_h*irrev -> mass_diff_tendency[scalar_shift_index + j]);
 	    }
 	    
 	    /*
@@ -169,8 +175,7 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 	This function manages the calculation of the phase transition rates.
 	*/
 	
-	// Only if we have multiple constituents, moisture needs to be included.
-	if (NO_OF_CONSTITUENTS > 1)
+	if (MOISTURE_ON == 1)
 	{
 		// calculating the source rates
 	    calc_h2otracers_source_rates(state, diagnostics, grid, config, irrev, 2.0*delta_t);
@@ -188,12 +193,12 @@ int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irrevers
 					scalar_index = scalar_shift_index + j;
 					if (i < NO_OF_CONDENSED_CONSTITUENTS)
 					{
-						state -> rho[scalar_index] = state -> rho[scalar_index] + delta_t*irrev -> mass_source_rates[scalar_index];
+						state -> rho[scalar_index] = state -> rho[scalar_index] + delta_t*irrev -> phase_trans_rates[scalar_index];
 					}
 					// for the gaseous constituents (apart from the main one), an index shift is necessary
 					else
 					{
-						state -> rho[scalar_index] = state -> rho[scalar_index] + delta_t*irrev -> mass_source_rates[(i - 1)*NO_OF_SCALARS + j];
+						state -> rho[scalar_index] = state -> rho[scalar_index] + delta_t*irrev -> phase_trans_rates[(i - 1)*NO_OF_SCALARS + j];
 					}
 				}
 			}

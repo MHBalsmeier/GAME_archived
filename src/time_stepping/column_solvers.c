@@ -10,6 +10,7 @@ This file contains the implicit vertical solvers.
 #include <stdlib.h>
 #include <stdio.h>
 #include "../game_types.h"
+#include "../game_constants.h"
 #include "../constituents/constituents.h"
 #include "../subgrid_scale/subgrid_scale.h"
 
@@ -25,7 +26,6 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 	// declaring and defining some variables that will be needed later on
 	int lower_index, base_index, soil_switch;
 	double impl_weight = config -> impl_thermo_weight;
-	double c_v = spec_heat_capacities_v_gas(0);
 	double c_p = spec_heat_capacities_p_gas(0);
 	double r_d = specific_gas_constants(0);
 	// This is for Klemp (2008).
@@ -52,7 +52,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			*(grid -> theta_v_bg[base_index] + state_new -> theta_v_pert[base_index]);
 			
 			// the sensible power flux density
-			diagnostics -> power_flux_density_sensible[i] = 0.5*c_v*(state_new -> rho[gas_phase_first_index + base_index]
+			diagnostics -> power_flux_density_sensible[i] = 0.5*C_D_V*(state_new -> rho[gas_phase_first_index + base_index]
 			*(temperature_gas_lowest_layer_old - state_old -> temperature_soil[i])
 			+ state_old -> rho[gas_phase_first_index + base_index]
 			*(temperature_gas_lowest_layer_new - state_new -> temperature_soil[i]))/diagnostics -> scalar_flux_resistance[i];
@@ -72,7 +72,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 		soil_switch = grid -> is_land[i]*config -> prog_soil_temp;
 		
 		// for meanings of these vectors look into the Kompendium
-		double c_vector[NO_OF_LAYERS - 2 + soil_switch*NO_OF_SOIL_LAYERS];
+		double C_D_Vector[NO_OF_LAYERS - 2 + soil_switch*NO_OF_SOIL_LAYERS];
 		double d_vector[NO_OF_LAYERS - 1 + soil_switch*NO_OF_SOIL_LAYERS];
 		double e_vector[NO_OF_LAYERS - 2 + soil_switch*NO_OF_SOIL_LAYERS];
 		double r_vector[NO_OF_LAYERS - 1 + soil_switch*NO_OF_SOIL_LAYERS];
@@ -110,7 +110,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 				alpha[j] = -state_old -> rhotheta_v[base_index]/pow(state_old -> rho[gas_phase_first_index + base_index], 2)
 				/grid -> volume[base_index];
 				beta[j] = 1.0/state_old -> rho[gas_phase_first_index + base_index]/grid -> volume[base_index];
-				gamma[j] = r_d/(c_v*state_old -> rhotheta_v[base_index])
+				gamma[j] = r_d/(C_D_V*state_old -> rhotheta_v[base_index])
 				*(grid -> exner_bg[base_index] + state_old -> exner_pert[base_index])/grid -> volume[base_index];
 			}
 			else
@@ -118,11 +118,11 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 				// old time step partial derivatives of theta_v and Pi
 				alpha_old[j] = -state_old -> rhotheta_v[base_index]/pow(state_old -> rho[gas_phase_first_index + base_index], 2);
 				beta_old[j] = 1.0/state_old -> rho[gas_phase_first_index + base_index];
-				gamma_old[j] = r_d/(c_v*state_old -> rhotheta_v[base_index])*(grid -> exner_bg[base_index] + state_old -> exner_pert[base_index]);
+				gamma_old[j] = r_d/(C_D_V*state_old -> rhotheta_v[base_index])*(grid -> exner_bg[base_index] + state_old -> exner_pert[base_index]);
 				// new time step partial derivatives of theta_v and Pi
 				alpha_new[j] = -state_new -> rhotheta_v[base_index]/pow(state_new -> rho[gas_phase_first_index + base_index], 2);
 				beta_new[j] = 1.0/state_new -> rho[gas_phase_first_index + base_index];
-				gamma_new[j] = r_d/(c_v*state_new -> rhotheta_v[base_index])*(grid -> exner_bg[base_index] + state_new -> exner_pert[base_index]);
+				gamma_new[j] = r_d/(C_D_V*state_new -> rhotheta_v[base_index])*(grid -> exner_bg[base_index] + state_new -> exner_pert[base_index]);
 				// interpolation in time and dividing by the volume
 				alpha[j] = ((1.0 - partial_deriv_new_time_step_weight)*alpha_old[j] + partial_deriv_new_time_step_weight*alpha_new[j])/grid -> volume[base_index];
 				beta[j] = ((1.0 - partial_deriv_new_time_step_weight)*beta_old[j] + partial_deriv_new_time_step_weight*beta_new[j])/grid -> volume[base_index];
@@ -172,7 +172,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			base_index = i + j*NO_OF_SCALARS_H;
 			lower_index = i + (j + 1)*NO_OF_SCALARS_H;
 			// lower diagonal
-			c_vector[j] = theta_v_int_new[j + 1]*gamma[j + 1]*theta_v_int_new[j]
+			C_D_Vector[j] = theta_v_int_new[j + 1]*gamma[j + 1]*theta_v_int_new[j]
 			+ 0.5*(grid -> exner_bg[lower_index] - grid -> exner_bg[(j + 2)*NO_OF_SCALARS_H + i])
 			*(alpha[j + 1] + beta[j + 1]*theta_v_int_new[j])
 			- (grid -> z_scalar[lower_index] - grid -> z_scalar[(j + 2)*NO_OF_SCALARS_H + i])/(impl_weight*delta_t*c_p)*0.5
@@ -256,11 +256,11 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 				}
 			}
 			// the off-diagonal components
-			c_vector[NO_OF_LAYERS - 2] = 0.0;
+			C_D_Vector[NO_OF_LAYERS - 2] = 0.0;
 			e_vector[NO_OF_LAYERS - 2] = 0.0;
 			for (int j = 0; j < NO_OF_SOIL_LAYERS - 1; ++j)
 			{
-				c_vector[j + NO_OF_LAYERS - 1] = -0.5*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
+				C_D_Vector[j + NO_OF_LAYERS - 1] = -0.5*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
 				/((grid -> z_soil_interface[j + 1] - grid -> z_soil_interface[j + 2])*grid -> sfc_rho_c[i])
 				/(grid -> z_soil_center[j] - grid -> z_soil_center[j + 1]);
 				e_vector[j + NO_OF_LAYERS - 1] = -0.5*delta_t*grid -> sfc_rho_c[i]*grid -> t_conduc_soil[i]
@@ -271,7 +271,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 		
 		
 		// calling the algorithm to solve the system of linear equations
-		thomas_algorithm(c_vector, d_vector, e_vector, r_vector, solution_vector, NO_OF_LAYERS - 1 + soil_switch*NO_OF_SOIL_LAYERS);
+		thomas_algorithm(C_D_Vector, d_vector, e_vector, r_vector, solution_vector, NO_OF_LAYERS - 1 + soil_switch*NO_OF_SOIL_LAYERS);
 		
 		// Klemp (2008) upper boundary layer
 		for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
@@ -392,7 +392,7 @@ int three_band_solver_gen_densities(State *state_old, State *state_new, State *s
 			for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 			{
 				// for meanings of these vectors look into the definition of the function thomas_algorithm
-				double c_vector[NO_OF_LAYERS - 1];
+				double C_D_Vector[NO_OF_LAYERS - 1];
 				double d_vector[NO_OF_LAYERS];
 				double e_vector[NO_OF_LAYERS - 1];
 				double r_vector[NO_OF_LAYERS];
@@ -456,12 +456,12 @@ int three_band_solver_gen_densities(State *state_old, State *state_new, State *s
 					base_index = i + j*NO_OF_SCALARS_H;
 					if (vertical_flux_vector_impl[j] >= 0.0)
 					{
-						c_vector[j] = 0.0;
+						C_D_Vector[j] = 0.0;
 						e_vector[j] = -impl_weight*delta_t/grid -> volume[base_index]*vertical_flux_vector_impl[j];
 					}
 					else
 					{
-						c_vector[j] = impl_weight*delta_t/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j];
+						C_D_Vector[j] = impl_weight*delta_t/grid -> volume[i + (j + 1)*NO_OF_SCALARS_H]*vertical_flux_vector_impl[j];
 						e_vector[j] = 0.0;
 					}
 				}
@@ -561,7 +561,7 @@ int three_band_solver_gen_densities(State *state_old, State *state_new, State *s
 				}
 				
 				// calling the algorithm to solve the system of linear equations
-				thomas_algorithm(c_vector, d_vector, e_vector, r_vector, solution_vector, NO_OF_LAYERS);
+				thomas_algorithm(C_D_Vector, d_vector, e_vector, r_vector, solution_vector, NO_OF_LAYERS);
 				
 				// this should account for round-off errors only
 				for (int j = 0; j < NO_OF_LAYERS; ++j)
@@ -584,7 +584,7 @@ int three_band_solver_gen_densities(State *state_old, State *state_new, State *s
 	return 0;
 }
 
-int thomas_algorithm(double c_vector[], double d_vector[], double e_vector[], double r_vector[], double solution_vector[], int solution_length)
+int thomas_algorithm(double C_D_Vector[], double d_vector[], double e_vector[], double r_vector[], double solution_vector[], int solution_length)
 {
 	/*
 	This function solves a system of linear equations with a three-band matrix.
@@ -596,13 +596,13 @@ int thomas_algorithm(double c_vector[], double d_vector[], double e_vector[], do
 	e_prime_vector[0] = e_vector[0]/d_vector[0];
 	for (int j = 1; j < solution_length - 1; ++j)
 	{
-		e_prime_vector[j] = e_vector[j]/(d_vector[j] - e_prime_vector[j - 1]*c_vector[j - 1]);
+		e_prime_vector[j] = e_vector[j]/(d_vector[j] - e_prime_vector[j - 1]*C_D_Vector[j - 1]);
 	}
 	// downward sweep (right-hand side)
 	r_prime_vector[0] = r_vector[0]/d_vector[0];
 	for (int j = 1; j < solution_length; ++j)
 	{
-		r_prime_vector[j] = (r_vector[j] - r_prime_vector[j - 1]*c_vector[j - 1])/(d_vector[j] - e_prime_vector[j - 1]*c_vector[j - 1]);
+		r_prime_vector[j] = (r_vector[j] - r_prime_vector[j - 1]*C_D_Vector[j - 1])/(d_vector[j] - e_prime_vector[j - 1]*C_D_Vector[j - 1]);
 	}
 	
 	// upward sweep (final solution)

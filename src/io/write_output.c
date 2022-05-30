@@ -1587,7 +1587,7 @@ int write_out_integral(State *state_write_out, double time_since_init, Grid *gri
     	Scalar_field *int_energy_density = malloc(sizeof(Scalar_field));
     	scalar_times_scalar(diagnostics -> scalar_field_placeholder, diagnostics -> temperature_gas, *int_energy_density);
     	internal_integral = global_scalar_integrator(*int_energy_density, grid);
-    	fprintf(global_integral_file, "%lf\t%lf\t%lf\t%lf\n", time_since_init, 0.5*kinetic_integral, potential_integral, spec_heat_capacities_v_gas(0)*internal_integral);
+    	fprintf(global_integral_file, "%lf\t%lf\t%lf\t%lf\n", time_since_init, 0.5*kinetic_integral, potential_integral, C_D_V*internal_integral);
     	free(int_energy_density);
     	fclose(global_integral_file);
     }
