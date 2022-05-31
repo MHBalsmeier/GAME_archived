@@ -23,7 +23,12 @@ echo "model top: "$toa" m"
 echo "number of layers following orography: "$orography_layers
 echo "stretching parameter: "$stretching_parameter
 echo "radius rescale factor: "$radius_rescale
+
+if [ $oro_id -eq 1 ]
+then
 echo "number of points used for averaging the orography: "$no_of_avg_points
+fi
+
 # end verbosity
 
 # downloading orography if necessary
