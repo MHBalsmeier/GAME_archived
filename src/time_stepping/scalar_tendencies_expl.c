@@ -140,18 +140,17 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 			scalar_times_vector_h(diagnostics -> scalar_field_placeholder, diagnostics -> flux_density, diagnostics -> flux_density, grid);
 			divv_h(diagnostics -> flux_density, diagnostics -> flux_density_divv, grid);
 			// adding the tendencies in all grid boxes
-			#pragma omp parallel for private(scalar_index)
+			#pragma omp parallel for
 			for (int j = 0; j < NO_OF_SCALARS; ++j)
 			{
-				scalar_index = scalar_shift_index + j;
 				state_tendency -> rhotheta_v[j]
 				= old_weight[i]*state_tendency -> rhotheta_v[j]
 				+ new_weight[i]*(
 				// the advection (resolved transport)
 				-diagnostics -> flux_density_divv[j]
 				// the diabatic forcings
-				// weighting factor
-				+ 1.0*(
+				// weighting factor accounting for condensates
+				+ C_D_V*state -> rho[scalar_shift_index + j]/c_v_mass_weighted_air(state, j)*(
 				// dissipation through molecular + turbulent momentum diffusion
 				irrev -> heating_diss[j]
 				// molecular + turbulent heat transport
