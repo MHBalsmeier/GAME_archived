@@ -31,12 +31,6 @@ int hor_viscosity(State *state, Irreversible_quantities *irrev, Grid *grid, Dual
 		
 		// computing and adding the turbulent component
 		irrev -> viscosity[i] += tke2hor_diff_coeff(irrev -> tke[i]);
-		
-		// maximum (stability constraint)
-		if (irrev -> viscosity[i] > irrev -> max_diff_h_coeff_turb)
-		{
-			irrev -> viscosity[i] = irrev -> max_diff_h_coeff_turb;
-		}
 	}
 	
 	/*
@@ -122,12 +116,8 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 	/*
 	This function computes the effective viscosity (Eddy + molecular viscosity) for the vertical diffusion of horizontal velocity.
 	This quantity is located at the half level edges.
-	To obey the symmetry of the stress tensor, the same coefficient must be used for the horizontal diffusion of vertical velocity.
 	*/
 	
-	double max_diff_v_coeff_turb = 0.125*pow(
-	grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H]
-	, 2)/delta_t;
 	int layer_index, h_index, scalar_base_index;
 	double mom_diff_coeff, molecular_viscosity;
 	// loop over horizontal vector points at half levels
@@ -149,12 +139,6 @@ int vert_hor_mom_viscosity(State *state, Irreversible_quantities *irrev, Diagnos
 		+ irrev -> molecular_diffusion_coeff[(layer_index + 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]]
 		+ irrev -> molecular_diffusion_coeff[(layer_index + 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]);
 		mom_diff_coeff += molecular_viscosity;
-		
-		// obeying the stability limit
-		if (mom_diff_coeff > max_diff_v_coeff_turb)
-		{
-			mom_diff_coeff = max_diff_v_coeff_turb;
-		}
 		
 		// multiplying by the density (averaged to the half level edge)
 		irrev -> vert_hor_viscosity[i + NO_OF_VECTORS_H] = 
@@ -184,10 +168,6 @@ int vert_vert_mom_viscosity(State *state, Grid *grid, Diagnostics *diagnostics, 
 	/*
 	This function multiplies scalar_field_placeholder (containing dw/dz) by the diffusion coefficient acting on w because of w.
 	*/
-	// the maximum vertical diffusion coefficient
-	double max_diff_v_coeff_turb = 0.125*pow(
-	grid -> z_vector[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER - NO_OF_SCALARS_H] - grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H]
-	, 2)/delta_t;
 	int i;
 	double mom_diff_coeff;
 	#pragma omp parallel for private(mom_diff_coeff, i)
@@ -201,11 +181,6 @@ int vert_vert_mom_viscosity(State *state, Grid *grid, Diagnostics *diagnostics, 
 			= irrev -> molecular_diffusion_coeff[i]
 			// turbulent component
 			+ tke2vert_diff_coeff(irrev -> tke[i]);
-			// stability criterion
-			if (mom_diff_coeff > max_diff_v_coeff_turb)
-			{
-				mom_diff_coeff = max_diff_v_coeff_turb;
-			}
 			
 			diagnostics -> scalar_field_placeholder[i] = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*mom_diff_coeff*diagnostics -> scalar_field_placeholder[i];
 		}

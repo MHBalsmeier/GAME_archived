@@ -289,8 +289,6 @@ int main(int argc, char *argv[])
     --------------------------------------
     */
     int wind_lowest_layer_step_counter = 0;
-	// the maximum horizontal diffusion coefficient (stability constraint)
-	irrev -> max_diff_h_coeff_turb = 0.125*grid -> mean_velocity_area/delta_t;
     linear_combine_two_states(state_old, state_old, state_new, 1, 0, grid);
     
     /*
