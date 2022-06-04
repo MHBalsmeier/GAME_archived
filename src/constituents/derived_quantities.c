@@ -18,10 +18,22 @@ int temperature_diagnostics(State *state, Grid *grid, Diagnostics *diagnostics)
 	This function diagnoses the temperature of the gas phase.
 	*/
 	
-	#pragma omp parallel for
-	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	if (MOISTURE_ON == 0)
 	{
-		diagnostics -> temperature_gas[i] = (grid -> theta_v_bg[i] + state -> theta_v_pert[i])*(grid -> exner_bg[i] + state -> exner_pert[i]);
+		#pragma omp parallel for
+		for (int i = 0; i < NO_OF_SCALARS; ++i)
+		{
+			diagnostics -> temperature_gas[i] = (grid -> theta_v_bg[i] + state -> theta_v_pert[i])*(grid -> exner_bg[i] + state -> exner_pert[i]);
+		}
+	}
+	if (MOISTURE_ON == 1)
+	{
+		#pragma omp parallel for
+		for (int i = 0; i < NO_OF_SCALARS; ++i)
+		{
+			diagnostics -> temperature_gas[i] = (grid -> theta_v_bg[i] + state -> theta_v_pert[i])*(grid -> exner_bg[i] + state -> exner_pert[i])
+			/(1.0 + state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i]/state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*(M_D/M_V - 1.0));
+		}
 	}
 	
 	return 0;
@@ -86,7 +98,7 @@ double calc_diffusion_coeff(double temperature, double density)
 	
 	// these things are hardly ever modified
 	double particle_radius = 130e-12;
-	double particle_mass = mean_particle_masses_gas(0);
+	double particle_mass = M_D/N_A;
 	
 	// actual calculation
     double thermal_velocity = sqrt(8.0*K_B*temperature/(M_PI*particle_mass));

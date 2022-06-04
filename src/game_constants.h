@@ -21,3 +21,7 @@ This file collects physical constants that are not modified within the code.
 #define C_V_V 1396.475121
 #define C_D_P 1005.0
 #define C_V_P 1858.0
+#define M_D (N_A*0.004810e-23)
+#define M_V (N_A*0.002991e-23)
+#define R_D 287.057811
+#define R_V 461.524879

@@ -1699,7 +1699,7 @@ double pseudopotential(State *state, Grid *grid, int scalar_index)
 		= (grid -> exner_bg[scalar_index] + state -> exner_pert[scalar_index])
 		*(grid -> theta_v_bg[scalar_index] + state -> theta_v_pert[scalar_index]);
 		pressure = P_0*pow(grid -> exner_bg[scalar_index] + state -> exner_pert[scalar_index],
-		C_D_P/specific_gas_constants(0));
+		C_D_P/R_D);
 		alpha_1 = 0.2854*(1.0 - 0.28e-3*r);
 		// this is just an estimate for now
 		t_lcl

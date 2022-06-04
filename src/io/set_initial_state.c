@@ -28,6 +28,7 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
 	
     double *pressure = malloc(NO_OF_SCALARS*sizeof(double));
     double *temperature = malloc(NO_OF_SCALARS*sizeof(double));
+    double *temperature_v = malloc(NO_OF_SCALARS*sizeof(double));
     double *water_vapour_density = calloc(NO_OF_SCALARS, sizeof(double));
     double z_height;
     double lat, lon, u, v, pressure_value, specific_humidity, dry_density;
@@ -56,6 +57,7 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
         if (ideal_input_id == 0)
         {
             temperature[i] = standard_temp(z_height);
+            temperature_v[i] = temperature[i];
             pressure[i] = standard_pres(z_height);
         }
         // dry Ullrich test
@@ -63,12 +65,14 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
         {
         	baroclinic_wave_test(&one, &zero, &one, &small_atmos_rescale, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i],
         	&dummy_2, &dummy_3, &dummy_4, &dummy_5, &dummy_6);
+            temperature_v[i] = temperature[i];
         }
         // moist Ullrich test
         if (ideal_input_id == 2)
         {
         	baroclinic_wave_test(&one, &one, &one, &small_atmos_rescale, &lon, &lat, &pressure[i], &z_height, &one, &dummy_0, &dummy_1, &temperature[i],
         	&dummy_2, &dummy_4, &dummy_5, &dry_density, &specific_humidity);
+            temperature_v[i] = temperature[i]*(1.0 + specific_humidity*(M_D/M_V - 1.0));
         	water_vapour_density[i] = dry_density*specific_humidity/(1.0 - specific_humidity);
         }
     }
@@ -113,7 +117,7 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
             // standard atmosphere: no wind
             if (ideal_input_id == 0)
             {
-                state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = 0;                
+                state -> wind[NO_OF_SCALARS_H + i*NO_OF_VECTORS_PER_LAYER + j] = 0.0;                
                 
 			    // adding a "random" perturbation to the horizontal wind in the case of the Held-Suarez test case
 			    if (config -> rad_on == 2)
@@ -145,12 +149,12 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
         {
             state -> wind[i*NO_OF_VECTORS_PER_LAYER + j] = 0.0;
         }
-    }    
+    }
     
-    // this is the density which has not yet been hydrostatically balanced
+    // this is the moist air density which has not yet been hydrostatically balanced
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		diagnostics -> scalar_field_placeholder[i] = pressure[i]/(specific_gas_constants(0)*temperature[i]);
+		diagnostics -> scalar_field_placeholder[i] = pressure[i]/(R_D*temperature_v[i]);
 	}
 	scalar_times_vector(diagnostics -> scalar_field_placeholder, state -> wind, diagnostics -> flux_density, grid);
 	// Now, the potential vorticity is evaluated.
@@ -175,32 +179,33 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
 			if (layer_index == NO_OF_LAYERS - 1)
 			{
 				pressure_value = pressure[scalar_index];
-				state -> exner_pert[scalar_index] = pow(pressure_value/P_0, specific_gas_constants(0)/C_D_P);
+				state -> exner_pert[scalar_index] = pow(pressure_value/P_0, R_D/C_D_P);
 			}
 			// other layers
 			else
 			{
 				// solving a quadratic equation for the Exner pressure
-				b = -0.5*state -> exner_pert[scalar_index + NO_OF_SCALARS_H]/temperature[scalar_index + NO_OF_SCALARS_H]
-				*(temperature[scalar_index] - temperature[scalar_index + NO_OF_SCALARS_H]
+				b = -0.5*state -> exner_pert[scalar_index + NO_OF_SCALARS_H]/temperature_v[scalar_index + NO_OF_SCALARS_H]
+				*(temperature_v[scalar_index] - temperature_v[scalar_index + NO_OF_SCALARS_H]
 				+ 2.0/C_D_P*(grid -> gravity_potential[scalar_index] - grid -> gravity_potential[scalar_index + NO_OF_SCALARS_H]
 				+ 0.5*diagnostics -> v_squared[scalar_index] - 0.5*diagnostics -> v_squared[scalar_index + NO_OF_SCALARS_H]
 				- (grid -> z_scalar[scalar_index] - grid -> z_scalar[scalar_index + NO_OF_SCALARS_H])*forcings -> pot_vort_tend[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER]));
-				c = pow(state -> exner_pert[scalar_index + NO_OF_SCALARS_H], 2)*temperature[scalar_index]/temperature[scalar_index + NO_OF_SCALARS_H];
+				c = pow(state -> exner_pert[scalar_index + NO_OF_SCALARS_H], 2)*temperature_v[scalar_index]/temperature_v[scalar_index + NO_OF_SCALARS_H];
 				state -> exner_pert[scalar_index] = b + pow((pow(b, 2) + c), 0.5);
 			}
 			// this is the full virtual potential temperature here
-			state -> theta_v_pert[scalar_index] = temperature[scalar_index]/state -> exner_pert[scalar_index];
+			state -> theta_v_pert[scalar_index] = temperature_v[scalar_index]/state -> exner_pert[scalar_index];
 			
 			// scalar_field_placeholder is the moist air gas density here
 			diagnostics -> scalar_field_placeholder[scalar_index] = P_0*pow(state -> exner_pert[scalar_index],
-			C_D_P/specific_gas_constants(0))/(specific_gas_constants(0)*temperature[scalar_index]);
+			C_D_P/R_D)/(R_D*temperature_v[scalar_index]);
 			
 			// setting rhotheta_v according to its definition
 			state -> rhotheta_v[scalar_index] = diagnostics -> scalar_field_placeholder[scalar_index]*state -> theta_v_pert[scalar_index];
 		}
 	}
     free(pressure);
+    free(temperature_v);
     
     // substracting the background state
     #pragma omp parallel for
@@ -218,7 +223,7 @@ int set_ideal_init(State *state, Grid* grid, Dualgrid* dualgrid, Diagnostics *di
 			// condensed densities are zero in all test states
 			state -> rho[j*NO_OF_SCALARS + i] = 0;
 		}
-		// the dry air density
+		// the moist air density
 		state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] = diagnostics -> scalar_field_placeholder[i];
 		// water vapour density
 		if (NO_OF_CONDENSED_CONSTITUENTS == 4)
@@ -292,18 +297,22 @@ int read_init_data(char init_state_file[], State *state, Irreversible_quantities
     }
 	
 	// diagnostic thermodynamical quantities
-	double pressure, pot_temp;
-	#pragma omp parallel for private(pressure, pot_temp)
+    double *temperature_v = malloc(NO_OF_SCALARS*sizeof(double));
+	double pressure, pot_temp_v;
+	#pragma omp parallel for private(pressure, pot_temp_v)
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
-		pressure = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*specific_gas_constants(0)*temperature[i];
-		pot_temp = temperature[i]*pow(P_0/pressure, specific_gas_constants(0)/C_D_P);
-		state -> rhotheta_v[i] = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*pot_temp;
+		temperature_v[i] = temperature[i]
+		*(1.0 + state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i]/state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*(M_D/M_V - 1.0));
+		pressure = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*R_D*temperature_v[i];
+		pot_temp_v = temperature_v[i]*pow(P_0/pressure, R_D/C_D_P);
+		state -> rhotheta_v[i] = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*pot_temp_v;
 		// calculating the virtual potential temperature perturbation
-		state -> theta_v_pert[i] = pot_temp - grid -> theta_v_bg[i];
+		state -> theta_v_pert[i] = pot_temp_v - grid -> theta_v_bg[i];
 		// calculating the Exner pressure perturbation
-		state -> exner_pert[i] = temperature[i]/(grid -> theta_v_bg[i] + state -> theta_v_pert[i]) - grid -> exner_bg[i];
+		state -> exner_pert[i] = temperature_v[i]/(grid -> theta_v_bg[i] + state -> theta_v_pert[i]) - grid -> exner_bg[i];
 	}
+	free(temperature_v);
 	
     // checks
     // checking for negative densities

@@ -38,20 +38,6 @@ double enthalpy_sublimation(double);
 double c_p_ice(double);
 double c_p_water(double);
 
-double mean_particle_masses_gas(int gas_constituent_id)
-{
-	double result = 0;
-	if (gas_constituent_id == 0)
-	{
-		result = 0.004810e-23;
-	}
-	if (gas_constituent_id == 1)
-	{
-		result = 0.002991e-23;
-	}
-	return result;
-}
-
 double specific_gas_constants(int gas_constituent_id)
 {
 	double result = 0;
@@ -156,7 +142,7 @@ double c_p_ice(double temperature)
 	}
 	double result = -2.0572 + 0.14644*temperature + 0.06163*temperature*exp(-pow(temperature/125.1, 2));
 	// unit conversion from J/(mol*K) to J/(kg*K)
-	result = result/(N_A*mean_particle_masses_gas(1));
+	result = result/M_V;
     return result;
 }
 
@@ -269,7 +255,7 @@ double enthalpy_evaporation(double temperature)
 		}
 		result = 56579.0 - 42.212*temperature + exp(0.1149*(281.6 - temperature));
 		// unit conversion from J/mol to J/kg
-		result = result/(N_A*mean_particle_masses_gas(1));
+		result = result/M_V;
 	}
 	else
 	{
@@ -308,7 +294,7 @@ double enthalpy_sublimation(double temperature)
 	double result = 46782.5 + 35.8925*temperature - 0.07414*pow(temperature, 2) + 541.5*exp(-pow(temperature/123.75, 2));
 	
 	// unit conversion from J/mol to J/kg
-	result = result/(N_A*mean_particle_masses_gas(1));
+	result = result/M_V;
 	
 	return result;
 }
