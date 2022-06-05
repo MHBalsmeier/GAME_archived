@@ -74,7 +74,7 @@ double density_total(State *state, int grid_point_index)
 	return result;
 }
 
-double c_v_mass_weighted_air(State *state, int grid_point_index)
+double c_v_mass_weighted_air(State *state, Diagnostics *diagnostics, int grid_point_index)
 {
 	/*
 	This function calculates the mass-weighted c_v of the air.

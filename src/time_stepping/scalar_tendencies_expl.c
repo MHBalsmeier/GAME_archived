@@ -150,7 +150,7 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 				-diagnostics -> flux_density_divv[j]
 				// the diabatic forcings
 				// weighting factor accounting for condensates
-				+ C_D_V*state -> rho[scalar_shift_index + j]/c_v_mass_weighted_air(state, j)*(
+				+ C_D_V*state -> rho[scalar_shift_index + j]/c_v_mass_weighted_air(state, diagnostics, j)*(
 				// dissipation through molecular + turbulent momentum diffusion
 				irrev -> heating_diss[j]
 				// molecular + turbulent heat transport
