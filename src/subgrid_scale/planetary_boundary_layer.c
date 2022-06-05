@@ -160,8 +160,8 @@ int pbl_wind_tendency(State *state, Diagnostics *diagnostics, Irreversible_quant
 			+ state -> exner_pert[layer_index*NO_OF_SCALARS_H + grid -> from_index[h_index]];
 			exner_to = grid -> exner_bg[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]]
 			+ state -> exner_pert[layer_index*NO_OF_SCALARS_H + grid -> to_index[h_index]];
-			pressure_from = P_0*pow(exner_from, C_D_P/specific_gas_constants(0));
-			pressure_to = P_0*pow(exner_to, C_D_P/specific_gas_constants(0));
+			pressure_from = P_0*pow(exner_from, C_D_P/R_D);
+			pressure_to = P_0*pow(exner_to, C_D_P/R_D);
 			pressure = 0.5*(pressure_from + pressure_to);
 			
 			// calculating the surface pressure at the horizontal vecor point
@@ -169,7 +169,7 @@ int pbl_wind_tendency(State *state, Diagnostics *diagnostics, Irreversible_quant
 		    temp_lowest_layer = diagnostics -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]];
 			exner_from = grid -> exner_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]]
 			+ state -> exner_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]];
-		    pressure_value_lowest_layer = P_0*pow(exner_from, C_D_P/specific_gas_constants(0));
+		    pressure_value_lowest_layer = P_0*pow(exner_from, C_D_P/R_D);
 			temp_surface = temp_lowest_layer + standard_vert_lapse_rate*(grid -> z_scalar[grid -> from_index[h_index] + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]
 			- grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> from_index[h_index]]);
 		    surface_p_factor = pow(1.0 - (temp_surface - temp_lowest_layer)/temp_surface, grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + grid -> from_index[h_index]]/
@@ -179,7 +179,7 @@ int pbl_wind_tendency(State *state, Diagnostics *diagnostics, Irreversible_quant
 		    temp_lowest_layer = diagnostics -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]];
 			exner_to = grid -> exner_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]
 			+ state -> exner_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]];
-		    pressure_value_lowest_layer = P_0*pow(exner_to, C_D_P/specific_gas_constants(0));
+		    pressure_value_lowest_layer = P_0*pow(exner_to, C_D_P/R_D);
 			temp_surface = temp_lowest_layer + standard_vert_lapse_rate*(grid -> z_scalar[grid -> to_index[h_index] + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H]
 			- grid -> z_vector[NO_OF_VECTORS - NO_OF_SCALARS_H + grid -> to_index[h_index]]);
 		    surface_p_factor = pow(1.0 - (temp_surface - temp_lowest_layer)/temp_surface, grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + grid -> to_index[h_index]]/

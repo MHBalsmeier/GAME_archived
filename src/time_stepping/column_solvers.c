@@ -26,7 +26,6 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 	// declaring and defining some variables that will be needed later on
 	int lower_index, base_index, soil_switch;
 	double impl_weight = config -> impl_thermo_weight;
-	double r_d = specific_gas_constants(0);
 	// This is for Klemp (2008).
 	double damping_coeff, damping_start_height, z_above_damping, temperature_gas_lowest_layer_old, temperature_gas_lowest_layer_new;
 	damping_start_height = config -> damping_start_height_over_toa*grid -> z_vector[0];
@@ -109,7 +108,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 				alpha[j] = -state_old -> rhotheta_v[base_index]/pow(state_old -> rho[gas_phase_first_index + base_index], 2)
 				/grid -> volume[base_index];
 				beta[j] = 1.0/state_old -> rho[gas_phase_first_index + base_index]/grid -> volume[base_index];
-				gamma[j] = r_d/(C_D_V*state_old -> rhotheta_v[base_index])
+				gamma[j] = R_D/(C_D_V*state_old -> rhotheta_v[base_index])
 				*(grid -> exner_bg[base_index] + state_old -> exner_pert[base_index])/grid -> volume[base_index];
 			}
 			else
@@ -117,11 +116,11 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 				// old time step partial derivatives of theta_v and Pi
 				alpha_old[j] = -state_old -> rhotheta_v[base_index]/pow(state_old -> rho[gas_phase_first_index + base_index], 2);
 				beta_old[j] = 1.0/state_old -> rho[gas_phase_first_index + base_index];
-				gamma_old[j] = r_d/(C_D_V*state_old -> rhotheta_v[base_index])*(grid -> exner_bg[base_index] + state_old -> exner_pert[base_index]);
+				gamma_old[j] = R_D/(C_D_V*state_old -> rhotheta_v[base_index])*(grid -> exner_bg[base_index] + state_old -> exner_pert[base_index]);
 				// new time step partial derivatives of theta_v and Pi
 				alpha_new[j] = -state_new -> rhotheta_v[base_index]/pow(state_new -> rho[gas_phase_first_index + base_index], 2);
 				beta_new[j] = 1.0/state_new -> rho[gas_phase_first_index + base_index];
-				gamma_new[j] = r_d/(C_D_V*state_new -> rhotheta_v[base_index])*(grid -> exner_bg[base_index] + state_new -> exner_pert[base_index]);
+				gamma_new[j] = R_D/(C_D_V*state_new -> rhotheta_v[base_index])*(grid -> exner_bg[base_index] + state_new -> exner_pert[base_index]);
 				// interpolation in time and dividing by the volume
 				alpha[j] = ((1.0 - partial_deriv_new_time_step_weight)*alpha_old[j] + partial_deriv_new_time_step_weight*alpha_new[j])/grid -> volume[base_index];
 				beta[j] = ((1.0 - partial_deriv_new_time_step_weight)*beta_old[j] + partial_deriv_new_time_step_weight*beta_new[j])/grid -> volume[base_index];

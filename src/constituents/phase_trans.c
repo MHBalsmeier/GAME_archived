@@ -70,10 +70,10 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
 		}
 		
 		// determining the water vapour pressure (using the EOS)
-        water_vapour_pressure = state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i]*specific_gas_constants(1)*diagnostics -> temperature_gas[i];
+        water_vapour_pressure = state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i]*R_V*diagnostics -> temperature_gas[i];
 		
 		// determining the water vapour pressure (using the EOS)
-        dry_pressure = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*specific_gas_constants(0)*diagnostics -> temperature_gas[i];
+        dry_pressure = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*R_D*diagnostics -> temperature_gas[i];
         
         // calculating the total air pressure
         air_pressure = dry_pressure + water_vapour_pressure;
@@ -90,7 +90,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
 		}
         
     	// the amount of water vapour that the air can still take 
-        diff_density = (saturation_pressure - water_vapour_pressure)/(specific_gas_constants(1)*diagnostics -> temperature_gas[i]);
+        diff_density = (saturation_pressure - water_vapour_pressure)/(R_V*diagnostics -> temperature_gas[i]);
         
     	/*
     	Clouds
@@ -266,7 +266,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         		}
         		
         		// difference water vapour density between saturation at ground temperature and actual absolute humidity in the lowest model layer
-        		diff_density_sfc = saturation_pressure_sfc/(specific_gas_constants(1)*state -> temperature_soil[h_index])
+        		diff_density_sfc = saturation_pressure_sfc/(R_V*state -> temperature_soil[h_index])
         		- state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i];
         		
         		// the thickness of the lowest model layer (we need it as a result of Guass' theorem)

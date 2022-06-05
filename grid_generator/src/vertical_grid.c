@@ -328,7 +328,7 @@ int set_background_state(double z_scalar[], double gravity_potential[], double t
 			if (layer_index == NO_OF_LAYERS - 1)
 			{
 				pressure = standard_pres(z_scalar[scalar_index]);
-				exner_bg[scalar_index] = pow(pressure/P_0, specific_gas_constants(0)/C_D_P);
+				exner_bg[scalar_index] = pow(pressure/P_0, R_D/C_D_P);
 				theta_v_bg[scalar_index] = temperature/exner_bg[scalar_index];
 			}
 			// other layers
@@ -376,20 +376,20 @@ double standard_pres(double z_height)
     double pressure, pressure_at_inv_standard;
     if (z_height < TROPO_HEIGHT_STANDARD)
     {
-        pressure = P_0_STANDARD*pow(1 + TEMP_GRADIENT*z_height/T_SFC, -G_MEAN_SFC_ABS/(specific_gas_constants(0)*TEMP_GRADIENT));
+        pressure = P_0_STANDARD*pow(1 + TEMP_GRADIENT*z_height/T_SFC, -G_MEAN_SFC_ABS/(R_D*TEMP_GRADIENT));
     }
     else if (z_height < INVERSE_HEIGHT_STANDARD)
     {
         pressure = P_0_STANDARD*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT_STANDARD/T_SFC,
-        -G_MEAN_SFC_ABS/(specific_gas_constants(0)*TEMP_GRADIENT))
-        *exp(-G_MEAN_SFC_ABS*(z_height - TROPO_HEIGHT_STANDARD)/(specific_gas_constants(0)*TROPO_TEMP_STANDARD));
+        -G_MEAN_SFC_ABS/(R_D*TEMP_GRADIENT))
+        *exp(-G_MEAN_SFC_ABS*(z_height - TROPO_HEIGHT_STANDARD)/(R_D*TROPO_TEMP_STANDARD));
     }
     else
     {
     	pressure_at_inv_standard = P_0_STANDARD*pow(1 + TEMP_GRADIENT*TROPO_HEIGHT_STANDARD/T_SFC,
-    	-G_MEAN_SFC_ABS/(specific_gas_constants(0)*TEMP_GRADIENT))
-    	*exp(-G_MEAN_SFC_ABS*(INVERSE_HEIGHT_STANDARD - TROPO_HEIGHT_STANDARD)/(specific_gas_constants(0)*TROPO_TEMP_STANDARD));
-        pressure = pressure_at_inv_standard*pow(1 + TEMP_GRADIENT*(z_height - INVERSE_HEIGHT_STANDARD)/T_SFC, -G_MEAN_SFC_ABS/(specific_gas_constants(0)*TEMP_GRADIENT));
+    	-G_MEAN_SFC_ABS/(R_D*TEMP_GRADIENT))
+    	*exp(-G_MEAN_SFC_ABS*(INVERSE_HEIGHT_STANDARD - TROPO_HEIGHT_STANDARD)/(R_D*TROPO_TEMP_STANDARD));
+        pressure = pressure_at_inv_standard*pow(1 + TEMP_GRADIENT*(z_height - INVERSE_HEIGHT_STANDARD)/T_SFC, -G_MEAN_SFC_ABS/(R_D*TEMP_GRADIENT));
     }
     return pressure;
 }

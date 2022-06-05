@@ -48,9 +48,14 @@ double gas_constant_diagnostics(State *state, int grid_point_index, Config *conf
 	int no_of_relevant_constituents = 1;
 	double rho_g = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index];
 	double result = 0.0;
+	
+	double specific_gas_constants[2];
+	specific_gas_constants[0] = R_D;
+	specific_gas_constants[1] = R_V;
+	
 	for (int i = 0; i < no_of_relevant_constituents; ++i)
 	{
-		result += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*specific_gas_constants(i);
+		result += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*specific_gas_constants[i];
 	}
 	
 	return result;

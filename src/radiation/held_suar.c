@@ -24,7 +24,7 @@ int held_suar(double latitude_scalar[], double z_scalar[], double mass_densities
 	{
 		layer_index = i/NO_OF_SCALARS_RAD_PER_LAYER;
 		h_index = i - layer_index*NO_OF_SCALARS_RAD_PER_LAYER;
-		pressure = mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS_RAD + i]*specific_gas_constants(0)*temperature_gas[i];
+		pressure = mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS_RAD + i]*R_D*temperature_gas[i];
 		radiation_tendency[i] = -k_T(latitude_scalar[h_index], pressure)*(temperature_gas[i] - t_eq(latitude_scalar[h_index], pressure));
 		radiation_tendency[i] = C_D_V*mass_densities[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS_RAD + i]*radiation_tendency[i];
 	}

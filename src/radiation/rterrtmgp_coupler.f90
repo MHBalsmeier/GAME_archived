@@ -30,6 +30,10 @@ module radiation
   ! used for C interoperability
   integer            :: zero = 0
   integer            :: one = 1
+  
+  ! specific gas constants
+  real(wp)           :: R_D = 287.057811_wp
+  real(wp)           :: R_V = 461.524879_wp
 
   character(len = 3),dimension(wp) :: active_gases = (/ &
    "N2 ","O2 ","CH4","O3 ","CO2","H2O","N2O","CO " &
@@ -268,7 +272,7 @@ module radiation
       do jk=1,no_of_layers
         temperature_rad(ji,jk) = temperature_gas((jk-1)*no_of_scalars_h+ji)
         ! the pressure is diagnozed here, using the equation of state for ideal gases
-        pressure_rad(ji,jk) = specific_gas_constants(0) &
+        pressure_rad(ji,jk) = R_D &
         *mass_densities(no_of_condensed_constituents*no_of_scalars &
         + (jk-1)*no_of_scalars_h+ji)*temperature_rad(ji,jk)
       enddo
@@ -795,10 +799,8 @@ module radiation
             do jk=1,no_of_day_points
               do jl=1,no_of_layers
                 vol_mix_ratio(jk,jl) = & 
-                mass_densities((no_of_condensed_constituents+1)*no_of_scalars+day_indices(jk)+(jl-1)*no_of_scalars_h) &
-                *specific_gas_constants(1)/ &
-                (mass_densities(no_of_condensed_constituents*no_of_scalars+day_indices(jk)+(jl-1)*no_of_scalars_h) &
-                *specific_gas_constants(0))
+                mass_densities((no_of_condensed_constituents+1)*no_of_scalars+day_indices(jk)+(jl-1)*no_of_scalars_h)*R_V/ &
+                (mass_densities(no_of_condensed_constituents*no_of_scalars+day_indices(jk)+(jl-1)*no_of_scalars_h)*R_D)
               enddo
             enddo
           ! in the long wave case,all points matter
@@ -806,10 +808,8 @@ module radiation
             do jk=1,no_of_scalars_h
               do jl=1,no_of_layers
                 vol_mix_ratio(jk,jl) = & 
-                mass_densities((no_of_condensed_constituents+1)*no_of_scalars+jk+(jl-1)*no_of_scalars_h) &
-                *specific_gas_constants(1)/ &
-                (mass_densities(no_of_condensed_constituents*no_of_scalars+jk+(jl-1)*no_of_scalars_h) &
-                *specific_gas_constants(0))
+                mass_densities((no_of_condensed_constituents+1)*no_of_scalars+jk+(jl-1)*no_of_scalars_h)*R_V/ &
+                (mass_densities(no_of_condensed_constituents*no_of_scalars+jk+(jl-1)*no_of_scalars_h)*R_D)
               enddo
             enddo
           endif

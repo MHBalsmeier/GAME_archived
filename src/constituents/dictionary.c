@@ -12,49 +12,34 @@ This file contains look-up functions for properties of the atmosphere.
 #include "../game_types.h"
 #include "constituents.h"
 
-/*
-Gas quantities
---------------
-*/
-
-/*
-gaseous constituents IDs:
-0: dry air
-1: H2O
-2: N2
-3: O2
-4: Ar
-5: CO2
-6: Ne
-7: He
-8: CH4
-9: CO
-10: O3
-11: N2O
-*/
-
 double enthalpy_evaporation(double);
 double enthalpy_sublimation(double);
 double c_p_ice(double);
 double c_p_water(double);
 
-double specific_gas_constants(int gas_constituent_id)
-{
-	double result = 0;
-	if (gas_constituent_id == 0)
-	{
-		result = 287.057811;
-	}
-	if (gas_constituent_id == 1)
-	{
-		result = 461.524879;
-	}
-	return result;
-}
-
-// This follows Zdunkowski & Bott: Thermodynamics of the Atmosphere (2004), pp. 120ff.
 double molar_fraction_in_dry_air(int gas_constituent_id)
 {
+
+	/*	
+	This follows Zdunkowski & Bott: Thermodynamics of the Atmosphere (2004), pp. 120ff.
+	*/
+
+	/*
+	gaseous constituents IDs:
+	0: dry air
+	1: H2O
+	2: N2
+	3: O2
+	4: Ar
+	5: CO2
+	6: Ne
+	7: He
+	8: CH4
+	9: CO
+	10: O3
+	11: N2O
+	*/
+
 	double result = 0;
 	if (gas_constituent_id == 2)
 	{
@@ -410,7 +395,7 @@ double rel_humidity(double abs_humidity, double temperature)
 	This function returns the relative humidity (NOT in percent) as a function of the absolute humidity in kg/m^3 and the temperature in K.
 	*/
 	
-	double vapour_pressure = abs_humidity*specific_gas_constants(1)*temperature;
+	double vapour_pressure = abs_humidity*R_D*temperature;
 	double saturation_pressure;
 	if (temperature > T_0)
 	{
