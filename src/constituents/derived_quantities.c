@@ -45,17 +45,16 @@ double gas_constant_diagnostics(State *state, int grid_point_index, Config *conf
 	This function calculates the specific gas constant of the gas phase.
 	*/
 	
-	int no_of_relevant_constituents = 1;
-	double rho_g = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index];
 	double result = 0.0;
-	
-	double specific_gas_constants[2];
-	specific_gas_constants[0] = R_D;
-	specific_gas_constants[1] = R_V;
-	
-	for (int i = 0; i < no_of_relevant_constituents; ++i)
+	if (MOISTURE_ON == 0)
 	{
-		result += state -> rho[(i + NO_OF_CONDENSED_CONSTITUENTS)*NO_OF_SCALARS + grid_point_index]/rho_g*specific_gas_constants[i];
+		result = R_D;
+	}
+	if (MOISTURE_ON == 1)
+	{
+		result = (state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index] - state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + grid_point_index])*R_D
+		+ state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + grid_point_index]*R_V;
+		result = result/state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + grid_point_index];
 	}
 	
 	return result;
