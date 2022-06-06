@@ -347,7 +347,7 @@ double saturation_pressure_over_ice(double temperature)
     {
     	temp_c = -70.0;
     }
-    // at temperatures > 0 degrees C ice cannot exist in equilibrium which is why this is clipped
+    // at temperatures > 0 degrees Celsius ice cannot exist in equilibrium which is why this is clipped
     if (temp_c > 0.0)
     {
     	temp_c = 0.0;
@@ -381,26 +381,6 @@ double enhancement_factor_over_ice(double air_pressure)
 	
 	double result = 0.99882*exp(0.00000008*air_pressure);
 	
-	return result;
-}
-
-double rel_humidity(double abs_humidity, double temperature)
-{
-	/*
-	This function returns the relative humidity (NOT in percent) as a function of the absolute humidity in kg/m^3 and the temperature in K.
-	*/
-	
-	double vapour_pressure = abs_humidity*R_D*temperature;
-	double saturation_pressure;
-	if (temperature > T_0)
-	{
-		saturation_pressure = saturation_pressure_over_water(temperature);
-	}
-	if (temperature <= T_0)
-	{
-		saturation_pressure = saturation_pressure_over_ice(temperature);
-	}
-	double result = vapour_pressure/saturation_pressure;
 	return result;
 }
 
