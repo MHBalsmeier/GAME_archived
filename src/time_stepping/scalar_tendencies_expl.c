@@ -51,7 +51,7 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 	if (config -> temperature_diff_h == 1 && rk_step == 0)
 	{
 	    // The diffusion of the temperature depends on its gradient.
-		grad(diagnostics -> temperature_gas, diagnostics -> vector_field_placeholder, grid);
+		grad(diagnostics -> temperature, diagnostics -> vector_field_placeholder, grid);
 		// Now the diffusive temperature flux density can be obtained.
 	    scalar_times_vector_h(irrev -> temp_diffusion_coeff_numerical_h, diagnostics -> vector_field_placeholder, diagnostics -> flux_density, grid);
 	    // The divergence of the diffusive temperature flux density is the diffusive temperature heating.

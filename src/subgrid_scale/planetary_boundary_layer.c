@@ -166,7 +166,7 @@ int pbl_wind_tendency(State *state, Diagnostics *diagnostics, Irreversible_quant
 			
 			// calculating the surface pressure at the horizontal vecor point
 			// calculating the surface pressure at the from scalar point
-		    temp_lowest_layer = diagnostics -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]];
+		    temp_lowest_layer = diagnostics -> temperature[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]];
 			exner_from = grid -> exner_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]]
 			+ state -> exner_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index]];
 		    pressure_value_lowest_layer = P_0*pow(exner_from, C_D_P/R_D);
@@ -176,7 +176,7 @@ int pbl_wind_tendency(State *state, Diagnostics *diagnostics, Irreversible_quant
 		    (gas_constant_diagnostics(state, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> from_index[h_index], config)*standard_vert_lapse_rate));
 			pressure_sfc_from = pressure_value_lowest_layer/surface_p_factor;
 			// calculating the surface pressure at the to scalar point
-		    temp_lowest_layer = diagnostics -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]];
+		    temp_lowest_layer = diagnostics -> temperature[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]];
 			exner_to = grid -> exner_bg[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]]
 			+ state -> exner_pert[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + grid -> to_index[h_index]];
 		    pressure_value_lowest_layer = P_0*pow(exner_to, C_D_P/R_D);

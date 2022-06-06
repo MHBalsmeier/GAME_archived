@@ -44,7 +44,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
 		}
 		else
 		{
-			solid_temperature = diagnostics -> temperature_gas[i];
+			solid_temperature = diagnostics -> temperature[i];
 		}
 		
 		// determining the temperature of the liquid cloud water
@@ -54,32 +54,32 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
 		}
 		else
 		{
-			liquid_temperature = diagnostics -> temperature_gas[i];
+			liquid_temperature = diagnostics -> temperature[i];
 		}
 		
 		// determining the saturation pressure
 		// "positive" temperatures (the saturation pressure is different over water compared to over ice)
-        if (diagnostics -> temperature_gas[i] >= T_0)
+        if (diagnostics -> temperature[i] >= T_0)
     	{
-            saturation_pressure = saturation_pressure_over_water(diagnostics -> temperature_gas[i]);
+            saturation_pressure = saturation_pressure_over_water(diagnostics -> temperature[i]);
 		}
 		// "negative" temperatures
         else
     	{
-            saturation_pressure = saturation_pressure_over_ice(diagnostics -> temperature_gas[i]);
+            saturation_pressure = saturation_pressure_over_ice(diagnostics -> temperature[i]);
 		}
 		
 		// determining the water vapour pressure (using the EOS)
-        water_vapour_pressure = state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i]*R_V*diagnostics -> temperature_gas[i];
+        water_vapour_pressure = state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i]*R_V*diagnostics -> temperature[i];
 		
 		// determining the water vapour pressure (using the EOS)
-        dry_pressure = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*R_D*diagnostics -> temperature_gas[i];
+        dry_pressure = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*R_D*diagnostics -> temperature[i];
         
         // calculating the total air pressure
         air_pressure = dry_pressure + water_vapour_pressure;
         
         // multiplying the saturation pressure by the enhancement factor
-        if (diagnostics -> temperature_gas[i] >= T_0)
+        if (diagnostics -> temperature[i] >= T_0)
     	{
             saturation_pressure = enhancement_factor_over_water(air_pressure)*saturation_pressure;
 		}
@@ -90,7 +90,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
 		}
         
     	// the amount of water vapour that the air can still take 
-        diff_density = (saturation_pressure - water_vapour_pressure)/(R_V*diagnostics -> temperature_gas[i]);
+        diff_density = (saturation_pressure - water_vapour_pressure)/(R_V*diagnostics -> temperature[i]);
         
     	/*
     	Clouds
@@ -100,7 +100,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         if (diff_density >= 0.0)
         {
             // temperature >= 0 °C
-            if (diagnostics -> temperature_gas[i] >= T_0)
+            if (diagnostics -> temperature[i] >= T_0)
             {
             	// It is assumed that the still present ice vanishes within one time step.
                 irrev -> phase_trans_rates[2*NO_OF_SCALARS + i] = -state -> rho[2*NO_OF_SCALARS + i]/delta_t;
@@ -162,7 +162,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         	// the vanishing of water vapour through the phase transition
             irrev -> phase_trans_rates[4*NO_OF_SCALARS + i] = diff_density/delta_t;
             // temperature >= 0 °C
-            if (diagnostics -> temperature_gas[i] >= T_0)
+            if (diagnostics -> temperature[i] >= T_0)
             {
             	// It is assumed that the still present ice vanishes within one time step.
                 irrev -> phase_trans_rates[2*NO_OF_SCALARS + i] = -state -> rho[2*NO_OF_SCALARS + i]/delta_t;
@@ -212,7 +212,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         irrev -> phase_trans_rates[NO_OF_SCALARS + i] = 0.0;
         // snow
         // this only happens if the air is saturated
-        if (diagnostics -> temperature_gas[i] < T_0 && diff_density <= 0.0)
+        if (diagnostics -> temperature[i] < T_0 && diff_density <= 0.0)
         {
         	irrev -> phase_trans_rates[i] = fmax(state -> rho[2*NO_OF_SCALARS + i] - maximum_cloud_water_content*state -> rho[4*NO_OF_SCALARS + i], 0.0)/delta_t;
         	// the snow creation comes at the cost of cloud ice particles
@@ -220,7 +220,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         }
     	// rain
         // this only happens if the air is saturated
-        else if (diagnostics -> temperature_gas[i] >= T_0 && diff_density <= 0.0)
+        else if (diagnostics -> temperature[i] >= T_0 && diff_density <= 0.0)
         {
         	irrev -> phase_trans_rates[NO_OF_SCALARS + i] = fmax(state -> rho[3*NO_OF_SCALARS + i] - maximum_cloud_water_content*state -> rho[4*NO_OF_SCALARS + i], 0.0)/delta_t;
         	// the rain creation comes at the cost of cloud water particles
@@ -228,14 +228,14 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         }
         
         // turning of snow to rain
-        if (diagnostics -> temperature_gas[i] >= T_0 && state -> rho[i] > 0.0)
+        if (diagnostics -> temperature[i] >= T_0 && state -> rho[i] > 0.0)
         {
         	irrev -> phase_trans_rates[i] = -state -> rho[i]/delta_t;
         	irrev -> phase_trans_rates[NO_OF_SCALARS + i] -= irrev -> phase_trans_rates[i];
         	irrev -> phase_trans_heating_rate[i] += irrev -> phase_trans_rates[i]*phase_trans_heat(2, T_0);
         }
         // turning of rain to snow
-        if (diagnostics -> temperature_gas[i] < T_0 && state -> rho[NO_OF_SCALARS + i] > 0.0)
+        if (diagnostics -> temperature[i] < T_0 && state -> rho[NO_OF_SCALARS + i] > 0.0)
         {
         	irrev -> phase_trans_rates[NO_OF_SCALARS + i] = -state -> rho[NO_OF_SCALARS + i]/delta_t;
         	irrev -> phase_trans_rates[i] -= irrev -> phase_trans_rates[NO_OF_SCALARS + i];

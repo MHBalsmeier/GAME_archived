@@ -42,7 +42,7 @@ int call_radiation(State *state, Grid *grid, Dualgrid *dualgrid, State *state_te
 		create_rad_array_scalar(grid -> z_scalar, radiation -> z_scal, rad_block_index);
 		create_rad_array_vector(grid -> z_vector, radiation -> z_vect, rad_block_index);
 		create_rad_array_mass_den(state -> rho, radiation -> rho, rad_block_index);
-		create_rad_array_scalar(diagnostics -> temperature_gas, radiation -> temp, rad_block_index);
+		create_rad_array_scalar(diagnostics -> temperature, radiation -> temp, rad_block_index);
 		// calling the radiation routine
 		// RTE+RRTMGP
 		if (config -> rad_on == 1)

@@ -139,7 +139,7 @@ Scalar_field flux_density_divv;
 double rel_vort_on_triangles[NO_OF_DUAL_V_VECTORS];
 Curl_field rel_vort;
 Curl_field pot_vort;
-Scalar_field temperature_gas;
+Scalar_field temperature;
 Scalar_field c_g_p_field;
 Scalar_field v_squared;
 Scalar_field wind_divv;

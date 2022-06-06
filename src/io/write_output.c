@@ -105,7 +105,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 		{
 			// Now the aim is to determine the value of the MSLP.
-		    temp_lowest_layer = diagnostics -> temperature_gas[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
+		    temp_lowest_layer = diagnostics -> temperature[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i];
 		    pressure_value = state_write_out -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i]
 		    *gas_constant_diagnostics(state_write_out, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i, config)
 		    *temp_lowest_layer;
@@ -126,7 +126,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				vector_to_minimize[j] = fabs(grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i] + 2 - grid -> z_scalar[i + j*NO_OF_SCALARS_H]);
 			}
 			closest_index = find_min_index(vector_to_minimize, NO_OF_LAYERS);
-		    temp_closest = diagnostics -> temperature_gas[closest_index*NO_OF_SCALARS_H + i];
+		    temp_closest = diagnostics -> temperature[closest_index*NO_OF_SCALARS_H + i];
 			delta_z_temp = grid -> z_vector[NO_OF_LAYERS*NO_OF_VECTORS_PER_LAYER + i] + 2 - grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H];
 		    // real radiation
 		    if (config -> prog_soil_temp == 1)
@@ -142,7 +142,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 				{
 					second_closest_index = closest_index + 1;
 				}
-				temp_second_closest = diagnostics -> temperature_gas[second_closest_index*NO_OF_SCALARS_H + i];
+				temp_second_closest = diagnostics -> temperature[second_closest_index*NO_OF_SCALARS_H + i];
 				// calculating the vertical temperature gradient that will be used for the extrapolation
 				temperature_gradient = (temp_closest - temp_second_closest)/(grid -> z_scalar[i + closest_index*NO_OF_SCALARS_H] - grid -> z_scalar[i + second_closest_index*NO_OF_SCALARS_H]);
 		    }
@@ -735,9 +735,9 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
     {    
 	    if (NO_OF_CONSTITUENTS >= 4)
 	    {
-    		(*rh)[i] = 100.0*rel_humidity(state_write_out -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i], diagnostics -> temperature_gas[i]);
+    		(*rh)[i] = 100.0*rel_humidity(state_write_out -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i], diagnostics -> temperature[i]);
     	}
-    	(*pressure)[i] = state_write_out -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*gas_constant_diagnostics(state_write_out, i, config)*diagnostics -> temperature_gas[i];
+    	(*pressure)[i] = state_write_out -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*gas_constant_diagnostics(state_write_out, i, config)*diagnostics -> temperature[i];
     }
     
 	#pragma omp parallel for
@@ -809,8 +809,8 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 					geopotential_height[i][j] = closest_weight*grid -> gravity_potential[closest_index*NO_OF_SCALARS_H + i]
 					+ (1 - closest_weight)*grid -> gravity_potential[second_closest_index*NO_OF_SCALARS_H + i];
 					geopotential_height[i][j] = geopotential_height[i][j]/G_MEAN_SFC_ABS;
-					t_on_pressure_levels[i][j] = closest_weight*diagnostics -> temperature_gas[closest_index*NO_OF_SCALARS_H + i]
-					+ (1 - closest_weight)*diagnostics -> temperature_gas[second_closest_index*NO_OF_SCALARS_H + i];
+					t_on_pressure_levels[i][j] = closest_weight*diagnostics -> temperature[closest_index*NO_OF_SCALARS_H + i]
+					+ (1 - closest_weight)*diagnostics -> temperature[second_closest_index*NO_OF_SCALARS_H + i];
 					rh_on_pressure_levels[i][j] = closest_weight*(*rh)[closest_index*NO_OF_SCALARS_H + i]
 					+ (1 - closest_weight)*(*rh)[second_closest_index*NO_OF_SCALARS_H + i];
 					epv_on_pressure_levels[i][j] = closest_weight*(*epv)[closest_index*NO_OF_SCALARS_H + i]
@@ -1212,7 +1212,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			#pragma omp parallel for
 			for (int j = 0; j < NO_OF_SCALARS_H; ++j)
 			{
-				temperature_h[j] = diagnostics -> temperature_gas[i*NO_OF_SCALARS_H + j];
+				temperature_h[j] = diagnostics -> temperature[i*NO_OF_SCALARS_H + j];
 				pressure_h[j] = (*pressure)[i*NO_OF_SCALARS_H + j];
 				rh_h[j] = (*rh)[i*NO_OF_SCALARS_H + j];
 			}
@@ -1483,7 +1483,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		// setting the variables
 		if ((retval = nc_put_var_double(ncid, densities_id, &state_write_out -> rho[0])))
 			NCERR(retval);
-		if ((retval = nc_put_var_double(ncid, temperature_id, &diagnostics -> temperature_gas[0])))
+		if ((retval = nc_put_var_double(ncid, temperature_id, &diagnostics -> temperature[0])))
 			NCERR(retval);
 		if ((retval = nc_put_var_double(ncid, wind_id, &state_write_out -> wind[0])))
 			NCERR(retval);
@@ -1585,7 +1585,7 @@ int write_out_integral(State *state_write_out, double time_since_init, Grid *gri
     	potential_integral = global_scalar_integrator(*pot_energy_density, grid);
     	free(pot_energy_density);
     	Scalar_field *int_energy_density = malloc(sizeof(Scalar_field));
-    	scalar_times_scalar(diagnostics -> scalar_field_placeholder, diagnostics -> temperature_gas, *int_energy_density);
+    	scalar_times_scalar(diagnostics -> scalar_field_placeholder, diagnostics -> temperature, *int_energy_density);
     	internal_integral = global_scalar_integrator(*int_energy_density, grid);
     	fprintf(global_integral_file, "%lf\t%lf\t%lf\t%lf\n", time_since_init, 0.5*kinetic_integral, potential_integral, C_D_V*internal_integral);
     	free(int_energy_density);
