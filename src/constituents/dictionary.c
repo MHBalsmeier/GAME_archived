@@ -293,12 +293,7 @@ double saturation_pressure_over_water(double temperature)
     // calculating the temperature in degrees Celsius
     double temp_c = temperature - T_0;
     
-    // clipping too low values for stability reasons
-    if (temp_c < -60.0)
-    {
-    	temp_c = -60.0;
-    }
-    // this is the boundary of this approximation
+    // this is the limit of this approximation
     if (temp_c > 100.0)
     {
     	temp_c = 100.0;
@@ -317,7 +312,7 @@ double saturation_pressure_over_water(double temperature)
     // For super-cooled water we use the formula cited in Pruppacher and Klett (2010), p. 854, Eq. (A.4-1).
     else
     {
-    	// Clipping values that are too extreme for this approximation.
+    	// this is the limit of this approximation
     	if (temp_c < -50.0)
     	{
     		temp_c = -50.0;
