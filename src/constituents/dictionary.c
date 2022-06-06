@@ -343,9 +343,9 @@ double saturation_pressure_over_ice(double temperature)
     double temp_c = temperature - T_0;
     
     // clipping too low values for stability reasons
-    if (temp_c < -60.0)
+    if (temp_c < -70.0)
     {
-    	temp_c = -60.0;
+    	temp_c = -70.0;
     }
     // at temperatures > 0 degrees C ice cannot exist in equilibrium which is why this is clipped
     if (temp_c > 0.0)
