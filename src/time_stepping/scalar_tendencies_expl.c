@@ -26,7 +26,7 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 	--------------------------------------
 	*/
 	// declaring needed variables
-    int scalar_shift_index, scalar_index;
+    int scalar_shift_index, scalar_shift_index_phase_trans, scalar_index;
     
     // determining the RK weights
     double old_weight[NO_OF_CONSTITUENTS];
@@ -95,6 +95,11 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 	for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
 	{
 		scalar_shift_index = i*NO_OF_SCALARS;
+		scalar_shift_index_phase_trans = scalar_shift_index;
+		if (MOISTURE_ON == 1 && i == NO_OF_CONDENSED_CONSTITUENTS + 1)
+		{
+			scalar_shift_index_phase_trans = scalar_shift_index - NO_OF_SCALARS;
+		}
 		
         // This is the mass advection, which needs to be carried out for all constituents.
         // -------------------------------------------------------------------------------
@@ -122,7 +127,9 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 			// the advection
 			-diagnostics -> flux_density_divv[j]
 			// the diffusion
-			+ config -> mass_diff_h*irrev -> mass_diff_tendency[scalar_shift_index + j]);
+			+ irrev -> mass_diff_tendency[scalar_shift_index + j]
+			// phase transitions
+			+ irrev -> phase_trans_rates[scalar_shift_index_phase_trans + j]);
 	    }
 	    
 	    /*
@@ -160,50 +167,15 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 				// phase transitions
 				+ irrev -> phase_trans_heating_rate[j]
 				// this has to be divided by c_p*exner
-				)/(C_D_P*(grid -> exner_bg[j] + state -> exner_pert[j])));
+				)/(C_D_P*(grid -> exner_bg[j] + state -> exner_pert[j]))
+				// tendency of due to phase transitions and mass diffusion
+				+ (irrev -> phase_trans_rates[scalar_shift_index + j] + irrev -> mass_diff_tendency[scalar_shift_index + j])
+				*C_D_V*R_V/(R_D*C_D_P)*diagnostics -> temperature[j]/(grid -> exner_bg[j] + state -> exner_pert[j]));
 			}
 		}
 	}
 	
 	return 0;
-}
-
-int moisturizer(State *state, double delta_t, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config *config, Grid *grid)
-{
-	/*
-	This function manages the calculation of the phase transition rates.
-	*/
-	
-	if (MOISTURE_ON == 1)
-	{
-		// calculating the source rates
-	    calc_h2otracers_source_rates(state, diagnostics, grid, config, irrev, 2.0*delta_t);
-	    int scalar_shift_index, scalar_index;
-	    // loop over all constituents
-		for (int i = 0; i < NO_OF_CONSTITUENTS; ++i)
-		{
-			scalar_shift_index = i*NO_OF_SCALARS;
-			// the main gaseous constituent has no source rates
-			if (i != NO_OF_CONDENSED_CONSTITUENTS)
-			{
-				#pragma omp parallel for private(scalar_index)
-				for (int j = 0; j < NO_OF_SCALARS; ++j)
-				{
-					scalar_index = scalar_shift_index + j;
-					if (i < NO_OF_CONDENSED_CONSTITUENTS)
-					{
-						state -> rho[scalar_index] = state -> rho[scalar_index] + delta_t*irrev -> phase_trans_rates[scalar_index];
-					}
-					// for the gaseous constituents (apart from the main one), an index shift is necessary
-					else
-					{
-						state -> rho[scalar_index] = state -> rho[scalar_index] + delta_t*irrev -> phase_trans_rates[(i - 1)*NO_OF_SCALARS + j];
-					}
-				}
-			}
-		}
-	}
-	return 0;	
 }
 
 

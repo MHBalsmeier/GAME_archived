@@ -34,6 +34,12 @@ Irreversible_quantities *irrev, Config *config, double delta_t, double time_coor
 	// diagnosing the temperature
 	temperature_diagnostics(state_old, grid, diagnostics);
 	
+	// cloud microphysics
+	if (MOISTURE_ON == 1)
+	{
+		calc_h2otracers_source_rates(state_old, diagnostics, grid, config, irrev, 2.0*delta_t);
+	}
+	
 	/*
 	Loop over the RK substeps
 	-------------------------
@@ -87,9 +93,6 @@ Irreversible_quantities *irrev, Config *config, double delta_t, double time_coor
 			three_band_solver_gen_densities(state_old, state_new, state_tendency, diagnostics, config, delta_t, grid);
 		}
     }
-    
-    // saturation adjustment, calculation of latent heating rates, evaporation at the surface
-    moisturizer(state_new, delta_t, diagnostics, irrev, config, grid);
     
     return 0;
 }

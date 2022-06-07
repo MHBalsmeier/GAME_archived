@@ -224,7 +224,7 @@ Scalar_field temp_diffusion_coeff_numerical_v;
 Scalar_field pressure_gradient_decel_factor;
 double mass_diff_tendency[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
 double phase_trans_rates[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS];
-double phase_trans_heating_rate[MOISTURE_ON*NO_OF_SCALARS];
+double phase_trans_heating_rate[NO_OF_SCALARS];
 Scalar_field viscosity;
 Vector_field viscosity_rhombi;
 double viscosity_triangles[NO_OF_DUAL_V_VECTORS];

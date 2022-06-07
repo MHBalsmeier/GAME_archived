@@ -26,7 +26,7 @@ In addition to that, some postprocessing diagnostics are also calculated here.
 
 int set_basic_props2grib(codes_handle *, long, long, long, long, long, long);
 double global_scalar_integrator(Scalar_field, Grid *);
-double pseudopotential(State *, Grid *, int);
+double pseudopotential_temperature(State *, Grid *, int);
 
 // the number of pressure levels for the pressure level output
 const int NO_OF_PRESSURE_LEVELS = 6;
@@ -155,7 +155,7 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			layer_index = NO_OF_LAYERS - 1;
 		    z_height = grid -> z_scalar[layer_index*NO_OF_SCALARS_H + i];
 		    // pseduovirtual potential temperature of the particle in the lowest layer
-		    theta_v_e = pseudopotential(state_write_out, grid, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i);
+		    theta_v_e = pseudopotential_temperature(state_write_out, grid, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i);
 			while (z_height < z_tropopause)
 			{
 				// full virtual potential temperature in the grid box
@@ -1677,10 +1677,10 @@ int interpolation_t(State *state_0, State *state_p1, State *state_write, double 
 }
 
 
-double pseudopotential(State *state, Grid *grid, int scalar_index)
+double pseudopotential_temperature(State *state, Grid *grid, int scalar_index)
 {
 	/*
-	This function returns the pseudovirtual potential temperature, which is needed for diagnozing CAPE.
+	This function returns the pseudopotential temperature, which is needed for diagnozing CAPE.
 	*/
 	
 	double result = 0.0;
