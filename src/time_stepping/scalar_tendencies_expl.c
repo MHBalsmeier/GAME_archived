@@ -170,7 +170,7 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 				)/(C_D_P*(grid -> exner_bg[j] + state -> exner_pert[j]))
 				// tendency of due to phase transitions and mass diffusion
 				+ (irrev -> phase_trans_rates[scalar_shift_index + j] + irrev -> mass_diff_tendency[scalar_shift_index + j])
-				*C_D_V*R_V/(R_D*C_D_P)*diagnostics -> temperature[j]/(grid -> exner_bg[j] + state -> exner_pert[j]));
+				*diagnostics -> scalar_field_placeholder[j]);
 			}
 		}
 	}
