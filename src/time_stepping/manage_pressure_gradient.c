@@ -71,6 +71,21 @@ int manage_pressure_gradient(State *state, Grid *grid, Dualgrid *dualgrid, Diagn
 	return 0;
 }
 
+int calc_pressure_grad_condensates_v(State *state, Grid *grid, Forcings *forcings, Irreversible_quantities *irrev)
+{
+	/*
+	This function computes the correction to the vertical pressure gradient acceleration due to condensates.
+	*/
+	
+	#pragma omp parallel for
+	for (int i = 0; i < NO_OF_SCALARS; ++i)
+	{
+		irrev -> pressure_gradient_decel_factor[i] = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]/density_total(state, i) - 1.0;
+	}
+	scalar_times_vector_v(irrev -> pressure_gradient_decel_factor, grid -> gravity_m, forcings -> pressure_grad_condensates_v, grid);
+	return 0;
+}
+
 
 
 

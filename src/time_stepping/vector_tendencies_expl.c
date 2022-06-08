@@ -123,7 +123,9 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     		// kinetic energy term
     		- 0.5*forcings -> v_squared_grad[i]
     		// momentum diffusion
-    		+ irrev -> friction_acc[i]);
+    		+ irrev -> friction_acc[i]
+    		// effect of condensates on the pressure gradient acceleration
+    		+ forcings -> pressure_grad_condensates_v[i]);
 		}
     }
     return 0;

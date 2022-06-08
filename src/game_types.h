@@ -178,6 +178,7 @@ typedef struct forcings {
 Vector_field pgrad_acc_old;
 Vector_field pressure_gradient_acc_neg_nl;
 Vector_field pressure_gradient_acc_neg_l;
+Vector_field pressure_grad_condensates_v;
 Vector_field v_squared_grad;
 Vector_field pot_vort_tend;
 double sfc_sw_in[NO_OF_SCALARS_H];

@@ -59,6 +59,8 @@ Irreversible_quantities *irrev, Config *config, double delta_t, double time_coor
 		{
 			manage_pressure_gradient(state_new, grid, dualgrid, diagnostics, forcings, irrev, config);
 		}
+		calc_pressure_grad_condensates_v(state_new, grid, forcings, irrev);
+		
 		// Only the horizontal momentum is a forward tendency.
 		vector_tendencies_expl(state_new, state_tendency, grid, dualgrid, diagnostics, forcings, irrev, config, rk_step, delta_t);
 	    // time stepping for the horizontal momentum can be directly executed
