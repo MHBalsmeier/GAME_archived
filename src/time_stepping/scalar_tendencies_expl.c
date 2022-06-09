@@ -166,6 +166,8 @@ Irreversible_quantities *irrev, Config *config, int rk_step)
 				+ forcings -> radiation_tendency[j]
 				// phase transitions
 				+ irrev -> phase_trans_heating_rate[j]
+				// heating rate due to falling condensates
+				+ irrev -> condensates_sediment_heat[j]
 				// this has to be divided by c_p*exner
 				)/(C_D_P*(grid -> exner_bg[j] + state -> exner_pert[j]))
 				// tendency of due to phase transitions and mass diffusion

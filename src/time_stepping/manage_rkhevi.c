@@ -18,7 +18,7 @@ This file manages the RKHEVI time stepping.
 #include "../io/io.h"
 
 int manage_rkhevi(State *state_old, State *state_new, Grid *grid, Dualgrid *dualgrid, State *state_tendency, Diagnostics *diagnostics, Forcings *forcings,
-Irreversible_quantities *irrev, Config *config, double delta_t, double time_coordinate, int total_step_counter)
+Irreversible_quantities *irrev, Config *config, double delta_t, double time_coordinate)
 {
 	/*
 	Preparations
@@ -92,7 +92,7 @@ Irreversible_quantities *irrev, Config *config, double delta_t, double time_coor
 		// -----------------------------
 		if (NO_OF_CONSTITUENTS > 1)
 		{
-			three_band_solver_gen_densities(state_old, state_new, state_tendency, diagnostics, config, delta_t, grid);
+			three_band_solver_gen_densities(state_old, state_new, state_tendency, diagnostics, irrev, config, delta_t, rk_step, grid);
 		}
     }
     

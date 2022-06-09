@@ -372,7 +372,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 	return 0;
 }
 
-int three_band_solver_gen_densities(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Config *config, double delta_t, Grid *grid)
+int three_band_solver_gen_densities(State *state_old, State *state_new, State *state_tendency, Diagnostics *diagnostics, Irreversible_quantities *irrev, Config *config, double delta_t, int rk_step, Grid *grid)
 {
 	// Vertical advection of mass densities (of tracers) with 3-band matrices.
 	double impl_weight, expl_weight;
@@ -396,13 +396,19 @@ int three_band_solver_gen_densities(State *state_old, State *state_new, State *s
 				double r_vector[NO_OF_LAYERS];
 				double vertical_flux_vector_impl[NO_OF_LAYERS - 1];
 				double vertical_flux_vector_rhs[NO_OF_LAYERS - 1];
+				double vertical_enthalpy_flux_vector[NO_OF_LAYERS - 1];
 				double solution_vector[NO_OF_LAYERS];
-				double density_old_at_interface, area;
+				double density_old_at_interface, temperature_old_at_interface, area;
 				int lower_index, upper_index, base_index;
 				
 				// diagnozing the vertical fluxes
 				for (int j = 0; j < NO_OF_LAYERS - 1; ++j)
 				{
+					// resetting the vertical enthalpy flux density divergence
+					if (rk_step == 0 && k == 0)
+					{
+						irrev -> condensates_sediment_heat[j*NO_OF_SCALARS_H + i] = 0.0;
+					}
 					base_index = i + j*NO_OF_SCALARS_H;
 					vertical_flux_vector_impl[j] = state_old -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
 					vertical_flux_vector_rhs[j] = state_new -> wind[i + (j + 1)*NO_OF_VECTORS_PER_LAYER];
@@ -437,12 +443,19 @@ int three_band_solver_gen_densities(State *state_old, State *state_new, State *s
 					if (vertical_flux_vector_rhs[j] >= 0.0)
 					{
 						density_old_at_interface = state_old -> rho[k*NO_OF_SCALARS + lower_index];
+						temperature_old_at_interface = diagnostics -> temperature[lower_index];
 					}
 					else
 					{
 						density_old_at_interface = state_old -> rho[k*NO_OF_SCALARS + upper_index];
+						temperature_old_at_interface = diagnostics -> temperature[upper_index];
 					}
 					vertical_flux_vector_rhs[j] = density_old_at_interface*vertical_flux_vector_rhs[j];
+					vertical_enthalpy_flux_vector[j] = c_p_cond(k, temperature_old_at_interface)*temperature_old_at_interface*vertical_flux_vector_rhs[j];
+				}
+				if (rk_step == 0 && k < NO_OF_CONDENSED_CONSTITUENTS)
+				{
+					irrev -> condensates_sediment_heat[(NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i] = 0.0;
 				}
 				
 				/*
@@ -528,33 +541,66 @@ int three_band_solver_gen_densities(State *state_old, State *state_new, State *s
 					if (j == 0)
 					{
 						r_vector[j] += expl_weight*delta_t*vertical_flux_vector_rhs[j]/grid -> volume[base_index];
+						if (rk_step == 0 && k < NO_OF_CONDENSED_CONSTITUENTS)
+						{
+							irrev -> condensates_sediment_heat[base_index] += vertical_enthalpy_flux_vector[j]/grid -> volume[base_index];
+						}
 					}
 					else if (j == NO_OF_LAYERS - 1)
 					{
 						r_vector[j] += -expl_weight*delta_t*vertical_flux_vector_rhs[j - 1]/grid -> volume[base_index];
+						if (rk_step == 0 && k < NO_OF_CONDENSED_CONSTITUENTS)
+						{
+							irrev -> condensates_sediment_heat[base_index] += -vertical_enthalpy_flux_vector[j - 1]/grid -> volume[base_index];
+						}
 						// precipitation
 						// snow
 						if (k < NO_OF_CONDENSED_CONSTITUENTS/4)
 						{
 							r_vector[j] += -expl_weight*config -> snow_velocity*delta_t*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
 							*grid -> area[i + NO_OF_VECTORS - NO_OF_SCALARS_H]/grid -> volume[base_index];
+							if (rk_step == 0 && k < NO_OF_CONDENSED_CONSTITUENTS)
+							{
+								irrev -> condensates_sediment_heat[base_index] += -config -> snow_velocity
+								*diagnostics -> temperature[i + NO_OF_SCALARS - NO_OF_SCALARS_H]*c_p_cond(k, diagnostics -> temperature[i + NO_OF_SCALARS - NO_OF_SCALARS_H])
+								*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
+								*grid -> area[i + NO_OF_VECTORS - NO_OF_SCALARS_H]/grid -> volume[base_index];
+							}
 						}
 						// rain
 						else if (k < NO_OF_CONDENSED_CONSTITUENTS/2)
 						{
 							r_vector[j] += -expl_weight*config -> rain_velocity*delta_t*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
 							*grid -> area[i + NO_OF_VECTORS - NO_OF_SCALARS_H]/grid -> volume[base_index];
+							if (rk_step == 0 && k < NO_OF_CONDENSED_CONSTITUENTS)
+							{
+								irrev -> condensates_sediment_heat[base_index] += -config -> rain_velocity
+								*diagnostics -> temperature[i + NO_OF_SCALARS - NO_OF_SCALARS_H]*c_p_cond(k, diagnostics -> temperature[i + NO_OF_SCALARS - NO_OF_SCALARS_H])
+								*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
+								*grid -> area[i + NO_OF_VECTORS - NO_OF_SCALARS_H]/grid -> volume[base_index];
+							}
 						}
 						// clouds
 						else if (k < NO_OF_CONDENSED_CONSTITUENTS)
 						{
 							r_vector[j] += -expl_weight*config -> cloud_droplets_velocity*delta_t*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
 							*grid -> area[i + NO_OF_VECTORS - NO_OF_SCALARS_H]/grid -> volume[base_index];
+							if (rk_step == 0 && k < NO_OF_CONDENSED_CONSTITUENTS)
+							{
+								irrev -> condensates_sediment_heat[base_index] += -config -> cloud_droplets_velocity
+								*diagnostics -> temperature[i + NO_OF_SCALARS - NO_OF_SCALARS_H]*c_p_cond(k, diagnostics -> temperature[i + NO_OF_SCALARS - NO_OF_SCALARS_H])
+								*state_old -> rho[k*NO_OF_SCALARS + i + NO_OF_SCALARS - NO_OF_SCALARS_H]
+								*grid -> area[i + NO_OF_VECTORS - NO_OF_SCALARS_H]/grid -> volume[base_index];
+							}
 						}
 					}
 					else
 					{
 						r_vector[j] += expl_weight*delta_t*(-vertical_flux_vector_rhs[j - 1] + vertical_flux_vector_rhs[j])/grid -> volume[base_index];
+						if (rk_step == 0 && k < NO_OF_CONDENSED_CONSTITUENTS)
+						{
+							irrev -> condensates_sediment_heat[base_index] += (-vertical_enthalpy_flux_vector[j - 1] + vertical_enthalpy_flux_vector[j])/grid -> volume[base_index];
+						}
 					}
 				}
 				

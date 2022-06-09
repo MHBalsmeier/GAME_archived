@@ -223,6 +223,7 @@ Scalar_field mass_diffusion_coeff_numerical_v;
 Scalar_field temp_diffusion_coeff_numerical_h;
 Scalar_field temp_diffusion_coeff_numerical_v;
 Scalar_field pressure_gradient_decel_factor;
+Scalar_field condensates_sediment_heat;
 double mass_diff_tendency[NO_OF_CONSTITUENTS*NO_OF_SCALARS];
 double phase_trans_rates[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS];
 double phase_trans_heating_rate[NO_OF_SCALARS];
