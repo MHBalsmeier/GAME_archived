@@ -29,7 +29,9 @@ int tke_update(Irreversible_quantities *irrev, double delta_t, State *state, Dia
 	for (int i = 0; i < NO_OF_SCALARS; ++i)
 	{
 		// decay constant, as derived from diffusion
-		decay_constant = 8.0*pow(M_PI, 2.0)/grid -> mean_velocity_area*irrev -> viscosity[i]/state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
+		decay_constant = 8.0*pow(M_PI, 2.0)/grid -> mean_velocity_area
+		// the vertical diffusion coefficient is neglected here because it is much smaller than the horizontal one
+		*irrev -> viscosity[i]/state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i];
 		
 		// prognostic equation for TKE
 		irrev -> tke[i] += delta_t*(

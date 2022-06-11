@@ -297,7 +297,7 @@ double tke2hor_diff_coeff(double tke, double effective_resolution)
 	*/
 	
 	double mean_velocity = pow(2.0*tke, 0.5);
-	double mean_free_path = effective_resolution/4.0;
+	double mean_free_path = effective_resolution/6.0;
 	double result = 1.0/6.0*mean_free_path*mean_velocity;
 	return result;
 }
