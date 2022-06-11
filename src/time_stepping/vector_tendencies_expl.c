@@ -40,9 +40,10 @@ int vector_tendencies_expl(State *state, State *state_tendency, Grid *grid, Dual
     */
     if (rk_step == 0)
     {
-		// updating the TKE if any diffusion is switched on because it is required for computing the diffusion coefficients
+		// updating the Brunt-Väisälä frequency and the TKE if any diffusion is switched on because it is required for computing the diffusion coefficients
     	if (config -> momentum_diff_h == 1 || config -> mass_diff_h == 1 || config -> temperature_diff_h == 1)
     	{
+    		update_n_squared(state, diagnostics, grid);
 			tke_update(irrev, delta_t, state, diagnostics, grid);
     	}
     	

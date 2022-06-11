@@ -201,6 +201,17 @@ int set_grid_properties(Grid *grid, Dualgrid *dualgrid, char grid_file_name[])
         	grid -> adjacent_vector_indices_h[i] = 0;
         }
     }
+    
+    // calculating the layer thicknesses
+    int layer_index, h_index;
+    #pragma omp parallel for private(layer_index, h_index)
+    for (int i = 0; i < NO_OF_SCALARS; ++i)
+    {
+    	layer_index = i/NO_OF_SCALARS_H;
+    	h_index = i - layer_index*NO_OF_SCALARS_H;
+    	grid -> layer_thickness[i] = grid -> z_vector[h_index + layer_index*NO_OF_VECTORS_PER_LAYER]
+    	- grid -> z_vector[h_index + (layer_index + 1)*NO_OF_VECTORS_PER_LAYER];
+    }
 	
     // determining coordinate slopes
     grad_hor_cov(grid -> z_scalar, grid -> slope, grid);

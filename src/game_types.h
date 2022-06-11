@@ -80,6 +80,7 @@ Vector_field slope;
 Scalar_field theta_v_bg;
 Scalar_field exner_bg;
 Vector_field exner_bg_grad;
+Scalar_field layer_thickness;
 int trsk_indices[10*NO_OF_VECTORS_H];
 int trsk_modified_curl_indices[10*NO_OF_VECTORS_H];
 int from_index[NO_OF_VECTORS_H];
@@ -109,6 +110,7 @@ double toa;
 int oro_id;
 double stretching_parameter;
 double radius;
+double eff_hor_res;
 } Grid;
 
 // Contains properties of the dual grid.
@@ -150,6 +152,7 @@ Vector_field u_at_edge;
 Vector_field v_at_edge;
 Scalar_field u_at_cell;
 Scalar_field v_at_cell;
+Scalar_field n_squared;
 double dv_hdz[NO_OF_H_VECTORS + NO_OF_VECTORS_H];
 double scalar_flux_resistance[NO_OF_SCALARS_H];
 double power_flux_density_sensible[NO_OF_SCALARS_H];

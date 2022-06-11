@@ -165,13 +165,13 @@ int main(int argc, char *argv[])
 	grid -> mean_velocity_area = 2.0/3.0*cell_area_sum/(NO_OF_LEVELS*NO_OF_SCALARS_H);
     
     // calculating the average horizontal resolution
-    double eff_hor_res = pow(cell_area_sum/(NO_OF_LEVELS*NO_OF_SCALARS_H), 0.5);
+    grid -> eff_hor_res = pow(cell_area_sum/(NO_OF_LEVELS*NO_OF_SCALARS_H), 0.5);
     
     // delta_t is the time step
-    double delta_t = 1.61*1e-3*eff_hor_res;
+    double delta_t = 1.61*1e-3*grid -> eff_hor_res;
     
 	// setting the radiation time step
-	config -> radiation_delta_t = 60.0*1e-3*eff_hor_res;
+	config -> radiation_delta_t = 60.0*1e-3*grid -> eff_hor_res;
     // the radiation time step is never longer then three hours
     if (config -> radiation_delta_t > 10800.0)
     {
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
 	}
 	
 	// finding the minimum horizontal grid distance
-	double normal_dist_min_hor = eff_hor_res;
+	double normal_dist_min_hor = grid -> eff_hor_res;
 	for (int i = 0; i < NO_OF_VECTORS_H; ++i)
 	{
 		if(grid -> normal_distance[NO_OF_VECTORS - NO_OF_VECTORS_PER_LAYER + i] < normal_dist_min_hor)
@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
     printf("Rain falling velocity set to %lf m/s.\n", config -> rain_velocity);
     printf("Snow falling velocity set to %lf m/s.\n", config -> snow_velocity);
 	
-	printf("Effective horizontal resolution: %lf km\n", 1e-3*eff_hor_res);
+	printf("Effective horizontal resolution: %lf km\n", 1e-3*grid -> eff_hor_res);
 	printf("Minimum horizontal normal distance: %lf km\n", 1e-3*normal_dist_min_hor);
     double max_speed_hor = 100;
 	printf("Horizontal advective Courant number: %lf\n", delta_t/normal_dist_min_hor*max_speed_hor);
