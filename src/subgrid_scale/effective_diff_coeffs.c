@@ -308,9 +308,13 @@ double tke2vert_diff_coeff(double tke, double n_squared, double layer_thickness)
 	This function returns the vertical kinematic eddy viscosity as a function of the specific TKE and the Brunt-Väisälä frequency.
 	*/
 	
+	// vertical component of the turbulent kinetic energy
 	double tke_vert = 1e-2*tke;
+	
 	double mean_velocity = pow(2.0*tke_vert, 0.5);
-	double mean_free_path = pow(2.0*tke_vert, 0.5)/pow(fmax(n_squared, 1e-4), 0.5);
+	// used Brunt-Väisälä frequency
+	double n_used = pow(fmax(n_squared, 1e-4), 0.5);
+	double mean_free_path = pow(2.0*tke_vert, 0.5)/n_used;
 	mean_free_path = fmin(mean_free_path, layer_thickness);
 	double result = 1.0/6.0*mean_free_path*mean_velocity;
 	return result;
