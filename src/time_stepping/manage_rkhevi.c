@@ -37,7 +37,7 @@ Irreversible_quantities *irrev, Config *config, double delta_t, double time_coor
 	// cloud microphysics
 	if (MOISTURE_ON == 1)
 	{
-		calc_h2otracers_source_rates(state_old, diagnostics, grid, config, irrev, 2.0*delta_t);
+		calc_h2otracers_source_rates(state_old, diagnostics, grid, config, irrev, delta_t);
 	}
 	
 	/*
