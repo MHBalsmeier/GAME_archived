@@ -7,6 +7,8 @@ double sink_velocity(int, double, double);
 int calc_h2otracers_source_rates(State *, Diagnostics *, Grid *, Config *, Irreversible_quantities *, double);
 double saturation_pressure_over_water(double);
 double saturation_pressure_over_ice(double);
+double dsaturation_pressure_over_water_dT(double);
+double dsaturation_pressure_over_ice_dT(double);
 double enhancement_factor_over_water(double);
 double enhancement_factor_over_ice(double);
 double c_v_mass_weighted_air(State *, Diagnostics *, int);
