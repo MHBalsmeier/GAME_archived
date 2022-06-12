@@ -332,6 +332,32 @@ double saturation_pressure_over_water(double temperature)
     return result;
 }
 
+double dsaturation_pressure_over_water_dT(double temperature)
+{
+	/*
+	This function returns the derivative of the saturation pressure in Pa of pure water vapour over plane liquid water
+	as a function of the temperature in K.
+	*/
+    
+    // calculating the temperature in degrees Celsius
+    double temp_c = temperature - T_0;
+    
+    // this are the limits of this approximation
+    if (temp_c > 100.0)
+    {
+    	temp_c = 100.0;
+    }
+    if (temp_c < 0.0)
+    {
+    	temp_c = 0.0;
+    }
+    
+   	double result = saturation_pressure_over_water(temperature)
+	*(4924.99/pow(temp_c + 237.1, 2.0) - 1.57/(temp_c + 105.0));
+    
+    return result;
+}
+
 double saturation_pressure_over_ice(double temperature)
 {
 	/*
@@ -353,9 +379,34 @@ double saturation_pressure_over_ice(double temperature)
     	temp_c = 0.0;
     }
     
-    double result;
+    double result = exp(43.494 - 6545.8/(temp_c + 278.0))/pow(temp_c + 868.0, 2);
     
-	result = exp(43.494 - 6545.8/(temp_c + 278.0))/pow(temp_c + 868.0, 2);
+    return result;
+}
+
+double dsaturation_pressure_over_ice_dT(double temperature)
+{
+	/*
+	This function returns derivative of the the saturation pressure in Pa of pure water vapour over plane ice
+	as a function of the temperature in K.
+	*/
+    
+    // calculating the temperature in degrees Celsius
+    double temp_c = temperature - T_0;
+    
+    // clipping too low values for stability reasons
+    if (temp_c < -80.0)
+    {
+    	temp_c = -80.0;
+    }
+    // at temperatures > 0 degrees Celsius ice cannot exist in equilibrium which is why this is clipped
+    if (temp_c > 0.0)
+    {
+    	temp_c = 0.0;
+    }
+    
+   	double result = saturation_pressure_over_ice(temperature)
+	*(6545.8/pow(temp_c + 278.0, 2.0) - 2.0/(temp_c + 868.0));
     
     return result;
 }
