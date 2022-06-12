@@ -309,7 +309,7 @@ double tke2vert_diff_coeff(double tke, double n_squared, double layer_thickness)
 	*/
 	
 	// vertical component of the turbulent kinetic energy
-	double tke_vert = 1e-2*tke;
+	double tke_vert = 3.0*1e-3*tke;
 	
 	double mean_velocity = pow(2.0*tke_vert, 0.5);
 	// used Brunt-Väisälä frequency
