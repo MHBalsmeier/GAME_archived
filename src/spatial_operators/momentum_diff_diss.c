@@ -207,8 +207,9 @@ int vert_momentum_diffusion(State *state, Diagnostics *diagnostics, Irreversible
 int hor_calc_curl_of_vorticity(Curl_field vorticity, double rel_vort_on_triangles[], Vector_field out_field, Grid *grid, Dualgrid *dualgrid)
 {
 	/*
-	calculates the curl of the vertical vorticity
+	This function calculates the curl of the vertical vorticity.
 	*/
+	
 	int layer_index, h_index, vector_index, upper_index_z, lower_index_z, upper_index_zeta, lower_index_zeta, base_index;
 	double delta_z, delta_x, tangential_slope, delta_zeta, dzeta_dz, checkerboard_damping_weight;
 	#pragma omp parallel for private(layer_index, h_index, vector_index, delta_z, delta_x, tangential_slope, dzeta_dz, upper_index_z, lower_index_z, upper_index_zeta, lower_index_zeta, checkerboard_damping_weight, base_index)
@@ -218,8 +219,8 @@ int hor_calc_curl_of_vorticity(Curl_field vorticity, double rel_vort_on_triangle
 		layer_index = i/NO_OF_VECTORS_H;
 		h_index = i - layer_index*NO_OF_VECTORS_H;
 		vector_index = NO_OF_SCALARS_H + layer_index*NO_OF_VECTORS_PER_LAYER + h_index;
-		out_field[vector_index] = 0;
-		delta_z = 0;
+		out_field[vector_index] = 0.0;
+		delta_z = 0.0;
 		checkerboard_damping_weight =
 		fabs(rel_vort_on_triangles[layer_index*NO_OF_DUAL_SCALARS_H + dualgrid -> to_index[h_index]]
 		- rel_vort_on_triangles[layer_index*NO_OF_DUAL_SCALARS_H + dualgrid -> from_index[h_index]])
@@ -232,7 +233,7 @@ int hor_calc_curl_of_vorticity(Curl_field vorticity, double rel_vort_on_triangle
 		{
 			out_field[vector_index] +=
 			// This prefactor accounts for the fact that we average over three rhombi and the weighting of the triangle voritcities.
-			+ 1.0/3.0*(1 - checkerboard_damping_weight)*(
+			+ 1.0/3.0*(1.0 - checkerboard_damping_weight)*(
 			// vertical length at the to_index_dual point
 			dualgrid -> normal_distance[base_index + dualgrid -> to_index[h_index]]
 			// vorticity at the to_index_dual point
@@ -252,7 +253,7 @@ int hor_calc_curl_of_vorticity(Curl_field vorticity, double rel_vort_on_triangle
 		*dualgrid -> normal_distance[base_index + dualgrid -> to_index[h_index]]
 		- rel_vort_on_triangles[layer_index*NO_OF_DUAL_SCALARS_H + dualgrid -> from_index[h_index]]
 		*dualgrid -> normal_distance[base_index + dualgrid -> from_index[h_index]]);
-		// Dividing by the area.
+		// dividing by the area
 		out_field[vector_index] = out_field[vector_index]/grid -> area[vector_index];
 		
 		/*
