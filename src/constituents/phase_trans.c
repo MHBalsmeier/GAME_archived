@@ -145,8 +145,17 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
             // temperature >= 0 °C
             if (diagnostics -> temperature[i] >= T_0)
             {
+            	a = -R_V*phase_trans_heat(0, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i);
+            	b = R_V*diagnostics -> temperature[i]
+            	- R_V*state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i]*phase_trans_heat(0, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i)
+            	+ dsaturation_pressure_over_water_dT(diagnostics -> temperature[i])*phase_trans_heat(0, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i);
+            	c = water_vapour_pressure - saturation_pressure;
+            	p = b/a;
+            	q = c/a;
+            	diff_density = -0.5*p - pow(0.25*pow(p, 2) - q, 0.5);
+            	
 		    	// the vanishing of water vapour through the phase transition
-		        irrev -> phase_trans_rates[4*NO_OF_SCALARS + i] = diff_density/delta_t_damp;
+		        irrev -> phase_trans_rates[4*NO_OF_SCALARS + i] = diff_density/delta_t;
             	// It is assumed that the still present ice vanishes within one time step.
                 irrev -> phase_trans_rates[2*NO_OF_SCALARS + i] = -state -> rho[2*NO_OF_SCALARS + i]/delta_t;
                 
@@ -155,7 +164,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
                 1.) the condensation
                 2.) the melting of ice
 				*/
-				irrev -> phase_trans_rates[3*NO_OF_SCALARS + i] = -diff_density/delta_t_damp + state -> rho[2*NO_OF_SCALARS + i]/delta_t;
+				irrev -> phase_trans_rates[3*NO_OF_SCALARS + i] = -diff_density/delta_t + state -> rho[2*NO_OF_SCALARS + i]/delta_t;
                 
                 // the heat source rates acting on the ice
                 irrev -> phase_trans_heating_rate[i] = irrev -> phase_trans_rates[2*NO_OF_SCALARS + i]*phase_trans_heat(2, diagnostics -> temperature[i]);
@@ -163,7 +172,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
                 // the heat source rates acting on the liquid water
                 irrev -> phase_trans_heating_rate[i] +=
                 // it is only affected by the condensation
-                -diff_density*phase_trans_heat(0, diagnostics -> temperature[i])/delta_t_damp;
+                -diff_density*phase_trans_heat(0, diagnostics -> temperature[i])/delta_t;
             }
             // temperature < 0 °C
             else

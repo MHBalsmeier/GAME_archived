@@ -342,7 +342,7 @@ double dsaturation_pressure_over_water_dT(double temperature)
     // calculating the temperature in degrees Celsius
     double temp_c = temperature - T_0;
     
-    // this are the limits of this approximation
+    // these are the limits of this approximation
     if (temp_c > 100.0)
     {
     	temp_c = 100.0;
@@ -368,7 +368,7 @@ double saturation_pressure_over_ice(double temperature)
     // calculating the temperature in degrees Celsius
     double temp_c = temperature - T_0;
     
-    // clipping too low values for stability reasons
+    // this is the stability limit
     if (temp_c < -80.0)
     {
     	temp_c = -80.0;
@@ -394,7 +394,7 @@ double dsaturation_pressure_over_ice_dT(double temperature)
     // calculating the temperature in degrees Celsius
     double temp_c = temperature - T_0;
     
-    // clipping too low values for stability reasons
+    // this is the stability limit
     if (temp_c < -80.0)
     {
     	temp_c = -80.0;
