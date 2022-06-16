@@ -21,15 +21,15 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
 	precipitating ice - precipitating liquid water - cloud ice - liquid cloud water - moist air - water vapour
 	*/
 	
-    double diff_density, phase_trans_density, saturation_pressure, water_vapour_pressure, layer_thickness,
-    diff_density_sfc, saturation_pressure_sfc, dry_pressure, air_pressure, a, b, c, p, q;
+    double diff_density, phase_trans_density, saturation_pressure, water_vapour_pressure,
+    diff_density_sfc, saturation_pressure_sfc, dry_pressure, air_pressure, a, b, c, p, q, enhancement_factor;
     
     //  maximum cloud water content in (kg cloud)/(kg dry air).
     double maximum_cloud_water_content = 0.2e-3;
     
     // loop over all grid boxes
     int layer_index, h_index;
-    #pragma omp parallel for private(diff_density, phase_trans_density, saturation_pressure, water_vapour_pressure, layer_index, h_index, layer_thickness, diff_density_sfc, saturation_pressure_sfc, dry_pressure, air_pressure, a, b, c, p, q)
+    #pragma omp parallel for private(diff_density, phase_trans_density, saturation_pressure, water_vapour_pressure, layer_index, h_index, diff_density_sfc, saturation_pressure_sfc, dry_pressure, air_pressure, a, b, c, p, q, enhancement_factor)
     for (int i = 0; i < NO_OF_SCALARS; ++i)
     {
     	/*
@@ -54,7 +54,8 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         water_vapour_pressure = state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i]*R_V*diagnostics -> temperature[i];
 		
 		// determining the water vapour pressure (using the EOS)
-        dry_pressure = state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i]*R_D*diagnostics -> temperature[i];
+        dry_pressure = (state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] - state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i])
+        *R_D*diagnostics -> temperature[i];
         
         // calculating the total air pressure
         air_pressure = dry_pressure + water_vapour_pressure;
@@ -62,13 +63,14 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         // multiplying the saturation pressure by the enhancement factor
         if (diagnostics -> temperature[i] >= T_0)
     	{
-            saturation_pressure = enhancement_factor_over_water(air_pressure)*saturation_pressure;
+            enhancement_factor = enhancement_factor_over_water(air_pressure);
 		}
 		// "negative" temperatures
         else
     	{
-            saturation_pressure = enhancement_factor_over_ice(air_pressure)*saturation_pressure;
+            enhancement_factor = enhancement_factor_over_ice(air_pressure);
 		}
+        saturation_pressure = enhancement_factor*saturation_pressure;
         
     	/*
     	Clouds
@@ -77,7 +79,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         // the case where the air is not over-saturated
         if (saturation_pressure >= water_vapour_pressure)
         {
-            // temperature >= 0 °C
+            // temperature >= 0° C
             if (diagnostics -> temperature[i] >= T_0)
             {
             	// It is assumed that the still present ice vanishes within one time step.
@@ -90,32 +92,31 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
             	a = -R_V*phase_trans_heat(0, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i);
             	b = R_V*diagnostics -> temperature[i]
             	- R_V*state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i]*phase_trans_heat(0, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i)
-            	+ dsaturation_pressure_over_water_dT(diagnostics -> temperature[i])*phase_trans_heat(0, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i);
+            	+ enhancement_factor*dsaturation_pressure_over_water_dT(diagnostics -> temperature[i])*phase_trans_heat(0, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i);
             	c = water_vapour_pressure - saturation_pressure;
             	p = b/a;
             	q = c/a;
             	diff_density = -0.5*p - pow(0.25*pow(p, 2) - q, 0.5);
                 phase_trans_density = fmin(state -> rho[3*NO_OF_SCALARS + i], diff_density);
                 
-                /*
-                The source rate for the liquid water consists of two terms:
-                1.) the evaporation
-                 2.) the melting of ice
-                */
-                irrev -> phase_trans_rates[3*NO_OF_SCALARS + i] = state -> rho[2*NO_OF_SCALARS + i]/delta_t - phase_trans_density/delta_t;
-                
                 // the tendency for the water vapour
                 irrev -> phase_trans_rates[4*NO_OF_SCALARS + i] = phase_trans_density/delta_t;
                 
-                // the heat source rates acting on the ice
-                irrev -> phase_trans_heating_rate[i] = irrev -> phase_trans_rates[2*NO_OF_SCALARS + i]*phase_trans_heat(2, diagnostics -> temperature[i]);
+                /*
+                The source rate for the liquid water consists of two terms:
+                1.) the melting
+                2.) the evaporation
+                */
+                irrev -> phase_trans_rates[3*NO_OF_SCALARS + i] = state -> rho[2*NO_OF_SCALARS + i]/delta_t - phase_trans_density/delta_t;
                 
                 // the heat source rates
-                irrev -> phase_trans_heating_rate[i] +=
-                // the evaporation
-                -phase_trans_density*phase_trans_heat(0, T_0)/delta_t;
+                irrev -> phase_trans_heating_rate[i]
+                // melting
+                = irrev -> phase_trans_rates[2*NO_OF_SCALARS + i]*phase_trans_heat(2, diagnostics -> temperature[i])
+                // evaporation
+                - phase_trans_density*phase_trans_heat(0, diagnostics -> temperature[i])/delta_t;
             }
-            // temperature < 0 °C
+            // temperature < 0° C
             else
             {
             	// It is assumed that the still present liquid water vanishes within one time step.
@@ -128,12 +129,15 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
             	a = -R_V*phase_trans_heat(1, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i);
             	b = R_V*diagnostics -> temperature[i]
             	- R_V*state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i]*phase_trans_heat(1, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i)
-            	+ dsaturation_pressure_over_ice_dT(diagnostics -> temperature[i])*phase_trans_heat(1, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i);
+            	+ enhancement_factor*dsaturation_pressure_over_ice_dT(diagnostics -> temperature[i])*phase_trans_heat(1, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i);
             	c = water_vapour_pressure - saturation_pressure;
             	p = b/a;
             	q = c/a;
             	diff_density = -0.5*p - pow(0.25*pow(p, 2) - q, 0.5);
                 phase_trans_density = fmin(state -> rho[2*NO_OF_SCALARS + i], diff_density);
+                
+                // the tendency for the water vapour
+                irrev -> phase_trans_rates[4*NO_OF_SCALARS + i] = phase_trans_density/delta_t;
                 
                 /*
                 the tendency for the ice contains two terms:
@@ -142,13 +146,10 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
                 */
                 irrev -> phase_trans_rates[2*NO_OF_SCALARS + i] = state -> rho[3*NO_OF_SCALARS + i]/delta_t - phase_trans_density/delta_t;
                 
-                // the tendency for the water vapour
-                irrev -> phase_trans_rates[4*NO_OF_SCALARS + i] = phase_trans_density/delta_t;
-                
                 // the heat source rates
-                irrev -> phase_trans_heating_rate[i] =
+                irrev -> phase_trans_heating_rate[i]
                 // the freezing
-                state -> rho[3*NO_OF_SCALARS + i]*phase_trans_heat(2, diagnostics -> temperature[i])/delta_t
+                = -irrev -> phase_trans_rates[3*NO_OF_SCALARS + i]*phase_trans_heat(2, diagnostics -> temperature[i])
                 // the sublimation
                 - phase_trans_density*phase_trans_heat(1, diagnostics -> temperature[i])/delta_t;
             }
@@ -156,7 +157,7 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         // the case where the air is over-saturated
         else
         {
-            // temperature >= 0 °C
+            // temperature >= 0° C
             if (diagnostics -> temperature[i] >= T_0)
             {
             	// It is assumed that the still present ice vanishes within one time step.
@@ -166,29 +167,30 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
             	a = -R_V*phase_trans_heat(0, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i);
             	b = R_V*diagnostics -> temperature[i]
             	- R_V*state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i]*phase_trans_heat(0, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i)
-            	+ dsaturation_pressure_over_water_dT(diagnostics -> temperature[i])*phase_trans_heat(0, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i);
+            	+ enhancement_factor*dsaturation_pressure_over_water_dT(diagnostics -> temperature[i])*phase_trans_heat(0, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i);
             	c = water_vapour_pressure - saturation_pressure;
             	p = b/a;
             	q = c/a;
             	diff_density = -0.5*p - pow(0.25*pow(p, 2) - q, 0.5);
+                
+                // the tendency for the water vapour
 		        irrev -> phase_trans_rates[4*NO_OF_SCALARS + i] = diff_density/delta_t;
                 
                 /*
                 The source rate for the liquid water consists of two terms:
-                1.) the condensation
-                2.) the melting of ice
+                1.) the melting
+                2.) the condensation
 				*/
-				irrev -> phase_trans_rates[3*NO_OF_SCALARS + i] = -diff_density/delta_t + state -> rho[2*NO_OF_SCALARS + i]/delta_t;
-                
-                // the heat source rates acting on the ice
-                irrev -> phase_trans_heating_rate[i] = irrev -> phase_trans_rates[2*NO_OF_SCALARS + i]*phase_trans_heat(2, diagnostics -> temperature[i]);
+				irrev -> phase_trans_rates[3*NO_OF_SCALARS + i] = state -> rho[2*NO_OF_SCALARS + i]/delta_t - diff_density/delta_t;
                 
                 // the heat source rates
-                irrev -> phase_trans_heating_rate[i] +=
-                // it is only affected by the condensation
-                -diff_density*phase_trans_heat(0, diagnostics -> temperature[i])/delta_t;
+                irrev -> phase_trans_heating_rate[i]
+                // melting
+                = irrev -> phase_trans_rates[2*NO_OF_SCALARS + i]*phase_trans_heat(2, diagnostics -> temperature[i])
+                // condensation
+                - diff_density*phase_trans_heat(0, diagnostics -> temperature[i])/delta_t;
             }
-            // temperature < 0 °C
+            // temperature < 0° C
             else
             {
                 
@@ -199,26 +201,28 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
             	a = -R_V*phase_trans_heat(1, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i);
             	b = R_V*diagnostics -> temperature[i]
             	- R_V*state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i]*phase_trans_heat(1, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i)
-            	+ dsaturation_pressure_over_ice_dT(diagnostics -> temperature[i])*phase_trans_heat(1, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i);
+            	+ enhancement_factor*dsaturation_pressure_over_ice_dT(diagnostics -> temperature[i])*phase_trans_heat(1, diagnostics -> temperature[i])/c_v_mass_weighted_air(state, diagnostics, i);
             	c = water_vapour_pressure - saturation_pressure;
             	p = b/a;
             	q = c/a;
             	diff_density = -0.5*p - pow(0.25*pow(p, 2) - q, 0.5);
+                
+                // the tendency for the water vapour
 		        irrev -> phase_trans_rates[4*NO_OF_SCALARS + i] = diff_density/delta_t;
 		        
             	/*
                 The source rate for the cloud ice consists of two terms:
-                1.) the resublimation
-                2.) the freezing of cloud water
+                1.) the freezing
+                2.) the resublimation
                 */
-                irrev -> phase_trans_rates[2*NO_OF_SCALARS + i] = -diff_density/delta_t + state -> rho[3*NO_OF_SCALARS + i]/delta_t;
+                irrev -> phase_trans_rates[2*NO_OF_SCALARS + i] = state -> rho[3*NO_OF_SCALARS + i]/delta_t - diff_density/delta_t;
                 
                 // the heat source rates
-                irrev -> phase_trans_heating_rate[i] =
-                // the component through the resublimation
-                -diff_density*phase_trans_heat(1, diagnostics -> temperature[i])/delta_t
-                // the component through freezing
-                + state -> rho[3*NO_OF_SCALARS + i]*phase_trans_heat(2, diagnostics -> temperature[i])/delta_t;
+                irrev -> phase_trans_heating_rate[i]
+                // freezing
+                = -irrev -> phase_trans_rates[3*NO_OF_SCALARS + i]*phase_trans_heat(2, diagnostics -> temperature[i])
+                // resublimation
+                - diff_density*phase_trans_heat(1, diagnostics -> temperature[i])/delta_t;
             }
         }
         
@@ -250,14 +254,14 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         {
         	irrev -> phase_trans_rates[i] = -state -> rho[i]/delta_t;
         	irrev -> phase_trans_rates[NO_OF_SCALARS + i] -= irrev -> phase_trans_rates[i];
-        	irrev -> phase_trans_heating_rate[i] += irrev -> phase_trans_rates[i]*phase_trans_heat(2, T_0);
+        	irrev -> phase_trans_heating_rate[i] += irrev -> phase_trans_rates[i]*phase_trans_heat(2, diagnostics -> temperature[i]);
         }
         // turning of rain to snow
         if (diagnostics -> temperature[i] < T_0 && state -> rho[NO_OF_SCALARS + i] > 0.0)
         {
         	irrev -> phase_trans_rates[NO_OF_SCALARS + i] = -state -> rho[NO_OF_SCALARS + i]/delta_t;
         	irrev -> phase_trans_rates[i] -= irrev -> phase_trans_rates[NO_OF_SCALARS + i];
-        	irrev -> phase_trans_heating_rate[i] += -irrev -> phase_trans_rates[NO_OF_SCALARS + i]*phase_trans_heat(2, T_0);
+        	irrev -> phase_trans_heating_rate[i] += -irrev -> phase_trans_rates[NO_OF_SCALARS + i]*phase_trans_heat(2, diagnostics -> temperature[i]);
         }
         
         /*
@@ -287,11 +291,8 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         		diff_density_sfc = saturation_pressure_sfc/(R_V*state -> temperature_soil[h_index])
         		- state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + i];
         		
-        		// the thickness of the lowest model layer (we need it as a result of Guass' theorem)
-        		layer_thickness = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + h_index] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + h_index];
-        		
         		// evporation, sublimation
-		    	irrev -> phase_trans_rates[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] += fmax(0.0, diff_density_sfc/diagnostics -> scalar_flux_resistance[h_index])/layer_thickness;
+		    	irrev -> phase_trans_rates[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + i] += fmax(0.0, diff_density_sfc/diagnostics -> scalar_flux_resistance[h_index])/grid -> layer_thickness[i];
 		    	
 		    	// calculating the latent heat flux density affecting the surface
         		if (state -> temperature_soil[h_index] >= T_0)
