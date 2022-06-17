@@ -5,8 +5,8 @@ import numpy as np
 
 def modify_value_boundaries(total_min, total_max, short_name):
 	if short_name == "tcc" or short_name == "r":
-		total_min = 0
-		total_max = 100
+		total_min = 0.0
+		total_max = 100.0
 	else:
 		if total_min == total_max:
 			total_max = total_min + 1
@@ -14,7 +14,11 @@ def modify_value_boundaries(total_min, total_max, short_name):
 			total_min = np.floor(total_min)
 			total_max = np.ceil(total_max)
 	if short_name == "cape":
-		total_min = 0
+		total_min = 0.0
+	if short_name == "rprate":
+		total_min = 0.0
+	if short_name == "sprate":
+		total_min = 0.0
 	return total_min, total_max
 
 def return_central_point(scope):
