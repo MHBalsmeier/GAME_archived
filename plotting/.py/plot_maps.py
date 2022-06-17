@@ -125,7 +125,7 @@ if short_name == "rprate":
 	variable_name = "Precipitation rate (rain)"
 	unit_string = "mm/h"
 	rescale = conv.kgm_2s_12mmh_1(1)
-	colormap = "Blues"
+	colormap = "Greys"
 	show_level_on = 0
 	surface_bool = 1
 if short_name == "sprate":
