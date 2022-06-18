@@ -26,7 +26,7 @@ In addition to that, some postprocessing diagnostics are also calculated here.
 
 int set_basic_props2grib(codes_handle *, long, long, long, long, long, long);
 double global_scalar_integrator(Scalar_field, Grid *);
-double pseudopotential_temperature(State *, Grid *, int);
+double pseudopotential_temperature(State *, Diagnostics *, Grid *, int);
 
 // the number of pressure levels for the pressure level output
 const int NO_OF_PRESSURE_LEVELS = 6;
@@ -98,10 +98,10 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 		double *cape = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double *sfc_sw_down = malloc(NO_OF_SCALARS_H*sizeof(double));
 		double temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta_v,
-		cape_integrand, delta_z, temp_closest, temp_second_closest, delta_z_temp, temperature_gradient, theta_v_e;
+		cape_integrand, delta_z, temp_closest, temp_second_closest, delta_z_temp, temperature_gradient, theta_e;
 		double z_tropopause = 12e3;
 		double standard_vert_lapse_rate = 0.0065;
-		#pragma omp parallel for private(temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta_v, cape_integrand, delta_z, temp_closest, temp_second_closest, delta_z_temp, temperature_gradient, theta_v_e, layer_index, closest_index, second_closest_index, cloud_water_content, vector_to_minimize)
+		#pragma omp parallel for private(temp_lowest_layer, pressure_value, mslp_factor, surface_p_factor, temp_mslp, temp_surface, z_height, theta_v, cape_integrand, delta_z, temp_closest, temp_second_closest, delta_z_temp, temperature_gradient, theta_e, layer_index, closest_index, second_closest_index, cloud_water_content, vector_to_minimize)
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 		{
 			// Now the aim is to determine the value of the MSLP.
@@ -155,16 +155,16 @@ int write_out(State *state_write_out, double wind_h_lowest_layer_array[], int mi
 			layer_index = NO_OF_LAYERS - 1;
 		    z_height = grid -> z_scalar[layer_index*NO_OF_SCALARS_H + i];
 		    // pseduovirtual potential temperature of the particle in the lowest layer
-		    theta_v_e = pseudopotential_temperature(state_write_out, grid, (NO_OF_LAYERS - 1)*NO_OF_SCALARS_H + i);
+		    theta_e = pseudopotential_temperature(state_write_out, diagnostics, grid, layer_index*NO_OF_SCALARS_H + i);
 			while (z_height < z_tropopause)
 			{
 				// full virtual potential temperature in the grid box
 			    theta_v = grid -> theta_v_bg[layer_index*NO_OF_SCALARS_H + i] + state_write_out -> theta_v_pert[layer_index*NO_OF_SCALARS_H + i];
 			    // thickness of the gridbox
-				delta_z = grid -> z_vector[layer_index*NO_OF_VECTORS_PER_LAYER + i] - grid -> z_vector[(layer_index + 1)*NO_OF_VECTORS_PER_LAYER + i];
+				delta_z = grid -> layer_thickness[layer_index*NO_OF_SCALARS_H + i];
 				// this is the candidate that we might want to add to the integral
 				cape_integrand
-				= grid -> gravity_m[(NO_OF_LAYERS - 1)*NO_OF_VECTORS_PER_LAYER + i]*(theta_v_e - theta_v)/theta_v;
+				= grid -> gravity_m[layer_index*NO_OF_VECTORS_PER_LAYER + i]*(theta_e - theta_v)/theta_v;
 				// we do not add negative values to CAPE (see the definition of CAPE)
 				if (cape_integrand > 0.0)
 				{
@@ -1677,7 +1677,7 @@ int interpolation_t(State *state_0, State *state_p1, State *state_write, double 
 }
 
 
-double pseudopotential_temperature(State *state, Grid *grid, int scalar_index)
+double pseudopotential_temperature(State *state, Diagnostics *diagnostics, Grid *grid, int scalar_index)
 {
 	/*
 	This function returns the pseudopotential temperature, which is needed for diagnozing CAPE.
@@ -1685,32 +1685,61 @@ double pseudopotential_temperature(State *state, Grid *grid, int scalar_index)
 	
 	double result = 0.0;
 	// the dry case
-	if (NO_OF_CONSTITUENTS == 1)
+	if (MOISTURE_ON == 0)
 	{
 		result = grid -> theta_v_bg[scalar_index] + state -> theta_v_pert[scalar_index];
 	}
-	// the moist case, based on Bolton (1980)
+	// This is the moist case, based on
+	// Bolton, D. (1980). The Computation of Equivalent Potential Temperature, Monthly Weather Review, 108(7), 1046-1053.
 	else
 	{
-		double alpha_1, alpha_2, alpha_3, r, temperature, pressure, t_lcl;
+		// some parameters we need to compute
+		double alpha_1, alpha_2, alpha_3, r, pressure, t_lcl;
+		// some helper variables
+		double vapour_pressure, saturation_pressure, rel_hum;
+		
+		// the mixing ratio
 		r = state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + scalar_index]
-		/state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index];
-		temperature
-		= (grid -> exner_bg[scalar_index] + state -> exner_pert[scalar_index])
-		*(grid -> theta_v_bg[scalar_index] + state -> theta_v_pert[scalar_index]);
-		pressure = P_0*pow(grid -> exner_bg[scalar_index] + state -> exner_pert[scalar_index],
-		C_D_P/R_D);
+		/(state -> rho[NO_OF_CONDENSED_CONSTITUENTS*NO_OF_SCALARS + scalar_index]
+		- state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + scalar_index]);
+		
+		// now, the first two required parameters can already be computed
 		alpha_1 = 0.2854*(1.0 - 0.28e-3*r);
-		// this is just an estimate for now
-		t_lcl
-		= (grid -> exner_bg[scalar_index - NO_OF_SCALARS_H] + state -> exner_pert[scalar_index - NO_OF_SCALARS_H])
-		*(grid -> theta_v_bg[scalar_index - NO_OF_SCALARS_H] + state -> theta_v_pert[scalar_index - NO_OF_SCALARS_H]);
-		alpha_2 = 3.376/t_lcl - 0.00254;
 		alpha_3 = r*(1.0 + 0.81e-3*r);
-		result = temperature*pow(P_0/pressure, alpha_1)*exp(alpha_2*alpha_3);
+		
+		// calculating the pressure
+		pressure = P_0*pow(grid -> exner_bg[scalar_index] + state -> exner_pert[scalar_index], C_D_P/R_D);
+		
+		// computing the temperature t_lcl of the air parcel after raising it to the lifted condensation level (LCL)
+		// therefore we firstly compute the saturation pressure, the vapour pressure and the relative humidity
+		if (diagnostics -> temperature[scalar_index] >= T_0)
+		{
+			saturation_pressure = saturation_pressure_over_water(diagnostics -> temperature[scalar_index]);
+		}
+		else
+		{
+			saturation_pressure = saturation_pressure_over_ice(diagnostics -> temperature[scalar_index]);
+		}
+		vapour_pressure = state -> rho[(NO_OF_CONDENSED_CONSTITUENTS + 1)*NO_OF_SCALARS + scalar_index]*R_V*diagnostics -> temperature[scalar_index];
+		rel_hum = vapour_pressure/saturation_pressure;
+		// we compute t_lcl using Eq. (22) of Bolton (1980)
+		t_lcl = 1.0/(1.0/(diagnostics -> temperature[scalar_index] - 55.0) - log(rel_hum)/2840.0) + 55.0;
+		
+		// the last remaining parameter can be computed now
+		alpha_2 = 3.376/t_lcl - 0.00254;
+		
+		// the final formula by Bolton
+		result = diagnostics -> temperature[scalar_index]*pow(P_0/pressure, alpha_1)*exp(alpha_2*alpha_3);
 	}
+	
 	return result;
 }
+
+
+
+
+
+
 
 
 
