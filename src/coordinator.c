@@ -219,15 +219,15 @@ int main(int argc, char *argv[])
 	
     // setting the hydrometeor falling velcotities
     config -> cloud_droplets_velocity = 0.01;
-    config -> rain_velocity = fmin(0.8*normal_dist_min_vert/delta_t, 10);
-    config -> snow_velocity = fmin(0.8*normal_dist_min_vert/delta_t, 5);
+    config -> rain_velocity = 10.0;
+    config -> snow_velocity = 5.0;
     printf("Cloud droplets falling velocity set to %lf m/s.\n", config -> cloud_droplets_velocity);
     printf("Rain falling velocity set to %lf m/s.\n", config -> rain_velocity);
     printf("Snow falling velocity set to %lf m/s.\n", config -> snow_velocity);
 	
 	printf("Effective horizontal resolution: %lf km\n", 1e-3*grid -> eff_hor_res);
 	printf("Minimum horizontal normal distance: %lf km\n", 1e-3*normal_dist_min_hor);
-    double max_speed_hor = 100;
+    double max_speed_hor = 100.0;
 	printf("Horizontal advective Courant number: %lf\n", delta_t/normal_dist_min_hor*max_speed_hor);
     double max_speed_vert = 0.1;
 	printf("Vertical advective Courant number: %lf\n", delta_t/normal_dist_min_vert*max_speed_vert);
