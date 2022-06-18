@@ -151,8 +151,6 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 	
 	double c_p_water = 4184.0;
 	double c_p_soil = 830.0;
-	// this is the stability limit
-	double c_p_stab_constraint = 0.65*c_p_water*pow(2.0, 5.0 - RES_ID);
 	double albedo_water = 0.06;
 	// setting the land surface albedo to 0.12 (compare Zdunkowski, Trautmann & Bott:
 	// Radiation in the Atmosphere, 2007, p. 444)
@@ -191,7 +189,7 @@ double sfc_rho_c[], double t_conductivity[], double oro[], int is_land[], int or
 				sfc_albedo[i] = albedo_soil;
 			}
 			
-			sfc_rho_c[i] = density_soil*fmax(c_p_soil, c_p_stab_constraint);
+			sfc_rho_c[i] = density_soil*c_p_soil;
 			
 			roughness_length[i] = vegetation_height_ideal(latitude_scalar[i], oro[i])/8.0;
 		}

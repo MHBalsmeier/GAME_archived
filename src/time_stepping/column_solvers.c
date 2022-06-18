@@ -27,7 +27,12 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 	int lower_index, base_index, soil_switch;
 	double impl_weight = config -> impl_thermo_weight;
 	// This is for Klemp (2008).
-	double damping_coeff, damping_start_height, z_above_damping, temperature_gas_lowest_layer_old, temperature_gas_lowest_layer_new;
+	double damping_coeff, damping_start_height, z_above_damping, temperature_gas_lowest_layer_old, temperature_gas_lowest_layer_new,
+	radiation_flux_density, resulting_temperature_change;
+	
+	// the maximum temperature change induced by radiation between two radiation time steps in the uppermost soil layer
+	double max_rad_temp_change = 30.0;
+	
 	damping_start_height = config -> damping_start_height_over_toa*grid -> z_vector[0];
 	
 	// partial derivatives new time step weight
@@ -38,7 +43,7 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 	// calculating the sensible power flux density
 	if (config -> sfc_sensible_heat_flux == 1)
 	{
-		#pragma omp parallel for private(base_index, temperature_gas_lowest_layer_old, temperature_gas_lowest_layer_new)
+		#pragma omp parallel for private(base_index, temperature_gas_lowest_layer_old, temperature_gas_lowest_layer_new, radiation_flux_density, resulting_temperature_change)
 		for (int i = 0; i < NO_OF_SCALARS_H; ++i)
 		{
 			base_index = NO_OF_SCALARS - NO_OF_SCALARS_H + i;
@@ -200,6 +205,13 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			- grid -> t_const_soil[i])
 			/(2*(grid -> z_soil_center[NO_OF_SOIL_LAYERS - 1] - grid -> z_t_const));
 			
+			radiation_flux_density = forcings -> sfc_sw_in[i] - forcings -> sfc_lw_out[i];
+			resulting_temperature_change = radiation_flux_density/((grid -> z_soil_interface[0] - grid -> z_soil_interface[1])*grid -> sfc_rho_c[i])*config -> radiation_delta_t;
+			if (fabs(resulting_temperature_change) > max_rad_temp_change)
+			{
+				radiation_flux_density = max_rad_temp_change/fabs(resulting_temperature_change)*radiation_flux_density;
+			}
+			
 			// calculating the explicit part of the temperature change
 			r_vector[NO_OF_LAYERS - 1]
 			// old temperature
@@ -208,10 +220,8 @@ Config *config, double delta_t, Grid *grid, int rk_step)
 			+ (diagnostics -> power_flux_density_sensible[i]
 			// latent heat flux
 			+ diagnostics -> power_flux_density_latent[i]
-			// shortwave inbound radiation
-			+ forcings -> sfc_sw_in[i]
-			// longwave outbound radiation
-			- forcings -> sfc_lw_out[i]
+			// radiation
+			+ radiation_flux_density
 			// heat conduction from below
 			+ 0.5*heat_flux_density_expl[0])
 			/((grid -> z_soil_interface[0] - grid -> z_soil_interface[1])*grid -> sfc_rho_c[i])*delta_t;
