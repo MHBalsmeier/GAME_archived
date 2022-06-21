@@ -52,7 +52,7 @@ netcdf_output_switch=0 # If set to 1, output will be written to netcdf files on 
 time_to_next_analysis=-1 # the time between this model run and the next analysis, only relevant in NWP runs for data assimilation
 
 # parallelization
-export OMP_NUM_THREADS=8 # relevant for OMP
+export OMP_NUM_THREADS=4 # relevant for OMP
 
 # that's it, now the basic run script will be sourced
 source $game_home_dir/run_scripts/.sh/root_script.sh

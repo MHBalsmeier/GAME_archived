@@ -233,18 +233,16 @@ int calc_h2otracers_source_rates(State *state, Diagnostics *diagnostics, Grid *g
         irrev -> phase_trans_rates[i] = 0.0;
         irrev -> phase_trans_rates[NO_OF_SCALARS + i] = 0.0;
         // snow
-        // this only happens if the air is saturated
-        if (diagnostics -> temperature[i] < T_0 && diff_density <= 0.0)
+        if (diagnostics -> temperature[i] < T_0)
         {
-        	irrev -> phase_trans_rates[i] = fmax(state -> rho[2*NO_OF_SCALARS + i] - maximum_cloud_water_content*state -> rho[4*NO_OF_SCALARS + i], 0.0)/delta_t;
+        	irrev -> phase_trans_rates[i] = fmax(state -> rho[2*NO_OF_SCALARS + i] - maximum_cloud_water_content*state -> rho[4*NO_OF_SCALARS + i], 0.0)/1000.0;
         	// the snow creation comes at the cost of cloud ice particles
         	irrev -> phase_trans_rates[2*NO_OF_SCALARS + i] -= irrev -> phase_trans_rates[i];
         }
     	// rain
-        // this only happens if the air is saturated
-        else if (diagnostics -> temperature[i] >= T_0 && diff_density <= 0.0)
+        else if (diagnostics -> temperature[i] >= T_0)
         {
-        	irrev -> phase_trans_rates[NO_OF_SCALARS + i] = fmax(state -> rho[3*NO_OF_SCALARS + i] - maximum_cloud_water_content*state -> rho[4*NO_OF_SCALARS + i], 0.0)/delta_t;
+        	irrev -> phase_trans_rates[NO_OF_SCALARS + i] = fmax(state -> rho[3*NO_OF_SCALARS + i] - maximum_cloud_water_content*state -> rho[4*NO_OF_SCALARS + i], 0.0)/1000.0;
         	// the rain creation comes at the cost of cloud water particles
         	irrev -> phase_trans_rates[3*NO_OF_SCALARS + i] -= irrev -> phase_trans_rates[NO_OF_SCALARS + i];
         }
