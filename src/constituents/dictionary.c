@@ -369,9 +369,9 @@ double saturation_pressure_over_ice(double temperature)
     double temp_c = temperature - T_0;
     
     // this is the stability limit
-    if (temp_c < -80.0)
+    if (temp_c < -60.0)
     {
-    	temp_c = -80.0;
+    	temp_c = -60.0;
     }
     // at temperatures > 0 degrees Celsius ice cannot exist in equilibrium which is why this is clipped
     if (temp_c > 0.0)
@@ -395,9 +395,9 @@ double dsaturation_pressure_over_ice_dT(double temperature)
     double temp_c = temperature - T_0;
     
     // this is the stability limit
-    if (temp_c < -80.0)
+    if (temp_c < -60.0)
     {
-    	temp_c = -80.0;
+    	temp_c = -60.0;
     }
     // at temperatures > 0 degrees Celsius ice cannot exist in equilibrium which is why this is clipped
     if (temp_c > 0.0)

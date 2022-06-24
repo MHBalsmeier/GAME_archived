@@ -317,6 +317,8 @@ double tke2vert_diff_coeff(double tke, double n_squared, double layer_thickness)
 	double mean_free_path = pow(2.0*tke_vert, 0.5)/n_used;
 	mean_free_path = fmin(mean_free_path, layer_thickness);
 	double result = 1.0/6.0*mean_free_path*mean_velocity;
+	// additional tuning
+	result = 0.9*result;
 	return result;
 }
 
