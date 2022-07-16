@@ -9,7 +9,6 @@ This file contains discrete coordinate transformations on the icosahedral grid.
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <geos95.h>
 #include "../../src/game_types.h"
 #include "grid_generator.h"
 

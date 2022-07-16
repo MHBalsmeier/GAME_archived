@@ -9,7 +9,6 @@ In this file, the inner product weights are computed.
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <geos95.h>
 #include "../../src/game_types.h"
 #include "grid_generator.h"
 

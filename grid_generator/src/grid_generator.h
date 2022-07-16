@@ -46,6 +46,52 @@ int direct_tangential_unity(double [], double [], double [], double [], int [], 
 int interpolate_ll(double [], double [], int [], double []);
 int set_background_state(double [], double [], double [], double []);
 int set_sfc_properties(double [], double [], double [], double [], double [], double [], double [], int [], int, int);
+int find_geodetic(double, double, double, double, double, double *, double *);
+int find_between_point(double, double, double, double, double, double, double, double *, double *, double *);
+double calculate_distance_h(double, double, double, double, double);
+double calculate_distance_cart(double, double, double, double, double, double);
+double find_geodetic_direction(double, double, double, double, double);
+int calc_local_i(double, double, double[]);
+int calc_local_j(double, double, double[]);
+int calc_local_k(double, double, double[]);
+int find_geos(double, double, double, double *, double *);
+int find_global_normal(double, double, double *, double *, double *);
+double scalar_product_elementary(double[], double[]);
+double scalar_product_elementary_2d(double[], double[]);
+double calculate_vertical_area(double, double, double);
+int find_barycenter_cart(double, double, double, double, double, double, double, double, double, double *, double *, double *);
+int find_barycenter_sphere(double, double, double, double, double, double, double *, double *);
+int find_voronoi_center_sphere(double, double, double, double, double, double, double *, double *);
+double find_volume(double, double, double);
+int active_turn(double, double, double, double *, double *);
+int passive_turn(double, double, double, double *, double *);
+int normalize_cartesian(double, double, double, double *, double *, double *);
+int cross_product_elementary(double[], double[], double[]);
+double calc_triangle_area(double, double, double, double, double, double);
+int active_turn_x(double, double[], double[]);
+double calc_spherical_polygon_area(double[], double[], int);
+int find_min_dist_rel_on_line(double, double, double, double, double, double, double *);
+int sort_edge_indices(double[], double[], int, int[]);
+double find_turn_angle(double, double);
+double deg2rad(double);
+double rad2deg(double);
+int flinspace(double[], int, double, double);
+int find_min_index(double[], int);
+int find_min_index_exclude(double [], int, int [], int);
+int find_max_index(double[], int);
+int fwhere_double(double[], int, double, double);
+int fmake_abs(double[], int);
+int fvec_scal(double[], double[], double, int);
+int find_index_where_equal_a(double[], double[], int, int, int[]);
+int find_index_n_equal(double[], double[], int, int);
+int find_n_between_points(double[], int, double, double);
+int in_bool_calculator(int, int [], int);
+double fsum(double[], int);
+int freverse(double[], int, double[]);
+int freverse_int(int[], int, int[]);
+double double_sum_gen(double[], int, int, int);
+double wind_direction_calculator(double, double);
+
 
 
 

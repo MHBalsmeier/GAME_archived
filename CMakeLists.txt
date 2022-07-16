@@ -39,6 +39,8 @@ src/constituents/phase_trans.c
 src/constituents/dictionary.c
 src/constituents/derived_quantities.c
 grid_generator/src/vertical_grid.c
+grid_generator/src/geodesy.c
+grid_generator/src/index_helpers.c
 ../rte-rrtmgp/rrtmgp/mo_gas_optics.F90
 ../rte-rrtmgp/rrtmgp/mo_gas_optics_rrtmgp.F90
 ../rte-rrtmgp/rrtmgp/mo_rrtmgp_constants.F90
@@ -68,7 +70,7 @@ grid_generator/src/vertical_grid.c
 find_package(OpenMP)
 SET(CMAKE_C_FLAGS "${OpenMP_C_FLAGS} -O2 -Wall")
 SET(CMAKE_Fortran_FLAGS "${OpenMP_Fortran_FLAGS} -O2 -Wall -Wno-c-binding-type -I/usr/include -L/usr/lib/x86_64-linux-gnu -lnetcdff")
-target_link_libraries(game eccodes m netcdf netcdff geos95)
+target_link_libraries(game eccodes m netcdf netcdff)
 
 
 

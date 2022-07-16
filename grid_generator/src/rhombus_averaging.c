@@ -9,7 +9,6 @@ In this file, remapping indices and weights to rhombi are computed.
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <geos95.h>
 #include "../../src/game_types.h"
 #include "../../src/game_constants.h"
 #include "grid_generator.h"

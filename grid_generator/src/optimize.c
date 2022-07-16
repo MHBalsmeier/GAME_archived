@@ -9,7 +9,6 @@ The Lloyd algorithm is implemented here.
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <geos95.h>
 #include "../../src/game_types.h"
 #include "grid_generator.h"
 

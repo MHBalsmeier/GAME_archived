@@ -10,7 +10,6 @@ In this file, the horizontal grid generation procedure is stored.
 #include <stdlib.h>
 #include <stdio.h>
 #include <netcdf.h>
-#include <geos95.h>
 #include "../../src/game_types.h"
 #include "../../src/game_constants.h"
 #include "grid_generator.h"

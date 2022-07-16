@@ -10,7 +10,6 @@ This file contains functions that compute properties of the vertical grid.
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <geos95.h>
 #include "../../src/game_types.h"
 #include "../../src/game_constants.h"
 #include "grid_generator.h"

@@ -10,7 +10,6 @@ This file collects functions that are relevant for the neighbourship relations o
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <geos95.h>
 #include <netcdf.h>
 #include <math.h>
 #include "../../src/game_types.h"

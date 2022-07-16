@@ -12,7 +12,6 @@ The grid generation procedure is manged from this file. Memory allocation and IO
 #include <netcdf.h>
 #include <string.h>
 #include <math.h>
-#include <geos95.h>
 #include "../../src/game_types.h"
 #include "../../src/game_constants.h"
 #include "grid_generator.h"

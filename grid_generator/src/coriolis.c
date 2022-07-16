@@ -9,7 +9,6 @@ In this file, everything that is needed for calculating the vorticity flux term 
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <geos95.h>
 #include "../../src/game_types.h"
 #include "../../src/game_constants.h"
 #include "grid_generator.h"
