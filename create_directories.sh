@@ -7,27 +7,27 @@ echo "Creating directories ..."
 
 if [ ! -d grid_generator/grids ]
 then
-mkdir grid_generator/grids
+  mkdir grid_generator/grids
 fi
 
 if [ ! -d grid_generator/statistics ]
 then
-mkdir grid_generator/statistics
+  mkdir grid_generator/statistics
 fi
 
 if [ ! -d output ]
 then
-mkdir output
+  mkdir output
 fi
 
 if [ ! -d nwp_init ]
 then
-mkdir nwp_init
+  mkdir nwp_init
 fi
 
 if [ ! -d figs ]
 then
-mkdir figs
+  mkdir figs
 fi
 
 echo "Completed."

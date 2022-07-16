@@ -8,7 +8,7 @@ then
   mkdir $fig_save_path
 fi
 
-echo plotting maps ...
+echo "plotting maps ..."
 
 number_of_variables=${#disp_shortname_list[@]}
 for (( i=0; $i<$number_of_variables ; i=$(($i+$omp_num_threads)) ))
@@ -25,4 +25,4 @@ do
 
 done
 
-echo Finished plotting maps.
+echo "Finished plotting maps."
