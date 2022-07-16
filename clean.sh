@@ -5,5 +5,5 @@
 
 if [ -d build ]
 then
-	rm -r build/*
+  rm -r build/*
 fi

@@ -6,21 +6,21 @@
 run_dir=$game_home_dir/output/$run_id
 if [ -d $run_dir ]
 then
-rm -r $run_dir
+  rm -r $run_dir
 fi
 mkdir $run_dir
 cd $run_dir
 
 if [ ! -f $game_home_dir/build/game ]
 then
-echo "Executable game missing. Compile first. Aborting run."
-cd - > /dev/null
-exit 1
+  echo "Executable game missing. Compile first. Aborting run."
+  cd - > /dev/null
+  exit 1
 fi
 
 if [ -f game ]
 then
-rm game
+  rm game
 fi
 
 cp $game_home_dir/build/game .
