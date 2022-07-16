@@ -17,12 +17,12 @@ int find_geodetic(double lat_1_in, double lon_1_in, double lat_2_in, double lon_
 	/*
 	This function calculates the geographical coordinates of a point on a geodetic between two points.
 	*/
-    double d = calculate_distance_cart(lat_1_in , lon_1_in, lat_2_in, lon_2_in, 1, 1);
-    double theta = 2*asin(d/2.0);
-    double tau_dash = 0.5 + sqrt(1/pow(d, 2) - 0.25)*tan(theta*(parameter - 0.5));
-    double z = tau_dash*sin(lat_2_in) + (1 - tau_dash)*sin(lat_1_in);
-    double x = tau_dash*cos(lat_2_in)*cos(lon_2_in) + (1 - tau_dash)*cos(lat_1_in)*cos(lon_1_in);
-    double y = tau_dash*cos(lat_2_in)*sin(lon_2_in) + (1 - tau_dash)*cos(lat_1_in)*sin(lon_1_in);
+    double d = calculate_distance_cart(lat_1_in , lon_1_in, lat_2_in, lon_2_in, 1.0, 1.0);
+    double theta = 2.0*asin(d/2.0);
+    double tau_dash = 0.5 + sqrt(1.0/pow(d, 2) - 0.25)*tan(theta*(parameter - 0.5));
+    double z = tau_dash*sin(lat_2_in) + (1.0- tau_dash)*sin(lat_1_in);
+    double x = tau_dash*cos(lat_2_in)*cos(lon_2_in) + (1.0 - tau_dash)*cos(lat_1_in)*cos(lon_1_in);
+    double y = tau_dash*cos(lat_2_in)*sin(lon_2_in) + (1.0 - tau_dash)*cos(lat_1_in)*sin(lon_1_in);
     *lat_out = asin(z/sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2)));
     *lon_out = atan2(y, x);
     return 0;
@@ -44,7 +44,7 @@ double calculate_distance_h(double latitude_a, double longitude_a, double latitu
 	/*
 	This function returns the geodetic distance of two points given their geographical coordinates.
 	*/
-    double dist = 2*radius*asin(sqrt(0.5 - 0.5*(cos(latitude_a)*cos(latitude_b)*cos(longitude_b - longitude_a) + sin(latitude_a)*sin(latitude_b))));
+    double dist = 2.0*radius*asin(sqrt(0.5 - 0.5*(cos(latitude_a)*cos(latitude_b)*cos(longitude_b - longitude_a) + sin(latitude_a)*sin(latitude_b))));
     return dist;
 }
 
@@ -139,17 +139,6 @@ int calc_local_j(double lat, double lon, double result_vec[])
     return 0;
 }
 
-int calc_local_k(double lat, double lon, double result_vec[])
-{
-	/*
-	This function calculates the local vertical basis vector.
-	*/
-    result_vec[0] = cos(lat)*cos(lon);
-    result_vec[1] = cos(lat)*sin(lon);
-    result_vec[2] = sin(lat);
-    return 0;
-}
-
 int find_geos(double x, double y, double z, double *lat_out, double *lon_out)
 {
 	/*
@@ -179,33 +168,6 @@ double calculate_vertical_area(double base_distance, double r_1, double r_2)
     double area;
     area = base_distance*(0.5*pow(r_2, 2)/r_1 - 0.5*r_1);
     return area;
-}
-
-int find_barycenter_cart(double x_0, double y_0, double z_0, double x_1, double y_1, double z_1, double x_2, double y_2, double z_2, double *x_res, double *y_res, double *z_res)
-{
-	/*
-	This function calculates the barycenter of three points given their Cartesian coordinates.
-	*/
-    *x_res = 1.0/3.0*(x_0 + x_1 + x_2);
-    *y_res = 1.0/3.0*(y_0 + y_1 + y_2);
-    *z_res = 1.0/3.0*(z_0 + z_1 + z_2);
-    return 0;
-}
-
-int find_barycenter_sphere(double lat_1_in, double lon_1_in, double lat_2_in, double lon_2_in, double lat_3_in, double lon_3_in, double *lat_out, double *lon_out)
-{
-	/*
-	This function calulates the barycenter of three points (everything in geographical coordinates).
-	*/
-    double x_1, y_1, z_1, x_2, y_2, z_2, x_3, y_3, z_3, x, y, z;
-    find_global_normal(lat_1_in, lon_1_in, &x_1, &y_1, &z_1);
-    find_global_normal(lat_2_in, lon_2_in, &x_2, &y_2, &z_2);
-    find_global_normal(lat_3_in, lon_3_in, &x_3, &y_3, &z_3);
-    x = x_1 + x_2 + x_3;
-    y = y_1 + y_2 + y_3;
-    z = z_1 + z_2 + z_3;
-    find_geos(x, y, z, lat_out, lon_out);
-    return 0;
 }
 
 int find_voronoi_center_sphere(double lat_0_in, double lon_0_in, double lat_1_in, double lon_1_in, double lat_2_in, double lon_2_in, double *lat_out, double *lon_out)
@@ -497,7 +459,7 @@ int sort_edge_indices(double lat_points[], double lon_points[], int number_of_ed
     }
 	int indices_resorted_w_dir[number_of_edges];
 	int needs_to_be_reversed = 0;
-	double angle_sum = 0;
+	double angle_sum = 0.0;
 	double new_direction, direction_0, direction_1;
 	int first_index, second_index, third_index;
 	for (int i = 0; i < number_of_edges; ++i)
@@ -506,17 +468,17 @@ int sort_edge_indices(double lat_points[], double lon_points[], int number_of_ed
 		second_index = (i + 1)%number_of_edges;
 		third_index = (i + 2)%number_of_edges;
 		direction_0 = find_geodetic_direction(lat_points[indices_resorted[first_index]], lon_points[indices_resorted[first_index]],
-		lat_points[indices_resorted[second_index]], lon_points[indices_resorted[second_index]], 1);
+		lat_points[indices_resorted[second_index]], lon_points[indices_resorted[second_index]], 1.0);
 		direction_1 = find_geodetic_direction(lat_points[indices_resorted[second_index]], lon_points[indices_resorted[second_index]],
-		lat_points[indices_resorted[third_index]], lon_points[indices_resorted[third_index]], 0);
+		lat_points[indices_resorted[third_index]], lon_points[indices_resorted[third_index]], 0.0);
 		new_direction = find_turn_angle(direction_0, direction_1);
 		angle_sum += new_direction;
 	}
-	if (angle_sum < -0.9*2*M_PI)
+	if (angle_sum < -0.9*2.0*M_PI)
 	{
-		needs_to_be_reversed = 1;
+		needs_to_be_reversed = 1.0;
 	}
-	if (fabs(angle_sum) < 0.99*2*M_PI || fabs(angle_sum) > 1.01*2*M_PI)
+	if (fabs(angle_sum) < 0.99*2.0*M_PI || fabs(angle_sum) > 1.01*2.0*M_PI)
 	{
 		printf("Problem in function sort_edge_indices.\n");
 	}
@@ -539,11 +501,11 @@ double find_turn_angle(double angle_0, double angle_1)
 	double result = angle_1 - angle_0;
 	if (result > M_PI)
 	{
-		result -= 2*M_PI;
+		result -= 2.0*M_PI;
 	}
 	if (result < -M_PI)
 	{
-		result += 2*M_PI;
+		result += 2.0*M_PI;
 	}
 	return result;
 }
@@ -553,7 +515,7 @@ double deg2rad(double input)
 	/*
 	This function converts an angle in degrees to an angle in radians.
 	*/
-    double output = input*2*M_PI/360;
+    double output = input*2.0*M_PI/360.0;
     return output;
 }
 
@@ -562,19 +524,9 @@ double rad2deg(double input)
 	/*
 	This function converts an angle in radians to an angle in degrees.
 	*/
-    double output = input*360/(2*M_PI);
+    double output = input*360.0/(2.0*M_PI);
     return output;
 }
-
-double wind_direction_calculator(double u, double v)
-{
-	/*
-	This function converts a horizontal wind vector (u, v) to a wind direction (in rad) according to the meteorological convention.
-	*/
-    double wind_dir = M_PI + atan2(u, v);
-    return wind_dir;
-}
-
 
 
 
