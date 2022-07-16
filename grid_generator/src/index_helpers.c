@@ -15,8 +15,8 @@ int flinspace(double in_vector[], int vector_length, double min, double max)
 	/*
 	This function separates the interval between a minimum and a maximum into equidistant sections.
 	*/
-    double delta = (max - min)/(vector_length - 1);
-    for(int i = 0; i < vector_length; i++)
+    double delta = (max - min)/(vector_length - 1.0);
+    for (int i = 0; i < vector_length; i++)
     {
         in_vector[i] = min + i*delta;
         if(i == vector_length - 1)
@@ -58,7 +58,7 @@ int find_min_index(double vector[], int vector_length)
 	*/
     int result = 0;
     double current_min = vector[0];
-    for(int i = 1; i < vector_length; ++i)
+    for (int i = 1; i < vector_length; ++i)
     {
         if (vector[i] < current_min)
         {
@@ -76,7 +76,7 @@ int find_max_index(double vector[], int vector_length)
 	*/
     int result = 0;
     double current_max = vector[0];
-    for(int i = 1; i < vector_length; i++)
+    for (int i = 1; i < vector_length; i++)
     {
         if(vector[i] > current_max)
         {
@@ -94,7 +94,7 @@ int find_min_index_exclude(double vector[], int vector_length, int exclude_indic
 	*/
     int result = 0;
     double current_min = vector[0];
-    for(int i = 1; i < vector_length; ++i)
+    for (int i = 1; i < vector_length; ++i)
     {
         if (vector[i] < current_min)
         {
@@ -113,7 +113,7 @@ int fmake_abs(double vector[], int vector_length)
 	/*
 	This function turns each element of a vector of doubles into its absolute value.
 	*/
-    for(int i = 0; i < vector_length; i++)
+    for (int i = 0; i < vector_length; i++)
     {
         vector[i] = fabs(vector[i]);
 	}
@@ -125,7 +125,7 @@ int fvec_scal(double result[], double vector[], double scalar, int vector_length
 	/*
 	This function adds a scalar value to a vector.
 	*/
-    for(int i = 0; i < vector_length; i++)
+    for (int i = 0; i < vector_length; i++)
     {
         result[i] = vector[i] + scalar;
 	}
@@ -192,7 +192,7 @@ double fsum(double vector[], int vector_length)
 	/*
 	This function calculates the sum of a vector.
 	*/
-	double result = 0;
+	double result = 0.0;
 	for (int i = 0; i < vector_length; ++i)
 	{
 		result = result + vector[i];
@@ -229,7 +229,7 @@ double double_sum_gen(double vector[], int vector_length, int first_index, int s
 	/*
 	This function calculates the sum of all elements of a vector of doubles between two indices.
 	*/
-	double result = 0;
+	double result = 0.0;
 	if (first_index <= second_index)
 	{
 		for (int i = first_index ; i <= second_index; ++i)
@@ -257,7 +257,7 @@ int in_bool_calculator(int value, int check_array[], int array_length)
 	This function checks if a vector of integers contains a certain value.
 	*/
     int result = 0;
-    for(int i = 0; i < array_length; i++)
+    for (int i = 0; i < array_length; i++)
     {
         if(check_array[i] == value)
         {
